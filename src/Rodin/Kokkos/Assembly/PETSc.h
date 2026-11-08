@@ -75,6 +75,10 @@ namespace Rodin::Assembly::Internal
     /// @brief Whether the entries are the diagonals of the component blocks only.
     bool diagonal = false;
 
+    /**
+     * @brief Compares all the members of the segments.
+     * @return Whether the segments have the same entries.
+     */
     bool operator==(const COOSegment&) const = default;
   };
 
@@ -97,7 +101,11 @@ namespace Rodin::Assembly::Internal
     /// @brief Indices, when the list is longer.
     ::Kokkos::View<Index*, MemorySpace> wide;
 
-    /// @brief Calls the function with the view that holds the indices.
+    /**
+     * @brief Calls the function with the view that holds the indices.
+     * @param function Callable taking the view of the indices.
+     * @return Result of the call.
+     */
     template <class Function>
     decltype(auto) visit(Function&& function) const
     {
@@ -130,8 +138,14 @@ namespace Rodin::Assembly::Internal
   {
     COOCache() = default;
 
+    /// @brief Constructs an empty cache, without sharing the buffers.
     COOCache(const COOCache&) {}
 
+    /**
+     * @brief Empties the cache, without sharing the buffers.
+     * @param other Cache assigned, whose buffers are not copied.
+     * @return Reference to this cache.
+     */
     COOCache& operator=(const COOCache& other)
     {
       if (this != &other)
@@ -139,8 +153,13 @@ namespace Rodin::Assembly::Internal
       return *this;
     }
 
+    /// @brief Takes the buffers of the moved cache.
     COOCache(COOCache&&) = default;
 
+    /**
+     * @brief Takes the buffers of the moved cache.
+     * @return Reference to this cache.
+     */
     COOCache& operator=(COOCache&&) = default;
 
     /// @brief PETSc identifier of the matrix preallocated with the pattern, or -1.
@@ -496,6 +515,17 @@ namespace Rodin::Assembly::Internal
     }
   };
 
+  /**
+   * @brief Device system assembled into a coordinate list for PETSc.
+   *
+   * The integrators write their entries into a coordinate list in device
+   * memory. The fixed degrees of freedom are eliminated and the identified
+   * ones are expanded on their masters on the device, and the values summed
+   * per distinct coordinate are handed to MatSetValuesCOO. The system may
+   * be distributed over MPI processes.
+   *
+   * @tparam Backend Kokkos backend of the mesh context.
+   */
   template <class Backend>
   class DeviceCOOSystem
   {
@@ -617,6 +647,8 @@ namespace Rodin::Assembly::Internal
        * @brief Whether the matrix contributes to the right-hand side;
        * collective once the system is distributed, since a process may hold
        * degrees of freedom fixed by another one.
+       * @return Whether a degree of freedom is fixed or identified, on any
+       * process once the system is distributed.
        */
       bool hasConstraints() const
       {
@@ -812,11 +844,15 @@ namespace Rodin::Assembly::Internal
       template <class Indices>
       struct Shift
       {
-        Indices rows;
-        Indices cols;
-        Index row;
-        Index col;
+        Indices rows; ///< Row coordinates.
+        Indices cols; ///< Column coordinates.
+        Index row; ///< Offset of the test space, added to the rows.
+        Index col; ///< Offset of the trial space, added to the columns.
 
+        /**
+         * @brief Adds the offsets to the coordinates of the entry.
+         * @param e Position of the entry in the list.
+         */
         KOKKOS_INLINE_FUNCTION void operator()(const size_t e) const
         {
           rows(e) += row;
@@ -824,7 +860,16 @@ namespace Rodin::Assembly::Internal
         }
       };
 
-      /// @brief Adds the block offsets to the coordinates of a segment.
+      /**
+       * @brief Adds the block offsets to the coordinates of a segment.
+       * @param execution Execution space instance of the kernel.
+       * @param rows Row coordinates.
+       * @param cols Column coordinates.
+       * @param offset Position of the first entry of the segment.
+       * @param count Number of entries of the segment.
+       * @param row Offset of the test space.
+       * @param col Offset of the trial space.
+       */
       template <class Indices>
       static void shift(const ExecutionSpace& execution, const Indices& rows,
         const Indices& cols, size_t offset, size_t count, Index row, Index col)
@@ -839,10 +884,14 @@ namespace Rodin::Assembly::Internal
       template <class Indices>
       struct DiagonalList
       {
-        size_t offset;
-        Indices rows;
-        Indices cols;
+        size_t offset; ///< Position of the first diagonal entry in the list.
+        Indices rows; ///< Receives the row coordinates.
+        Indices cols; ///< Receives the column coordinates.
 
+        /**
+         * @brief Lists the diagonal entry.
+         * @param i Row and column of the diagonal entry.
+         */
         KOKKOS_INLINE_FUNCTION void operator()(const size_t i) const
         {
           rows(offset + i) = i;
@@ -850,7 +899,14 @@ namespace Rodin::Assembly::Internal
         }
       };
 
-      /// @brief Lists every diagonal entry.
+      /**
+       * @brief Lists every diagonal entry.
+       * @param execution Execution space instance of the kernel.
+       * @param offset Position of the first diagonal entry in the list.
+       * @param count Number of diagonal entries.
+       * @param rows Receives the row coordinates.
+       * @param cols Receives the column coordinates.
+       */
       template <class Indices>
       static void listDiagonal(const ExecutionSpace& execution, size_t offset,
         size_t count, const Indices& rows, const Indices& cols)
@@ -865,13 +921,19 @@ namespace Rodin::Assembly::Internal
       template <class Fixed, class Owned, class Scalars>
       struct DiagonalFill
       {
-        size_t offset;
-        bool hasFixed;
-        Fixed fixed;
+        size_t offset; ///< Position of the first diagonal value in the list.
+        bool hasFixed; ///< Whether the system has fixed degrees of freedom.
+        Fixed fixed; ///< Flags of the fixed degrees of freedom.
+        /// @brief Flags of the degrees of freedom the process owns, empty when the system
+        /// is not distributed.
         Owned owned;
-        Scalars coo;
-        bool distributed;
+        Scalars coo; ///< Values of the coordinate list.
+        bool distributed; ///< Whether the system is distributed.
 
+        /**
+         * @brief Writes the diagonal value of the row.
+         * @param i Row of the diagonal value.
+         */
         KOKKOS_INLINE_FUNCTION void operator()(const size_t i) const
         {
           const bool one = hasFixed && fixed(i) && (!distributed || owned(i));
@@ -879,7 +941,19 @@ namespace Rodin::Assembly::Internal
         }
       };
 
-      /// @brief Writes the diagonal values, one on fixed rows.
+      /**
+       * @brief Writes the diagonal values, one on fixed rows.
+       * @param execution Execution space instance of the kernel.
+       * @param offset Position of the first diagonal value in the list.
+       * @param count Number of diagonal values.
+       * @param hasFixed Whether the system has fixed degrees of freedom.
+       * @param fixed Flags of the fixed degrees of freedom.
+       * @param owned Flags of the degrees of freedom the process owns, empty
+       * when the system is not distributed.
+       * @param coo Values of the coordinate list.
+       *
+       * On a distributed system, the owner of a fixed row alone writes one.
+       */
       template <class Fixed, class Owned, class Scalars>
       static void fillDiagonal(const ExecutionSpace& execution, size_t offset,
         size_t count, bool hasFixed, const Fixed& fixed, const Owned& owned,
@@ -897,10 +971,15 @@ namespace Rodin::Assembly::Internal
       template <class Indices, class Fixed>
       struct EliminatedCount
       {
-        Indices rows;
-        Indices cols;
-        Fixed fixed;
+        Indices rows; ///< Row coordinates.
+        Indices cols; ///< Column coordinates.
+        Fixed fixed; ///< Flags of the fixed degrees of freedom.
 
+        /**
+         * @brief Counts the entry when its value moves to the right-hand side.
+         * @param e Position of the entry in the list.
+         * @param sum Number of moved values, incremented.
+         */
         KOKKOS_INLINE_FUNCTION void operator()(const size_t e, size_t& sum) const
         {
           sum += !fixed(rows(e)) && fixed(cols(e));
@@ -910,6 +989,12 @@ namespace Rodin::Assembly::Internal
       /**
        * @brief Counts the matrix values moved to the right-hand side by the
        * columns of the fixed degrees of freedom.
+       * @param execution Execution space instance of the kernel.
+       * @param count Number of entries in the list.
+       * @param rows Row coordinates.
+       * @param cols Column coordinates.
+       * @param fixed Flags of the fixed degrees of freedom.
+       * @return Number of values of a free row and a fixed column.
        */
       template <class Indices, class Fixed>
       static size_t countEliminated(const ExecutionSpace& execution, size_t count,
@@ -930,15 +1015,23 @@ namespace Rodin::Assembly::Internal
       template <class Indices, class Fixed, class Values, class Scalars>
       struct Elimination
       {
-        Indices rows;
-        Indices cols;
-        Fixed fixed;
-        Values values;
-        Scalars coo;
+        Indices rows; ///< Row coordinates.
+        Indices cols; ///< Column coordinates.
+        Fixed fixed; ///< Flags of the fixed degrees of freedom.
+        Values values; ///< Fixed values, per degree of freedom.
+        Scalars coo; ///< Values of the coordinate list.
+        /// @brief Receives the rows of the moved values.
         ::Kokkos::View<Index*, MemorySpace> resRows;
-        ::Kokkos::View<Real*, MemorySpace> resValues;
-        size_t offset;
+        ::Kokkos::View<Real*, MemorySpace> resValues; ///< Receives the moved values.
+        size_t offset; ///< Position of the first reserved contribution.
 
+        /**
+         * @brief Eliminates the fixed degrees of freedom from the entry.
+         * @param e Position of the entry in the list.
+         * @param update Number of values moved by the previous entries,
+         * incremented.
+         * @param final Whether the pass writes the results.
+         */
         KOKKOS_INLINE_FUNCTION void operator()(
           const size_t e, size_t& update, const bool final) const
         {
@@ -961,6 +1054,13 @@ namespace Rodin::Assembly::Internal
       /**
        * @brief Clears the rows of the fixed degrees of freedom and lists the
        * values of their columns moved to the right-hand side.
+       * @param execution Execution space instance of the kernel.
+       * @param count Number of entries in the list.
+       * @param rows Row coordinates.
+       * @param cols Column coordinates.
+       * @param fixed Flags of the fixed degrees of freedom.
+       * @param values Fixed values, per degree of freedom.
+       * @param coo Values of the coordinate list, cleared on the fixed rows.
        * @param res Receives the moved values, in coordinate order.
        */
       template <class Indices, class Fixed, class Values, class Scalars>
@@ -977,10 +1077,17 @@ namespace Rodin::Assembly::Internal
 
       /**
        * @brief Number of contributions of an entry of a linear integrator.
+       * @param e Position of the entry.
+       * @param indices Indices of the entries in the space of the integrator.
+       * @param values Values of the entries.
        * @param row Offset of the space of the integrator.
+       * @param hasFixed Whether the system has fixed degrees of freedom.
+       * @param fixed Flags of the fixed degrees of freedom.
        * @param x Expansions on the masters, used when @p expanded is set.
        * @param expanded Whether an entry goes to the masters of its row, with
        * their coefficients, rather than to its row when it is free.
+       * @return Zero for a zero value, the number of masters of the row when
+       * @p expanded is set, and otherwise one when the row is free.
        */
       template <class Indices, class Values, class Fixed>
       KOKKOS_INLINE_FUNCTION static size_t countEntry(size_t e, const Indices& indices,
@@ -999,14 +1106,19 @@ namespace Rodin::Assembly::Internal
       template <class Indices, class Values, class Fixed>
       struct VectorCount
       {
-        Indices indices;
-        Values values;
-        Index row;
-        bool hasFixed;
-        Fixed fixed;
-        Expansions x;
-        bool expanded;
+        Indices indices; ///< Indices of the entries in the space of the integrator.
+        Values values; ///< Values of the entries.
+        Index row; ///< Offset of the space of the integrator.
+        bool hasFixed; ///< Whether the system has fixed degrees of freedom.
+        Fixed fixed; ///< Flags of the fixed degrees of freedom.
+        Expansions x; ///< Expansions on the masters.
+        bool expanded; ///< Whether the entries go to the masters of their rows.
 
+        /**
+         * @brief Counts the contributions of the entry.
+         * @param e Position of the entry.
+         * @param sum Number of contributions, incremented.
+         */
         KOKKOS_INLINE_FUNCTION void operator()(const size_t e, size_t& sum) const
         {
           sum += countEntry(e, indices, values, row, hasFixed, fixed, x, expanded);
@@ -1016,9 +1128,16 @@ namespace Rodin::Assembly::Internal
       /**
        * @brief Counts the contributions of the entries of a linear
        * integrator to the right-hand side.
+       * @param execution Execution space instance of the kernel.
        * @param begin Position of the first entry. @param count Entry count.
-       *
-       * See countEntry for the other parameters.
+       * @param indices Indices of the entries in the space of the integrator.
+       * @param values Values of the entries.
+       * @param row Offset of the space of the integrator.
+       * @param hasFixed Whether the system has fixed degrees of freedom.
+       * @param fixed Flags of the fixed degrees of freedom.
+       * @param x Expansions on the masters, used when @p expanded is set.
+       * @param expanded Whether an entry goes to the masters of its row.
+       * @return Number of contributions, as counted by countEntry.
        */
       template <class Indices, class Values, class Fixed>
       static size_t countVector(const ExecutionSpace& execution, size_t begin,
@@ -1042,17 +1161,25 @@ namespace Rodin::Assembly::Internal
       template <class Indices, class Values, class Fixed>
       struct VectorList
       {
-        Indices indices;
-        Values values;
-        Index row;
-        bool hasFixed;
-        Fixed fixed;
-        Expansions x;
-        bool expanded;
+        Indices indices; ///< Indices of the entries in the space of the integrator.
+        Values values; ///< Values of the entries.
+        Index row; ///< Offset of the space of the integrator.
+        bool hasFixed; ///< Whether the system has fixed degrees of freedom.
+        Fixed fixed; ///< Flags of the fixed degrees of freedom.
+        Expansions x; ///< Expansions on the masters.
+        bool expanded; ///< Whether the entries go to the masters of their rows.
+        /// @brief Receives the rows of the contributions.
         ::Kokkos::View<Index*, MemorySpace> resRows;
-        ::Kokkos::View<Real*, MemorySpace> resValues;
-        size_t offset;
+        ::Kokkos::View<Real*, MemorySpace> resValues; ///< Receives the contributions.
+        size_t offset; ///< Position of the first reserved contribution.
 
+        /**
+         * @brief Lists the contributions of the entry.
+         * @param e Position of the entry.
+         * @param update Number of contributions of the previous entries,
+         * incremented.
+         * @param final Whether the pass writes the results.
+         */
         KOKKOS_INLINE_FUNCTION void operator()(
           const size_t e, size_t& update, const bool final) const
         {
@@ -1084,10 +1211,19 @@ namespace Rodin::Assembly::Internal
       /**
        * @brief Lists the nonzero entries of a linear integrator as
        * contributions to the right-hand side.
+       * @param execution Execution space instance of the kernel.
+       * @param begin Position of the first entry. @param count Entry count.
+       * @param indices Indices of the entries in the space of the integrator.
+       * @param values Values of the entries.
+       * @param row Offset of the space of the integrator.
+       * @param hasFixed Whether the system has fixed degrees of freedom.
+       * @param fixed Flags of the fixed degrees of freedom.
+       * @param x Expansions on the masters, used when @p expanded is set.
+       * @param expanded Whether an entry goes to the masters of its row.
        * @param res Receives the contributions, counted by countVector.
        *
        * The contributions follow the order of the entries, and of the masters
-       * of an entry. See countVector for the other parameters.
+       * of an entry.
        */
       template <class Indices, class Values, class Fixed>
       static void listVector(const ExecutionSpace& execution, size_t begin, size_t count,
@@ -1106,12 +1242,18 @@ namespace Rodin::Assembly::Internal
       template <class Fixed, class Values, class Owned, class RHS>
       struct FixedImposition
       {
-        Fixed fixed;
-        Values values;
+        Fixed fixed; ///< Flags of the rows whose value is imposed.
+        Values values; ///< Imposed values, per degree of freedom.
+        /// @brief Flags of the degrees of freedom the process owns, empty when the system
+        /// is not distributed.
         Owned owned;
-        RHS rhs;
-        bool distributed;
+        RHS rhs; ///< Right-hand side.
+        bool distributed; ///< Whether the system is distributed.
 
+        /**
+         * @brief Writes the fixed value of the row.
+         * @param i Row.
+         */
         KOKKOS_INLINE_FUNCTION void operator()(const size_t i) const
         {
           if (fixed(i))
@@ -1119,7 +1261,18 @@ namespace Rodin::Assembly::Internal
         }
       };
 
-      /// @brief Writes the fixed values on the fixed rows.
+      /**
+       * @brief Writes the fixed values on the fixed rows.
+       * @param execution Execution space instance of the kernel.
+       * @param count Number of rows.
+       * @param fixed Flags of the rows whose value is imposed.
+       * @param values Imposed values, per degree of freedom.
+       * @param owned Flags of the degrees of freedom the process owns, empty
+       * when the system is not distributed.
+       * @param rhs Right-hand side.
+       *
+       * On a distributed system, the other processes write zero.
+       */
       template <class Fixed, class Values, class Owned, class RHS>
       static void imposeFixed(const ExecutionSpace& execution, size_t count,
         const Fixed& fixed, const Values& values, const Owned& owned, const RHS& rhs)
@@ -1136,10 +1289,14 @@ namespace Rodin::Assembly::Internal
       template <class Indices>
       struct EntryRows
       {
-        Indices indices;
-        Index row;
-        Indices res;
+        Indices indices; ///< Indices of the entries in the space of the integrator.
+        Index row; ///< Offset of the test space.
+        Indices res; ///< Receives the rows.
 
+        /**
+         * @brief Writes the row of the entry.
+         * @param e Position of the entry.
+         */
         KOKKOS_INLINE_FUNCTION void operator()(const size_t e) const
         {
           res(e) = row + indices(e);
@@ -1148,6 +1305,7 @@ namespace Rodin::Assembly::Internal
 
       /**
        * @brief Writes the rows of the entries of a linear integrator.
+       * @param execution Execution space instance of the kernel.
        * @param indices Entry indices. @param begin Position of the first
        * entry. @param end Position past the last one.
        * @param row Offset of the test space. @param res Receives the rows.
@@ -1166,12 +1324,20 @@ namespace Rodin::Assembly::Internal
       template <class Indices>
       struct Sequence
       {
-        Indices res;
+        Indices res; ///< Receives the numbering.
 
+        /**
+         * @brief Writes the index of the entry into it.
+         * @param i Index of the entry.
+         */
         KOKKOS_INLINE_FUNCTION void operator()(const size_t i) const { res(i) = i; }
       };
 
-      /// @brief Numbers the entries of a dense vector.
+      /**
+       * @brief Numbers the entries of a dense vector.
+       * @param execution Execution space instance of the kernel.
+       * @param res Receives the index of each entry.
+       */
       template <class Indices>
       static void sequence(const ExecutionSpace& execution, const Indices& res)
       {
@@ -1188,11 +1354,16 @@ namespace Rodin::Assembly::Internal
       template <class Indices, class Scalars>
       struct ExpandedCount
       {
-        Indices rows;
-        Indices cols;
-        Scalars values;
-        Expansions x;
+        Indices rows; ///< Row coordinates.
+        Indices cols; ///< Column coordinates.
+        Scalars values; ///< Values of the coordinate list.
+        Expansions x; ///< Expansions on the masters.
 
+        /**
+         * @brief Counts the contributions and lifted values of the entry.
+         * @param e Position of the entry in the list.
+         * @param sum Numbers of contributions and of lifted values, incremented.
+         */
         KOKKOS_INLINE_FUNCTION void operator()(const size_t e, Sizes& sum) const
         {
           if (values(e) == PetscScalar(0))
@@ -1208,6 +1379,13 @@ namespace Rodin::Assembly::Internal
       /**
        * @brief Counts the contributions of the coordinate list expanded on
        * the masters, and the affine values they lift.
+       * @param execution Execution space instance of the kernel.
+       * @param count Number of entries in the list.
+       * @param rows Row coordinates.
+       * @param cols Column coordinates.
+       * @param values Values of the coordinate list.
+       * @param x Expansions on the masters.
+       * @return Numbers of expanded contributions and of lifted values.
        */
       template <class Indices, class Scalars>
       static Sizes countExpanded(const ExecutionSpace& execution, size_t count,
@@ -1229,17 +1407,25 @@ namespace Rodin::Assembly::Internal
       template <class Indices, class Scalars>
       struct Expansion
       {
-        Indices rows;
-        Indices cols;
-        Scalars values;
-        Expansions x;
-        Indices resRows;
-        Indices resCols;
-        Scalars resValues;
+        Indices rows; ///< Row coordinates.
+        Indices cols; ///< Column coordinates.
+        Scalars values; ///< Values of the coordinate list.
+        Expansions x; ///< Expansions on the masters.
+        Indices resRows; ///< Receives the rows of the expanded contributions.
+        Indices resCols; ///< Receives the columns of the expanded contributions.
+        Scalars resValues; ///< Receives the expanded contributions.
+        /// @brief Receives the rows of the lifted values.
         ::Kokkos::View<Index*, MemorySpace> liftRows;
-        ::Kokkos::View<Real*, MemorySpace> liftValues;
-        size_t offset;
+        ::Kokkos::View<Real*, MemorySpace> liftValues; ///< Receives the lifted values.
+        size_t offset; ///< Position of the first reserved lifted value.
 
+        /**
+         * @brief Expands the entry and lists the values it lifts.
+         * @param e Position of the entry in the list.
+         * @param update Numbers of contributions and of lifted values of the
+         * previous entries, incremented.
+         * @param final Whether the pass writes the results.
+         */
         KOKKOS_INLINE_FUNCTION void operator()(
           const size_t e, Sizes& update, const bool final) const
         {
@@ -1279,6 +1465,15 @@ namespace Rodin::Assembly::Internal
 
       /**
        * @brief Expands the coordinate list on the masters.
+       * @param execution Execution space instance of the kernel.
+       * @param count Number of entries in the list.
+       * @param rows Row coordinates.
+       * @param cols Column coordinates.
+       * @param values Values of the coordinate list.
+       * @param x Expansions on the masters.
+       * @param resRows Receives the rows of the expanded contributions.
+       * @param resCols Receives the columns of the expanded contributions.
+       * @param resValues Receives the expanded contributions.
        * @param lifts Receives the lifted affine values, in coordinate order.
        *
        * The nonzero value @f$ a @f$ of row @f$ i @f$ and column @f$ j @f$
@@ -1304,16 +1499,27 @@ namespace Rodin::Assembly::Internal
       template <class Indices, class Previous>
       struct DifferenceCount
       {
-        Indices indices;
-        Previous previous;
+        Indices indices; ///< Index list.
+        Previous previous; ///< Index list it is compared with.
 
+        /**
+         * @brief Counts the position when the lists differ there.
+         * @param i Position in the lists.
+         * @param sum Number of differing positions, incremented.
+         */
         KOKKOS_INLINE_FUNCTION void operator()(const size_t i, size_t& sum) const
         {
           sum += indices(i) != previous(i);
         }
       };
 
-      /// @brief Counts the positions at which two index lists differ.
+      /**
+       * @brief Counts the positions at which two index lists differ.
+       * @param execution Execution space instance of the kernel.
+       * @param indices Index list.
+       * @param previous Index list it is compared with, at least as long.
+       * @return Number of differing positions.
+       */
       template <class Indices, class Previous>
       static size_t countDifferences(
         const ExecutionSpace& execution, const Indices& indices, const Previous& previous)
@@ -1330,18 +1536,31 @@ namespace Rodin::Assembly::Internal
       template <class Indices>
       struct ChangeCount
       {
-        Indices rows;
-        Indices cols;
-        Indices previousRows;
-        Indices previousCols;
+        Indices rows; ///< Row coordinates.
+        Indices cols; ///< Column coordinates.
+        Indices previousRows; ///< Row coordinates of the previous pattern.
+        Indices previousCols; ///< Column coordinates of the previous pattern.
 
+        /**
+         * @brief Counts the coordinate when it differs between the patterns.
+         * @param e Position of the coordinate.
+         * @param sum Number of differing coordinates, incremented.
+         */
         KOKKOS_INLINE_FUNCTION void operator()(const size_t e, size_t& sum) const
         {
           sum += rows(e) != previousRows(e) || cols(e) != previousCols(e);
         }
       };
 
-      /// @brief Counts the coordinates that differ between two patterns.
+      /**
+       * @brief Counts the coordinates that differ between two patterns.
+       * @param execution Execution space instance of the kernel.
+       * @param rows Row coordinates.
+       * @param cols Column coordinates.
+       * @param previousRows Row coordinates of the previous pattern.
+       * @param previousCols Column coordinates of the previous pattern.
+       * @return Number of differing coordinates.
+       */
       template <class Indices>
       static size_t countChanges(const ExecutionSpace& execution, const Indices& rows,
         const Indices& cols, const Indices& previousRows, const Indices& previousCols)
@@ -1356,6 +1575,7 @@ namespace Rodin::Assembly::Internal
 
       /**
        * @brief Sorts the coordinates by row then column.
+       * @param execution Execution space instance of the kernel.
        * @param columns Column count of the system.
        * @param segments Segments of the coordinates.
        * @param offsets Position of the first entry of every segment, the
@@ -1399,17 +1619,23 @@ namespace Rodin::Assembly::Internal
       template <class Indices, class Order>
       struct PatternKeys
       {
+        /// @brief Type of the indices in the permutation.
         using Position = typename Order::value_type;
 
-        size_t begin;
-        size_t size;
-        size_t spacing;
+        size_t begin; ///< Position of the first entry of the segment.
+        size_t size; ///< Number of entries of the segment.
+        size_t spacing; ///< Spacing of the entries of the segment.
+        /// @brief Receives the keys, the row times the column count plus the column.
         ::Kokkos::View<std::uint64_t*, MemorySpace> keys;
-        Indices rows;
-        Indices cols;
-        size_t columns;
-        Order order;
+        Indices rows; ///< Row coordinates.
+        Indices cols; ///< Column coordinates.
+        size_t columns; ///< Column count of the system.
+        Order order; ///< Receives the indices of the coordinates.
 
+        /**
+         * @brief Writes the key and the index of the coordinate.
+         * @param r Rank of the coordinate in the segment.
+         */
         KOKKOS_INLINE_FUNCTION void operator()(const size_t r) const
         {
           const size_t e =
@@ -1419,7 +1645,16 @@ namespace Rodin::Assembly::Internal
         }
       };
 
-      /// @brief Sorts the coordinates into the given indices.
+      /**
+       * @brief Sorts the coordinates into the given indices.
+       * @param execution Execution space instance of the kernel.
+       * @param columns Column count of the system.
+       * @param segments Segments of the coordinates.
+       * @param offsets Position of the first entry of every segment.
+       * @param rows Row coordinates.
+       * @param cols Column coordinates.
+       * @param order Receives the indices of the sorted coordinates.
+       */
       template <class Indices, class Order>
       static void sortPattern(const ExecutionSpace& execution, size_t columns,
         const std::vector<COOSegment>& segments, const std::vector<size_t>& offsets,
@@ -1452,10 +1687,16 @@ namespace Rodin::Assembly::Internal
       template <class Indices, class Order>
       struct DistinctHead
       {
-        Indices rows;
-        Indices cols;
-        Order order;
+        Indices rows; ///< Row coordinates.
+        Indices cols; ///< Column coordinates.
+        Order order; ///< Indices of the sorted coordinates.
 
+        /**
+         * @brief Tests the sorted coordinate.
+         * @param i Position in the sorted coordinates.
+         * @return Whether the coordinate is the first or differs from the
+         * previous one.
+         */
         KOKKOS_INLINE_FUNCTION bool operator()(const size_t i) const
         {
           const Index e = order(i);
@@ -1470,8 +1711,14 @@ namespace Rodin::Assembly::Internal
       template <class Indices, class Order>
       struct DistinctCount
       {
+        /// @brief Test of the starts of the distinct coordinates.
         DistinctHead<Indices, Order> head;
 
+        /**
+         * @brief Counts the sorted coordinate when it starts a distinct one.
+         * @param i Position in the sorted coordinates.
+         * @param sum Number of distinct coordinates, incremented.
+         */
         KOKKOS_INLINE_FUNCTION void operator()(const size_t i, size_t& sum) const
         {
           sum += head(i);
@@ -1485,9 +1732,17 @@ namespace Rodin::Assembly::Internal
       template <class Indices, class Order>
       struct DistinctStartList
       {
+        /// @brief Test of the starts of the distinct coordinates.
         DistinctHead<Indices, Order> head;
-        Indices starts;
+        Indices starts; ///< Receives the start of each distinct coordinate.
 
+        /**
+         * @brief Writes the position of the sorted coordinate when it starts a
+         * distinct one.
+         * @param i Position in the sorted coordinates.
+         * @param update Number of distinct coordinates before it, incremented.
+         * @param final Whether the pass writes the results.
+         */
         KOKKOS_INLINE_FUNCTION void operator()(
           const size_t i, size_t& update, const bool final) const
         {
@@ -1503,6 +1758,10 @@ namespace Rodin::Assembly::Internal
       /**
        * @brief Finds where each distinct coordinate starts in the sorted
        * coordinates.
+       * @param execution Execution space instance of the kernel.
+       * @param rows Row coordinates.
+       * @param cols Column coordinates.
+       * @param order Indices of the sorted coordinates.
        * @returns Starts of the distinct coordinates, followed by the list size.
        */
       template <class Indices, class Order>
@@ -1531,13 +1790,17 @@ namespace Rodin::Assembly::Internal
       template <class Indices, class Order, class Coordinates>
       struct DistinctList
       {
-        Indices rows;
-        Indices cols;
-        Order order;
-        Indices starts;
-        Coordinates distinctRows;
-        Coordinates distinctCols;
+        Indices rows; ///< Row coordinates.
+        Indices cols; ///< Column coordinates.
+        Order order; ///< Indices of the sorted coordinates.
+        Indices starts; ///< Start of each distinct coordinate in the sorted coordinates.
+        Coordinates distinctRows; ///< Receives the rows of the distinct coordinates.
+        Coordinates distinctCols; ///< Receives the columns of the distinct coordinates.
 
+        /**
+         * @brief Lists the distinct coordinate.
+         * @param u Index of the distinct coordinate.
+         */
         KOKKOS_INLINE_FUNCTION void operator()(const size_t u) const
         {
           const Index e = order(starts(u));
@@ -1546,7 +1809,17 @@ namespace Rodin::Assembly::Internal
         }
       };
 
-      /// @brief Lists the distinct coordinates in the PETSc index type.
+      /**
+       * @brief Lists the distinct coordinates in the PETSc index type.
+       * @param execution Execution space instance of the kernel.
+       * @param rows Row coordinates.
+       * @param cols Column coordinates.
+       * @param order Indices of the sorted coordinates.
+       * @param starts Start of each distinct coordinate in the sorted
+       * coordinates.
+       * @param distinctRows Receives the rows of the distinct coordinates.
+       * @param distinctCols Receives the columns of the distinct coordinates.
+       */
       template <class Indices, class Order, class Coordinates>
       static void listDistinct(const ExecutionSpace& execution, const Indices& rows,
         const Indices& cols, const Order& order, const Indices& starts,
@@ -1563,11 +1836,17 @@ namespace Rodin::Assembly::Internal
       template <class Order, class Indices, class Scalars>
       struct Merge
       {
-        Order order;
+        Order order; ///< Indices of the sorted coordinates.
+        /// @brief Start of each distinct coordinate in the sorted coordinates, followed
+        /// by the list size.
         Indices starts;
-        Scalars values;
-        Scalars merged;
+        Scalars values; ///< Values of the coordinate list.
+        Scalars merged; ///< Receives the sum of each distinct coordinate.
 
+        /**
+         * @brief Sums the values of the distinct coordinate.
+         * @param u Index of the distinct coordinate.
+         */
         KOKKOS_INLINE_FUNCTION void operator()(const size_t u) const
         {
           PetscScalar sum = 0;
@@ -1577,7 +1856,15 @@ namespace Rodin::Assembly::Internal
         }
       };
 
-      /// @brief Sums the values of each distinct coordinate.
+      /**
+       * @brief Sums the values of each distinct coordinate.
+       * @param execution Execution space instance of the kernel.
+       * @param order Indices of the sorted coordinates.
+       * @param starts Start of each distinct coordinate in the sorted
+       * coordinates, followed by the list size.
+       * @param values Values of the coordinate list.
+       * @param merged Receives the sum of each distinct coordinate.
+       */
       template <class Order, class Indices, class Scalars>
       static void merge(const ExecutionSpace& execution, const Order& order,
         const Indices& starts, const Scalars& values, const Scalars& merged)
@@ -2534,7 +2821,7 @@ namespace Rodin::Assembly::Internal
 namespace Rodin::Assembly
 {
   /**
-   * @ingroup RodinAssembly
+   * @ingroup KokkosAssemblySpecializations
    * @brief Device assembly of a PETSc bilinear form on a Kokkos mesh.
    *
    * The integrators of the form, possibly negated, are integrated on the
@@ -2660,7 +2947,7 @@ namespace Rodin::Assembly
   };
 
   /**
-   * @ingroup RodinAssembly
+   * @ingroup KokkosAssemblySpecializations
    * @brief Device assembly of a PETSc linear form on a Kokkos mesh.
    *
    * The integrators of the form, possibly negated, are integrated on the
@@ -2778,7 +3065,7 @@ namespace Rodin::Assembly
   };
 
   /**
-   * @ingroup RodinAssembly
+   * @ingroup KokkosAssemblySpecializations
    * @brief Device assembly of a single field PETSc problem on a Kokkos mesh.
    *
    * The integrators of the problem, possibly negated, are integrated on the
@@ -2976,7 +3263,7 @@ namespace Rodin::Assembly
   };
 
   /**
-   * @ingroup RodinAssembly
+   * @ingroup KokkosAssemblySpecializations
    * @brief Device assembly of a mixed PETSc problem on a Kokkos mesh.
    *
    * Each field occupies a block of the system, at the offsets given by the
