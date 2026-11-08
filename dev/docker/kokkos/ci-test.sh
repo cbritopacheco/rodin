@@ -44,6 +44,8 @@ esac
 # (cicc) and ptxas take most of the time at -O3. On HIP, -O0 covers both.
 if [[ $build_only -eq 1 ]]; then
   options+=("-DCMAKE_CXX_FLAGS_RELEASE=-O0 -DNDEBUG")
+  # The CI checks out without Git LFS, and a build needs no mesh.
+  options+=(-DRODIN_INSTALL_RESOURCES=OFF)
   if [[ $RODIN_KOKKOS_BACKEND == cuda ]]; then
     export NVCC_APPEND_FLAGS="${NVCC_APPEND_FLAGS:-} -Xcicc -O0 -Xptxas -O0"
   fi

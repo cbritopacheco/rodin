@@ -82,7 +82,8 @@ RocSolverRF test and the Kokkos examples, and runs the tests; the MPI tests run 
 which share the GPU. Logs land in `<build-dir>/test-logs`.
 
 `ci-test.sh --build-only` stops after the build, on a host without GPU,
-and compiles at -O0 on the host and the device.
+compiles at -O0 on the host and the device, and does not need the meshes
+of Git LFS.
 The workflow `KokkosBuild.yml` runs it on GitHub hosted runners, with the
 images pulled from `ghcr.io/<owner>/rodin-kokkos-ci`, or from the registry
 named by the repository variable `RODIN_KOKKOS_CI_IMAGES`. To publish them:
