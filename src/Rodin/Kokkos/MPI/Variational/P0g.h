@@ -157,7 +157,7 @@ namespace Rodin::Variational
       }
 
       /// @param[in] local Local degree of freedom. @return Zero.
-      Index getGlobalIndex(Index) const
+      Index getGlobalIndex([[maybe_unused]] Index local) const
       {
         return 0;
       }
