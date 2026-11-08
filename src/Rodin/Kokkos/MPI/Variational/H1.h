@@ -83,8 +83,8 @@ namespace Rodin::Variational
        * @param[in] mesh Mesh without pyramids supporting the space, which must
        * outlive it.
        */
-      H1(std::integral_constant<size_t, K> degree, const MeshType& mesh)
-      requires std::is_same_v<RangeType, Real>
+      H1(std::integral_constant<size_t, K> degree,
+         const MeshType& mesh) requires std::is_same_v<RangeType, Real>
         : m_mesh(mesh),
           m_host(degree, mesh.getHost()),
           m_local(degree, mesh.getLocal())
@@ -97,8 +97,8 @@ namespace Rodin::Variational
        * outlive it.
        * @param[in] vdim Vector dimension.
        */
-      H1(std::integral_constant<size_t, K> degree, const MeshType& mesh, size_t vdim)
-      requires(!std::is_same_v<RangeType, Real>)
+      H1(std::integral_constant<size_t, K> degree, const MeshType& mesh,
+         size_t vdim) requires(!std::is_same_v<RangeType, Real>)
         : m_mesh(mesh),
           m_host(degree, mesh.getHost(), vdim),
           m_local(degree, mesh.getLocal(), vdim)

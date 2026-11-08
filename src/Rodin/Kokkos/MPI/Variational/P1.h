@@ -79,8 +79,7 @@ namespace Rodin::Variational
        * @brief Constructs the scalar space; collective over the processes.
        * @param[in] mesh Mesh supporting the space, which must outlive it.
        */
-      P1(const MeshType& mesh)
-      requires std::is_same_v<RangeType, Real>
+      P1(const MeshType& mesh) requires std::is_same_v<RangeType, Real>
         : m_mesh(mesh), m_host(mesh.getHost()), m_local(mesh.getLocal())
       {}
 
@@ -89,8 +88,7 @@ namespace Rodin::Variational
        * @param[in] mesh Mesh supporting the space, which must outlive it.
        * @param[in] vdim Vector dimension.
        */
-      P1(const MeshType& mesh, size_t vdim)
-      requires(!std::is_same_v<RangeType, Real>)
+      P1(const MeshType& mesh, size_t vdim) requires(!std::is_same_v<RangeType, Real>)
         : m_mesh(mesh),
           m_host(mesh.getHost(), vdim),
           m_local(mesh.getLocal(), vdim)
