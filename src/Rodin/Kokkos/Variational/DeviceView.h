@@ -1476,7 +1476,12 @@ namespace Rodin::Kokkos::Variational::Internal
   template <class... Nodes>
   struct DeviceViewPack
   {
-    /// @brief Evaluates no component.
+    /**
+     * @brief Evaluates no component.
+     * @param out Vector receiving the values, left unchanged.
+     * @param p Device or integration point.
+     * @param i Position past the last component.
+     */
     template <class Point>
     KOKKOS_INLINE_FUNCTION void evaluate([[maybe_unused]] Geometry::Vector& out,
       [[maybe_unused]] const Point& p, [[maybe_unused]] Index i) const

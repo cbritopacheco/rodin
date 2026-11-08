@@ -104,6 +104,10 @@ namespace Rodin::Kokkos::Variational
     /// attributes and the region above selecting its test polytopes.
     std::vector<::Rodin::Geometry::Attribute> trialAttributes = {};
 
+    /**
+     * @brief Compares two layouts member by member.
+     * @return Whether the layouts are equal.
+     */
     bool operator==(const DeviceLayout&) const = default;
   };
 
@@ -497,6 +501,7 @@ namespace Rodin::Kokkos::Variational::Internal
   struct MeshBackend<
     ::Rodin::Geometry::Mesh<::Rodin::Context::Kokkos<::Rodin::Context::Local, Backend>>>
   {
+    /// @brief Kokkos backend of the resident mesh.
     using Type = Backend;
   };
 
@@ -505,6 +510,7 @@ namespace Rodin::Kokkos::Variational::Internal
   struct MeshBackend<
     ::Rodin::Geometry::Mesh<::Rodin::Context::Kokkos<::Rodin::Context::MPI, Backend>>>
   {
+    /// @brief Kokkos backend of the distributed resident mesh.
     using Type = Backend;
   };
 
@@ -516,6 +522,7 @@ namespace Rodin::Kokkos::Variational::Internal
   template <class FES>
   struct IsP1Space
   {
+    /// @brief Whether the space is a P1 space, false in general.
     static constexpr bool Value = false;
   };
 
@@ -523,6 +530,7 @@ namespace Rodin::Kokkos::Variational::Internal
   template <class Range, class Mesh>
   struct IsP1Space<::Rodin::Variational::P1<Range, Mesh>>
   {
+    /// @brief Whether the space is a P1 space, true here.
     static constexpr bool Value = true;
   };
 
@@ -530,6 +538,7 @@ namespace Rodin::Kokkos::Variational::Internal
   template <class FES>
   struct IsH1Space
   {
+    /// @brief Whether the space is an H1 space, false in general.
     static constexpr bool Value = false;
   };
 
@@ -537,6 +546,7 @@ namespace Rodin::Kokkos::Variational::Internal
   template <size_t K, class Range, class Mesh>
   struct IsH1Space<::Rodin::Variational::H1<K, Range, Mesh>>
   {
+    /// @brief Whether the space is an H1 space, true here.
     static constexpr bool Value = true;
   };
 
@@ -572,6 +582,7 @@ namespace Rodin::Kokkos::Variational::Internal
   template <class LHSDerived, class RHSDerived>
   struct DerivativeForm
   {
+    /// @brief Derivatives of the pair, none in general.
     static constexpr DerivativeKind Kind = DerivativeKind::None;
   };
 
@@ -583,6 +594,7 @@ namespace Rodin::Kokkos::Variational::Internal
     ::Rodin::Variational::Grad<::Rodin::Variational::ShapeFunction<RHSDerived, TestFES,
       ::Rodin::Variational::ShapeFunctionSpaceType::Test>>>
   {
+    /// @brief Gradients on both sides.
     static constexpr DerivativeKind Kind = DerivativeKind::Gradients;
   };
 
@@ -598,6 +610,7 @@ namespace Rodin::Kokkos::Variational::Internal
     ::Rodin::Variational::Grad<::Rodin::Variational::ShapeFunction<RHSDerived, TestFES,
       ::Rodin::Variational::ShapeFunctionSpaceType::Test>>>
   {
+    /// @brief Gradients on both sides.
     static constexpr DerivativeKind Kind = DerivativeKind::Gradients;
   };
 
@@ -609,6 +622,8 @@ namespace Rodin::Kokkos::Variational::Internal
     ::Rodin::Variational::ShapeFunction<RHSDerived, TestFES,
       ::Rodin::Variational::ShapeFunctionSpaceType::Test>>
   {
+    /// @brief Divergence of the trial function when the test space is scalar,
+    /// none otherwise.
     static constexpr DerivativeKind Kind =
       std::is_same_v<typename TestFES::RangeType, Real>
       ? DerivativeKind::TrialDivergence
@@ -622,6 +637,8 @@ namespace Rodin::Kokkos::Variational::Internal
     ::Rodin::Variational::Div<::Rodin::Variational::ShapeFunction<RHSDerived, TestFES,
       ::Rodin::Variational::ShapeFunctionSpaceType::Test>>>
   {
+    /// @brief Divergence of the test function when the trial space is scalar,
+    /// none otherwise.
     static constexpr DerivativeKind Kind =
       std::is_same_v<typename TrialFES::RangeType, Real>
       ? DerivativeKind::TestDivergence
@@ -636,6 +653,7 @@ namespace Rodin::Kokkos::Variational::Internal
     ::Rodin::Variational::Jacobian<::Rodin::Variational::ShapeFunction<RHSDerived,
       TestFES, ::Rodin::Variational::ShapeFunctionSpaceType::Test>>>
   {
+    /// @brief Jacobians on both sides.
     static constexpr DerivativeKind Kind = DerivativeKind::Gradients;
   };
 
@@ -651,6 +669,7 @@ namespace Rodin::Kokkos::Variational::Internal
     ::Rodin::Variational::Jacobian<::Rodin::Variational::ShapeFunction<RHSDerived,
       TestFES, ::Rodin::Variational::ShapeFunctionSpaceType::Test>>>
   {
+    /// @brief Jacobians on both sides.
     static constexpr DerivativeKind Kind = DerivativeKind::Gradients;
   };
 
@@ -667,6 +686,7 @@ namespace Rodin::Kokkos::Variational::Internal
     ::Rodin::Variational::ShapeFunction<RHSDerived, TestFES,
       ::Rodin::Variational::ShapeFunctionSpaceType::Test>>
   {
+    /// @brief Jacobian of the trial function times a function.
     static constexpr DerivativeKind Kind = DerivativeKind::JacobianValue;
   };
 
@@ -941,10 +961,17 @@ namespace Rodin::Kokkos::Variational::Internal
       /// @brief Records the minimum polytope index of every geometry.
       struct Representatives
       {
+        /// @brief Device mesh.
         Rodin::Kokkos::Geometry::MeshView view;
+        /// @brief Minimum polytope index of every geometry.
         ::Kokkos::View<Index[GeometryCount], MemorySpace> first;
+        /// @brief Dimension of the polytopes.
         Index dimension;
 
+        /**
+         * @brief Lowers the minimum of the geometry of a polytope to its index.
+         * @param p Polytope index.
+         */
         KOKKOS_INLINE_FUNCTION void operator()(Index p) const
         {
           const Index g = static_cast<Index>(view.getPolytope(dimension, p).getGeometry());
@@ -1025,9 +1052,16 @@ namespace Rodin::Kokkos::Variational::Internal
       /// @brief Starts empty: a copy must not share the offsets it may locate again.
       DevicePolytopes(const DevicePolytopes&) {}
 
+      /**
+       * @brief Move constructor, keeping the located offsets.
+       */
       DevicePolytopes(DevicePolytopes&&) = default;
 
-      /// @brief Empties this object, see the copy constructor. @returns This object.
+      /**
+       * @brief Empties this object, see the copy constructor.
+       * @param other Polytopes to assign, only compared to this object.
+       * @return This object.
+       */
       DevicePolytopes& operator=(const DevicePolytopes& other)
       {
         if (this != &other)
@@ -1035,6 +1069,10 @@ namespace Rodin::Kokkos::Variational::Internal
         return *this;
       }
 
+      /**
+       * @brief Move assignment, keeping the located offsets.
+       * @return This object.
+       */
       DevicePolytopes& operator=(DevicePolytopes&&) = default;
 
       /**
@@ -1163,15 +1201,29 @@ namespace Rodin::Kokkos::Variational::Internal
       template <class TrialDOFs, class TestDOFs>
       struct EntryCount
       {
+        /// @brief Device mesh.
         Rodin::Kokkos::Geometry::MeshView view;
+        /// @brief Integration region.
         ::Rodin::Geometry::Region region;
+        /// @brief Dimension of the integrated polytopes.
         Index dimension;
+        /// @brief Selected attributes; empty selects every polytope of the region.
         AttributesType attributes;
+        /// @brief Device degrees of freedom of the trial space.
         TrialDOFs trialDOFs;
+        /// @brief Vector dimension of the trial space.
         Index trialVDim;
+        /// @brief Device degrees of freedom of the test space.
         TestDOFs testDOFs;
+        /// @brief Vector dimension of the test space.
         Index testVDim;
 
+        /**
+         * @brief Counts the entries of a polytope.
+         * @param p Polytope index.
+         * @return Number of entries, zero when the polytope is not
+         * integrated.
+         */
         KOKKOS_INLINE_FUNCTION Index operator()(Index p) const
         {
           const auto polytope = view.getPolytope(dimension, p);
@@ -1186,8 +1238,16 @@ namespace Rodin::Kokkos::Variational::Internal
       template <class TrialDOFs, class TestDOFs>
       struct EntryRange
       {
+        /// @brief Entry count of a polytope.
         EntryCount<TrialDOFs, TestDOFs> count;
 
+        /**
+         * @brief Adds a polytope to the reduction.
+         * @param p Polytope index.
+         * @param m Number of integrated polytopes.
+         * @param lo Smallest entry count of an integrated polytope.
+         * @param hi Largest entry count of an integrated polytope.
+         */
         KOKKOS_INLINE_FUNCTION void operator()(
           Index p, Index& m, Index& lo, Index& hi) const
         {
@@ -1207,10 +1267,19 @@ namespace Rodin::Kokkos::Variational::Internal
       template <class TrialDOFs, class TestDOFs>
       struct EntryOffsets
       {
+        /// @brief Entry count of a polytope.
         EntryCount<TrialDOFs, TestDOFs> count;
+        /// @brief Entry offset of every polytope.
         ::Kokkos::View<Index*, MemorySpace> offsets;
+        /// @brief Whether the integrated polytopes own the same entry count.
         bool uniform;
 
+        /**
+         * @brief Adds a polytope to the exclusive scan of the offsets.
+         * @param p Polytope index.
+         * @param update Running offset, the offset of the polytope on input.
+         * @param final Whether the pass writes the offsets.
+         */
         KOKKOS_INLINE_FUNCTION void operator()(Index p, Index& update, bool final) const
         {
           if (final)
@@ -1229,6 +1298,21 @@ namespace Rodin::Kokkos::Variational::Internal
        * spacing is their number, as described by getEntryPosition().
        * Otherwise the offset of a polytope is the count of the previous
        * ones and the spacing is one.
+       *
+       * @param execution Execution space instance.
+       * @param view Device mesh.
+       * @param region Integration region.
+       * @param dimension Dimension of the polytopes.
+       * @param attributes Selected attributes; empty selects every polytope of
+       * the region.
+       * @param offsets Entry offset of every polytope, written.
+       * @param count Number of polytopes of the dimension.
+       * @param trialDOFs Device degrees of freedom of the trial space.
+       * @param trialVDim Vector dimension of the trial space.
+       * @param testDOFs Device degrees of freedom of the test space.
+       * @param testVDim Vector dimension of the test space.
+       * @param spacing Set to the spacing of the entries.
+       * @return Number of entries.
        */
       template <class TrialDOFs, class TestDOFs>
       static size_t locate(const ExecutionSpace& execution,
@@ -1408,7 +1492,11 @@ namespace Rodin::Kokkos::Variational
         return *m_integrand;
       }
 
-      /// @brief Unavailable; the integral has no host evaluation. @throws Alert::Exception Always.
+      /**
+       * @brief Unavailable; the integral has no host evaluation.
+       * @return Never returns.
+       * @throws Alert::Exception Always.
+       */
       const ::Rodin::Geometry::Polytope& getPolytope() const override
       {
         Alert::MemberFunctionException(*this, __func__)
@@ -1417,7 +1505,12 @@ namespace Rodin::Kokkos::Variational
         std::abort();
       }
 
-      /// @brief Unavailable; the integral has no host evaluation. @throws Alert::Exception Always.
+      /**
+       * @brief Unavailable; the integral has no host evaluation.
+       * @param polytope Ignored host polytope.
+       * @return Never returns.
+       * @throws Alert::Exception Always.
+       */
       DeviceBilinearIntegral& setPolytope(
         [[maybe_unused]] const ::Rodin::Geometry::Polytope& polytope) override
       {
@@ -1427,7 +1520,13 @@ namespace Rodin::Kokkos::Variational
         std::abort();
       }
 
-      /// @brief Unavailable; the integral has no host evaluation. @throws Alert::Exception Always.
+      /**
+       * @brief Unavailable; the integral has no host evaluation.
+       * @param tr Ignored local trial index.
+       * @param te Ignored local test index.
+       * @return Never returns.
+       * @throws Alert::Exception Always.
+       */
       Real integrate([[maybe_unused]] size_t tr, [[maybe_unused]] size_t te) override
       {
         Alert::MemberFunctionException(*this, __func__)
@@ -1507,6 +1606,17 @@ namespace Rodin::Kokkos::Variational
        * among the entries of the polytope, or the diagonals of its
        * component blocks as described by Internal::writeEntries() when
        * prepared so.
+       *
+       * @param values Entry values, the entry of rank r being written at
+       * offset + getEntryPosition(r, count, getSpacing()).
+       * @param offset Position of the first entry.
+       * @param sign Factor of the contributions.
+       * @param accumulate Whether the contributions are added to the values
+       * instead of replacing them.
+       * @param rows Row indices, test degrees of freedom, written as the
+       * values unless empty.
+       * @param cols Column indices, trial degrees of freedom, written as the
+       * values unless empty.
        */
       void fill(const ::Kokkos::View<Real*, MemorySpace>& values, size_t offset,
         Real sign, bool accumulate, const ::Kokkos::View<Index*, MemorySpace>& rows,
@@ -1643,6 +1753,7 @@ namespace Rodin::Kokkos::Variational
       /**
        * @brief Gets the number of quadrature points of a group of the team
        * kernel that fit in TeamScratch.
+       * @return TeamScratch divided by getTeamPointBytes().
        */
       template <Index Vertices, class Trial, class Test>
       static constexpr Index getTeamPoints()
@@ -1656,6 +1767,23 @@ namespace Rodin::Kokkos::Variational
        * When Exact, both spaces are P1, every polytope has Vertices vertices
        * and both vector dimensions are maximal, so the local loops have
        * static bounds. Shape is the geometry tag of the integration points.
+       *
+       * @param mesh Resident mesh.
+       * @param polytopes Selected polytopes, located by prepare().
+       * @param trial Device view of the trial operator.
+       * @param test Device view of the test operator.
+       * @param trialDOFs Device degrees of freedom of the trial space.
+       * @param trialVDim Vector dimension of the trial space.
+       * @param testDOFs Device degrees of freedom of the test space.
+       * @param testVDim Vector dimension of the test space.
+       * @param values Entry values.
+       * @param offset Position of the first entry.
+       * @param sign Factor of the contributions.
+       * @param accumulate Whether the contributions are added to the values.
+       * @param compact Whether to list the diagonals of the component blocks
+       * only.
+       * @param rows Row indices, written unless empty.
+       * @param cols Column indices, written unless empty.
        */
       template <Index Vertices, bool Exact = false, class Shape = DynamicGeometry,
         class Trial, class Test>
@@ -1703,6 +1831,23 @@ namespace Rodin::Kokkos::Variational
        * (StoredValue), and writes
        * each entry on the diagonal of its component block
        * (Internal::writeEntries()).
+       *
+       * @param mesh Resident mesh.
+       * @param polytopes Selected polytopes, located by prepare().
+       * @param trial Device view of the trial operator.
+       * @param test Device view of the test operator.
+       * @param trialDOFs Device degrees of freedom of the trial space.
+       * @param trialVDim Vector dimension of the trial space.
+       * @param testDOFs Device degrees of freedom of the test space.
+       * @param testVDim Vector dimension of the test space.
+       * @param values Entry values.
+       * @param offset Position of the first entry.
+       * @param sign Factor of the contributions.
+       * @param accumulate Whether the contributions are added to the values.
+       * @param compact Whether to list the diagonals of the component blocks
+       * only.
+       * @param rows Row indices, written unless empty.
+       * @param cols Column indices, written unless empty.
        */
       template <Index Vertices, bool Exact = false, class Shape = DynamicGeometry,
         class Trial, class Test>
@@ -1748,6 +1893,23 @@ namespace Rodin::Kokkos::Variational
        * Each thread holds the local matrix of its polytope, reduced to the
        * pairs of scalar degrees of freedom for a component diagonal
        * integrand as in integrateTeams().
+       *
+       * @param mesh Resident mesh.
+       * @param polytopes Selected polytopes, located by prepare().
+       * @param trial Device view of the trial operator.
+       * @param test Device view of the test operator.
+       * @param trialDOFs Device degrees of freedom of the trial space.
+       * @param trialVDim Vector dimension of the trial space.
+       * @param testDOFs Device degrees of freedom of the test space.
+       * @param testVDim Vector dimension of the test space.
+       * @param values Entry values.
+       * @param offset Position of the first entry.
+       * @param sign Factor of the contributions.
+       * @param accumulate Whether the contributions are added to the values.
+       * @param compact Whether to list the diagonals of the component blocks
+       * only.
+       * @param rows Row indices, written unless empty.
+       * @param cols Column indices, written unless empty.
        */
       template <Index Vertices, bool Exact = false, class Shape = DynamicGeometry,
         class Trial, class Test>
@@ -1769,6 +1931,10 @@ namespace Rodin::Kokkos::Variational
           QuadratureType::policy(execution, polytopes.getPolytopeCount()), kernel);
       }
 
+      /**
+       * @brief Creates a polymorphic copy of this integral.
+       * @return Pointer to a new copy.
+       */
       DeviceBilinearIntegral* copy() const noexcept override = 0;
 
     private:
@@ -1897,53 +2063,93 @@ namespace Rodin::Kokkos::Variational
       template <Index Vertices, bool Exact, class Shape, class Trial, class Test>
       struct TeamKernel
       {
+        /// @brief Stored value of a test basis function at a point (StoredValue).
         using TestValue = StoredValue<Test, Trial, Test>;
+        /// @brief Stored value of a trial basis function at a point (StoredValue).
         using TrialValue = StoredValue<Trial, Trial, Test>;
+        /// @brief Integration point type of the geometry tag.
         using PointType = Rodin::Kokkos::Variational::KernelPointView<Shape>;
+        /// @brief Team policy of the kernel launch.
         using Policy = ::Kokkos::TeamPolicy<ExecutionSpace, ::Kokkos::IndexType<Index>>;
+        /// @brief Team handle given to the kernel.
         using Member = typename Policy::member_type;
-        // Component diagonal integrands integrate one entry per pair of
-        // scalar degrees of freedom.
+        /// @brief Whether the integrand is component diagonal, so that one entry
+        /// is integrated per pair of scalar degrees of freedom.
         static constexpr bool Diagonal = isComponentDiagonal<Trial, Test>();
+        /// @brief Maximum number of integrated trial indices of a polytope.
         static constexpr Index TrialCapacity = TrialDOFsType::getCapacity(Vertices) *
           getComponentCapacity<TrialRange, Trial, Test>();
+        /// @brief Maximum number of integrated test indices of a polytope.
         static constexpr Index TestCapacity = TestDOFsType::getCapacity(Vertices) *
           getComponentCapacity<TestRange, Trial, Test>();
+        /// @brief Team scratch bytes of one quadrature point of a group.
         static constexpr size_t PointBytes = getTeamPointBytes<Vertices, Trial, Test>();
         // Groups that do not fit TeamScratch go to the slower scratch level.
+        /// @brief Number of quadrature points of a group that fit TeamScratch.
         static constexpr Index Fit = getTeamPoints<Vertices, Trial, Test>();
+        /// @brief Number of quadrature points of a group, at most TeamPoints, or
+        /// TeamSlowPoints when fewer than TeamMinimumPoints fit.
         static constexpr Index P = Fit < TeamMinimumPoints ? TeamSlowPoints
           : Fit > TeamPoints                               ? TeamPoints
                                                            : Fit;
         // Wider blocks reduce the passes over the quadrature of large matrices.
+        /// @brief Number of local matrix entries accumulated by each thread per
+        /// pass over the quadrature.
         static constexpr Index E =
           TrialCapacity * TestCapacity > LocalCapacity ? TeamWideEntries : TeamEntries;
+        /// @brief Alignment of the arrays in team scratch memory.
         static constexpr size_t Alignment = std::max({alignof(TestValue),
           alignof(TrialValue), alignof(IntegrationPointView), alignof(Real)});
 
+        /// @brief Device mesh.
         Rodin::Kokkos::Geometry::MeshView view;
+        /// @brief Quadrature tables of the polytopes.
         QuadratureType quadrature;
+        /// @brief Selected attributes; empty selects every polytope of the region.
         typename PolytopesType::AttributesType attributes;
+        /// @brief Entry offset of every polytope, relative to offset.
         ::Kokkos::View<Index*, MemorySpace> offsets;
+        /// @brief Distance between consecutive entries of a polytope.
         size_t spacing;
+        /// @brief Integration region.
         ::Rodin::Geometry::Region region;
+        /// @brief Dimension of the integrated polytopes.
         Index dimension;
+        /// @brief Device view of the trial operator.
         Trial trial;
+        /// @brief Device view of the test operator.
         Test test;
+        /// @brief Device degrees of freedom of the trial space.
         TrialDOFsType trialDOFs;
+        /// @brief Vector dimension of the trial space.
         Index trialVDim;
+        /// @brief Device degrees of freedom of the test space.
         TestDOFsType testDOFs;
+        /// @brief Vector dimension of the test space.
         Index testVDim;
+        /// @brief Entry values.
         ::Kokkos::View<Real*, MemorySpace> values;
+        /// @brief Position of the first entry of the integral.
         size_t offset;
+        /// @brief Factor of the contributions.
         Real sign;
+        /// @brief Whether the contributions are added to the values.
         bool accumulate;
+        /// @brief Whether only the diagonals of the component blocks are listed.
         bool compact;
+        /// @brief Whether the indices of the entries are written.
         bool index;
+        /// @brief Row indices, test degrees of freedom.
         ::Kokkos::View<Index*, MemorySpace> rows;
+        /// @brief Column indices, trial degrees of freedom.
         ::Kokkos::View<Index*, MemorySpace> cols;
+        /// @brief Team scratch level holding the groups of quadrature points.
         int level;
 
+        /**
+         * @brief Integrates the polytope of a team if it is selected.
+         * @param team Team handle, whose league rank is the polytope index.
+         */
         KOKKOS_INLINE_FUNCTION void operator()(const Member& team) const
         {
           const Index p = team.league_rank();
@@ -2066,37 +2272,65 @@ namespace Rodin::Kokkos::Variational
       template <Index Vertices, bool Exact, class Shape, class Trial, class Test>
       struct ThreadKernel
       {
+        /// @brief Stored value of a test basis function at a point (StoredValue).
         using TestValue = StoredValue<Test, Trial, Test>;
-        // Component diagonal integrands integrate one entry per pair of
-        // scalar degrees of freedom.
+        /// @brief Whether the integrand is component diagonal, so that one entry
+        /// is integrated per pair of scalar degrees of freedom.
         static constexpr bool Diagonal = isComponentDiagonal<Trial, Test>();
+        /// @brief Maximum number of integrated trial indices of a polytope.
         static constexpr Index TrialCapacity = TrialDOFsType::getCapacity(Vertices) *
           getComponentCapacity<TrialRange, Trial, Test>();
+        /// @brief Maximum number of integrated test indices of a polytope.
         static constexpr Index TestCapacity = TestDOFsType::getCapacity(Vertices) *
           getComponentCapacity<TestRange, Trial, Test>();
 
+        /// @brief Device mesh.
         Rodin::Kokkos::Geometry::MeshView view;
+        /// @brief Quadrature tables of the polytopes.
         QuadratureType quadrature;
+        /// @brief Selected attributes; empty selects every polytope of the region.
         typename PolytopesType::AttributesType attributes;
+        /// @brief Entry offset of every polytope, relative to offset.
         ::Kokkos::View<Index*, MemorySpace> offsets;
+        /// @brief Distance between consecutive entries of a polytope.
         size_t spacing;
+        /// @brief Integration region.
         ::Rodin::Geometry::Region region;
+        /// @brief Dimension of the integrated polytopes.
         Index dimension;
+        /// @brief Device view of the trial operator.
         Trial trial;
+        /// @brief Device view of the test operator.
         Test test;
+        /// @brief Device degrees of freedom of the trial space.
         TrialDOFsType trialDOFs;
+        /// @brief Vector dimension of the trial space.
         Index trialVDim;
+        /// @brief Device degrees of freedom of the test space.
         TestDOFsType testDOFs;
+        /// @brief Vector dimension of the test space.
         Index testVDim;
+        /// @brief Entry values.
         ::Kokkos::View<Real*, MemorySpace> values;
+        /// @brief Position of the first entry of the integral.
         size_t offset;
+        /// @brief Factor of the contributions.
         Real sign;
+        /// @brief Whether the contributions are added to the values.
         bool accumulate;
+        /// @brief Whether only the diagonals of the component blocks are listed.
         bool compact;
+        /// @brief Whether the indices of the entries are written.
         bool index;
+        /// @brief Row indices, test degrees of freedom.
         ::Kokkos::View<Index*, MemorySpace> rows;
+        /// @brief Column indices, trial degrees of freedom.
         ::Kokkos::View<Index*, MemorySpace> cols;
 
+        /**
+         * @brief Integrates a polytope if it is selected.
+         * @param p Polytope index.
+         */
         KOKKOS_INLINE_FUNCTION void operator()(Index p) const
         {
           const auto polytope = view.getPolytope(dimension, p);
@@ -2274,7 +2508,11 @@ namespace Rodin::Kokkos::Variational
         return *m_integrand;
       }
 
-      /// @brief Unavailable; the integral has no host evaluation. @throws Alert::Exception Always.
+      /**
+       * @brief Unavailable; the integral has no host evaluation.
+       * @return Never returns.
+       * @throws Alert::Exception Always.
+       */
       const ::Rodin::Geometry::Polytope& getPolytope() const override
       {
         Alert::MemberFunctionException(*this, __func__)
@@ -2283,7 +2521,12 @@ namespace Rodin::Kokkos::Variational
         std::abort();
       }
 
-      /// @brief Unavailable; the integral has no host evaluation. @throws Alert::Exception Always.
+      /**
+       * @brief Unavailable; the integral has no host evaluation.
+       * @param polytope Ignored host polytope.
+       * @return Never returns.
+       * @throws Alert::Exception Always.
+       */
       DeviceLinearIntegral& setPolytope(
         [[maybe_unused]] const ::Rodin::Geometry::Polytope& polytope) override
       {
@@ -2293,7 +2536,12 @@ namespace Rodin::Kokkos::Variational
         std::abort();
       }
 
-      /// @brief Unavailable; the integral has no host evaluation. @throws Alert::Exception Always.
+      /**
+       * @brief Unavailable; the integral has no host evaluation.
+       * @param local Ignored local test index.
+       * @return Never returns.
+       * @throws Alert::Exception Always.
+       */
       Real integrate([[maybe_unused]] size_t local) override
       {
         Alert::MemberFunctionException(*this, __func__)
@@ -2335,7 +2583,17 @@ namespace Rodin::Kokkos::Variational
         return m_polytopes.getSpacing();
       }
 
-      /// @brief Integrates every selected polytope on the device.
+      /**
+       * @brief Integrates every selected polytope on the device.
+       * @param values Entry values, the entry of rank r being written at
+       * offset + getEntryPosition(r, count, getSpacing()).
+       * @param offset Position of the first entry.
+       * @param sign Factor of the contributions.
+       * @param accumulate Whether the contributions are added to the values
+       * instead of replacing them.
+       * @param indices Entry indices, test degrees of freedom, written as the
+       * values unless empty.
+       */
       void fill(const ::Kokkos::View<Real*, MemorySpace>& values, size_t offset,
         Real sign, bool accumulate,
         const ::Kokkos::View<Index*, MemorySpace>& indices) const override
@@ -2390,6 +2648,17 @@ namespace Rodin::Kokkos::Variational
        * When Exact, the space is P1, every polytope has Vertices vertices and
        * the vector dimension is maximal, so the local loop has a static bound.
        * Shape is the geometry tag of the integration points.
+       *
+       * @param mesh Resident mesh.
+       * @param polytopes Selected polytopes, located by prepare().
+       * @param test Device view of the test operator.
+       * @param dofs Device degrees of freedom of the test space.
+       * @param vdim Vector dimension of the test space.
+       * @param values Entry values.
+       * @param offset Position of the first entry.
+       * @param sign Factor of the contributions.
+       * @param accumulate Whether the contributions are added to the values.
+       * @param indices Entry indices, written unless empty.
        */
       template <Index Vertices, bool Exact = false, class Shape = DynamicGeometry,
         class Test>
@@ -2407,6 +2676,10 @@ namespace Rodin::Kokkos::Variational
           QuadratureType::policy(execution, polytopes.getPolytopeCount()), kernel);
       }
 
+      /**
+       * @brief Creates a polymorphic copy of this integral.
+       * @return Pointer to a new copy.
+       */
       DeviceLinearIntegral* copy() const noexcept override = 0;
 
     private:
@@ -2455,25 +2728,46 @@ namespace Rodin::Kokkos::Variational
       template <Index Vertices, bool Exact, class Shape, class Test>
       struct PolytopeKernel
       {
+        /// @brief Maximum number of local test indices of a polytope.
         static constexpr Index Capacity = DOFsType::getCapacity(Vertices) * VectorCapacity;
 
+        /// @brief Device mesh.
         Rodin::Kokkos::Geometry::MeshView view;
+        /// @brief Quadrature tables of the polytopes.
         QuadratureType quadrature;
+        /// @brief Selected attributes; empty selects every polytope of the region.
         typename PolytopesType::AttributesType attributes;
+        /// @brief Entry offset of every polytope, relative to offset.
         ::Kokkos::View<Index*, MemorySpace> offsets;
+        /// @brief Distance between consecutive entries of a polytope.
         size_t spacing;
+        /// @brief Integration region.
         ::Rodin::Geometry::Region region;
+        /// @brief Dimension of the integrated polytopes.
         Index dimension;
+        /// @brief Device view of the test operator.
         Test test;
+        /// @brief Device degrees of freedom of the test space.
         DOFsType dofs;
+        /// @brief Vector dimension of the test space.
         Index vdim;
+        /// @brief Entry values.
         ::Kokkos::View<Real*, MemorySpace> values;
+        /// @brief Position of the first entry of the integral.
         size_t offset;
+        /// @brief Factor of the contributions.
         Real sign;
+        /// @brief Whether the contributions are added to the values.
         bool accumulate;
+        /// @brief Whether the indices of the entries are written.
         bool index;
+        /// @brief Entry indices, test degrees of freedom.
         ::Kokkos::View<Index*, MemorySpace> indices;
 
+        /**
+         * @brief Integrates a polytope if it is selected.
+         * @param p Polytope index.
+         */
         KOKKOS_INLINE_FUNCTION void operator()(Index p) const
         {
           const auto polytope = view.getPolytope(dimension, p);
@@ -2606,6 +2900,10 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /**
+       * @brief Creates a polymorphic copy of this integral.
+       * @return Pointer to a new copy.
+       */
       Integral* copy() const noexcept override
       {
         return new Integral(*this);
@@ -2689,6 +2987,10 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /**
+       * @brief Creates a polymorphic copy of this integral.
+       * @return Pointer to a new copy.
+       */
       Integral* copy() const noexcept override
       {
         return new Integral(*this);
@@ -2775,6 +3077,10 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /**
+       * @brief Creates a polymorphic copy of this integral.
+       * @return Pointer to a new copy.
+       */
       BoundaryIntegral* copy() const noexcept override
       {
         return new BoundaryIntegral(*this);
@@ -2858,6 +3164,10 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /**
+       * @brief Creates a polymorphic copy of this integral.
+       * @return Pointer to a new copy.
+       */
       BoundaryIntegral* copy() const noexcept override
       {
         return new BoundaryIntegral(*this);
@@ -2944,6 +3254,10 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /**
+       * @brief Creates a polymorphic copy of this integral.
+       * @return Pointer to a new copy.
+       */
       FaceIntegral* copy() const noexcept override
       {
         return new FaceIntegral(*this);
@@ -3027,6 +3341,10 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /**
+       * @brief Creates a polymorphic copy of this integral.
+       * @return Pointer to a new copy.
+       */
       FaceIntegral* copy() const noexcept override
       {
         return new FaceIntegral(*this);
@@ -3113,6 +3431,10 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /**
+       * @brief Creates a polymorphic copy of this integral.
+       * @return Pointer to a new copy.
+       */
       InterfaceIntegral* copy() const noexcept override
       {
         return new InterfaceIntegral(*this);
@@ -3196,6 +3518,10 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /**
+       * @brief Creates a polymorphic copy of this integral.
+       * @return Pointer to a new copy.
+       */
       InterfaceIntegral* copy() const noexcept override
       {
         return new InterfaceIntegral(*this);

@@ -222,11 +222,17 @@ namespace Rodin::Variational
       return ::Rodin::Kokkos::Variational::DeviceView<FunctionBase<Derived>>(fn);
     }
 
-    /// @brief Tells that a source is a function expression.
+    /**
+     * @brief Tells that a source is a function expression.
+     * @return std::true_type, used only in unevaluated context.
+     */
     template <class Derived>
     static std::true_type isFunction(const FunctionBase<Derived>*);
 
-    /// @brief Tells that a source is not a function expression.
+    /**
+     * @brief Tells that a source is not a function expression.
+     * @return std::false_type, used only in unevaluated context.
+     */
     static std::false_type isFunction(const void*);
 
     /**
@@ -236,14 +242,26 @@ namespace Rodin::Variational
     template <class AttributeView, class Select, class DOFs>
     struct Owners
     {
+      /// @brief Device mesh.
       ::Rodin::Kokkos::Geometry::MeshView view;
+      /// @brief Region on which to project.
       Geometry::Region region;
+      /// @brief Dimension of the polytopes of the region.
       Index d;
+      /// @brief Selected attributes; empty selects the whole region.
       AttributeView attributes;
+      /// @brief Device predicate selecting the polytopes.
       Select select;
+      /// @brief One plus the index of the polytope owning each scalar degree of
+      /// freedom, zero when none does.
       ::Kokkos::View<Index*, MemorySpace> owners;
+      /// @brief Device degrees of freedom.
       DOFs dofs;
 
+      /**
+       * @brief Marks the degrees of freedom of a polytope if it is selected.
+       * @param i Index of the polytope of dimension d.
+       */
       KOKKOS_INLINE_FUNCTION void operator()(Index i) const
       {
         const auto polytope = view.getPolytope(d, i);
@@ -264,18 +282,36 @@ namespace Rodin::Variational
     template <class AttributeView, class Select, class ValueView, class DOFs>
     struct Values
     {
+      /// @brief Device mesh.
       ::Rodin::Kokkos::Geometry::MeshView view;
+      /// @brief Region on which to project.
       Geometry::Region region;
+      /// @brief Dimension of the polytopes of the region.
       Index d;
+      /// @brief Selected attributes; empty selects the whole region.
       AttributeView attributes;
+      /// @brief Device predicate selecting the polytopes.
       Select select;
+      /// @brief One plus the index of the polytope owning each scalar degree of
+      /// freedom, zero when none does.
       ::Kokkos::View<Index*, MemorySpace> owners;
+      /// @brief Projected values, component r of the degree of freedom i at
+      /// i + r * stride.
       ::Kokkos::View<Real*, MemorySpace> values;
+      /// @brief Device view of the source.
       ValueView value;
+      /// @brief Device degrees of freedom.
       DOFs dofs;
+      /// @brief Offset between components.
       Index stride;
+      /// @brief Vector dimension of the space.
       Index vdim;
 
+      /**
+       * @brief Evaluates the source at the nodes of the degrees of freedom
+       * owned by a selected polytope.
+       * @param i Index of the polytope of dimension d.
+       */
       KOKKOS_INLINE_FUNCTION void operator()(Index i) const
       {
         const auto polytope = view.getPolytope(d, i);
