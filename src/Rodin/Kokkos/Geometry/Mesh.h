@@ -1048,7 +1048,10 @@ namespace Rodin::Geometry
       // Kernel functors are public because NVCC's generated host launch stubs
       // name them outside the class scope. They are implementation details,
       // not part of the mesh API.
+      /// @brief Device-supported geometric transformation representation.
       using GeometryKind = Rodin::Kokkos::Geometry::GeometryKind;
+      /// @brief One-dimensional resident array in the context memory space.
+      /// @tparam T Entry type.
       template <class T>
       using DeviceArray = ::Kokkos::View<T*, MemorySpace>;
 
@@ -1103,6 +1106,16 @@ namespace Rodin::Geometry
       /// @brief Grows entity data after device discovery without changing existing maps.
       struct GrowEntities
       {
+        /// @var oldOffsets
+        /// Dimension offsets of the flattened entity numbering before discovery.
+        /// @var oldAttributes
+        /// Existing labels, indexed by the old flattened numbering.
+        /// @var oldPresent
+        /// Existing explicit label presence flags.
+        /// @var oldKinds
+        /// Existing geometric transformation representations.
+        /// @var oldControls
+        /// Existing control-point offsets, including the terminal offset.
         ::Kokkos::Array<Index, 5> oldOffsets,
           newOffsets; ///< Dimension offsets before and after discovery.
         DeviceArray<Attribute> oldAttributes,

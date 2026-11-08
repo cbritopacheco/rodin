@@ -72,6 +72,7 @@ namespace Rodin::Solver::Internal
       void initialize() override {}
 
       /// @brief Always initialized.
+      /// @returns True.
       bool isInitialized() const override
       {
         return true;
@@ -81,12 +82,14 @@ namespace Rodin::Solver::Internal
       void compute() override {}
 
       /// @brief Always computed.
+      /// @returns True.
       bool isComputed() const override
       {
         return true;
       }
 
       /// @brief A diagonal is its own transpose.
+      /// @returns True.
       bool hasTransposeApply() const override
       {
         return true;
@@ -168,7 +171,10 @@ namespace Rodin::Solver
           m_result(other.m_result)
       {}
 
-      /// @brief Moves the solver.
+      /**
+       * @brief Moves the solver.
+       * @param other Solver to move.
+       */
       GMRES(GMRES&& other) = default;
 
       /// @brief Destructor.
@@ -266,18 +272,21 @@ namespace Rodin::Solver
       }
 
       /// @brief Whether the last solve reached the tolerance.
+      /// @returns True if the last solve converged.
       Boolean success() const
       {
         return m_result.converged;
       }
 
       /// @brief Number of iterations of the last solve.
+      /// @returns Iteration count reported by the GMRES handle.
       size_t getIterationNumber() const
       {
         return m_result.iterations;
       }
 
       /// @brief Relative residual of the last solve.
+      /// @returns Final relative residual reported by the GMRES handle.
       Real getError() const
       {
         return m_result.error;

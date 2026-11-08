@@ -72,42 +72,50 @@ namespace Rodin::Math
       virtual ~LinearSystem() = default;
 
       /// @brief Copies the system, the matrix included.
+      /// @return Reference to this system.
       LinearSystem& operator=(const LinearSystem&) = default;
 
       /// @brief Moves the system.
+      /// @return Reference to this system.
       LinearSystem& operator=(LinearSystem&&) noexcept = default;
 
       /// @brief Returns the operator @f$ A @f$.
+      /// @return Mutable reference to the device matrix.
       MatrixType& getOperator()
       {
         return m_operator;
       }
 
       /// @brief Returns the operator @f$ A @f$.
+      /// @return Read-only reference to the device matrix.
       const MatrixType& getOperator() const
       {
         return m_operator;
       }
 
       /// @brief Returns the right-hand side @f$ b @f$.
+      /// @return Mutable reference to the right-hand side.
       VectorType& getVector()
       {
         return m_vector;
       }
 
       /// @brief Returns the right-hand side @f$ b @f$.
+      /// @return Read-only reference to the right-hand side.
       const VectorType& getVector() const
       {
         return m_vector;
       }
 
       /// @brief Returns the solution @f$ x @f$.
+      /// @return Mutable reference to the solution.
       VectorType& getSolution()
       {
         return m_solution;
       }
 
       /// @brief Returns the solution @f$ x @f$.
+      /// @return Read-only reference to the solution.
       const VectorType& getSolution() const
       {
         return m_solution;

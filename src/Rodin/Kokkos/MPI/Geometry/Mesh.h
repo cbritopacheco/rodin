@@ -102,8 +102,16 @@ namespace Rodin::Geometry
         m_context.getExecutionSpace().fence("Rodin mesh ownership");
       }
 
+      /**
+       * @brief Copies the mesh, sharing the host mesh and the resident ownership flags.
+       * @param other Mesh to copy.
+       */
       Mesh(const Mesh& other) = default;
 
+      /**
+       * @brief Moves the mesh.
+       * @param other Mesh to move.
+       */
       Mesh(Mesh&& other) = default;
 
       /// @returns Distributed execution context.
@@ -160,21 +168,25 @@ namespace Rodin::Geometry
         return getShard().isOwned(d, i);
       }
 
+      /// @brief Gets the topological dimension. @returns Dimension of the cells of the shard.
       size_t getDimension() const override
       {
         return m_shard.getDimension();
       }
 
+      /// @brief Gets the dimension of the ambient space. @returns Number of coordinates of each vertex.
       size_t getSpaceDimension() const override
       {
         return m_shard.getSpaceDimension();
       }
 
+      /// @brief Gets the connectivity of the shard. @returns Resident connectivity, in the local numbering.
       ConnectivityType& getConnectivity() override
       {
         return m_shard.getConnectivity();
       }
 
+      /// @brief Gets the connectivity of the shard. @returns Read-only resident connectivity, in the local numbering.
       const ConnectivityType& getConnectivity() const override
       {
         return m_shard.getConnectivity();
@@ -192,16 +204,19 @@ namespace Rodin::Geometry
         return m_shard.getPolytopeCount(g);
       }
 
+      /// @param d Entity dimension. @param i Local entity index. @returns Reference family of the entity.
       Polytope::Type getGeometry(size_t d, Index i) const override
       {
         return m_shard.getGeometry(d, i);
       }
 
+      /// @brief Whether the mesh is a submesh. @returns False.
       bool isSubMesh() const override
       {
         return false;
       }
 
+      /// @brief Raises an exception, the mesh not being a submesh. @returns Never returns.
       SubMeshBase& asSubMesh() override
       {
         Alert::MemberFunctionException(*this, __func__)
@@ -209,6 +224,7 @@ namespace Rodin::Geometry
         std::abort();
       }
 
+      /// @brief Raises an exception, the mesh not being a submesh. @returns Never returns.
       const SubMeshBase& asSubMesh() const override
       {
         Alert::MemberFunctionException(*this, __func__)
@@ -216,39 +232,46 @@ namespace Rodin::Geometry
         std::abort();
       }
 
+      /// @brief Raises an exception, the mesh being immutable. @returns Never returns.
       Mesh& scale(Real) override
       {
         immutable(__func__);
         return *this;
       }
 
+      /// @brief Flushes the cached data of the resident shard.
       void flush() override
       {
         m_shard.flush();
       }
 
+      /// @param vertex Local vertex index. @returns Coordinates of the vertex.
       Math::SpatialPoint getVertexCoordinates(Index vertex) const override
       {
         return m_shard.getVertexCoordinates(vertex);
       }
 
+      /// @brief Raises an exception, the mesh being immutable. @returns Never returns.
       Mesh& setVertexCoordinates(Index, Real, size_t) override
       {
         immutable(__func__);
         return *this;
       }
 
+      /// @brief Raises an exception, the mesh being immutable. @returns Never returns.
       Mesh& setVertexCoordinates(Index, const Math::SpatialPoint&) override
       {
         immutable(__func__);
         return *this;
       }
 
+      /// @param d Entity dimension. @param i Local entity index. @returns Attribute of the entity, if any.
       Optional<Attribute> getAttribute(size_t d, Index i) const override
       {
         return m_shard.getAttribute(d, i);
       }
 
+      /// @brief Raises an exception, the mesh being immutable. @returns Never returns.
       Mesh& setAttribute(
         const std::pair<size_t, Index>&, const Optional<Attribute>&) override
       {
@@ -256,6 +279,7 @@ namespace Rodin::Geometry
         return *this;
       }
 
+      /// @brief Raises an exception, the mesh being immutable. @returns Never returns.
       Mesh& setPolytopeTransformation(
         const std::pair<size_t, Index>, PolytopeTransformation*) override
       {
@@ -263,18 +287,21 @@ namespace Rodin::Geometry
         return *this;
       }
 
+      /// @param d Entity dimension. @param i Local entity index. @returns Geometric transformation of the entity.
       const PolytopeTransformation& getPolytopeTransformation(
         size_t d, Index i) const override
       {
         return m_shard.getPolytopeTransformation(d, i);
       }
 
+      /// @param d Entity dimension. @param i Local entity index. @param formula Reference quadrature formula. @returns Quadrature of the formula on the entity.
       const PolytopeQuadrature& getQuadrature(
         size_t d, Index i, const QF::QuadratureFormula& formula) const override
       {
         return m_shard.getQuadrature(d, i, formula);
       }
 
+      /// @brief Raises an exception, the mesh being immutable. @returns Never returns.
       Mesh& load(const boost::filesystem::path&, IO::FileFormat) override
       {
         immutable(__func__);
@@ -299,41 +326,49 @@ namespace Rodin::Geometry
         return getHost().getInterface();
       }
 
+      /// @returns Iterator over the local cells, ghosts included.
       CellIterator getCell() const override
       {
         return m_shard.getCell();
       }
 
+      /// @returns Iterator over the local faces, ghosts included.
       FaceIterator getFace() const override
       {
         return m_shard.getFace();
       }
 
+      /// @returns Iterator over the local vertices, ghosts included.
       VertexIterator getVertex() const override
       {
         return m_shard.getVertex();
       }
 
+      /// @param dimension Entity dimension. @returns Iterator over the local entities of that dimension, ghosts included.
       PolytopeIterator getPolytope(size_t dimension) const override
       {
         return m_shard.getPolytope(dimension);
       }
 
+      /// @param idx Local cell index. @returns Iterator starting at the cell.
       CellIterator getCell(Index idx) const override
       {
         return m_shard.getCell(idx);
       }
 
+      /// @param idx Local face index. @returns Iterator starting at the face.
       FaceIterator getFace(Index idx) const override
       {
         return m_shard.getFace(idx);
       }
 
+      /// @param idx Local vertex index. @returns Iterator starting at the vertex.
       VertexIterator getVertex(Index idx) const override
       {
         return m_shard.getVertex(idx);
       }
 
+      /// @param dimension Entity dimension. @param idx Local entity index. @returns Iterator starting at the entity.
       PolytopeIterator getPolytope(size_t dimension, Index idx) const override
       {
         return m_shard.getPolytope(dimension, idx);
@@ -351,61 +386,73 @@ namespace Rodin::Geometry
         return getHost().isBoundary(face);
       }
 
+      /// @brief Gets the volume of the distributed mesh. @returns Measure of the three-dimensional entities over all processes.
       Real getVolume() const override
       {
         return getHost().getVolume();
       }
 
+      /// @param attribute Attribute. @returns Measure of the three-dimensional entities with that attribute over all processes.
       Real getVolume(Attribute attribute) const override
       {
         return getHost().getVolume(attribute);
       }
 
+      /// @param attributes Attributes. @returns Measure of the three-dimensional entities with one of the attributes over all processes.
       Real getVolume(const FlatSet<Attribute>& attributes) const override
       {
         return getHost().getVolume(attributes);
       }
 
+      /// @brief Gets the area of the distributed mesh. @returns Measure of the two-dimensional entities over all processes.
       Real getArea() const override
       {
         return getHost().getArea();
       }
 
+      /// @param attribute Attribute. @returns Measure of the two-dimensional entities with that attribute over all processes.
       Real getArea(Attribute attribute) const override
       {
         return getHost().getArea(attribute);
       }
 
+      /// @param attributes Attributes. @returns Measure of the two-dimensional entities with one of the attributes over all processes.
       Real getArea(const FlatSet<Attribute>& attributes) const override
       {
         return getHost().getArea(attributes);
       }
 
+      /// @param d Entity dimension. @returns Measure of the entities of that dimension over all processes.
       Real getMeasure(size_t d) const override
       {
         return getHost().getMeasure(d);
       }
 
+      /// @param d Entity dimension. @param attribute Attribute. @returns Measure of the entities of that dimension with the attribute over all processes.
       Real getMeasure(size_t d, Attribute attribute) const override
       {
         return getHost().getMeasure(d, attribute);
       }
 
+      /// @param d Entity dimension. @param attributes Attributes. @returns Measure of the entities of that dimension with one of the attributes over all processes.
       Real getMeasure(size_t d, const FlatSet<Attribute>& attributes) const override
       {
         return getHost().getMeasure(d, attributes);
       }
 
+      /// @brief Gets the perimeter of the distributed mesh. @returns Measure of the boundary over all processes.
       Real getPerimeter() const override
       {
         return getHost().getPerimeter();
       }
 
+      /// @param attribute Attribute. @returns Measure of the boundary faces with that attribute over all processes.
       Real getPerimeter(Attribute attribute) const override
       {
         return getHost().getPerimeter(attribute);
       }
 
+      /// @param attributes Attributes. @returns Measure of the boundary faces with one of the attributes over all processes.
       Real getPerimeter(const FlatSet<Attribute>& attributes) const override
       {
         return getHost().getPerimeter(attributes);

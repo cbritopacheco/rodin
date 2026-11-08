@@ -210,7 +210,13 @@ namespace Rodin::Kokkos::Variational
         return *m_integrand;
       }
 
-      /// @brief Unavailable; the integral has no host evaluation. @throws Alert::Exception Always.
+      /**
+       * @brief Unavailable; the integral has no host evaluation.
+       * @param tau Trial polytope.
+       * @param t Test polytope.
+       * @returns Never returns.
+       * @throws Alert::Exception Always.
+       */
       DevicePotentialIntegral& setPolytope(
         [[maybe_unused]] const ::Rodin::Geometry::Polytope& tau,
         [[maybe_unused]] const ::Rodin::Geometry::Polytope& t) override
@@ -221,7 +227,13 @@ namespace Rodin::Kokkos::Variational
         std::abort();
       }
 
-      /// @brief Unavailable; the integral has no host evaluation. @throws Alert::Exception Always.
+      /**
+       * @brief Unavailable; the integral has no host evaluation.
+       * @param tr Local trial degree of freedom.
+       * @param te Local test degree of freedom.
+       * @returns Never returns.
+       * @throws Alert::Exception Always.
+       */
       Real integrate([[maybe_unused]] size_t tr, [[maybe_unused]] size_t te) override
       {
         Alert::MemberFunctionException(*this, __func__)
@@ -319,6 +331,17 @@ namespace Rodin::Kokkos::Variational
        *
        * The entry of local test index te and local trial index tr of a pair
        * has rank te * ntr + tr among the entries of the pair.
+       *
+       * @param values Entry values, the entry of rank r being written at
+       * offset + getEntryPosition(r, count, getSpacing()).
+       * @param offset Position of the first entry.
+       * @param sign Factor of the contributions.
+       * @param accumulate Whether the contributions are added to the values
+       * instead of replacing them.
+       * @param rows Row indices, test degrees of freedom, written as the
+       * values unless empty.
+       * @param cols Column indices, trial degrees of freedom, written as the
+       * values unless empty.
        */
       void fill(const ::Kokkos::View<Real*, MemorySpace>& values, size_t offset,
         Real sign, bool accumulate, const ::Kokkos::View<Index*, MemorySpace>& rows,
@@ -338,13 +361,26 @@ namespace Rodin::Kokkos::Variational
       template <class DOFs>
       struct CellRange
       {
+        /// @brief Device mesh.
         Geometry::MeshView view;
+        /// @brief Integration region of the cells.
         ::Rodin::Geometry::Region region;
+        /// @brief Dimension of the cells.
         Index dimension;
+        /// @brief Selected attributes; empty selects every cell.
         AttributesType attributes;
+        /// @brief Device degrees of freedom of the side.
         DOFs dofs;
+        /// @brief Vector dimension of the side.
         Index vdim;
 
+        /**
+         * @brief Counts one cell if it is selected and bounds its local count.
+         * @param p Cell index.
+         * @param m Number of selected cells.
+         * @param lo Smallest local count.
+         * @param hi Largest local count.
+         */
         KOKKOS_INLINE_FUNCTION void operator()(
           Index p, Index& m, Index& lo, Index& hi) const
         {
@@ -361,12 +397,24 @@ namespace Rodin::Kokkos::Variational
       /// @brief Writes the selected cells, in increasing order.
       struct SelectedCells
       {
+        /// @brief Device mesh.
         Geometry::MeshView view;
+        /// @brief Integration region of the cells.
         ::Rodin::Geometry::Region region;
+        /// @brief Dimension of the cells.
         Index dimension;
+        /// @brief Selected attributes; empty selects every cell.
         AttributesType attributes;
+        /// @brief Selected cells, in increasing order.
         ::Kokkos::View<Index*, MemorySpace> cells;
 
+        /**
+         * @brief Writes one cell at its rank among the selected cells if it is
+         * selected.
+         * @param p Cell index.
+         * @param update Number of selected cells before the cell.
+         * @param final Whether the scan is in its final pass.
+         */
         KOKKOS_INLINE_FUNCTION void operator()(
           Index p, Index& update, const bool final) const
         {
@@ -383,13 +431,25 @@ namespace Rodin::Kokkos::Variational
       template <class DOFs>
       struct CellOffsets
       {
+        /// @brief Device mesh.
         Geometry::MeshView view;
+        /// @brief Dimension of the cells.
         Index dimension;
+        /// @brief Device degrees of freedom of the side.
         DOFs dofs;
+        /// @brief Vector dimension of the side.
         Index vdim;
+        /// @brief Selected cells, in increasing order.
         ::Kokkos::View<Index*, MemorySpace> cells;
+        /// @brief Sum of the local counts of the previous selected cells.
         ::Kokkos::View<Index*, MemorySpace> offsets;
 
+        /**
+         * @brief Writes the offset of one selected cell.
+         * @param a Rank of the cell among the selected cells.
+         * @param update Sum of the local counts of the previous selected cells.
+         * @param final Whether the scan is in its final pass.
+         */
         KOKKOS_INLINE_FUNCTION void operator()(
           Index a, Index& update, const bool final) const
         {
@@ -451,7 +511,32 @@ namespace Rodin::Kokkos::Variational
         selection.largest = largest;
       }
 
-      /// @brief Integrates the pairs of selected cells.
+      /**
+       * @brief Integrates the pairs of selected cells.
+       * @param mesh Resident mesh.
+       * @param kernel Device kernel @f$ k(x, y) @f$.
+       * @param test Selected test cells.
+       * @param trial Selected trial cells.
+       * @param uniform Whether all the pairs have the same local counts, the
+       * entries then being interleaved with the given spacing.
+       * @param spacing Spacing of the entries.
+       * @param nodes Gauss-Legendre nodes on the unit interval.
+       * @param weights Gauss-Legendre weights on the unit interval.
+       * @param centroids Reference coordinates of the centroid of each
+       * reference geometry, with stride ReferenceStride.
+       * @param centroidWeights Centroid rule weight of each reference geometry.
+       * @param trialDOFs Device degrees of freedom of the trial space.
+       * @param trialVDim Vector dimension of the trial space.
+       * @param testDOFs Device degrees of freedom of the test space.
+       * @param testVDim Vector dimension of the test space.
+       * @param values Entry values.
+       * @param offset Position of the first entry.
+       * @param sign Factor of the contributions.
+       * @param accumulate Whether the contributions are added to the values
+       * instead of replacing them.
+       * @param rows Row indices, written as the values unless empty.
+       * @param cols Column indices, written as the values unless empty.
+       */
       static void integratePairs(const MeshType& mesh, const KernelType& kernel,
         const Selection& test, const Selection& trial, bool uniform, size_t spacing,
         const TableType& nodes, const TableType& weights, const TableType& centroids,
@@ -476,6 +561,10 @@ namespace Rodin::Kokkos::Variational
             rows.extent(0) > 0, rows, cols});
       }
 
+      /**
+       * @brief Creates a copy of the integral.
+       * @returns Pointer to a new instance of the derived integral.
+       */
       DevicePotentialIntegral* copy() const noexcept override = 0;
 
     private:
@@ -543,34 +632,65 @@ namespace Rodin::Kokkos::Variational
       /// @brief Kernel of integratePairs(), one pair of selected cells per thread.
       struct PairKernel
       {
+        /// @brief Device kernel @f$ k(x, y) @f$.
         KernelType kernel;
+        /// @brief Device mesh.
         Geometry::MeshView view;
+        /// @brief Dimension of the cells.
         Index dimension;
+        /// @brief Selected test cells.
         ::Kokkos::View<Index*, MemorySpace> testCells;
+        /// @brief Sum of the local counts of the previous selected test cells.
         ::Kokkos::View<Index*, MemorySpace> testOffsets;
+        /// @brief Selected trial cells.
         ::Kokkos::View<Index*, MemorySpace> trialCells;
+        /// @brief Sum of the local counts of the previous selected trial cells.
         ::Kokkos::View<Index*, MemorySpace> trialOffsets;
+        /// @brief Number of selected trial cells.
         Index trialCount;
+        /// @brief Sum of the local counts of the selected trial cells.
         Index trialTotal;
+        /// @brief Whether all the pairs have the same local counts.
         bool uniform;
+        /// @brief Spacing of the entries.
         size_t spacing;
+        /// @brief Gauss-Legendre nodes on the unit interval.
         TableType nodes;
+        /// @brief Gauss-Legendre weights on the unit interval.
         TableType weights;
+        /// @brief Reference coordinates of the centroid of each reference geometry.
         TableType centroids;
+        /// @brief Centroid rule weight of each reference geometry.
         TableType centroidWeights;
+        /// @brief Number of Gauss-Legendre nodes.
         Index n;
+        /// @brief Device degrees of freedom of the trial space.
         TrialDOFsType trialDOFs;
+        /// @brief Vector dimension of the trial space.
         Index trialVDim;
+        /// @brief Device degrees of freedom of the test space.
         TestDOFsType testDOFs;
+        /// @brief Vector dimension of the test space.
         Index testVDim;
+        /// @brief Entry values.
         ::Kokkos::View<Real*, MemorySpace> values;
+        /// @brief Position of the first entry.
         size_t offset;
+        /// @brief Factor of the contributions.
         Real sign;
+        /// @brief Whether the contributions are added to the values.
         bool accumulate;
+        /// @brief Whether the row and column indices are written.
         bool index;
+        /// @brief Row indices, test degrees of freedom.
         ::Kokkos::View<Index*, MemorySpace> rows;
+        /// @brief Column indices, trial degrees of freedom.
         ::Kokkos::View<Index*, MemorySpace> cols;
 
+        /**
+         * @brief Integrates one pair of selected cells.
+         * @param k Rank of the pair, ordered by test cell, then by trial cell.
+         */
         KOKKOS_INLINE_FUNCTION void operator()(size_t k) const
         {
           const Index a = k / trialCount;
@@ -812,6 +932,10 @@ namespace Rodin::Variational
         return Geometry::Region::Cells;
       }
 
+      /**
+       * @brief Creates a copy of the integral.
+       * @returns Pointer to a new Integral instance.
+       */
       Integral* copy() const noexcept override
       {
         return new Integral(*this);

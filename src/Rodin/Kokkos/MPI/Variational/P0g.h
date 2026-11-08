@@ -80,6 +80,10 @@ namespace Rodin::Variational
         : m_mesh(mesh), m_host(mesh.getHost()), m_local(mesh.getLocal())
       {}
 
+      /**
+       * @brief Copies the space, sharing its mesh.
+       * @param other Space to copy.
+       */
       P0g(const P0g& other)
         : Parent(other),
           m_mesh(other.m_mesh),
@@ -87,6 +91,10 @@ namespace Rodin::Variational
           m_local(other.m_local)
       {}
 
+      /**
+       * @brief Moves the space.
+       * @param other Space to move.
+       */
       P0g(P0g&& other)
         : Parent(std::move(other)),
           m_mesh(std::move(other.m_mesh)),
@@ -112,11 +120,13 @@ namespace Rodin::Variational
         return 1;
       }
 
+      /// @brief Gets the vector dimension of the range. @return One.
       size_t getVectorDimension() const override
       {
         return 1;
       }
 
+      /// @brief Gets the mesh supporting the space. @return Distributed resident mesh.
       const MeshType& getMesh() const override
       {
         return m_mesh.get();
@@ -160,7 +170,7 @@ namespace Rodin::Variational
         return {};
       }
 
-      /// @return The single global degree of freedom.
+      /// @param[in] d Dimension of the polytope. @param[in] i Local index of the polytope. @return The single global degree of freedom.
       const IndexArray& getDOFs(size_t d, Index i) const override
       {
         return m_host.getDOFs(d, i);

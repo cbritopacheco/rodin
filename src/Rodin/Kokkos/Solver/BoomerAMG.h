@@ -162,7 +162,10 @@ namespace Rodin::Solver
           m_error(other.m_error)
       {}
 
-      /// @brief Moves the solver.
+      /**
+       * @brief Moves the solver.
+       * @param other Solver to move.
+       */
       BoomerAMG(BoomerAMG&& other) = default;
 
       /// @brief Destructor.
@@ -262,6 +265,7 @@ namespace Rodin::Solver
       }
 
       /// @brief Whether a hierarchy is retained.
+      /// @returns True if a hierarchy has been set up and not cleared.
       Boolean isSetup() const noexcept
       {
         return static_cast<bool>(m_hierarchy);
@@ -370,18 +374,21 @@ namespace Rodin::Solver
       }
 
       /// @brief Whether the last solve reached the tolerance.
+      /// @returns True if the last solve converged.
       Boolean success() const
       {
         return m_converged;
       }
 
       /// @brief Number of iterations of the last solve.
+      /// @returns Iteration count reported by hypre.
       size_t getIterationNumber() const
       {
         return m_iterations;
       }
 
       /// @brief Relative residual of the last solve.
+      /// @returns Final relative residual norm reported by hypre.
       Real getError() const
       {
         return m_error;
@@ -400,10 +407,17 @@ namespace Rodin::Solver
       template <class Starts, class Counts, class Rows>
       struct FillRows
       {
+        /// @brief CSR row starts.
         Starts starts;
+        /// @brief Row counts, one per row.
         Counts counts;
+        /// @brief Global row numbers, one per row.
         Rows rows;
 
+        /**
+         * @brief Writes the count and the number of one row.
+         * @param i Row index.
+         */
         KOKKOS_INLINE_FUNCTION void operator()(const size_t i) const
         {
           counts(i) = starts(i + 1) - starts(i);

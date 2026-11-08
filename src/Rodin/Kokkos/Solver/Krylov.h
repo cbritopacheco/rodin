@@ -116,11 +116,19 @@ namespace Rodin::Solver::Internal
     /// @brief Writes the inverse of the diagonal coefficient of each row.
     struct InvertDiagonal
     {
+      /// @brief CSR row offsets of the matrix.
       ::Kokkos::View<Math::SparseIndex*, MemorySpace> starts;
+      /// @brief CSR column indices of the matrix.
       ::Kokkos::View<Math::SparseIndex*, MemorySpace> columns;
+      /// @brief CSR values of the matrix.
       ::Kokkos::View<Real*, MemorySpace> values;
+      /// @brief Inverse diagonal, set to one where the diagonal is zero or absent.
       Vector inverse;
 
+      /**
+       * @brief Inverts the diagonal coefficient of one row.
+       * @param i Row index.
+       */
       KOKKOS_INLINE_FUNCTION void operator()(const size_t i) const
       {
         Real d = 0;
@@ -136,9 +144,16 @@ namespace Rodin::Solver::Internal
     /// @brief Sums the products of the coefficients of two vectors.
     struct Dot
     {
+      /// @brief First vector.
       Vector a;
+      /// @brief Second vector.
       Vector b;
 
+      /**
+       * @brief Accumulates the product of one pair of coefficients.
+       * @param i Coefficient index.
+       * @param sum Reduction accumulator.
+       */
       KOKKOS_INLINE_FUNCTION void operator()(const size_t i, Real& sum) const
       {
         sum += a(i) * b(i);
@@ -148,12 +163,21 @@ namespace Rodin::Solver::Internal
     /// @brief Writes @f$ y = \beta y + \alpha D^{-1} x @f$ coefficientwise.
     struct Scale
     {
+      /// @brief Inverse diagonal @f$ D^{-1} @f$.
       Vector inverse;
+      /// @brief Input vector @f$ x @f$.
       ::Kokkos::View<const Real*, Device> x;
+      /// @brief Output vector @f$ y @f$.
       Vector y;
+      /// @brief Factor @f$ \alpha @f$ of @f$ D^{-1} x @f$.
       Real alpha;
+      /// @brief Factor @f$ \beta @f$ of @f$ y @f$, zero to overwrite @f$ y @f$.
       Real beta;
 
+      /**
+       * @brief Writes one coefficient of @f$ y @f$.
+       * @param i Coefficient index.
+       */
       KOKKOS_INLINE_FUNCTION void operator()(const size_t i) const
       {
         const Real v = alpha * inverse(i) * x(i);

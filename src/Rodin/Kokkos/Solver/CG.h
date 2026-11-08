@@ -29,10 +29,19 @@ namespace Rodin::Solver::Internal
   template <class Backend>
   struct KokkosCGPrecondition
   {
+    /// @brief Inverse of the diagonal of the matrix.
     typename KokkosKrylov<Backend>::Vector inverse;
+    /// @brief Residual.
     typename KokkosKrylov<Backend>::Vector r;
+    /// @brief Preconditioned residual, written as the first search direction.
     typename KokkosKrylov<Backend>::Vector p;
 
+    /**
+     * @brief Preconditions one entry and accumulates its contribution to
+     * @f$ r \cdot p @f$.
+     * @param i Entry index.
+     * @param sum Reduction accumulator.
+     */
     KOKKOS_INLINE_FUNCTION void operator()(const size_t i, Real& sum) const
     {
       const Real v = inverse(i) * r(i);
@@ -49,14 +58,28 @@ namespace Rodin::Solver::Internal
   template <class Backend>
   struct KokkosCGUpdate
   {
+    /// @brief Iterate, updated in place.
     typename KokkosKrylov<Backend>::Vector x;
+    /// @brief Search direction.
     typename KokkosKrylov<Backend>::Vector p;
+    /// @brief Residual, updated in place.
     typename KokkosKrylov<Backend>::Vector r;
+    /// @brief Product @f$ q = A p @f$.
     typename KokkosKrylov<Backend>::Vector q;
+    /// @brief Inverse of the diagonal of the matrix.
     typename KokkosKrylov<Backend>::Vector inverse;
+    /// @brief Preconditioned residual, written by the step.
     typename KokkosKrylov<Backend>::Vector z;
+    /// @brief Step length along the search direction.
     Real alpha;
 
+    /**
+     * @brief Updates one entry and accumulates its contributions to
+     * @f$ |r|^2 @f$ and @f$ r \cdot z @f$.
+     * @param k Entry index.
+     * @param rr Accumulator of @f$ |r|^2 @f$.
+     * @param dz Accumulator of @f$ r \cdot z @f$.
+     */
     KOKKOS_INLINE_FUNCTION void operator()(const size_t k, Real& rr, Real& dz) const
     {
       x(k) += alpha * p(k);
@@ -73,10 +96,17 @@ namespace Rodin::Solver::Internal
   template <class Backend>
   struct KokkosCGDirection
   {
+    /// @brief Search direction, updated in place.
     typename KokkosKrylov<Backend>::Vector p;
+    /// @brief Preconditioned residual.
     typename KokkosKrylov<Backend>::Vector z;
+    /// @brief Ratio of the successive values of @f$ r \cdot z @f$.
     Real beta;
 
+    /**
+     * @brief Updates one entry of the search direction.
+     * @param k Entry index.
+     */
     KOKKOS_INLINE_FUNCTION void operator()(const size_t k) const
     {
       p(k) = z(k) + beta * p(k);
@@ -97,6 +127,7 @@ namespace Rodin::Solver::Internal
    * @param q Work vector.
    * @param tolerance Relative tolerance on @f$ \|b - Ax\| / \|b\| @f$.
    * @param maxIterations Iteration limit.
+   * @returns Convergence flag, iteration count and relative residual.
    */
   template <class Backend>
   KokkosKrylovResult kokkosCG(
@@ -238,7 +269,10 @@ namespace Rodin::Solver
           m_result(other.m_result)
       {}
 
-      /// @brief Moves the solver.
+      /**
+       * @brief Moves the solver.
+       * @param other Solver to move.
+       */
       CG(CG&& other) = default;
 
       /// @brief Destructor.
@@ -312,18 +346,21 @@ namespace Rodin::Solver
       }
 
       /// @brief Whether the last solve reached the tolerance.
+      /// @returns True if the last solve converged.
       Boolean success() const
       {
         return m_result.converged;
       }
 
       /// @brief Number of iterations of the last solve.
+      /// @returns Iteration count of the last solve.
       size_t getIterationNumber() const
       {
         return m_result.iterations;
       }
 
       /// @brief Relative residual of the last solve.
+      /// @returns Relative residual estimated by the last solve.
       Real getError() const
       {
         return m_result.error;
