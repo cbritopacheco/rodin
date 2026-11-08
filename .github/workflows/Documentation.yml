@@ -18,7 +18,8 @@ jobs:
     permissions:
       contents: write
       actions: read
-    runs-on: ubuntu-latest
+    # setup-python has no Python 3.12.0 for Ubuntu 26.04, which ubuntu-latest became.
+    runs-on: ubuntu-24.04
     env:
       MAKEFLAGS: "-j2"
     steps:
