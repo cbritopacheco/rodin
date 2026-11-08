@@ -1243,8 +1243,7 @@ namespace Rodin::Kokkos::Geometry
     // 2.40 and 2.41 drop the stores of some lanes in the irreducible loops
     // that come out of it.
     using Type = ::Rodin::Geometry::Polytope::Type;
-    constexpr auto mask = [](Type g)
-    {
+    constexpr auto mask = [](Type g) {
       std::uint32_t result = 0;
       for (Index v = 0; v < 8; ++v)
       {
@@ -1270,9 +1269,11 @@ namespace Rodin::Kokkos::Geometry
     constexpr std::uint32_t wedge = mask(Type::Wedge);
     constexpr std::uint32_t pyramid = mask(Type::Pyramid);
     KOKKOS_ASSERT(a < 8 && d < 3);
-    const std::uint32_t bits =
-      type == Type::Quadrilateral || type == Type::Hexahedron ? cube :
-      type == Type::Wedge ? wedge : type == Type::Pyramid ? pyramid : simplex;
+    const std::uint32_t bits = type == Type::Quadrilateral || type == Type::Hexahedron
+      ? cube
+      : type == Type::Wedge   ? wedge
+      : type == Type::Pyramid ? pyramid
+                              : simplex;
     return (bits >> (3 * a + d)) & 1 ? Real(1) : Real(0);
   }
 

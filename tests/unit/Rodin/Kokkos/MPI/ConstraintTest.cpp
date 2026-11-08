@@ -49,7 +49,8 @@ namespace Rodin::Tests::Unit
       for (auto it = shard.getVertex(); !it.end(); ++it)
       {
         const auto node = position(it->getCoordinates());
-        const Index g = fes.getGlobalIndex(fes.getShard().getDOFs(0, it->getIndex())[0]);
+        const Index g =
+          fes.getGlobalIndex(fes.getShard().getDOFs(0, it->getIndex())[0]);
         nodes[g] = node;
         held.insert(held.end(), {node.first, node.second, static_cast<size_t>(g)});
       }
@@ -187,9 +188,8 @@ namespace Rodin::Tests::Unit
       PeriodicBC(su, seqPairs);
     Solver::SparseLU(sp).solve();
 
-    RealFunction df(KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real {
-      return source(p);
-    });
+    RealFunction df(
+      KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real { return source(p); });
     PETSc::Variational::TrialFunction du(grid.fes);
     PETSc::Variational::TestFunction dv(grid.fes);
     Problem dp(du, dv);
@@ -238,9 +238,8 @@ namespace Rodin::Tests::Unit
       DirichletBC(su, hg) + PeriodicBC(su, seqPairs);
     Solver::SparseLU(sp).solve();
 
-    RealFunction df(KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real {
-      return source(p);
-    });
+    RealFunction df(
+      KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real { return source(p); });
     RealFunction dg(KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real {
       return 1 + p.x() + 2 * p.y();
     });
@@ -284,12 +283,12 @@ namespace Rodin::Tests::Unit
     Problem sys(sa, sp, sb, sr);
     sys = Integral(Grad(sa), Grad(sb)) + Integral(sa, sb) - Integral(hf, sb) +
       Integral(Grad(sp), Grad(sr)) + Integral(sp, sr) + Integral(Real(0.5) * sa, sr) -
-      Integral(hf, sr) + DirichletBC(sa, RealFunction(Real(0))) + PeriodicBC(sp, seqPairs);
+      Integral(hf, sr) + DirichletBC(sa, RealFunction(Real(0))) +
+      PeriodicBC(sp, seqPairs);
     Solver::SparseLU(sys).solve();
 
-    RealFunction df(KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real {
-      return source(p);
-    });
+    RealFunction df(
+      KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real { return source(p); });
     PETSc::Variational::TrialFunction da(grid.fes);
     PETSc::Variational::TestFunction db(grid.fes);
     PETSc::Variational::TrialFunction dp(dq);
@@ -336,9 +335,8 @@ namespace Rodin::Tests::Unit
     PETSc::Variational::TestFunction dq(dph);
 
     RealFunction hf([](const Geometry::Point& p) { return source(p); });
-    RealFunction df(KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real {
-      return source(p);
-    });
+    RealFunction df(
+      KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real { return source(p); });
 
     Problem hs(ha, hp, hb, hq);
     hs = Integral(Grad(ha), Grad(hb)) + Integral(ha, hb) - Integral(hf, hb) +

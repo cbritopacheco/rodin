@@ -263,7 +263,8 @@ int main(int argc, char** argv)
       else if (k == 2)
       {
         std::optional<P2Space> fes;
-        const double tfes = time([&] { fes.emplace(std::integral_constant<size_t, 2>(), mesh); });
+        const double tfes =
+          time([&] { fes.emplace(std::integral_constant<size_t, 2>(), mesh); });
         report(fes->getSize(), tfes);
         run(world, *fes, prefix, repeat);
       }

@@ -594,9 +594,10 @@ namespace Rodin::Solver
         if constexpr (Arrays::Resident)
         {
           check(cudaMemcpy(pattern.data(), starts, (rows + 1) * sizeof(Math::SparseIndex),
-            cudaMemcpyDeviceToHost), "copy the matrix pattern to the host");
+                  cudaMemcpyDeviceToHost),
+            "copy the matrix pattern to the host");
           check(cudaMemcpy(pattern.data() + rows + 1, indices,
-            nonzeros * sizeof(Math::SparseIndex), cudaMemcpyDeviceToHost),
+                  nonzeros * sizeof(Math::SparseIndex), cudaMemcpyDeviceToHost),
             "copy the matrix pattern to the host");
         }
         else

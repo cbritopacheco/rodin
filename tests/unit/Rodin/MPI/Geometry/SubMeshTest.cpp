@@ -283,7 +283,8 @@ TEST(MPI_Geometry_SubMesh, SparseBoundarySelection_DimensionConsistentOnEmptyRan
   {
     const Index faceIdx = it->getIndex();
     const auto remote = halo.find(faceIdx);
-    if (shard.isOwned(faceDim, faceIdx) && (remote == halo.end() || remote->second.empty()))
+    if (shard.isOwned(faceDim, faceIdx) &&
+      (remote == halo.end() || remote->second.empty()))
     {
       hasOwnedBoundary = true;
       selectedFace = faceIdx;

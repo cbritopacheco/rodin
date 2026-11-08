@@ -95,6 +95,7 @@ namespace Rodin::Examples
     Real dt = 1e-3;
     Real mu = 0.0049;
     Real eps = 1e-3;
+
     /// @brief Pressure penalty of examples/Heart/Atrium.
     Real delta = 1e-12;
   };
@@ -151,8 +152,9 @@ namespace Rodin::Examples
   /// @returns Whether @p source is a cell count rather than a path.
   bool isGrid(const std::string& source)
   {
-    return !source.empty() &&
-      std::all_of(source.begin(), source.end(), [](char c) { return c >= '0' && c <= '9'; });
+    return !source.empty() && std::all_of(source.begin(), source.end(), [](char c) {
+      return c >= '0' && c <= '9';
+    });
   }
 
   /**
@@ -173,10 +175,12 @@ namespace Rodin::Examples
     midpoints.reserve(2 * mesh.getCellCount());
     std::vector<Math::SpatialPoint> coordinates;
     const auto mid = [&](Index a, Index b) {
-      const auto key = (static_cast<std::uint64_t>(std::min(a, b)) << 32) | std::max(a, b);
+      const auto key =
+        (static_cast<std::uint64_t>(std::min(a, b)) << 32) | std::max(a, b);
       const auto [it, inserted] = midpoints.emplace(key, nv + coordinates.size());
       if (inserted)
-        coordinates.push_back(0.5 * (mesh.getVertexCoordinates(a) + mesh.getVertexCoordinates(b)));
+        coordinates.push_back(
+          0.5 * (mesh.getVertexCoordinates(a) + mesh.getVertexCoordinates(b)));
       return it->second;
     };
 
@@ -194,8 +198,8 @@ namespace Rodin::Examples
       const Math::SpatialPoint a = at(t[1]) - at(t[0]);
       const Math::SpatialPoint b = at(t[2]) - at(t[0]);
       const Math::SpatialPoint c = at(t[3]) - at(t[0]);
-      return a.x() * (b.y() * c.z() - b.z() * c.y()) - a.y() * (b.x() * c.z() - b.z() * c.x()) +
-        a.z() * (b.x() * c.y() - b.y() * c.x());
+      return a.x() * (b.y() * c.z() - b.z() * c.y()) -
+        a.y() * (b.x() * c.z() - b.z() * c.x()) + a.z() * (b.x() * c.y() - b.y() * c.x());
     };
     const auto length = [&](Index a, Index b) {
       const auto at = [&](Index k) -> Math::SpatialPoint {
@@ -208,18 +212,20 @@ namespace Rodin::Examples
       const auto& v = conn.getPolytope(3, i);
       const Index m01 = mid(v[0], v[1]), m02 = mid(v[0], v[2]), m03 = mid(v[0], v[3]);
       const Index m12 = mid(v[1], v[2]), m13 = mid(v[1], v[3]), m23 = mid(v[2], v[3]);
-      const bool positive = volume({ v[0], v[1], v[2], v[3] }) > 0;
-      std::array<std::array<Index, 4>, 8> children{ { { v[0], m01, m02, m03 },
-        { m01, v[1], m12, m13 }, { m02, m12, v[2], m23 }, { m03, m13, m23, v[3] } } };
+      const bool positive = volume({v[0], v[1], v[2], v[3]}) > 0;
+      std::array<std::array<Index, 4>, 8> children{{{v[0], m01, m02, m03},
+        {m01, v[1], m12, m13}, {m02, m12, v[2], m23}, {m03, m13, m23, v[3]}}};
       // The three diagonals of the octahedron, each with the two pairs of
       // opposite vertices left around it.
-      const std::array<std::array<Index, 6>, 3> diagonals{ { { m01, m23, m02, m13, m03, m12 },
-        { m02, m13, m01, m23, m03, m12 }, { m03, m12, m01, m23, m02, m13 } } };
-      const auto& d = *std::min_element(diagonals.begin(), diagonals.end(),
-        [&](const auto& a, const auto& b) { return length(a[0], a[1]) < length(b[0], b[1]); });
-      const std::array<Index, 4> ring{ d[2], d[4], d[3], d[5] };
+      const std::array<std::array<Index, 6>, 3> diagonals{{{m01, m23, m02, m13, m03, m12},
+        {m02, m13, m01, m23, m03, m12}, {m03, m12, m01, m23, m02, m13}}};
+      const auto& d = *std::min_element(
+        diagonals.begin(), diagonals.end(), [&](const auto& a, const auto& b) {
+          return length(a[0], a[1]) < length(b[0], b[1]);
+        });
+      const std::array<Index, 4> ring{d[2], d[4], d[3], d[5]};
       for (size_t k = 0; k < 4; ++k)
-        children[4 + k] = { d[0], d[1], ring[k], ring[(k + 1) % 4] };
+        children[4 + k] = {d[0], d[1], ring[k], ring[(k + 1) % 4]};
       const auto attr = mesh.getAttribute(3, i);
       for (auto& c : children)
       {
@@ -237,8 +243,8 @@ namespace Rodin::Examples
       const auto& v = conn.getPolytope(1, i);
       const Index m = mid(v[0], v[1]);
       const auto attr = mesh.getAttribute(1, i);
-      segments.push_back({ { v[0], m }, attr });
-      segments.push_back({ { m, v[1] }, attr });
+      segments.push_back({{v[0], m}, attr});
+      segments.push_back({{m, v[1]}, attr});
     }
     std::vector<std::pair<std::array<Index, 3>, Optional<Geometry::Attribute>>> triangles;
     for (Index i = 0; i < conn.getCount(2); ++i)
@@ -246,10 +252,10 @@ namespace Rodin::Examples
       const auto& v = conn.getPolytope(2, i);
       const Index m01 = mid(v[0], v[1]), m12 = mid(v[1], v[2]), m02 = mid(v[0], v[2]);
       const auto attr = mesh.getAttribute(2, i);
-      triangles.push_back({ { v[0], m01, m02 }, attr });
-      triangles.push_back({ { m01, v[1], m12 }, attr });
-      triangles.push_back({ { m02, m12, v[2] }, attr });
-      triangles.push_back({ { m01, m12, m02 }, attr });
+      triangles.push_back({{v[0], m01, m02}, attr});
+      triangles.push_back({{m01, v[1], m12}, attr});
+      triangles.push_back({{m02, m12, v[2]}, attr});
+      triangles.push_back({{m01, m12, m02}, attr});
     }
 
     LocalMesh::Builder build;
@@ -257,7 +263,7 @@ namespace Rodin::Examples
     for (Index i = 0; i < nv; ++i)
     {
       build.vertex(x[i]);
-      build.attribute({ 0, i }, mesh.getAttribute(0, i));
+      build.attribute({0, i}, mesh.getAttribute(0, i));
     }
     for (const auto& c : coordinates)
       build.vertex(c);
@@ -265,23 +271,23 @@ namespace Rodin::Examples
     for (const auto& [s, attr] : segments)
     {
       Index index;
-      build.polytope(Polytope::Type::Segment, { s[0], s[1] }, index);
-      build.attribute({ 1, index }, attr);
+      build.polytope(Polytope::Type::Segment, {s[0], s[1]}, index);
+      build.attribute({1, index}, attr);
     }
     build.reserve(2, triangles.size());
     for (const auto& [t, attr] : triangles)
     {
       Index index;
-      build.polytope(Polytope::Type::Triangle, { t[0], t[1], t[2] }, index);
-      build.attribute({ 2, index }, attr);
+      build.polytope(Polytope::Type::Triangle, {t[0], t[1], t[2]}, index);
+      build.attribute({2, index}, attr);
     }
     build.reserve(3, tets.size());
     for (size_t i = 0; i < tets.size(); ++i)
     {
       const auto& t = tets[i];
       Index index;
-      build.polytope(Polytope::Type::Tetrahedron, { t[0], t[1], t[2], t[3] }, index);
-      build.attribute({ 3, index }, tattrs[i]);
+      build.polytope(Polytope::Type::Tetrahedron, {t[0], t[1], t[2], t[3]}, index);
+      build.attribute({3, index}, tattrs[i]);
     }
     return build.finalize();
   }
@@ -319,7 +325,8 @@ namespace Rodin::Examples
       PetscOptionsGetInt(nullptr, nullptr, "-oseen_refine", &levels, nullptr);
       for (PetscInt l = 0; l < levels; ++l)
         mesh = refine(mesh);
-      if (mesh.getPolytopeCount(Geometry::Polytope::Type::Tetrahedron) != mesh.getCellCount())
+      if (mesh.getPolytopeCount(Geometry::Polytope::Type::Tetrahedron) !=
+        mesh.getCellCount())
         throw std::runtime_error(source + " has cells other than tetrahedra.");
       if (renumber)
         mesh = mesh.renumber();
@@ -331,8 +338,8 @@ namespace Rodin::Examples
       conn.compute(2, 3);
       conn.compute(2, 0);
       char name[16] = "compact";
-      PetscOptionsGetString(nullptr, nullptr, "-oseen_partitioner", name, sizeof(name),
-        nullptr);
+      PetscOptionsGetString(
+        nullptr, nullptr, "-oseen_partitioner", name, sizeof(name), nullptr);
       if (std::string(name) == "greedy")
       {
         Geometry::GreedyPartitioner partitioner(mesh);
@@ -371,18 +378,21 @@ namespace Rodin::Examples
    * @param A Assembled operator.
    * @param prefix Leading keys of the printed line.
    */
-  void printLayout(const boost::mpi::communicator& comm, ::Mat A, const std::string& prefix)
+  void printLayout(
+    const boost::mpi::communicator& comm, ::Mat A, const std::string& prefix)
   {
     PetscInt rows = 0, ghosts = 0;
     ::Mat Ad, Ao;
     const PetscInt* colmap = nullptr;
     MatGetLocalSize(A, &rows, nullptr);
     // A single process holds a sequential matrix, without ghost columns.
-    if (comm.size() > 1 && MatMPIAIJGetSeqAIJ(A, &Ad, &Ao, &colmap) == PETSC_SUCCESS && Ao)
+    if (comm.size() > 1 && MatMPIAIJGetSeqAIJ(A, &Ad, &Ao, &colmap) == PETSC_SUCCESS &&
+      Ao)
       MatGetSize(Ao, nullptr, &ghosts);
-    const std::array<long, 4> local{ rows, -rows, ghosts, -ghosts };
+    const std::array<long, 4> local{rows, -rows, ghosts, -ghosts};
     std::array<long, 4> extreme;
-    boost::mpi::all_reduce(comm, local.data(), 4, extreme.data(), boost::mpi::maximum<long>());
+    boost::mpi::all_reduce(
+      comm, local.data(), 4, extreme.data(), boost::mpi::maximum<long>());
     if (comm.rank() == 0)
     {
       std::cout << prefix << " rows=" << -extreme[1] << ".." << extreme[0]
@@ -524,8 +534,8 @@ int main(int argc, char** argv)
         qh.emplace(mesh);
       });
       const size_t dofs = vh->getSize() + qh->getSize();
-      const std::string name = isGrid(source) ? "grid" + source
-        : source.substr(source.find_last_of('/') + 1);
+      const std::string name =
+        isGrid(source) ? "grid" + source : source.substr(source.find_last_of('/') + 1);
       PetscInt levels = 0;
       PetscOptionsGetInt(nullptr, nullptr, "-oseen_refine", &levels, nullptr);
       const std::string prefix = "np=" + std::to_string(world.size()) + " mesh=" + name +

@@ -309,8 +309,7 @@ int main(int argc, char** argv)
     .setAbsoluteTolerance(1e-10)
     .setRelativeTolerance(1e-8);
 
-  const auto define = [&](auto& pb, Real ty)
-  {
+  const auto define = [&](auto& pb, Real ty) {
     pb = ivw(du, w) + aMass * Integral(du, w) + aDamp * Integral(du, w) +
       aMass * Integral(u, w) + aDamp * Integral(u, w) -
       BoundaryIntegral(VectorFunction{0, ty}, w).over(rightBC) -

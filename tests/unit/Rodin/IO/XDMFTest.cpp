@@ -597,8 +597,7 @@ namespace Rodin::Tests::Unit
     GridFunction field(fes);
     field = 1.0;
     const auto path = m_directory / "steps.xdmf";
-    const auto read = [&]()
-    {
+    const auto read = [&]() {
       std::ifstream input(path.string(), std::ios::binary);
       return std::string((std::istreambuf_iterator<char>(input)), {});
     };

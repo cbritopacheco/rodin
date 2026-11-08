@@ -435,8 +435,7 @@ namespace Rodin::Solid
           polytopes.getSpacing(), polytopes.getRegion(), polytopes.getDimension(),
           trialDOFs, testDOFs, vdim, state, lambda, mu, values, offset, sign, accumulate,
           rows.extent(0) > 0, rows, cols};
-        ::Kokkos::parallel_for(
-          "Rodin hyperelastic tangent integration",
+        ::Kokkos::parallel_for("Rodin hyperelastic tangent integration",
           QuadratureType::policy(execution, polytopes.getPolytopeCount()), kernel);
       }
 
@@ -592,48 +591,68 @@ namespace Rodin::Solid
       {
         /// @brief Maximum number of scalar trial degrees of freedom of a cell.
         static constexpr Index TrialCapacity = TrialDOFsType::getCapacity(Vertices);
+
         /// @brief Maximum number of scalar test degrees of freedom of a cell.
         static constexpr Index TestCapacity = TestDOFsType::getCapacity(Vertices);
 
         /// @brief Device view of the mesh.
         Rodin::Kokkos::Geometry::MeshView view;
+
         /// @brief Quadrature tables of the integrated polytopes.
         QuadratureType quadrature;
+
         /// @brief Selected attributes; empty selects every polytope of the region.
         typename PolytopesType::AttributesType attributes;
+
         /// @brief Position of the first entry of every polytope, relative to offset.
         ::Kokkos::View<Index*, MemorySpace> offsets;
+
         /// @brief Distance between consecutive entries of one polytope.
         size_t spacing;
+
         /// @brief Integration region.
         Geometry::Region region;
+
         /// @brief Dimension of the integrated polytopes.
         Index dimension;
+
         /// @brief Device degrees of freedom of the trial space.
         TrialDOFsType trialDOFs;
+
         /// @brief Device degrees of freedom of the test space.
         TestDOFsType testDOFs;
+
         /// @brief Vector dimension of the trial and test spaces.
         Index vdim;
+
         /// @brief Device coefficients of the current displacement.
         StateViewType state;
+
         /// @brief First Lamé parameter.
         Real lambda;
+
         /// @brief Shear modulus.
         Real mu;
+
         /// @brief Entry values.
         ::Kokkos::View<Real*, MemorySpace> values;
+
         /// @brief Position of the first entry of the integration.
         size_t offset;
+
         /// @brief Factor of the contributions.
         Real sign;
+
         /// @brief Whether the contributions are added to the values instead of
         /// replacing them.
         bool accumulate;
+
         /// @brief Whether the row and column indices are written.
         bool index;
+
         /// @brief Row indices, test degrees of freedom.
         ::Kokkos::View<Index*, MemorySpace> rows;
+
         /// @brief Column indices, trial degrees of freedom.
         ::Kokkos::View<Index*, MemorySpace> cols;
 
@@ -735,10 +754,13 @@ namespace Rodin::Solid
       {
         /// @brief Integration point at a quadrature node of the cell.
         using Point = Kokkos::Variational::CellIntegrationPointView;
+
         /// @brief Neo-Hookean kinematics at a quadrature point.
         using Kinematics = Kokkos::Variational::NeoHookeanPoint;
+
         /// @brief Device vector of the basis gradients.
         using Vector = Kokkos::Geometry::Vector;
+
         /// @brief Kokkos execution space of the mesh.
         using ExecutionSpace = typename MeshType::ExecutionSpace;
         // The register bound keeps enough threads for one pass over the
@@ -746,28 +768,38 @@ namespace Rodin::Solid
         /// @brief Team policy, compiled for at most TeamThreads threads per team.
         using Policy = ::Kokkos::TeamPolicy<ExecutionSpace, ::Kokkos::IndexType<Index>,
           ::Kokkos::LaunchBounds<TeamThreads, 1>>;
+
         /// @brief Team handle of the policy.
         using Member = typename Policy::member_type;
+
         /// @brief Device degrees of freedom of the displacement space.
         using StateDOFsType =
           std::decay_t<decltype(std::declval<const StateViewType&>().getDOFs())>;
+
         /// @brief Maximum number of scalar trial degrees of freedom of a cell.
         static constexpr Index TrialCapacity = TrialDOFsType::getCapacity(Vertices);
+
         /// @brief Maximum number of scalar test degrees of freedom of a cell.
         static constexpr Index TestCapacity = TestDOFsType::getCapacity(Vertices);
+
         /// @brief Maximal space dimension, which bounds the vector dimension.
         static constexpr Index D = RODIN_MAXIMAL_SPACE_DIMENSION;
+
         /// @brief Number of entries of a displacement gradient.
         static constexpr Index Square = D * D;
         // Spaces of one type share their basis gradients.
         /// @brief Whether the test space shares the basis gradients of the trial space.
         static constexpr bool SharedTest = std::is_same_v<TrialDOFsType, TestDOFsType>;
+
         /// @brief Whether the displacement space shares the basis gradients of the
         /// trial space.
-        static constexpr bool SharedState = std::is_same_v<TrialDOFsType, StateDOFsType>;
+        static constexpr bool SharedState =
+          std::is_same_v<TrialDOFsType, StateDOFsType>;
+
         /// @brief Number of test gradients stored per point, zero when the test space
         /// shares the trial gradients.
         static constexpr Index TestStorage = SharedTest ? 0 : TestCapacity;
+
         /// @brief Bytes of team scratch memory per quadrature point, for the
         /// integration point, the kinematics, the coefficients, the displacement
         /// gradient, the gradients and the pullbacks.
@@ -777,57 +809,80 @@ namespace Rodin::Solid
         // Groups that do not fit TeamScratch go to the slower scratch level.
         /// @brief Number of quadrature points whose values fit TeamScratch.
         static constexpr Index Fit = TeamScratch / PointBytes;
+
         /// @brief Number of quadrature points of a group.
         static constexpr Index P = Fit < TeamMinimumPoints ? TeamSlowPoints
           : Fit > TeamPoints                               ? TeamPoints
                                                            : Fit;
+
         /// @brief Number of test functions of the block of a thread.
         static constexpr Index E = TeamPairs;
+
         /// @brief Alignment of the arrays in team scratch memory.
-        static constexpr size_t Alignment =
-          std::max({alignof(Point), alignof(Kinematics), alignof(Vector), alignof(Real)});
+        static constexpr size_t Alignment = std::max(
+          {alignof(Point), alignof(Kinematics), alignof(Vector), alignof(Real)});
 
         /// @brief Device view of the mesh.
         Rodin::Kokkos::Geometry::MeshView view;
+
         /// @brief Quadrature tables of the integrated polytopes.
         QuadratureType quadrature;
+
         /// @brief Selected attributes; empty selects every polytope of the region.
         typename PolytopesType::AttributesType attributes;
+
         /// @brief Position of the first entry of every polytope, relative to offset.
         ::Kokkos::View<Index*, MemorySpace> offsets;
+
         /// @brief Distance between consecutive entries of one polytope.
         size_t spacing;
+
         /// @brief Integration region.
         Geometry::Region region;
+
         /// @brief Dimension of the integrated polytopes.
         Index dimension;
+
         /// @brief Device degrees of freedom of the trial space.
         TrialDOFsType trialDOFs;
+
         /// @brief Device degrees of freedom of the test space.
         TestDOFsType testDOFs;
+
         /// @brief Vector dimension of the trial and test spaces.
         Index vdim;
+
         /// @brief Device coefficients of the current displacement.
         StateViewType state;
+
         /// @brief First Lamé parameter.
         Real lambda;
+
         /// @brief Shear modulus.
         Real mu;
+
         /// @brief Entry values.
         ::Kokkos::View<Real*, MemorySpace> values;
+
         /// @brief Position of the first entry of the integration.
         size_t offset;
+
         /// @brief Factor of the contributions.
         Real sign;
+
         /// @brief Whether the contributions are added to the values instead of
         /// replacing them.
         bool accumulate;
+
         /// @brief Whether the row and column indices are written.
         bool index;
+
         /// @brief Row indices, test degrees of freedom.
         ::Kokkos::View<Index*, MemorySpace> rows;
+
         /// @brief Column indices, trial degrees of freedom.
         ::Kokkos::View<Index*, MemorySpace> cols;
+
         /// @brief Team scratch memory level of the groups of points.
         int level;
 
@@ -861,8 +916,8 @@ namespace Rodin::Solid
             static_cast<Point*>(memory.get_shmem_aligned(P * sizeof(Point), Alignment));
           auto* const kinematics = static_cast<Kinematics*>(
             memory.get_shmem_aligned(P * sizeof(Kinematics), Alignment));
-          auto* const coefficients =
-            static_cast<Real*>(memory.get_shmem_aligned(3 * P * sizeof(Real), Alignment));
+          auto* const coefficients = static_cast<Real*>(
+            memory.get_shmem_aligned(3 * P * sizeof(Real), Alignment));
           auto* const jacobians = static_cast<Real*>(
             memory.get_shmem_aligned(Square * P * sizeof(Real), Alignment));
           auto* const ga = static_cast<Vector*>(
@@ -1348,8 +1403,7 @@ namespace Rodin::Solid
           polytopes.getSpacing(), polytopes.getRegion(), polytopes.getDimension(), dofs,
           vdim, state, lambda, mu, values, offset, sign, accumulate,
           indices.extent(0) > 0, indices};
-        ::Kokkos::parallel_for(
-          "Rodin hyperelastic residual integration",
+        ::Kokkos::parallel_for("Rodin hyperelastic residual integration",
           QuadratureType::policy(execution, polytopes.getPolytopeCount()), kernel);
       }
 
@@ -1405,39 +1459,56 @@ namespace Rodin::Solid
 
         /// @brief Device view of the mesh.
         Rodin::Kokkos::Geometry::MeshView view;
+
         /// @brief Quadrature tables of the integrated polytopes.
         QuadratureType quadrature;
+
         /// @brief Selected attributes; empty selects every polytope of the region.
         typename PolytopesType::AttributesType attributes;
+
         /// @brief Position of the first entry of every polytope, relative to offset.
         ::Kokkos::View<Index*, MemorySpace> offsets;
+
         /// @brief Distance between consecutive entries of one polytope.
         size_t spacing;
+
         /// @brief Integration region.
         Geometry::Region region;
+
         /// @brief Dimension of the integrated polytopes.
         Index dimension;
+
         /// @brief Device degrees of freedom of the test space.
         DOFsType dofs;
+
         /// @brief Vector dimension of the test space.
         Index vdim;
+
         /// @brief Device coefficients of the current displacement.
         StateViewType state;
+
         /// @brief First Lamé parameter.
         Real lambda;
+
         /// @brief Shear modulus.
         Real mu;
+
         /// @brief Entry values.
         ::Kokkos::View<Real*, MemorySpace> values;
+
         /// @brief Position of the first entry of the integration.
         size_t offset;
+
         /// @brief Factor of the contributions.
         Real sign;
+
         /// @brief Whether the contributions are added to the values instead of
         /// replacing them.
         bool accumulate;
+
         /// @brief Whether the entry indices are written.
         bool index;
+
         /// @brief Entry indices, test degrees of freedom.
         ::Kokkos::View<Index*, MemorySpace> indices;
 
@@ -1831,8 +1902,7 @@ namespace Rodin::Solid
           polytopes.getSpacing(), polytopes.getRegion(), polytopes.getDimension(),
           trialDOFs, testDOFs, vdim, state, law, values, offset, sign, accumulate,
           rows.extent(0) > 0, rows, cols};
-        ::Kokkos::parallel_for(
-          "Rodin hyperelastic law tangent integration",
+        ::Kokkos::parallel_for("Rodin hyperelastic law tangent integration",
           QuadratureType::policy(execution, polytopes.getPolytopeCount()), kernel);
       }
 
@@ -1985,50 +2055,71 @@ namespace Rodin::Solid
       {
         /// @brief Maximum number of scalar trial degrees of freedom of a cell.
         static constexpr Index TrialCapacity = TrialDOFsType::getCapacity(Vertices);
+
         /// @brief Maximum number of scalar test degrees of freedom of a cell.
         static constexpr Index TestCapacity = TestDOFsType::getCapacity(Vertices);
+
         /// @brief Stride of the indices of an elasticity tensor.
         static constexpr Index D = Kokkos::Variational::ElasticityStride;
+
         /// @brief Number of entries of a row of an elasticity tensor.
         static constexpr Index Row = Kokkos::Variational::ElasticityRow;
 
         /// @brief Device view of the mesh.
         Rodin::Kokkos::Geometry::MeshView view;
+
         /// @brief Quadrature tables of the integrated polytopes.
         QuadratureType quadrature;
+
         /// @brief Selected attributes; empty selects every polytope of the region.
         typename PolytopesType::AttributesType attributes;
+
         /// @brief Position of the first entry of every polytope, relative to offset.
         ::Kokkos::View<Index*, MemorySpace> offsets;
+
         /// @brief Distance between consecutive entries of one polytope.
         size_t spacing;
+
         /// @brief Integration region.
         Geometry::Region region;
+
         /// @brief Dimension of the integrated polytopes.
         Index dimension;
+
         /// @brief Device degrees of freedom of the trial space.
         TrialDOFsType trialDOFs;
+
         /// @brief Device degrees of freedom of the test space.
         TestDOFsType testDOFs;
+
         /// @brief Vector dimension of the trial and test spaces.
         Index vdim;
+
         /// @brief Device coefficients of the current displacement.
         StateViewType state;
+
         /// @brief Device evaluation of the hyperelastic law.
         DeviceLawType law;
+
         /// @brief Entry values.
         ::Kokkos::View<Real*, MemorySpace> values;
+
         /// @brief Position of the first entry of the integration.
         size_t offset;
+
         /// @brief Factor of the contributions.
         Real sign;
+
         /// @brief Whether the contributions are added to the values instead of
         /// replacing them.
         bool accumulate;
+
         /// @brief Whether the row and column indices are written.
         bool index;
+
         /// @brief Row indices, test degrees of freedom.
         ::Kokkos::View<Index*, MemorySpace> rows;
+
         /// @brief Column indices, trial degrees of freedom.
         ::Kokkos::View<Index*, MemorySpace> cols;
 
@@ -2137,8 +2228,10 @@ namespace Rodin::Solid
       {
         /// @brief Integration point at a quadrature node of the cell.
         using Point = Kokkos::Variational::CellIntegrationPointView;
+
         /// @brief Device vector of the basis gradients.
         using Vector = Kokkos::Geometry::Vector;
+
         /// @brief Kokkos execution space of the mesh.
         using ExecutionSpace = typename MeshType::ExecutionSpace;
         // The register bound keeps enough threads for one pass over the
@@ -2146,32 +2239,44 @@ namespace Rodin::Solid
         /// @brief Team policy, compiled for at most TeamThreads threads per team.
         using Policy = ::Kokkos::TeamPolicy<ExecutionSpace, ::Kokkos::IndexType<Index>,
           ::Kokkos::LaunchBounds<TeamThreads, 1>>;
+
         /// @brief Team handle of the policy.
         using Member = typename Policy::member_type;
+
         /// @brief Device degrees of freedom of the displacement space.
         using StateDOFsType =
           std::decay_t<decltype(std::declval<const StateViewType&>().getDOFs())>;
+
         /// @brief Maximum number of scalar trial degrees of freedom of a cell.
         static constexpr Index TrialCapacity = TrialDOFsType::getCapacity(Vertices);
+
         /// @brief Maximum number of scalar test degrees of freedom of a cell.
         static constexpr Index TestCapacity = TestDOFsType::getCapacity(Vertices);
+
         /// @brief Stride of the indices of an elasticity tensor.
         static constexpr Index D = Kokkos::Variational::ElasticityStride;
+
         /// @brief Number of entries of a row of an elasticity tensor.
         static constexpr Index Row = Kokkos::Variational::ElasticityRow;
+
         /// @brief Number of entries of a displacement gradient.
         static constexpr Index Square = D * D;
+
         /// @brief Number of entries of an elasticity tensor.
         static constexpr Index Tensor = D * Row;
         // Spaces of one type share their basis gradients.
         /// @brief Whether the test space shares the basis gradients of the trial space.
         static constexpr bool SharedTest = std::is_same_v<TrialDOFsType, TestDOFsType>;
+
         /// @brief Whether the displacement space shares the basis gradients of the
         /// trial space.
-        static constexpr bool SharedState = std::is_same_v<TrialDOFsType, StateDOFsType>;
+        static constexpr bool SharedState =
+          std::is_same_v<TrialDOFsType, StateDOFsType>;
+
         /// @brief Number of test gradients stored per point, zero when the test space
         /// shares the trial gradients.
         static constexpr Index TestStorage = SharedTest ? 0 : TestCapacity;
+
         /// @brief Bytes of team scratch memory per quadrature point, for the
         /// integration point, the displacement gradient, the elasticity tensor and the
         /// gradients.
@@ -2181,55 +2286,77 @@ namespace Rodin::Solid
         // Groups that do not fit TeamScratch go to the slower scratch level.
         /// @brief Number of quadrature points whose values fit TeamScratch.
         static constexpr Index Fit = TeamScratch / PointBytes;
+
         /// @brief Number of quadrature points of a group.
         static constexpr Index P = Fit < TeamMinimumPoints ? TeamSlowPoints
           : Fit > TeamPoints                               ? TeamPoints
                                                            : Fit;
+
         /// @brief Number of test functions of the block of a thread.
         static constexpr Index E = TeamPairs;
+
         /// @brief Alignment of the arrays in team scratch memory.
         static constexpr size_t Alignment =
           std::max({alignof(Point), alignof(Vector), alignof(Real)});
 
         /// @brief Device view of the mesh.
         Rodin::Kokkos::Geometry::MeshView view;
+
         /// @brief Quadrature tables of the integrated polytopes.
         QuadratureType quadrature;
+
         /// @brief Selected attributes; empty selects every polytope of the region.
         typename PolytopesType::AttributesType attributes;
+
         /// @brief Position of the first entry of every polytope, relative to offset.
         ::Kokkos::View<Index*, MemorySpace> offsets;
+
         /// @brief Distance between consecutive entries of one polytope.
         size_t spacing;
+
         /// @brief Integration region.
         Geometry::Region region;
+
         /// @brief Dimension of the integrated polytopes.
         Index dimension;
+
         /// @brief Device degrees of freedom of the trial space.
         TrialDOFsType trialDOFs;
+
         /// @brief Device degrees of freedom of the test space.
         TestDOFsType testDOFs;
+
         /// @brief Vector dimension of the trial and test spaces.
         Index vdim;
+
         /// @brief Device coefficients of the current displacement.
         StateViewType state;
+
         /// @brief Device evaluation of the hyperelastic law.
         DeviceLawType law;
+
         /// @brief Entry values.
         ::Kokkos::View<Real*, MemorySpace> values;
+
         /// @brief Position of the first entry of the integration.
         size_t offset;
+
         /// @brief Factor of the contributions.
         Real sign;
+
         /// @brief Whether the contributions are added to the values instead of
         /// replacing them.
         bool accumulate;
+
         /// @brief Whether the row and column indices are written.
         bool index;
+
         /// @brief Row indices, test degrees of freedom.
         ::Kokkos::View<Index*, MemorySpace> rows;
+
         /// @brief Column indices, trial degrees of freedom.
         ::Kokkos::View<Index*, MemorySpace> cols;
+
         /// @brief Team scratch memory level of the groups of points.
         int level;
 
@@ -2737,8 +2864,7 @@ namespace Rodin::Solid
           polytopes.getSpacing(), polytopes.getRegion(), polytopes.getDimension(), dofs,
           vdim, state, law, values, offset, sign, accumulate, indices.extent(0) > 0,
           indices};
-        ::Kokkos::parallel_for(
-          "Rodin hyperelastic law residual integration",
+        ::Kokkos::parallel_for("Rodin hyperelastic law residual integration",
           QuadratureType::policy(execution, polytopes.getPolytopeCount()), kernel);
       }
 
@@ -2794,37 +2920,53 @@ namespace Rodin::Solid
 
         /// @brief Device view of the mesh.
         Rodin::Kokkos::Geometry::MeshView view;
+
         /// @brief Quadrature tables of the integrated polytopes.
         QuadratureType quadrature;
+
         /// @brief Selected attributes; empty selects every polytope of the region.
         typename PolytopesType::AttributesType attributes;
+
         /// @brief Position of the first entry of every polytope, relative to offset.
         ::Kokkos::View<Index*, MemorySpace> offsets;
+
         /// @brief Distance between consecutive entries of one polytope.
         size_t spacing;
+
         /// @brief Integration region.
         Geometry::Region region;
+
         /// @brief Dimension of the integrated polytopes.
         Index dimension;
+
         /// @brief Device degrees of freedom of the test space.
         DOFsType dofs;
+
         /// @brief Vector dimension of the test space.
         Index vdim;
+
         /// @brief Device coefficients of the current displacement.
         StateViewType state;
+
         /// @brief Device evaluation of the hyperelastic law.
         DeviceLawType law;
+
         /// @brief Entry values.
         ::Kokkos::View<Real*, MemorySpace> values;
+
         /// @brief Position of the first entry of the integration.
         size_t offset;
+
         /// @brief Factor of the contributions.
         Real sign;
+
         /// @brief Whether the contributions are added to the values instead of
         /// replacing them.
         bool accumulate;
+
         /// @brief Whether the entry indices are written.
         bool index;
+
         /// @brief Entry indices, test degrees of freedom.
         ::Kokkos::View<Index*, MemorySpace> indices;
 

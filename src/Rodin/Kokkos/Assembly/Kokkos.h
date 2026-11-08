@@ -425,8 +425,8 @@ namespace Rodin::Assembly::Internal
        */
       template <class Map, class Offset, class Finalize>
       Resolved resolve(const ExecutionSpace& execution, Map& map,
-        std::vector<Index>& globals, std::vector<unsigned char>& owned,
-        Offset&& offset, Finalize&& finalize)
+        std::vector<Index>& globals, std::vector<unsigned char>& owned, Offset&& offset,
+        Finalize&& finalize)
       {
         using Entry = typename Map::Entry;
         const size_t local = globals.size();
@@ -444,7 +444,8 @@ namespace Rodin::Assembly::Internal
           {
             // The value conditions are already among the fixed degrees of
             // freedom.
-            const auto* dofs = std::get_if<typename DBC::IdentifiedDOFs>(&c.dbc->getDOFs());
+            const auto* dofs =
+              std::get_if<typename DBC::IdentifiedDOFs>(&c.dbc->getDOFs());
             if (!dofs)
               continue;
             const Index masters = offset(c.masterOffset);
@@ -564,8 +565,8 @@ namespace Rodin::Assembly::Internal
       void setFixed(std::vector<unsigned char> fixed, std::vector<Real> values)
       {
         assert(fixed.size() == values.size());
-        m_constrained =
-          std::find(fixed.begin(), fixed.end(), static_cast<unsigned char>(1)) != fixed.end();
+        m_constrained = std::find(fixed.begin(), fixed.end(),
+                          static_cast<unsigned char>(1)) != fixed.end();
         m_fixed = std::move(fixed);
         m_values = std::move(values);
       }
@@ -884,8 +885,8 @@ namespace Rodin::Assembly::Internal
 #if defined(KOKKOS_ENABLE_CUDA) || defined(KOKKOS_ENABLE_HIP)
           KOKKOS_IF_ON_DEVICE((return -__dmul_rn(values(e), fixedValues(cols(e)));))
 #elif defined(KOKKOS_ENABLE_SYCL)
-          KOKKOS_IF_ON_DEVICE(
-            (return -::sycl::ext::intel::math::dmul_rn(values(e), fixedValues(cols(e)));))
+          KOKKOS_IF_ON_DEVICE((return -::sycl::ext::intel::math::dmul_rn(
+            values(e), fixedValues(cols(e)));))
 #endif
           return -(values(e) * fixedValues(cols(e)));
         }
@@ -916,6 +917,7 @@ namespace Rodin::Assembly::Internal
           return *this;
         }
       };
+
       /// @brief Whether a sorted key starts a group.
       struct GroupHead
       {
@@ -1341,10 +1343,9 @@ namespace Rodin::Assembly::Internal
         Index row, Index col, const Array<Index>& rows, const Array<Index>& cols)
       {
         const bool matrix = cols.extent(0) > 0;
-        ::Kokkos::parallel_for(
-          "Rodin::Assembly::Kokkos::shift",
+        ::Kokkos::parallel_for("Rodin::Assembly::Kokkos::shift",
           Range(execution, offset, offset + count),
-          IndexShift{ rows, cols, row, col, matrix });
+          IndexShift{rows, cols, row, col, matrix});
       }
 
       /// @brief Counts the groups of sorted keys and the entries following
@@ -1458,13 +1459,12 @@ namespace Rodin::Assembly::Internal
         if (count > 0)
           ::Kokkos::Experimental::sort_by_key(execution, keys, positions);
         const unsigned shift = ranks.shift;
-        const GroupHead head{ keys, shift };
+        const GroupHead head{keys, shift};
         const auto policy = Range(execution, 0, count);
         size_t distinct = 0;
         size_t unordered = 0;
-        ::Kokkos::parallel_reduce(
-          "Rodin::Assembly::Kokkos::groups", policy,
-          GroupCount{ head, ranks, positions }, ::Kokkos::Sum<size_t>(distinct),
+        ::Kokkos::parallel_reduce("Rodin::Assembly::Kokkos::groups", policy,
+          GroupCount{head, ranks, positions}, ::Kokkos::Sum<size_t>(distinct),
           ::Kokkos::Sum<size_t>(unordered));
         Groups res;
         res.starts =
@@ -1477,18 +1477,15 @@ namespace Rodin::Assembly::Internal
             distinct);
         const auto starts = res.starts;
         const auto groupKeys = res.keys;
-        ::Kokkos::parallel_scan(
-          "Rodin::Assembly::Kokkos::starts", policy,
-          GroupStarts{ head, starts, groupKeys, keys, shift });
+        ::Kokkos::parallel_scan("Rodin::Assembly::Kokkos::starts", policy,
+          GroupStarts{head, starts, groupKeys, keys, shift});
         ::Kokkos::deep_copy(execution, ::Kokkos::subview(starts, distinct), count);
         if (unordered == 0)
           return res;
 
         // Groups are small, a few polytopes sharing a pair of degrees of freedom.
-        ::Kokkos::parallel_for(
-          "Rodin::Assembly::Kokkos::order",
-          Range(execution, 0, distinct),
-          GroupOrder{ starts, positions, ranks });
+        ::Kokkos::parallel_for("Rodin::Assembly::Kokkos::order",
+          Range(execution, 0, distinct), GroupOrder{starts, positions, ranks});
         return res;
       }
 
@@ -1609,14 +1606,12 @@ namespace Rodin::Assembly::Internal
         const auto cols = triplets.cols;
         const auto values = triplets.values;
         const bool constrained = fixed.extent(0) > 0;
-        const Classification classify{ size, rows, cols, values, fixed, coefficientRanks,
-          constrained, listCoefficients, listEliminated };
-        const auto policy =
-          Range(execution, 0, size + diagonal);
+        const Classification classify{size, rows, cols, values, fixed, coefficientRanks,
+          constrained, listCoefficients, listEliminated};
+        const auto policy = Range(execution, 0, size + diagonal);
         Counts count;
-        ::Kokkos::parallel_reduce(
-          "Rodin::Assembly::Kokkos::countContributions", policy,
-          ContributionCount{ classify }, count);
+        ::Kokkos::parallel_reduce("Rodin::Assembly::Kokkos::countContributions", policy,
+          ContributionCount{classify}, count);
         const auto allocate = [&](Listed& listed, size_t n, const char* label) {
           listed.keys =
             Array<Index>(::Kokkos::view_alloc(execution, ::Kokkos::WithoutInitializing,
@@ -1633,10 +1628,9 @@ namespace Rodin::Assembly::Internal
         const auto cp = coefficients.positions;
         const auto ek = eliminated.keys;
         const auto ep = eliminated.positions;
-        ::Kokkos::parallel_scan(
-          "Rodin::Assembly::Kokkos::listContributions", policy,
-          ContributionList{ classify, size, rows, cols, rowMajor, innerCount, ck, cp,
-            coefficientRanks, ek, ep, eliminatedRanks });
+        ::Kokkos::parallel_scan("Rodin::Assembly::Kokkos::listContributions", policy,
+          ContributionList{classify, size, rows, cols, rowMajor, innerCount, ck, cp,
+            coefficientRanks, ek, ep, eliminatedRanks});
       }
 
       /// @brief Sums the contributions of a coefficient and writes its inner
@@ -1745,15 +1739,12 @@ namespace Rodin::Assembly::Internal
         const auto starts = groups.starts;
         const auto keys = groups.keys;
         const size_t nnz = data.extent(0);
-        ::Kokkos::parallel_for(
-          "Rodin::Assembly::Kokkos::sumCoefficients",
+        ::Kokkos::parallel_for("Rodin::Assembly::Kokkos::sumCoefficients",
           Range(execution, 0, nnz),
-          CoefficientSum{
-            size, values, positions, starts, data, inner, keys, innerCount });
-        ::Kokkos::parallel_for(
-          "Rodin::Assembly::Kokkos::outer",
+          CoefficientSum{size, values, positions, starts, data, inner, keys, innerCount});
+        ::Kokkos::parallel_for("Rodin::Assembly::Kokkos::outer",
           Range(execution, 0, nnz + 1),
-          OuterStarts{ nnz, keys, innerCount, outerCount, outer });
+          OuterStarts{nnz, keys, innerCount, outerCount, outer});
       }
 
       /// @brief Counts the nonzero entries of a vector.
@@ -1822,11 +1813,10 @@ namespace Rodin::Assembly::Internal
         const Array<Index>& indices, const Array<Real>& values, const Ranks& ranks,
         Array<Index>& keys, Array<Index>& positions)
       {
-        const auto policy =
-          Range(execution, 0, indices.extent(0));
+        const auto policy = Range(execution, 0, indices.extent(0));
         size_t count = 0;
         ::Kokkos::parallel_reduce(
-          "Rodin::Assembly::Kokkos::countEntries", policy, NonzeroCount{ values }, count);
+          "Rodin::Assembly::Kokkos::countEntries", policy, NonzeroCount{values}, count);
         keys = Array<Index>(::Kokkos::view_alloc(execution, ::Kokkos::WithoutInitializing,
                               std::string("Rodin vector keys")),
           count);
@@ -1836,9 +1826,8 @@ namespace Rodin::Assembly::Internal
             count);
         const auto k = keys;
         const auto p = positions;
-        ::Kokkos::parallel_scan(
-          "Rodin::Assembly::Kokkos::listEntries", policy,
-          EntryList{ values, k, p, ranks, indices });
+        ::Kokkos::parallel_scan("Rodin::Assembly::Kokkos::listEntries", policy,
+          EntryList{values, k, p, ranks, indices});
       }
 
       /// @brief Adds the contributions of a group to its entry of the
@@ -1892,10 +1881,9 @@ namespace Rodin::Assembly::Internal
       {
         const auto starts = groups.starts;
         const auto keys = groups.keys;
-        ::Kokkos::parallel_for(
-          "Rodin::Assembly::Kokkos::accumulate",
+        ::Kokkos::parallel_for("Rodin::Assembly::Kokkos::accumulate",
           Range(execution, 0, groups.size()),
-          Accumulation<Contribution>{ keys, rhs, starts, contributions, positions });
+          Accumulation<Contribution>{keys, rhs, starts, contributions, positions});
       }
 
       /// @brief Adds an entry of a preassembled vector to the right-hand side.
@@ -1926,10 +1914,8 @@ namespace Rodin::Assembly::Internal
       static void addDense(const ExecutionSpace& execution, const Array<Real>& values,
         Index row, const Array<Real>& rhs)
       {
-        ::Kokkos::parallel_for(
-          "Rodin::Assembly::Kokkos::addDense",
-          Range(execution, 0, values.extent(0)),
-          DenseSum{ rhs, row, values });
+        ::Kokkos::parallel_for("Rodin::Assembly::Kokkos::addDense",
+          Range(execution, 0, values.extent(0)), DenseSum{rhs, row, values});
       }
 
       /// @brief Writes the fixed value on a fixed row.
@@ -1963,10 +1949,8 @@ namespace Rodin::Assembly::Internal
         const Array<unsigned char>& fixed, const Array<Real>& values,
         const Array<Real>& rhs)
       {
-        ::Kokkos::parallel_for(
-          "Rodin::Assembly::Kokkos::imposeFixed",
-          Range(execution, 0, count),
-          FixedValue{ fixed, rhs, values });
+        ::Kokkos::parallel_for("Rodin::Assembly::Kokkos::imposeFixed",
+          Range(execution, 0, count), FixedValue{fixed, rhs, values});
       }
 
       /// @brief Writes the position of an entry at its rank.
@@ -2000,10 +1984,8 @@ namespace Rodin::Assembly::Internal
           ::Kokkos::view_alloc(
             execution, ::Kokkos::WithoutInitializing, std::string("Rodin rank order")),
           count);
-        ::Kokkos::parallel_for(
-          "Rodin::Assembly::Kokkos::rankOrder",
-          Range(execution, 0, count),
-          RankOrder{ res, ranks });
+        ::Kokkos::parallel_for("Rodin::Assembly::Kokkos::rankOrder",
+          Range(execution, 0, count), RankOrder{res, ranks});
         return res;
       }
 
@@ -2128,12 +2110,11 @@ namespace Rodin::Assembly::Internal
         const auto cols = triplets.cols;
         const auto values = triplets.values;
         const auto positions = order(execution, size, triplets.ranks);
-        const MatrixExpansionSizes sizes{ positions, rows, cols, values, x };
+        const MatrixExpansionSizes sizes{positions, rows, cols, values, x};
         const auto policy = Range(execution, 0, size);
         Sizes total;
-        ::Kokkos::parallel_reduce(
-          "Rodin::Assembly::Kokkos::countExpansions", policy,
-          MatrixExpansionCount{ sizes }, total);
+        ::Kokkos::parallel_reduce("Rodin::Assembly::Kokkos::countExpansions", policy,
+          MatrixExpansionCount{sizes}, total);
         const auto allocate = [&](auto& array, size_t n, const char* label) {
           using ArrayType = std::decay_t<decltype(array)>;
           array = ArrayType(::Kokkos::view_alloc(execution, ::Kokkos::WithoutInitializing,
@@ -2153,10 +2134,9 @@ namespace Rodin::Assembly::Internal
         const auto lr = res.rows;
         const auto lv = res.values;
         const auto ls = res.starts;
-        ::Kokkos::parallel_scan(
-          "Rodin::Assembly::Kokkos::expandMatrix", policy,
+        ::Kokkos::parallel_scan("Rodin::Assembly::Kokkos::expandMatrix", policy,
           MatrixExpansion{
-            sizes, ls, positions, values, x, rows, cols, er, ec, ev, lr, lv });
+            sizes, ls, positions, values, x, rows, cols, er, ec, ev, lr, lv});
         ::Kokkos::deep_copy(execution, ::Kokkos::subview(ls, size), total.lifts);
       }
 
@@ -2243,12 +2223,11 @@ namespace Rodin::Assembly::Internal
       {
         const size_t size = indices.extent(0);
         const auto positions = order(execution, size, ranks);
-        const VectorExpansionSize sizes{ positions, indices, values, x };
+        const VectorExpansionSize sizes{positions, indices, values, x};
         const auto policy = Range(execution, 0, size);
         size_t total = 0;
-        ::Kokkos::parallel_reduce(
-          "Rodin::Assembly::Kokkos::countVectorExpansions", policy,
-          VectorExpansionCount{ sizes }, total);
+        ::Kokkos::parallel_reduce("Rodin::Assembly::Kokkos::countVectorExpansions",
+          policy, VectorExpansionCount{sizes}, total);
         resIndices =
           Array<Index>(::Kokkos::view_alloc(execution, ::Kokkos::WithoutInitializing,
                          std::string("Rodin expanded indices")),
@@ -2259,9 +2238,8 @@ namespace Rodin::Assembly::Internal
             total);
         const auto ei = resIndices;
         const auto ev = resValues;
-        ::Kokkos::parallel_scan(
-          "Rodin::Assembly::Kokkos::expandVector", policy,
-          VectorExpansion{ sizes, positions, values, x, indices, ei, ev });
+        ::Kokkos::parallel_scan("Rodin::Assembly::Kokkos::expandVector", policy,
+          VectorExpansion{sizes, positions, values, x, indices, ei, ev});
       }
 
       /// @brief Writes the index of an entry of a preassembled vector.
@@ -2294,10 +2272,8 @@ namespace Rodin::Assembly::Internal
           ::Kokkos::view_alloc(execution, ::Kokkos::WithoutInitializing,
             std::string("Rodin preassembled indices")),
           count);
-        ::Kokkos::parallel_for(
-          "Rodin::Assembly::Kokkos::sequence",
-          Range(execution, 0, count),
-          Sequence{ res, first });
+        ::Kokkos::parallel_for("Rodin::Assembly::Kokkos::sequence",
+          Range(execution, 0, count), Sequence{res, first});
         return res;
       }
 
@@ -3435,10 +3411,10 @@ namespace Rodin::Assembly
             execution, 0, faceCount);
         const Index faceDim = view.getDimension() - 1;
         ::Kokkos::parallel_for("Rodin boundary owners", policy,
-          BoundaryOwners<AttributeView>{ view, attributes, dofs, faceDim, owners });
+          BoundaryOwners<AttributeView>{view, attributes, dofs, faceDim, owners});
         ::Kokkos::parallel_for("Rodin boundary values", policy,
           BoundaryValues<AttributeView, ValueView>{
-            view, attributes, faceDim, dofs, owners, values, stride, vdim, value });
+            view, attributes, faceDim, dofs, owners, values, stride, vdim, value});
       }
 
       /**

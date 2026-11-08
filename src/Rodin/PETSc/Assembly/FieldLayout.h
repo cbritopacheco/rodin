@@ -105,7 +105,8 @@ namespace Rodin::PETSc::Assembly
         if (m_offsets.empty())
           return index;
         const size_t k = static_cast<size_t>(
-          std::upper_bound(m_offsets.begin(), m_offsets.end(), index) - m_offsets.begin() - 1);
+          std::upper_bound(m_offsets.begin(), m_offsets.end(), index) -
+          m_offsets.begin() - 1);
         const PetscInt g = index - m_offsets[k];
         const auto& first = m_firsts[k];
         const size_t r = static_cast<size_t>(

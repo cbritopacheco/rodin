@@ -65,8 +65,7 @@ namespace Rodin::Geometry
       for (size_t k = 0; k < sdim; k++)
         c[k] /= vertices.size();
     }
-    const auto distance = [&](Index i, const Real* c)
-    {
+    const auto distance = [&](Index i, const Real* c) {
       const Real* x = centroids.data() + i * sdim;
       Real r = 0;
       for (size_t k = 0; k < sdim; k++)
@@ -92,7 +91,7 @@ namespace Rodin::Geometry
       std::vector<Index> cells(n);
       for (Index i = 0; i < n; i++)
         cells[i] = i;
-      tasks.push_back({ std::move(cells), 0, count });
+      tasks.push_back({std::move(cells), 0, count});
     }
     // The height of a polytope does not change, so a polytope enters the front
     // once.
@@ -112,8 +111,7 @@ namespace Rodin::Geometry
         m_partition[i] = second;
 
       // The polytope furthest from the first one of the set.
-      const auto furthest = [&](Index from)
-      {
+      const auto furthest = [&](Index from) {
         const Real* c = centroids.data() + from * sdim;
         Index best = from;
         Real bestDistance = -1;
@@ -136,8 +134,7 @@ namespace Rodin::Geometry
       std::vector<Real> axis(sdim);
       for (size_t k = 0; k < sdim; k++)
         axis[k] = centroids[end * sdim + k] - origin[k];
-      const auto height = [&](Index i)
-      {
+      const auto height = [&](Index i) {
         const Real* x = centroids.data() + i * sdim;
         Real r = 0;
         for (size_t k = 0; k < sdim; k++)
@@ -164,7 +161,7 @@ namespace Rodin::Geometry
               next = i;
             }
           }
-          front.push({ lowest, next });
+          front.push({lowest, next});
           queued[next] = true;
         }
         const Index i = front.top().second;
@@ -175,7 +172,7 @@ namespace Rodin::Geometry
         {
           if (m_partition[j] == second && !queued[j])
           {
-            front.push({ height(j), j });
+            front.push({height(j), j});
             queued[j] = true;
           }
         }
@@ -190,8 +187,8 @@ namespace Rodin::Geometry
       for (const Index i : task.cells)
         (m_partition[i] == task.first ? region : rest).push_back(i);
       task.cells = {};
-      tasks.push_back({ std::move(rest), second, task.count - half });
-      tasks.push_back({ std::move(region), task.first, half });
+      tasks.push_back({std::move(rest), second, task.count - half});
+      tasks.push_back({std::move(region), task.first, half});
     }
   }
 

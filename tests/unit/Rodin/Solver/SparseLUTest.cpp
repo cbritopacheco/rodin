@@ -118,8 +118,7 @@ namespace Rodin::Tests::Unit::Solver
     expected << 1.0, 2.0, 3.0;
 
     Rodin::Solver::SparseLU solver(problem);
-    const auto check = [&]()
-    {
+    const auto check = [&]() {
       system.getVector() = a * expected;
       solver.solve(system);
       EXPECT_TRUE(solver.success());

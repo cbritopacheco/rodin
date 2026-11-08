@@ -282,12 +282,11 @@ namespace Rodin::Solver
   {
     m_info = Info{};
     const OperatorType& matrix = axb.getOperator();
-    const bool reuse = matrix.isCompressed()
-      && !m_outer.empty()
-      && m_outer.size() == static_cast<size_t>(matrix.outerSize() + 1)
-      && m_inner.size() == static_cast<size_t>(matrix.nonZeros())
-      && std::equal(m_outer.begin(), m_outer.end(), matrix.outerIndexPtr())
-      && std::equal(m_inner.begin(), m_inner.end(), matrix.innerIndexPtr());
+    const bool reuse = matrix.isCompressed() && !m_outer.empty() &&
+      m_outer.size() == static_cast<size_t>(matrix.outerSize() + 1) &&
+      m_inner.size() == static_cast<size_t>(matrix.nonZeros()) &&
+      std::equal(m_outer.begin(), m_outer.end(), matrix.outerIndexPtr()) &&
+      std::equal(m_inner.begin(), m_inner.end(), matrix.innerIndexPtr());
     if (!reuse)
     {
       m_outer.clear();

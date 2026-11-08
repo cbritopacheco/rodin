@@ -244,17 +244,23 @@ namespace Rodin::Variational
     {
       /// @brief Device mesh.
       ::Rodin::Kokkos::Geometry::MeshView view;
+
       /// @brief Region on which to project.
       Geometry::Region region;
+
       /// @brief Dimension of the polytopes of the region.
       Index d;
+
       /// @brief Selected attributes; empty selects the whole region.
       AttributeView attributes;
+
       /// @brief Device predicate selecting the polytopes.
       Select select;
+
       /// @brief One plus the index of the polytope owning each scalar degree of
       /// freedom, zero when none does.
       ::Kokkos::View<Index*, MemorySpace> owners;
+
       /// @brief Device degrees of freedom.
       DOFs dofs;
 
@@ -284,26 +290,36 @@ namespace Rodin::Variational
     {
       /// @brief Device mesh.
       ::Rodin::Kokkos::Geometry::MeshView view;
+
       /// @brief Region on which to project.
       Geometry::Region region;
+
       /// @brief Dimension of the polytopes of the region.
       Index d;
+
       /// @brief Selected attributes; empty selects the whole region.
       AttributeView attributes;
+
       /// @brief Device predicate selecting the polytopes.
       Select select;
+
       /// @brief One plus the index of the polytope owning each scalar degree of
       /// freedom, zero when none does.
       ::Kokkos::View<Index*, MemorySpace> owners;
+
       /// @brief Projected values, component r of the degree of freedom i at
       /// i + r * stride.
       ::Kokkos::View<Real*, MemorySpace> values;
+
       /// @brief Device view of the source.
       ValueView value;
+
       /// @brief Device degrees of freedom.
       DOFs dofs;
+
       /// @brief Offset between components.
       Index stride;
+
       /// @brief Vector dimension of the space.
       Index vdim;
 
@@ -364,8 +380,8 @@ namespace Rodin::Variational
         ::Kokkos::RangePolicy<ExecutionSpace, ::Kokkos::IndexType<Index>>(
           execution, 0, count);
       ::Kokkos::parallel_for("Rodin projection owners", policy,
-        Owners<AttributeView, Select, DOFs>{view, region, d, attributes, select, owners,
-          dofs});
+        Owners<AttributeView, Select, DOFs>{
+          view, region, d, attributes, select, owners, dofs});
       ::Kokkos::parallel_for("Rodin projection values", policy,
         Values<AttributeView, Select, ValueView, DOFs>{view, region, d, attributes,
           select, owners, values, value, dofs, stride, vdim});

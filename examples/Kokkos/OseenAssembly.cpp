@@ -397,7 +397,8 @@ namespace Rodin::Examples
       const Parameters P;
 
       const HostMesh host = renumber ? load(source).renumber() : load(source);
-      if (host.getPolytopeCount(Geometry::Polytope::Type::Tetrahedron) != host.getCellCount())
+      if (host.getPolytopeCount(Geometry::Polytope::Type::Tetrahedron) !=
+        host.getCellCount())
       {
         std::fprintf(stderr, "%s has cells other than tetrahedra.\n", source.c_str());
         PetscFinalize();

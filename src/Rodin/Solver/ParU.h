@@ -436,6 +436,7 @@ namespace Rodin::Solver
 
       Index m_maxThreads = 0;
       Ordering m_ordering = Ordering::Default;
+
       /// @brief Returns whether the matrix has the analyzed sparsity pattern.
       bool hasPattern(const OperatorType& matrix) const
       {

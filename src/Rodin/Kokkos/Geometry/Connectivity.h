@@ -360,10 +360,12 @@ namespace Rodin::Geometry
           return;
         const auto offsets = ::Kokkos::create_mirror_view_and_copy(::Kokkos::HostSpace{},
           ::Kokkos::subview(m_vertexOffsets, std::make_pair(begin, end + 1)));
-        const auto geometries = ::Kokkos::create_mirror_view_and_copy(
-          ::Kokkos::HostSpace{}, ::Kokkos::subview(m_geometries, std::make_pair(begin, end)));
+        const auto geometries =
+          ::Kokkos::create_mirror_view_and_copy(::Kokkos::HostSpace{},
+            ::Kokkos::subview(m_geometries, std::make_pair(begin, end)));
         const auto vertices = ::Kokkos::create_mirror_view_and_copy(::Kokkos::HostSpace{},
-          ::Kokkos::subview(m_vertices, std::make_pair(offsets(0), offsets(end - begin))));
+          ::Kokkos::subview(
+            m_vertices, std::make_pair(offsets(0), offsets(end - begin))));
         for (Index i = 0; i < end - begin; ++i)
         {
           m_types.emplace(begin + i, geometries(i));
@@ -504,8 +506,10 @@ namespace Rodin::Geometry
       // They are implementation details, not part of the connectivity API.
       /// @brief Borrowed resident arrays of one dimension-pair relation.
       using Descriptor = Rodin::Kokkos::Geometry::IncidenceDescriptor;
+
       /// @brief Borrowed compressed-row incidence relation.
       using IncidenceView = Rodin::Kokkos::Geometry::IncidenceView;
+
       /// @brief One-dimensional resident array in the context memory space.
       /// @tparam T Entry type.
       template <class T>
@@ -556,6 +560,7 @@ namespace Rodin::Geometry
       struct Candidate
       {
         ::Kokkos::Array<Index, 4> vertices{}; ///< Sorted vertex multiset.
+
         /// @var size
         /// Number of active vertices in the key.
         Index size = 0, order = 0; ///< Active count and occurrence.
@@ -611,6 +616,7 @@ namespace Rodin::Geometry
         struct Fill
         {}; ///< Fill compact indices and count rows.
         DeviceArray<Entry> entries; ///< Sorted candidate incidences.
+
         /// @var flags
         /// First-occurrence flags, in traversal or sorted order.
         /// @var positions
@@ -663,13 +669,16 @@ namespace Rodin::Geometry
       struct ComposeEntries
       {
         DeviceView topology; ///< Resident ordered vertex lists.
+
         /// @var left
         /// Relation from the source dimension to the pivot dimension.
         IncidenceView left, right; ///< Two relations through the pivot dimension.
+
         /// @var counts
         /// Candidate row lengths, written by the counting pass.
         DeviceArray<Index> counts, offsets; ///< Candidate row lengths and offsets.
         DeviceArray<Entry> entries; ///< Emitted pairs.
+
         /// @var dimension
         /// Source dimension.
         size_t dimension, targetDimension; ///< Source and target dimensions.
@@ -739,13 +748,16 @@ namespace Rodin::Geometry
         {}; ///< Fill cell-local incidence in reference order.
         DeviceView topology; ///< Input resident topology.
         DeviceArray<Reference> reference; ///< Rodin reference-cell constants.
+
         /// @var counts
         /// Number of candidates emitted by each cell, then retained row lengths.
         DeviceArray<Index> counts, offsets; ///< Emission row lengths and offsets.
+
         /// @var records
         /// Oriented candidate entities, existing entities first.
         DeviceArray<Entity> records, added; ///< Oriented candidates and new entities.
         DeviceArray<Candidate> candidates; ///< Canonical identity keys.
+
         /// @var flags
         /// Group-start flags of the sorted candidates.
         /// @var groupOffsets
@@ -763,6 +775,7 @@ namespace Rodin::Geometry
         DeviceArray<Index> flags, groupOffsets, groups, leaders, leaderFlags,
           leaderOffsets, assigned, ids; ///< Grouping and numbering workspace.
         DeviceArray<unsigned char> matched; ///< Explicit membership of each occurrence.
+
         /// @var rowOffsets
         /// Row offsets of the output cell-to-entity relation.
         DeviceArray<Index> rowOffsets, rowIndices; ///< Output cell-to-entity relation.
@@ -923,6 +936,7 @@ namespace Rodin::Geometry
         DeviceView source; ///< Old dimension-major tables.
         DeviceArray<Entity> added; ///< Newly discovered entities.
         DeviceArray<Polytope::Type> geometries; ///< New geometry table.
+
         /// @var counts
         /// Vertex count of each entity in the new table.
         /// @var offsets
@@ -974,6 +988,7 @@ namespace Rodin::Geometry
       {
         DeviceView topology; ///< Ordered keys.
         size_t dimension; ///< Source dimension.
+
         /// @var counts
         /// Vertex count of each entity.
         /// @var offsets

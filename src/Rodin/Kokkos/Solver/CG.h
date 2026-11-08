@@ -31,8 +31,10 @@ namespace Rodin::Solver::Internal
   {
     /// @brief Inverse of the diagonal of the matrix.
     typename KokkosKrylov<Backend>::Vector inverse;
+
     /// @brief Residual.
     typename KokkosKrylov<Backend>::Vector r;
+
     /// @brief Preconditioned residual, written as the first search direction.
     typename KokkosKrylov<Backend>::Vector p;
 
@@ -60,16 +62,22 @@ namespace Rodin::Solver::Internal
   {
     /// @brief Iterate, updated in place.
     typename KokkosKrylov<Backend>::Vector x;
+
     /// @brief Search direction.
     typename KokkosKrylov<Backend>::Vector p;
+
     /// @brief Residual, updated in place.
     typename KokkosKrylov<Backend>::Vector r;
+
     /// @brief Product @f$ q = A p @f$.
     typename KokkosKrylov<Backend>::Vector q;
+
     /// @brief Inverse of the diagonal of the matrix.
     typename KokkosKrylov<Backend>::Vector inverse;
+
     /// @brief Preconditioned residual, written by the step.
     typename KokkosKrylov<Backend>::Vector z;
+
     /// @brief Step length along the search direction.
     Real alpha;
 
@@ -98,8 +106,10 @@ namespace Rodin::Solver::Internal
   {
     /// @brief Search direction, updated in place.
     typename KokkosKrylov<Backend>::Vector p;
+
     /// @brief Preconditioned residual.
     typename KokkosKrylov<Backend>::Vector z;
+
     /// @brief Ratio of the successive values of @f$ r \cdot z @f$.
     Real beta;
 
@@ -171,8 +181,7 @@ namespace Rodin::Solver::Internal
 
     // p = D^{-1} r
     Real absNew = 0;
-    ::Kokkos::parallel_reduce(
-      "Rodin::Solver::CG::precondition", Policy(execution, 0, n),
+    ::Kokkos::parallel_reduce("Rodin::Solver::CG::precondition", Policy(execution, 0, n),
       KokkosCGPrecondition<Backend>{inverse, r, p}, absNew);
 
     size_t i = 0;
@@ -183,8 +192,7 @@ namespace Rodin::Solver::Internal
 
       // x += alpha p, r -= alpha q, z = D^{-1} r, with |r|^2 and r.z.
       Real rz = 0;
-      ::Kokkos::parallel_reduce(
-        "Rodin::Solver::CG::update", Policy(execution, 0, n),
+      ::Kokkos::parallel_reduce("Rodin::Solver::CG::update", Policy(execution, 0, n),
         KokkosCGUpdate<Backend>{x, p, r, q, inverse, z, alpha},
         ::Kokkos::Sum<Real>(residualNorm2), ::Kokkos::Sum<Real>(rz));
       if (residualNorm2 < threshold)
@@ -192,8 +200,7 @@ namespace Rodin::Solver::Internal
 
       const Real beta = rz / absNew;
       absNew = rz;
-      ::Kokkos::parallel_for(
-        "Rodin::Solver::CG::direction", Policy(execution, 0, n),
+      ::Kokkos::parallel_for("Rodin::Solver::CG::direction", Policy(execution, 0, n),
         KokkosCGDirection<Backend>{p, z, beta});
       ++i;
     }

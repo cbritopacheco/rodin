@@ -118,10 +118,13 @@ namespace Rodin::Solver::Internal
     {
       /// @brief CSR row offsets of the matrix.
       ::Kokkos::View<Math::SparseIndex*, MemorySpace> starts;
+
       /// @brief CSR column indices of the matrix.
       ::Kokkos::View<Math::SparseIndex*, MemorySpace> columns;
+
       /// @brief CSR values of the matrix.
       ::Kokkos::View<Real*, MemorySpace> values;
+
       /// @brief Inverse diagonal, set to one where the diagonal is zero or absent.
       Vector inverse;
 
@@ -146,6 +149,7 @@ namespace Rodin::Solver::Internal
     {
       /// @brief First vector.
       Vector a;
+
       /// @brief Second vector.
       Vector b;
 
@@ -165,12 +169,16 @@ namespace Rodin::Solver::Internal
     {
       /// @brief Inverse diagonal @f$ D^{-1} @f$.
       Vector inverse;
+
       /// @brief Input vector @f$ x @f$.
       ::Kokkos::View<const Real*, Device> x;
+
       /// @brief Output vector @f$ y @f$.
       Vector y;
+
       /// @brief Factor @f$ \alpha @f$ of @f$ D^{-1} x @f$.
       Real alpha;
+
       /// @brief Factor @f$ \beta @f$ of @f$ y @f$, zero to overwrite @f$ y @f$.
       Real beta;
 
@@ -198,8 +206,7 @@ namespace Rodin::Solver::Internal
       const auto starts = matrix.getRowStarts();
       const auto columns = matrix.getColumns();
       const auto values = matrix.getValues();
-      ::Kokkos::parallel_for(
-        "Rodin::Solver::Krylov::invertDiagonal",
+      ::Kokkos::parallel_for("Rodin::Solver::Krylov::invertDiagonal",
         ::Kokkos::RangePolicy<ExecutionSpace>(execution, 0, inverse.extent(0)),
         InvertDiagonal{starts, columns, values, inverse});
     }
@@ -214,10 +221,9 @@ namespace Rodin::Solver::Internal
     static Real dot(const ExecutionSpace& execution, const Vector& a, const Vector& b)
     {
       Real res = 0;
-      ::Kokkos::parallel_reduce(
-        "Rodin::Solver::Krylov::dot",
-        ::Kokkos::RangePolicy<ExecutionSpace>(execution, 0, a.extent(0)),
-        Dot{a, b}, res);
+      ::Kokkos::parallel_reduce("Rodin::Solver::Krylov::dot",
+        ::Kokkos::RangePolicy<ExecutionSpace>(execution, 0, a.extent(0)), Dot{a, b},
+        res);
       return res;
     }
 
@@ -234,8 +240,7 @@ namespace Rodin::Solver::Internal
       const ::Kokkos::View<const Real*, Device>& x, const Vector& y, Real alpha,
       Real beta)
     {
-      ::Kokkos::parallel_for(
-        "Rodin::Solver::Krylov::scale",
+      ::Kokkos::parallel_for("Rodin::Solver::Krylov::scale",
         ::Kokkos::RangePolicy<ExecutionSpace>(execution, 0, y.extent(0)),
         Scale{inverse, x, y, alpha, beta});
     }

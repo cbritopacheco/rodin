@@ -409,8 +409,10 @@ namespace Rodin::Solver
       {
         /// @brief CSR row starts.
         Starts starts;
+
         /// @brief Row counts, one per row.
         Counts counts;
+
         /// @brief Global row numbers, one per row.
         Rows rows;
 
@@ -434,8 +436,7 @@ namespace Rodin::Solver
       template <class Starts, class Counts, class Rows>
       static void fillRows(const Starts& starts, const Counts& counts, const Rows& rows)
       {
-        ::Kokkos::parallel_for(
-          "Rodin::Solver::BoomerAMG::rows",
+        ::Kokkos::parallel_for("Rodin::Solver::BoomerAMG::rows",
           ::Kokkos::RangePolicy<ExecutionSpace>(0, counts.extent(0)),
           FillRows<Starts, Counts, Rows>{starts, counts, rows});
       }

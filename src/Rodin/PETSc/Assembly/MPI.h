@@ -1330,8 +1330,7 @@ namespace Rodin::Assembly
         });
 
         // Rows and columns of the degrees of freedom in the PETSc layout.
-        const auto layout = [&](auto& fns, const auto& offsets)
-        {
+        const auto layout = [&](auto& fns, const auto& offsets) {
           std::vector<PETSc::Assembly::FieldLayout::Field> fields;
           fns.iapply([&](size_t i, const auto& ref) {
             size_t first, last;

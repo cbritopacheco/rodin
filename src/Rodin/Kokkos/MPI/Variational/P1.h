@@ -75,6 +75,10 @@ namespace Rodin::Variational
 
       using Parent::getGlobalIndex;
 
+      // Doxygen 1.15 takes the initializers for functions when the requires
+      // clause, which clang-format puts on its own line, precedes them in a
+      // class of two characters.
+      // clang-format off
       /**
        * @brief Constructs the scalar space; collective over the processes.
        * @param[in] mesh Mesh supporting the space, which must outlive it.
@@ -93,6 +97,7 @@ namespace Rodin::Variational
           m_host(mesh.getHost(), vdim),
           m_local(mesh.getLocal(), vdim)
       {}
+      // clang-format on
 
       /**
        * @brief Copies the space, sharing its mesh.

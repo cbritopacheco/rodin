@@ -77,7 +77,9 @@ namespace Rodin::Variational
        * @param[in] mesh Mesh supporting the space, which must outlive it.
        */
       explicit P0g(const MeshType& mesh)
-        : m_mesh(mesh), m_host(mesh.getHost()), m_local(mesh.getLocal())
+        : m_mesh(mesh),
+          m_host(mesh.getHost()),
+          m_local(mesh.getLocal())
       {}
 
       /**

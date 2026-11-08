@@ -84,11 +84,11 @@ namespace Rodin::Tests::Unit
   /// @brief Triangle and quadrilateral grids split into equal connected parts.
   TEST(BalancedCompactPartitioner, Surface)
   {
-    for (const auto type : { Polytope::Type::Triangle, Polytope::Type::Quadrilateral })
+    for (const auto type : {Polytope::Type::Triangle, Polytope::Type::Quadrilateral})
     {
-      auto mesh = LocalMesh::UniformGrid(type, { 32, 24 });
+      auto mesh = LocalMesh::UniformGrid(type, {32, 24});
       mesh.getConnectivity().compute(2, 2);
-      for (size_t count : { 1, 2, 3, 4, 7, 8, 16 })
+      for (size_t count : {1, 2, 3, 4, 7, 8, 16})
         checkBalancedCompactPartition(mesh, count);
     }
   }
@@ -96,9 +96,9 @@ namespace Rodin::Tests::Unit
   /// @brief Tetrahedral grids split into equal connected parts.
   TEST(BalancedCompactPartitioner, Volume)
   {
-    auto mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 10, 8, 6 });
+    auto mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, {10, 8, 6});
     mesh.getConnectivity().compute(3, 3);
-    for (size_t count : { 2, 3, 4, 8, 12 })
+    for (size_t count : {2, 3, 4, 8, 12})
       checkBalancedCompactPartition(mesh, count);
   }
 
@@ -138,7 +138,7 @@ namespace Rodin::Tests::Unit
   /// @brief More partitions than cells leaves the extra partitions empty.
   TEST(BalancedCompactPartitioner, MorePartitionsThanCells)
   {
-    auto mesh = LocalMesh::UniformGrid(Polytope::Type::Segment, { 4 });
+    auto mesh = LocalMesh::UniformGrid(Polytope::Type::Segment, {4});
     mesh.getConnectivity().compute(1, 1);
     BalancedCompactPartitioner partitioner(mesh);
     partitioner.partition(5, 1);

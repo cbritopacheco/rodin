@@ -378,7 +378,8 @@ namespace Rodin::Assembly::Internal
       const size_t count = fes.getLocalSize();
       starts.push_back(static_cast<Index>(globals.size()));
       offsets.push_back(offset);
-      ranges.emplace_back(static_cast<PetscInt>(first), static_cast<PetscInt>(last - first));
+      ranges.emplace_back(
+        static_cast<PetscInt>(first), static_cast<PetscInt>(last - first));
       globals.reserve(globals.size() + count);
       owned.reserve(owned.size() + count);
       for (size_t i = 0; i < count; ++i)
@@ -874,10 +875,8 @@ namespace Rodin::Assembly::Internal
       static void shift(const ExecutionSpace& execution, const Indices& rows,
         const Indices& cols, size_t offset, size_t count, Index row, Index col)
       {
-        ::Kokkos::parallel_for(
-          "Rodin::Assembly::Kokkos::PETSc::shift",
-          Range(execution, offset, offset + count),
-          Shift<Indices>{ rows, cols, row, col });
+        ::Kokkos::parallel_for("Rodin::Assembly::Kokkos::PETSc::shift",
+          Range(execution, offset, offset + count), Shift<Indices>{rows, cols, row, col});
       }
 
       /// @brief Lists the diagonal entry i after the given offset.
@@ -911,10 +910,8 @@ namespace Rodin::Assembly::Internal
       static void listDiagonal(const ExecutionSpace& execution, size_t offset,
         size_t count, const Indices& rows, const Indices& cols)
       {
-        ::Kokkos::parallel_for(
-          "Rodin::Assembly::Kokkos::PETSc::diagonal",
-          Range(execution, 0, count),
-          DiagonalList<Indices>{ offset, rows, cols });
+        ::Kokkos::parallel_for("Rodin::Assembly::Kokkos::PETSc::diagonal",
+          Range(execution, 0, count), DiagonalList<Indices>{offset, rows, cols});
       }
 
       /// @brief Writes the diagonal value of row i, one when it is fixed.
@@ -924,6 +921,7 @@ namespace Rodin::Assembly::Internal
         size_t offset; ///< Position of the first diagonal value in the list.
         bool hasFixed; ///< Whether the system has fixed degrees of freedom.
         Fixed fixed; ///< Flags of the fixed degrees of freedom.
+
         /// @brief Flags of the degrees of freedom the process owns, empty when the system
         /// is not distributed.
         Owned owned;
@@ -960,11 +958,10 @@ namespace Rodin::Assembly::Internal
         const Scalars& coo)
       {
         const bool distributed = owned.extent(0) > 0;
-        ::Kokkos::parallel_for(
-          "Rodin::Assembly::Kokkos::PETSc::diagonal",
+        ::Kokkos::parallel_for("Rodin::Assembly::Kokkos::PETSc::diagonal",
           Range(execution, 0, count),
           DiagonalFill<Fixed, Owned, Scalars>{
-            offset, hasFixed, fixed, owned, coo, distributed });
+            offset, hasFixed, fixed, owned, coo, distributed});
       }
 
       /// @brief Counts entry e when its value moves to the right-hand side.
@@ -1001,10 +998,9 @@ namespace Rodin::Assembly::Internal
         const Indices& rows, const Indices& cols, const Fixed& fixed)
       {
         size_t res = 0;
-        ::Kokkos::parallel_reduce(
-          "Rodin::Assembly::Kokkos::PETSc::countEliminated",
-          Range(execution, 0, count),
-          EliminatedCount<Indices, Fixed>{ rows, cols, fixed }, res);
+        ::Kokkos::parallel_reduce("Rodin::Assembly::Kokkos::PETSc::countEliminated",
+          Range(execution, 0, count), EliminatedCount<Indices, Fixed>{rows, cols, fixed},
+          res);
         return res;
       }
 
@@ -1020,6 +1016,7 @@ namespace Rodin::Assembly::Internal
         Fixed fixed; ///< Flags of the fixed degrees of freedom.
         Values values; ///< Fixed values, per degree of freedom.
         Scalars coo; ///< Values of the coordinate list.
+
         /// @brief Receives the rows of the moved values.
         ::Kokkos::View<Index*, MemorySpace> resRows;
         ::Kokkos::View<Real*, MemorySpace> resValues; ///< Receives the moved values.
@@ -1068,11 +1065,10 @@ namespace Rodin::Assembly::Internal
         const Indices& rows, const Indices& cols, const Fixed& fixed,
         const Values& values, const Scalars& coo, const Contributions& res)
       {
-        ::Kokkos::parallel_scan(
-          "Rodin::Assembly::Kokkos::PETSc::eliminate",
+        ::Kokkos::parallel_scan("Rodin::Assembly::Kokkos::PETSc::eliminate",
           Range(execution, 0, count),
           Elimination<Indices, Fixed, Values, Scalars>{
-            rows, cols, fixed, values, coo, res.rows, res.values, res.offset });
+            rows, cols, fixed, values, coo, res.rows, res.values, res.offset});
       }
 
       /**
@@ -1145,11 +1141,10 @@ namespace Rodin::Assembly::Internal
         bool hasFixed, const Fixed& fixed, const Expansions& x, bool expanded)
       {
         size_t res = 0;
-        ::Kokkos::parallel_reduce(
-          "Rodin::Assembly::Kokkos::PETSc::countVector",
+        ::Kokkos::parallel_reduce("Rodin::Assembly::Kokkos::PETSc::countVector",
           Range(execution, begin, begin + count),
           VectorCount<Indices, Values, Fixed>{
-            indices, values, row, hasFixed, fixed, x, expanded },
+            indices, values, row, hasFixed, fixed, x, expanded},
           res);
         return res;
       }
@@ -1168,6 +1163,7 @@ namespace Rodin::Assembly::Internal
         Fixed fixed; ///< Flags of the fixed degrees of freedom.
         Expansions x; ///< Expansions on the masters.
         bool expanded; ///< Whether the entries go to the masters of their rows.
+
         /// @brief Receives the rows of the contributions.
         ::Kokkos::View<Index*, MemorySpace> resRows;
         ::Kokkos::View<Real*, MemorySpace> resValues; ///< Receives the contributions.
@@ -1230,12 +1226,10 @@ namespace Rodin::Assembly::Internal
         const Indices& indices, const Values& values, Index row, bool hasFixed,
         const Fixed& fixed, const Expansions& x, bool expanded, const Contributions& res)
       {
-        const auto policy =
-          Range(execution, begin, begin + count);
-        ::Kokkos::parallel_scan(
-          "Rodin::Assembly::Kokkos::PETSc::vector", policy,
-          VectorList<Indices, Values, Fixed>{ indices, values, row, hasFixed, fixed, x,
-            expanded, res.rows, res.values, res.offset });
+        const auto policy = Range(execution, begin, begin + count);
+        ::Kokkos::parallel_scan("Rodin::Assembly::Kokkos::PETSc::vector", policy,
+          VectorList<Indices, Values, Fixed>{indices, values, row, hasFixed, fixed, x,
+            expanded, res.rows, res.values, res.offset});
       }
 
       /// @brief Writes the fixed value of row i when it is fixed.
@@ -1244,6 +1238,7 @@ namespace Rodin::Assembly::Internal
       {
         Fixed fixed; ///< Flags of the rows whose value is imposed.
         Values values; ///< Imposed values, per degree of freedom.
+
         /// @brief Flags of the degrees of freedom the process owns, empty when the system
         /// is not distributed.
         Owned owned;
@@ -1278,11 +1273,10 @@ namespace Rodin::Assembly::Internal
         const Fixed& fixed, const Values& values, const Owned& owned, const RHS& rhs)
       {
         const bool distributed = owned.extent(0) > 0;
-        ::Kokkos::parallel_for(
-          "Rodin::Assembly::Kokkos::PETSc::fixed",
+        ::Kokkos::parallel_for("Rodin::Assembly::Kokkos::PETSc::fixed",
           Range(execution, 0, count),
           FixedImposition<Fixed, Values, Owned, RHS>{
-            fixed, values, owned, rhs, distributed });
+            fixed, values, owned, rhs, distributed});
       }
 
       /// @brief Writes the row of entry e of a linear integrator.
@@ -1314,10 +1308,8 @@ namespace Rodin::Assembly::Internal
       static void shiftEntries(const ExecutionSpace& execution, const Indices& indices,
         size_t begin, size_t end, Index row, const Indices& res)
       {
-        ::Kokkos::parallel_for(
-          "Rodin::Assembly::Kokkos::PETSc::rows",
-          Range(execution, begin, end),
-          EntryRows<Indices>{ indices, row, res });
+        ::Kokkos::parallel_for("Rodin::Assembly::Kokkos::PETSc::rows",
+          Range(execution, begin, end), EntryRows<Indices>{indices, row, res});
       }
 
       /// @brief Numbers entry i of a dense vector.
@@ -1330,7 +1322,10 @@ namespace Rodin::Assembly::Internal
          * @brief Writes the index of the entry into it.
          * @param i Index of the entry.
          */
-        KOKKOS_INLINE_FUNCTION void operator()(const size_t i) const { res(i) = i; }
+        KOKKOS_INLINE_FUNCTION void operator()(const size_t i) const
+        {
+          res(i) = i;
+        }
       };
 
       /**
@@ -1341,10 +1336,8 @@ namespace Rodin::Assembly::Internal
       template <class Indices>
       static void sequence(const ExecutionSpace& execution, const Indices& res)
       {
-        ::Kokkos::parallel_for(
-          "Rodin::Assembly::Kokkos::PETSc::sequence",
-          Range(execution, 0, res.extent(0)),
-          Sequence<Indices>{ res });
+        ::Kokkos::parallel_for("Rodin::Assembly::Kokkos::PETSc::sequence",
+          Range(execution, 0, res.extent(0)), Sequence<Indices>{res});
       }
 
       /**
@@ -1393,10 +1386,9 @@ namespace Rodin::Assembly::Internal
         const Expansions& x)
       {
         Sizes res;
-        ::Kokkos::parallel_reduce(
-          "Rodin::Assembly::Kokkos::PETSc::countExpanded",
+        ::Kokkos::parallel_reduce("Rodin::Assembly::Kokkos::PETSc::countExpanded",
           Range(execution, 0, count),
-          ExpandedCount<Indices, Scalars>{ rows, cols, values, x }, res);
+          ExpandedCount<Indices, Scalars>{rows, cols, values, x}, res);
         return res;
       }
 
@@ -1414,6 +1406,7 @@ namespace Rodin::Assembly::Internal
         Indices resRows; ///< Receives the rows of the expanded contributions.
         Indices resCols; ///< Receives the columns of the expanded contributions.
         Scalars resValues; ///< Receives the expanded contributions.
+
         /// @brief Receives the rows of the lifted values.
         ::Kokkos::View<Index*, MemorySpace> liftRows;
         ::Kokkos::View<Real*, MemorySpace> liftValues; ///< Receives the lifted values.
@@ -1488,11 +1481,10 @@ namespace Rodin::Assembly::Internal
         const Expansions& x, const Indices& resRows, const Indices& resCols,
         const Scalars& resValues, const Contributions& lifts)
       {
-        ::Kokkos::parallel_scan(
-          "Rodin::Assembly::Kokkos::PETSc::expand",
+        ::Kokkos::parallel_scan("Rodin::Assembly::Kokkos::PETSc::expand",
           Range(execution, 0, count),
-          Expansion<Indices, Scalars>{ rows, cols, values, x, resRows, resCols,
-            resValues, lifts.rows, lifts.values, lifts.offset });
+          Expansion<Indices, Scalars>{rows, cols, values, x, resRows, resCols, resValues,
+            lifts.rows, lifts.values, lifts.offset});
       }
 
       /// @brief Counts position i when two index lists differ there.
@@ -1525,10 +1517,9 @@ namespace Rodin::Assembly::Internal
         const ExecutionSpace& execution, const Indices& indices, const Previous& previous)
       {
         size_t differences = 0;
-        ::Kokkos::parallel_reduce(
-          "Rodin::Assembly::Kokkos::PETSc::differences",
+        ::Kokkos::parallel_reduce("Rodin::Assembly::Kokkos::PETSc::differences",
           Range(execution, 0, indices.extent(0)),
-          DifferenceCount<Indices, Previous>{ indices, previous }, differences);
+          DifferenceCount<Indices, Previous>{indices, previous}, differences);
         return differences;
       }
 
@@ -1566,10 +1557,9 @@ namespace Rodin::Assembly::Internal
         const Indices& cols, const Indices& previousRows, const Indices& previousCols)
       {
         size_t changes = 0;
-        ::Kokkos::parallel_reduce(
-          "Rodin::Assembly::Kokkos::PETSc::pattern",
+        ::Kokkos::parallel_reduce("Rodin::Assembly::Kokkos::PETSc::pattern",
           Range(execution, 0, rows.extent(0)),
-          ChangeCount<Indices>{ rows, cols, previousRows, previousCols }, changes);
+          ChangeCount<Indices>{rows, cols, previousRows, previousCols}, changes);
         return changes;
       }
 
@@ -1625,6 +1615,7 @@ namespace Rodin::Assembly::Internal
         size_t begin; ///< Position of the first entry of the segment.
         size_t size; ///< Number of entries of the segment.
         size_t spacing; ///< Spacing of the entries of the segment.
+
         /// @brief Receives the keys, the row times the column count plus the column.
         ::Kokkos::View<std::uint64_t*, MemorySpace> keys;
         Indices rows; ///< Row coordinates.
@@ -1672,11 +1663,10 @@ namespace Rodin::Assembly::Internal
           const size_t begin = offsets[s];
           const size_t size = (s < segments.size() ? offsets[s + 1] : count) - begin;
           const size_t spacing = s < segments.size() ? segments[s].spacing : 1;
-          ::Kokkos::parallel_for(
-            "Rodin::Assembly::Kokkos::PETSc::keys",
+          ::Kokkos::parallel_for("Rodin::Assembly::Kokkos::PETSc::keys",
             Range(execution, 0, size),
             PatternKeys<Indices, Order>{
-              begin, size, spacing, keys, rows, cols, columns, order });
+              begin, size, spacing, keys, rows, cols, columns, order});
         }
         ::Kokkos::Experimental::sort_by_key(execution, keys, order);
       }
@@ -1769,19 +1759,15 @@ namespace Rodin::Assembly::Internal
         const Indices& cols, const Order& order)
       {
         const size_t count = order.extent(0);
-        const DistinctHead<Indices, Order> head{ rows, cols, order };
+        const DistinctHead<Indices, Order> head{rows, cols, order};
         size_t distinct = 0;
-        ::Kokkos::parallel_reduce(
-          "Rodin::Assembly::Kokkos::PETSc::distinct",
-          Range(execution, 0, count),
-          DistinctCount<Indices, Order>{ head }, distinct);
+        ::Kokkos::parallel_reduce("Rodin::Assembly::Kokkos::PETSc::distinct",
+          Range(execution, 0, count), DistinctCount<Indices, Order>{head}, distinct);
         Indices starts(::Kokkos::view_alloc(execution, ::Kokkos::WithoutInitializing,
                          std::string("Rodin COO starts")),
           distinct + 1);
-        ::Kokkos::parallel_scan(
-          "Rodin::Assembly::Kokkos::PETSc::starts",
-          Range(execution, 0, count),
-          DistinctStartList<Indices, Order>{ head, starts });
+        ::Kokkos::parallel_scan("Rodin::Assembly::Kokkos::PETSc::starts",
+          Range(execution, 0, count), DistinctStartList<Indices, Order>{head, starts});
         ::Kokkos::deep_copy(execution, ::Kokkos::subview(starts, distinct), count);
         return starts;
       }
@@ -1793,7 +1779,8 @@ namespace Rodin::Assembly::Internal
         Indices rows; ///< Row coordinates.
         Indices cols; ///< Column coordinates.
         Order order; ///< Indices of the sorted coordinates.
-        Indices starts; ///< Start of each distinct coordinate in the sorted coordinates.
+        Indices
+          starts; ///< Start of each distinct coordinate in the sorted coordinates.
         Coordinates distinctRows; ///< Receives the rows of the distinct coordinates.
         Coordinates distinctCols; ///< Receives the columns of the distinct coordinates.
 
@@ -1825,11 +1812,10 @@ namespace Rodin::Assembly::Internal
         const Indices& cols, const Order& order, const Indices& starts,
         const Coordinates& distinctRows, const Coordinates& distinctCols)
       {
-        ::Kokkos::parallel_for(
-          "Rodin::Assembly::Kokkos::PETSc::distinctCoordinates",
+        ::Kokkos::parallel_for("Rodin::Assembly::Kokkos::PETSc::distinctCoordinates",
           Range(execution, 0, distinctRows.extent(0)),
           DistinctList<Indices, Order, Coordinates>{
-            rows, cols, order, starts, distinctRows, distinctCols });
+            rows, cols, order, starts, distinctRows, distinctCols});
       }
 
       /// @brief Sums the values of the distinct coordinate u.
@@ -1837,6 +1823,7 @@ namespace Rodin::Assembly::Internal
       struct Merge
       {
         Order order; ///< Indices of the sorted coordinates.
+
         /// @brief Start of each distinct coordinate in the sorted coordinates, followed
         /// by the list size.
         Indices starts;
@@ -1869,10 +1856,9 @@ namespace Rodin::Assembly::Internal
       static void merge(const ExecutionSpace& execution, const Order& order,
         const Indices& starts, const Scalars& values, const Scalars& merged)
       {
-        ::Kokkos::parallel_for(
-          "Rodin::Assembly::Kokkos::PETSc::merge",
+        ::Kokkos::parallel_for("Rodin::Assembly::Kokkos::PETSc::merge",
           Range(execution, 0, merged.extent(0)),
-          Merge<Order, Indices, Scalars>{ order, starts, values, merged });
+          Merge<Order, Indices, Scalars>{order, starts, values, merged});
       }
 
     private:
@@ -1926,24 +1912,27 @@ namespace Rodin::Assembly::Internal
         std::unordered_map<PetscInt, Index> locals;
         if (m_distribution && !m_operators.empty())
           locals = m_distribution->getLocals();
-        const auto local = [&](PetscInt global) {
-          const auto it = locals.find(global);
-          if (it == locals.end())
-          {
-            Alert::Exception()
-              << "A preassembled operator couples a degree of freedom the "
-                 "process does not hold."
-              << Alert::Raise;
-          }
-          return it->second;
-        };
+        const auto local =
+          [&](PetscInt global) {
+            const auto it = locals.find(global);
+            if (it == locals.end())
+            {
+              Alert::Exception()
+                << "A preassembled operator couples a degree of freedom the "
+                   "process does not hold."
+                << Alert::Raise;
+            }
+            return it->second;
+          };
         for (const auto& o : m_operators)
         {
           PetscInt begin = 0, end = 0;
           PetscErrorCode ierr = MatGetOwnershipRange(o.op, &begin, &end);
           assert(ierr == PETSC_SUCCESS);
-          const PetscInt rowOffset = m_distribution ? m_distribution->getOffset(o.row) : 0;
-          const PetscInt colOffset = m_distribution ? m_distribution->getOffset(o.col) : 0;
+          const PetscInt rowOffset =
+            m_distribution ? m_distribution->getOffset(o.row) : 0;
+          const PetscInt colOffset =
+            m_distribution ? m_distribution->getOffset(o.col) : 0;
           for (PetscInt i = begin; i < end; ++i)
           {
             PetscInt count = 0;
@@ -2923,8 +2912,8 @@ namespace Rodin::Assembly
         SystemType system(trial.getMesh().getContext().getExecutionSpace(), rows, cols);
         if constexpr (distributed)
         {
-          system.distribute(Internal::COODistribution::of(test),
-            Internal::COODistribution::of(trial));
+          system.distribute(
+            Internal::COODistribution::of(test), Internal::COODistribution::of(trial));
         }
         for (const auto& lbfi : input.getLocalBFIs())
           system.addMatrix(lbfi, 0, 0);
@@ -3383,8 +3372,8 @@ namespace Rodin::Assembly
         // The kernels number the local degrees of freedom, ghosts included,
         // and the blocks of a distributed system follow each other in the
         // local numbering.
-        std::vector<Index> trialOffsets(input.getTrialOffsets().begin(),
-          input.getTrialOffsets().end());
+        std::vector<Index> trialOffsets(
+          input.getTrialOffsets().begin(), input.getTrialOffsets().end());
         std::vector<Index> testOffsets(
           input.getTestOffsets().begin(), input.getTestOffsets().end());
         size_t rows = input.getTotalTestSize();
@@ -3423,9 +3412,12 @@ namespace Rodin::Assembly
                  "share the space of the trial function of its block."
               << Alert::Raise;
           }
-          distribution.close(
-            us.template get<0>().get().getFiniteElementSpace().getMesh().getContext()
-              .getCommunicator(),
+          distribution.close(us.template get<0>()
+                               .get()
+                               .getFiniteElementSpace()
+                               .getMesh()
+                               .getContext()
+                               .getCommunicator(),
             static_cast<PetscInt>(input.getTotalTrialSize()));
         }
         const auto trialOffset = [&](const auto& uuid) -> Index {
@@ -3581,7 +3573,8 @@ namespace Rodin::Kokkos::Variational
       if (PetscMemTypeHost(type))
       {
         ::Kokkos::deep_copy(execution, values,
-          ::Kokkos::View<const PetscScalar*, ::Kokkos::HostSpace, Unmanaged>(array, count));
+          ::Kokkos::View<const PetscScalar*, ::Kokkos::HostSpace, Unmanaged>(
+            array, count));
       }
       else
       {
@@ -3624,7 +3617,7 @@ namespace Rodin::Kokkos::Variational
           size);
         ::Kokkos::parallel_for("Rodin PETSc grid function gather",
           ::Kokkos::RangePolicy<std::decay_t<decltype(execution)>>(execution, 0, size),
-          GhostedCoefficientsGather<MemorySpace>{ res, values, position });
+          GhostedCoefficientsGather<MemorySpace>{res, values, position});
         execution.fence("Rodin PETSc grid function gather");
         (void)ierr;
         return res;

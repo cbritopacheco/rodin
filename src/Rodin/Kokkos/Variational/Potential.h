@@ -363,14 +363,19 @@ namespace Rodin::Kokkos::Variational
       {
         /// @brief Device mesh.
         Geometry::MeshView view;
+
         /// @brief Integration region of the cells.
         ::Rodin::Geometry::Region region;
+
         /// @brief Dimension of the cells.
         Index dimension;
+
         /// @brief Selected attributes; empty selects every cell.
         AttributesType attributes;
+
         /// @brief Device degrees of freedom of the side.
         DOFs dofs;
+
         /// @brief Vector dimension of the side.
         Index vdim;
 
@@ -399,12 +404,16 @@ namespace Rodin::Kokkos::Variational
       {
         /// @brief Device mesh.
         Geometry::MeshView view;
+
         /// @brief Integration region of the cells.
         ::Rodin::Geometry::Region region;
+
         /// @brief Dimension of the cells.
         Index dimension;
+
         /// @brief Selected attributes; empty selects every cell.
         AttributesType attributes;
+
         /// @brief Selected cells, in increasing order.
         ::Kokkos::View<Index*, MemorySpace> cells;
 
@@ -433,14 +442,19 @@ namespace Rodin::Kokkos::Variational
       {
         /// @brief Device mesh.
         Geometry::MeshView view;
+
         /// @brief Dimension of the cells.
         Index dimension;
+
         /// @brief Device degrees of freedom of the side.
         DOFs dofs;
+
         /// @brief Vector dimension of the side.
         Index vdim;
+
         /// @brief Selected cells, in increasing order.
         ::Kokkos::View<Index*, MemorySpace> cells;
+
         /// @brief Sum of the local counts of the previous selected cells.
         ::Kokkos::View<Index*, MemorySpace> offsets;
 
@@ -480,8 +494,7 @@ namespace Rodin::Kokkos::Variational
         Index selected = 0;
         Index smallest = 0;
         Index largest = 0;
-        ::Kokkos::parallel_reduce(
-          "Rodin potential cell counts", policy(execution, count),
+        ::Kokkos::parallel_reduce("Rodin potential cell counts", policy(execution, count),
           CellRange<DOFs>{view, region, dimension, attributes, dofs, vdim},
           ::Kokkos::Sum<Index>(selected), ::Kokkos::Min<Index>(smallest),
           ::Kokkos::Max<Index>(largest));
@@ -498,12 +511,10 @@ namespace Rodin::Kokkos::Variational
         }
         const auto cells = selection.cells;
         const auto offsets = selection.offsets;
-        ::Kokkos::parallel_scan(
-          "Rodin potential cells", policy(execution, count),
+        ::Kokkos::parallel_scan("Rodin potential cells", policy(execution, count),
           SelectedCells{view, region, dimension, attributes, cells});
         Index total = 0;
-        ::Kokkos::parallel_scan(
-          "Rodin potential offsets", policy(execution, selected),
+        ::Kokkos::parallel_scan("Rodin potential offsets", policy(execution, selected),
           CellOffsets<DOFs>{view, dimension, dofs, vdim, cells, offsets}, total);
         selection.count = selected;
         selection.total = total;
@@ -550,8 +561,7 @@ namespace Rodin::Kokkos::Variational
         if (pairs == 0)
           return;
         const auto& execution = mesh.getContext().getExecutionSpace();
-        ::Kokkos::parallel_for(
-          "Rodin potential integration",
+        ::Kokkos::parallel_for("Rodin potential integration",
           ::Kokkos::RangePolicy<ExecutionSpace, ::Kokkos::IndexType<size_t>>(
             execution, 0, pairs),
           PairKernel{kernel, mesh.getDeviceView(), mesh.getDimension(), test.cells,
@@ -634,56 +644,82 @@ namespace Rodin::Kokkos::Variational
       {
         /// @brief Device kernel @f$ k(x, y) @f$.
         KernelType kernel;
+
         /// @brief Device mesh.
         Geometry::MeshView view;
+
         /// @brief Dimension of the cells.
         Index dimension;
+
         /// @brief Selected test cells.
         ::Kokkos::View<Index*, MemorySpace> testCells;
+
         /// @brief Sum of the local counts of the previous selected test cells.
         ::Kokkos::View<Index*, MemorySpace> testOffsets;
+
         /// @brief Selected trial cells.
         ::Kokkos::View<Index*, MemorySpace> trialCells;
+
         /// @brief Sum of the local counts of the previous selected trial cells.
         ::Kokkos::View<Index*, MemorySpace> trialOffsets;
+
         /// @brief Number of selected trial cells.
         Index trialCount;
+
         /// @brief Sum of the local counts of the selected trial cells.
         Index trialTotal;
+
         /// @brief Whether all the pairs have the same local counts.
         bool uniform;
+
         /// @brief Spacing of the entries.
         size_t spacing;
+
         /// @brief Gauss-Legendre nodes on the unit interval.
         TableType nodes;
+
         /// @brief Gauss-Legendre weights on the unit interval.
         TableType weights;
+
         /// @brief Reference coordinates of the centroid of each reference geometry.
         TableType centroids;
+
         /// @brief Centroid rule weight of each reference geometry.
         TableType centroidWeights;
+
         /// @brief Number of Gauss-Legendre nodes.
         Index n;
+
         /// @brief Device degrees of freedom of the trial space.
         TrialDOFsType trialDOFs;
+
         /// @brief Vector dimension of the trial space.
         Index trialVDim;
+
         /// @brief Device degrees of freedom of the test space.
         TestDOFsType testDOFs;
+
         /// @brief Vector dimension of the test space.
         Index testVDim;
+
         /// @brief Entry values.
         ::Kokkos::View<Real*, MemorySpace> values;
+
         /// @brief Position of the first entry.
         size_t offset;
+
         /// @brief Factor of the contributions.
         Real sign;
+
         /// @brief Whether the contributions are added to the values.
         bool accumulate;
+
         /// @brief Whether the row and column indices are written.
         bool index;
+
         /// @brief Row indices, test degrees of freedom.
         ::Kokkos::View<Index*, MemorySpace> rows;
+
         /// @brief Column indices, trial degrees of freedom.
         ::Kokkos::View<Index*, MemorySpace> cols;
 

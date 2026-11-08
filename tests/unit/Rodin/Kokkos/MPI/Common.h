@@ -61,7 +61,8 @@ namespace Rodin::Tests::Unit
    * @brief Distributes a unit grid from rank 0, through an HDF5 reload of
    * each shard as the host distributed tests do.
    */
-  inline HostMesh distributeFromRoot(const Context::MPI& ctx, Polytope::Type type, size_t n)
+  inline HostMesh distributeFromRoot(
+    const Context::MPI& ctx, Polytope::Type type, size_t n)
   {
     const auto& comm = ctx.getCommunicator();
     Geometry::Sharder<Context::MPI> sharder(ctx);
@@ -163,12 +164,12 @@ namespace Rodin::Tests::Unit
    * system, empty when the host system lays out its rows field after field.
    */
   inline std::vector<FieldRows> getFieldRows(::Vec v, const std::vector<PetscInt>& starts,
-                                             const std::vector<PetscInt>& hostStarts = {})
+    const std::vector<PetscInt>& hostStarts = {})
   {
     PetscInt begin = 0, end = 0;
     VecGetOwnershipRange(v, &begin, &end);
     if (starts.empty())
-      return { FieldRows{ begin, begin, end - begin } };
+      return {FieldRows{begin, begin, end - begin}};
     std::vector<FieldRows> res;
     PetscInt offset = 0;
     for (size_t k = 0; k < starts.size(); ++k)
@@ -176,7 +177,7 @@ namespace Rodin::Tests::Unit
       const PetscInt count = (k + 1 < starts.size() ? starts[k + 1] : end) - starts[k];
       if (!hostStarts.empty())
       {
-        res.push_back(FieldRows{ hostStarts[k], starts[k], count });
+        res.push_back(FieldRows{hostStarts[k], starts[k], count});
         continue;
       }
       PetscInt first = 0, total = 0;
@@ -184,7 +185,7 @@ namespace Rodin::Tests::Unit
       if (g_world->rank() == 0)
         first = 0;
       MPI_Allreduce(&count, &total, 1, MPIU_INT, MPI_SUM, *g_world);
-      res.push_back(FieldRows{ offset + first, starts[k], count });
+      res.push_back(FieldRows{offset + first, starts[k], count});
       offset += total;
     }
     return res;
@@ -220,7 +221,8 @@ namespace Rodin::Tests::Unit
    * @param host Reference vector. @param device Compared vector. @param
    * fields Owned rows of each field, see getFieldRows.
    */
-  inline void expectSameVector(::Vec host, ::Vec device, const std::vector<FieldRows>& fields)
+  inline void expectSameVector(
+    ::Vec host, ::Vec device, const std::vector<FieldRows>& fields)
   {
     PetscInt nh = 0, nd = 0;
     VecGetLocalSize(host, &nh);
@@ -264,8 +266,8 @@ namespace Rodin::Tests::Unit
    * square system, see getFieldRows, or empty when the operators share their
    * layout.
    */
-  inline void expectSameOperator(::Mat host, ::Mat device,
-                                 const std::vector<FieldRows>& fields = {})
+  inline void expectSameOperator(
+    ::Mat host, ::Mat device, const std::vector<FieldRows>& fields = {})
   {
     PetscBool kokkos = PETSC_FALSE;
     PetscObjectTypeCompareAny(reinterpret_cast<PetscObject>(device), &kokkos,
@@ -320,7 +322,8 @@ namespace Rodin::Tests::Unit
   {
     const auto& h = host.getLinearSystem();
     const auto& d = device.getLinearSystem();
-    const auto fields = getFieldRows(d.getVector(), d.getFieldStarts(), h.getFieldStarts());
+    const auto fields =
+      getFieldRows(d.getVector(), d.getFieldStarts(), h.getFieldStarts());
     expectSameOperator(h.getOperator(), d.getOperator(), fields);
     expectSameVector(h.getVector(), d.getVector(), fields);
   }

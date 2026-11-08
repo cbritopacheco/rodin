@@ -773,7 +773,8 @@ namespace Rodin::Variational
         // Scatter global solution back into each trial function solution
         m_us.iapply([&](size_t i, auto& u) {
           auto& gf = u.get().getSolution();
-          gf.setData(axb.getSolution(), static_cast<size_t>(getFieldOffset(i, gf.getData())));
+          gf.setData(
+            axb.getSolution(), static_cast<size_t>(getFieldOffset(i, gf.getData())));
         });
       }
 

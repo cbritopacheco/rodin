@@ -596,102 +596,96 @@ namespace Rodin::IO
 
     const std::string stemStr = m_stem.filename().string();
     const auto& patterns = gr.options.patterns ? *gr.options.patterns : m_patterns;
-      const auto& snap = gr.snapshots[s];
-      const std::string indexStr = padIndex(s, m_padding);
+    const auto& snap = gr.snapshots[s];
+    const std::string indexStr = padIndex(s, m_padding);
 
-      os << indent(3) << "<Grid Name=\"Step_" << s
-         << "\" GridType=\"Collection\" CollectionType=\"Spatial\">\n";
-      os << indent(4) << "<Time Value=\"" << snap.time << "\" />\n";
+    os << indent(3) << "<Grid Name=\"Step_" << s
+       << "\" GridType=\"Collection\" CollectionType=\"Spatial\">\n";
+    os << indent(4) << "<Time Value=\"" << snap.time << "\" />\n";
 
-      for (size_t r = 0; r < m_numRanks; ++r)
+    for (size_t r = 0; r < m_numRanks; ++r)
+    {
+      const std::string rStr = std::to_string(r);
+
+      const std::string meshH5 = (gr.options.meshPolicy == MeshPolicy::Static)
+        ? expandPattern(patterns.staticMesh, stemStr, gr.name, "", "", rStr)
+        : expandPattern(patterns.transientMesh, stemStr, gr.name, "", indexStr, rStr);
+
+      const auto& meta = snap.pieces[r];
+
+      os << indent(5) << "<Grid Name=\"" << escapeXML(makeGridPieceName(gridName, r))
+         << "\" GridType=\"Uniform\">\n";
+
+      os << indent(6) << "<Topology TopologyType=\"Mixed\" NumberOfElements=\""
+         << meta.cellCount << "\">\n";
+      os << indent(7)
+         << "<DataItem Format=\"HDF\" NumberType=\"UInt\" Precision=\"8\" "
+            "Dimensions=\""
+         << meta.topologySize << "\">" << escapeXML(meshH5) << ":"
+         << HDF5::Path::MeshXDMFTopology << "</DataItem>\n";
+      os << indent(6) << "</Topology>\n";
+
+      os << indent(6) << "<Geometry GeometryType=\""
+         << getGeometryType(meta.spaceDimension) << "\">\n";
+      os << indent(7)
+         << "<DataItem Format=\"HDF\" NumberType=\"Float\" Precision=\"8\" "
+            "Dimensions=\""
+         << meta.vertexCount << " " << meta.spaceDimension << "\">" << escapeXML(meshH5)
+         << ":" << HDF5::Path::MeshGeometryVertices << "</DataItem>\n";
+      os << indent(6) << "</Geometry>\n";
+
+      for (const auto& attr : snap.meshAttributes)
       {
-        const std::string rStr = std::to_string(r);
+        const char* centerStr = (attr.center == Center::Node) ? "Node" : "Cell";
+        std::ostringstream dimStr;
+        dimStr << ((attr.center == Center::Node) ? meta.vertexCount : meta.cellCount);
 
-        const std::string meshH5 = (gr.options.meshPolicy == MeshPolicy::Static)
-          ? expandPattern(patterns.staticMesh, stemStr, gr.name, "", "", rStr)
-          : expandPattern(
-              patterns.transientMesh, stemStr, gr.name, "", indexStr, rStr);
-
-        const auto& meta = snap.pieces[r];
-
-        os << indent(5) << "<Grid Name=\""
-           << escapeXML(makeGridPieceName(gridName, r))
-           << "\" GridType=\"Uniform\">\n";
-
-        os << indent(6) << "<Topology TopologyType=\"Mixed\" NumberOfElements=\""
-           << meta.cellCount << "\">\n";
+        os << indent(6) << "<Attribute Name=\"" << escapeXML(attr.name)
+           << "\" AttributeType=\"Scalar\" Center=\"" << centerStr << "\">\n";
         os << indent(7)
            << "<DataItem Format=\"HDF\" NumberType=\"UInt\" Precision=\"8\" "
               "Dimensions=\""
-           << meta.topologySize << "\">" << escapeXML(meshH5) << ":"
-           << HDF5::Path::MeshXDMFTopology << "</DataItem>\n";
-        os << indent(6) << "</Topology>\n";
+           << dimStr.str() << "\">" << escapeXML(meshH5) << ":"
+           << HDF5::attributePath(attr.topologicalDimension) << "</DataItem>\n";
+        os << indent(6) << "</Attribute>\n";
+      }
 
-        os << indent(6) << "<Geometry GeometryType=\""
-           << getGeometryType(meta.spaceDimension) << "\">\n";
+      for (const auto& attr : snap.attributes)
+      {
+        const auto attrH5 = attr.isStatic
+          ? expandPattern(patterns.staticAttribute, stemStr, gr.name, attr.name, "", rStr)
+          : expandPattern(
+              patterns.attribute, stemStr, gr.name, attr.name, indexStr, rStr);
+
+        const char* centerStr = (attr.center == Center::Node) ? "Node" : "Cell";
+        const char* attrType = attr.rows
+          ? (attr.rows == 3 && attr.columns == 3 ? "Tensor" : "Matrix")
+          : ((attr.dimension == 1) ? "Scalar" : "Vector");
+
+        std::ostringstream dimStr;
+        const std::uint64_t count =
+          (attr.center == Center::Node) ? meta.vertexCount : meta.cellCount;
+        if (attr.rows)
+          dimStr << count << " " << attr.rows << " " << attr.columns;
+        else if (attr.dimension == 1)
+          dimStr << count;
+        else
+          dimStr << count << " " << attr.dimension;
+
+        os << indent(6) << "<Attribute Name=\"" << escapeXML(attr.name)
+           << "\" AttributeType=\"" << attrType << "\" Center=\"" << centerStr << "\">\n";
         os << indent(7)
            << "<DataItem Format=\"HDF\" NumberType=\"Float\" Precision=\"8\" "
               "Dimensions=\""
-           << meta.vertexCount << " " << meta.spaceDimension << "\">"
-           << escapeXML(meshH5) << ":" << HDF5::Path::MeshGeometryVertices
-           << "</DataItem>\n";
-        os << indent(6) << "</Geometry>\n";
-
-        for (const auto& attr : snap.meshAttributes)
-        {
-          const char* centerStr = (attr.center == Center::Node) ? "Node" : "Cell";
-          std::ostringstream dimStr;
-          dimStr << ((attr.center == Center::Node) ? meta.vertexCount
-                                                   : meta.cellCount);
-
-          os << indent(6) << "<Attribute Name=\"" << escapeXML(attr.name)
-             << "\" AttributeType=\"Scalar\" Center=\"" << centerStr << "\">\n";
-          os << indent(7)
-             << "<DataItem Format=\"HDF\" NumberType=\"UInt\" Precision=\"8\" "
-                "Dimensions=\""
-             << dimStr.str() << "\">" << escapeXML(meshH5) << ":"
-             << HDF5::attributePath(attr.topologicalDimension) << "</DataItem>\n";
-          os << indent(6) << "</Attribute>\n";
-        }
-
-        for (const auto& attr : snap.attributes)
-        {
-          const auto attrH5 = attr.isStatic
-            ? expandPattern(
-                patterns.staticAttribute, stemStr, gr.name, attr.name, "", rStr)
-            : expandPattern(
-                patterns.attribute, stemStr, gr.name, attr.name, indexStr, rStr);
-
-          const char* centerStr = (attr.center == Center::Node) ? "Node" : "Cell";
-          const char* attrType = attr.rows
-            ? (attr.rows == 3 && attr.columns == 3 ? "Tensor" : "Matrix")
-            : ((attr.dimension == 1) ? "Scalar" : "Vector");
-
-          std::ostringstream dimStr;
-          const std::uint64_t count =
-            (attr.center == Center::Node) ? meta.vertexCount : meta.cellCount;
-          if (attr.rows)
-            dimStr << count << " " << attr.rows << " " << attr.columns;
-          else if (attr.dimension == 1)
-            dimStr << count;
-          else
-            dimStr << count << " " << attr.dimension;
-
-          os << indent(6) << "<Attribute Name=\"" << escapeXML(attr.name)
-             << "\" AttributeType=\"" << attrType << "\" Center=\"" << centerStr
-             << "\">\n";
-          os << indent(7)
-             << "<DataItem Format=\"HDF\" NumberType=\"Float\" Precision=\"8\" "
-                "Dimensions=\""
-             << dimStr.str() << "\">" << escapeXML(attrH5) << ":"
-             << HDF5::Path::GridFunctionValuesData << "</DataItem>\n";
-          os << indent(6) << "</Attribute>\n";
-        }
-
-        os << indent(5) << "</Grid>\n";
+           << dimStr.str() << "\">" << escapeXML(attrH5) << ":"
+           << HDF5::Path::GridFunctionValuesData << "</DataItem>\n";
+        os << indent(6) << "</Attribute>\n";
       }
 
-      os << indent(3) << "</Grid>\n";
+      os << indent(5) << "</Grid>\n";
+    }
+
+    os << indent(3) << "</Grid>\n";
   }
 
   void XDMF::flush()
@@ -735,8 +729,7 @@ namespace Rodin::IO
     headerStream << indent(1) << "<Domain>\n";
     const std::string header = headerStream.str();
 
-    const auto open = [](const GridRecord& gr)
-    {
+    const auto open = [](const GridRecord& gr) {
       const std::string gridName = gr.name.empty() ? "mesh" : gr.name;
       std::ostringstream os;
       os << indent(2) << "<Grid Name=\"" << escapeXML(gridName)
@@ -746,10 +739,9 @@ namespace Rodin::IO
     const std::string close = indent(2) + "</Grid>\n";
 
     boost::system::error_code ec;
-    const bool append = !m_flushed.rewrite
-      && m_flushed.path == xdmfPath
-      && m_flushed.grids.size() <= m_grids.size()
-      && boost::filesystem::file_size(xdmfPath, ec) == m_flushed.size && !ec;
+    const bool append = !m_flushed.rewrite && m_flushed.path == xdmfPath &&
+      m_flushed.grids.size() <= m_grids.size() &&
+      boost::filesystem::file_size(xdmfPath, ec) == m_flushed.size && !ec;
 
     // First grid whose text changed since the last flush, and the offset
     // in the document of the end of its text then.
@@ -758,8 +750,8 @@ namespace Rodin::IO
     if (append)
     {
       offset = header.size();
-      while (first < m_flushed.grids.size()
-          && m_grids[first].xml.size() == m_flushed.grids[first])
+      while (first < m_flushed.grids.size() &&
+        m_grids[first].xml.size() == m_flushed.grids[first])
       {
         offset += open(m_grids[first]).size() + m_grids[first].xml.size() + close.size();
         ++first;

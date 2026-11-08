@@ -874,8 +874,8 @@ namespace Rodin::Kokkos::Variational::Internal
         using Type = ::Rodin::Geometry::Polytope::Type;
         if (mesh.getPolytopeCount(Type::Pyramid) > 0)
         {
-          Alert::Exception()
-            << "Kokkos H1 spaces do not support pyramids." << Alert::Raise;
+          Alert::Exception() << "Kokkos H1 spaces do not support pyramids."
+                             << Alert::Raise;
         }
         // The incidences missing on the device only number the host
         // closure, the kernels never bind the polytopes they create.

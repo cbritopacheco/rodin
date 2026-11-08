@@ -92,7 +92,7 @@ namespace Rodin::Tests::Unit
     expectSameLinearForm(hv, Integral(hf, hv), dv, Integral(df, dv));
   }
 
-/// @brief Subtracted and restricted integrators match the host.
+  /// @brief Subtracted and restricted integrators match the host.
   void checkCombinedLinearForm(const HostMesh& source)
   {
     const DeviceMesh mesh(TestContext{}, source);

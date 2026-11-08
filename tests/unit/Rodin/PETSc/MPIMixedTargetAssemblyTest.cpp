@@ -158,7 +158,7 @@ namespace
   {
     size_t first = 0, last = 0;
     fes.getOwnershipRange(first, last);
-    return { offset, PetscInt(first), PetscInt(last - first) };
+    return {offset, PetscInt(first), PetscInt(last - first)};
   }
 
   /// @brief Indices in the system of the degrees of freedom owned by this process.
@@ -256,7 +256,7 @@ namespace
     // The owned rows of a process hold its degrees of freedom of each field
     // in turn.
     const std::vector<PETSc::Assembly::FieldLayout::Field> fields = {
-      field(0, first), field(PetscInt(firstSize), second) };
+      field(0, first), field(PetscInt(firstSize), second)};
     const PETSc::Assembly::FieldLayout rowOf(MPI_COMM_WORLD, fields);
     const auto& splits = system.getFieldSplits().getSplits();
     ASSERT_EQ(splits.size(), 2u);
@@ -370,7 +370,8 @@ TEST(PETSc_MPIMixedTargetAssembly, UnequalVectorComponents)
     MPI_SUCCESS);
   // The rows and columns of a system of several fields are those of the
   // owned degrees of freedom of a process, field after field.
-  const auto check = [&](::Mat matrix, const std::vector<PETSc::Assembly::FieldLayout::Field>& rows,
+  const auto check = [&](::Mat matrix,
+                       const std::vector<PETSc::Assembly::FieldLayout::Field>& rows,
                        const std::vector<PETSc::Assembly::FieldLayout::Field>& columns) {
     const PETSc::Assembly::FieldLayout rowOf(MPI_COMM_WORLD, rows);
     const PETSc::Assembly::FieldLayout columnOf(MPI_COMM_WORLD, columns);
@@ -384,17 +385,15 @@ TEST(PETSc_MPIMixedTargetAssembly, UnequalVectorComponents)
         const PetscInt column = columnOf(j);
         PetscScalar actual;
         ASSERT_EQ(MatGetValues(matrix, 1, &row, 1, &column, &actual), PETSC_SUCCESS);
-        const PetscScalar value = i < expected.rows() && j < expected.cols()
-          ? expected(i, j)
-          : PetscScalar(0);
-        EXPECT_LT(PetscAbsScalar(actual - value), 1e-12)
-          << "entry=" << i << ',' << j;
+        const PetscScalar value =
+          i < expected.rows() && j < expected.cols() ? expected(i, j) : PetscScalar(0);
+        EXPECT_LT(PetscAbsScalar(actual - value), 1e-12) << "entry=" << i << ',' << j;
       }
     }
   };
   // A single field is laid out as its space.
   const auto single = [](const auto& fes) {
-    return std::vector<PETSc::Assembly::FieldLayout::Field>{ field(0, fes) };
+    return std::vector<PETSc::Assembly::FieldLayout::Field>{field(0, fes)};
   };
   BilinearForm form(u, v);
   form = Integral(Component(u, 0), Component(v, 0));
@@ -408,6 +407,6 @@ TEST(PETSc_MPIMixedTargetAssembly, UnequalVectorComponents)
   mixed = Integral(Component(u, 0), Component(v, 0));
   mixed.assemble();
   check(mixed.getLinearSystem().getOperator(),
-    { field(0, test), field(PetscInt(test.getSize()), auxiliary) },
-    { field(0, trial), field(PetscInt(trial.getSize()), auxiliary) });
+    {field(0, test), field(PetscInt(test.getSize()), auxiliary)},
+    {field(0, trial), field(PetscInt(trial.getSize()), auxiliary)});
 }

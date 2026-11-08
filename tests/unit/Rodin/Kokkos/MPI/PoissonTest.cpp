@@ -152,8 +152,9 @@ namespace Rodin::Tests::Unit
     // factorization of PETSc requires.
     const Real eps = 1e-2;
     RealFunction hf([](const Geometry::Point& p) { return 1 + p.x() * p.y(); });
-    RealFunction df(
-      KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real { return 1 + p.x() * p.y(); });
+    RealFunction df(KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real {
+      return 1 + p.x() * p.y();
+    });
 
     Problem hn(hu, hl, hv, hm);
     hn = Integral(Grad(hu), Grad(hv)) + Integral(hl, hv) + Integral(hu, hm) -
@@ -356,12 +357,10 @@ namespace Rodin::Tests::Unit
     const BilinearFormBase<::Mat>& dpenalty = de;
     Problem hs(hw, hu, hz, hv);
     hs = Body(Integral(Jacobian(hw), Jacobian(hz))) - Integral(hu, Div(hz)) +
-      Integral(Div(hw), hv) + hpenalty - hload +
-      DirichletBC(hw, VectorFunction{0, 0});
+      Integral(Div(hw), hv) + hpenalty - hload + DirichletBC(hw, VectorFunction{0, 0});
     Problem ds(dw, du, dz, dv);
     ds = Body(Integral(Jacobian(dw), Jacobian(dz))) - Integral(du, Div(dz)) +
-      Integral(Div(dw), dv) + dpenalty - dload +
-      DirichletBC(dw, VectorFunction{0, 0});
+      Integral(Div(dw), dv) + dpenalty - dload + DirichletBC(dw, VectorFunction{0, 0});
     solveDirect(hs);
     solveDirect(ds);
     expectSameSystem(hs, ds);

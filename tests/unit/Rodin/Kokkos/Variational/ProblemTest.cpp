@@ -139,7 +139,7 @@ namespace Rodin::Tests::Unit
     expectSameSystem(hp, dp);
   }
 
-/// @brief Mixed velocity and pressure problems match the host.
+  /// @brief Mixed velocity and pressure problems match the host.
   void checkMixedProblem(const HostMesh& source)
   {
     ASSERT_EQ(source.getSpaceDimension(), 2);
@@ -227,7 +227,7 @@ namespace Rodin::Tests::Unit
     expectSameSystem(hp, dp);
   }
 
-/// @brief Boundary conditions without face to cell incidence raise.
+  /// @brief Boundary conditions without face to cell incidence raise.
   void checkMissingIncidenceRaises()
   {
     auto source = makeMixedMesh();

@@ -462,8 +462,7 @@ namespace Rodin::Geometry
       {
         requireFinite(factor);
         const auto coordinates = m_coordinates;
-        ::Kokkos::parallel_for(
-          "Rodin mesh scale", policy(coordinates.extent(0)),
+        ::Kokkos::parallel_for("Rodin mesh scale", policy(coordinates.extent(0)),
           ScaleCoordinates{coordinates, factor});
         flush();
         return *this;
@@ -520,8 +519,7 @@ namespace Rodin::Geometry
           value(s) = point(s);
         const auto coordinates = m_coordinates;
         const size_t sdim = m_sdim;
-        ::Kokkos::parallel_for(
-          "Rodin vertex update", policy(sdim),
+        ::Kokkos::parallel_for("Rodin vertex update", policy(sdim),
           SetVertexCoordinates{coordinates, vertex, sdim, value});
         flush();
         return *this;
@@ -608,8 +606,7 @@ namespace Rodin::Geometry
           ::Kokkos::view_alloc(execution, std::string("mesh controls")),
           (total - oldCount + count) * m_sdim);
         const auto previous = m_controlOffsets;
-        ::Kokkos::parallel_for(
-          "Rodin control offsets", policy(offsets.extent(0)),
+        ::Kokkos::parallel_for("Rodin control offsets", policy(offsets.extent(0)),
           ShiftControlOffsets{offsets, previous, index, oldCount, count});
         ::Kokkos::deep_copy(execution,
           ::Kokkos::subview(controls, std::make_pair(Index(0), first * m_sdim)),
@@ -643,7 +640,8 @@ namespace Rodin::Geometry
             size_t dimension, Index index) -> std::unique_ptr<PolytopeTransformation> {
             const Index entity = m_connectivity.getOffset(dimension) + index;
             const auto& execution = m_context.getExecutionSpace();
-            const auto kind = Rodin::Kokkos::Internal::read(execution, m_geometryKinds, entity);
+            const auto kind =
+              Rodin::Kokkos::Internal::read(execution, m_geometryKinds, entity);
             if (kind == GeometryKind::Identity)
               return std::make_unique<IdentityTransformation>(dimension);
             const auto& vertices = m_connectivity.getPolytope(dimension, index);
@@ -754,16 +752,14 @@ namespace Rodin::Geometry
               map = std::make_unique<IdentityTransformation>(d);
             else if (kinds(entity) == GeometryKind::VertexP1)
             {
-              map = makeTransformation(d, i, vertices.size(), [&](Index a, size_t s) {
-                return coordinates(vertices[a] * sdim + s);
-              });
+              map = makeTransformation(d, i, vertices.size(),
+                [&](Index a, size_t s) { return coordinates(vertices[a] * sdim + s); });
             }
             else
             {
               const Index first = controlOffsets(entity) * sdim;
-              map = makeTransformation(d, i, vertices.size(), [&](Index a, size_t s) {
-                return controls(first + a * sdim + s);
-              });
+              map = makeTransformation(d, i, vertices.size(),
+                [&](Index a, size_t s) { return controls(first + a * sdim + s); });
             }
             output.setPolytopeTransformation({d, i}, map.release());
           }
@@ -1050,6 +1046,7 @@ namespace Rodin::Geometry
       // not part of the mesh API.
       /// @brief Device-supported geometric transformation representation.
       using GeometryKind = Rodin::Kokkos::Geometry::GeometryKind;
+
       /// @brief One-dimensional resident array in the context memory space.
       /// @tparam T Entry type.
       template <class T>
