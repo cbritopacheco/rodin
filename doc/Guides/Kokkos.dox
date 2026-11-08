@@ -1,6 +1,6 @@
 /**
-  @page guides-kokkos Kokkos local mesh
-  @brief MeshBase specialization backed by resident Kokkos arrays.
+  @page guides-kokkos GPU assembly and solvers with Kokkos
+  @brief Resident meshes, device assembly and device solvers on CUDA, HIP and SYCL.
 
   @tableofcontents
   @m_footernavigation
@@ -12,8 +12,9 @@
   for `Context::Kokkos<Context::Local, Backend>`. The mesh derives directly
   from `Geometry::MeshBase`; its topology, coordinates, optional attributes,
   and geometric maps live in the selected Kokkos memory space. The CUDA tag
-  selects `::Kokkos::Cuda` and its device memory, and the HIP tag selects
-  `::Kokkos::HIP` and its device memory. A native Kokkos execution
+  selects `::Kokkos::Cuda` and its device memory, the HIP tag selects
+  `::Kokkos::HIP` and its device memory, and the SYCL tag selects
+  `::Kokkos::SYCL` and its device USM memory. A native Kokkos execution
   space, such as `::Kokkos::Serial`, selects that execution space explicitly.
 
   There is no persistent CPU mesh and no separate publication step. File
@@ -187,13 +188,22 @@
   transformations are rejected without silently approximating their geometry.
 
   Assembly region traversal is available through KokkosIteration. On this
-  mesh, `P1`, `H1<2>` and `P0g` spaces, grid functions, variational
+  mesh, `P1`, `H1<K>` and `P0g` spaces, grid functions, variational
   expressions, integrals over cells, boundaries, interfaces and faces,
-  `LinearElasticityIntegral`, `Solid::InternalVirtualWork` with
-  `Solid::NeoHookean`, projections, Dirichlet, periodic and identification
-  constraints, and problems are assembled by device kernels into Eigen or
-  PETSc systems. Rodin solvers, including `Solver::NewtonSolver`, act on the
-  assembled systems. Other constitutive laws are not provided.
+  global integrators, `LinearElasticityIntegral`,
+  `Solid::InternalVirtualWork` with the Neo-Hookean, Saint Venant-Kirchhoff,
+  Mooney-Rivlin and Yeoh laws, projections, Dirichlet, periodic and
+  identification constraints, and problems are assembled by device kernels
+  into Eigen or PETSc systems. Rodin solvers, including
+  `Solver::NewtonSolver`, act on the assembled systems.
+
+  The kernels add the contributions of the cells in index order. A mesh
+  whose cell and vertex numberings are unrelated, as produced by most
+  meshers, scatters these contributions across the matrix; `Mesh::renumber()`
+  returns a copy ordered along space, which is built once before the spaces.
+  On the atrium mesh of the examples, renumbering makes the distributed
+  Oseen assembly 1.3 to 2 times faster and the bilinear form alone 3 to 4
+  times faster, depending on the GPU.
 
   The matrix can also stay on the device. A problem named with a linear
   system whose operator is a `Rodin::Kokkos::SparseMatrix` receives the
@@ -296,9 +306,18 @@
   systems are not distributed. Link the
   `Rodin::KokkosMPI` target, available when Rodin is configured with both
   `RODIN_USE_MPI` and `RODIN_USE_PETSC`. PETSc must be built with Kokkos;
-  with a CUDA-aware MPI, such as Open MPI configured `--with-cuda`, device
-  buffers are exchanged directly, otherwise run with
-  `-use_gpu_aware_mpi 0`.
+  with a CUDA-aware or ROCm-aware MPI, such as Open MPI configured
+  `--with-cuda` or `--with-rocm`, device buffers are exchanged directly,
+  otherwise run with `-use_gpu_aware_mpi 0`. Open MPI does not know SYCL
+  memory, so SYCL runs always take that option.
+
+  `Geometry::BalancedCompactPartitioner` splits the cells by recursive
+  bisection into regions grown through the adjacency, whose sizes differ by
+  at most one cell; compact parts keep the ghost layer of each process
+  small. `KokkosMPIOseenScaling` (`examples/Kokkos/MPI`) partitions the
+  atrium mesh with it. The scaling examples report the first repetition in
+  its own `-log_view` stage, since it loads the device kernels and builds
+  the sparsity pattern and the preconditioner.
 
   @section guides-kokkos-solvers Choosing a Solver
 
@@ -312,7 +331,11 @@
   | PETSc system on a Kokkos mesh | `MATAIJKOKKOS` or `MATMPIAIJKOKKOS` | PETSc KSP and SNES | device for the Krylov iteration and the PETSc preconditioners implemented on Kokkos matrices, one or several processes |
 
   A distributed device system is solved by PETSc only; the other device
-  solvers act on one process.
+  solvers act on one process. `CuDSS` requires an NVIDIA GPU and
+  `RocSolverRF` an AMD GPU. On an Intel GPU no direct solver runs on the
+  device: a saddle point system on one GPU is either solved by PETSc with
+  a Schur field split or assembled into the default host matrix and
+  factorized on the host.
 
   | Problem | One GPU | Several GPUs |
   | --- | --- | --- |
@@ -475,6 +498,75 @@
   `boost::mpi::environment env(argc, argv, boost::mpi::threading::multiple)`,
   or sets `PETSC_MPI_THREAD_REQUIRED` before `PetscInitialize`.
 
+  @section guides-kokkos-build-sycl SYCL Build
+
+  Intel GPUs are reached through the SYCL backend of Kokkos and the `icpx`
+  compiler of oneAPI; Rodin is validated with oneAPI 2026.2 on an Arc Pro
+  B70 (Battlemage, Xe2). The kernels are compiled ahead of time for one
+  architecture. Kokkos 5.2.2 and PETSc 3.26 know the data center GPUs
+  (`INTEL_PVC`, `--with-sycl-arch=pvc`) but not Battlemage: the patches
+  `kokkos-sycl-bmg.patch` and `petsc-sycl-bmg.patch` of `dev/docker/kokkos`
+  add `INTEL_BMG` to Kokkos and `bmg` to PETSc.
+
+  @code{.bash}
+  cmake -S /path/to/kokkos -B /path/to/kokkos-build \
+    -DCMAKE_INSTALL_PREFIX=/path/to/kokkos-install \
+    -DCMAKE_CXX_COMPILER=icpx -DCMAKE_CXX_EXTENSIONS=OFF \
+    -DCMAKE_CXX_STANDARD=20 -DBUILD_SHARED_LIBS=ON \
+    -DKokkos_ENABLE_SERIAL=ON -DKokkos_ENABLE_SYCL=ON \
+    -DKokkos_ARCH_INTEL_BMG=ON
+  cmake --build /path/to/kokkos-build --parallel
+  cmake --install /path/to/kokkos-build
+
+  cmake -S . -B build-kokkos-sycl -G Ninja \
+    -DCMAKE_CXX_COMPILER=icpx \
+    -DCMAKE_PREFIX_PATH=/path/to/kokkos-install \
+    -DRODIN_USE_KOKKOS=ON \
+    -DRODIN_BUILD_UNIT_TESTS=ON
+  @endcode
+
+  Under `icpx`, Rodin compiles OpenMP with `-fopenmp=libomp` and the
+  floating point model `precise`: the OpenMP lowering of `-fiopenmp`
+  miscompiles the host assembly from `-O1` on, and the default `fast` model
+  of `icpx` assumes finite values and reassociates sums. For `INTEL_BMG`, the
+  Kokkos module passes `-ze-intel-enable-auto-large-GRF-mode` to the device
+  compiler, so that kernels which would spill their 128 registers take 256.
+  Device code is compiled ahead of time by each compile command, so a
+  backend option must reach the compile line, not the link line.
+
+  The GPU runtime and its compiler, IGC, come from the releases of Intel
+  rather than from the distribution. Rodin is validated with the compute
+  runtime 26.31, IGC 2.40 and the Level Zero loader 1.32. IGC 2.41 and 2.42
+  crash on a kernel of oneDPL that hypre compiles at run time.
+
+  PETSc takes SYCL, oneMKL for BLAS and LAPACK, and Kokkos-Kernels through
+  the 32-bit integer interface of oneMKL, which `MKLConfig` of Kokkos-Kernels
+  must take as well:
+  @code{.bash}
+  ./configure --with-sycl=1 --with-syclc=icpx --with-sycl-arch=bmg \
+    --with-cxx-dialect=20 --with-blaslapack-dir=$MKLROOT \
+    --with-kokkos-dir=/path/to/kokkos-install \
+    --download-kokkos-kernels=/path/to/kokkos-kernels.tar.gz \
+    --download-kokkos-kernels-cmake-arguments=-DMKL_INTERFACE=lp64 \
+    --download-hypre
+  @endcode
+  The Kokkos-Kernels sources are patched with
+  `kokkos-kernels-sycl-nrm2.patch`, so that the Euclidean norm of a device
+  vector does not call oneMKL (see @ref guides-kokkos-limitations).
+
+  Three settings of the environment apply to every run. Open MPI does not
+  know SYCL memory, so PETSc exchanges host buffers
+  (`PETSC_OPTIONS=-use_gpu_aware_mpi 0`). The Level Zero component of hwloc
+  crashes `mpirun` (`HWLOC_COMPONENTS=-levelzero`). PETSc also enumerates the
+  OpenCL devices, on which Kokkos refuses to run
+  (`ONEAPI_DEVICE_SELECTOR=level_zero:gpu`).
+
+  `dev/docker/kokkos/Dockerfile.sycl` builds this whole stack, Open MPI and
+  hypre included; `dev/docker/kokkos/README.md` describes the three images,
+  CUDA, HIP and SYCL, and how `ci-test.sh` runs the tests in them.
+
+  @section guides-kokkos-consumers Installed Consumers
+
   Installed consumers enable the same compiler setup and link the module:
 
   @code{.cmake}
@@ -483,9 +575,53 @@
   target_link_libraries(mesh_device PRIVATE Rodin::Kokkos)
   @endcode
 
+  @section guides-kokkos-limitations Known Limitations and Workarounds
+
+  The following defects lie in the libraries and drivers below Rodin. Each
+  entry gives the affected configuration, the observed effect and the
+  workaround that Rodin or its build applies.
+
+  - <b>Euclidean norm of oneMKL on Intel GPUs.</b> The `nrm2` of oneMKL
+    2026.0 to 2026.2 on an Arc Pro B70 reads past the end of a vector of
+    more than about 65536 entries, up to the next multiple of 2048, when
+    the length is not such a multiple. Kokkos-Kernels calls it for
+    `KokkosBlas::nrm2` on SYCL, and PETSc for `VecNorm` of its Kokkos
+    vectors. The work vectors of a PETSc Krylov method share one
+    allocation, so the norm adds the entries of the next vector: CG and
+    BiCGStab compute a wrong residual norm and do not converge, and a
+    field split reads uninitialized memory. The patch
+    `kokkos-kernels-sycl-nrm2.patch` makes Kokkos-Kernels use its own
+    kernel on SYCL.
+  - <b>Intel graphics compiler.</b> IGC 2.40 and 2.41 drop the stores of
+    some lanes in irreducible loops, and double atomic additions in team
+    scratch memory hang about one launch in two on the Arc Pro B70. The
+    device kernels of Rodin avoid both constructions. IGC 2.41 and 2.42
+    crash on a kernel of oneDPL compiled at run time by hypre, so IGC 2.40
+    is required.
+  - <b>OpenMP under icpx.</b> `-fiopenmp` miscompiles the host assembly from
+    `-O1` on; Rodin compiles OpenMP with `-fopenmp=libomp` under `icpx`.
+  - <b>Open MPI and SYCL memory.</b> Open MPI does not exchange SYCL device
+    buffers, so distributed SYCL runs use `-use_gpu_aware_mpi 0`.
+  - <b>GAMG on V100.</b> The aggressive MIS-k coarsening of PETSc GAMG
+    builds corrupted matrices in the device products `MatPtAP` and
+    `MatTranspose` on V100, and P1 triangles at 16.8 million degrees of
+    freedom crash in `KokkosSparse::spgemm_symbolic`. The workaround is
+    `-pc_gamg_aggressive_coarsening 0`.
+  - <b>Reproducibility on CUDA.</b> The iteration count of a distributed
+    Krylov solve varies between runs on CUDA, while the assembled matrix
+    and right-hand side are bitwise identical. The sparse product of the
+    off-diagonal block calls `cusparseSpMV` with a nonzero beta, whose
+    default algorithm changes the last bit of some entries between calls.
+    Iteration counts on CUDA are therefore compared as ranges.
+  - <b>ROCm runtime.</b> On ROCm 10, Kokkos-Kernels 5.2.2 names a removed
+    rocSPARSE index type, hypre assumes 64 lanes per wavefront, and the
+    zlib of ROCm can abort `MPI_Init`; the
+    @ref guides-kokkos-build-hip "HIP build" section gives the workaround of
+    each.
+
   @section guides-kokkos-validation Validation
 
-  Tests select CUDA or HIP when Kokkos has that backend enabled. Otherwise they explicitly
+  Tests select CUDA, HIP or SYCL when Kokkos has that backend enabled. Otherwise they explicitly
   select the default host execution space and exercise the same specialization.
   They compare all reference geometries and embeddings with LocalMesh,
   topology and attributes, resident updates, copy independence, lifetime,
@@ -497,6 +633,6 @@
   nonmanifold adjacency, including explicit incidence requirements and empty
   selections. A Threads
   build can exercise the same kernels concurrently on the host. Passing host tests does not
-  certify CUDA or HIP compilation, device execution or GPU performance; those
+  certify CUDA, HIP or SYCL compilation, device execution or GPU performance; those
   require the device toolchain and compatible hardware.
 */

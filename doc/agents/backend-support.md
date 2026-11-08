@@ -44,35 +44,6 @@ Kokkos built with CUDA, `Context::HIP` Kokkos built with HIP and
 implicit host fallback. Native execution spaces can exercise the same
 specialization on the host without establishing device correctness.
 
-With icpx (oneAPI 2026.2), the OpenMP lowering of `-fiopenmp` miscompiles
-the host assembly from -O1 on: in an `omp for`, a test on an `Optional`
-under a loop-invariant branch skips every iteration, so `.over(attribute)`
-assembles to zero. The top CMakeLists.txt and RodinConfig.cmake compile
-OpenMP with `-fopenmp=libomp` (the front end of Clang) and keep libiomp5 at
-link; the default `-fp-model=fast` of icpx is overridden by
-`-fp-model=precise`.
-
-On Intel GPUs, IGC 2.40 and 2.41 drop the stores of some lanes in
-irreducible loops, which LLVM builds when it threads a branch on a value
-of the thread into a loop. A test on the geometry inside a loop over the
-dimension did it in the device projections: keep such tests out of device
-loops, as `Geometry::getReferenceVertexCoordinate` does with one mask per
-geometry, and compare a new device kernel with the host on a mixed mesh.
-Double atomic additions in team scratch memory also hang about one launch
-in two on the Arc Pro B70: sum each entry in the registers of one thread
-instead, as the team kernels of `InternalVirtualWork.h` do for the
-displacement gradients, and run a new team kernel several times.
-
-IGC gives a thread 128 registers by default, and the bilinear integration
-kernels spill hundreds of them at SIMD16 (the warnings of ocloc in the
-build log say how many). `src/Rodin/Kokkos/CMakeLists.txt` passes
-`-ze-intel-enable-auto-large-GRF-mode` to ocloc for INTEL_BMG, so the kernels
-that would spill get 256 registers; this took the Oseen atrium assembly from
-36.0 to 16.5 ms on the renumbered mesh (104 to 72 ms raw). Device code is compiled ahead of time
-by each compile command, not at link, so a backend option must reach the
-compile line. On the raw mesh the COO merge stays bound by the locality of
-its gather (53 ms against 3.3 ms renumbered): renumber the mesh.
-
 The mesh derives directly from MeshBase and retains no LocalMesh. Temporary
 host builders/loaders create independently owned Kokkos arrays. Reference-
 returning host queries materialize compatibility entries; those are never
@@ -98,7 +69,7 @@ indexed assembly region contract and keeps device handles private. Boundary
 and Interface require explicit face-to-cell incidence; their counts include
 all face candidates, and filtering uses exactly one or more than one incident
 cell respectively. Launching kernels remains the assembly backend's concern.
-Device kernels assemble variational problems on this mesh (P1, H1<2> and P0g
+Device kernels assemble variational problems on this mesh (P1, H1<K> and P0g
 spaces, integrals, constraints, linear elasticity and the Neo-Hookean, Saint
 Venant-Kirchhoff, Mooney-Rivlin and Yeoh hyperelastic laws) into Eigen or PETSc systems solved by Rodin solvers. A
 Problem named with a `Math::LinearSystem<Kokkos::SparseMatrix<Real, Backend>,
@@ -224,6 +195,57 @@ as HIP too, where `constexpr` functions calling host code and Eigen
   SLATE requires `MPI_THREAD_MULTIPLE` from the application.
 - A Kokkos change is HIP-verified only after building and running the Kokkos
   tests with a HIP-enabled Kokkos installation.
+
+In SYCL builds, `icpx` of oneAPI 2026.2 compiles Rodin and the device code
+of Intel GPUs ahead of time. Its toolchain and the GPU runtime carry defects
+that CUDA and HIP do not:
+
+- The OpenMP lowering of `-fiopenmp` miscompiles the host assembly from -O1
+  on: in an `omp for`, a test on an `Optional` under a loop-invariant branch
+  skips every iteration, so `.over(attribute)` assembles to zero. The top
+  CMakeLists.txt and RodinConfig.cmake compile OpenMP with `-fopenmp=libomp`
+  (the front end of Clang) and keep libiomp5 at link; the default
+  `-fp-model=fast` of icpx is overridden by `-fp-model=precise`.
+- IGC 2.40 and 2.41 drop the stores of some lanes in irreducible loops, which
+  LLVM builds when it threads a branch on a value of the thread into a loop.
+  A test on the geometry inside a loop over the dimension did it in the
+  device projections: keep such tests out of device loops, as
+  `Geometry::getReferenceVertexCoordinate` does with one mask per geometry,
+  and compare a new device kernel with the host on a mixed mesh.
+- Double atomic additions in team scratch memory hang about one launch in two
+  on the Arc Pro B70: sum each entry in the registers of one thread instead,
+  as the team kernels of `InternalVirtualWork.h` do for the displacement
+  gradients, and run a new team kernel several times.
+- IGC gives a thread 128 registers by default, and the bilinear integration
+  kernels spill hundreds of them at SIMD16 (the warnings of ocloc in the
+  build log say how many). `src/Rodin/Kokkos/CMakeLists.txt` passes
+  `-ze-intel-enable-auto-large-GRF-mode` to ocloc for INTEL_BMG, so the
+  kernels that would spill get 256 registers; this took the Oseen atrium
+  assembly from 36.0 to 16.5 ms on the renumbered mesh (104 to 72 ms raw).
+  Device code is compiled ahead of time by each compile command, not at
+  link, so a backend option must reach the compile line. On the raw mesh the
+  COO merge stays bound by the locality of its gather (53 ms against 3.3 ms
+  renumbered): renumber the mesh.
+- IGC 2.41 and 2.42 crash on a kernel of oneDPL that hypre compiles just in
+  time, so the image stays on IGC 2.40.
+- The `nrm2` of oneMKL 2026.0 to 2026.2 on the GPU reads past the end of a
+  vector longer than about 65536 entries, up to the next multiple of 2048.
+  Kokkos-Kernels routes `KokkosBlas::nrm2` there and PETSc `VecNorm` of its
+  Kokkos vectors; since `VecDuplicateVecs` puts the Krylov work vectors in
+  one allocation, CG and BiCGStab norms take in the next vector and a field
+  split reads garbage. The SYCL image patches Kokkos-Kernels
+  (`kokkos-kernels-sycl-nrm2.patch`) to keep its native kernel on SYCL; a
+  PETSc built against an unpatched Kokkos-Kernels with oneMKL fails the
+  same way.
+- Open MPI does not know SYCL memory, so PETSc runs with
+  `-use_gpu_aware_mpi 0`; `HWLOC_COMPONENTS=-levelzero` keeps mpirun from
+  crashing and `ONEAPI_DEVICE_SELECTOR=level_zero:gpu` keeps PETSc off the
+  OpenCL devices, on which Kokkos refuses to run.
+- No direct solver runs on an Intel GPU: CuDSS needs NVIDIA and RocSolverRF
+  AMD. Saddle point systems go to PETSc with a Schur field split or to a
+  host factorization.
+- A Kokkos change is SYCL-verified only after building and running the
+  Kokkos tests with a SYCL-enabled Kokkos installation.
 
 ## Common extension decisions
 
