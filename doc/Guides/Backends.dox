@@ -73,23 +73,27 @@
   be used with local meshes or MPI meshes. For large distributed problems,
   PETSc is the standard solver backend.
 
-  @section guides-backends-kokkos Kokkos local mesh
+  @section guides-backends-kokkos Kokkos device meshes
 
   The optional `Rodin::Kokkos` target provides
-  `Context::Kokkos<Context::Local, Backend>` and resident mesh/connectivity
-  specializations. `Context::CUDA` selects CUDA execution and device memory.
-  The mesh implements MeshBase directly; its owned Kokkos arrays support
-  device traversal, geometry evaluation, updates, measure reductions, and
-  incidence computation including discovery of missing entities.
-  Host iterators and reference-returning accessors use compatibility adapters.
+  `Context::Kokkos<Context::Local, Backend>` and resident mesh and
+  connectivity specializations. `Context::CUDA`, `Context::HIP` and
+  `Context::SYCL` select the execution space and device memory of NVIDIA,
+  AMD and Intel GPUs. The mesh implements MeshBase directly; its owned Kokkos
+  arrays support device traversal, geometry evaluation, updates, measure
+  reductions, and incidence computation including discovery of missing
+  entities. Host iterators and reference-returning accessors use
+  compatibility adapters.
 
-  Device kernels assemble variational problems on this mesh into Eigen or
-  PETSc systems. Distributed meshes are made resident by
-  `Mesh<Context::Kokkos<Context::MPI, Backend>>`, on which `P1` problems are
-  assembled into distributed PETSc Kokkos systems; see
-  @ref guides-kokkos-mpi "Distributed Meshes".
-  See @ref guides-kokkos "Kokkos local mesh" for supported geometry,
-  ownership, host interfaces and CUDA build setup.
+  Device kernels assemble variational problems on `P1`, `H1<K>` and `P0g`
+  spaces, single or multi-field, into Eigen, device CSR or PETSc systems.
+  Distributed meshes are made resident by
+  `Mesh<Context::Kokkos<Context::MPI, Backend>>` and assembled into
+  distributed PETSc Kokkos systems (`Rodin::KokkosMPI`); see
+  @ref guides-kokkos-mpi "Distributed Meshes". The
+  @ref guides-kokkos "Kokkos guide" covers the supported terms, the device
+  solvers, the CUDA, HIP and SYCL builds and the known limitations of each
+  stack.
 
   @section guides-backends-support What complete support means
 
