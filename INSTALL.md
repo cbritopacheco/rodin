@@ -211,7 +211,6 @@ cmake .. -DCMAKE_PREFIX_PATH=/path/to/rodin/install
 | `RODIN_USE_OPENMP` | Enable OpenMP support | `OFF` (auto `ON` with `RODIN_MULTITHREADED`) |
 | `RODIN_MULTITHREADED` | Enable multithreading capabilities | `ON` |
 | `RODIN_THREAD_SAFE` | Enforce thread-safety | `OFF` (auto `ON` with `RODIN_MULTITHREADED`) |
-| `RODIN_WITH_PLOT` | Build the Rodin::Plot module | `OFF` |
 | `RODIN_WITH_PY` | Build Python bindings | `OFF` |
 
 ### Solver Options
@@ -219,7 +218,7 @@ cmake .. -DCMAKE_PREFIX_PATH=/path/to/rodin/install
 | Option | Description | Default |
 |--------|-------------|---------|
 | `RODIN_USE_MPI` | Enable MPI support | `OFF` |
-| `RODIN_USE_PETSC` | Enable PETSc support | `OFF` |
+| `RODIN_USE_PETSC` | Enable PETSc support | `ON` |
 | `RODIN_USE_UMFPACK` | Enable UMFPACK solver | `OFF` |
 | `RODIN_USE_CHOLMOD` | Enable CHOLMOD solver | `OFF` |
 | `RODIN_USE_SPQR` | Enable SPQR solver | `OFF` |
@@ -228,6 +227,21 @@ cmake .. -DCMAKE_PREFIX_PATH=/path/to/rodin/install
 | `RODIN_USE_PASTIX` | Enable PaStiX solver | `OFF` |
 | `RODIN_USE_PARDISO` | Enable Pardiso solver | `OFF` |
 | `RODIN_USE_SCOTCH` | Enable Scotch support | `OFF` |
+| `RODIN_USE_MUMPS` | Enable MUMPS solver | `OFF` |
+| `RODIN_USE_PARU` | Enable ParU solver | `OFF` |
+| `RODIN_USE_HYPRE` | Enable hypre support (BoomerAMG) | `OFF` |
+
+### GPU Options
+
+| Option | Description | Default |
+|--------|-------------|---------|
+| `RODIN_USE_KOKKOS` | Build the Rodin::Kokkos module for CUDA, HIP or SYCL GPUs | `OFF` |
+| `RODIN_USE_KOKKOSKERNELS` | Enable the Kokkos-Kernels GPU solvers | `OFF` |
+| `RODIN_USE_CUDSS` | Enable the NVIDIA cuDSS direct solver | `OFF` |
+| `RODIN_USE_ROCSOLVER` | Enable the AMD rocSOLVER direct solver, which requires `RODIN_USE_UMFPACK` | `OFF` |
+
+The [Kokkos guide](https://cbritopacheco.github.io/rodin/docs/refs/heads/master/guides-kokkos.html)
+describes the builds of Kokkos and PETSc for each GPU vendor.
 
 ### Other Options
 
@@ -258,19 +272,22 @@ When you `find_package(Rodin)`, the following targets become available:
 - `Rodin::Alert` - Logging and alerts
 - `Rodin::Utility` - General utilities
 - `Rodin::Context` - Execution context
-- `Rodin::Threads` - Threading support
 - `Rodin::Serialization` - Serialization support
 - `Rodin::Test` - Testing utilities
 
 ### Model Targets
-- `Rodin::Models::Eikonal` - Eikonal equation models
-- `Rodin::Models::Advection` - Advection models
+- `Rodin::Eikonal` - Eikonal equation models
+- `Rodin::Advection` - Advection models
 
 ### Optional Targets (when enabled)
-- `Rodin::Plot` - Plotting (requires `RODIN_WITH_PLOT=ON`)
 - `Rodin::PETSc` - PETSc integration (requires `RODIN_USE_PETSC=ON`)
 - `Rodin::Scotch` - Scotch integration (requires `RODIN_USE_SCOTCH=ON`)
 - `Rodin::MPI` - MPI support (requires `RODIN_USE_MPI=ON`)
+- `Rodin::Kokkos` - GPU meshes, assembly and solvers (requires `RODIN_USE_KOKKOS=ON`)
+- `Rodin::KokkosPETSc` - PETSc systems on the GPU (requires `RODIN_USE_KOKKOS=ON` and `RODIN_USE_PETSC=ON`)
+- `Rodin::KokkosMPI` - Distributed GPU meshes and spaces (requires `RODIN_USE_KOKKOS=ON`, `RODIN_USE_PETSC=ON` and `RODIN_USE_MPI=ON`)
+- `Rodin::KokkosKernels` - Kokkos-Kernels GPU solvers (requires `RODIN_USE_KOKKOS=ON` and `RODIN_USE_KOKKOSKERNELS=ON`)
+- `Rodin::KokkosHypre` - hypre on the GPU (requires `RODIN_USE_KOKKOS=ON` and `RODIN_USE_HYPRE=ON`)
 
 ## Troubleshooting
 

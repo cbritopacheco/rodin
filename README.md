@@ -479,27 +479,25 @@ manager.
 
 ## CMake options
 
-| Option                 | Description                                       |
-|------------------------|---------------------------------------------------|
-| RODIN_BUILD_EXAMPLES   | Builds the examples in the `examples/` directory. |
-| RODIN_BUILD_DOC        | Builds the documentation using Doxygen            |
-| RODIN_USE_MCSS         | Builds the documentation using Doxygen and m.css  |
-| RODIN_BUILD_SRC        | Build the Rodin source code                       |
-| RODIN_BUILD_EXAMPLES   | Build the Rodin examples                          |
-| RODIN_BUILD_DOC        | Build the Rodin documentation                     |
-| RODIN_USE_MCSS         | Use m.css style documentation                     |
-| RODIN_WITH_PLOT        | Build the Rodin::Plot module                      |
-| RODIN_USE_MPI          | Build with MPI support                            |
-| RODIN_USE_PETSC        | Build with PETSc support (ON by default)          |
-| RODIN_USE_KOKKOS       | Build the Rodin::Kokkos GPU module                |
-| RODIN_USE_KOKKOSKERNELS | Build with the Kokkos-Kernels GPU solvers        |
-| RODIN_USE_HYPRE        | Build with hypre support (BoomerAMG)              |
-| RODIN_USE_CUDSS        | Build with the NVIDIA cuDSS direct solver         |
-| RODIN_USE_ROCSOLVER    | Build with the AMD rocSOLVER direct solver        |
-| RODIN_USE_OPENMP       | Build with OpenMP support                         |
-| RODIN_USE_SUITESPARSE  | Build with SuiteSparse support                    |
-| RODIN_SILENCE_WARNINGS | Silence warnings outputted by Rodin               |
-| RODIN_BUILD_PY         | Build Python bindings                             |
+| Option                  | Description                                    |
+|-------------------------|------------------------------------------------|
+| RODIN_BUILD_SRC         | Build the Rodin source code                    |
+| RODIN_BUILD_EXAMPLES    | Build the examples in the `examples/` directory |
+| RODIN_BUILD_DOC         | Build the documentation with Doxygen           |
+| RODIN_USE_MCSS          | Build the documentation with m.css             |
+| RODIN_USE_MPI           | Build with MPI support                          |
+| RODIN_USE_PETSC         | Build with PETSc support (ON by default)       |
+| RODIN_USE_KOKKOS        | Build the Rodin::Kokkos GPU module             |
+| RODIN_USE_KOKKOSKERNELS | Build with the Kokkos-Kernels GPU solvers      |
+| RODIN_USE_HYPRE         | Build with hypre support (BoomerAMG)           |
+| RODIN_USE_CUDSS         | Build with the NVIDIA cuDSS direct solver      |
+| RODIN_USE_ROCSOLVER     | Build with the AMD rocSOLVER direct solver     |
+| RODIN_USE_OPENMP        | Build with OpenMP support                      |
+| RODIN_USE_UMFPACK       | Build with the SuiteSparse UMFPACK solver      |
+| RODIN_SILENCE_WARNINGS  | Silence warnings outputted by Rodin            |
+| RODIN_WITH_PY           | Build Python bindings                          |
+
+[INSTALL.md](INSTALL.md#cmake-configuration-options) lists every option.
 
 ## Benchmark machine
 
