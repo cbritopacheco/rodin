@@ -55,12 +55,14 @@ namespace Rodin::Solver::Internal
        * @brief Computes @f$ Y = \beta Y + \alpha D^{-1} X @f$.
        * @param X Input vector.
        * @param Y Output vector.
+       * @param trans Transposition mode, ignored since the diagonal equals
+       * its transpose.
        * @param alpha Coefficient of @f$ D^{-1} X @f$.
        * @param beta Coefficient of @f$ Y @f$.
        */
       void apply(const ::Kokkos::View<const Real*, Device>& X,
-        const ::Kokkos::View<Real*, Device>& Y, const char[] = "N", Real alpha = Real(1),
-        Real beta = Real(0)) const override
+        const ::Kokkos::View<Real*, Device>& Y, [[maybe_unused]] const char trans[] = "N",
+        Real alpha = Real(1), Real beta = Real(0)) const override
       {
         Krylov::scale(typename Krylov::ExecutionSpace(), m_inverse, X, Y, alpha, beta);
       }

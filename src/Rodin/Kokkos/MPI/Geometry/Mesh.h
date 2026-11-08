@@ -232,8 +232,12 @@ namespace Rodin::Geometry
         std::abort();
       }
 
-      /// @brief Raises an exception, the mesh being immutable. @returns Never returns.
-      Mesh& scale(Real) override
+      /**
+       * @brief Raises an exception, the mesh being immutable.
+       * @param[in] c Requested scaling factor, ignored.
+       * @returns Never returns.
+       */
+      Mesh& scale([[maybe_unused]] Real c) override
       {
         immutable(__func__);
         return *this;
@@ -251,15 +255,28 @@ namespace Rodin::Geometry
         return m_shard.getVertexCoordinates(vertex);
       }
 
-      /// @brief Raises an exception, the mesh being immutable. @returns Never returns.
-      Mesh& setVertexCoordinates(Index, Real, size_t) override
+      /**
+       * @brief Raises an exception, the mesh being immutable.
+       * @param[in] idx Local vertex index, ignored.
+       * @param[in] s Requested coordinate, ignored.
+       * @param[in] i Coordinate index, ignored.
+       * @returns Never returns.
+       */
+      Mesh& setVertexCoordinates([[maybe_unused]] Index idx, [[maybe_unused]] Real s,
+        [[maybe_unused]] size_t i) override
       {
         immutable(__func__);
         return *this;
       }
 
-      /// @brief Raises an exception, the mesh being immutable. @returns Never returns.
-      Mesh& setVertexCoordinates(Index, const Math::SpatialPoint&) override
+      /**
+       * @brief Raises an exception, the mesh being immutable.
+       * @param[in] idx Local vertex index, ignored.
+       * @param[in] coords Requested coordinates, ignored.
+       * @returns Never returns.
+       */
+      Mesh& setVertexCoordinates([[maybe_unused]] Index idx,
+        [[maybe_unused]] const Math::SpatialPoint& coords) override
       {
         immutable(__func__);
         return *this;
@@ -271,17 +288,27 @@ namespace Rodin::Geometry
         return m_shard.getAttribute(d, i);
       }
 
-      /// @brief Raises an exception, the mesh being immutable. @returns Never returns.
-      Mesh& setAttribute(
-        const std::pair<size_t, Index>&, const Optional<Attribute>&) override
+      /**
+       * @brief Raises an exception, the mesh being immutable.
+       * @param[in] p Pair of (dimension, local index) of the polytope, ignored.
+       * @param[in] attr Requested attribute, ignored.
+       * @returns Never returns.
+       */
+      Mesh& setAttribute([[maybe_unused]] const std::pair<size_t, Index>& p,
+        [[maybe_unused]] const Optional<Attribute>& attr) override
       {
         immutable(__func__);
         return *this;
       }
 
-      /// @brief Raises an exception, the mesh being immutable. @returns Never returns.
-      Mesh& setPolytopeTransformation(
-        const std::pair<size_t, Index>, PolytopeTransformation*) override
+      /**
+       * @brief Raises an exception, the mesh being immutable.
+       * @param[in] p Pair of (dimension, local index) of the polytope, ignored.
+       * @param[in] trans Requested transformation, ignored and not taken over.
+       * @returns Never returns.
+       */
+      Mesh& setPolytopeTransformation([[maybe_unused]] const std::pair<size_t, Index> p,
+        [[maybe_unused]] PolytopeTransformation* trans) override
       {
         immutable(__func__);
         return *this;
@@ -301,8 +328,14 @@ namespace Rodin::Geometry
         return m_shard.getQuadrature(d, i, formula);
       }
 
-      /// @brief Raises an exception, the mesh being immutable. @returns Never returns.
-      Mesh& load(const boost::filesystem::path&, IO::FileFormat) override
+      /**
+       * @brief Raises an exception, the mesh being immutable.
+       * @param[in] filename Path to the mesh file, ignored.
+       * @param[in] fmt File format, ignored.
+       * @returns Never returns.
+       */
+      Mesh& load([[maybe_unused]] const boost::filesystem::path& filename,
+        [[maybe_unused]] IO::FileFormat fmt) override
       {
         immutable(__func__);
         return *this;
@@ -459,6 +492,10 @@ namespace Rodin::Geometry
       }
 
     private:
+      /**
+       * @brief Raises the exception reporting that the mesh is immutable.
+       * @param[in] function Name of the rejected member function.
+       */
       [[noreturn]] void immutable(const char* function) const
       {
         Alert::MemberFunctionException(*this, function)
@@ -473,10 +510,14 @@ namespace Rodin::Geometry
       ::Kokkos::View<std::uint8_t*, MemorySpace> m_owned;
   };
 
-  /// @brief Deduces the distributed resident mesh of a host mesh.
+  /**
+   * @brief Deduces the distributed resident mesh of a host mesh.
+   * @param[in] context Kokkos MPI execution context.
+   * @param[in] host Distributed host mesh.
+   */
   template <class Backend>
-  Mesh(Rodin::Context::Kokkos<Rodin::Context::MPI, Backend>,
-    const Mesh<Rodin::Context::MPI>&)
+  Mesh(Rodin::Context::Kokkos<Rodin::Context::MPI, Backend> context,
+    const Mesh<Rodin::Context::MPI>& host)
     -> Mesh<Rodin::Context::Kokkos<Rodin::Context::MPI, Backend>>;
 }
 

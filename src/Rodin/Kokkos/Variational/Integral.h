@@ -108,9 +108,10 @@ namespace Rodin::Kokkos::Variational
 
     /**
      * @brief Compares two layouts member by member.
+     * @param other Layout to compare with.
      * @return Whether the layouts are equal.
      */
-    bool operator==(const DeviceLayout&) const = default;
+    bool operator==(const DeviceLayout& other) const = default;
   };
 
   /**
@@ -1060,11 +1061,17 @@ namespace Rodin::Kokkos::Variational::Internal
 
       DevicePolytopes() = default;
 
-      /// @brief Starts empty: a copy must not share the offsets it may locate again.
-      DevicePolytopes(const DevicePolytopes&) {}
+      /**
+       * @brief Starts empty: a copy must not share the offsets it may locate again.
+       * @param other Polytopes not copied.
+       */
+      DevicePolytopes([[maybe_unused]] const DevicePolytopes& other) {}
 
-      /// @brief Move constructor, keeping the located offsets.
-      DevicePolytopes(DevicePolytopes&&) = default;
+      /**
+       * @brief Move constructor, keeping the located offsets.
+       * @param other Polytopes to move.
+       */
+      DevicePolytopes(DevicePolytopes&& other) = default;
 
       /**
        * @brief Empties this object, see the copy constructor.
@@ -1080,9 +1087,10 @@ namespace Rodin::Kokkos::Variational::Internal
 
       /**
        * @brief Move assignment, keeping the located offsets.
+       * @param other Polytopes to move.
        * @return This object.
        */
-      DevicePolytopes& operator=(DevicePolytopes&&) = default;
+      DevicePolytopes& operator=(DevicePolytopes&& other) = default;
 
       /**
        * @brief Locates the entries of every selected polytope.
@@ -1368,7 +1376,12 @@ namespace Rodin::Kokkos::Variational::Internal
         Index trialVDim;
         Index testVDim;
 
-        bool operator==(const Located&) const = default;
+        /**
+         * @brief Compares two locations member by member.
+         * @param other Location to compare with.
+         * @return Whether the locations are equal.
+         */
+        bool operator==(const Located& other) const = default;
       };
 
       const Mesh* m_mesh = nullptr;
@@ -2978,11 +2991,17 @@ namespace Rodin::Variational
         : Parent(integrand)
       {}
 
-      /// @brief Copy constructor.
-      Integral(const Integral&) = default;
+      /**
+       * @brief Copy constructor.
+       * @param[in] other Integral to copy.
+       */
+      Integral(const Integral& other) = default;
 
-      /// @brief Move constructor.
-      Integral(Integral&&) = default;
+      /**
+       * @brief Move constructor.
+       * @param[in] other Integral to move.
+       */
+      Integral(Integral&& other) = default;
 
       /**
        * @brief Gets the integration region.
@@ -3065,11 +3084,17 @@ namespace Rodin::Variational
         : Parent(integrand)
       {}
 
-      /// @brief Copy constructor.
-      Integral(const Integral&) = default;
+      /**
+       * @brief Copy constructor.
+       * @param[in] other Integral to copy.
+       */
+      Integral(const Integral& other) = default;
 
-      /// @brief Move constructor.
-      Integral(Integral&&) = default;
+      /**
+       * @brief Move constructor.
+       * @param[in] other Integral to move.
+       */
+      Integral(Integral&& other) = default;
 
       /**
        * @brief Gets the integration region.
@@ -3155,11 +3180,17 @@ namespace Rodin::Variational
         : Parent(integrand)
       {}
 
-      /// @brief Copy constructor.
-      BoundaryIntegral(const BoundaryIntegral&) = default;
+      /**
+       * @brief Copy constructor.
+       * @param[in] other Integral to copy.
+       */
+      BoundaryIntegral(const BoundaryIntegral& other) = default;
 
-      /// @brief Move constructor.
-      BoundaryIntegral(BoundaryIntegral&&) = default;
+      /**
+       * @brief Move constructor.
+       * @param[in] other Integral to move.
+       */
+      BoundaryIntegral(BoundaryIntegral&& other) = default;
 
       /**
        * @brief Gets the integration region.
@@ -3242,11 +3273,17 @@ namespace Rodin::Variational
         : Parent(integrand)
       {}
 
-      /// @brief Copy constructor.
-      BoundaryIntegral(const BoundaryIntegral&) = default;
+      /**
+       * @brief Copy constructor.
+       * @param[in] other Integral to copy.
+       */
+      BoundaryIntegral(const BoundaryIntegral& other) = default;
 
-      /// @brief Move constructor.
-      BoundaryIntegral(BoundaryIntegral&&) = default;
+      /**
+       * @brief Move constructor.
+       * @param[in] other Integral to move.
+       */
+      BoundaryIntegral(BoundaryIntegral&& other) = default;
 
       /**
        * @brief Gets the integration region.
@@ -3332,11 +3369,17 @@ namespace Rodin::Variational
         : Parent(integrand)
       {}
 
-      /// @brief Copy constructor.
-      FaceIntegral(const FaceIntegral&) = default;
+      /**
+       * @brief Copy constructor.
+       * @param[in] other Integral to copy.
+       */
+      FaceIntegral(const FaceIntegral& other) = default;
 
-      /// @brief Move constructor.
-      FaceIntegral(FaceIntegral&&) = default;
+      /**
+       * @brief Move constructor.
+       * @param[in] other Integral to move.
+       */
+      FaceIntegral(FaceIntegral&& other) = default;
 
       /**
        * @brief Gets the integration region.
@@ -3419,11 +3462,17 @@ namespace Rodin::Variational
         : Parent(integrand)
       {}
 
-      /// @brief Copy constructor.
-      FaceIntegral(const FaceIntegral&) = default;
+      /**
+       * @brief Copy constructor.
+       * @param[in] other Integral to copy.
+       */
+      FaceIntegral(const FaceIntegral& other) = default;
 
-      /// @brief Move constructor.
-      FaceIntegral(FaceIntegral&&) = default;
+      /**
+       * @brief Move constructor.
+       * @param[in] other Integral to move.
+       */
+      FaceIntegral(FaceIntegral&& other) = default;
 
       /**
        * @brief Gets the integration region.
@@ -3509,11 +3558,17 @@ namespace Rodin::Variational
         : Parent(integrand)
       {}
 
-      /// @brief Copy constructor.
-      InterfaceIntegral(const InterfaceIntegral&) = default;
+      /**
+       * @brief Copy constructor.
+       * @param[in] other Integral to copy.
+       */
+      InterfaceIntegral(const InterfaceIntegral& other) = default;
 
-      /// @brief Move constructor.
-      InterfaceIntegral(InterfaceIntegral&&) = default;
+      /**
+       * @brief Move constructor.
+       * @param[in] other Integral to move.
+       */
+      InterfaceIntegral(InterfaceIntegral&& other) = default;
 
       /**
        * @brief Gets the integration region.
@@ -3596,11 +3651,17 @@ namespace Rodin::Variational
         : Parent(integrand)
       {}
 
-      /// @brief Copy constructor.
-      InterfaceIntegral(const InterfaceIntegral&) = default;
+      /**
+       * @brief Copy constructor.
+       * @param[in] other Integral to copy.
+       */
+      InterfaceIntegral(const InterfaceIntegral& other) = default;
 
-      /// @brief Move constructor.
-      InterfaceIntegral(InterfaceIntegral&&) = default;
+      /**
+       * @brief Move constructor.
+       * @param[in] other Integral to move.
+       */
+      InterfaceIntegral(InterfaceIntegral&& other) = default;
 
       /**
        * @brief Gets the integration region.

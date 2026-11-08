@@ -178,8 +178,14 @@ namespace Rodin::Variational
         return m_host.getDOFs(d, i);
       }
 
-      /// @return Zero.
-      Index getGlobalIndex(const std::pair<size_t, Index>&, Index) const override
+      /**
+       * @brief Converts a local degree of freedom to its global index.
+       * @param[in] idx Pair of (dimension, local index) of the polytope.
+       * @param[in] local Local degree of freedom on the polytope.
+       * @return Zero.
+       */
+      Index getGlobalIndex([[maybe_unused]] const std::pair<size_t, Index>& idx,
+        [[maybe_unused]] Index local) const override
       {
         return 0;
       }

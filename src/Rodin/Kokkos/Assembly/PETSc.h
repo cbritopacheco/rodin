@@ -74,9 +74,10 @@ namespace Rodin::Assembly::Internal
 
     /**
      * @brief Compares all the members of the segments.
+     * @param other Segment compared.
      * @return Whether the segments have the same entries.
      */
-    bool operator==(const COOSegment&) const = default;
+    bool operator==(const COOSegment& other) const = default;
   };
 
   /**
@@ -135,8 +136,11 @@ namespace Rodin::Assembly::Internal
   {
     COOCache() = default;
 
-    /// @brief Constructs an empty cache, without sharing the buffers.
-    COOCache(const COOCache&) {}
+    /**
+     * @brief Constructs an empty cache, without sharing the buffers.
+     * @param other Cache copied, whose buffers are not copied.
+     */
+    COOCache([[maybe_unused]] const COOCache& other) {}
 
     /**
      * @brief Empties the cache, without sharing the buffers.
@@ -150,14 +154,18 @@ namespace Rodin::Assembly::Internal
       return *this;
     }
 
-    /// @brief Takes the buffers of the moved cache.
-    COOCache(COOCache&&) = default;
+    /**
+     * @brief Takes the buffers of the moved cache.
+     * @param other Cache moved.
+     */
+    COOCache(COOCache&& other) = default;
 
     /**
      * @brief Takes the buffers of the moved cache.
+     * @param other Cache moved.
      * @return Reference to this cache.
      */
-    COOCache& operator=(COOCache&&) = default;
+    COOCache& operator=(COOCache&& other) = default;
 
     /// @brief PETSc identifier of the matrix preallocated with the pattern, or -1.
     PetscInt64 matrix = -1;
@@ -1922,6 +1930,7 @@ namespace Rodin::Assembly::Internal
        * the global numbering of its spaces. Their entries are numbered
        * locally, as the integrated ones, so that they are eliminated and sent
        * alike.
+       * @return Coordinates and values of the entries.
        */
       Entries listOperators() const
       {
@@ -1979,7 +1988,11 @@ namespace Rodin::Assembly::Internal
         return res;
       }
 
-      /// @brief Unmanaged host view of a vector.
+      /**
+       * @brief Unmanaged host view of a vector.
+       * @param data Vector viewed, alive while the view is used.
+       * @return View of the values of the vector.
+       */
       template <class T>
       static auto host(const std::vector<T>& data)
       {
@@ -1987,6 +2000,13 @@ namespace Rodin::Assembly::Internal
           ::Kokkos::MemoryTraits<::Kokkos::Unmanaged>>(data.data(), data.size());
       }
 
+      /**
+       * @brief Reallocates a view, without initializing it, when its size
+       * changes.
+       * @param view View resized, kept when it already has the size.
+       * @param size Number of entries.
+       * @param label Label of the allocation.
+       */
       template <class T>
       void resize(
         ::Kokkos::View<T*, MemorySpace>& view, size_t size, const char* label) const
@@ -2000,6 +2020,12 @@ namespace Rodin::Assembly::Internal
         }
       }
 
+      /**
+       * @brief Copies a host vector to a view, resized to its size.
+       * @param view Destination view.
+       * @param host Values copied.
+       * @param label Label of the allocation, when the view is resized.
+       */
       template <class T>
       void copy(::Kokkos::View<T*, MemorySpace>& view, const std::vector<T>& host,
         const char* label) const
@@ -2011,7 +2037,11 @@ namespace Rodin::Assembly::Internal
         ::Kokkos::deep_copy(m_execution, view, source);
       }
 
-      /// @brief Integrates the local integrators into the coordinate list.
+      /**
+       * @brief Integrates the local integrators into the coordinate list.
+       * @param cache Buffers and pattern of the previous assemblies.
+       * @param fixed Whether the fixed degrees of freedom are eliminated.
+       */
       void integrateMatrices(CacheType& cache, bool fixed)
       {
         // Integrators with equal layouts and blocks share their entries,
@@ -2128,6 +2158,10 @@ namespace Rodin::Assembly::Internal
        * @brief Expands the coordinate list on the masters, appends the rows
        * of the identified degrees of freedom and every diagonal entry, then
        * eliminates the fixed degrees of freedom.
+       * @param cache Buffers and pattern of the previous assemblies, holding
+       * the listed coordinates.
+       * @param constraints Resolved identifications.
+       * @param fixed Whether the fixed degrees of freedom are eliminated.
        */
       void expandMatrices(CacheType& cache,
         const typename ConstraintsType::Resolved& constraints, bool fixed)
@@ -2183,6 +2217,7 @@ namespace Rodin::Assembly::Internal
       /**
        * @brief Reserves contributions to the right-hand side at the end of
        * the list.
+       * @param cache Buffers holding the list.
        * @param count Number of contributions.
        * @returns Buffers of the list and position of the first reserved
        * contribution.
@@ -2214,6 +2249,8 @@ namespace Rodin::Assembly::Internal
        *
        * The contributions to a row are summed in list order, so the
        * right-hand side does not depend on the scheduling of the kernels.
+       * @param cache Buffers holding the contributions and the right-hand
+       * side.
        */
       void sumContributions(CacheType& cache) const
       {
@@ -2258,6 +2295,7 @@ namespace Rodin::Assembly::Internal
       /**
        * @brief Adds the entries of the linear integrators to the right-hand
        * side, as contributions listed in entry order.
+       * @param cache Buffers holding the entries and the right-hand side.
        * @param offsets Position of the first entry of every integrator,
        * followed by the entry count.
        *
@@ -2316,6 +2354,7 @@ namespace Rodin::Assembly::Internal
       /**
        * @brief Lists buffered entries of a vector as contributions to the
        * right-hand side.
+       * @param cache Buffers holding the entries and the list.
        * @param begin Position of the first entry in the buffers.
        * @param count Entry count. @param row Offset of the space.
        * @param fixed Whether degrees of freedom are fixed.
@@ -2335,6 +2374,9 @@ namespace Rodin::Assembly::Internal
       /**
        * @brief Lists the entries of the linear integrators and of the
        * preassembled vectors as contributions to the right-hand side.
+       * @param cache Buffers of the entries and of the list.
+       * @param fixed Whether degrees of freedom are fixed.
+       * @param x Expansions on the masters, or null without identifications.
        */
       void integrateVectors(CacheType& cache, bool fixed, const Expansions* x)
       {
@@ -2412,7 +2454,11 @@ namespace Rodin::Assembly::Internal
         }
       }
 
-      /// @brief Copies a vector, wherever it stores its values.
+      /**
+       * @brief Copies a vector, wherever it stores its values.
+       * @param vec Vector copied.
+       * @param res Destination, with the local size of the vector.
+       */
       void getVector(::Vec vec, const ::Kokkos::View<Real*, MemorySpace>& res) const
       {
         using Unmanaged = ::Kokkos::MemoryTraits<::Kokkos::Unmanaged>;
@@ -2446,7 +2492,16 @@ namespace Rodin::Assembly::Internal
        * The matrix is laid out as a PETSc Kokkos matrix unless it already has
        * a type. The pattern is analysed again only when it is not the one the
        * matrix was last preallocated with.
+       * @param cache Pattern last given to PETSc and merged values.
+       * @param A Matrix filled.
        * @param expanded Whether the coordinates are expanded on the masters.
+       * @param coordRows Row coordinates of the list.
+       * @param coordCols Column coordinates of the list.
+       * @param order Coordinates sorted by row then column, as indices in the
+       * list.
+       * @param starts Start in the sorted coordinates of each distinct
+       * coordinate, and the list size.
+       * @param values Values of the list.
        */
       template <class Indices, class Scalars>
       void setMatrix(CacheType& cache, ::Mat A, bool expanded, const Indices& coordRows,
@@ -2545,7 +2600,11 @@ namespace Rodin::Assembly::Internal
         (void)ierr;
       }
 
-      /// @brief Copies the right-hand side where the vector stores it.
+      /**
+       * @brief Copies the right-hand side where the vector stores it.
+       * @param b Vector filled.
+       * @param rhs Right-hand side, of at least the row count.
+       */
       void setVector(::Vec b, const ::Kokkos::View<Real*, MemorySpace>& rhs) const
       {
         using Unmanaged = ::Kokkos::MemoryTraits<::Kokkos::Unmanaged>;
@@ -2584,6 +2643,7 @@ namespace Rodin::Assembly::Internal
       /**
        * @brief Whether a process fixes a degree of freedom; collective.
        * @param local Whether this process fixes one.
+       * @return Whether any process fixes one.
        */
       bool isFixed(bool local) const
       {
@@ -2689,6 +2749,7 @@ namespace Rodin::Assembly::Internal
        * The masters the process does not hold become local degrees of
        * freedom past the held ones, with their global index, so that the
        * entries the expansion moves to them are sent to their owners.
+       * @return Resolved identifications, in the local numbering.
        */
       typename ConstraintsType::Resolved resolveDistributed()
       {
@@ -2727,6 +2788,9 @@ namespace Rodin::Assembly::Internal
        * The vector is preallocated with the global index of each local row,
        * once per vector, and PETSc sums the entries of the rows held by
        * several processes.
+       * @param cache Buffers holding the right-hand side, and the vector it
+       * was last preallocated for.
+       * @param b Distributed vector filled.
        */
       void setDistributedVector(CacheType& cache, ::Vec b) const
       {
@@ -3182,6 +3246,13 @@ namespace Rodin::Assembly
         Context::IsMPI<typename FormLanguage::Traits<typename FormLanguage::Traits<
           typename FormLanguage::Traits<U>::FESType>::MeshType>::ContextType>::value;
 
+      /**
+       * @brief Assembles the problem into the linear system.
+       * @param axb Linear system to assemble.
+       * @param input Problem input.
+       * @param doMatrix Whether the matrix is assembled.
+       * @param doVector Whether the right-hand side is assembled.
+       */
       void assemble(
         LinearSystemType& axb, const InputType& input, bool doMatrix, bool doVector)
       {
@@ -3372,6 +3443,13 @@ namespace Rodin::Assembly
         Context::IsMPI<typename FormLanguage::Traits<typename FormLanguage::Traits<
           typename FormLanguage::Traits<U1>::FESType>::MeshType>::ContextType>::value;
 
+      /**
+       * @brief Assembles the problem into the linear system.
+       * @param axb Linear system to assemble.
+       * @param input Problem input.
+       * @param doMatrix Whether the matrix is assembled.
+       * @param doVector Whether the right-hand side is assembled.
+       */
       void assemble(
         LinearSystemType& axb, const InputType& input, bool doMatrix, bool doVector)
       {

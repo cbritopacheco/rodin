@@ -224,16 +224,18 @@ namespace Rodin::Variational
 
     /**
      * @brief Tells that a source is a function expression.
+     * @param source Pointer to the source.
      * @return std::true_type, used only in unevaluated context.
      */
     template <class Derived>
-    static std::true_type isFunction(const FunctionBase<Derived>*);
+    static std::true_type isFunction(const FunctionBase<Derived>* source);
 
     /**
      * @brief Tells that a source is not a function expression.
+     * @param source Pointer to the source.
      * @return std::false_type, used only in unevaluated context.
      */
-    static std::false_type isFunction(const void*);
+    static std::false_type isFunction(const void* source);
 
     /**
      * @brief Marks every degree of freedom of a selected polytope with one plus

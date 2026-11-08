@@ -229,6 +229,11 @@ namespace Rodin::Kokkos
       }
 
     private:
+      /**
+       * @brief Deep copy of a device array, with the same label.
+       * @param a Array to copy.
+       * @return New array holding a copy of @p a, empty when @p a is empty.
+       */
       template <class T>
       static Array<T> clone(const Array<T>& a)
       {
@@ -279,8 +284,11 @@ namespace Rodin::Solver::Internal
     static constexpr bool Resident = !::Kokkos::SpaceAccessibility<::Kokkos::HostSpace,
       typename MatrixType::MemorySpace>::accessible;
 
-    /// @brief Leaves the matrix unchanged, being already compressed.
-    static void prepare(MatrixType&) {}
+    /**
+     * @brief Leaves the matrix unchanged, being already compressed.
+     * @param matrix Compressed device matrix.
+     */
+    static void prepare([[maybe_unused]] MatrixType& matrix) {}
 
     /**
      * @brief Number of rows.

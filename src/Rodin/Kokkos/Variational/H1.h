@@ -557,7 +557,11 @@ namespace Rodin::Kokkos::Variational
         return {weight * value, weight * derivative};
       }
 
-      /// @brief Gets the powers @f$ r_k^p @f$, @f$ p \leq K @f$.
+      /**
+       * @brief Gets the powers @f$ r_k^p @f$, @f$ p \leq K @f$.
+       * @param r Reference coordinates.
+       * @return Table whose entry @f$ (k, p) @f$ is @f$ r_k^p @f$.
+       */
       KOKKOS_INLINE_FUNCTION
       static Powers getPowers(const Geometry::Vector& r)
       {
@@ -571,7 +575,13 @@ namespace Rodin::Kokkos::Variational
         return powers;
       }
 
-      /// @brief Gets the exponents of the monomials of a reference geometry.
+      /**
+       * @brief Gets the exponents of the monomials of a reference geometry.
+       * @param g Reference geometry.
+       * @return Exponents @f$ (i, j, k) @f$ of the monomials of degree at most
+       * K in each variable, of total degree at most K on a simplex and of
+       * degree at most K in the first two variables together on a wedge.
+       */
       static std::vector<std::array<std::uint8_t, 3>> getExponents(
         ::Rodin::Geometry::Polytope::Type g)
       {
@@ -777,7 +787,12 @@ namespace Rodin::Kokkos::Variational
       }
 
     private:
-      /// @brief Tells whether a polytope is a simplex.
+      /**
+       * @brief Tells whether a polytope is a simplex.
+       * @param polytope Device polytope.
+       * @return Whether @p polytope is a point, a segment, a triangle or a
+       * tetrahedron.
+       */
       KOKKOS_INLINE_FUNCTION
       static bool isSimplex(const Geometry::PolytopeView& polytope)
       {
@@ -844,9 +859,18 @@ namespace Rodin::Kokkos::Variational::Internal
           m_vector.emplace(std::integral_constant<size_t, K>{}, m_mesh, vdim);
       }
 
-      LagrangeMirror(const LagrangeMirror&) = delete;
+      /**
+       * @brief Not copyable, the host spaces referring to the owned host mesh.
+       * @param other Mirror not copied.
+       */
+      LagrangeMirror(const LagrangeMirror& other) = delete;
 
-      LagrangeMirror& operator=(const LagrangeMirror&) = delete;
+      /**
+       * @brief Not copy assignable, the host spaces referring to the owned host mesh.
+       * @param other Mirror not copied.
+       * @return Reference to this mirror.
+       */
+      LagrangeMirror& operator=(const LagrangeMirror& other) = delete;
 
       /// @brief Gets the scalar host space. @return Scalar space.
       const ScalarSpace& getScalar() const

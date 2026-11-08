@@ -312,9 +312,11 @@ namespace Rodin::Solid
 
       /**
        * @brief Locates the entries of every cell.
+       * @param diagonal Whether to list only the diagonals of the component
+       * blocks, ignored since the tangent couples every pair of components.
        * @return Number of entries, laid out as by the device integrals.
        */
-      size_t prepare(bool) const override
+      size_t prepare([[maybe_unused]] bool diagonal) const override
       {
         const auto& trialfes = m_trial.get().getFiniteElementSpace();
         const auto& testfes = m_test.get().getFiniteElementSpace();
@@ -548,7 +550,12 @@ namespace Rodin::Solid
        */
       static constexpr Index TeamPairs = 4;
 
-      /// @brief Selects the quadrature order of a cell, as on the host.
+      /**
+       * @brief Selects the quadrature order of a cell, as on the host.
+       * @param polytope Mesh cell.
+       * @return The order set by setQuadratureOrder(), otherwise twice the
+       * largest polynomial order of the operators on @p polytope.
+       */
       size_t getOrder(const Geometry::Polytope& polytope) const
       {
         if (m_quadOrder > 0)
@@ -565,6 +572,11 @@ namespace Rodin::Solid
         return 2 * std::max({*trialOrder, *testOrder, *stateOrder});
       }
 
+      /**
+       * @brief Checks that the trial, test and displacement spaces are vector
+       * spaces of the space dimension on one mesh of full dimension.
+       * @param displacement Displacement grid function.
+       */
       void checkCompatibility(const StateType& displacement) const
       {
         const auto& trialfes = m_trial.get().getFiniteElementSpace();
@@ -1432,7 +1444,12 @@ namespace Rodin::Solid
       }
 
     private:
-      /// @brief Selects the quadrature order of a cell, as on the host.
+      /**
+       * @brief Selects the quadrature order of a cell, as on the host.
+       * @param polytope Mesh cell.
+       * @return The order set by setQuadratureOrder(), otherwise twice the
+       * largest polynomial order of the operators on @p polytope.
+       */
       size_t getOrder(const Geometry::Polytope& polytope) const
       {
         if (m_quadOrder > 0)
@@ -1448,6 +1465,11 @@ namespace Rodin::Solid
         return 2 * std::max(*testOrder, *stateOrder);
       }
 
+      /**
+       * @brief Checks that the test and displacement spaces are vector spaces
+       * of the space dimension on one mesh of full dimension.
+       * @param displacement Displacement grid function.
+       */
       void checkCompatibility(const StateType& displacement) const
       {
         const auto& testfes = m_test.get().getFiniteElementSpace();
@@ -1804,9 +1826,11 @@ namespace Rodin::Solid
 
       /**
        * @brief Locates the entries of every cell.
+       * @param diagonal Whether to list only the diagonals of the component
+       * blocks, ignored since the tangent couples every pair of components.
        * @return Number of entries, laid out as by the device integrals.
        */
-      size_t prepare(bool) const override
+      size_t prepare([[maybe_unused]] bool diagonal) const override
       {
         const auto& trialfes = m_trial.get().getFiniteElementSpace();
         const auto& testfes = m_test.get().getFiniteElementSpace();
@@ -2040,7 +2064,12 @@ namespace Rodin::Solid
        */
       static constexpr Index TeamPairs = 4;
 
-      /// @brief Selects the quadrature order of a cell, as on the host.
+      /**
+       * @brief Selects the quadrature order of a cell, as on the host.
+       * @param polytope Mesh cell.
+       * @return The order set by setQuadratureOrder(), otherwise twice the
+       * largest polynomial order of the operators on @p polytope.
+       */
       size_t getOrder(const Geometry::Polytope& polytope) const
       {
         if (m_quadOrder > 0)
@@ -2057,6 +2086,11 @@ namespace Rodin::Solid
         return 2 * std::max({*trialOrder, *testOrder, *stateOrder});
       }
 
+      /**
+       * @brief Checks that the trial, test and displacement spaces are vector
+       * spaces of the space dimension on one mesh of full dimension.
+       * @param displacement Displacement grid function.
+       */
       void checkCompatibility(const StateType& displacement) const
       {
         const auto& trialfes = m_trial.get().getFiniteElementSpace();
@@ -2929,7 +2963,12 @@ namespace Rodin::Solid
       }
 
     private:
-      /// @brief Selects the quadrature order of a cell, as on the host.
+      /**
+       * @brief Selects the quadrature order of a cell, as on the host.
+       * @param polytope Mesh cell.
+       * @return The order set by setQuadratureOrder(), otherwise twice the
+       * largest polynomial order of the operators on @p polytope.
+       */
       size_t getOrder(const Geometry::Polytope& polytope) const
       {
         if (m_quadOrder > 0)
@@ -2945,6 +2984,11 @@ namespace Rodin::Solid
         return 2 * std::max(*testOrder, *stateOrder);
       }
 
+      /**
+       * @brief Checks that the test and displacement spaces are vector spaces
+       * of the space dimension on one mesh of full dimension.
+       * @param displacement Displacement grid function.
+       */
       void checkCompatibility(const StateType& displacement) const
       {
         const auto& testfes = m_test.get().getFiniteElementSpace();

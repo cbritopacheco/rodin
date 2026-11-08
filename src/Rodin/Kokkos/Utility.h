@@ -178,11 +178,18 @@ namespace Rodin::Kokkos::Internal
           ::Kokkos::fence("Rodin transfer release");
       }
 
-      /// @brief Starts empty, the arrays of the source stay with it.
-      TransferCache(const TransferCache&) {}
+      /**
+       * @brief Starts empty, the arrays of the source stay with it.
+       * @param other Cache whose arrays are not copied.
+       */
+      TransferCache([[maybe_unused]] const TransferCache& other) {}
 
-      /// @brief Keeps the arrays of this cache. @returns This object.
-      TransferCache& operator=(const TransferCache&)
+      /**
+       * @brief Keeps the arrays of this cache.
+       * @param other Cache whose arrays are not copied.
+       * @returns This object.
+       */
+      TransferCache& operator=([[maybe_unused]] const TransferCache& other)
       {
         return *this;
       }

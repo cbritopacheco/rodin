@@ -56,9 +56,10 @@ namespace Rodin::Solver
   /**
    * @ingroup RodinCTAD
    * @brief CTAD (Class Template Argument Deduction) guide for BoomerAMG.
+   * @param problem Problem whose linear system the solver solves.
    */
   template <class LinearSystem>
-  BoomerAMG(Variational::ProblemBase<LinearSystem>&) -> BoomerAMG<LinearSystem>;
+  BoomerAMG(Variational::ProblemBase<LinearSystem>& problem) -> BoomerAMG<LinearSystem>;
 
   /**
    * @ingroup BoomerAMGSpecializations
@@ -469,9 +470,18 @@ namespace Rodin::Solver
 
         Objects() = default;
 
-        Objects(const Objects&) = delete;
+        /**
+         * @brief Not copyable, the objects being destroyed once.
+         * @param other Objects not copied.
+         */
+        Objects(const Objects& other) = delete;
 
-        Objects& operator=(const Objects&) = delete;
+        /**
+         * @brief Not copyable, the objects being destroyed once.
+         * @param other Objects not copied.
+         * @returns Reference to these objects.
+         */
+        Objects& operator=(const Objects& other) = delete;
 
         ~Objects()
         {
@@ -496,9 +506,18 @@ namespace Rodin::Solver
 
         Hierarchy() = default;
 
-        Hierarchy(const Hierarchy&) = delete;
+        /**
+         * @brief Not copyable, the hierarchy being destroyed once.
+         * @param other Hierarchy not copied.
+         */
+        Hierarchy(const Hierarchy& other) = delete;
 
-        Hierarchy& operator=(const Hierarchy&) = delete;
+        /**
+         * @brief Not copyable, the hierarchy being destroyed once.
+         * @param other Hierarchy not copied.
+         * @returns Reference to this hierarchy.
+         */
+        Hierarchy& operator=(const Hierarchy& other) = delete;
 
         ~Hierarchy()
         {
@@ -512,8 +531,15 @@ namespace Rodin::Solver
       /**
        * @brief Preconditioner setup that the conjugate gradient calls, the
        * hierarchy being built beforehand.
+       * @param solver Preconditioner, already set up.
+       * @param A Matrix of the system.
+       * @param b Right-hand side.
+       * @param x Solution.
+       * @returns Zero, the success code of hypre.
        */
-      static HYPRE_Int skipSetup(HYPRE_Solver, HYPRE_Matrix, HYPRE_Vector, HYPRE_Vector)
+      static HYPRE_Int skipSetup([[maybe_unused]] HYPRE_Solver solver,
+        [[maybe_unused]] HYPRE_Matrix A, [[maybe_unused]] HYPRE_Vector b,
+        [[maybe_unused]] HYPRE_Vector x)
       {
         return 0;
       }

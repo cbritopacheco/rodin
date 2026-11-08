@@ -463,10 +463,13 @@ namespace Rodin::Kokkos::Variational
    * Kernels skip the pairs that do not overlap. Values without sparsity
    * always overlap.
    *
+   * @param lhs Left operand, ignored.
+   * @param rhs Right operand, ignored.
    * @return True.
    */
   template <class LHS, class RHS>
-  KOKKOS_INLINE_FUNCTION constexpr bool overlaps(const LHS&, const RHS&)
+  KOKKOS_INLINE_FUNCTION constexpr bool overlaps(
+    [[maybe_unused]] const LHS& lhs, [[maybe_unused]] const RHS& rhs)
   {
     return true;
   }
@@ -587,10 +590,11 @@ namespace Rodin::Kokkos::Variational
        * @brief Evaluates the P1 basis at a reference point of a polytope.
        * @param polytope Device polytope.
        * @param reference Reference coordinates.
+       * @param geometry Tag of a geometry known at run time only.
        */
       KOKKOS_INLINE_FUNCTION
       IntegrationPointView(const Geometry::PolytopeView& polytope,
-        const Geometry::Vector& reference, DynamicGeometry)
+        const Geometry::Vector& reference, [[maybe_unused]] DynamicGeometry geometry)
         : IntegrationPointView(polytope.getPoint(reference))
       {}
 
@@ -599,10 +603,11 @@ namespace Rodin::Kokkos::Variational
        * @param polytope Device polytope of geometry G, in a mesh of spatial
        * dimension the dimension of G.
        * @param reference Reference coordinates.
+       * @param geometry Tag of the geometry G.
        */
       template <::Rodin::Geometry::Polytope::Type G>
       KOKKOS_INLINE_FUNCTION IntegrationPointView(const Geometry::PolytopeView& polytope,
-        const Geometry::Vector& reference, StaticGeometry<G>)
+        const Geometry::Vector& reference, [[maybe_unused]] StaticGeometry<G> geometry)
         : m_point(polytope, reference, reference),
           m_count(Geometry::StaticBasis<G>::Count)
       {
@@ -641,9 +646,11 @@ namespace Rodin::Kokkos::Variational
       /**
        * @brief Moves the integration point within its polytope.
        * @param reference Reference coordinates in the current polytope.
+       * @param geometry Tag of a geometry known at run time only.
        */
       KOKKOS_INLINE_FUNCTION
-      void setPoint(const Geometry::Vector& reference, DynamicGeometry)
+      void setPoint(
+        const Geometry::Vector& reference, [[maybe_unused]] DynamicGeometry geometry)
       {
         setPoint(m_point.getPolytope().getPoint(reference));
       }
@@ -655,10 +662,11 @@ namespace Rodin::Kokkos::Variational
        * and basis gradients.
        *
        * @param reference Reference coordinates in the current polytope.
+       * @param geometry Tag of the geometry G.
        */
       template <::Rodin::Geometry::Polytope::Type G>
       KOKKOS_INLINE_FUNCTION void setPoint(
-        const Geometry::Vector& reference, StaticGeometry<G>)
+        const Geometry::Vector& reference, [[maybe_unused]] StaticGeometry<G> geometry)
       {
         const Geometry::PolytopeView polytope = m_point.getPolytope();
         evaluate<G, !Geometry::StaticBasis<G>::Affine>(polytope, reference);
@@ -710,7 +718,10 @@ namespace Rodin::Kokkos::Variational
       }
 
     private:
-      /// @brief Evaluates the basis, the gradients and the distortion at a point of the polytope.
+      /**
+       * @brief Evaluates the basis, the gradients and the distortion at a point of the polytope.
+       * @param point Point on a mesh entity.
+       */
       KOKKOS_INLINE_FUNCTION
       void evaluate(const Geometry::PointView& point)
       {
@@ -1912,12 +1923,13 @@ namespace Rodin::Kokkos::Variational
        * @brief Interpolates the physical Jacobian at an integration point of
        * a cell.
        * @param ip Integration point on a cell of the space mesh.
+       * @param trace Trace domain, unused since a cell is not an interface.
        * @return Matrix with one row per component, row @f$ r @f$ holding
        * @f$ \nabla u_r(p) @f$.
        */
       KOKKOS_INLINE_FUNCTION
-      Geometry::Matrix interpolateJacobian(
-        const CellIntegrationPointView& ip, const TraceDomainView& = {}) const
+      Geometry::Matrix interpolateJacobian(const CellIntegrationPointView& ip,
+        [[maybe_unused]] const TraceDomainView& trace = {}) const
       {
         return getCellJacobian(ip);
       }
@@ -1925,11 +1937,12 @@ namespace Rodin::Kokkos::Variational
       /**
        * @brief Interpolates the divergence at an integration point of a cell.
        * @param ip Integration point on a cell of the space mesh.
+       * @param trace Trace domain, unused since a cell is not an interface.
        * @return Trace of interpolateJacobian(ip), summed in the same order.
        */
       KOKKOS_INLINE_FUNCTION
-      Real interpolateDivergence(
-        const CellIntegrationPointView& ip, const TraceDomainView& = {}) const
+      Real interpolateDivergence(const CellIntegrationPointView& ip,
+        [[maybe_unused]] const TraceDomainView& trace = {}) const
       {
         return getCellDivergence(ip);
       }
@@ -1986,6 +1999,10 @@ namespace Rodin::Kokkos::Variational
        *
        * The P1 basis is evaluated directly at the point, the other bases
        * through an IntegrationPointView of the point.
+       *
+       * @param p Point on a cell of the space mesh.
+       * @return Matrix with one row per component, row @f$ r @f$ holding
+       * @f$ \nabla u_r(p) @f$.
        */
       KOKKOS_INLINE_FUNCTION
       Geometry::Matrix getCellJacobian(const Geometry::PointView& p) const
@@ -2019,7 +2036,11 @@ namespace Rodin::Kokkos::Variational
         }
       }
 
-      /// @brief Interpolates the divergence at a point of a cell.
+      /**
+       * @brief Interpolates the divergence at a point of a cell.
+       * @param p Point on a cell of the space mesh.
+       * @return Trace of getCellJacobian(p).
+       */
       KOKKOS_INLINE_FUNCTION
       Real getCellDivergence(const Geometry::PointView& p) const
       {
@@ -2053,7 +2074,12 @@ namespace Rodin::Kokkos::Variational
         }
       }
 
-      /// @brief Interpolates the physical Jacobian at an integration point of a cell.
+      /**
+       * @brief Interpolates the physical Jacobian at an integration point of a cell.
+       * @param ip Integration point on a cell of the space mesh.
+       * @return Matrix with one row per component, row @f$ r @f$ holding
+       * @f$ \nabla u_r(p) @f$.
+       */
       KOKKOS_INLINE_FUNCTION
       Geometry::Matrix getCellJacobian(const IntegrationPointView& ip) const
       {
@@ -2070,7 +2096,11 @@ namespace Rodin::Kokkos::Variational
         return result;
       }
 
-      /// @brief Interpolates the divergence at an integration point of a cell.
+      /**
+       * @brief Interpolates the divergence at an integration point of a cell.
+       * @param ip Integration point on a cell of the space mesh.
+       * @return Trace of getCellJacobian(ip).
+       */
       KOKKOS_INLINE_FUNCTION
       Real getCellDivergence(const IntegrationPointView& ip) const
       {

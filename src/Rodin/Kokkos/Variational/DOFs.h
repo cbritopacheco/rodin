@@ -125,9 +125,9 @@ namespace Rodin::Kokkos::Variational
       return 1;
     }
 
-    /// @return Zero, the global index.
+    /// @param q Local degree of freedom, necessarily zero. @return Zero, the global index.
     KOKKOS_INLINE_FUNCTION
-    Index operator[](Index) const
+    Index operator[]([[maybe_unused]] Index q) const
     {
       return 0;
     }
@@ -141,9 +141,9 @@ namespace Rodin::Kokkos::Variational
    */
   struct ConstantDOFs
   {
-    /// @return One.
+    /// @param vertices Vertex count, ignored. @return One.
     KOKKOS_INLINE_FUNCTION
-    static constexpr Index getCapacity(Index)
+    static constexpr Index getCapacity([[maybe_unused]] Index vertices)
     {
       return 1;
     }
@@ -155,23 +155,25 @@ namespace Rodin::Kokkos::Variational
       return 1;
     }
 
-    /// @return The single degree of freedom.
+    /// @param polytope Device polytope, ignored. @return The single degree of freedom.
     KOKKOS_INLINE_FUNCTION
-    ConstantIndex bind(const Geometry::PolytopeView&) const
+    ConstantIndex bind([[maybe_unused]] const Geometry::PolytopeView& polytope) const
     {
       return {};
     }
 
-    /// @return One.
+    /// @param ip Integration point, ignored. @param q Local degree of freedom, necessarily zero. @return One.
     template <class Point>
-    KOKKOS_INLINE_FUNCTION Real getBasis(const Point&, Index) const
+    KOKKOS_INLINE_FUNCTION Real getBasis(
+      [[maybe_unused]] const Point& ip, [[maybe_unused]] Index q) const
     {
       return 1;
     }
 
-    /// @param ip Integration point. @return Zero gradient.
+    /// @param ip Integration point. @param q Local degree of freedom, necessarily zero. @return Zero gradient.
     template <class Point>
-    KOKKOS_INLINE_FUNCTION Geometry::Vector getGradient(const Point& ip, Index) const
+    KOKKOS_INLINE_FUNCTION Geometry::Vector getGradient(
+      const Point& ip, [[maybe_unused]] Index q) const
     {
       return Geometry::Vector(ip.getGradient(0).size());
     }

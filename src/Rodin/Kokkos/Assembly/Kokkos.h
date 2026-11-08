@@ -600,6 +600,13 @@ namespace Rodin::Assembly::Internal
         size_t masterOffset;
       };
 
+      /**
+       * @brief Copies a host vector into a new device array.
+       * @param execution Execution space of the copy.
+       * @param data Host values.
+       * @param label Label of the device array.
+       * @return Device array holding a copy of @p data.
+       */
       template <class T>
       static Array<T> upload(
         const ExecutionSpace& execution, const std::vector<T>& data, const char* label)
@@ -1259,7 +1266,11 @@ namespace Rodin::Assembly::Internal
       }
 
     private:
-      /// @brief Builds the system into a host or a device matrix.
+      /**
+       * @brief Builds the system into a host or a device matrix.
+       * @param A Matrix, host or device, built when not null.
+       * @param b Right-hand side, built when not null.
+       */
       template <class Matrix>
       void build(Matrix* A, Math::Vector<Real>* b)
       {
@@ -2421,6 +2432,12 @@ namespace Rodin::Assembly::Internal
         size_t matrices;
       };
 
+      /**
+       * @brief Wraps a host buffer in an unmanaged view.
+       * @param data Host buffer.
+       * @param size Number of entries of @p data.
+       * @return Unmanaged host view of the buffer.
+       */
       template <class T>
       static ::Kokkos::View<T*, ::Kokkos::HostSpace,
         ::Kokkos::MemoryTraits<::Kokkos::Unmanaged>>
@@ -2430,6 +2447,12 @@ namespace Rodin::Assembly::Internal
           ::Kokkos::MemoryTraits<::Kokkos::Unmanaged>>(data, size);
       }
 
+      /**
+       * @brief Allocates an uninitialized device array.
+       * @param size Number of entries.
+       * @param label Label of the array.
+       * @return Uninitialized device array.
+       */
       template <class T>
       Array<T> allocate(size_t size, const char* label) const
       {
@@ -2438,6 +2461,14 @@ namespace Rodin::Assembly::Internal
           size);
       }
 
+      /**
+       * @brief Copies a host buffer into a new device array, waiting for the
+       * copy to complete.
+       * @param data Host buffer.
+       * @param size Number of entries of @p data.
+       * @param label Label of the device array.
+       * @return Device array holding a copy of the buffer.
+       */
       template <class T>
       Array<T> upload(const T* data, size_t size, const char* label) const
       {
@@ -2448,6 +2479,13 @@ namespace Rodin::Assembly::Internal
         return device;
       }
 
+      /**
+       * @brief Copies a host vector into a new device array, waiting for the
+       * copy to complete.
+       * @param data Host values.
+       * @param label Label of the device array.
+       * @return Device array holding a copy of @p data.
+       */
       template <class T>
       Array<T> upload(const std::vector<T>& data, const char* label) const
       {
@@ -2457,6 +2495,10 @@ namespace Rodin::Assembly::Internal
       /**
        * @brief Integrates the local integrators and lists the matrix
        * contributions.
+       * @param offsets Set to the rank of the first contribution of every
+       * matrix, followed by their count.
+       * @return Listed contributions of all the matrices, in the order they
+       * were added.
        */
       Triplets listMatrix(std::vector<size_t>& offsets) const
       {
@@ -2531,7 +2573,12 @@ namespace Rodin::Assembly::Internal
         return triplets;
       }
 
-      /// @brief Numbers the polytopes of segments and uploads them.
+      /**
+       * @brief Numbers the polytopes of segments and uploads them.
+       * @param segments Segments of contributions, numbered consecutively.
+       * @param label Label of the device array of segments.
+       * @return Ranks over the uploaded segments.
+       */
       Ranks rank(std::vector<Segment> segments, const char* label) const
       {
         Ranks ranks;
@@ -2550,8 +2597,12 @@ namespace Rodin::Assembly::Internal
 
       /**
        * @brief Sums the listed coefficients and copies the compressed matrix.
+       * @param triplets Matrix contributions.
        * @param ranks Ranks of the contributions, with the layout of the
        * coefficient sort keys.
+       * @param listed Sort keys and positions of the contributions to the
+       * coefficients.
+       * @param A Host matrix, resized and filled in compressed columns.
        */
       void compress(const Triplets& triplets, const Ranks& ranks, const Listed& listed,
         Math::SparseMatrix<Real>& A) const
@@ -2580,8 +2631,13 @@ namespace Rodin::Assembly::Internal
       /**
        * @brief Sums the listed coefficients into compressed rows on the
        * device.
+       * @param triplets Matrix contributions.
        * @param ranks Ranks of the contributions, with the layout of the
        * coefficient sort keys.
+       * @param listed Sort keys and positions of the contributions to the
+       * coefficients.
+       * @param A Device matrix, whose arrays are reused when their sizes are
+       * unchanged.
        */
       void compress(const Triplets& triplets, const Ranks& ranks, const Listed& listed,
         DeviceMatrix& A) const
@@ -2615,6 +2671,10 @@ namespace Rodin::Assembly::Internal
       /**
        * @brief Expands the matrix contributions and appends the rows of the
        * identified degrees of freedom, as the host assemblies do.
+       * @param triplets Matrix contributions.
+       * @param constraints Resolved constraints, with the expansions on the
+       * masters and the rows of the identified degrees of freedom.
+       * @return Expanded contributions and the lifted affine values.
        */
       Lifted expand(const Triplets& triplets,
         const typename ConstraintsType::Resolved& constraints) const
@@ -2644,6 +2704,8 @@ namespace Rodin::Assembly::Internal
        * @param starts Number of lifts before every rank.
        * @param offsets Rank of the first contribution of every matrix,
        * followed by their count.
+       * @return Number of lifts before the contributions of every entry of
+       * @p offsets.
        */
       std::vector<Index> download(
         const Array<Index>& starts, const std::vector<size_t>& offsets) const
@@ -2663,7 +2725,11 @@ namespace Rodin::Assembly::Internal
       /**
        * @brief Adds listed contributions to the right-hand side, in rank
        * order.
+       * @param indices Rows of the contributions.
+       * @param values Contributions.
+       * @param ranks Ranks of the contributions.
        * @param x Expansions on the masters, or null.
+       * @param rhs Device right-hand side, incremented.
        */
       void addEntries(const Array<Index>& indices, const Array<Real>& values,
         const Ranks& ranks, const Expansions* x, const Array<Real>& rhs) const
@@ -2686,6 +2752,7 @@ namespace Rodin::Assembly::Internal
       /**
        * @brief Sums the linear integrators and the preassembled vectors into
        * the right-hand side, in the order they were added.
+       * @param rhs Device right-hand side, incremented.
        * @param x Expansions on the masters, or null.
        * @param lift Sums the values lifted by a number of first matrices.
        */

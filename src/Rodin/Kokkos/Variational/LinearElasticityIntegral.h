@@ -223,9 +223,11 @@ namespace Rodin::Kokkos::Variational
 
       /**
        * @brief Locates the entries of every selected cell.
+       * @param diagonal Whether to list only the diagonals of the component
+       * blocks, ignored since both terms couple every pair of components.
        * @return Number of entries, shared by both terms.
        */
-      size_t prepare(bool) const override
+      size_t prepare([[maybe_unused]] bool diagonal) const override
       {
         restrict();
         const size_t count = m_dilatation.prepare(false);

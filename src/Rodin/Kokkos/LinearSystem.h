@@ -62,26 +62,34 @@ namespace Rodin::Math
       /// @brief Empty system.
       LinearSystem() = default;
 
-      /// @brief Copies the system, the matrix included.
-      LinearSystem(const LinearSystem&) = default;
+      /**
+       * @brief Copies the system, the matrix included.
+       * @param other System to copy.
+       */
+      LinearSystem(const LinearSystem& other) = default;
 
-      /// @brief Moves the system.
-      LinearSystem(LinearSystem&&) noexcept = default;
+      /**
+       * @brief Moves the system.
+       * @param other System to move.
+       */
+      LinearSystem(LinearSystem&& other) noexcept = default;
 
       /// @brief Destructor.
       virtual ~LinearSystem() = default;
 
       /**
        * @brief Copies the system, the matrix included.
+       * @param other System to copy.
        * @return Reference to this system.
        */
-      LinearSystem& operator=(const LinearSystem&) = default;
+      LinearSystem& operator=(const LinearSystem& other) = default;
 
       /**
        * @brief Moves the system.
+       * @param other System to move.
        * @return Reference to this system.
        */
-      LinearSystem& operator=(LinearSystem&&) noexcept = default;
+      LinearSystem& operator=(LinearSystem&& other) noexcept = default;
 
       /**
        * @brief Returns the operator @f$ A @f$.

@@ -270,11 +270,13 @@ namespace Rodin::Kokkos::Variational
 
       /**
        * @brief Locates the entries of every pair of selected cells.
+       * @param diagonal Whether to list only the diagonals of the component
+       * blocks, ignored since a global integrator lists every entry.
        * @return Number of entries, the pair of a test cell with n test and a
        * trial cell with m trial local degrees of freedom owning n * m
        * entries.
        */
-      size_t prepare(bool) const override
+      size_t prepare([[maybe_unused]] bool diagonal) const override
       {
         const auto& integrand = getIntegrand();
         const auto& trialfes = integrand.getLHS().getOperand().getFiniteElementSpace();
@@ -958,11 +960,17 @@ namespace Rodin::Variational
         : Parent(integrand)
       {}
 
-      /// @brief Copy constructor.
-      Integral(const Integral&) = default;
+      /**
+       * @brief Copy constructor.
+       * @param[in] other Integral to copy.
+       */
+      Integral(const Integral& other) = default;
 
-      /// @brief Move constructor.
-      Integral(Integral&&) = default;
+      /**
+       * @brief Move constructor.
+       * @param[in] other Integral to move.
+       */
+      Integral(Integral&& other) = default;
 
       /// @brief Gets the test region. @return Region::Cells.
       Geometry::Region getTestRegion() const override
