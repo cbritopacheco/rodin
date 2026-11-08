@@ -14,7 +14,7 @@ permissions:
   actions: read
 jobs:
   Convergence:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: ${{ (matrix.suite == 'curved_nonlinear_pyramid' || matrix.suite == 'pressure_pyramid' || endsWith(matrix.group,
       '/NonlinearPoisson')) && 360 || matrix.suite == 'baseline' && 90 || 180 }}
     strategy:

@@ -16,7 +16,7 @@ jobs:
   Labeler:
     if: ${{ !github.event.pull_request.draft }}
     name: Labeler
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
     - name: Check out proposed rules and regression tests
       uses: actions/checkout@v4

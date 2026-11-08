@@ -43,7 +43,7 @@ permissions:
 jobs:
   copilot-setup-steps:
     if: ${{ !github.event.pull_request.draft }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
       # Submodules are not optional: googletest and benchmark live in

@@ -23,7 +23,7 @@ concurrency:
 jobs:
   Kokkos:
     if: ${{ !github.event.pull_request.draft }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 330
     strategy:
       matrix:
