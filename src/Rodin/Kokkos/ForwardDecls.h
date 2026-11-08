@@ -28,13 +28,27 @@ namespace Rodin::Assembly
   class KokkosIteration;
 
   /**
+   * @defgroup KokkosAssemblySpecializations Kokkos Assembly Template Specializations
+   * @brief Template specializations of the Kokkos assembly class.
+   * @see <a href="class_rodin_1_1_assembly_1_1_kokkos.html">Kokkos</a>
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref Kokkos "Kokkos<Math::SparseMatrix<Real>, BilinearForm<...>>" | Sparse bilinear form into a host matrix. |
+   * | @ref Kokkos "Kokkos<Math::Vector<Real>, LinearForm<...>>" | Linear form into a host vector. |
+   * | @ref Kokkos "Kokkos<Math::LinearSystem<Matrix, Math::Vector<Real>>, Problem<...>>" | Single field or mixed problem into a host or device CSR system. |
+   * | @ref Kokkos "Kokkos<IndexMap<...>, DirichletBC<...>>" | Value and identification Dirichlet conditions. |
+   * | @ref Kokkos "Kokkos<::Mat, BilinearForm<...>>" | Bilinear form into a PETSc Kokkos matrix. |
+   * | @ref Kokkos "Kokkos<::Vec, LinearForm<...>>" | Linear form into a PETSc Kokkos vector. |
+   * | @ref Kokkos "Kokkos<PETSc::Math::LinearSystem, Problem<...>>" | Single field or multi-field problem into a PETSc Kokkos system. |
+   */
+
+  /**
    * @brief Device assembly on resident Kokkos meshes.
    * @tparam LinearAlgebraType Target linear algebra type.
    * @tparam Object Variational form type to assemble.
    *
-   * | Specialization | Description |
-   * |----------------|-------------|
-   * | @ref Kokkos "Kokkos<Math::SparseMatrix<Real>, BilinearForm<...>>" | Device assembly of one sparse bilinear form. |
+   * The specializations are listed in @ref KokkosAssemblySpecializations.
    */
   template <class LinearAlgebraType, class Object>
   class Kokkos;
