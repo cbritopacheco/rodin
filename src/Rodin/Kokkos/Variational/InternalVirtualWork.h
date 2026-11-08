@@ -40,9 +40,7 @@ namespace Rodin::Kokkos::Variational
    */
   struct NeoHookeanPoint
   {
-    /**
-     * @param h Displacement gradient @f$ H @f$, a square matrix.
-     */
+    /// @param h Displacement gradient @f$ H @f$, a square matrix.
     KOKKOS_INLINE_FUNCTION
     explicit NeoHookeanPoint(const Geometry::Matrix& h)
       : F(h),
@@ -359,15 +357,19 @@ namespace Rodin::Solid
           constexpr Index Vertices = decltype(n)::value;
           // Larger local matrices take one team per cell.
           if constexpr (getLocalSize<Vertices>() <= LocalCapacity)
+          {
             integratePolytopes<Vertices>(trialfes.getMesh(), m_polytopes,
               trialfes.getDeviceDOFs(), testfes.getDeviceDOFs(),
               testfes.getVectorDimension(), state, m_law.getLameFirstParameter(),
               m_law.getShearModulus(), values, offset, sign, accumulate, rows, cols);
+          }
           else
+          {
             integrateTeams<Vertices>(trialfes.getMesh(), m_polytopes,
               trialfes.getDeviceDOFs(), testfes.getDeviceDOFs(),
               testfes.getVectorDimension(), state, m_law.getLameFirstParameter(),
               m_law.getShearModulus(), values, offset, sign, accumulate, rows, cols);
+          }
           return true;
         });
       }
@@ -516,8 +518,10 @@ namespace Rodin::Solid
       }
 
     private:
-      /// @brief Maximum number of entries of the local matrix of a thread,
-      /// so larger local matrices take one team per cell.
+      /**
+       * @brief Maximum number of entries of the local matrix of a thread,
+       * so larger local matrices take one team per cell.
+       */
       static constexpr Index LocalCapacity = 1024;
 
       /// @brief Largest group of quadrature points of a team.
@@ -529,15 +533,19 @@ namespace Rodin::Solid
       /// @brief Fewest points of a group in the fast scratch level.
       static constexpr Index TeamMinimumPoints = 4;
 
-      /// @brief Number of points of a group whose values exceed TeamScratch,
-      /// in the slower scratch level.
+      /**
+       * @brief Number of points of a group whose values exceed TeamScratch,
+       * in the slower scratch level.
+       */
       static constexpr Index TeamSlowPoints = 8;
 
       /// @brief Largest team, whose register bound the kernel is compiled for.
       static constexpr unsigned int TeamThreads = 512;
 
-      /// @brief Test functions of the block of a thread, whose entries
-      /// with one trial function it accumulates per pass over the quadrature.
+      /**
+       * @brief Test functions of the block of a thread, whose entries
+       * with one trial function it accumulates per pass over the quadrature.
+       */
       static constexpr Index TeamPairs = 4;
 
       /// @brief Selects the quadrature order of a cell, as on the host.
@@ -643,8 +651,10 @@ namespace Rodin::Solid
         /// @brief Factor of the contributions.
         Real sign;
 
-        /// @brief Whether the contributions are added to the values instead of
-        /// replacing them.
+        /**
+         * @brief Whether the contributions are added to the values instead of
+         * replacing them.
+         */
         bool accumulate;
 
         /// @brief Whether the row and column indices are written.
@@ -791,18 +801,24 @@ namespace Rodin::Solid
         /// @brief Whether the test space shares the basis gradients of the trial space.
         static constexpr bool SharedTest = std::is_same_v<TrialDOFsType, TestDOFsType>;
 
-        /// @brief Whether the displacement space shares the basis gradients of the
-        /// trial space.
+        /**
+         * @brief Whether the displacement space shares the basis gradients of the
+         * trial space.
+         */
         static constexpr bool SharedState =
           std::is_same_v<TrialDOFsType, StateDOFsType>;
 
-        /// @brief Number of test gradients stored per point, zero when the test space
-        /// shares the trial gradients.
+        /**
+         * @brief Number of test gradients stored per point, zero when the test space
+         * shares the trial gradients.
+         */
         static constexpr Index TestStorage = SharedTest ? 0 : TestCapacity;
 
-        /// @brief Bytes of team scratch memory per quadrature point, for the
-        /// integration point, the kinematics, the coefficients, the displacement
-        /// gradient, the gradients and the pullbacks.
+        /**
+         * @brief Bytes of team scratch memory per quadrature point, for the
+         * integration point, the kinematics, the coefficients, the displacement
+         * gradient, the gradients and the pullbacks.
+         */
         static constexpr size_t PointBytes = sizeof(Point) + sizeof(Kinematics) +
           (3 + Square) * sizeof(Real) +
           2 * (TrialCapacity + TestStorage) * sizeof(Vector);
@@ -870,8 +886,10 @@ namespace Rodin::Solid
         /// @brief Factor of the contributions.
         Real sign;
 
-        /// @brief Whether the contributions are added to the values instead of
-        /// replacing them.
+        /**
+         * @brief Whether the contributions are added to the values instead of
+         * replacing them.
+         */
         bool accumulate;
 
         /// @brief Whether the row and column indices are written.
@@ -991,13 +1009,17 @@ namespace Rodin::Solid
                   const Real value = data(stateIndices[q] + r * stateDOFs.getStride());
                   RODIN_KOKKOS_UNROLL
                   for (Index k = 0; k < D; ++k)
+                  {
                     if (k < vdim)
                       row[k] += gradient(k) * value;
+                  }
                 }
                 RODIN_KOKKOS_UNROLL
                 for (Index k = 0; k < D; ++k)
+                {
                   if (k < vdim)
                     jacobians[c * Square + r * vdim + k] = row[k];
+                }
               };
               if (!SharedState)
               {
@@ -1015,8 +1037,10 @@ namespace Rodin::Solid
               {
                 Kokkos::Geometry::Matrix h(vdim, vdim);
                 for (Index r = 0; r < vdim; ++r)
+                {
                   for (Index k = 0; k < vdim; ++k)
                     h(r, k) = jacobians[c * Square + r * vdim + k];
+                }
                 new (kinematics + c) Kinematics(h);
                 const Real wdet =
                   quadrature.getWeight(q0 + c) * points[c].getDistortion();
@@ -1502,8 +1526,10 @@ namespace Rodin::Solid
         /// @brief Factor of the contributions.
         Real sign;
 
-        /// @brief Whether the contributions are added to the values instead of
-        /// replacing them.
+        /**
+         * @brief Whether the contributions are added to the values instead of
+         * replacing them.
+         */
         bool accumulate;
 
         /// @brief Whether the entry indices are written.
@@ -1824,15 +1850,19 @@ namespace Rodin::Solid
           constexpr Index Vertices = decltype(n)::value;
           // Larger local matrices take one team per cell.
           if constexpr (getLocalSize<Vertices>() <= LocalCapacity)
+          {
             integratePolytopes<Vertices>(trialfes.getMesh(), m_polytopes,
               trialfes.getDeviceDOFs(), testfes.getDeviceDOFs(),
               testfes.getVectorDimension(), state, law, values, offset, sign, accumulate,
               rows, cols);
+          }
           else
+          {
             integrateTeams<Vertices>(trialfes.getMesh(), m_polytopes,
               trialfes.getDeviceDOFs(), testfes.getDeviceDOFs(),
               testfes.getVectorDimension(), state, law, values, offset, sign, accumulate,
               rows, cols);
+          }
           return true;
         });
       }
@@ -1980,8 +2010,10 @@ namespace Rodin::Solid
       }
 
     private:
-      /// @brief Maximum number of entries of the local matrix of a thread,
-      /// so larger local matrices take one team per cell.
+      /**
+       * @brief Maximum number of entries of the local matrix of a thread,
+       * so larger local matrices take one team per cell.
+       */
       static constexpr Index LocalCapacity = 1024;
 
       /// @brief Largest group of quadrature points of a team.
@@ -1993,15 +2025,19 @@ namespace Rodin::Solid
       /// @brief Fewest points of a group in the fast scratch level.
       static constexpr Index TeamMinimumPoints = 4;
 
-      /// @brief Number of points of a group whose values exceed TeamScratch,
-      /// in the slower scratch level.
+      /**
+       * @brief Number of points of a group whose values exceed TeamScratch,
+       * in the slower scratch level.
+       */
       static constexpr Index TeamSlowPoints = 8;
 
       /// @brief Largest team, whose register bound the kernel is compiled for.
       static constexpr unsigned int TeamThreads = 512;
 
-      /// @brief Test functions of the block of a thread, whose entries
-      /// with one trial function it accumulates per pass over the quadrature.
+      /**
+       * @brief Test functions of the block of a thread, whose entries
+       * with one trial function it accumulates per pass over the quadrature.
+       */
       static constexpr Index TeamPairs = 4;
 
       /// @brief Selects the quadrature order of a cell, as on the host.
@@ -2110,8 +2146,10 @@ namespace Rodin::Solid
         /// @brief Factor of the contributions.
         Real sign;
 
-        /// @brief Whether the contributions are added to the values instead of
-        /// replacing them.
+        /**
+         * @brief Whether the contributions are added to the values instead of
+         * replacing them.
+         */
         bool accumulate;
 
         /// @brief Whether the row and column indices are written.
@@ -2268,18 +2306,24 @@ namespace Rodin::Solid
         /// @brief Whether the test space shares the basis gradients of the trial space.
         static constexpr bool SharedTest = std::is_same_v<TrialDOFsType, TestDOFsType>;
 
-        /// @brief Whether the displacement space shares the basis gradients of the
-        /// trial space.
+        /**
+         * @brief Whether the displacement space shares the basis gradients of the
+         * trial space.
+         */
         static constexpr bool SharedState =
           std::is_same_v<TrialDOFsType, StateDOFsType>;
 
-        /// @brief Number of test gradients stored per point, zero when the test space
-        /// shares the trial gradients.
+        /**
+         * @brief Number of test gradients stored per point, zero when the test space
+         * shares the trial gradients.
+         */
         static constexpr Index TestStorage = SharedTest ? 0 : TestCapacity;
 
-        /// @brief Bytes of team scratch memory per quadrature point, for the
-        /// integration point, the displacement gradient, the elasticity tensor and the
-        /// gradients.
+        /**
+         * @brief Bytes of team scratch memory per quadrature point, for the
+         * integration point, the displacement gradient, the elasticity tensor and the
+         * gradients.
+         */
         static constexpr size_t PointBytes = sizeof(Point) +
           (Square + Tensor) * sizeof(Real) +
           (TrialCapacity + TestStorage) * sizeof(Vector);
@@ -2344,8 +2388,10 @@ namespace Rodin::Solid
         /// @brief Factor of the contributions.
         Real sign;
 
-        /// @brief Whether the contributions are added to the values instead of
-        /// replacing them.
+        /**
+         * @brief Whether the contributions are added to the values instead of
+         * replacing them.
+         */
         bool accumulate;
 
         /// @brief Whether the row and column indices are written.
@@ -2396,8 +2442,10 @@ namespace Rodin::Solid
             memory.get_shmem_aligned(P * TrialCapacity * sizeof(Vector), Alignment));
           Vector* gb = ga;
           if (!SharedTest)
+          {
             gb = static_cast<Vector*>(
               memory.get_shmem_aligned(P * TestCapacity * sizeof(Vector), Alignment));
+          }
           // A slot is a trial function and a block of E test functions.
           const Index slots = na * ((nb + E - 1) / E);
           const Index begin = quadrature.begin(g);
@@ -2456,13 +2504,17 @@ namespace Rodin::Solid
                   const Real value = data(stateIndices[q] + r * stateDOFs.getStride());
                   RODIN_KOKKOS_UNROLL
                   for (Index k = 0; k < D; ++k)
+                  {
                     if (k < vdim)
                       row[k] += gradient(k) * value;
+                  }
                 }
                 RODIN_KOKKOS_UNROLL
                 for (Index k = 0; k < D; ++k)
+                {
                   if (k < vdim)
                     jacobians[c * Square + r * vdim + k] = row[k];
+                }
               };
               if (!SharedState)
               {
@@ -2484,8 +2536,10 @@ namespace Rodin::Solid
                 const Index t = i - c * vdim;
                 Kokkos::Geometry::Matrix h(vdim, vdim);
                 for (Index r = 0; r < vdim; ++r)
+                {
                   for (Index k = 0; k < vdim; ++k)
                     h(r, k) = jacobians[c * Square + r * vdim + k];
+                }
                 const Real wdet =
                   quadrature.getWeight(q0 + c) * points[c].getDistortion();
                 law.getElasticity(
@@ -2501,8 +2555,10 @@ namespace Rodin::Solid
                     const Vector& gradient = ga[c * TrialCapacity + a];
                     RODIN_KOKKOS_UNROLL
                     for (Index L = 0; L < D; ++L)
+                    {
                       if (L < vdim)
                         alpha[L] = gradient(L);
+                    }
                   }
                   Real beta[E][D] = {};
                   RODIN_KOKKOS_UNROLL
@@ -2513,8 +2569,10 @@ namespace Rodin::Solid
                       const Vector& gradient = gb[c * TestCapacity + b0 + j];
                       RODIN_KOKKOS_UNROLL
                       for (Index J = 0; J < D; ++J)
+                      {
                         if (J < vdim)
                           beta[j][J] = gradient(J);
+                      }
                     }
                   }
                   const Real* const A = tensors + c * Tensor;
@@ -2536,8 +2594,10 @@ namespace Rodin::Solid
                             Rodin::Kokkos::Variational::getElasticityIndex(J, s, 0);
                           RODIN_KOKKOS_UNROLL
                           for (Index L = 0; L < D; ++L)
+                          {
                             if (J < vdim && s < vdim && L < vdim)
                               m[J][s] += AJ[L] * alpha[L];
+                          }
                         }
                       }
                       RODIN_KOKKOS_UNROLL
@@ -2960,8 +3020,10 @@ namespace Rodin::Solid
         /// @brief Factor of the contributions.
         Real sign;
 
-        /// @brief Whether the contributions are added to the values instead of
-        /// replacing them.
+        /**
+         * @brief Whether the contributions are added to the values instead of
+         * replacing them.
+         */
         bool accumulate;
 
         /// @brief Whether the entry indices are written.

@@ -837,8 +837,10 @@ namespace Rodin::Kokkos::Variational
                           if constexpr (Scalar)
                             local[l * ntr + m] += factor * s[i] * kv[i] * (phi * psi);
                           else
+                          {
                             local[l * ntr + m] += factor * s[i] *
                               (kv[i](l % testVDim, m % trialVDim) * phi * psi);
+                          }
                         }
                       }
                     }

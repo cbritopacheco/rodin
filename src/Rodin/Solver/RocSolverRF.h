@@ -401,8 +401,10 @@ namespace Rodin::Solver
       /// @brief Factorization stage, shared by the factorization solvers.
       using Factorization = Rodin::Solver::Factorization;
 
-      /// @brief Info::status of a zero or non-finite pivot, or of a solution
-      /// that is not finite.
+      /**
+       * @brief Info::status of a zero or non-finite pivot, or of a solution
+       * that is not finite.
+       */
       static constexpr Integer Breakdown = std::numeric_limits<Integer>::max();
 
       /// @brief Matrix symmetry declared to rocSOLVER.
@@ -534,8 +536,10 @@ namespace Rodin::Solver
         /// @brief Number of nonzeros of the analyzed matrix.
         Index nonzeros = 0;
 
-        /// @brief Line starts then indices of the compressed arrays of the
-        /// analyzed matrix, on the host.
+        /**
+         * @brief Line starts then indices of the compressed arrays of the
+         * analyzed matrix, on the host.
+         */
         std::vector<Math::SparseIndex> pattern;
 
         /// @brief Number of nonzeros of the bundled factors.

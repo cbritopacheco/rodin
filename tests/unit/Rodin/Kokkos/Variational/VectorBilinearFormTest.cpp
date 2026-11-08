@@ -27,8 +27,10 @@ namespace Rodin::Tests::Unit
 
     Math::SpatialMatrix<Real> a(d, d);
     for (size_t i = 0; i < d; ++i)
+    {
       for (size_t j = 0; j < d; ++j)
         a(i, j) = 1 + Real(i) - 2 * Real(j) + Real(i == j);
+    }
     MatrixFunction ha(a);
     MatrixFunction da(a);
     expectSameForm(hu, hv, Integral(Dot(ha, Jacobian(hu)), Dot(ha, Jacobian(hv))), du, dv,

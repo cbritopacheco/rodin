@@ -37,9 +37,7 @@ namespace Rodin::PETSc::Assembly
   class FieldLayout
   {
     public:
-      /**
-       * @brief Field of the system.
-       */
+      /// @brief Field of the system.
       struct Field
       {
         /// @brief Index in the system of the first degree of freedom of the field.

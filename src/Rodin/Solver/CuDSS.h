@@ -252,8 +252,10 @@ namespace Rodin::Solver
         /// @brief Number of nonzeros of the analyzed matrix.
         Index nonzeros = 0;
 
-        /// @brief Line starts then indices of the compressed arrays of the
-        /// analyzed matrix, on the host.
+        /**
+         * @brief Line starts then indices of the compressed arrays of the
+         * analyzed matrix, on the host.
+         */
         std::vector<Math::SparseIndex> pattern;
 
         /**
@@ -582,8 +584,10 @@ namespace Rodin::Solver
           "copy to the device");
       }
 
-      /// @brief Copies the row starts then the column indices of the matrix
-      /// to the host.
+      /**
+       * @brief Copies the row starts then the column indices of the matrix
+       * to the host.
+       */
       template <class M>
       void readPattern(
         std::vector<Math::SparseIndex>& pattern, M& matrix, Index rows, Index nonzeros)

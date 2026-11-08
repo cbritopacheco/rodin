@@ -325,8 +325,10 @@ namespace Rodin::Kokkos::Variational
           {
             const Index rdim = reference[i].size();
             for (Index k = 0; k < 3; ++k)
+            {
               points(3 * (m_nodeOffsets[g] + i) + k) =
                 k < rdim ? reference[i](k) : Real(0);
+            }
             for (Index m = 0; m < n; ++m)
             {
               long double monomial = 1;
@@ -370,8 +372,10 @@ namespace Rodin::Kokkos::Variational
           for (Index q = 0; q < n; ++q)
           {
             for (Index m = 0; m < n; ++m)
+            {
               values(m_coefficientOffsets[g] + q * n + m) =
                 static_cast<Real>(inverse(q, m));
+            }
           }
         }
         ::Kokkos::deep_copy(execution, m_exponents, exponents);

@@ -227,8 +227,10 @@ namespace Rodin::Geometry
               attributes[first + i] = attribute.value_or(Attribute{});
               present[first + i] = attribute.has_value();
               if (local)
+              {
                 mapped[first + i] =
                   local->getPolytopeTransformationIndex().find(d, i) != nullptr;
+              }
             });
         }
         for (size_t d = 0, first = 0; d <= getDimension(); first += getPolytopeCount(d++))
@@ -1047,8 +1049,10 @@ namespace Rodin::Geometry
       /// @brief Device-supported geometric transformation representation.
       using GeometryKind = Rodin::Kokkos::Geometry::GeometryKind;
 
-      /// @brief One-dimensional resident array in the context memory space.
-      /// @tparam T Entry type.
+      /**
+       * @brief One-dimensional resident array in the context memory space.
+       * @tparam T Entry type.
+       */
       template <class T>
       using DeviceArray = ::Kokkos::View<T*, MemorySpace>;
 
@@ -1103,16 +1107,18 @@ namespace Rodin::Geometry
       /// @brief Grows entity data after device discovery without changing existing maps.
       struct GrowEntities
       {
-        /// @var oldOffsets
-        /// Dimension offsets of the flattened entity numbering before discovery.
-        /// @var oldAttributes
-        /// Existing labels, indexed by the old flattened numbering.
-        /// @var oldPresent
-        /// Existing explicit label presence flags.
-        /// @var oldKinds
-        /// Existing geometric transformation representations.
-        /// @var oldControls
-        /// Existing control-point offsets, including the terminal offset.
+        /**
+         * @var oldOffsets
+         * Dimension offsets of the flattened entity numbering before discovery.
+         * @var oldAttributes
+         * Existing labels, indexed by the old flattened numbering.
+         * @var oldPresent
+         * Existing explicit label presence flags.
+         * @var oldKinds
+         * Existing geometric transformation representations.
+         * @var oldControls
+         * Existing control-point offsets, including the terminal offset.
+         */
         ::Kokkos::Array<Index, 5> oldOffsets,
           newOffsets; ///< Dimension offsets before and after discovery.
         DeviceArray<Attribute> oldAttributes,
@@ -1290,8 +1296,10 @@ namespace Rodin::Geometry
           m_context.getExecutionSpace(), values, label);
       }
 
-      /// @brief Initializes host compatibility cache buckets.
-      /// @returns Revision never handed out before, in any mesh.
+      /**
+       * @brief Initializes host compatibility cache buckets.
+       * @returns Revision never handed out before, in any mesh.
+       */
       static std::uint64_t nextRevision()
       {
         static std::atomic<std::uint64_t> counter{0};

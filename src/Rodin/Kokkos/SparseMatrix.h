@@ -138,51 +138,65 @@ namespace Rodin::Kokkos
         return *this;
       }
 
-      /// @brief Number of rows.
-      /// @return Row count of the matrix.
+      /**
+       * @brief Number of rows.
+       * @return Row count of the matrix.
+       */
       size_t getRowCount() const
       {
         return m_rows;
       }
 
-      /// @brief Number of columns.
-      /// @return Column count of the matrix.
+      /**
+       * @brief Number of columns.
+       * @return Column count of the matrix.
+       */
       size_t getColumnCount() const
       {
         return m_cols;
       }
 
-      /// @brief Number of stored coefficients.
-      /// @return Length of the column and value arrays.
+      /**
+       * @brief Number of stored coefficients.
+       * @return Length of the column and value arrays.
+       */
       size_t getNonZeroCount() const
       {
         return m_values.extent(0);
       }
 
-      /// @brief Position of the first coefficient of every row, followed by
-      /// the number of coefficients. Empty for an empty matrix.
-      /// @return Resident CSR row offsets.
+      /**
+       * @brief Position of the first coefficient of every row, followed by
+       * the number of coefficients. Empty for an empty matrix.
+       * @return Resident CSR row offsets.
+       */
       const Array<IndexType>& getRowStarts() const
       {
         return m_starts;
       }
 
-      /// @brief Column of every coefficient.
-      /// @return Resident CSR column indices.
+      /**
+       * @brief Column of every coefficient.
+       * @return Resident CSR column indices.
+       */
       const Array<IndexType>& getColumns() const
       {
         return m_columns;
       }
 
-      /// @brief Value of every coefficient.
-      /// @return Resident CSR values, read-only.
+      /**
+       * @brief Value of every coefficient.
+       * @return Resident CSR values, read-only.
+       */
       const Array<Scalar>& getValues() const
       {
         return m_values;
       }
 
-      /// @brief Value of every coefficient, for an update in place.
-      /// @return Resident CSR values, writable.
+      /**
+       * @brief Value of every coefficient, for an update in place.
+       * @return Resident CSR values, writable.
+       */
       Array<Scalar>& getValues()
       {
         return m_values;
@@ -268,49 +282,61 @@ namespace Rodin::Solver::Internal
     /// @brief Leaves the matrix unchanged, being already compressed.
     static void prepare(MatrixType&) {}
 
-    /// @brief Number of rows.
-    /// @param matrix Compressed device matrix.
-    /// @return Row count of @p matrix.
+    /**
+     * @brief Number of rows.
+     * @param matrix Compressed device matrix.
+     * @return Row count of @p matrix.
+     */
     static size_t getRowCount(const MatrixType& matrix)
     {
       return matrix.getRowCount();
     }
 
-    /// @brief Number of columns.
-    /// @param matrix Compressed device matrix.
-    /// @return Column count of @p matrix.
+    /**
+     * @brief Number of columns.
+     * @param matrix Compressed device matrix.
+     * @return Column count of @p matrix.
+     */
     static size_t getColumnCount(const MatrixType& matrix)
     {
       return matrix.getColumnCount();
     }
 
-    /// @brief Number of stored coefficients.
-    /// @param matrix Compressed device matrix.
-    /// @return Stored coefficient count of @p matrix.
+    /**
+     * @brief Number of stored coefficients.
+     * @param matrix Compressed device matrix.
+     * @return Stored coefficient count of @p matrix.
+     */
     static size_t getNonZeroCount(const MatrixType& matrix)
     {
       return matrix.getNonZeroCount();
     }
 
-    /// @brief Start of every row, followed by the coefficient count.
-    /// @param matrix Compressed device matrix.
-    /// @return Pointer to the CSR row offsets of @p matrix.
+    /**
+     * @brief Start of every row, followed by the coefficient count.
+     * @param matrix Compressed device matrix.
+     * @return Pointer to the CSR row offsets of @p matrix.
+     */
     static const Math::SparseIndex* getStarts(const MatrixType& matrix)
     {
       return matrix.getRowStarts().data();
     }
 
-    /// @brief Column of every coefficient.
-    /// @param matrix Compressed device matrix.
-    /// @return Pointer to the CSR column indices of @p matrix.
+    /**
+     * @brief Column of every coefficient.
+     * @param matrix Compressed device matrix.
+     * @return Pointer to the CSR column indices of @p matrix.
+     */
     static const Math::SparseIndex* getIndices(const MatrixType& matrix)
     {
       return matrix.getColumns().data();
     }
 
-    /// @brief Value of every coefficient.
-    /// @param matrix Compressed device matrix.
-    /// @return Pointer to the CSR values of @p matrix.
+    /**
+     * @brief Value of every coefficient.
+     * @param matrix Compressed device matrix.
+     * @return Pointer to the CSR values of @p matrix.
+     */
     static const Real* getValues(const MatrixType& matrix)
     {
       return matrix.getValues().data();

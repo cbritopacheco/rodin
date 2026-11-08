@@ -352,22 +352,28 @@ namespace Rodin::Solver
         Krylov::download(m_x, axb.getSolution());
       }
 
-      /// @brief Whether the last solve reached the tolerance.
-      /// @returns True if the last solve converged.
+      /**
+       * @brief Whether the last solve reached the tolerance.
+       * @returns True if the last solve converged.
+       */
       Boolean success() const
       {
         return m_result.converged;
       }
 
-      /// @brief Number of iterations of the last solve.
-      /// @returns Iteration count of the last solve.
+      /**
+       * @brief Number of iterations of the last solve.
+       * @returns Iteration count of the last solve.
+       */
       size_t getIterationNumber() const
       {
         return m_result.iterations;
       }
 
-      /// @brief Relative residual of the last solve.
-      /// @returns Relative residual estimated by the last solve.
+      /**
+       * @brief Relative residual of the last solve.
+       * @returns Relative residual estimated by the last solve.
+       */
       Real getError() const
       {
         return m_result.error;

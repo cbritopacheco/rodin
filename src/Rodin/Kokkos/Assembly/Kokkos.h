@@ -73,8 +73,10 @@ namespace Rodin::Assembly::Internal
     const auto* integrator = dynamic_cast<
       const ::Rodin::Kokkos::Variational::DeviceBilinearFormIntegrator<Backend>*>(&lbfi);
     if (!integrator)
+    {
       Alert::Exception() << "Local integrator has no device implementation."
                          << Alert::Raise;
+    }
     return {integrator, sign};
   }
 
@@ -98,8 +100,10 @@ namespace Rodin::Assembly::Internal
     const auto* integrator = dynamic_cast<
       const ::Rodin::Kokkos::Variational::DeviceBilinearFormIntegrator<Backend>*>(&gbfi);
     if (!integrator)
+    {
       Alert::Exception() << "Global integrator has no device implementation."
                          << Alert::Raise;
+    }
     return {integrator, sign};
   }
 
@@ -169,13 +173,17 @@ namespace Rodin::Assembly::Internal
         /// @brief Coefficients of the masters.
         Array<Real> coefficients;
 
-        /// @brief Affine values of the identified degrees of freedom, zero
-        /// for the others.
+        /**
+         * @brief Affine values of the identified degrees of freedom, zero
+         * for the others.
+         */
         Array<Real> values;
 
-        /// @brief Number of masters of a degree of freedom.
-        /// @param i Index of the degree of freedom.
-        /// @return Number of entries of the expansion of @p i.
+        /**
+         * @brief Number of masters of a degree of freedom.
+         * @param i Index of the degree of freedom.
+         * @return Number of entries of the expansion of @p i.
+         */
         KOKKOS_INLINE_FUNCTION size_t count(Index i) const
         {
           return starts(i + 1) - starts(i);
@@ -188,8 +196,10 @@ namespace Rodin::Assembly::Internal
         /// @brief Expansions, empty when no degree of freedom stays identified.
         Expansions expansions;
 
-        /// @brief Rows of the constraints of the identified rows, by
-        /// increasing row.
+        /**
+         * @brief Rows of the constraints of the identified rows, by
+         * increasing row.
+         */
         std::vector<Index> rows;
 
         /// @brief Columns of the constraint rows.
@@ -198,12 +208,16 @@ namespace Rodin::Assembly::Internal
         /// @brief Values of the constraint rows.
         std::vector<Real> values;
 
-        /// @brief Whether the right-hand side of each row is imposed, the
-        /// rows being fixed or identified.
+        /**
+         * @brief Whether the right-hand side of each row is imposed, the
+         * rows being fixed or identified.
+         */
         std::vector<unsigned char> imposed;
 
-        /// @brief Whether some degree of freedom stays identified.
-        /// @return True when the expansions are uploaded.
+        /**
+         * @brief Whether some degree of freedom stays identified.
+         * @return True when the expansions are uploaded.
+         */
         bool isExpanded() const
         {
           return expansions.starts.extent(0) > 0;
@@ -263,23 +277,29 @@ namespace Rodin::Assembly::Internal
         m_identified = true;
       }
 
-      /// @brief Whether some degree of freedom is fixed.
-      /// @return True when at least one degree of freedom is fixed.
+      /**
+       * @brief Whether some degree of freedom is fixed.
+       * @return True when at least one degree of freedom is fixed.
+       */
       bool isConstrained() const
       {
         return m_constrained;
       }
 
-      /// @brief Whether some condition identifies degrees of freedom.
-      /// @return True when an identification or periodic condition was
-      /// recorded.
+      /**
+       * @brief Whether some condition identifies degrees of freedom.
+       * @return True when an identification or periodic condition was
+       * recorded.
+       */
       bool isIdentified() const
       {
         return m_identified;
       }
 
-      /// @brief Whether each degree of freedom is fixed.
-      /// @return Flag of each degree of freedom, nonzero when fixed.
+      /**
+       * @brief Whether each degree of freedom is fixed.
+       * @return Flag of each degree of freedom, nonzero when fixed.
+       */
       const std::vector<unsigned char>& getFixed() const
       {
         return m_fixed;
@@ -682,8 +702,10 @@ namespace Rodin::Assembly::Internal
         /// @brief Number of its first polytope.
         size_t first;
 
-        /// @brief Whether the zero entries are kept, as for a preassembled
-        /// operator.
+        /**
+         * @brief Whether the zero entries are kept, as for a preassembled
+         * operator.
+         */
         bool dense;
       };
 
@@ -711,10 +733,12 @@ namespace Rodin::Assembly::Internal
         /// @brief Bits of the sort keys holding the polytope.
         unsigned shift = 0;
 
-        /// @brief Finds the segment holding a position.
-        /// @param e Position of an entry in storage.
-        /// @return Index of the segment holding @p e, or the number of
-        /// segments when @p e follows the last one.
+        /**
+         * @brief Finds the segment holding a position.
+         * @param e Position of an entry in storage.
+         * @return Index of the segment holding @p e, or the number of
+         * segments when @p e follows the last one.
+         */
         KOKKOS_INLINE_FUNCTION size_t find(size_t e) const
         {
           size_t k = 0;
@@ -723,9 +747,11 @@ namespace Rodin::Assembly::Internal
           return k;
         }
 
-        /// @brief Rank of the entry stored at a position.
-        /// @param e Position of the entry in storage.
-        /// @return Rank of the entry in the list of contributions.
+        /**
+         * @brief Rank of the entry stored at a position.
+         * @param e Position of the entry in storage.
+         * @return Rank of the entry in the list of contributions.
+         */
         KOKKOS_INLINE_FUNCTION Index operator()(Index e) const
         {
           const size_t k = find(e);
@@ -737,10 +763,12 @@ namespace Rodin::Assembly::Internal
               e - s.offset, s.count, s.spacing);
         }
 
-        /// @brief Number of the polytope of the entry stored at a position.
-        /// @param e Position of the entry in storage.
-        /// @return Number of its polytope, the last one for the entries
-        /// following the last segment.
+        /**
+         * @brief Number of the polytope of the entry stored at a position.
+         * @param e Position of the entry in storage.
+         * @return Number of its polytope, the last one for the entries
+         * following the last segment.
+         */
         KOKKOS_INLINE_FUNCTION Index polytope(size_t e) const
         {
           const size_t k = find(e);
@@ -750,11 +778,13 @@ namespace Rodin::Assembly::Internal
           return s.spacing > 1 ? s.first + (e - s.offset) % s.spacing : s.first;
         }
 
-        /// @brief Sort key of the entry stored at a position.
-        /// @param key Key of the entry, without the polytope.
-        /// @param e Position of the entry in storage.
-        /// @return Key shifted with the number of the polytope as lowest
-        /// bits, or @p key when the polytopes do not fit.
+        /**
+         * @brief Sort key of the entry stored at a position.
+         * @param key Key of the entry, without the polytope.
+         * @param e Position of the entry in storage.
+         * @return Key shifted with the number of the polytope as lowest
+         * bits, or @p key when the polytopes do not fit.
+         */
         KOKKOS_INLINE_FUNCTION Index sortKey(Index key, size_t e) const
         {
           return shift > 0 ? (key << shift) | polytope(e) : key;
@@ -775,11 +805,13 @@ namespace Rodin::Assembly::Internal
           return res;
         }
 
-        /// @brief Whether the entry stored at a position is listed.
-        /// @param values Values of the entries, by position.
-        /// @param e Position of the entry in storage.
-        /// @return True when the entry is nonzero or belongs to a segment
-        /// keeping its zero entries.
+        /**
+         * @brief Whether the entry stored at a position is listed.
+         * @param values Values of the entries, by position.
+         * @param e Position of the entry in storage.
+         * @return True when the entry is nonzero or belongs to a segment
+         * keeping its zero entries.
+         */
         KOKKOS_INLINE_FUNCTION bool kept(const Array<Real>& values, size_t e) const
         {
           if (values(e) != Real(0))
@@ -829,9 +861,11 @@ namespace Rodin::Assembly::Internal
         /// @brief Contributions moved to the right-hand side.
         size_t eliminated = 0;
 
-        /// @brief Adds counts.
-        /// @param other Counts to add.
-        /// @return Reference to these counts.
+        /**
+         * @brief Adds counts.
+         * @param other Counts to add.
+         * @return Reference to these counts.
+         */
         KOKKOS_INLINE_FUNCTION Counts& operator+=(const Counts& other)
         {
           coefficients += other.coefficients;
@@ -843,15 +877,19 @@ namespace Rodin::Assembly::Internal
       /// @brief Entries grouped by key.
       struct Groups
       {
-        /// @brief Start of every group in the entries, followed by the entry
-        /// count.
+        /**
+         * @brief Start of every group in the entries, followed by the entry
+         * count.
+         */
         Array<Index> starts;
 
         /// @brief Key of every group.
         Array<Index> keys;
 
-        /// @brief Number of groups.
-        /// @return Number of distinct keys.
+        /**
+         * @brief Number of groups.
+         * @return Number of distinct keys.
+         */
         size_t size() const
         {
           return keys.extent(0);
@@ -907,9 +945,11 @@ namespace Rodin::Assembly::Internal
         /// @brief Affine values lifted to the right-hand side.
         size_t lifts = 0;
 
-        /// @brief Adds sizes.
-        /// @param other Sizes to add.
-        /// @return Reference to these sizes.
+        /**
+         * @brief Adds sizes.
+         * @param other Sizes to add.
+         * @return Reference to these sizes.
+         */
         KOKKOS_INLINE_FUNCTION Sizes& operator+=(const Sizes& other)
         {
           entries += other.entries;
@@ -924,22 +964,28 @@ namespace Rodin::Assembly::Internal
         /// @brief Sorted keys.
         Array<Index> keys;
 
-        /// @brief Bits of the keys holding the polytope, ignored when
-        /// comparing.
+        /**
+         * @brief Bits of the keys holding the polytope, ignored when
+         * comparing.
+         */
         unsigned shift;
 
-        /// @brief Whether a sorted key starts a group.
-        /// @param i Index of the key.
-        /// @return True when @p i is the first index or its key differs
-        /// from the previous one.
+        /**
+         * @brief Whether a sorted key starts a group.
+         * @param i Index of the key.
+         * @return True when @p i is the first index or its key differs
+         * from the previous one.
+         */
         KOKKOS_INLINE_FUNCTION bool operator()(const size_t i) const
         {
           return i == 0 || (keys(i) >> shift) != (keys(i - 1) >> shift);
         }
       };
 
-      /// @brief Lists of a contribution, or of a fixed diagonal entry past
-      /// the triplets.
+      /**
+       * @brief Lists of a contribution, or of a fixed diagonal entry past
+       * the triplets.
+       */
       struct Classification
       {
         /// @brief Number of contributions, the diagonal entries following.
@@ -969,11 +1015,13 @@ namespace Rodin::Assembly::Internal
         /// @brief Whether the eliminated contributions are listed.
         bool listEliminated;
 
-        /// @brief Lists of the entry stored at a position.
-        /// @param e Position of the contribution, or size plus the row of
-        /// a fixed diagonal entry.
-        /// @return One coefficient or one eliminated contribution, or
-        /// none when the entry is dropped.
+        /**
+         * @brief Lists of the entry stored at a position.
+         * @param e Position of the contribution, or size plus the row of
+         * a fixed diagonal entry.
+         * @return One coefficient or one eliminated contribution, or
+         * none when the entry is dropped.
+         */
         KOKKOS_INLINE_FUNCTION Counts operator()(const size_t e) const
         {
           Counts c;
@@ -1010,10 +1058,12 @@ namespace Rodin::Assembly::Internal
         /// @brief Expansions of the degrees of freedom.
         Expansions x;
 
-        /// @brief Expanded sizes of a contribution.
-        /// @param k Rank of the contribution.
-        /// @return Number of expanded entries, and of affine values lifted
-        /// by its column, zero for a zero contribution.
+        /**
+         * @brief Expanded sizes of a contribution.
+         * @param k Rank of the contribution.
+         * @return Number of expanded entries, and of affine values lifted
+         * by its column, zero for a zero contribution.
+         */
         KOKKOS_INLINE_FUNCTION Sizes operator()(const size_t k) const
         {
           Sizes c;
@@ -1042,10 +1092,12 @@ namespace Rodin::Assembly::Internal
         /// @brief Expansions of the degrees of freedom.
         Expansions x;
 
-        /// @brief Expanded size of a contribution.
-        /// @param k Rank of the contribution.
-        /// @return Number of masters of its row, zero for a zero
-        /// contribution.
+        /**
+         * @brief Expanded size of a contribution.
+         * @param k Rank of the contribution.
+         * @return Number of masters of its row, zero for a zero
+         * contribution.
+         */
         KOKKOS_INLINE_FUNCTION size_t operator()(const size_t k) const
         {
           const Index e = positions(k);
@@ -1056,8 +1108,10 @@ namespace Rodin::Assembly::Internal
       /// @brief Expanded matrix contributions.
       struct Lifted
       {
-        /// @brief Contributions, followed by the rows of the identified
-        /// degrees of freedom.
+        /**
+         * @brief Contributions, followed by the rows of the identified
+         * degrees of freedom.
+         */
         Triplets triplets;
 
         /// @brief Rows of the lifted affine values.
@@ -1319,8 +1373,10 @@ namespace Rodin::Assembly::Internal
         /// @brief Whether the entries have columns.
         bool matrix;
 
-        /// @brief Shifts the indices of an entry.
-        /// @param e Position of the entry in storage.
+        /**
+         * @brief Shifts the indices of an entry.
+         * @param e Position of the entry in storage.
+         */
         KOKKOS_INLINE_FUNCTION void operator()(const size_t e) const
         {
           rows(e) += row;
@@ -1348,8 +1404,10 @@ namespace Rodin::Assembly::Internal
           IndexShift{rows, cols, row, col, matrix});
       }
 
-      /// @brief Counts the groups of sorted keys and the entries following
-      /// an entry of higher rank in their group.
+      /**
+       * @brief Counts the groups of sorted keys and the entries following
+       * an entry of higher rank in their group.
+       */
       struct GroupCount
       {
         /// @brief Tells the keys starting a group.
@@ -1361,11 +1419,13 @@ namespace Rodin::Assembly::Internal
         /// @brief Positions of the entries, in key order.
         Array<Index> positions;
 
-        /// @brief Counts a sorted key.
-        /// @param i Index of the key.
-        /// @param d Number of groups, incremented when @p i starts one.
-        /// @param u Number of entries out of rank order, incremented when
-        /// the entry of @p i ranks before the previous one of its group.
+        /**
+         * @brief Counts a sorted key.
+         * @param i Index of the key.
+         * @param d Number of groups, incremented when @p i starts one.
+         * @param u Number of entries out of rank order, incremented when
+         * the entry of @p i ranks before the previous one of its group.
+         */
         KOKKOS_INLINE_FUNCTION void operator()(
           const size_t i, size_t& d, size_t& u) const
         {
@@ -1394,10 +1454,12 @@ namespace Rodin::Assembly::Internal
         /// @brief Bits of the keys holding the polytope.
         unsigned shift;
 
-        /// @brief Scans a sorted key.
-        /// @param i Index of the key.
-        /// @param update Number of groups started before @p i.
-        /// @param final Whether the pass writes the groups.
+        /**
+         * @brief Scans a sorted key.
+         * @param i Index of the key.
+         * @param update Number of groups started before @p i.
+         * @param final Whether the pass writes the groups.
+         */
         KOKKOS_INLINE_FUNCTION void operator()(
           const size_t i, size_t& update, const bool final) const
         {
@@ -1425,8 +1487,10 @@ namespace Rodin::Assembly::Internal
         /// @brief Ranks of the entries.
         Ranks ranks;
 
-        /// @brief Sorts a group.
-        /// @param u Index of the group.
+        /**
+         * @brief Sorts a group.
+         * @param u Index of the group.
+         */
         KOKKOS_INLINE_FUNCTION void operator()(const size_t u) const
         {
           for (Index i = starts(u) + 1; i < starts(u + 1); ++i)
@@ -1495,17 +1559,21 @@ namespace Rodin::Assembly::Internal
         /// @brief Lists of each contribution.
         Classification classify;
 
-        /// @brief Adds the lists of a contribution.
-        /// @param e Position of the contribution.
-        /// @param sum Numbers of listed contributions.
+        /**
+         * @brief Adds the lists of a contribution.
+         * @param e Position of the contribution.
+         * @param sum Numbers of listed contributions.
+         */
         KOKKOS_INLINE_FUNCTION void operator()(const size_t e, Counts& sum) const
         {
           sum += classify(e);
         }
       };
 
-      /// @brief Writes the sort key and the position of every listed
-      /// contribution.
+      /**
+       * @brief Writes the sort key and the position of every listed
+       * contribution.
+       */
       struct ContributionList
       {
         /// @brief Lists of each contribution.
@@ -1523,8 +1591,10 @@ namespace Rodin::Assembly::Internal
         /// @brief Whether the coefficient keys are row major.
         bool rowMajor;
 
-        /// @brief Number of columns of a row major matrix, of rows of a
-        /// column major one.
+        /**
+         * @brief Number of columns of a row major matrix, of rows of a
+         * column major one.
+         */
         size_t innerCount;
 
         /// @brief Receives the sort keys of the coefficients.
@@ -1545,11 +1615,13 @@ namespace Rodin::Assembly::Internal
         /// @brief Ranks with the layout of the row sort keys.
         Ranks eliminatedRanks;
 
-        /// @brief Writes the lists of a contribution.
-        /// @param e Position of the contribution, or size plus the row of
-        /// a fixed diagonal entry.
-        /// @param update Numbers of contributions listed before @p e.
-        /// @param final Whether the pass writes the lists.
+        /**
+         * @brief Writes the lists of a contribution.
+         * @param e Position of the contribution, or size plus the row of
+         * a fixed diagonal entry.
+         * @param update Numbers of contributions listed before @p e.
+         * @param final Whether the pass writes the lists.
+         */
         KOKKOS_INLINE_FUNCTION void operator()(
           const size_t e, Counts& update, const bool final) const
         {
@@ -1633,8 +1705,10 @@ namespace Rodin::Assembly::Internal
             coefficientRanks, ek, ep, eliminatedRanks});
       }
 
-      /// @brief Sums the contributions of a coefficient and writes its inner
-      /// index.
+      /**
+       * @brief Sums the contributions of a coefficient and writes its inner
+       * index.
+       */
       struct CoefficientSum
       {
         /// @brief Number of contributions, the diagonal entries following.
@@ -1643,12 +1717,16 @@ namespace Rodin::Assembly::Internal
         /// @brief Values of the contributions.
         Array<Real> values;
 
-        /// @brief Positions of the listed contributions, grouped by
-        /// coefficient in rank order.
+        /**
+         * @brief Positions of the listed contributions, grouped by
+         * coefficient in rank order.
+         */
         Array<Index> positions;
 
-        /// @brief Start of every coefficient in the positions, followed by
-        /// their count.
+        /**
+         * @brief Start of every coefficient in the positions, followed by
+         * their count.
+         */
         Array<Index> starts;
 
         /// @brief Receives the value of every coefficient.
@@ -1660,12 +1738,16 @@ namespace Rodin::Assembly::Internal
         /// @brief Sort key of every coefficient, without the polytope.
         Array<Index> keys;
 
-        /// @brief Number of columns of a row major matrix, of rows of a
-        /// column major one.
+        /**
+         * @brief Number of columns of a row major matrix, of rows of a
+         * column major one.
+         */
         size_t innerCount;
 
-        /// @brief Sums a coefficient.
-        /// @param u Index of the coefficient in the compressed storage.
+        /**
+         * @brief Sums a coefficient.
+         * @param u Index of the coefficient in the compressed storage.
+         */
         KOKKOS_INLINE_FUNCTION void operator()(const size_t u) const
         {
           const auto value = [&](const Index e) {
@@ -1679,8 +1761,10 @@ namespace Rodin::Assembly::Internal
         }
       };
 
-      /// @brief Starts the outer indices following the one of the previous
-      /// coefficient, up to its own, at a coefficient.
+      /**
+       * @brief Starts the outer indices following the one of the previous
+       * coefficient, up to its own, at a coefficient.
+       */
       struct OuterStarts
       {
         /// @brief Number of coefficients.
@@ -1689,20 +1773,26 @@ namespace Rodin::Assembly::Internal
         /// @brief Sort key of every coefficient, without the polytope.
         Array<Index> keys;
 
-        /// @brief Number of columns of a row major matrix, of rows of a
-        /// column major one.
+        /**
+         * @brief Number of columns of a row major matrix, of rows of a
+         * column major one.
+         */
         size_t innerCount;
 
-        /// @brief Number of rows of a row major matrix, of columns of a
-        /// column major one.
+        /**
+         * @brief Number of rows of a row major matrix, of columns of a
+         * column major one.
+         */
         size_t outerCount;
 
         /// @brief Receives the start of every outer index.
         Array<Math::SparseIndex> outer;
 
-        /// @brief Writes the outer starts ending at a coefficient.
-        /// @param u Index of the coefficient, or the number of coefficients
-        /// for the starts following the last one.
+        /**
+         * @brief Writes the outer starts ending at a coefficient.
+         * @param u Index of the coefficient, or the number of coefficients
+         * for the starts following the last one.
+         */
         KOKKOS_INLINE_FUNCTION void operator()(const size_t u) const
         {
           const Index end = u < nnz ? keys(u) / innerCount : outerCount;
@@ -1753,17 +1843,21 @@ namespace Rodin::Assembly::Internal
         /// @brief Values of the entries.
         Array<Real> values;
 
-        /// @brief Counts an entry when it is nonzero.
-        /// @param e Position of the entry.
-        /// @param sum Number of nonzero entries.
+        /**
+         * @brief Counts an entry when it is nonzero.
+         * @param e Position of the entry.
+         * @param sum Number of nonzero entries.
+         */
         KOKKOS_INLINE_FUNCTION void operator()(const size_t e, size_t& sum) const
         {
           sum += values(e) != Real(0);
         }
       };
 
-      /// @brief Writes the sort key and the position of every nonzero entry
-      /// of a vector.
+      /**
+       * @brief Writes the sort key and the position of every nonzero entry
+       * of a vector.
+       */
       struct EntryList
       {
         /// @brief Values of the entries.
@@ -1781,10 +1875,12 @@ namespace Rodin::Assembly::Internal
         /// @brief Indices of the entries.
         Array<Index> indices;
 
-        /// @brief Lists an entry when it is nonzero.
-        /// @param e Position of the entry.
-        /// @param update Number of nonzero entries before @p e.
-        /// @param final Whether the pass writes the list.
+        /**
+         * @brief Lists an entry when it is nonzero.
+         * @param e Position of the entry.
+         * @param update Number of nonzero entries before @p e.
+         * @param final Whether the pass writes the list.
+         */
         KOKKOS_INLINE_FUNCTION void operator()(
           const size_t e, size_t& update, const bool final) const
         {
@@ -1830,8 +1926,10 @@ namespace Rodin::Assembly::Internal
           EntryList{values, k, p, ranks, indices});
       }
 
-      /// @brief Adds the contributions of a group to its entry of the
-      /// right-hand side, in rank order.
+      /**
+       * @brief Adds the contributions of a group to its entry of the
+       * right-hand side, in rank order.
+       */
       template <class Contribution>
       struct Accumulation
       {
@@ -1841,8 +1939,10 @@ namespace Rodin::Assembly::Internal
         /// @brief Right-hand side, updated in place.
         Array<Real> rhs;
 
-        /// @brief Start of every group in the positions, followed by their
-        /// count.
+        /**
+         * @brief Start of every group in the positions, followed by their
+         * count.
+         */
         Array<Index> starts;
 
         /// @brief Contribution of an entry, by position.
@@ -1851,8 +1951,10 @@ namespace Rodin::Assembly::Internal
         /// @brief Positions of the entries, grouped in rank order.
         Array<Index> positions;
 
-        /// @brief Adds the contributions of a group.
-        /// @param u Index of the group.
+        /**
+         * @brief Adds the contributions of a group.
+         * @param u Index of the group.
+         */
         KOKKOS_INLINE_FUNCTION void operator()(const size_t u) const
         {
           const Index i = keys(u);
@@ -1898,19 +2000,23 @@ namespace Rodin::Assembly::Internal
         /// @brief Entries of the vector.
         Array<Real> values;
 
-        /// @brief Adds an entry.
-        /// @param i Index of the entry in the vector.
+        /**
+         * @brief Adds an entry.
+         * @param i Index of the entry in the vector.
+         */
         KOKKOS_INLINE_FUNCTION void operator()(const size_t i) const
         {
           rhs(row + i) += values(i);
         }
       };
 
-      /// @brief Adds a preassembled vector to the right-hand side.
-      /// @param execution Execution space of the kernel.
-      /// @param values Entries of the vector.
-      /// @param row Offset of its test space.
-      /// @param rhs Right-hand side, updated in place.
+      /**
+       * @brief Adds a preassembled vector to the right-hand side.
+       * @param execution Execution space of the kernel.
+       * @param values Entries of the vector.
+       * @param row Offset of its test space.
+       * @param rhs Right-hand side, updated in place.
+       */
       static void addDense(const ExecutionSpace& execution, const Array<Real>& values,
         Index row, const Array<Real>& rhs)
       {
@@ -1930,8 +2036,10 @@ namespace Rodin::Assembly::Internal
         /// @brief Fixed value of each row.
         Array<Real> values;
 
-        /// @brief Writes the fixed value of a row when it is fixed.
-        /// @param i Index of the row.
+        /**
+         * @brief Writes the fixed value of a row when it is fixed.
+         * @param i Index of the row.
+         */
         KOKKOS_INLINE_FUNCTION void operator()(const size_t i) const
         {
           if (fixed(i))
@@ -1939,12 +2047,14 @@ namespace Rodin::Assembly::Internal
         }
       };
 
-      /// @brief Writes the fixed values on the fixed rows.
-      /// @param execution Execution space of the kernel.
-      /// @param count Number of rows.
-      /// @param fixed Whether each row is fixed.
-      /// @param values Fixed value of each row.
-      /// @param rhs Right-hand side, updated in place.
+      /**
+       * @brief Writes the fixed values on the fixed rows.
+       * @param execution Execution space of the kernel.
+       * @param count Number of rows.
+       * @param fixed Whether each row is fixed.
+       * @param values Fixed value of each row.
+       * @param rhs Right-hand side, updated in place.
+       */
       static void imposeFixed(const ExecutionSpace& execution, size_t count,
         const Array<unsigned char>& fixed, const Array<Real>& values,
         const Array<Real>& rhs)
@@ -1962,8 +2072,10 @@ namespace Rodin::Assembly::Internal
         /// @brief Ranks of the entries.
         Ranks ranks;
 
-        /// @brief Writes the position of an entry.
-        /// @param e Position of the entry in storage.
+        /**
+         * @brief Writes the position of an entry.
+         * @param e Position of the entry in storage.
+         */
         KOKKOS_INLINE_FUNCTION void operator()(const size_t e) const
         {
           res(ranks(e)) = e;
@@ -1995,17 +2107,21 @@ namespace Rodin::Assembly::Internal
         /// @brief Expanded sizes of each contribution.
         MatrixExpansionSizes sizes;
 
-        /// @brief Adds the expanded sizes of a contribution.
-        /// @param k Rank of the contribution.
-        /// @param sum Total expanded sizes.
+        /**
+         * @brief Adds the expanded sizes of a contribution.
+         * @param k Rank of the contribution.
+         * @param sum Total expanded sizes.
+         */
         KOKKOS_INLINE_FUNCTION void operator()(const size_t k, Sizes& sum) const
         {
           sum += sizes(k);
         }
       };
 
-      /// @brief Expands the matrix contribution of rank k and lifts its
-      /// affine values.
+      /**
+       * @brief Expands the matrix contribution of rank k and lifts its
+       * affine values.
+       */
       struct MatrixExpansion
       {
         /// @brief Expanded sizes of each contribution.
@@ -2044,10 +2160,12 @@ namespace Rodin::Assembly::Internal
         /// @brief Receives the lifted affine values.
         Array<Real> lv;
 
-        /// @brief Expands a contribution.
-        /// @param k Rank of the contribution.
-        /// @param update Expanded sizes of the contributions of lower rank.
-        /// @param final Whether the pass writes the expansion.
+        /**
+         * @brief Expands a contribution.
+         * @param k Rank of the contribution.
+         * @param update Expanded sizes of the contributions of lower rank.
+         * @param final Whether the pass writes the expansion.
+         */
         KOKKOS_INLINE_FUNCTION void operator()(
           const size_t k, Sizes& update, const bool final) const
         {
@@ -2146,9 +2264,11 @@ namespace Rodin::Assembly::Internal
         /// @brief Expanded size of each contribution.
         VectorExpansionSize sizes;
 
-        /// @brief Adds the expanded size of a contribution.
-        /// @param k Rank of the contribution.
-        /// @param sum Total expanded size.
+        /**
+         * @brief Adds the expanded size of a contribution.
+         * @param k Rank of the contribution.
+         * @param sum Total expanded size.
+         */
         KOKKOS_INLINE_FUNCTION void operator()(const size_t k, size_t& sum) const
         {
           sum += sizes(k);
@@ -2179,10 +2299,12 @@ namespace Rodin::Assembly::Internal
         /// @brief Receives the values of the expanded contributions.
         Array<Real> ev;
 
-        /// @brief Expands a contribution.
-        /// @param k Rank of the contribution.
-        /// @param update Expanded size of the contributions of lower rank.
-        /// @param final Whether the pass writes the expansion.
+        /**
+         * @brief Expands a contribution.
+         * @param k Rank of the contribution.
+         * @param update Expanded size of the contributions of lower rank.
+         * @param final Whether the pass writes the expansion.
+         */
         KOKKOS_INLINE_FUNCTION void operator()(
           const size_t k, size_t& update, const bool final) const
         {
@@ -2251,8 +2373,10 @@ namespace Rodin::Assembly::Internal
         /// @brief Offset of the space of the vector.
         Index first;
 
-        /// @brief Writes an index.
-        /// @param i Index of the entry in the vector.
+        /**
+         * @brief Writes an index.
+         * @param i Index of the entry in the vector.
+         */
         KOKKOS_INLINE_FUNCTION void operator()(const size_t i) const
         {
           res(i) = first + i;
@@ -2372,8 +2496,10 @@ namespace Rodin::Assembly::Internal
               triplets.values, offset, m.sign, false, triplets.rows, triplets.cols);
             ::Rodin::Kokkos::Internal::checkLaunches("A device bilinear integrator");
             if (m.row != 0 || m.col != 0)
+            {
               shift(
                 m_execution, offset, count, m.row, m.col, triplets.rows, triplets.cols);
+            }
             offset += count;
             continue;
           }
@@ -3295,8 +3421,10 @@ namespace Rodin::Assembly
         }
       }
 
-      /// @brief Assigns the degrees of freedom of a constrained face to their
-      /// first constrained face.
+      /**
+       * @brief Assigns the degrees of freedom of a constrained face to their
+       * first constrained face.
+       */
       template <class AttributeView>
       struct BoundaryOwners
       {
@@ -3312,13 +3440,17 @@ namespace Rodin::Assembly
         /// @brief Dimension of the faces.
         Index faceDim;
 
-        /// @brief First constrained face of every scalar degree of freedom,
-        /// lowered atomically.
+        /**
+         * @brief First constrained face of every scalar degree of freedom,
+         * lowered atomically.
+         */
         ::Kokkos::View<Index*, MemorySpace> owners;
 
-        /// @brief Claims the degrees of freedom of a face when it is
-        /// constrained.
-        /// @param f Face index.
+        /**
+         * @brief Claims the degrees of freedom of a face when it is
+         * constrained.
+         * @param f Face index.
+         */
         KOKKOS_INLINE_FUNCTION void operator()(Index f) const
         {
           if (!isConstrained(view, attributes, f))
@@ -3329,8 +3461,10 @@ namespace Rodin::Assembly
         }
       };
 
-      /// @brief Evaluates the value at the nodes of the degrees of freedom
-      /// owned by a constrained face.
+      /**
+       * @brief Evaluates the value at the nodes of the degrees of freedom
+       * owned by a constrained face.
+       */
       template <class AttributeView, class ValueView>
       struct BoundaryValues
       {
@@ -3349,8 +3483,10 @@ namespace Rodin::Assembly
         /// @brief First constrained face of every scalar degree of freedom.
         ::Kokkos::View<Index*, MemorySpace> owners;
 
-        /// @brief Receives component r of the value of the degree of
-        /// freedom i at i + r * stride.
+        /**
+         * @brief Receives component r of the value of the degree of
+         * freedom i at i + r * stride.
+         */
         ::Kokkos::View<Real*, MemorySpace> values;
 
         /// @brief Offset between components.
@@ -3362,9 +3498,11 @@ namespace Rodin::Assembly
         /// @brief Device view of the value function.
         ValueView value;
 
-        /// @brief Evaluates the value at the degrees of freedom owned by a
-        /// face when it is constrained.
-        /// @param f Face index.
+        /**
+         * @brief Evaluates the value at the degrees of freedom owned by a
+         * face when it is constrained.
+         * @param f Face index.
+         */
         KOKKOS_INLINE_FUNCTION void operator()(Index f) const
         {
           if (!isConstrained(view, attributes, f))

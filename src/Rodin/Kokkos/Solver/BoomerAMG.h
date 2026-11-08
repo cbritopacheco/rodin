@@ -264,8 +264,10 @@ namespace Rodin::Solver
         m_hierarchy.reset();
       }
 
-      /// @brief Whether a hierarchy is retained.
-      /// @returns True if a hierarchy has been set up and not cleared.
+      /**
+       * @brief Whether a hierarchy is retained.
+       * @returns True if a hierarchy has been set up and not cleared.
+       */
       Boolean isSetup() const noexcept
       {
         return static_cast<bool>(m_hierarchy);
@@ -373,22 +375,28 @@ namespace Rodin::Solver
         download(x, system.getSolution());
       }
 
-      /// @brief Whether the last solve reached the tolerance.
-      /// @returns True if the last solve converged.
+      /**
+       * @brief Whether the last solve reached the tolerance.
+       * @returns True if the last solve converged.
+       */
       Boolean success() const
       {
         return m_converged;
       }
 
-      /// @brief Number of iterations of the last solve.
-      /// @returns Iteration count reported by hypre.
+      /**
+       * @brief Number of iterations of the last solve.
+       * @returns Iteration count reported by hypre.
+       */
       size_t getIterationNumber() const
       {
         return m_iterations;
       }
 
-      /// @brief Relative residual of the last solve.
-      /// @returns Final relative residual norm reported by hypre.
+      /**
+       * @brief Relative residual of the last solve.
+       * @returns Final relative residual norm reported by hypre.
+       */
       Real getError() const
       {
         return m_error;
@@ -633,9 +641,7 @@ namespace Rodin::Solver
           << call << " failed: " << description << Alert::Raise;
       }
 
-      /**
-       * @brief Ensures that MPI and hypre are initialized.
-       */
+      /// @brief Ensures that MPI and hypre are initialized.
       void initializeSession() const
       {
         int finalized = 0;

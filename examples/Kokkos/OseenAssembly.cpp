@@ -156,8 +156,10 @@ namespace Rodin::Examples
       {
         PetscInt dofs[16];
         for (int r = 0; r < 16; ++r)
+        {
           dofs[r] =
             r < 12 ? ht[4 * e + r / 3] + (r % 3) * nv : 3 * nv + ht[4 * e + r - 12];
+        }
         for (int r = 0; r < 16; ++r)
         {
           entries[16 * size_t(e) + r] = dofs[r];
@@ -234,8 +236,10 @@ namespace Rodin::Examples
           }
           Real J[3][3];
           for (int i = 0; i < 3; ++i)
+          {
             for (int k = 0; k < 3; ++k)
               J[i][k] = p[k + 1][i] - p[0][i];
+          }
           const Real det = J[0][0] * (J[1][1] * J[2][2] - J[1][2] * J[2][1]) -
             J[0][1] * (J[1][0] * J[2][2] - J[1][2] * J[2][0]) +
             J[0][2] * (J[1][0] * J[2][1] - J[1][1] * J[2][0]);
@@ -256,15 +260,18 @@ namespace Rodin::Examples
 
           Real divw = 0, ws[3] = {};
           for (int a = 0; a < 4; ++a)
+          {
             for (int i = 0; i < 3; ++i)
             {
               divw += G[a][i] * wa[a][i];
               ws[i] += wa[a][i];
             }
+          }
           // Exact P1 integrals: (l_a, l_b) = V (1 + d_ab) / 20 and
           // (w.G_b, l_a) = V G_b.(ws + w_a) / 20.
           Real M[4][4], C[4][4], K[4][4];
           for (int a = 0; a < 4; ++a)
+          {
             for (int b = 0; b < 4; ++b)
             {
               M[a][b] = V * (a == b ? 2 : 1) / 20;
@@ -276,9 +283,11 @@ namespace Rodin::Examples
                 K[a][b] += V * G[a][i] * G[b][i];
               }
             }
+          }
           const Real react = P.rho / P.dt + Real(0.5) * P.rho * divw;
           Real* out = &values(256 * size_t(e));
           for (int r = 0; r < 16; ++r)
+          {
             for (int c = 0; c < 16; ++c)
             {
               Real val = 0;
@@ -296,8 +305,10 @@ namespace Rodin::Examples
                 val = P.eps * K[r - 12][c - 12];
               out[16 * r + c] = val;
             }
+          }
           Real* f = &rhs(16 * size_t(e));
           for (int a = 0; a < 4; ++a)
+          {
             for (int i = 0; i < 3; ++i)
             {
               Real s = 0;
@@ -305,6 +316,7 @@ namespace Rodin::Examples
                 s += M[a][b] * wa[b][i];
               f[3 * a + i] = P.rho / P.dt * s;
             }
+          }
           for (int a = 0; a < 4; ++a)
             f[12 + a] = 0;
         });

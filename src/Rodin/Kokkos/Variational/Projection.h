@@ -257,8 +257,10 @@ namespace Rodin::Variational
       /// @brief Device predicate selecting the polytopes.
       Select select;
 
-      /// @brief One plus the index of the polytope owning each scalar degree of
-      /// freedom, zero when none does.
+      /**
+       * @brief One plus the index of the polytope owning each scalar degree of
+       * freedom, zero when none does.
+       */
       ::Kokkos::View<Index*, MemorySpace> owners;
 
       /// @brief Device degrees of freedom.
@@ -303,12 +305,16 @@ namespace Rodin::Variational
       /// @brief Device predicate selecting the polytopes.
       Select select;
 
-      /// @brief One plus the index of the polytope owning each scalar degree of
-      /// freedom, zero when none does.
+      /**
+       * @brief One plus the index of the polytope owning each scalar degree of
+       * freedom, zero when none does.
+       */
       ::Kokkos::View<Index*, MemorySpace> owners;
 
-      /// @brief Projected values, component r of the degree of freedom i at
-      /// i + r * stride.
+      /**
+       * @brief Projected values, component r of the degree of freedom i at
+       * i + r * stride.
+       */
       ::Kokkos::View<Real*, MemorySpace> values;
 
       /// @brief Device view of the source.

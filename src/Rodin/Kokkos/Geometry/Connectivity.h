@@ -510,16 +510,20 @@ namespace Rodin::Geometry
       /// @brief Borrowed compressed-row incidence relation.
       using IncidenceView = Rodin::Kokkos::Geometry::IncidenceView;
 
-      /// @brief One-dimensional resident array in the context memory space.
-      /// @tparam T Entry type.
+      /**
+       * @brief One-dimensional resident array in the context memory space.
+       * @tparam T Entry type.
+       */
       template <class T>
       using DeviceArray = ::Kokkos::View<T*, MemorySpace>;
 
       /// @brief Independently owned dimension-pair relation.
       struct Relation
       {
-        /// @var offsets
-        /// Row offsets of the resident CSR relation, including the terminal offset.
+        /**
+         * @var offsets
+         * Row offsets of the resident CSR relation, including the terminal offset.
+         */
         DeviceArray<Index> offsets, indices; ///< Resident CSR arrays.
         bool present = false; ///< Whether arrays are materialized.
         bool dirty = true; ///< Whether compute must rebuild the relation.
@@ -528,10 +532,12 @@ namespace Rodin::Geometry
       /// @brief Candidate incidence with its deterministic traversal position.
       struct Entry
       {
-        /// @var row
-        /// Source entity index.
-        /// @var target
-        /// Target entity index.
+        /**
+         * @var row
+         * Source entity index.
+         * @var target
+         * Target entity index.
+         */
         Index row, target, order; ///< Source, target and original occurrence.
       };
 
@@ -561,8 +567,10 @@ namespace Rodin::Geometry
       {
         ::Kokkos::Array<Index, 4> vertices{}; ///< Sorted vertex multiset.
 
-        /// @var size
-        /// Number of active vertices in the key.
+        /**
+         * @var size
+         * Number of active vertices in the key.
+         */
         Index size = 0, order = 0; ///< Active count and occurrence.
       };
 
@@ -594,8 +602,10 @@ namespace Rodin::Geometry
       /// @brief Exclusive row prefix sum with a terminal entry.
       struct Prefix
       {
-        /// @var counts
-        /// Row counts to be scanned.
+        /**
+         * @var counts
+         * Row counts to be scanned.
+         */
         DeviceArray<Index> counts, offsets; ///< Counts and prefix output.
 
         /// @param i Prefix index. @param sum Running total. @param final Whether output may be written.
@@ -617,12 +627,14 @@ namespace Rodin::Geometry
         {}; ///< Fill compact indices and count rows.
         DeviceArray<Entry> entries; ///< Sorted candidate incidences.
 
-        /// @var flags
-        /// First-occurrence flags, in traversal or sorted order.
-        /// @var positions
-        /// Exclusive prefix sum of the flags, giving each retained entry its output slot.
-        /// @var indices
-        /// Compacted target indices of the output relation.
+        /**
+         * @var flags
+         * First-occurrence flags, in traversal or sorted order.
+         * @var positions
+         * Exclusive prefix sum of the flags, giving each retained entry its output slot.
+         * @var indices
+         * Compacted target indices of the output relation.
+         */
         DeviceArray<Index> flags, positions, indices, counts; ///< Compaction arrays.
         bool ordered; ///< Whether to retain original traversal order.
 
@@ -670,17 +682,23 @@ namespace Rodin::Geometry
       {
         DeviceView topology; ///< Resident ordered vertex lists.
 
-        /// @var left
-        /// Relation from the source dimension to the pivot dimension.
+        /**
+         * @var left
+         * Relation from the source dimension to the pivot dimension.
+         */
         IncidenceView left, right; ///< Two relations through the pivot dimension.
 
-        /// @var counts
-        /// Candidate row lengths, written by the counting pass.
+        /**
+         * @var counts
+         * Candidate row lengths, written by the counting pass.
+         */
         DeviceArray<Index> counts, offsets; ///< Candidate row lengths and offsets.
         DeviceArray<Entry> entries; ///< Emitted pairs.
 
-        /// @var dimension
-        /// Source dimension.
+        /**
+         * @var dimension
+         * Source dimension.
+         */
         size_t dimension, targetDimension; ///< Source and target dimensions.
         bool fill; ///< Whether this is the emission pass.
 
@@ -749,35 +767,43 @@ namespace Rodin::Geometry
         DeviceView topology; ///< Input resident topology.
         DeviceArray<Reference> reference; ///< Rodin reference-cell constants.
 
-        /// @var counts
-        /// Number of candidates emitted by each cell, then retained row lengths.
+        /**
+         * @var counts
+         * Number of candidates emitted by each cell, then retained row lengths.
+         */
         DeviceArray<Index> counts, offsets; ///< Emission row lengths and offsets.
 
-        /// @var records
-        /// Oriented candidate entities, existing entities first.
+        /**
+         * @var records
+         * Oriented candidate entities, existing entities first.
+         */
         DeviceArray<Entity> records, added; ///< Oriented candidates and new entities.
         DeviceArray<Candidate> candidates; ///< Canonical identity keys.
 
-        /// @var flags
-        /// Group-start flags of the sorted candidates.
-        /// @var groupOffsets
-        /// Inclusive prefix sum of the group-start flags.
-        /// @var groups
-        /// Group of each original candidate.
-        /// @var leaders
-        /// First occurrence of each group.
-        /// @var leaderFlags
-        /// Flags of the new candidates that lead their group.
-        /// @var leaderOffsets
-        /// Exclusive prefix sum of the leader flags.
-        /// @var assigned
-        /// Stable entity index assigned to each leader.
+        /**
+         * @var flags
+         * Group-start flags of the sorted candidates.
+         * @var groupOffsets
+         * Inclusive prefix sum of the group-start flags.
+         * @var groups
+         * Group of each original candidate.
+         * @var leaders
+         * First occurrence of each group.
+         * @var leaderFlags
+         * Flags of the new candidates that lead their group.
+         * @var leaderOffsets
+         * Exclusive prefix sum of the leader flags.
+         * @var assigned
+         * Stable entity index assigned to each leader.
+         */
         DeviceArray<Index> flags, groupOffsets, groups, leaders, leaderFlags,
           leaderOffsets, assigned, ids; ///< Grouping and numbering workspace.
         DeviceArray<unsigned char> matched; ///< Explicit membership of each occurrence.
 
-        /// @var rowOffsets
-        /// Row offsets of the output cell-to-entity relation.
+        /**
+         * @var rowOffsets
+         * Row offsets of the output cell-to-entity relation.
+         */
         DeviceArray<Index> rowOffsets, rowIndices; ///< Output cell-to-entity relation.
         size_t dimension; ///< Intermediate entity dimension.
         Index oldCount; ///< Existing entities, which retain their indices.
@@ -937,10 +963,12 @@ namespace Rodin::Geometry
         DeviceArray<Entity> added; ///< Newly discovered entities.
         DeviceArray<Polytope::Type> geometries; ///< New geometry table.
 
-        /// @var counts
-        /// Vertex count of each entity in the new table.
-        /// @var offsets
-        /// Vertex offsets of each entity in the new table.
+        /**
+         * @var counts
+         * Vertex count of each entity in the new table.
+         * @var offsets
+         * Vertex offsets of each entity in the new table.
+         */
         DeviceArray<Index> counts, offsets, vertices; ///< New vertex lists.
         Index insertion; ///< Old end of the growing dimension.
         bool fill; ///< Whether vertex storage is allocated.
@@ -989,10 +1017,12 @@ namespace Rodin::Geometry
         DeviceView topology; ///< Ordered keys.
         size_t dimension; ///< Source dimension.
 
-        /// @var counts
-        /// Vertex count of each entity.
-        /// @var offsets
-        /// Row offsets of the relation.
+        /**
+         * @var counts
+         * Vertex count of each entity.
+         * @var offsets
+         * Row offsets of the relation.
+         */
         DeviceArray<Index> counts, offsets, indices; ///< Relation arrays.
         bool fill; ///< Whether offsets have been computed.
 

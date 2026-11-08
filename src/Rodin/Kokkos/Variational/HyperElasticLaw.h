@@ -68,9 +68,7 @@ namespace Rodin::Kokkos::Variational
    */
   struct IsochoricPoint
   {
-    /**
-     * @param h Displacement gradient @f$ H @f$, a square matrix.
-     */
+    /// @param h Displacement gradient @f$ H @f$, a square matrix.
     KOKKOS_INLINE_FUNCTION
     explicit IsochoricPoint(const Geometry::Matrix& h)
       : F(h),
@@ -317,8 +315,10 @@ namespace Rodin::Kokkos::Variational
       const Real volume = kappa * (p.J - 1) * p.J;
       P = Geometry::Matrix(d, d);
       for (Index i = 0; i < d; ++i)
+      {
         for (Index j = 0; j < d; ++j)
           P(i, j) = w1 * p.getIsochoricGradient(i, j) + volume * p.FinvT(i, j);
+      }
     }
 
     /**
@@ -382,9 +382,7 @@ namespace Rodin::Kokkos::Variational
     /// @brief Kinematics at a quadrature point.
     struct Point : IsochoricPoint
     {
-      /**
-       * @param h Displacement gradient @f$ H @f$, a square matrix.
-       */
+      /// @param h Displacement gradient @f$ H @f$, a square matrix.
       KOKKOS_INLINE_FUNCTION
       explicit Point(const Geometry::Matrix& h)
         : IsochoricPoint(h),
@@ -498,9 +496,13 @@ namespace Rodin::Kokkos::Variational
       const Real volume = kappa * (p.J - 1) * p.J;
       P = Geometry::Matrix(d, d);
       for (Index i = 0; i < d; ++i)
+      {
         for (Index j = 0; j < d; ++j)
+        {
           P(i, j) = c1 * p.getIsochoricGradient(i, j) + c2 * p.getSecondGradient(i, j) +
             volume * p.FinvT(i, j);
+        }
+      }
     }
 
     /**

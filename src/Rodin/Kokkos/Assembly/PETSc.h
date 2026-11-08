@@ -30,9 +30,6 @@
 #include <Kokkos_Core.hpp>
 #include <Kokkos_Sort.hpp>
 
-#include <petscmat.h>
-#include <petscvec.h>
-
 #include "Rodin/Configure.h"
 #include "Rodin/PETSc/Assembly/VectorSetup.h"
 #ifdef RODIN_USE_MPI
@@ -165,8 +162,10 @@ namespace Rodin::Assembly::Internal
     /// @brief PETSc identifier of the matrix preallocated with the pattern, or -1.
     PetscInt64 matrix = -1;
 
-    /// @brief PETSc identifier of the distributed right-hand side
-    /// preallocated with the local coordinates, or -1.
+    /**
+     * @brief PETSc identifier of the distributed right-hand side
+     * preallocated with the local coordinates, or -1.
+     */
     PetscInt64 vector = -1;
 
     /// @brief Whether the coordinates hold the pattern of the segments.
@@ -193,8 +192,10 @@ namespace Rodin::Assembly::Internal
     /// @brief Coordinates sorted by row then column, as indices in the list.
     COOOrder<MemorySpace> order;
 
-    /// @brief Start in the sorted coordinates of each distinct coordinate,
-    /// and the list size.
+    /**
+     * @brief Start in the sorted coordinates of each distinct coordinate,
+     * and the list size.
+     */
     ::Kokkos::View<Index*, MemorySpace> starts;
 
     /// @brief Sum of the values of each distinct coordinate.
@@ -209,8 +210,10 @@ namespace Rodin::Assembly::Internal
     /// @brief Values of the linear integrator entries.
     ::Kokkos::View<Real*, MemorySpace> entryValues;
 
-    /// @brief Rows of the contributions to the right-hand side, listed in a
-    /// fixed order.
+    /**
+     * @brief Rows of the contributions to the right-hand side, listed in a
+     * fixed order.
+     */
     ::Kokkos::View<Index*, MemorySpace> contributionRows;
 
     /// @brief Contributions to the right-hand side.
@@ -222,19 +225,25 @@ namespace Rodin::Assembly::Internal
     /// @brief Rows of the contributions grouped at the last assembly.
     ::Kokkos::View<Index*, MemorySpace> groupedRows;
 
-    /// @brief Positions of these contributions, grouped by row in list
-    /// order.
+    /**
+     * @brief Positions of these contributions, grouped by row in list
+     * order.
+     */
     ::Kokkos::View<Index*, MemorySpace> groupedPositions;
 
-    /// @brief Start of every row group in groupedPositions, followed by the
-    /// contribution count.
+    /**
+     * @brief Start of every row group in groupedPositions, followed by the
+     * contribution count.
+     */
     ::Kokkos::View<Index*, MemorySpace> groupStarts;
 
     /// @brief Row of every group.
     ::Kokkos::View<Index*, MemorySpace> groupKeys;
 
-    /// @brief Linear integrators whose entries were grouped at the last
-    /// assembly, when the entries were the contributions themselves.
+    /**
+     * @brief Linear integrators whose entries were grouped at the last
+     * assembly, when the entries were the contributions themselves.
+     */
     std::vector<COOSegment> vectorSegments;
 
     /// @brief Whether each degree of freedom is fixed.
@@ -243,8 +252,10 @@ namespace Rodin::Assembly::Internal
     /// @brief Values of the fixed degrees of freedom.
     ::Kokkos::View<Real*, MemorySpace> fixedValues;
 
-    /// @brief Whether the right-hand side of each row is imposed, when
-    /// degrees of freedom are identified.
+    /**
+     * @brief Whether the right-hand side of each row is imposed, when
+     * degrees of freedom are identified.
+     */
     ::Kokkos::View<unsigned char*, MemorySpace> imposed;
 
     /// @brief Whether the matrix was preallocated with the expanded pattern.
@@ -813,8 +824,10 @@ namespace Rodin::Assembly::Internal
         integrateVectors(cache, fixed, expanded ? &constraints.expansions : nullptr);
         sumContributions(cache);
         if (expanded)
+        {
           imposeFixed(
             m_execution, m_rows, cache.imposed, cache.fixedValues, m_owned, cache.rhs);
+        }
         else if (fixed)
         {
           imposeFixed(
@@ -922,8 +935,10 @@ namespace Rodin::Assembly::Internal
         bool hasFixed; ///< Whether the system has fixed degrees of freedom.
         Fixed fixed; ///< Flags of the fixed degrees of freedom.
 
-        /// @brief Flags of the degrees of freedom the process owns, empty when the system
-        /// is not distributed.
+        /**
+         * @brief Flags of the degrees of freedom the process owns, empty when the system
+         * is not distributed.
+         */
         Owned owned;
         Scalars coo; ///< Values of the coordinate list.
         bool distributed; ///< Whether the system is distributed.
@@ -1239,8 +1254,10 @@ namespace Rodin::Assembly::Internal
         Fixed fixed; ///< Flags of the rows whose value is imposed.
         Values values; ///< Imposed values, per degree of freedom.
 
-        /// @brief Flags of the degrees of freedom the process owns, empty when the system
-        /// is not distributed.
+        /**
+         * @brief Flags of the degrees of freedom the process owns, empty when the system
+         * is not distributed.
+         */
         Owned owned;
         RHS rhs; ///< Right-hand side.
         bool distributed; ///< Whether the system is distributed.
@@ -1671,9 +1688,7 @@ namespace Rodin::Assembly::Internal
         ::Kokkos::Experimental::sort_by_key(execution, keys, order);
       }
 
-      /**
-       * @brief Whether the sorted coordinate i differs from the previous one.
-       */
+      /// @brief Whether the sorted coordinate i differs from the previous one.
       template <class Indices, class Order>
       struct DistinctHead
       {
@@ -1824,8 +1839,10 @@ namespace Rodin::Assembly::Internal
       {
         Order order; ///< Indices of the sorted coordinates.
 
-        /// @brief Start of each distinct coordinate in the sorted coordinates, followed
-        /// by the list size.
+        /**
+         * @brief Start of each distinct coordinate in the sorted coordinates, followed
+         * by the list size.
+         */
         Indices starts;
         Scalars values; ///< Values of the coordinate list.
         Scalars merged; ///< Receives the sum of each distinct coordinate.
@@ -1994,9 +2011,7 @@ namespace Rodin::Assembly::Internal
         ::Kokkos::deep_copy(m_execution, view, source);
       }
 
-      /**
-       * @brief Integrates the local integrators into the coordinate list.
-       */
+      /// @brief Integrates the local integrators into the coordinate list.
       void integrateMatrices(CacheType& cache, bool fixed)
       {
         // Integrators with equal layouts and blocks share their entries,
@@ -2397,9 +2412,7 @@ namespace Rodin::Assembly::Internal
         }
       }
 
-      /**
-       * @brief Copies a vector, wherever it stores its values.
-       */
+      /// @brief Copies a vector, wherever it stores its values.
       void getVector(::Vec vec, const ::Kokkos::View<Real*, MemorySpace>& res) const
       {
         using Unmanaged = ::Kokkos::MemoryTraits<::Kokkos::Unmanaged>;
@@ -2532,9 +2545,7 @@ namespace Rodin::Assembly::Internal
         (void)ierr;
       }
 
-      /**
-       * @brief Copies the right-hand side where the vector stores it.
-       */
+      /// @brief Copies the right-hand side where the vector stores it.
       void setVector(::Vec b, const ::Kokkos::View<Real*, MemorySpace>& rhs) const
       {
         using Unmanaged = ::Kokkos::MemoryTraits<::Kokkos::Unmanaged>;

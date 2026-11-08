@@ -918,8 +918,10 @@ namespace Rodin::Kokkos::Variational
     template <class View, class Point = IntegrationPointView>
     struct BoundBasis
     {
-      /// @param dof Local scalar degree of freedom.
-      /// @param component Vector component. @return Basis value.
+      /**
+       * @param dof Local scalar degree of freedom.
+       * @param component Vector component. @return Basis value.
+       */
       KOKKOS_INLINE_FUNCTION
       decltype(auto) getBasis(Index dof, Index component) const
       {
@@ -937,8 +939,10 @@ namespace Rodin::Kokkos::Variational
     template <class Value, class Basis>
     struct LeftScaledBasis
     {
-      /// @param dof Local scalar degree of freedom.
-      /// @param component Vector component. @return Scaled basis value.
+      /**
+       * @param dof Local scalar degree of freedom.
+       * @param component Vector component. @return Scaled basis value.
+       */
       KOKKOS_INLINE_FUNCTION
       auto getBasis(Index dof, Index component) const
       {
@@ -956,8 +960,10 @@ namespace Rodin::Kokkos::Variational
     template <class Basis, class Value>
     struct RightScaledBasis
     {
-      /// @param dof Local scalar degree of freedom.
-      /// @param component Vector component. @return Scaled basis value.
+      /**
+       * @param dof Local scalar degree of freedom.
+       * @param component Vector component. @return Scaled basis value.
+       */
       KOKKOS_INLINE_FUNCTION
       auto getBasis(Index dof, Index component) const
       {
@@ -975,8 +981,10 @@ namespace Rodin::Kokkos::Variational
     template <class Value, class Basis>
     struct DotBasis
     {
-      /// @param dof Local scalar degree of freedom.
-      /// @param component Vector component. @return Dot product value.
+      /**
+       * @param dof Local scalar degree of freedom.
+       * @param component Vector component. @return Dot product value.
+       */
       KOKKOS_INLINE_FUNCTION
       Real getBasis(Index dof, Index component) const
       {
@@ -994,8 +1002,10 @@ namespace Rodin::Kokkos::Variational
     template <class LHS, class RHS>
     struct SumBasis
     {
-      /// @param dof Local scalar degree of freedom.
-      /// @param component Vector component. @return Sum of the basis values.
+      /**
+       * @param dof Local scalar degree of freedom.
+       * @param component Vector component. @return Sum of the basis values.
+       */
       KOKKOS_INLINE_FUNCTION
       auto getBasis(Index dof, Index component) const
       {
@@ -1013,8 +1023,10 @@ namespace Rodin::Kokkos::Variational
     template <class Basis>
     struct NegatedBasis
     {
-      /// @param dof Local scalar degree of freedom.
-      /// @param component Vector component. @return Opposite basis value.
+      /**
+       * @param dof Local scalar degree of freedom.
+       * @param component Vector component. @return Opposite basis value.
+       */
       KOKKOS_INLINE_FUNCTION
       auto getBasis(Index dof, Index component) const
       {
@@ -1029,8 +1041,10 @@ namespace Rodin::Kokkos::Variational
     template <class Basis>
     struct TransposedBasis
     {
-      /// @param dof Local scalar degree of freedom.
-      /// @param component Vector component. @return Transposed basis value.
+      /**
+       * @param dof Local scalar degree of freedom.
+       * @param component Vector component. @return Transposed basis value.
+       */
       KOKKOS_INLINE_FUNCTION
       Geometry::Matrix getBasis(Index dof, Index component) const
       {
@@ -1321,8 +1335,10 @@ namespace Rodin::Kokkos::Variational
       }
       value = Geometry::Matrix(matrix.rows(), matrix.cols());
       for (Index r = 0; r < value.rows(); ++r)
+      {
         for (Index c = 0; c < value.cols(); ++c)
           value(r, c) = matrix(r, c);
+      }
     }
 
     /// @param p Device or integration point, unused. @return Constant value.
@@ -2227,8 +2243,10 @@ namespace Rodin::Kokkos::Variational
       : dofs(node.getFiniteElementSpace().getDeviceDOFs())
     {}
 
-    /// @param ip Quadrature point. @param dof Local scalar degree of freedom.
-    /// @param component Vector component. @return Basis value.
+    /**
+     * @param ip Quadrature point. @param dof Local scalar degree of freedom.
+     * @param component Vector component. @return Basis value.
+     */
     KOKKOS_INLINE_FUNCTION
     Real getBasis(const IntegrationPointView& ip, Index dof, Index component) const
     {
@@ -2252,8 +2270,10 @@ namespace Rodin::Kokkos::Variational
       : dofs(node.getOperand().getFiniteElementSpace().getDeviceDOFs())
     {}
 
-    /// @param ip Quadrature point. @param dof Local scalar degree of freedom.
-    /// @param component Vector component. @return Gradient.
+    /**
+     * @param ip Quadrature point. @param dof Local scalar degree of freedom.
+     * @param component Vector component. @return Gradient.
+     */
     KOKKOS_INLINE_FUNCTION
     decltype(auto) getBasis(
       const IntegrationPointView& ip, Index dof, Index component) const
@@ -2281,8 +2301,10 @@ namespace Rodin::Kokkos::Variational
         rhs(node.getRHS())
     {}
 
-    /// @param ip Quadrature point. @param dof Local scalar degree of freedom.
-    /// @param component Vector component. @return Scaled basis value.
+    /**
+     * @param ip Quadrature point. @param dof Local scalar degree of freedom.
+     * @param component Vector component. @return Scaled basis value.
+     */
     KOKKOS_INLINE_FUNCTION
     auto getBasis(const IntegrationPointView& ip, Index dof, Index component) const
     {
@@ -2321,8 +2343,10 @@ namespace Rodin::Kokkos::Variational
         rhs(node.getRHS())
     {}
 
-    /// @param ip Quadrature point. @param dof Local scalar degree of freedom.
-    /// @param component Vector component. @return Scaled basis value.
+    /**
+     * @param ip Quadrature point. @param dof Local scalar degree of freedom.
+     * @param component Vector component. @return Scaled basis value.
+     */
     KOKKOS_INLINE_FUNCTION
     auto getBasis(const IntegrationPointView& ip, Index dof, Index component) const
     {
@@ -2361,8 +2385,10 @@ namespace Rodin::Kokkos::Variational
         rhs(node.getRHS())
     {}
 
-    /// @param ip Quadrature point. @param dof Local scalar degree of freedom.
-    /// @param component Vector component. @return Dot product value.
+    /**
+     * @param ip Quadrature point. @param dof Local scalar degree of freedom.
+     * @param component Vector component. @return Dot product value.
+     */
     KOKKOS_INLINE_FUNCTION
     Real getBasis(const IntegrationPointView& ip, Index dof, Index component) const
     {
@@ -2402,8 +2428,10 @@ namespace Rodin::Kokkos::Variational
         dofs(node.getFiniteElementSpace().getDeviceDOFs())
     {}
 
-    /// @param ip Quadrature point. @param dof Local scalar degree of freedom.
-    /// @param component Vector component. @return Basis value.
+    /**
+     * @param ip Quadrature point. @param dof Local scalar degree of freedom.
+     * @param component Vector component. @return Basis value.
+     */
     KOKKOS_INLINE_FUNCTION
     UnitVector getBasis(
       const IntegrationPointView& ip, Index dof, Index component) const
@@ -2437,8 +2465,10 @@ namespace Rodin::Kokkos::Variational
         dofs(node.getFiniteElementSpace().getDeviceDOFs())
     {}
 
-    /// @param ip Quadrature point. @param dof Local scalar degree of freedom.
-    /// @param component Vector component. @return Jacobian.
+    /**
+     * @param ip Quadrature point. @param dof Local scalar degree of freedom.
+     * @param component Vector component. @return Jacobian.
+     */
     KOKKOS_INLINE_FUNCTION
     RowMatrix getBasis(const IntegrationPointView& ip, Index dof, Index component) const
     {
@@ -2470,8 +2500,10 @@ namespace Rodin::Kokkos::Variational
         dofs(node.getFiniteElementSpace().getDeviceDOFs())
     {}
 
-    /// @param ip Quadrature point. @param dof Local scalar degree of freedom.
-    /// @param component Vector component. @return Divergence.
+    /**
+     * @param ip Quadrature point. @param dof Local scalar degree of freedom.
+     * @param component Vector component. @return Divergence.
+     */
     KOKKOS_INLINE_FUNCTION
     Real getBasis(const IntegrationPointView& ip, Index dof, Index component) const
     {
@@ -2501,8 +2533,10 @@ namespace Rodin::Kokkos::Variational
         rhs(node.getRHS())
     {}
 
-    /// @param ip Quadrature point. @param dof Local scalar degree of freedom.
-    /// @param component Vector component. @return Basis value.
+    /**
+     * @param ip Quadrature point. @param dof Local scalar degree of freedom.
+     * @param component Vector component. @return Basis value.
+     */
     KOKKOS_INLINE_FUNCTION
     auto getBasis(const IntegrationPointView& ip, Index dof, Index component) const
     {
@@ -2538,8 +2572,10 @@ namespace Rodin::Kokkos::Variational
       : operand(node.getOperand())
     {}
 
-    /// @param ip Quadrature point. @param dof Local scalar degree of freedom.
-    /// @param component Vector component. @return Basis value.
+    /**
+     * @param ip Quadrature point. @param dof Local scalar degree of freedom.
+     * @param component Vector component. @return Basis value.
+     */
     KOKKOS_INLINE_FUNCTION
     auto getBasis(const IntegrationPointView& ip, Index dof, Index component) const
     {
@@ -2571,8 +2607,10 @@ namespace Rodin::Kokkos::Variational
       : operand(node.getOperand())
     {}
 
-    /// @param ip Quadrature point. @param dof Local scalar degree of freedom.
-    /// @param component Vector component. @return Basis value.
+    /**
+     * @param ip Quadrature point. @param dof Local scalar degree of freedom.
+     * @param component Vector component. @return Basis value.
+     */
     KOKKOS_INLINE_FUNCTION
     Geometry::Matrix getBasis(
       const IntegrationPointView& ip, Index dof, Index component) const

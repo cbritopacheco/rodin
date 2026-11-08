@@ -462,10 +462,12 @@ namespace Rodin::Variational
       /// @brief Parent CRTP reference type.
       using Parent = GridFunctionBaseReference<Derived>;
 
-      /// @brief Whether the space lives on a Kokkos device mesh.
-      ///
-      /// Device grid functions are evaluated through Kokkos device views, so
-      /// the host interpolation path is not instantiated for them.
+      /**
+       * @brief Whether the space lives on a Kokkos device mesh.
+       *
+       * Device grid functions are evaluated through Kokkos device views, so
+       * the host interpolation path is not instantiated for them.
+       */
       static constexpr bool IsDevice = Context::IsKokkos<
         typename FormLanguage::Traits<typename FESType::MeshType>::ContextType>::value;
 
@@ -1015,8 +1017,10 @@ namespace Rodin::Variational
         if constexpr (IsDevice)
           return projectOnDevice(Geometry::Region::Cells, fn, {});
         else
+        {
           return static_cast<Derived&>(*this).project(
             Geometry::Region::Cells, fn, [](const Geometry::Polytope&) { return true; });
+        }
       }
 
       /**
@@ -1035,8 +1039,10 @@ namespace Rodin::Variational
         if constexpr (IsDevice)
           return projectOnDevice(region, fn, {});
         else
+        {
           return static_cast<Derived&>(*this).project(
             region, fn, [](const Geometry::Polytope&) { return true; });
+        }
       }
 
       /**
@@ -1058,10 +1064,12 @@ namespace Rodin::Variational
         if constexpr (IsDevice)
           return projectOnDevice(region, fn, {attr});
         else
+        {
           return static_cast<Derived&>(*this).project(
             region, fn, [&](const Geometry::Polytope& polytope) {
               return polytope.getAttribute() == attr;
             });
+        }
       }
 
       /**
@@ -1084,11 +1092,13 @@ namespace Rodin::Variational
         if constexpr (IsDevice)
           return projectOnDevice(region, fn, attrs);
         else
+        {
           return static_cast<Derived&>(*this).project(
             region, fn, [&](const Geometry::Polytope& polytope) {
               const auto attribute = polytope.getAttribute();
               return attrs.empty() || (attribute && attrs.count(*attribute));
             });
+        }
       }
 
       /**

@@ -58,8 +58,10 @@ namespace Rodin::Solver::Internal
     using CrsMatrix = ::KokkosSparse::CrsMatrix<Real, Math::SparseIndex, Device, void,
       Math::SparseIndex>;
 
-    /// @brief Kokkos-Kernels SpMV handle, which keeps the cuSPARSE descriptors
-    /// of one matrix between products.
+    /**
+     * @brief Kokkos-Kernels SpMV handle, which keeps the cuSPARSE descriptors
+     * of one matrix between products.
+     */
     using SpMV = ::KokkosSparse::SPMVHandle<Device, CrsMatrix, Vector, Vector>;
 
     /**
@@ -84,8 +86,10 @@ namespace Rodin::Solver::Internal
     static void reserve(Vector& v, size_t n, const char* label)
     {
       if (v.extent(0) != n)
+      {
         v = Vector(
           ::Kokkos::view_alloc(::Kokkos::WithoutInitializing, std::string(label)), n);
+      }
     }
 
     /**

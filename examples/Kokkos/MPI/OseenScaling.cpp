@@ -179,8 +179,10 @@ namespace Rodin::Examples
         (static_cast<std::uint64_t>(std::min(a, b)) << 32) | std::max(a, b);
       const auto [it, inserted] = midpoints.emplace(key, nv + coordinates.size());
       if (inserted)
+      {
         coordinates.push_back(
           0.5 * (mesh.getVertexCoordinates(a) + mesh.getVertexCoordinates(b)));
+      }
       return it->second;
     };
 

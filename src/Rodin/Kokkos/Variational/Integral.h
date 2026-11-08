@@ -100,8 +100,10 @@ namespace Rodin::Kokkos::Variational
     /// @brief Whether the entries couple pairs of polytopes, as global integrators do.
     bool global = false;
 
-    /// @brief Selected trial attributes of a global integrator, the
-    /// attributes and the region above selecting its test polytopes.
+    /**
+     * @brief Selected trial attributes of a global integrator, the
+     * attributes and the region above selecting its test polytopes.
+     */
     std::vector<::Rodin::Geometry::Attribute> trialAttributes = {};
 
     /**
@@ -622,8 +624,10 @@ namespace Rodin::Kokkos::Variational::Internal
     ::Rodin::Variational::ShapeFunction<RHSDerived, TestFES,
       ::Rodin::Variational::ShapeFunctionSpaceType::Test>>
   {
-    /// @brief Divergence of the trial function when the test space is scalar,
-    /// none otherwise.
+    /**
+     * @brief Divergence of the trial function when the test space is scalar,
+     * none otherwise.
+     */
     static constexpr DerivativeKind Kind =
       std::is_same_v<typename TestFES::RangeType, Real>
       ? DerivativeKind::TrialDivergence
@@ -637,8 +641,10 @@ namespace Rodin::Kokkos::Variational::Internal
     ::Rodin::Variational::Div<::Rodin::Variational::ShapeFunction<RHSDerived, TestFES,
       ::Rodin::Variational::ShapeFunctionSpaceType::Test>>>
   {
-    /// @brief Divergence of the test function when the trial space is scalar,
-    /// none otherwise.
+    /**
+     * @brief Divergence of the test function when the trial space is scalar,
+     * none otherwise.
+     */
     static constexpr DerivativeKind Kind =
       std::is_same_v<typename TrialFES::RangeType, Real>
       ? DerivativeKind::TestDivergence
@@ -752,8 +758,10 @@ namespace Rodin::Kokkos::Variational::Internal
             weights.push_back(qf.getWeight(qp));
             const auto& point = qf.getPoint(qp);
             for (size_t k = 0; k < ReferenceStride; ++k)
+            {
               points.push_back(
                 k < static_cast<size_t>(point.size()) ? point(k) : Real(0));
+            }
           }
         }
         offsets[GeometryCount] = weights.size();
@@ -1055,9 +1063,7 @@ namespace Rodin::Kokkos::Variational::Internal
       /// @brief Starts empty: a copy must not share the offsets it may locate again.
       DevicePolytopes(const DevicePolytopes&) {}
 
-      /**
-       * @brief Move constructor, keeping the located offsets.
-       */
+      /// @brief Move constructor, keeping the located offsets.
       DevicePolytopes(DevicePolytopes&&) = default;
 
       /**
@@ -1681,12 +1687,16 @@ namespace Rodin::Kokkos::Variational
         }
         constexpr Index Capacity = IntegrationPointView::Capacity;
         if (vertices <= 4)
+        {
           integratePolytopes<4>(mesh, m_polytopes, trial, test, trialDOFs, trialVDim,
             testDOFs, testVDim, values, offset, sign, accumulate, compact, rows, cols);
+        }
         else
+        {
           integratePolytopes<Capacity>(mesh, m_polytopes, trial, test, trialDOFs,
             trialVDim, testDOFs, testVDim, values, offset, sign, accumulate, compact,
             rows, cols);
+        }
       }
 
       /**
@@ -2027,8 +2037,10 @@ namespace Rodin::Kokkos::Variational
           const size_t trialDegree = trialfe.getDegree().value_or(2 * trialfe.getOrder());
           const size_t testDegree = testfe.getDegree().value_or(2 * testfe.getOrder());
           if (p1 || kind == Internal::DerivativeKind::Gradients)
+          {
             order =
               (trialDegree == 0 || testDegree == 0) ? 0 : trialDegree + testDegree - 2;
+          }
           else if (kind == Internal::DerivativeKind::TrialDivergence)
             order = trialDegree == 0 ? 0 : trialDegree + testDegree - 1;
           else if (kind == Internal::DerivativeKind::TestDivergence)
@@ -2043,15 +2055,19 @@ namespace Rodin::Kokkos::Variational
           auto trialOrder = integrand.getLHS().getLeaf().getOrder(polytope);
           auto testOrder = integrand.getRHS().getLeaf().getOrder(polytope);
           if (!trialOrder)
+          {
             trialOrder = integrand.getLHS()
                            .getFiniteElementSpace()
                            .getFiniteElement(d, i)
                            .getDegree();
+          }
           if (!testOrder)
+          {
             testOrder = integrand.getRHS()
                           .getFiniteElementSpace()
                           .getFiniteElement(d, i)
                           .getDegree();
+          }
           if (trialOrder && testOrder)
             order = *trialOrder + *testOrder;
         }
@@ -2069,9 +2085,7 @@ namespace Rodin::Kokkos::Variational
       mutable bool m_compact = false;
 
     public:
-      /**
-       * @brief Kernel of integrateTeams(), one team per polytope.
-       */
+      /// @brief Kernel of integrateTeams(), one team per polytope.
       template <Index Vertices, bool Exact, class Shape, class Trial, class Test>
       struct TeamKernel
       {
@@ -2090,8 +2104,10 @@ namespace Rodin::Kokkos::Variational
         /// @brief Team handle given to the kernel.
         using Member = typename Policy::member_type;
 
-        /// @brief Whether the integrand is component diagonal, so that one entry
-        /// is integrated per pair of scalar degrees of freedom.
+        /**
+         * @brief Whether the integrand is component diagonal, so that one entry
+         * is integrated per pair of scalar degrees of freedom.
+         */
         static constexpr bool Diagonal = isComponentDiagonal<Trial, Test>();
 
         /// @brief Maximum number of integrated trial indices of a polytope.
@@ -2108,14 +2124,18 @@ namespace Rodin::Kokkos::Variational
         /// @brief Number of quadrature points of a group that fit TeamScratch.
         static constexpr Index Fit = getTeamPoints<Vertices, Trial, Test>();
 
-        /// @brief Number of quadrature points of a group, at most TeamPoints, or
-        /// TeamSlowPoints when fewer than TeamMinimumPoints fit.
+        /**
+         * @brief Number of quadrature points of a group, at most TeamPoints, or
+         * TeamSlowPoints when fewer than TeamMinimumPoints fit.
+         */
         static constexpr Index P = Fit < TeamMinimumPoints ? TeamSlowPoints
           : Fit > TeamPoints                               ? TeamPoints
                                                            : Fit;
         // Wider blocks reduce the passes over the quadrature of large matrices.
-        /// @brief Number of local matrix entries accumulated by each thread per
-        /// pass over the quadrature.
+        /**
+         * @brief Number of local matrix entries accumulated by each thread per
+         * pass over the quadrature.
+         */
         static constexpr Index E =
           TrialCapacity * TestCapacity > LocalCapacity ? TeamWideEntries : TeamEntries;
 
@@ -2312,17 +2332,17 @@ namespace Rodin::Kokkos::Variational
         }
       };
 
-      /**
-       * @brief Kernel of integrateThreads(), one thread per polytope.
-       */
+      /// @brief Kernel of integrateThreads(), one thread per polytope.
       template <Index Vertices, bool Exact, class Shape, class Trial, class Test>
       struct ThreadKernel
       {
         /// @brief Stored value of a test basis function at a point (StoredValue).
         using TestValue = StoredValue<Test, Trial, Test>;
 
-        /// @brief Whether the integrand is component diagonal, so that one entry
-        /// is integrated per pair of scalar degrees of freedom.
+        /**
+         * @brief Whether the integrand is component diagonal, so that one entry
+         * is integrated per pair of scalar degrees of freedom.
+         */
         static constexpr bool Diagonal = isComponentDiagonal<Trial, Test>();
 
         /// @brief Maximum number of integrated trial indices of a polytope.
@@ -2439,8 +2459,10 @@ namespace Rodin::Kokkos::Variational
               const auto trialBasis = Rodin::Kokkos::Variational::bindBasis(trial, ip);
               RODIN_KOKKOS_UNROLL
               for (Index te = 0; te < nte; ++te)
+              {
                 phi[te] = Rodin::Kokkos::Variational::getStored<Diagonal>(
                   testBasis.getBasis(te / testComponents, te % testComponents));
+              }
               RODIN_KOKKOS_UNROLL
               for (Index tr = 0; tr < ntr; ++tr)
               {
@@ -2450,8 +2472,10 @@ namespace Rodin::Kokkos::Variational
                 for (Index te = 0; te < nte; ++te)
                 {
                   if (Rodin::Kokkos::Variational::overlaps(psi, phi[te]))
+                  {
                     local[te * ntr + tr] +=
                       wdet * Rodin::Kokkos::Variational::dot(psi, phi[te]);
+                  }
                 }
               }
             }
@@ -2791,9 +2815,7 @@ namespace Rodin::Kokkos::Variational
       mutable PolytopesType m_polytopes;
 
     public:
-      /**
-       * @brief Kernel of integratePolytopes(), one thread per polytope.
-       */
+      /// @brief Kernel of integratePolytopes(), one thread per polytope.
       template <Index Vertices, bool Exact, class Shape, class Test>
       struct PolytopeKernel
       {
