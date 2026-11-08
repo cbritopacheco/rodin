@@ -19,7 +19,7 @@ def main():
     _plot_examples = next(parent for parent in _PlotPath(__file__).resolve().parents
                           if (parent / 'rodin.mplstyle').is_file())
     _plot_sys.path.insert(0, str(_plot_examples))
-    from plot_style import apply_style
+    from plot_style import apply_style, turbo_colors
     apply_style()
     args.output.mkdir(parents=True, exist_ok=True)
     data = np.genfromtxt(args.root / 'Quadrature.csv', names=True, delimiter=',')
@@ -30,7 +30,7 @@ def main():
         ax.add_patch(Polygon(triangle, closed=True, facecolor='#166699',
                              alpha=.09, edgecolor='#718096', linewidth=1.5))
         ax.scatter(data[coordinates[0]], data[coordinates[1]],
-                   s=data['w'] / max(data['w']) * 200, color='#13b6d0')
+                   s=data['w'] / max(data['w']) * 200, color=turbo_colors(1)[0])
         ax.set_aspect('equal')
         ax.autoscale_view()
         ax.margins(.15)

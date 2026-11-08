@@ -42,6 +42,11 @@ YAML_VERSION = '6.0.2'
 PYTHON_INSTALL_TIMEOUT = 180
 PYTHON_INSTALL_ATTEMPTS = 3
 PYTHON_RETRY_DELAY = 2
+# The read-only version probe stalled once on a hosted runner. Retry timeouts
+# within a 96-second total budget; unsuccessful CMake exits remain fatal.
+CMAKE_PROBE_TIMEOUT = 30
+CMAKE_PROBE_ATTEMPTS = 3
+CMAKE_PROBE_RETRY_DELAY = 2
 
 
 def install_python():
@@ -77,7 +82,16 @@ def select_compiler(compiler):
                                       text=True, timeout=30).strip() for tool in [compiler, cxx]]
     if any(version.split('.')[0] != match[1] for version in versions) or versions[0] != versions[1]:
         raise RuntimeError('Requested GCC and G++ versions do not match: ' + repr(versions))
-    subprocess.run(['cmake', '--version'], check=True, timeout=30)
+    for attempt in range(1, CMAKE_PROBE_ATTEMPTS + 1):
+        try:
+            subprocess.run(['cmake', '--version'], check=True, timeout=CMAKE_PROBE_TIMEOUT)
+            break
+        except subprocess.TimeoutExpired as error:
+            print(f'CMake version probe timed out (attempt {attempt}/{CMAKE_PROBE_ATTEMPTS}).', flush=True)
+            if attempt == CMAKE_PROBE_ATTEMPTS:
+                raise RuntimeError('CMake version probe exhausted its bounded timeout retries') from error
+            time.sleep(CMAKE_PROBE_RETRY_DELAY * attempt)
+
     output = os.environ.get('GITHUB_ENV')
     if not output:
         raise RuntimeError('Compiler selection requires GITHUB_ENV')

@@ -21,24 +21,17 @@ target_link_libraries(RodinConvergenceHPETScLinearElasticity
   PRIVATE GTest::gtest RodinConvergenceH Rodin::PETSc)
 set(_RODIN_ELASTICITY_GEOMETRIES
   Segment Triangle Quadrilateral Tetrahedron Pyramid Hexahedron Wedge)
-# Isolate the pyramid's complete cases: its coverage-instrumented rate history
-# exceeds the former shared ten-minute process allowance. Other geometries keep
-# their existing grouping. Registration regressions verify every source case.
+# Give each complete case its own watchdog. The bundled hexahedron process
+# exhausted 600 seconds after five passing checks, interrupting sensitivity.
+# Registration regressions verify every geometry, case and MPI rank exactly once.
 # Match the three-hour coverage allowance of the 3D traction histories.
 set(_RODIN_ELASTICITY_PYRAMID_RATE_TIMEOUT 10800)
-set(_RODIN_ELASTICITY_PYRAMID_CASES
+set(_RODIN_ELASTICITY_CASES
   AffineP1Patch QuadraticP2Patch P1OptimalRates P2OptimalRates
   QuadraticPatchRejectsOmittedVolumetricTerm QuadratureAndSolverSensitivity)
 foreach(geometry IN LISTS _RODIN_ELASTICITY_GEOMETRIES)
-  set(_cases "*")
-  if (geometry STREQUAL "Pyramid")
-    set(_cases ${_RODIN_ELASTICITY_PYRAMID_CASES})
-  endif()
-  foreach(case IN LISTS _cases)
-    set(_test RodinConvergenceHPETScLinearElasticity_${geometry})
-    if (geometry STREQUAL "Pyramid")
-      set(_test RodinConvergenceHPETScLinearElasticity_${case}_${geometry})
-    endif()
+  foreach(case IN LISTS _RODIN_ELASTICITY_CASES)
+    set(_test RodinConvergenceHPETScLinearElasticity_${case}_${geometry})
     add_test(NAME ${_test}
       COMMAND $<TARGET_FILE:RodinConvergenceHPETScLinearElasticity>
         "--gtest_filter=AllGeometries/PETScLinearElasticityLocalTest.${case}/${geometry}"
@@ -66,15 +59,8 @@ if (RODIN_USE_MPI)
   endif()
   foreach(np 1 2 3 4)
     foreach(geometry IN LISTS _RODIN_ELASTICITY_GEOMETRIES)
-      set(_cases "*")
-      if (geometry STREQUAL "Pyramid")
-        set(_cases ${_RODIN_ELASTICITY_PYRAMID_CASES} GlobalNormCountsOwnedCellsOnce)
-      endif()
-      foreach(case IN LISTS _cases)
-        set(_test RodinConvergenceHPETScMPILinearElasticity_np${np}_${geometry})
-        if (geometry STREQUAL "Pyramid")
-          set(_test RodinConvergenceHPETScMPILinearElasticity_np${np}_${case}_${geometry})
-        endif()
+      foreach(case ${_RODIN_ELASTICITY_CASES} GlobalNormCountsOwnedCellsOnce)
+        set(_test RodinConvergenceHPETScMPILinearElasticity_np${np}_${case}_${geometry})
         add_test(NAME ${_test}
           COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
             ${_RODIN_MPI_OVERSUBSCRIBE_FLAG}

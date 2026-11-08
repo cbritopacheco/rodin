@@ -13,6 +13,45 @@
     dark: 'M21 13a9 9 0 0 1-10-10A9 9 0 1 0 21 13Z'
   };
 
+  let figureVariants = {};
+  function applyFigureTheme(light) {
+    for (const image of document.querySelectorAll('main article img, main article video')) {
+      const attribute = image.tagName === 'VIDEO' ? 'poster' : 'src';
+      const original = image.dataset.rodinFigure || image.getAttribute(attribute);
+      if (!original) continue;
+      const name = original.split('/').pop();
+      if (!figureVariants[name]) continue;
+      image.dataset.rodinFigure = original;
+      const selected = light ? original : original.replace(name, figureVariants[name]);
+      if (image.getAttribute(attribute) !== selected) image.setAttribute(attribute, selected);
+    }
+    for (const video of document.querySelectorAll('main article video')) {
+      const source = video.querySelector('source');
+      if (!source) continue;
+      const original = source.dataset.rodinFigure || source.getAttribute('src');
+      if (!original) continue;
+      const name = original.split('/').pop();
+      if (!figureVariants[name]) continue;
+      source.dataset.rodinFigure = original;
+      const selected = light ? original : original.replace(name, figureVariants[name]);
+      if (source.getAttribute('src') === selected) continue;
+      const time = video.currentTime;
+      const playing = !video.paused;
+      source.setAttribute('src', selected);
+      video.addEventListener('loadedmetadata', () => {
+        video.currentTime = time;
+        if (playing) video.play().catch(() => {});
+      }, {once: true});
+      video.load();
+    }
+  }
+  document.addEventListener('DOMContentLoaded', async () => {
+    const response = await fetch('rodin-figure-themes.json');
+    if (!response.ok) return;
+    figureVariants = await response.json();
+    applyTheme();
+  }, {once: true});
+
   function applyTheme() {
     if (theme === 'system') delete document.documentElement.dataset.theme;
     else document.documentElement.dataset.theme = theme;
@@ -22,6 +61,7 @@
       option.setAttribute('aria-checked', String(option.dataset.theme === theme));
     }
     const light = theme === 'light' || (theme === 'system' && system.matches);
+    applyFigureTheme(light);
     document.querySelector('meta[name="theme-color"]')?.setAttribute('content', light ? '#f7f8fa' : '#20252d');
   }
   applyTheme();

@@ -113,6 +113,11 @@ Final installation is offline, allows no package removals and has a
 900-second budget; configuration failures are not retried as download failures.
 Exhausted mirrors fail the job rather than skip its tests.
 
+Compiler selection verifies matching GCC/G++ versions before exporting them.
+If `cmake --version` stalls, it retries up to three 30-second attempts with
+2- and 4-second delays. A nonzero exit fails immediately; exhausted timeouts
+fail before compiler variables are exported.
+
 Disk checks log available space and require **8 GiB of free headroom**. This is
 a conservative initial policy, not a measured peak for every hierarchy group.
 With sufficient space they do nothing. Otherwise, on GitHub-hosted runners only,
@@ -122,6 +127,11 @@ They never delete dependency archives or Rodin build/coverage artifacts. If the
 allowlisted cleanup cannot supply enough space, the job fails explicitly. Local
 and self-hosted machines are never cleaned by this helper. Dependency setup and
 artifact restoration recheck headroom, replacing unconditional bulk deletion.
+Before extraction, restoration reserves the archive's expanded regular-file size
+in addition to the 8 GiB floor. After a successful execution-build restore, the
+runner deletes its downloaded `ci-runtime-inputs` copy and rechecks headroom.
+The extracted build, coverage notes, manifests and remote artifacts remain intact.
+Execution jobs also report final workspace and temporary-directory disk usage.
 
 Change package lists in `test-environment/action.yml` for shared environments,
 or in `../ci/targeted-lanes.yml` for dedicated lanes, then regenerate dedicated
@@ -249,11 +259,20 @@ compatibility. Compilation stops at `Unit / Rodin / <Module>`,
 `Manufactured / Rodin / <Module>` and `Convergence / H`, `/ P`, `/ HP` or
 `/ Isoparametric`. Selected descendants normally share their group's single
 artifact; direct root targets retain a separate parent group. The optional
-Release build with both sanitizers divides the oversized Variational producer
-into numbered parts of at most 24 executables. This configuration selected 133
-executables and lost its runner after four hours of compilation. Each part
-restores the same common libraries, and dependent lanes wait for the group.
-Execution lanes retain their existing partitions. Test enable switches register a superset
+Debug and Release builds divide the oversized Variational
+producer into numbered parts of at most 24 executables. Release previously lost
+its runner during compilation; Debug exhausted disk space with ASan alone and
+with both sanitizers, and later without sanitizers. Each
+part restores the same common libraries, and dependent lanes wait for the group.
+
+The 3D P1 manufactured elasticity group runs tetrahedron, hexahedron, pyramid and
+wedge cases in four independent geometry jobs. Every build, threading, sanitizer
+and backend configuration retains all its original regular and slow cases.
+The jobs reuse the same compiled executable and retain the six-hour job limit.
+Each geometry has a distinct producer receipt; coverage finalization requires
+all four and checks their selections against the complete invocation manifest.
+
+Test enable switches register a superset
 without changing production ABI; original configuration-specific
 inventories and runtime selectors remain required.
 
@@ -281,7 +300,7 @@ restores their compatible artifacts. CMake regeneration is suppressed;
 execution lanes do not rebuild test targets.
 
 Execution lanes download only the exact archive names in their build index.
-Single-artifact steps use the named download action; multi-artifact steps use
+Benchmark build/execution and documentation/benchmark publication downloads use
 [the exact-name downloader](../actions/download-artifacts/action.yml). It uses
 GitHub's official artifact client with the current-run runtime credentials,
 resolves each name once, then downloads that artifact ID. It never lists every
@@ -294,6 +313,11 @@ with fresh staging on each attempt. A missing name fails immediately. Each
 artifact gets its own subdirectory. Restoration still requires `manifest.json`
 and `build.tar.gz`; source/configuration, runtime compatibility and archive
 SHA256 validation remain mandatory. Incomplete restoration fails the lane.
+Benchmark and publication inputs use the same three-attempt transfer policy as
+coverage inputs. Each retry discards partial extraction and obtains a fresh
+transfer URL for the resolved artifact ID. A reported digest mismatch fails the
+transfer; an exhausted or missing artifact remains a hard failure.
+
 The downloader's official client dependency is pinned in a lockfile and installed
 once per runner in `RUNNER_TEMP`; its JavaScript action uses Node 24.
 Client 4.0.0 rejects interrupted streams that could leave 2.3.2 with an unresolved
@@ -455,8 +479,11 @@ It does not wait for benchmark builds, execution or pooling. After successful po
 updates only complete benchmark histories; it cannot replace newer documentation. Missing or failed
 benchmark contributions leave the previous complete results intact. The independent documentation and benchmark workflows hold the same `rodin-gh-pages-publication` lock
 while writing and deploying. Each publisher uploads the locked `gh-pages`
-checkout as its own Pages artifact and uses `actions/deploy-pages` in that
-same job. This avoids a second hosted-runner queue for a legacy Pages build;
+checkout as its own Pages artifact and deploys its exact artifact ID in that
+same job. The Pages API build version is the published `gh-pages` commit,
+which distinguishes master, develop and benchmark updates even when they share
+one source commit. The deployment retains the workflow OIDC token and protected
+environment. This avoids a second hosted-runner queue for a legacy Pages build;
 that queue delayed one deployment by almost eleven hours. A successful branch
 push alone is never treated as deployment success. After the deployment action
 succeeds, `dev/deploy_pages.py` checks the served `rodin-publication.json` marker
@@ -473,8 +500,7 @@ Repository setup for these publishers:
   and require `pages: write` and `id-token: write`.
 
 The local workflow repair does not change these repository settings. A legacy
-Pages source fails preparation with an actionable diagnostic. The automatic documentation and complete-benchmark publishers, together with
-the manual documentation publisher, use the same artifact deployment path.
+Pages source fails preparation with an actionable diagnostic. The automatic documentation and complete-benchmark publishers use the same artifact deployment path.
 The unused include-dependency-graph workflow has been removed.
 
 Component histories live
@@ -652,8 +678,8 @@ missing endpoints remain unavailable until the first publisher initializes them.
 
 ### Artifact-client bootstrap resilience
 
-The exact-name downloader and its Plan regression checks install the unchanged
-lockfile-pinned client through `dev/ci_artifact_client.py`. Successful installs
+The exact-name downloader, retrying uploader and Plan regression checks install
+the shared lockfile-pinned client through `dev/ci_artifact_client.py`. Successful installs
 are reused on the runner only when the lockfile marker and installed package
 are present. A failed invocation is retried at most twice for recognized
 network resets, DNS failures, timeouts or registry 502/503/504 responses.
@@ -661,9 +687,64 @@ Lockfile, dependency-resolution, integrity and engine errors fail immediately.
 The success marker is written only after npm succeeds and the package exists.
 Install scripts remain disabled.
 
+Repository-owned build, result, coverage and diagnostic uploads use
+[`upload-artifacts`](../actions/upload-artifacts/action.yml). It permits three
+whole-upload attempts with 2- and 4-second delays for network resets, timeouts,
+rate limits and retryable service errors. The official client also retains its
+own bounded request retries. Permission, quota, validation, cancellation and
+missing-required-file failures are not retried. Exhaustion fails the step and
+its producer; mandatory contributions remain required by finalization.
+
+An upload configured with `overwrite: true` clears its exact existing artifact
+name before each attempt. A finalized upload whose acknowledgment was lost can
+therefore be replaced on retry. A failed lookup or deletion is never treated as
+proof of absence unless the client reports `ArtifactNotFoundError`. Successful
+outputs contain the finalized artifact ID, URL and ZIP digest. Input paths,
+exclusions, hidden-file defaults, compression and retention retain their existing
+settings. Pages snapshot packaging continues to use `upload-pages-artifact`.
+
+The Plan job exercises real ZIP uploads to a local HTTP service, including
+injected connection resets during artifact creation and finalization. These
+checks require no GitHub credentials or remote artifact writes.
+
 Benchmark execution also emits memory readings every minute to its live job
 log and `benchmark-diagnostics/memory.log`. Host availability and cgroup limits
 and OOM counters are recorded where exposed. Missing counters remain unknown.
 The monitor is stopped when the lane exits. These measurements help distinguish
 resource exhaustion from hosted runner interruptions; they do not prevent a
 runner shutdown or replace the existing single-retry policy.
+
+Explicit resource hydration uses `dev/ci_lfs.py` with five attempts, 300 seconds
+per attempt, and 15-, 30-, 60- and 120-second backoffs for transient network/server
+failures. The retry span is 225 seconds; the worst-case total with all command
+watchdogs exhausted is 1,725 seconds. Manufactured 3D elasticity partitions
+generate their meshes with `UniformGrid` and skip resource hydration. Authentication, missing objects, quota and unknown errors fail
+immediately. Exhaustion fails the job; required resources remain mandatory.
+GoogleTest discovery has a 60-second default startup allowance. Explicit
+`DISCOVERY_TIMEOUT` values and all test execution watchdogs remain unchanged.
+
+MPI Poisson registers nine complete cases independently on each of seven
+geometries and four MPI ranks. All 252 entries retain their numerical checks and
+300-second watchdogs; no refinement history is subdivided.
+
+All build-index and test-plan downloads use the pinned exact-name downloader.
+Transient artifact lookup failures receive three attempts with two- and
+four-second backoffs. Missing artifacts, authorization and unknown lookup errors
+fail immediately. Transfer retries retain their separate three-attempt bound,
+clean staging and digest verification. Single-artifact metadata restores merge
+verified contents into their original destinations while retaining workspace
+sources. A failed lookup or transfer never publishes partial input.
+
+The distributed named vector P2 form oracle retains its tetrahedral grid,
+material parameters, two reassembly passes and independent full-matrix
+comparisons. Its Debug build with coverage has a 300-second per-case allowance
+at each existing MPI rank. Hosted Debug/coverage runs took 90--111 seconds,
+with the three-rank check exceeding the former 120-second limit twice.
+Other named-form cases and configurations retain 120 seconds. Compiler flags,
+coverage instrumentation and numerical acceptance thresholds are unchanged.
+
+The local curved P3 mixed-traction hexahedron history retains all three
+refinements and numerical requirements. Coverage runs have a 3,600-second
+allowance, matching the existing local P3 pyramid allowance. Its first two
+hosted levels took 25 and 194 seconds before the final level exhausted the
+former 1,800-second limit. MPI cases and non-coverage watchdogs remain unchanged.

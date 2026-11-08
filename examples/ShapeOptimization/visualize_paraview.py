@@ -43,7 +43,7 @@ for target,time in [(left,times[0]),(right,times[-1])]:
     target.CameraParallelScale=max(x1-x0,y1-y0)*.85
     source.UpdatePipeline(time)
     display=style.color(source,target,args.field,(0,maximum),title=r'$\Vert\mathbf{u}_h\Vert$')
-    display.Representation='Surface With Edges';display.EdgeColor=style.TEXT
+    display.Representation='Surface With Edges';display.EdgeColor=style.EDGE
     bar=GetScalarBar(GetColorTransferFunction(args.field),target)
     bar.Orientation='Horizontal';bar.Position=[.22,.025];bar.ScalarBarLength=.56
     bar.CustomLabels=[0,maximum/2,maximum];bar.TitleFontSize=17;bar.LabelFontSize=15

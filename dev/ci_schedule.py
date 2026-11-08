@@ -88,6 +88,8 @@ def execution_key(request, family):
     job, matrix = request['job'], request['matrix']
     selection = (matrix['group'] if job in ['Ordinary', 'ConvergenceBaseline'] else
                  graph.specification(job, matrix)['targets'])
+    if job == 'Ordinary' and matrix.get('partition'):
+        selection = [selection, matrix['partition']]
     return key('e', [job, family, selection])
 
 
@@ -206,7 +208,7 @@ def configuration_workflow(variant=None):
         {'name': 'Bind configured targets to independent hierarchy edges', 'id': 'schedule',
          'env': {'COMMON_ID': expression('inputs.id')},
          'run': 'python3 dev/ci_schedule.py --prepare "$COMMON_ID"'},
-        {'uses': 'actions/upload-artifact@v4', 'with': {'overwrite': True,
+        {'uses': './.github/actions/upload-artifacts', 'with': {'overwrite': True,
          'name': 'ci-build-index-${{ inputs.id }}', 'path': 'ci-build-index.json', 'if-no-files-found': 'error'}}]
     jobs = {'Common': common}
     for identity, producer in sorted(producers.items(), key=lambda x: x[1]['path']):
@@ -225,7 +227,7 @@ def configuration_workflow(variant=None):
             job.update({'strategy': {'fail-fast': False, 'matrix': expression('fromJSON(needs.Common.outputs.' + identity + ')')},
                         'uses': './.github/workflows/TestGroup.yml',
                         'with': {k: expression('matrix.' + k) for k in ['family', 'backend', 'profile', 'group',
-                                 'build_type', 'multithreaded', 'asan', 'ubsan', 'id', 'name', 'baseline']}})
+                                 'build_type', 'multithreaded', 'asan', 'ubsan', 'id', 'name', 'baseline', 'partition']}})
         else:
             job.update({'uses': './.github/workflows/Test' + execution['job'] + '.yml',
                         'with': {'matrix': expression('needs.Common.outputs.' + identity)}})

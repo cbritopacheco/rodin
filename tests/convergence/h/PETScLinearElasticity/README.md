@@ -107,11 +107,14 @@ The executable is built by `PETScConvergence` CI. Configure with
 `RODIN_BUILD_CONVERGENCE_TESTS=ON`, `RODIN_USE_PETSC=ON`, and, for distributed
 cases, `RODIN_USE_MPI=ON`. Run
 `ctest --test-dir build/tests -R 'RodinConvergenceHPETSc(MPI)?LinearElasticity' --output-on-failure`.
-CTest entries are split by geometry and, for MPI, rank count. Each carries
-the `slow` label and a 600-second timeout; MPI entries also declare their
-process count for CTest scheduling. The dedicated
-PETSc job selects these entries by name, so that label does not remove their
-CI execution.
+Each complete check has a separate CTest entry for every geometry and MPI
+rank count. This preserves all six local checks and all seven distributed
+checks without sharing one timeout across their execution. Entries carry the
+`slow` label and a 600-second timeout. Coverage-instrumented pyramid P1 and P2
+rate histories retain their existing 10,800-second allowance and pyramid
+resource lock. MPI entries also declare their process count for CTest
+scheduling. The dedicated PETSc job selects these entries by name, so the
+`slow` label retains their CI execution.
 
 ## Mixed traction and nearly incompressible counterparts
 

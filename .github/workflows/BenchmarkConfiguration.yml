@@ -31,7 +31,7 @@ jobs:
         env:
           CONFIGURATION: ${{ inputs.configuration }}
         run: python3 dev/benchmark_ci.py prepare --configuration "$CONFIGURATION" --output benchmark-common
-      - uses: actions/upload-artifact@v4
+      - uses: ./.github/actions/upload-artifacts
         with:
           overwrite: true
           name: benchmark-common-${{ inputs.configuration }}
@@ -39,7 +39,7 @@ jobs:
           compression-level: 0
           retention-days: 7
           if-no-files-found: error
-      - uses: actions/upload-artifact@v4
+      - uses: ./.github/actions/upload-artifacts
         with:
           overwrite: true
           name: benchmark-plan-common-${{ inputs.configuration }}

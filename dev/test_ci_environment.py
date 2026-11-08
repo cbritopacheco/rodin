@@ -26,6 +26,28 @@ class EnvironmentTest(unittest.TestCase):
         self.release.start()
         self.addCleanup(self.release.stop)
 
+    def test_reporting_disk_errors_warn_without_failing_successful_tests(self):
+        workflow = yaml.safe_load((ROOT / '.github/workflows/TestGroup.yml').read_text())
+        step = next(s for s in workflow['jobs']['Run']['steps']
+                    if s.get('name') == 'Report execution disk usage')
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / 'build').mkdir()
+            (root / 'rodin-apt-archives').mkdir()
+            tools = root / 'bin'
+            tools.mkdir()
+            for name in ('df', 'du'):
+                tool = tools / name
+                tool.write_text('#!/bin/sh\necho "diagnostic: Permission denied" >&2\nexit 1\n')
+                tool.chmod(0o755)
+            result = subprocess.run(['bash', '-e', '-o', 'pipefail', '-c', step['run']],
+                                    cwd=root, text=True, capture_output=True,
+                                    env=dict(os.environ, PATH=str(tools) + os.pathsep + os.environ['PATH'],
+                                             RUNNER_TEMP=str(root)))
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(result.stdout.count('::warning::'), 3)
+            self.assertIn('Permission denied', result.stderr)
+
     def test_python_dependency_reuses_exact_importable_version(self):
         with patch.object(environment.subprocess, 'run', return_value=SimpleNamespace(returncode=0)) as run:
             environment.install_python()
@@ -83,6 +105,33 @@ class EnvironmentTest(unittest.TestCase):
             self.assertEqual(Path(os.environ['GITHUB_ENV']).read_text(), 'CC=gcc-14\nCXX=g++-14\n')
             self.assertEqual([call.args[0][0] for call in probe.call_args_list], ['gcc-14', 'g++-14'])
             cmake.assert_called_once_with(['cmake', '--version'], check=True, timeout=30)
+
+    def test_cmake_probe_retries_only_timeouts_before_exporting_compilers(self):
+        with tempfile.TemporaryDirectory() as folder, \
+                patch.dict(os.environ, GITHUB_ENV=str(Path(folder) / 'environment')), \
+                patch.object(environment.subprocess, 'check_output', return_value='14.2.0\n'), \
+                patch.object(environment.subprocess, 'run', side_effect=[
+                    subprocess.TimeoutExpired(['cmake', '--version'], 30),
+                    SimpleNamespace(returncode=0)]) as probe, \
+                patch.object(environment.time, 'sleep') as sleep:
+            environment.select_compiler('gcc-14')
+            self.assertEqual(probe.call_count, 2)
+            sleep.assert_called_once_with(2)
+            self.assertEqual(Path(os.environ['GITHUB_ENV']).read_text(), 'CC=gcc-14\nCXX=g++-14\n')
+
+    def test_cmake_probe_exhaustion_or_failed_exit_cannot_export_compilers(self):
+        for error in (subprocess.TimeoutExpired(['cmake', '--version'], 30),
+                      subprocess.CalledProcessError(1, ['cmake', '--version'])):
+            with self.subTest(error=error), tempfile.TemporaryDirectory() as folder, \
+                    patch.dict(os.environ, GITHUB_ENV=str(Path(folder) / 'environment')), \
+                    patch.object(environment.subprocess, 'check_output', return_value='14.2.0\n'), \
+                    patch.object(environment.subprocess, 'run', side_effect=error) as probe, \
+                    patch.object(environment.time, 'sleep') as sleep:
+                with self.assertRaises((RuntimeError, subprocess.CalledProcessError)):
+                    environment.select_compiler('gcc-14')
+                self.assertEqual(probe.call_count, 3 if isinstance(error, subprocess.TimeoutExpired) else 1)
+                self.assertEqual(sleep.call_count, 2 if isinstance(error, subprocess.TimeoutExpired) else 0)
+                self.assertFalse(Path(os.environ['GITHUB_ENV']).exists())
 
     def test_mismatched_or_missing_compilers_cannot_export_a_fallback(self):
         for versions in [['13.3.0', '13.3.0'], ['14.2.0', '14.3.0'], FileNotFoundError('g++-14')]:

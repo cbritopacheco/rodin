@@ -34,15 +34,16 @@ jobs:
         definition: ${{ inputs.definition }}
     - name: Install pinned lane planning dependency
       run: python3 dev/ci_environment.py python
-    - uses: actions/download-artifact@v4
+    - uses: ./.github/actions/download-artifacts
       with:
-        name: ci-test-plan
+        names: '["ci-test-plan"]'
         path: .
+        merge-single: true
     - name: Compile common libraries once
       env:
         DEFINITION: ${{ inputs.definition }}
       run: python3 dev/ci_build_graph.py common --definition "$DEFINITION"
-    - uses: actions/upload-artifact@v4
+    - uses: ./.github/actions/upload-artifacts
       with:
         overwrite: true
         name: ci-common-${{ inputs.id }}
@@ -50,7 +51,7 @@ jobs:
         compression-level: 0
         retention-days: 7
         if-no-files-found: error
-    - uses: actions/upload-artifact@v4
+    - uses: ./.github/actions/upload-artifacts
       with:
         overwrite: true
         name: ci-common-manifest-${{ fromJSON(inputs.definition).mode }}-${{ inputs.id }}
@@ -61,7 +62,7 @@ jobs:
       env:
         COMMON_ID: ${{ inputs.id }}
       run: python3 dev/ci_schedule.py --prepare "$COMMON_ID"
-    - uses: actions/upload-artifact@v4
+    - uses: ./.github/actions/upload-artifacts
       with:
         overwrite: true
         name: ci-build-index-${{ inputs.id }}
@@ -123,7 +124,10 @@ jobs:
       e_b1dd47638d1bef42: ${{ steps.schedule.outputs.e_b1dd47638d1bef42 }}
       e_58bfd15ee9417aa2: ${{ steps.schedule.outputs.e_58bfd15ee9417aa2 }}
       e_8e1d1dc208212471: ${{ steps.schedule.outputs.e_8e1d1dc208212471 }}
-      e_fe559a2375c8bb17: ${{ steps.schedule.outputs.e_fe559a2375c8bb17 }}
+      e_d8dc993985b1c7e3: ${{ steps.schedule.outputs.e_d8dc993985b1c7e3 }}
+      e_b1c9dda0fed5eaab: ${{ steps.schedule.outputs.e_b1c9dda0fed5eaab }}
+      e_26efa33aa070421f: ${{ steps.schedule.outputs.e_26efa33aa070421f }}
+      e_0a7142552b7731b0: ${{ steps.schedule.outputs.e_0a7142552b7731b0 }}
       e_6d8bcfd9c4246aac: ${{ steps.schedule.outputs.e_6d8bcfd9c4246aac }}
       e_4a2b49e231129006: ${{ steps.schedule.outputs.e_4a2b49e231129006 }}
       e_9c68bf931a59a45f: ${{ steps.schedule.outputs.e_9c68bf931a59a45f }}
@@ -132,7 +136,10 @@ jobs:
       e_d9c53777a387fc06: ${{ steps.schedule.outputs.e_d9c53777a387fc06 }}
       e_98047d7208498759: ${{ steps.schedule.outputs.e_98047d7208498759 }}
       e_3b9348adab56cb6b: ${{ steps.schedule.outputs.e_3b9348adab56cb6b }}
-      e_4cca9a8538cc6aad: ${{ steps.schedule.outputs.e_4cca9a8538cc6aad }}
+      e_4aedf2275356db84: ${{ steps.schedule.outputs.e_4aedf2275356db84 }}
+      e_0438e1d735b66d11: ${{ steps.schedule.outputs.e_0438e1d735b66d11 }}
+      e_ea89e8119cc3be39: ${{ steps.schedule.outputs.e_ea89e8119cc3be39 }}
+      e_f76e5038749e50ae: ${{ steps.schedule.outputs.e_f76e5038749e50ae }}
       e_ec3565cfb8138ed9: ${{ steps.schedule.outputs.e_ec3565cfb8138ed9 }}
       p_baseline: ${{ steps.schedule.outputs.p_baseline }}
       p_manufactured_1: ${{ steps.schedule.outputs.p_manufactured_1 }}
@@ -625,6 +632,31 @@ jobs:
       id: ${{ matrix.id }}
       name: ${{ matrix.name }}
       baseline: ${{ matrix.baseline }}
+      partition: ${{ matrix.partition }}
+    secrets: inherit
+  e_0438e1d735b66d11:
+    name: Manufactured / Rodin / P1 / LinearElasticity3D / Slow / Hexahedron
+    needs:
+    - Common
+    - b_0dbff32f8c18754e
+    if: ${{ !cancelled() }}
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.Common.outputs.e_0438e1d735b66d11) }}
+    uses: ./.github/workflows/TestGroup.yml
+    with:
+      family: ${{ matrix.family }}
+      backend: ${{ matrix.backend }}
+      profile: ${{ matrix.profile }}
+      group: ${{ matrix.group }}
+      build_type: ${{ matrix.build_type }}
+      multithreaded: ${{ matrix.multithreaded }}
+      asan: ${{ matrix.asan }}
+      ubsan: ${{ matrix.ubsan }}
+      id: ${{ matrix.id }}
+      name: ${{ matrix.name }}
+      baseline: ${{ matrix.baseline }}
+      partition: ${{ matrix.partition }}
     secrets: inherit
   e_0902c944445fce1e:
     name: Unit / Rodin / Variational / H1 / ShapeFunction / Backends / Baseline
@@ -648,6 +680,31 @@ jobs:
       id: ${{ matrix.id }}
       name: ${{ matrix.name }}
       baseline: ${{ matrix.baseline }}
+      partition: ${{ matrix.partition }}
+    secrets: inherit
+  e_0a7142552b7731b0:
+    name: Manufactured / Rodin / P1 / LinearElasticity3D / Backends / Baseline / Wedge
+    needs:
+    - Common
+    - b_0dbff32f8c18754e
+    if: ${{ !cancelled() }}
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.Common.outputs.e_0a7142552b7731b0) }}
+    uses: ./.github/workflows/TestGroup.yml
+    with:
+      family: ${{ matrix.family }}
+      backend: ${{ matrix.backend }}
+      profile: ${{ matrix.profile }}
+      group: ${{ matrix.group }}
+      build_type: ${{ matrix.build_type }}
+      multithreaded: ${{ matrix.multithreaded }}
+      asan: ${{ matrix.asan }}
+      ubsan: ${{ matrix.ubsan }}
+      id: ${{ matrix.id }}
+      name: ${{ matrix.name }}
+      baseline: ${{ matrix.baseline }}
+      partition: ${{ matrix.partition }}
     secrets: inherit
   e_1e60a7246d24bcf4:
     name: Manufactured / Rodin / Backends / Baseline
@@ -678,6 +735,7 @@ jobs:
       id: ${{ matrix.id }}
       name: ${{ matrix.name }}
       baseline: ${{ matrix.baseline }}
+      partition: ${{ matrix.partition }}
     secrets: inherit
   e_1fea204855efc00f:
     name: Unit / Rodin / MPI / Variational / Backends / Baseline
@@ -701,6 +759,31 @@ jobs:
       id: ${{ matrix.id }}
       name: ${{ matrix.name }}
       baseline: ${{ matrix.baseline }}
+      partition: ${{ matrix.partition }}
+    secrets: inherit
+  e_26efa33aa070421f:
+    name: Manufactured / Rodin / P1 / LinearElasticity3D / Backends / Baseline / Pyramid
+    needs:
+    - Common
+    - b_0dbff32f8c18754e
+    if: ${{ !cancelled() }}
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.Common.outputs.e_26efa33aa070421f) }}
+    uses: ./.github/workflows/TestGroup.yml
+    with:
+      family: ${{ matrix.family }}
+      backend: ${{ matrix.backend }}
+      profile: ${{ matrix.profile }}
+      group: ${{ matrix.group }}
+      build_type: ${{ matrix.build_type }}
+      multithreaded: ${{ matrix.multithreaded }}
+      asan: ${{ matrix.asan }}
+      ubsan: ${{ matrix.ubsan }}
+      id: ${{ matrix.id }}
+      name: ${{ matrix.name }}
+      baseline: ${{ matrix.baseline }}
+      partition: ${{ matrix.partition }}
     secrets: inherit
   e_2cc98b51c9d77f30:
     name: Unit / Rodin / PETSc / Backends / Baseline
@@ -724,6 +807,7 @@ jobs:
       id: ${{ matrix.id }}
       name: ${{ matrix.name }}
       baseline: ${{ matrix.baseline }}
+      partition: ${{ matrix.partition }}
     secrets: inherit
   e_3b9348adab56cb6b:
     name: Manufactured / Rodin / P1 / Slow
@@ -747,6 +831,7 @@ jobs:
       id: ${{ matrix.id }}
       name: ${{ matrix.name }}
       baseline: ${{ matrix.baseline }}
+      partition: ${{ matrix.partition }}
     secrets: inherit
   e_41b363ca687142b3:
     name: Manufactured / Rodin / H1 / Slow
@@ -770,6 +855,7 @@ jobs:
       id: ${{ matrix.id }}
       name: ${{ matrix.name }}
       baseline: ${{ matrix.baseline }}
+      partition: ${{ matrix.partition }}
     secrets: inherit
   e_4a2b49e231129006:
     name: Unit / Rodin / MPI / Variational / Slow
@@ -793,16 +879,17 @@ jobs:
       id: ${{ matrix.id }}
       name: ${{ matrix.name }}
       baseline: ${{ matrix.baseline }}
+      partition: ${{ matrix.partition }}
     secrets: inherit
-  e_4cca9a8538cc6aad:
-    name: Manufactured / Rodin / P1 / LinearElasticity3D / Slow
+  e_4aedf2275356db84:
+    name: Manufactured / Rodin / P1 / LinearElasticity3D / Slow / Tetrahedron
     needs:
     - Common
     - b_0dbff32f8c18754e
     if: ${{ !cancelled() }}
     strategy:
       fail-fast: false
-      matrix: ${{ fromJSON(needs.Common.outputs.e_4cca9a8538cc6aad) }}
+      matrix: ${{ fromJSON(needs.Common.outputs.e_4aedf2275356db84) }}
     uses: ./.github/workflows/TestGroup.yml
     with:
       family: ${{ matrix.family }}
@@ -816,6 +903,7 @@ jobs:
       id: ${{ matrix.id }}
       name: ${{ matrix.name }}
       baseline: ${{ matrix.baseline }}
+      partition: ${{ matrix.partition }}
     secrets: inherit
   e_58bfd15ee9417aa2:
     name: Manufactured / Rodin / H1 / Backends / Baseline
@@ -839,6 +927,7 @@ jobs:
       id: ${{ matrix.id }}
       name: ${{ matrix.name }}
       baseline: ${{ matrix.baseline }}
+      partition: ${{ matrix.partition }}
     secrets: inherit
   e_680fee2db4506cf4:
     name: Unit / Rodin / Variational / MatrixQuadrature / Backends / Baseline
@@ -862,6 +951,7 @@ jobs:
       id: ${{ matrix.id }}
       name: ${{ matrix.name }}
       baseline: ${{ matrix.baseline }}
+      partition: ${{ matrix.partition }}
     secrets: inherit
   e_6d8bcfd9c4246aac:
     name: Unit / Rodin / MPI / Assembly / Slow
@@ -885,6 +975,7 @@ jobs:
       id: ${{ matrix.id }}
       name: ${{ matrix.name }}
       baseline: ${{ matrix.baseline }}
+      partition: ${{ matrix.partition }}
     secrets: inherit
   e_74373ab9a7387dc3:
     name: Unit / Rodin / Models / Solid / Backends / Baseline
@@ -908,6 +999,7 @@ jobs:
       id: ${{ matrix.id }}
       name: ${{ matrix.name }}
       baseline: ${{ matrix.baseline }}
+      partition: ${{ matrix.partition }}
     secrets: inherit
   e_8e1d1dc208212471:
     name: Manufactured / Rodin / MPI / H1 / LinearElasticity / Backends / Baseline
@@ -931,6 +1023,7 @@ jobs:
       id: ${{ matrix.id }}
       name: ${{ matrix.name }}
       baseline: ${{ matrix.baseline }}
+      partition: ${{ matrix.partition }}
     secrets: inherit
   e_98047d7208498759:
     name: Manufactured / Rodin / MPI / H1 / LinearElasticity / Slow
@@ -954,6 +1047,7 @@ jobs:
       id: ${{ matrix.id }}
       name: ${{ matrix.name }}
       baseline: ${{ matrix.baseline }}
+      partition: ${{ matrix.partition }}
     secrets: inherit
   e_9c68bf931a59a45f:
     name: Unit / Rodin / PETSc / Slow
@@ -977,6 +1071,7 @@ jobs:
       id: ${{ matrix.id }}
       name: ${{ matrix.name }}
       baseline: ${{ matrix.baseline }}
+      partition: ${{ matrix.partition }}
     secrets: inherit
   e_ab3f31961e0632cc:
     name: Unit / Rodin / Variational / QuadratureExpression / Backends / Baseline
@@ -1000,6 +1095,31 @@ jobs:
       id: ${{ matrix.id }}
       name: ${{ matrix.name }}
       baseline: ${{ matrix.baseline }}
+      partition: ${{ matrix.partition }}
+    secrets: inherit
+  e_b1c9dda0fed5eaab:
+    name: Manufactured / Rodin / P1 / LinearElasticity3D / Backends / Baseline / Hexahedron
+    needs:
+    - Common
+    - b_0dbff32f8c18754e
+    if: ${{ !cancelled() }}
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.Common.outputs.e_b1c9dda0fed5eaab) }}
+    uses: ./.github/workflows/TestGroup.yml
+    with:
+      family: ${{ matrix.family }}
+      backend: ${{ matrix.backend }}
+      profile: ${{ matrix.profile }}
+      group: ${{ matrix.group }}
+      build_type: ${{ matrix.build_type }}
+      multithreaded: ${{ matrix.multithreaded }}
+      asan: ${{ matrix.asan }}
+      ubsan: ${{ matrix.ubsan }}
+      id: ${{ matrix.id }}
+      name: ${{ matrix.name }}
+      baseline: ${{ matrix.baseline }}
+      partition: ${{ matrix.partition }}
     secrets: inherit
   e_b1dd47638d1bef42:
     name: Manufactured / Rodin / P1 / Backends / Baseline
@@ -1023,6 +1143,7 @@ jobs:
       id: ${{ matrix.id }}
       name: ${{ matrix.name }}
       baseline: ${{ matrix.baseline }}
+      partition: ${{ matrix.partition }}
     secrets: inherit
   e_b88223a2a372730c:
     name: Manufactured / Rodin / MPI / H1 / Poisson / Backends / Baseline
@@ -1046,6 +1167,7 @@ jobs:
       id: ${{ matrix.id }}
       name: ${{ matrix.name }}
       baseline: ${{ matrix.baseline }}
+      partition: ${{ matrix.partition }}
     secrets: inherit
   e_cee61ec2449cb999:
     name: Unit / Rodin / Variational / QuadratureRuleSpecialization / Backends / Baseline
@@ -1069,6 +1191,7 @@ jobs:
       id: ${{ matrix.id }}
       name: ${{ matrix.name }}
       baseline: ${{ matrix.baseline }}
+      partition: ${{ matrix.partition }}
     secrets: inherit
   e_d0380ee0576ba0f7:
     name: Unit / Rodin / Adaptation / Backends / Baseline
@@ -1092,6 +1215,7 @@ jobs:
       id: ${{ matrix.id }}
       name: ${{ matrix.name }}
       baseline: ${{ matrix.baseline }}
+      partition: ${{ matrix.partition }}
     secrets: inherit
   e_d19b8fc0b65f74a7:
     name: Unit / Rodin / Variational / Backends / Baseline
@@ -1115,6 +1239,31 @@ jobs:
       id: ${{ matrix.id }}
       name: ${{ matrix.name }}
       baseline: ${{ matrix.baseline }}
+      partition: ${{ matrix.partition }}
+    secrets: inherit
+  e_d8dc993985b1c7e3:
+    name: Manufactured / Rodin / P1 / LinearElasticity3D / Backends / Baseline / Tetrahedron
+    needs:
+    - Common
+    - b_0dbff32f8c18754e
+    if: ${{ !cancelled() }}
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.Common.outputs.e_d8dc993985b1c7e3) }}
+    uses: ./.github/workflows/TestGroup.yml
+    with:
+      family: ${{ matrix.family }}
+      backend: ${{ matrix.backend }}
+      profile: ${{ matrix.profile }}
+      group: ${{ matrix.group }}
+      build_type: ${{ matrix.build_type }}
+      multithreaded: ${{ matrix.multithreaded }}
+      asan: ${{ matrix.asan }}
+      ubsan: ${{ matrix.ubsan }}
+      id: ${{ matrix.id }}
+      name: ${{ matrix.name }}
+      baseline: ${{ matrix.baseline }}
+      partition: ${{ matrix.partition }}
     secrets: inherit
   e_d9c53777a387fc06:
     name: Manufactured / Rodin / MPI / H1 / Poisson / Slow
@@ -1138,6 +1287,7 @@ jobs:
       id: ${{ matrix.id }}
       name: ${{ matrix.name }}
       baseline: ${{ matrix.baseline }}
+      partition: ${{ matrix.partition }}
     secrets: inherit
   e_e40e24bb0f7f2d9e:
     name: Unit / Rodin / MPI / Backends / Baseline
@@ -1161,6 +1311,7 @@ jobs:
       id: ${{ matrix.id }}
       name: ${{ matrix.name }}
       baseline: ${{ matrix.baseline }}
+      partition: ${{ matrix.partition }}
     secrets: inherit
   e_e541e873336ae2ab:
     name: Unit / Rodin / MPI / Assembly / Backends / Baseline
@@ -1184,6 +1335,7 @@ jobs:
       id: ${{ matrix.id }}
       name: ${{ matrix.name }}
       baseline: ${{ matrix.baseline }}
+      partition: ${{ matrix.partition }}
     secrets: inherit
   e_e69b3dbff2bf906c:
     name: Unit / Rodin / Variational / H1 / Backends / Baseline
@@ -1207,6 +1359,31 @@ jobs:
       id: ${{ matrix.id }}
       name: ${{ matrix.name }}
       baseline: ${{ matrix.baseline }}
+      partition: ${{ matrix.partition }}
+    secrets: inherit
+  e_ea89e8119cc3be39:
+    name: Manufactured / Rodin / P1 / LinearElasticity3D / Slow / Pyramid
+    needs:
+    - Common
+    - b_0dbff32f8c18754e
+    if: ${{ !cancelled() }}
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.Common.outputs.e_ea89e8119cc3be39) }}
+    uses: ./.github/workflows/TestGroup.yml
+    with:
+      family: ${{ matrix.family }}
+      backend: ${{ matrix.backend }}
+      profile: ${{ matrix.profile }}
+      group: ${{ matrix.group }}
+      build_type: ${{ matrix.build_type }}
+      multithreaded: ${{ matrix.multithreaded }}
+      asan: ${{ matrix.asan }}
+      ubsan: ${{ matrix.ubsan }}
+      id: ${{ matrix.id }}
+      name: ${{ matrix.name }}
+      baseline: ${{ matrix.baseline }}
+      partition: ${{ matrix.partition }}
     secrets: inherit
   e_ec3565cfb8138ed9:
     name: Coverage / Baseline / Libraries / Rodin
@@ -1264,6 +1441,7 @@ jobs:
       id: ${{ matrix.id }}
       name: ${{ matrix.name }}
       baseline: ${{ matrix.baseline }}
+      partition: ${{ matrix.partition }}
     secrets: inherit
   e_f1f84fad36c84070:
     name: Unit / Rodin / Backends / Baseline
@@ -1305,6 +1483,31 @@ jobs:
       id: ${{ matrix.id }}
       name: ${{ matrix.name }}
       baseline: ${{ matrix.baseline }}
+      partition: ${{ matrix.partition }}
+    secrets: inherit
+  e_f76e5038749e50ae:
+    name: Manufactured / Rodin / P1 / LinearElasticity3D / Slow / Wedge
+    needs:
+    - Common
+    - b_0dbff32f8c18754e
+    if: ${{ !cancelled() }}
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.Common.outputs.e_f76e5038749e50ae) }}
+    uses: ./.github/workflows/TestGroup.yml
+    with:
+      family: ${{ matrix.family }}
+      backend: ${{ matrix.backend }}
+      profile: ${{ matrix.profile }}
+      group: ${{ matrix.group }}
+      build_type: ${{ matrix.build_type }}
+      multithreaded: ${{ matrix.multithreaded }}
+      asan: ${{ matrix.asan }}
+      ubsan: ${{ matrix.ubsan }}
+      id: ${{ matrix.id }}
+      name: ${{ matrix.name }}
+      baseline: ${{ matrix.baseline }}
+      partition: ${{ matrix.partition }}
     secrets: inherit
   e_f902161e19bc35bc:
     name: Unit / Rodin / Geometry / Backends / Baseline
@@ -1328,6 +1531,7 @@ jobs:
       id: ${{ matrix.id }}
       name: ${{ matrix.name }}
       baseline: ${{ matrix.baseline }}
+      partition: ${{ matrix.partition }}
     secrets: inherit
   e_fce35885472e0a05:
     name: Unit / Rodin / Variational / H1 / MassQuadrature / Backends / Baseline
@@ -1351,29 +1555,7 @@ jobs:
       id: ${{ matrix.id }}
       name: ${{ matrix.name }}
       baseline: ${{ matrix.baseline }}
-    secrets: inherit
-  e_fe559a2375c8bb17:
-    name: Manufactured / Rodin / P1 / LinearElasticity3D / Backends / Baseline
-    needs:
-    - Common
-    - b_0dbff32f8c18754e
-    if: ${{ !cancelled() }}
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJSON(needs.Common.outputs.e_fe559a2375c8bb17) }}
-    uses: ./.github/workflows/TestGroup.yml
-    with:
-      family: ${{ matrix.family }}
-      backend: ${{ matrix.backend }}
-      profile: ${{ matrix.profile }}
-      group: ${{ matrix.group }}
-      build_type: ${{ matrix.build_type }}
-      multithreaded: ${{ matrix.multithreaded }}
-      asan: ${{ matrix.asan }}
-      ubsan: ${{ matrix.ubsan }}
-      id: ${{ matrix.id }}
-      name: ${{ matrix.name }}
-      baseline: ${{ matrix.baseline }}
+      partition: ${{ matrix.partition }}
     secrets: inherit
   Publish_baseline:
     name: Coverage / Publish / Baseline
@@ -1407,7 +1589,10 @@ jobs:
     - Common
     - e_58bfd15ee9417aa2
     - e_8e1d1dc208212471
-    - e_fe559a2375c8bb17
+    - e_d8dc993985b1c7e3
+    - e_b1c9dda0fed5eaab
+    - e_26efa33aa070421f
+    - e_0a7142552b7731b0
     if: ${{ !cancelled() }}
     uses: ./.github/workflows/CoveragePublish.yml
     secrets: inherit
@@ -1427,7 +1612,10 @@ jobs:
     - e_d9c53777a387fc06
     - e_98047d7208498759
     - e_3b9348adab56cb6b
-    - e_4cca9a8538cc6aad
+    - e_4aedf2275356db84
+    - e_0438e1d735b66d11
+    - e_ea89e8119cc3be39
+    - e_f76e5038749e50ae
     if: ${{ !cancelled() }}
     uses: ./.github/workflows/CoveragePublish.yml
     secrets: inherit

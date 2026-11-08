@@ -22,12 +22,15 @@ flowchart LR
     b_c73f1c5dc55cbb1f["Build / Manufactured / Rodin / PETSc"]:::build
     b_832be36f07ba17e2["Build / Manufactured / Rodin / PreassembledMixed"]:::build
     b_40fe281c3dcd857e["Build / Manufactured / Rodin / Solver"]:::build
+    e_0a7142552b7731b0["Manufactured / Rodin / P1 / LinearElasticity3D / Wedge"]:::execution
     e_1e60a7246d24bcf4["Manufactured / Rodin"]:::execution
+    e_26efa33aa070421f["Manufactured / Rodin / P1 / LinearElasticity3D / Pyramid"]:::execution
     e_58bfd15ee9417aa2["Manufactured / Rodin / H1"]:::execution
     e_8e1d1dc208212471["Manufactured / Rodin / MPI / H1 / LinearElasticity"]:::execution
+    e_b1c9dda0fed5eaab["Manufactured / Rodin / P1 / LinearElasticity3D / Hexahedron"]:::execution
     e_b1dd47638d1bef42["Manufactured / Rodin / P1"]:::execution
     e_b88223a2a372730c["Manufactured / Rodin / MPI / H1 / Poisson"]:::execution
-    e_fe559a2375c8bb17["Manufactured / Rodin / P1 / LinearElasticity3D"]:::execution
+    e_d8dc993985b1c7e3["Manufactured / Rodin / P1 / LinearElasticity3D / Tetrahedron"]:::execution
     Common --> b_1b3e09feff6d0310
     Common --> b_4fc891bf60607765
     Common --> b_22bdf11a32b1e59b
@@ -39,6 +42,8 @@ flowchart LR
     Common --> b_c73f1c5dc55cbb1f
     Common --> b_832be36f07ba17e2
     Common --> b_40fe281c3dcd857e
+    Common --> e_0a7142552b7731b0
+    b_0dbff32f8c18754e --> e_0a7142552b7731b0
     Common --> e_1e60a7246d24bcf4
     b_1b3e09feff6d0310 --> e_1e60a7246d24bcf4
     b_40fe281c3dcd857e --> e_1e60a7246d24bcf4
@@ -48,16 +53,20 @@ flowchart LR
     b_ae3ddeee44430a7b --> e_1e60a7246d24bcf4
     b_c73f1c5dc55cbb1f --> e_1e60a7246d24bcf4
     b_e96c266e7ada561e --> e_1e60a7246d24bcf4
+    Common --> e_26efa33aa070421f
+    b_0dbff32f8c18754e --> e_26efa33aa070421f
     Common --> e_58bfd15ee9417aa2
     b_4fc891bf60607765 --> e_58bfd15ee9417aa2
     Common --> e_8e1d1dc208212471
     b_22bdf11a32b1e59b --> e_8e1d1dc208212471
+    Common --> e_b1c9dda0fed5eaab
+    b_0dbff32f8c18754e --> e_b1c9dda0fed5eaab
     Common --> e_b1dd47638d1bef42
     b_0dbff32f8c18754e --> e_b1dd47638d1bef42
     Common --> e_b88223a2a372730c
     b_22bdf11a32b1e59b --> e_b88223a2a372730c
-    Common --> e_fe559a2375c8bb17
-    b_0dbff32f8c18754e --> e_fe559a2375c8bb17
+    Common --> e_d8dc993985b1c7e3
+    b_0dbff32f8c18754e --> e_d8dc993985b1c7e3
     classDef build fill:#dbeafe,stroke:#2563eb,color:#111827
     classDef execution fill:#dcfce7,stroke:#16a34a,color:#111827
     classDef coverage fill:#f3e8ff,stroke:#9333ea,color:#111827

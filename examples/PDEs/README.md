@@ -39,8 +39,9 @@ pressure, and a solver step of 0.01. Its smooth compact lid patch travels
 horizontally between $x=0.28$ and $x=0.72$ with period 8, at peak-speed Reynolds
 number 200 (peak lid speed 2 and viscosity 0.01). The 2,000 Oseen steps
 cover simulation time 0–20. Output is saved
-every five solver steps; every second output frame at 10 fps preserves
-simulation-time playback. The example follows a transient flow. A convergence study requires independent
+every five solver steps. The ParaView renderer interpolates those snapshots
+for 30 fps playback, preserving simulation time. Use `--fps 60` for 60 fps;
+these are the two supported documentation-video frame rates. The example follows a transient flow. A convergence study requires independent
   mesh and time-step refinements.
 
 The boundary-conditions guide uses `MixedBoundary`, whose exact solution on the
@@ -65,4 +66,26 @@ Reproduce the refinement chart with the following command.
 ```sh
 python3 examples/PDEs/visualize_surface_convergence.py \
   /path/to/refinement-root doc/Images/SurfaceMeshConvergence.png
+```
+
+## README illustration
+
+The compact README figure uses the exported Poisson point values. Its height
+and color follow the P1 field on the original triangles. ParaView interpolates
+the point scalars before applying Turbo; the vertical display scale is 9.
+
+```sh
+pvpython examples/PDEs/visualize_paraview.py /path/to/output doc/README \
+  --example READMEPoisson
+```
+
+The README uses a six-second, 30 fps rotating GIF. Its camera makes one
+full orbit in 180 frames, with the endpoint omitted for a continuous loop.
+Every frame retains the same camera scale, Turbo range, mesh and P1 solution.
+A single crop is applied to the full sequence. A global 256-color palette and
+error-diffusion dithering preserve the field gradient on a transparent background.
+
+```sh
+pvpython examples/PDEs/visualize_paraview.py /path/to/output doc/README \
+  --example READMEPoissonRotation --frames /path/to/temporary-frames --fps 30
 ```

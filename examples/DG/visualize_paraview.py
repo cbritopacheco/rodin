@@ -22,13 +22,13 @@ for target, stem, title in [(left,'DGCoarse','4 intervals per axis'),
                             (right,'DGPoisson','32 intervals per axis')]:
     source = XDMFReader(FileNames=[str((args.root / (stem+'.xdmf')).resolve())])
     source.UpdatePipeline()
-    target.CameraFocalPoint=[.5,.42,0]
-    target.CameraPosition=[.5,.42,5]
-    target.CameraParallelScale = .92
+    target.CameraFocalPoint=[.5,.5,0]
+    target.CameraPosition=[.5,.5,5]
+    target.CameraParallelScale = .66
     display = style.color(source, target, 'u', (1,4), title=r'$u_h$')
     if stem == 'DGCoarse':
         display.Representation = 'Surface With Edges'
-        display.EdgeColor = style.TEXT
+        display.EdgeColor = style.EDGE
     bar = GetScalarBar(GetColorTransferFunction('u'), target)
     bar.Orientation = 'Horizontal'
     bar.Position = [.22,.025]

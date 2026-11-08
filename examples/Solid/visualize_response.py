@@ -6,8 +6,9 @@ import sys
 import numpy as np
 import matplotlib.pyplot as plt
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
-from plot_style import apply_style
+from plot_style import apply_style, turbo_colors
 apply_style()
+COLORS = turbo_colors(2)
 parser=argparse.ArgumentParser(description=__doc__)
 parser.add_argument('root',type=Path)
 parser.add_argument('output',type=Path)
@@ -16,12 +17,12 @@ data=np.genfromtxt(args.root/'ConstitutiveResponse.csv',delimiter=',',names=True
 for name in ['energy', 'stress']:
     fig, ax = plt.subplots(figsize=(4.8, 4.3), layout='constrained')
     if name == 'energy':
-        ax.plot(data['stretch'], data['energy'], color='#166699', linewidth=2)
+        ax.plot(data['stretch'], data['energy'], color=COLORS[0], linewidth=2)
         ax.set_title('Stored energy')
         ax.set_ylabel(r'$W$')
     else:
-        ax.plot(data['stretch'], data['stress'], color='#166699', linewidth=2, label=r'$P_{11}$')
-        ax.plot(data['stretch'][::7], data['finite_difference'][::7], 'o', color='#13b6d0',
+        ax.plot(data['stretch'], data['stress'], color=COLORS[0], linewidth=2, label=r'$P_{11}$')
+        ax.plot(data['stretch'][::7], data['finite_difference'][::7], 'o', color=COLORS[1],
                 markersize=4, label=r'$dW/ds$ (finite difference)')
         ax.set_title('Stress and energy derivative')
         ax.set_ylabel(r'$P_{11}$')

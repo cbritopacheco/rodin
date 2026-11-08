@@ -43,7 +43,7 @@ jobs:
     - name: Verify pinned artifact client handles interrupted streams
       run: |
         python3 dev/ci_artifact_client.py --action .github/actions/download-artifacts --client .github/actions/download-artifacts
-        node --test --test-concurrency=1 dev/test_ci_artifact_stream.js
+        node --test --test-concurrency=1 dev/test_ci_artifact_stream.js dev/test_ci_artifact_upload_stream.js
     - name: Verify dependency graph and publish graph navigation
       run: python3 dev/ci_schedule.py --summary
     - name: Verify scoped discovery and incremental coverage guards
@@ -54,7 +54,7 @@ jobs:
     - name: Plan common compilation configurations
       id: common
       run: python3 dev/ci_build_graph.py prepare
-    - uses: actions/upload-artifact@v4
+    - uses: ./.github/actions/upload-artifacts
       with:
         overwrite: true
         name: ci-test-plan
@@ -260,7 +260,7 @@ jobs:
         RODIN_INSTALL_RESOURCES: ${{ env.RODIN_INSTALL_RESOURCES }}
     - name: Archive installation artifacts on failure
       if: failure()
-      uses: actions/upload-artifact@v4
+      uses: ./.github/actions/upload-artifacts
       with:
         overwrite: true
         name: installation-test-failure-${{ matrix.compiler }}-mpi${{ matrix.mpi }}-petsc${{ matrix.petsc }}
@@ -325,7 +325,7 @@ jobs:
         RODIN_INSTALL_RESOURCES: ${{ env.RODIN_INSTALL_RESOURCES }}
     - name: Archive installation artifacts on failure
       if: failure()
-      uses: actions/upload-artifact@v4
+      uses: ./.github/actions/upload-artifacts
       with:
         overwrite: true
         name: installation-test-failure-macos-mpi${{ matrix.mpi }}-petsc${{ matrix.petsc }}
@@ -360,10 +360,11 @@ jobs:
       with:
         lfs: false
     - name: Download expected plan
-      uses: actions/download-artifact@v4
+      uses: ./.github/actions/download-artifacts
       with:
-        name: ci-test-plan
+        names: '["ci-test-plan"]'
         path: .
+        merge-single: true
     - name: Plan exact shared-build indices
       run: python3 dev/ci_artifacts.py indices --output ci-index-inputs.json
     - name: Download every shared-build index
@@ -383,7 +384,7 @@ jobs:
         CI_JOB_RESULTS: ${{ toJSON(needs.*.result) }}
       run: python3 dev/ci_coverage.py finalize
     - name: Publish complete coverage summary
-      uses: actions/upload-artifact@v4
+      uses: ./.github/actions/upload-artifacts
       with:
         overwrite: true
         name: coverage-final-summary

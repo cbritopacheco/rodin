@@ -35,9 +35,6 @@ for target,field,title,symbol in [(left,'gamma','Material density',r'$\gamma$'),
     target.CameraParallelScale=.95
     maximum=1 if field=='gamma' else source.PointData[field].GetRange()[1]
     style.color(source,target,field,(0,maximum),title=symbol)
-    if field=='gamma':
-        lut=GetColorTransferFunction(field)
-        lut.RGBPoints=[0,.957,.973,.984, .5,.075,.714,.816, 1,.027,.122,.275]
     bar=GetScalarBar(GetColorTransferFunction(field),target)
     bar.Orientation='Horizontal';bar.Position=[.22,.025];bar.ScalarBarLength=.56
     bar.CustomLabels=[0,maximum/2,maximum];bar.TitleFontSize=17;bar.LabelFontSize=15

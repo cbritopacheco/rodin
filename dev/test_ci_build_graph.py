@@ -1,4 +1,5 @@
 """Uniform sharing must preserve execution contracts and avoid recompilation."""
+import itertools
 import hashlib
 import json
 import os
@@ -69,30 +70,32 @@ class BuildGraphPlanTest(unittest.TestCase):
             self.assertEqual(slow_record['selected'], targets[:1])
             self.assertEqual(json.dumps(records, sort_keys=True), frozen)
 
-    def test_oversized_optional_sanitizer_build_is_split_without_losing_targets(self):
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            folder = root / 'tests/unit/Rodin/Variational'
-            folder.mkdir(parents=True)
-            (folder / 'CMakeLists.txt').touch()
-            targets = [{'target': f'Target{i:03}', 'owner': 'tests/unit/Rodin/Variational',
-                        'kind': 'test'} for i in range(133)]
-            first = planning.entry('unit', 'unit/Rodin/Variational', 'Release', 'ON',
-                                   asan='ON', ubsan='ON', backend='optional')
-            request = {'job': 'Ordinary', 'matrix': first}
-            entry = {'id': 'common', 'definition': graph.common_specification(graph.specification(**request))}
-            records = [{'request': request, 'selected': targets, 'configured': targets}]
-            with patch.object(graph, 'ROOT', root), patch.object(archive, 'commit', return_value='current'):
-                document = graph.directory_plan(entry, records)
-            parts = list(document['directories'].values())
-            self.assertEqual(len(parts), 6)
-            self.assertEqual([p['part'] for p in parts], list(range(1, 7)))
-            self.assertTrue(all(p['common'] == 'common' and len(p['targets']) <= 24 for p in parts))
-            self.assertTrue(all(graph.directory_common_specification(p) == entry['definition'] for p in parts))
-            self.assertEqual([t for part in parts for t in part['targets']],
-                             sorted(t['target'] for t in targets))
-            self.assertEqual(set(document['requests'][graph.request_key(**request)]['builds']),
-                             {archive.identity(part) for part in parts})
+    def test_oversized_optional_build_is_split_without_losing_targets(self):
+        for build_type, mt, (asan, ubsan) in itertools.product(
+                ['Debug', 'Release'], ['ON', 'OFF'], [('OFF', 'OFF'), ('ON', 'OFF'), ('OFF', 'ON'), ('ON', 'ON')]):
+            with tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                folder = root / 'tests/unit/Rodin/Variational'
+                folder.mkdir(parents=True)
+                (folder / 'CMakeLists.txt').touch()
+                targets = [{'target': f'Target{i:03}', 'owner': 'tests/unit/Rodin/Variational',
+                            'kind': 'test'} for i in range(133)]
+                first = planning.entry('unit', 'unit/Rodin/Variational', build_type, mt,
+                                       asan=asan, ubsan=ubsan, backend='optional')
+                request = {'job': 'Ordinary', 'matrix': first}
+                entry = {'id': 'common', 'definition': graph.common_specification(graph.specification(**request))}
+                records = [{'request': request, 'selected': targets, 'configured': targets}]
+                with patch.object(graph, 'ROOT', root), patch.object(archive, 'commit', return_value='current'):
+                    document = graph.directory_plan(entry, records)
+                parts = list(document['directories'].values())
+                self.assertEqual(len(parts), 6)
+                self.assertEqual([p['part'] for p in parts], list(range(1, 7)))
+                self.assertTrue(all(p['common'] == 'common' and len(p['targets']) <= 24 for p in parts))
+                self.assertTrue(all(graph.directory_common_specification(p) == entry['definition'] for p in parts))
+                self.assertEqual([t for part in parts for t in part['targets']],
+                                 sorted(t['target'] for t in targets))
+                self.assertEqual(set(document['requests'][graph.request_key(**request)]['builds']),
+                                 {archive.identity(part) for part in parts})
 
     def requests(self):
         native = [{'multithreaded': mt, 'suite': 'baseline', 'group': group, 'path': tests.display_group(group)}
@@ -103,14 +106,25 @@ class BuildGraphPlanTest(unittest.TestCase):
         ordinary, targeted = self.requests()
         # Reviewed execution partition snapshot: numerical registrations and MPI
         # ranks are independently checked by test_ci_backend_registration.py.
-        for value, digest in [(ordinary, '009a23d4c5fc380bcca406302cfb7062208a2b14f3526f2ce6078cde95005c54'),
+        # Collapse the reviewed geometry partitions to compare the unchanged
+        # configuration inventory against the original scheduling snapshot.
+        collapsed = {}
+        for family, rows in ordinary.items():
+            seen = {}
+            for row in rows:
+                old = planning.entry(**{k: v for k, v in row.items()
+                                        if k not in {'id', 'name', 'partition'}})
+                old.pop('partition')
+                seen.setdefault(old['id'], old)
+            collapsed[family] = list(seen.values())
+        for value, digest in [(collapsed, '009a23d4c5fc380bcca406302cfb7062208a2b14f3526f2ce6078cde95005c54'),
                               (targeted, '53e09f3c2a124de8430bba7f43f8f411e9ccddf47b5fe53a93d5cb610359cbd4')]:
             self.assertEqual(hashlib.sha256(json.dumps(value, sort_keys=True, separators=(',', ':')).encode()).hexdigest(), digest)
         rows = graph.prepare(ordinary, targeted)
         self.assertEqual(len(rows), 46)
         requests = [r for row in rows for r in row['requests']]
-        self.assertEqual(len(requests), 1355)
-        self.assertEqual(len({graph.request_key(**r) for r in requests}), 1355)
+        self.assertEqual(len(requests), 1415)
+        self.assertEqual(len({graph.request_key(**r) for r in requests}), 1415)
         for row in rows:
             for request in row['requests']:
                 original = graph.specification(**request)

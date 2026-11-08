@@ -22,14 +22,10 @@ _plot_sys.path.insert(0, str(_plot_examples))
 from plot_style import apply_style
 apply_style()
 from matplotlib.animation import FFMpegWriter
-from matplotlib.colors import LinearSegmentedColormap
 from matplotlib.tri import LinearTriInterpolator, Triangulation
 import numpy as np
 
-SEQUENTIAL = LinearSegmentedColormap.from_list(
-    'Rodin', ['#071F46', '#17679A', '#13B6D0', '#F4F8FB'])
-DIVERGING = LinearSegmentedColormap.from_list(
-    'Rodin signed', ['#071F46', '#F4F8FB', '#13B6D0'])
+COLORMAP = plt.get_cmap('turbo')
 
 
 def snapshot(root, name, index=-1):
@@ -56,7 +52,7 @@ def snapshot(root, name, index=-1):
 
 def planar(ax, xy, triangles, values, title, limit=1):
     field = ax.tripcolor(*xy.T, triangles, values, shading='gouraud',
-                         cmap=DIVERGING, vmin=-limit, vmax=limit)
+                         cmap=COLORMAP, vmin=-limit, vmax=limit)
     ax.set_aspect('equal')
     ax.set(xlabel='$x$', ylabel='$y$', title=title)
     return field
@@ -72,7 +68,7 @@ def flow_figure(root, name, index=-1):
     uy = LinearTriInterpolator(tri, velocity[:, 1])(xx, yy)
     fig, axes = plt.subplots(1, 2, figsize=(9.2, 4.8), dpi=140)
     speed = np.linalg.norm(velocity, axis=1)
-    image = axes[0].tripcolor(tri, speed, shading='gouraud', cmap=SEQUENTIAL, vmin=0,
+    image = axes[0].tripcolor(tri, speed, shading='gouraud', cmap=COLORMAP, vmin=0,
                                 vmax=2 if name == 'NavierStokes' else 1)
     axes[0].set_title('Speed', pad=36)
     axes[1].streamplot(coordinates, coordinates, ux, uy, density=1.8,
@@ -107,7 +103,7 @@ def render_mixed_boundary(root, output):
     xy, triangles, fields, _ = snapshot(root, 'MixedBoundary')
     fig, ax = plt.subplots(figsize=(8, 5), dpi=180)
     image = ax.tripcolor(*xy.T, triangles, fields['u'], shading='gouraud',
-                         cmap=SEQUENTIAL, vmin=0, vmax=1)
+                         cmap=COLORMAP, vmin=0, vmax=1)
     ax.plot([0, 0], [0, 1], color='#071F46', linewidth=3)
     ax.plot([1, 1], [0, 1], color='#13B6D0', linewidth=3)
     ax.plot([0, 1], [0, 0], color='#718096', linewidth=1)
@@ -135,7 +131,7 @@ def render_poisson(root, output):
     ax = fig.add_subplot(projection='3d')
     surface = ax.plot_trisurf(*xy.T, u, triangles=triangles, shade=False,
                              linewidth=.28, edgecolor=(7/255, 31/255, 70/255, .55))
-    surface.set_facecolors(SEQUENTIAL(plt.Normalize(0, u.max())(u[triangles].mean(axis=1))))
+    surface.set_facecolors(COLORMAP(plt.Normalize(0, u.max())(u[triangles].mean(axis=1))))
     ax.set_box_aspect((1, 1, .7))
     ax.view_init(elev=27, azim=-55)
     ax.set_axis_off()
@@ -150,7 +146,7 @@ def render_elasticity(root, output):
     magnitude = np.linalg.norm(displacement, axis=1)
     warped = xy + 10 * displacement
     fig, ax = plt.subplots(figsize=(9, 3.9), dpi=200)
-    field = ax.tripcolor(*warped.T, triangles, magnitude, shading='gouraud', cmap=SEQUENTIAL)
+    field = ax.tripcolor(*warped.T, triangles, magnitude, shading='gouraud', cmap=COLORMAP)
     ax.triplot(*warped.T, triangles, color='#17679A', linewidth=.26, alpha=.65)
     ax.plot([0, 4, 4, 0, 0], [0, 0, 1, 1, 0], color='#718096',
             linestyle=(0, (4, 3)), linewidth=1, label='Undeformed beam')
@@ -166,7 +162,7 @@ def render_elasticity(root, output):
     plt.close(fig)
 
 
-def render(root, output):
+def render(root, output, fps=30):
     output.mkdir(parents=True, exist_ok=True)
     render_poisson(root, output)
     render_elasticity(root, output)
@@ -198,11 +194,11 @@ def render(root, output):
     ax = fig.add_subplot(projection='3d')
     surface = ax.plot_trisurf(*xyz.T, triangles=triangles, shade=False,
                              linewidth=.2, edgecolor=(.1, .3, .45, .35))
-    surface.set_facecolors(DIVERGING((u[triangles].mean(axis=1) + .5)))
+    surface.set_facecolors(COLORMAP((u[triangles].mean(axis=1) + .5)))
     ax.set_box_aspect((1, 1, 1))
     ax.view_init(elev=24, azim=38)
     ax.set_axis_off()
-    fig.colorbar(plt.cm.ScalarMappable(norm=plt.Normalize(-.5, .5), cmap=DIVERGING),
+    fig.colorbar(plt.cm.ScalarMappable(norm=plt.Normalize(-.5, .5), cmap=COLORMAP),
                  ax=ax, shrink=.65, pad=0, label='$u$')
     fig.tight_layout()
     fig.savefig(output / 'SurfaceMesh.png')
@@ -214,14 +210,16 @@ def render(root, output):
         plt.close(fig)
 
     grids = ET.parse(root / 'NavierStokes/NavierStokes.xdmf').findall('.//Grid[@GridType="Uniform"]')
-    # Every second dt=0.05 snapshot at 10 fps preserves simulation-time playback.
+    # Retain snapshot timing and resample the encoded output to 30 or 60 fps.
     # VP9/WebM retains alpha; the MP4/H.264 format does not support it.
-    writer = FFMpegWriter(fps=10, codec='libvpx-vp9', bitrate=-1,
-                          extra_args=['-pix_fmt', 'yuva420p', '-crf', '30',
+    sample_times = [float(grid.find('Time').get('Value')) for grid in grids]
+    source_fps = 1 / (sample_times[1] - sample_times[0])
+    writer = FFMpegWriter(fps=source_fps, codec='libvpx-vp9', bitrate=-1,
+                          extra_args=['-r', str(fps), '-pix_fmt', 'yuva420p', '-crf', '30',
                                       '-b:v', '0', '-auto-alt-ref', '0'])
     first = flow_figure(root, 'NavierStokes', 0)
     with writer.saving(first, str(output / 'NavierStokes.webm'), dpi=140):
-        for index in range(0, len(grids), 2):
+        for index in range(len(grids)):
             fig = flow_figure(root, 'NavierStokes', index)
             writer.fig = fig
             writer.grab_frame(transparent=True, facecolor='none')
