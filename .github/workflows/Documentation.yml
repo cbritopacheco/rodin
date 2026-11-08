@@ -23,7 +23,7 @@ jobs:
       MAKEFLAGS: "-j2"
     steps:
       - name: Checkout repository and submodules
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           submodules: recursive
           lfs: false
@@ -43,7 +43,7 @@ jobs:
           --documentation running --source-run "$RUN" --source-sha "$SHA"
           --source-attempt "$ATTEMPT"
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: 3.12.0
           cache: 'pip'
@@ -115,7 +115,7 @@ jobs:
       name: Documentation and benchmarks
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           lfs: false
       - name: Mark documentation publication as running
@@ -131,7 +131,7 @@ jobs:
           python3 dev/ci_badges.py --documentation-only --branch "$BRANCH"
           --documentation running --source-run "$RUN" --source-sha "$SHA"
           --source-attempt "$ATTEMPT"
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
       - run: pip install -r doc/requirements.txt
@@ -139,7 +139,7 @@ jobs:
         with:
           names: '["documentation"]'
           path: documentation-inputs
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           ref: gh-pages
           path: .ci-pages

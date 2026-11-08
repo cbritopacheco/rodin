@@ -19,7 +19,7 @@ runs:
       run: python3 dev/ci_environment.py prepare --packages "$PACKAGES"
     - name: Restore downloaded package archives
       id: archives
-      uses: actions/cache/restore@v4
+      uses: actions/cache/restore@v5
       with:
         path: ${{ runner.temp }}/rodin-apt-archives/*.deb
         key: ${{ steps.plan.outputs.key }}
@@ -29,7 +29,7 @@ runs:
       run: python3 dev/ci_environment.py install
     - name: Save validated package archives
       if: steps.archives.outputs.cache-hit != 'true'
-      uses: actions/cache/save@v4
+      uses: actions/cache/save@v5
       with:
         path: ${{ runner.temp }}/rodin-apt-archives/*.deb
         key: ${{ steps.plan.outputs.key }}

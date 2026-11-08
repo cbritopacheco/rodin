@@ -60,7 +60,7 @@ jobs:
       SUITESPARSE_VERSION: 7.14.1
       SUITESPARSE_PREFIX: ${{ github.workspace }}/suitesparse
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           submodules: recursive
           lfs: false

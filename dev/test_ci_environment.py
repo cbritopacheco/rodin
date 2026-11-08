@@ -499,8 +499,8 @@ class EnvironmentTest(unittest.TestCase):
     def test_cache_contains_only_archives_and_uses_resolved_version_key(self):
         action = yaml.safe_load((ROOT / '.github/actions/apt-dependencies/action.yml').read_text())
         steps = action['runs']['steps']
-        restore = next(s for s in steps if s.get('uses') == 'actions/cache/restore@v4')
-        save = next(s for s in steps if s.get('uses') == 'actions/cache/save@v4')
+        restore = next(s for s in steps if s.get('uses') == 'actions/cache/restore@v5')
+        save = next(s for s in steps if s.get('uses') == 'actions/cache/save@v5')
         self.assertEqual(restore['with']['path'], '${{ runner.temp }}/rodin-apt-archives/*.deb')
         self.assertEqual(restore['with']['key'], '${{ steps.plan.outputs.key }}')
         self.assertEqual(restore['with'], {**save['with'], 'restore-keys': '${{ steps.plan.outputs.restore-prefix }}'})

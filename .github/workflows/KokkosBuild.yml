@@ -33,7 +33,7 @@ jobs:
       IMAGE: ${{ vars.RODIN_KOKKOS_CI_IMAGES || format('ghcr.io/{0}/rodin-kokkos-ci', github.repository_owner) }}:${{ matrix.image }}
     steps:
       - name: Checkout repository and submodules
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           submodules: recursive
           lfs: false
