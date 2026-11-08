@@ -27,6 +27,9 @@ options=(
 )
 case "${RODIN_KOKKOS_BACKEND:-}" in
   cuda)
+    # The image targets sm_52, which CUDA 12 deprecates: nvcc would say so
+    # for every source.
+    export NVCC_APPEND_FLAGS="${NVCC_APPEND_FLAGS:-} -Wno-deprecated-gpu-targets"
     options+=(-DRODIN_USE_CUDSS=ON) ;;
   hip)
     # hipcc would add -x hip to every source; the clang++ of ROCm compiles
@@ -48,6 +51,12 @@ if [[ $build_only -eq 1 ]]; then
   options+=(-DRODIN_INSTALL_RESOURCES=OFF)
   if [[ $RODIN_KOKKOS_BACKEND == cuda ]]; then
     export NVCC_APPEND_FLAGS="${NVCC_APPEND_FLAGS:-} -Xcicc -O0 -Xptxas -O0"
+  fi
+  # At -O0, IGC (ocloc) cannot resolve the generic address space nor inline
+  # the calls of a kernel, and warns about it for nearly every Kokkos kernel:
+  # 450 MB of log for code that is never run.
+  if [[ $RODIN_KOKKOS_BACKEND == sycl ]]; then
+    export IGC_DisableWarnings=1
   fi
 fi
 
