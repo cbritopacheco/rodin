@@ -61,6 +61,9 @@ solid:
 linear-elasticity:
   color: 39764D
   description: Linear-elasticity models, formulations and validation cases.
+kokkos:
+  color: E8D978
+  description: Kokkos device meshes, spaces, assembly and solvers on GPUs.
 mfem:
   color: E8D978
   description: MFEM interoperability and external mesh or finite-element data.
