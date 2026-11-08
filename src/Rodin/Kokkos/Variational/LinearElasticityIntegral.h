@@ -171,7 +171,11 @@ namespace Rodin::Kokkos::Variational
         return *m_mu;
       }
 
-      /// @brief Unavailable; the integrator has no host evaluation. @throws Alert::Exception Always.
+      /**
+       * @brief Unavailable; the integrator has no host evaluation.
+       * @return Never returns; the call aborts after raising.
+       * @throws Alert::Exception Always.
+       */
       const ::Rodin::Geometry::Polytope& getPolytope() const override
       {
         Alert::MemberFunctionException(*this, __func__)
@@ -180,7 +184,12 @@ namespace Rodin::Kokkos::Variational
         std::abort();
       }
 
-      /// @brief Unavailable; the integrator has no host evaluation. @throws Alert::Exception Always.
+      /**
+       * @brief Unavailable; the integrator has no host evaluation.
+       * @param polytope Polytope that would be integrated, ignored.
+       * @return Never returns; the call aborts after raising.
+       * @throws Alert::Exception Always.
+       */
       LinearElasticityIntegratorBase& setPolytope(
         [[maybe_unused]] const ::Rodin::Geometry::Polytope& polytope) override
       {
@@ -190,7 +199,13 @@ namespace Rodin::Kokkos::Variational
         std::abort();
       }
 
-      /// @brief Unavailable; the integrator has no host evaluation. @throws Alert::Exception Always.
+      /**
+       * @brief Unavailable; the integrator has no host evaluation.
+       * @param tr Local trial index, ignored.
+       * @param te Local test index, ignored.
+       * @return Never returns; the call aborts after raising.
+       * @throws Alert::Exception Always.
+       */
       Real integrate([[maybe_unused]] size_t tr, [[maybe_unused]] size_t te) override
       {
         Alert::MemberFunctionException(*this, __func__)
@@ -228,6 +243,16 @@ namespace Rodin::Kokkos::Variational
 
       /**
        * @brief Integrates both terms on the device.
+       * @param values Entry values, the entry of rank r being written at
+       * offset + getEntryPosition(r, count, getSpacing()).
+       * @param offset Position of the first entry.
+       * @param sign Factor of the contributions.
+       * @param accumulate Whether the contributions of the dilatation term
+       * are added to the values instead of replacing them.
+       * @param rows Row indices, test degrees of freedom, written as the
+       * values unless empty.
+       * @param cols Column indices, trial degrees of freedom, written as the
+       * values unless empty.
        *
        * The shear term accumulates onto the entries of the dilatation term,
        * which share their arrangement.

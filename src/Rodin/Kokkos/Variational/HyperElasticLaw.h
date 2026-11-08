@@ -110,6 +110,10 @@ namespace Rodin::Kokkos::Variational
 
     /**
      * @brief Gets the derivative of @f$ \partial \bar I_1 / \partial F @f$.
+     * @param i Row of the first deformation gradient entry.
+     * @param J Column of the first deformation gradient entry.
+     * @param k Row of the second deformation gradient entry.
+     * @param L Column of the second deformation gradient entry.
      * @return @f$ \partial^2 \bar I_1 / \partial F_{iJ} \partial F_{kL} @f$.
      */
     KOKKOS_INLINE_FUNCTION
@@ -126,6 +130,10 @@ namespace Rodin::Kokkos::Variational
     /**
      * @brief Gets the elasticity of @f$ \frac{\kappa}{2} (J - 1)^2 @f$.
      * @param kappa Bulk modulus.
+     * @param i Row of the first deformation gradient entry.
+     * @param j Column of the first deformation gradient entry.
+     * @param k Row of the second deformation gradient entry.
+     * @param l Column of the second deformation gradient entry.
      * @return Entry @f$ iJkL @f$ of the volumetric elasticity.
      */
     KOKKOS_INLINE_FUNCTION
@@ -418,6 +426,8 @@ namespace Rodin::Kokkos::Variational
 
       /**
        * @brief Gets @f$ \partial \bar I_2 / \partial F @f$.
+       * @param i Row.
+       * @param j Column.
        * @return @f$ J^{-4/d} (2 I_1 F - 2 F C - \frac{4}{d} I_2 F^{-T})_{ij} @f$.
        */
       KOKKOS_INLINE_FUNCTION
@@ -429,6 +439,10 @@ namespace Rodin::Kokkos::Variational
 
       /**
        * @brief Gets the derivative of @f$ \partial \bar I_2 / \partial F @f$.
+       * @param i Row of the first deformation gradient entry.
+       * @param J Column of the first deformation gradient entry.
+       * @param k Row of the second deformation gradient entry.
+       * @param L Column of the second deformation gradient entry.
        * @return @f$ \partial^2 \bar I_2 / \partial F_{iJ} \partial F_{kL} @f$.
        */
       KOKKOS_INLINE_FUNCTION

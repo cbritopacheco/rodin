@@ -236,7 +236,12 @@ namespace Rodin::Solid
         return *this;
       }
 
-      /// @brief Unavailable on the device. @throws Alert::Exception Always.
+      /**
+       * @brief Unavailable on the device.
+       * @param input Constitutive input, ignored.
+       * @return Reference to this, not reached since the call raises.
+       * @throws Alert::Exception Always.
+       */
       InternalVirtualWorkTangent& setInput([[maybe_unused]] InputFunction input)
       {
         Alert::MemberFunctionException(*this, __func__)
@@ -250,7 +255,11 @@ namespace Rodin::Solid
         return m_law;
       }
 
-      /// @brief Unavailable; the integrator has no host evaluation. @throws Alert::Exception Always.
+      /**
+       * @brief Unavailable; the integrator has no host evaluation.
+       * @return Never returns; the call aborts after raising.
+       * @throws Alert::Exception Always.
+       */
       const Geometry::Polytope& getPolytope() const override
       {
         Alert::MemberFunctionException(*this, __func__)
@@ -259,7 +268,12 @@ namespace Rodin::Solid
         std::abort();
       }
 
-      /// @brief Unavailable; the integrator has no host evaluation. @throws Alert::Exception Always.
+      /**
+       * @brief Unavailable; the integrator has no host evaluation.
+       * @param polytope Polytope that would be integrated, ignored.
+       * @return Never returns; the call aborts after raising.
+       * @throws Alert::Exception Always.
+       */
       InternalVirtualWorkTangent& setPolytope(
         [[maybe_unused]] const Geometry::Polytope& polytope) override
       {
@@ -269,7 +283,13 @@ namespace Rodin::Solid
         std::abort();
       }
 
-      /// @brief Unavailable; the integrator has no host evaluation. @throws Alert::Exception Always.
+      /**
+       * @brief Unavailable; the integrator has no host evaluation.
+       * @param tr Local trial index, ignored.
+       * @param te Local test index, ignored.
+       * @return Never returns; the call aborts after raising.
+       * @throws Alert::Exception Always.
+       */
       Real integrate([[maybe_unused]] size_t tr, [[maybe_unused]] size_t te) override
       {
         Alert::MemberFunctionException(*this, __func__)
@@ -312,7 +332,19 @@ namespace Rodin::Solid
         return m_polytopes.getSpacing();
       }
 
-      /// @brief Integrates every cell on the device.
+      /**
+       * @brief Integrates every cell on the device.
+       * @param values Entry values, the entry of rank r being written at
+       * offset + getEntryPosition(r, count, getSpacing()).
+       * @param offset Position of the first entry.
+       * @param sign Factor of the contributions.
+       * @param accumulate Whether the contributions are added to the values
+       * instead of replacing them.
+       * @param rows Row indices, test degrees of freedom, written as the
+       * values unless empty.
+       * @param cols Column indices, trial degrees of freedom, written as the
+       * values unless empty.
+       */
       void fill(const ::Kokkos::View<Real*, MemorySpace>& values, size_t offset,
         Real sign, bool accumulate, const ::Kokkos::View<Index*, MemorySpace>& rows,
         const ::Kokkos::View<Index*, MemorySpace>& cols) const override
@@ -366,6 +398,24 @@ namespace Rodin::Solid
 
       /**
        * @brief Integrates the cells of at most Vertices vertices.
+       * @tparam Vertices Maximum vertex count of the cells.
+       * @param mesh Mesh of the spaces.
+       * @param polytopes Integrated polytopes, located by prepare().
+       * @param trialDOFs Device degrees of freedom of the trial space.
+       * @param testDOFs Device degrees of freedom of the test space.
+       * @param vdim Vector dimension of the trial and test spaces.
+       * @param state Device coefficients of the current displacement.
+       * @param lambda First Lamé parameter.
+       * @param mu Shear modulus.
+       * @param values Entry values.
+       * @param offset Position of the first entry.
+       * @param sign Factor of the contributions.
+       * @param accumulate Whether the contributions are added to the values instead
+       * of replacing them.
+       * @param rows Row indices, test degrees of freedom, written as the values
+       * unless empty.
+       * @param cols Column indices, trial degrees of freedom, written as the values
+       * unless empty.
        *
        * The entry of local test index te and local trial index tr has rank
        * te * ntr + tr among the entries of the cell, the local index
@@ -393,6 +443,24 @@ namespace Rodin::Solid
       /**
        * @brief Integrates the cells of at most Vertices vertices with one
        * team per cell.
+       * @tparam Vertices Maximum vertex count of the cells.
+       * @param mesh Mesh of the spaces.
+       * @param polytopes Integrated polytopes, located by prepare().
+       * @param trialDOFs Device degrees of freedom of the trial space.
+       * @param testDOFs Device degrees of freedom of the test space.
+       * @param vdim Vector dimension of the trial and test spaces.
+       * @param state Device coefficients of the current displacement.
+       * @param lambda First Lamé parameter.
+       * @param mu Shear modulus.
+       * @param values Entry values.
+       * @param offset Position of the first entry.
+       * @param sign Factor of the contributions.
+       * @param accumulate Whether the contributions are added to the values instead
+       * of replacing them.
+       * @param rows Row indices, test degrees of freedom, written as the values
+       * unless empty.
+       * @param cols Column indices, trial degrees of freedom, written as the values
+       * unless empty.
        *
        * The quadrature points are taken by groups of P points. The threads
        * of the team build the integration points of a group in team scratch
@@ -522,30 +590,58 @@ namespace Rodin::Solid
       template <Index Vertices>
       struct PolytopeKernel
       {
+        /// @brief Maximum number of scalar trial degrees of freedom of a cell.
         static constexpr Index TrialCapacity = TrialDOFsType::getCapacity(Vertices);
+        /// @brief Maximum number of scalar test degrees of freedom of a cell.
         static constexpr Index TestCapacity = TestDOFsType::getCapacity(Vertices);
 
+        /// @brief Device view of the mesh.
         Rodin::Kokkos::Geometry::MeshView view;
+        /// @brief Quadrature tables of the integrated polytopes.
         QuadratureType quadrature;
+        /// @brief Selected attributes; empty selects every polytope of the region.
         typename PolytopesType::AttributesType attributes;
+        /// @brief Position of the first entry of every polytope, relative to offset.
         ::Kokkos::View<Index*, MemorySpace> offsets;
+        /// @brief Distance between consecutive entries of one polytope.
         size_t spacing;
+        /// @brief Integration region.
         Geometry::Region region;
+        /// @brief Dimension of the integrated polytopes.
         Index dimension;
+        /// @brief Device degrees of freedom of the trial space.
         TrialDOFsType trialDOFs;
+        /// @brief Device degrees of freedom of the test space.
         TestDOFsType testDOFs;
+        /// @brief Vector dimension of the trial and test spaces.
         Index vdim;
+        /// @brief Device coefficients of the current displacement.
         StateViewType state;
+        /// @brief First Lamé parameter.
         Real lambda;
+        /// @brief Shear modulus.
         Real mu;
+        /// @brief Entry values.
         ::Kokkos::View<Real*, MemorySpace> values;
+        /// @brief Position of the first entry of the integration.
         size_t offset;
+        /// @brief Factor of the contributions.
         Real sign;
+        /// @brief Whether the contributions are added to the values instead of
+        /// replacing them.
         bool accumulate;
+        /// @brief Whether the row and column indices are written.
         bool index;
+        /// @brief Row indices, test degrees of freedom.
         ::Kokkos::View<Index*, MemorySpace> rows;
+        /// @brief Column indices, trial degrees of freedom.
         ::Kokkos::View<Index*, MemorySpace> cols;
 
+        /**
+         * @brief Integrates one cell and writes the entries of its local matrix.
+         * @param p Index of the cell among the polytopes of the integrated
+         * dimension.
+         */
         KOKKOS_INLINE_FUNCTION void operator()(Index p) const
         {
           const auto polytope = view.getPolytope(dimension, p);
@@ -637,59 +733,109 @@ namespace Rodin::Solid
       template <Index Vertices>
       struct TeamKernel
       {
+        /// @brief Integration point at a quadrature node of the cell.
         using Point = Kokkos::Variational::CellIntegrationPointView;
+        /// @brief Neo-Hookean kinematics at a quadrature point.
         using Kinematics = Kokkos::Variational::NeoHookeanPoint;
+        /// @brief Device vector of the basis gradients.
         using Vector = Kokkos::Geometry::Vector;
+        /// @brief Kokkos execution space of the mesh.
         using ExecutionSpace = typename MeshType::ExecutionSpace;
         // The register bound keeps enough threads for one pass over the
         // quadrature, at the price of a few spills.
+        /// @brief Team policy, compiled for at most TeamThreads threads per team.
         using Policy = ::Kokkos::TeamPolicy<ExecutionSpace, ::Kokkos::IndexType<Index>,
           ::Kokkos::LaunchBounds<TeamThreads, 1>>;
+        /// @brief Team handle of the policy.
         using Member = typename Policy::member_type;
+        /// @brief Device degrees of freedom of the displacement space.
         using StateDOFsType =
           std::decay_t<decltype(std::declval<const StateViewType&>().getDOFs())>;
+        /// @brief Maximum number of scalar trial degrees of freedom of a cell.
         static constexpr Index TrialCapacity = TrialDOFsType::getCapacity(Vertices);
+        /// @brief Maximum number of scalar test degrees of freedom of a cell.
         static constexpr Index TestCapacity = TestDOFsType::getCapacity(Vertices);
+        /// @brief Maximal space dimension, which bounds the vector dimension.
         static constexpr Index D = RODIN_MAXIMAL_SPACE_DIMENSION;
+        /// @brief Number of entries of a displacement gradient.
         static constexpr Index Square = D * D;
         // Spaces of one type share their basis gradients.
+        /// @brief Whether the test space shares the basis gradients of the trial space.
         static constexpr bool SharedTest = std::is_same_v<TrialDOFsType, TestDOFsType>;
+        /// @brief Whether the displacement space shares the basis gradients of the
+        /// trial space.
         static constexpr bool SharedState = std::is_same_v<TrialDOFsType, StateDOFsType>;
+        /// @brief Number of test gradients stored per point, zero when the test space
+        /// shares the trial gradients.
         static constexpr Index TestStorage = SharedTest ? 0 : TestCapacity;
+        /// @brief Bytes of team scratch memory per quadrature point, for the
+        /// integration point, the kinematics, the coefficients, the displacement
+        /// gradient, the gradients and the pullbacks.
         static constexpr size_t PointBytes = sizeof(Point) + sizeof(Kinematics) +
           (3 + Square) * sizeof(Real) +
           2 * (TrialCapacity + TestStorage) * sizeof(Vector);
         // Groups that do not fit TeamScratch go to the slower scratch level.
+        /// @brief Number of quadrature points whose values fit TeamScratch.
         static constexpr Index Fit = TeamScratch / PointBytes;
+        /// @brief Number of quadrature points of a group.
         static constexpr Index P = Fit < TeamMinimumPoints ? TeamSlowPoints
           : Fit > TeamPoints                               ? TeamPoints
                                                            : Fit;
+        /// @brief Number of test functions of the block of a thread.
         static constexpr Index E = TeamPairs;
+        /// @brief Alignment of the arrays in team scratch memory.
         static constexpr size_t Alignment =
           std::max({alignof(Point), alignof(Kinematics), alignof(Vector), alignof(Real)});
 
+        /// @brief Device view of the mesh.
         Rodin::Kokkos::Geometry::MeshView view;
+        /// @brief Quadrature tables of the integrated polytopes.
         QuadratureType quadrature;
+        /// @brief Selected attributes; empty selects every polytope of the region.
         typename PolytopesType::AttributesType attributes;
+        /// @brief Position of the first entry of every polytope, relative to offset.
         ::Kokkos::View<Index*, MemorySpace> offsets;
+        /// @brief Distance between consecutive entries of one polytope.
         size_t spacing;
+        /// @brief Integration region.
         Geometry::Region region;
+        /// @brief Dimension of the integrated polytopes.
         Index dimension;
+        /// @brief Device degrees of freedom of the trial space.
         TrialDOFsType trialDOFs;
+        /// @brief Device degrees of freedom of the test space.
         TestDOFsType testDOFs;
+        /// @brief Vector dimension of the trial and test spaces.
         Index vdim;
+        /// @brief Device coefficients of the current displacement.
         StateViewType state;
+        /// @brief First Lamé parameter.
         Real lambda;
+        /// @brief Shear modulus.
         Real mu;
+        /// @brief Entry values.
         ::Kokkos::View<Real*, MemorySpace> values;
+        /// @brief Position of the first entry of the integration.
         size_t offset;
+        /// @brief Factor of the contributions.
         Real sign;
+        /// @brief Whether the contributions are added to the values instead of
+        /// replacing them.
         bool accumulate;
+        /// @brief Whether the row and column indices are written.
         bool index;
+        /// @brief Row indices, test degrees of freedom.
         ::Kokkos::View<Index*, MemorySpace> rows;
+        /// @brief Column indices, trial degrees of freedom.
         ::Kokkos::View<Index*, MemorySpace> cols;
+        /// @brief Team scratch memory level of the groups of points.
         int level;
 
+        /**
+         * @brief Integrates the cell of the league rank of the team and writes
+         * the entries of its local matrix.
+         * @param team Team handle, whose league rank is the index of the cell.
+         */
         KOKKOS_INLINE_FUNCTION void operator()(const Member& team) const
         {
           const Index p = team.league_rank();
@@ -1040,7 +1186,12 @@ namespace Rodin::Solid
         return *this;
       }
 
-      /// @brief Unavailable on the device. @throws Alert::Exception Always.
+      /**
+       * @brief Unavailable on the device.
+       * @param input Constitutive input, ignored.
+       * @return Reference to this, not reached since the call raises.
+       * @throws Alert::Exception Always.
+       */
       InternalVirtualWorkResidual& setInput([[maybe_unused]] InputFunction input)
       {
         Alert::MemberFunctionException(*this, __func__)
@@ -1054,7 +1205,11 @@ namespace Rodin::Solid
         return m_law;
       }
 
-      /// @brief Unavailable; the integrator has no host evaluation. @throws Alert::Exception Always.
+      /**
+       * @brief Unavailable; the integrator has no host evaluation.
+       * @return Never returns; the call aborts after raising.
+       * @throws Alert::Exception Always.
+       */
       const Geometry::Polytope& getPolytope() const override
       {
         Alert::MemberFunctionException(*this, __func__)
@@ -1063,7 +1218,12 @@ namespace Rodin::Solid
         std::abort();
       }
 
-      /// @brief Unavailable; the integrator has no host evaluation. @throws Alert::Exception Always.
+      /**
+       * @brief Unavailable; the integrator has no host evaluation.
+       * @param polytope Polytope that would be integrated, ignored.
+       * @return Never returns; the call aborts after raising.
+       * @throws Alert::Exception Always.
+       */
       InternalVirtualWorkResidual& setPolytope(
         [[maybe_unused]] const Geometry::Polytope& polytope) override
       {
@@ -1073,7 +1233,12 @@ namespace Rodin::Solid
         std::abort();
       }
 
-      /// @brief Unavailable; the integrator has no host evaluation. @throws Alert::Exception Always.
+      /**
+       * @brief Unavailable; the integrator has no host evaluation.
+       * @param local Local test index, ignored.
+       * @return Never returns; the call aborts after raising.
+       * @throws Alert::Exception Always.
+       */
       Real integrate([[maybe_unused]] size_t local) override
       {
         Alert::MemberFunctionException(*this, __func__)
@@ -1109,7 +1274,17 @@ namespace Rodin::Solid
         return m_polytopes.getSpacing();
       }
 
-      /// @brief Integrates every cell on the device.
+      /**
+       * @brief Integrates every cell on the device.
+       * @param values Entry values, the entry of rank r being written at
+       * offset + getEntryPosition(r, count, getSpacing()).
+       * @param offset Position of the first entry.
+       * @param sign Factor of the contributions.
+       * @param accumulate Whether the contributions are added to the values
+       * instead of replacing them.
+       * @param indices Entry indices, test degrees of freedom, written as the
+       * values unless empty.
+       */
       void fill(const ::Kokkos::View<Real*, MemorySpace>& values, size_t offset,
         Real sign, bool accumulate,
         const ::Kokkos::View<Index*, MemorySpace>& indices) const override
@@ -1142,6 +1317,21 @@ namespace Rodin::Solid
 
       /**
        * @brief Integrates the cells of at most Vertices vertices.
+       * @tparam Vertices Maximum vertex count of the cells.
+       * @param mesh Mesh of the spaces.
+       * @param polytopes Integrated polytopes, located by prepare().
+       * @param dofs Device degrees of freedom of the test space.
+       * @param vdim Vector dimension of the test space.
+       * @param state Device coefficients of the current displacement.
+       * @param lambda First Lamé parameter.
+       * @param mu Shear modulus.
+       * @param values Entry values.
+       * @param offset Position of the first entry.
+       * @param sign Factor of the contributions.
+       * @param accumulate Whether the contributions are added to the values instead
+       * of replacing them.
+       * @param indices Entry indices, test degrees of freedom, written as the values
+       * unless empty.
        *
        * Local index a * vdim + c is component c of the scalar degree of
        * freedom a.
@@ -1209,28 +1399,53 @@ namespace Rodin::Solid
       template <Index Vertices>
       struct PolytopeKernel
       {
+        /// @brief Maximum number of entries of the local vector of a cell.
         static constexpr Index Capacity =
           DOFsType::getCapacity(Vertices) * RODIN_MAXIMAL_SPACE_DIMENSION;
 
+        /// @brief Device view of the mesh.
         Rodin::Kokkos::Geometry::MeshView view;
+        /// @brief Quadrature tables of the integrated polytopes.
         QuadratureType quadrature;
+        /// @brief Selected attributes; empty selects every polytope of the region.
         typename PolytopesType::AttributesType attributes;
+        /// @brief Position of the first entry of every polytope, relative to offset.
         ::Kokkos::View<Index*, MemorySpace> offsets;
+        /// @brief Distance between consecutive entries of one polytope.
         size_t spacing;
+        /// @brief Integration region.
         Geometry::Region region;
+        /// @brief Dimension of the integrated polytopes.
         Index dimension;
+        /// @brief Device degrees of freedom of the test space.
         DOFsType dofs;
+        /// @brief Vector dimension of the test space.
         Index vdim;
+        /// @brief Device coefficients of the current displacement.
         StateViewType state;
+        /// @brief First Lamé parameter.
         Real lambda;
+        /// @brief Shear modulus.
         Real mu;
+        /// @brief Entry values.
         ::Kokkos::View<Real*, MemorySpace> values;
+        /// @brief Position of the first entry of the integration.
         size_t offset;
+        /// @brief Factor of the contributions.
         Real sign;
+        /// @brief Whether the contributions are added to the values instead of
+        /// replacing them.
         bool accumulate;
+        /// @brief Whether the entry indices are written.
         bool index;
+        /// @brief Entry indices, test degrees of freedom.
         ::Kokkos::View<Index*, MemorySpace> indices;
 
+        /**
+         * @brief Integrates one cell and writes the entries of its local vector.
+         * @param p Index of the cell among the polytopes of the integrated
+         * dimension.
+         */
         KOKKOS_INLINE_FUNCTION void operator()(Index p) const
         {
           const auto polytope = view.getPolytope(dimension, p);
@@ -1414,7 +1629,12 @@ namespace Rodin::Solid
         return *this;
       }
 
-      /// @brief Unavailable on the device. @throws Alert::Exception Always.
+      /**
+       * @brief Unavailable on the device.
+       * @param input Constitutive input, ignored.
+       * @return Reference to this, not reached since the call raises.
+       * @throws Alert::Exception Always.
+       */
       InternalVirtualWorkTangent& setInput([[maybe_unused]] InputFunction input)
       {
         Alert::MemberFunctionException(*this, __func__)
@@ -1428,7 +1648,11 @@ namespace Rodin::Solid
         return m_law;
       }
 
-      /// @brief Unavailable; the integrator has no host evaluation. @throws Alert::Exception Always.
+      /**
+       * @brief Unavailable; the integrator has no host evaluation.
+       * @return Never returns; the call aborts after raising.
+       * @throws Alert::Exception Always.
+       */
       const Geometry::Polytope& getPolytope() const override
       {
         Alert::MemberFunctionException(*this, __func__)
@@ -1437,7 +1661,12 @@ namespace Rodin::Solid
         std::abort();
       }
 
-      /// @brief Unavailable; the integrator has no host evaluation. @throws Alert::Exception Always.
+      /**
+       * @brief Unavailable; the integrator has no host evaluation.
+       * @param polytope Polytope that would be integrated, ignored.
+       * @return Never returns; the call aborts after raising.
+       * @throws Alert::Exception Always.
+       */
       InternalVirtualWorkTangent& setPolytope(
         [[maybe_unused]] const Geometry::Polytope& polytope) override
       {
@@ -1447,7 +1676,13 @@ namespace Rodin::Solid
         std::abort();
       }
 
-      /// @brief Unavailable; the integrator has no host evaluation. @throws Alert::Exception Always.
+      /**
+       * @brief Unavailable; the integrator has no host evaluation.
+       * @param tr Local trial index, ignored.
+       * @param te Local test index, ignored.
+       * @return Never returns; the call aborts after raising.
+       * @throws Alert::Exception Always.
+       */
       Real integrate([[maybe_unused]] size_t tr, [[maybe_unused]] size_t te) override
       {
         Alert::MemberFunctionException(*this, __func__)
@@ -1490,7 +1725,19 @@ namespace Rodin::Solid
         return m_polytopes.getSpacing();
       }
 
-      /// @brief Integrates every cell on the device.
+      /**
+       * @brief Integrates every cell on the device.
+       * @param values Entry values, the entry of rank r being written at
+       * offset + getEntryPosition(r, count, getSpacing()).
+       * @param offset Position of the first entry.
+       * @param sign Factor of the contributions.
+       * @param accumulate Whether the contributions are added to the values
+       * instead of replacing them.
+       * @param rows Row indices, test degrees of freedom, written as the
+       * values unless empty.
+       * @param cols Column indices, trial degrees of freedom, written as the
+       * values unless empty.
+       */
       void fill(const ::Kokkos::View<Real*, MemorySpace>& values, size_t offset,
         Real sign, bool accumulate, const ::Kokkos::View<Index*, MemorySpace>& rows,
         const ::Kokkos::View<Index*, MemorySpace>& cols) const override
@@ -1545,6 +1792,23 @@ namespace Rodin::Solid
 
       /**
        * @brief Integrates the cells of at most Vertices vertices.
+       * @tparam Vertices Maximum vertex count of the cells.
+       * @param mesh Mesh of the spaces.
+       * @param polytopes Integrated polytopes, located by prepare().
+       * @param trialDOFs Device degrees of freedom of the trial space.
+       * @param testDOFs Device degrees of freedom of the test space.
+       * @param vdim Vector dimension of the trial and test spaces.
+       * @param state Device coefficients of the current displacement.
+       * @param law Device evaluation of the hyperelastic law.
+       * @param values Entry values.
+       * @param offset Position of the first entry.
+       * @param sign Factor of the contributions.
+       * @param accumulate Whether the contributions are added to the values instead
+       * of replacing them.
+       * @param rows Row indices, test degrees of freedom, written as the values
+       * unless empty.
+       * @param cols Column indices, trial degrees of freedom, written as the values
+       * unless empty.
        *
        * The entry of local test index te and local trial index tr has rank
        * te * ntr + tr among the entries of the cell, the local index
@@ -1575,6 +1839,23 @@ namespace Rodin::Solid
       /**
        * @brief Integrates the cells of at most Vertices vertices with one
        * team per cell.
+       * @tparam Vertices Maximum vertex count of the cells.
+       * @param mesh Mesh of the spaces.
+       * @param polytopes Integrated polytopes, located by prepare().
+       * @param trialDOFs Device degrees of freedom of the trial space.
+       * @param testDOFs Device degrees of freedom of the test space.
+       * @param vdim Vector dimension of the trial and test spaces.
+       * @param state Device coefficients of the current displacement.
+       * @param law Device evaluation of the hyperelastic law.
+       * @param values Entry values.
+       * @param offset Position of the first entry.
+       * @param sign Factor of the contributions.
+       * @param accumulate Whether the contributions are added to the values instead
+       * of replacing them.
+       * @param rows Row indices, test degrees of freedom, written as the values
+       * unless empty.
+       * @param cols Column indices, trial degrees of freedom, written as the values
+       * unless empty.
        *
        * The quadrature points are taken by groups of P points. The threads
        * of the team build the integration points of a group in team scratch
@@ -1702,31 +1983,60 @@ namespace Rodin::Solid
       template <Index Vertices>
       struct PolytopeKernel
       {
+        /// @brief Maximum number of scalar trial degrees of freedom of a cell.
         static constexpr Index TrialCapacity = TrialDOFsType::getCapacity(Vertices);
+        /// @brief Maximum number of scalar test degrees of freedom of a cell.
         static constexpr Index TestCapacity = TestDOFsType::getCapacity(Vertices);
+        /// @brief Stride of the indices of an elasticity tensor.
         static constexpr Index D = Kokkos::Variational::ElasticityStride;
+        /// @brief Number of entries of a row of an elasticity tensor.
         static constexpr Index Row = Kokkos::Variational::ElasticityRow;
 
+        /// @brief Device view of the mesh.
         Rodin::Kokkos::Geometry::MeshView view;
+        /// @brief Quadrature tables of the integrated polytopes.
         QuadratureType quadrature;
+        /// @brief Selected attributes; empty selects every polytope of the region.
         typename PolytopesType::AttributesType attributes;
+        /// @brief Position of the first entry of every polytope, relative to offset.
         ::Kokkos::View<Index*, MemorySpace> offsets;
+        /// @brief Distance between consecutive entries of one polytope.
         size_t spacing;
+        /// @brief Integration region.
         Geometry::Region region;
+        /// @brief Dimension of the integrated polytopes.
         Index dimension;
+        /// @brief Device degrees of freedom of the trial space.
         TrialDOFsType trialDOFs;
+        /// @brief Device degrees of freedom of the test space.
         TestDOFsType testDOFs;
+        /// @brief Vector dimension of the trial and test spaces.
         Index vdim;
+        /// @brief Device coefficients of the current displacement.
         StateViewType state;
+        /// @brief Device evaluation of the hyperelastic law.
         DeviceLawType law;
+        /// @brief Entry values.
         ::Kokkos::View<Real*, MemorySpace> values;
+        /// @brief Position of the first entry of the integration.
         size_t offset;
+        /// @brief Factor of the contributions.
         Real sign;
+        /// @brief Whether the contributions are added to the values instead of
+        /// replacing them.
         bool accumulate;
+        /// @brief Whether the row and column indices are written.
         bool index;
+        /// @brief Row indices, test degrees of freedom.
         ::Kokkos::View<Index*, MemorySpace> rows;
+        /// @brief Column indices, trial degrees of freedom.
         ::Kokkos::View<Index*, MemorySpace> cols;
 
+        /**
+         * @brief Integrates one cell and writes the entries of its local matrix.
+         * @param p Index of the cell among the polytopes of the integrated
+         * dimension.
+         */
         KOKKOS_INLINE_FUNCTION void operator()(Index p) const
         {
           const auto polytope = view.getPolytope(dimension, p);
@@ -1825,59 +2135,109 @@ namespace Rodin::Solid
       template <Index Vertices>
       struct TeamKernel
       {
+        /// @brief Integration point at a quadrature node of the cell.
         using Point = Kokkos::Variational::CellIntegrationPointView;
+        /// @brief Device vector of the basis gradients.
         using Vector = Kokkos::Geometry::Vector;
+        /// @brief Kokkos execution space of the mesh.
         using ExecutionSpace = typename MeshType::ExecutionSpace;
         // The register bound keeps enough threads for one pass over the
         // quadrature, at the price of a few spills.
+        /// @brief Team policy, compiled for at most TeamThreads threads per team.
         using Policy = ::Kokkos::TeamPolicy<ExecutionSpace, ::Kokkos::IndexType<Index>,
           ::Kokkos::LaunchBounds<TeamThreads, 1>>;
+        /// @brief Team handle of the policy.
         using Member = typename Policy::member_type;
+        /// @brief Device degrees of freedom of the displacement space.
         using StateDOFsType =
           std::decay_t<decltype(std::declval<const StateViewType&>().getDOFs())>;
+        /// @brief Maximum number of scalar trial degrees of freedom of a cell.
         static constexpr Index TrialCapacity = TrialDOFsType::getCapacity(Vertices);
+        /// @brief Maximum number of scalar test degrees of freedom of a cell.
         static constexpr Index TestCapacity = TestDOFsType::getCapacity(Vertices);
+        /// @brief Stride of the indices of an elasticity tensor.
         static constexpr Index D = Kokkos::Variational::ElasticityStride;
+        /// @brief Number of entries of a row of an elasticity tensor.
         static constexpr Index Row = Kokkos::Variational::ElasticityRow;
+        /// @brief Number of entries of a displacement gradient.
         static constexpr Index Square = D * D;
+        /// @brief Number of entries of an elasticity tensor.
         static constexpr Index Tensor = D * Row;
         // Spaces of one type share their basis gradients.
+        /// @brief Whether the test space shares the basis gradients of the trial space.
         static constexpr bool SharedTest = std::is_same_v<TrialDOFsType, TestDOFsType>;
+        /// @brief Whether the displacement space shares the basis gradients of the
+        /// trial space.
         static constexpr bool SharedState = std::is_same_v<TrialDOFsType, StateDOFsType>;
+        /// @brief Number of test gradients stored per point, zero when the test space
+        /// shares the trial gradients.
         static constexpr Index TestStorage = SharedTest ? 0 : TestCapacity;
+        /// @brief Bytes of team scratch memory per quadrature point, for the
+        /// integration point, the displacement gradient, the elasticity tensor and the
+        /// gradients.
         static constexpr size_t PointBytes = sizeof(Point) +
           (Square + Tensor) * sizeof(Real) +
           (TrialCapacity + TestStorage) * sizeof(Vector);
         // Groups that do not fit TeamScratch go to the slower scratch level.
+        /// @brief Number of quadrature points whose values fit TeamScratch.
         static constexpr Index Fit = TeamScratch / PointBytes;
+        /// @brief Number of quadrature points of a group.
         static constexpr Index P = Fit < TeamMinimumPoints ? TeamSlowPoints
           : Fit > TeamPoints                               ? TeamPoints
                                                            : Fit;
+        /// @brief Number of test functions of the block of a thread.
         static constexpr Index E = TeamPairs;
+        /// @brief Alignment of the arrays in team scratch memory.
         static constexpr size_t Alignment =
           std::max({alignof(Point), alignof(Vector), alignof(Real)});
 
+        /// @brief Device view of the mesh.
         Rodin::Kokkos::Geometry::MeshView view;
+        /// @brief Quadrature tables of the integrated polytopes.
         QuadratureType quadrature;
+        /// @brief Selected attributes; empty selects every polytope of the region.
         typename PolytopesType::AttributesType attributes;
+        /// @brief Position of the first entry of every polytope, relative to offset.
         ::Kokkos::View<Index*, MemorySpace> offsets;
+        /// @brief Distance between consecutive entries of one polytope.
         size_t spacing;
+        /// @brief Integration region.
         Geometry::Region region;
+        /// @brief Dimension of the integrated polytopes.
         Index dimension;
+        /// @brief Device degrees of freedom of the trial space.
         TrialDOFsType trialDOFs;
+        /// @brief Device degrees of freedom of the test space.
         TestDOFsType testDOFs;
+        /// @brief Vector dimension of the trial and test spaces.
         Index vdim;
+        /// @brief Device coefficients of the current displacement.
         StateViewType state;
+        /// @brief Device evaluation of the hyperelastic law.
         DeviceLawType law;
+        /// @brief Entry values.
         ::Kokkos::View<Real*, MemorySpace> values;
+        /// @brief Position of the first entry of the integration.
         size_t offset;
+        /// @brief Factor of the contributions.
         Real sign;
+        /// @brief Whether the contributions are added to the values instead of
+        /// replacing them.
         bool accumulate;
+        /// @brief Whether the row and column indices are written.
         bool index;
+        /// @brief Row indices, test degrees of freedom.
         ::Kokkos::View<Index*, MemorySpace> rows;
+        /// @brief Column indices, trial degrees of freedom.
         ::Kokkos::View<Index*, MemorySpace> cols;
+        /// @brief Team scratch memory level of the groups of points.
         int level;
 
+        /**
+         * @brief Integrates the cell of the league rank of the team and writes
+         * the entries of its local matrix.
+         * @param team Team handle, whose league rank is the index of the cell.
+         */
         KOKKOS_INLINE_FUNCTION void operator()(const Member& team) const
         {
           const Index p = team.league_rank();
@@ -2215,7 +2575,12 @@ namespace Rodin::Solid
         return *this;
       }
 
-      /// @brief Unavailable on the device. @throws Alert::Exception Always.
+      /**
+       * @brief Unavailable on the device.
+       * @param input Constitutive input, ignored.
+       * @return Reference to this, not reached since the call raises.
+       * @throws Alert::Exception Always.
+       */
       InternalVirtualWorkResidual& setInput([[maybe_unused]] InputFunction input)
       {
         Alert::MemberFunctionException(*this, __func__)
@@ -2229,7 +2594,11 @@ namespace Rodin::Solid
         return m_law;
       }
 
-      /// @brief Unavailable; the integrator has no host evaluation. @throws Alert::Exception Always.
+      /**
+       * @brief Unavailable; the integrator has no host evaluation.
+       * @return Never returns; the call aborts after raising.
+       * @throws Alert::Exception Always.
+       */
       const Geometry::Polytope& getPolytope() const override
       {
         Alert::MemberFunctionException(*this, __func__)
@@ -2238,7 +2607,12 @@ namespace Rodin::Solid
         std::abort();
       }
 
-      /// @brief Unavailable; the integrator has no host evaluation. @throws Alert::Exception Always.
+      /**
+       * @brief Unavailable; the integrator has no host evaluation.
+       * @param polytope Polytope that would be integrated, ignored.
+       * @return Never returns; the call aborts after raising.
+       * @throws Alert::Exception Always.
+       */
       InternalVirtualWorkResidual& setPolytope(
         [[maybe_unused]] const Geometry::Polytope& polytope) override
       {
@@ -2248,7 +2622,12 @@ namespace Rodin::Solid
         std::abort();
       }
 
-      /// @brief Unavailable; the integrator has no host evaluation. @throws Alert::Exception Always.
+      /**
+       * @brief Unavailable; the integrator has no host evaluation.
+       * @param local Local test index, ignored.
+       * @return Never returns; the call aborts after raising.
+       * @throws Alert::Exception Always.
+       */
       Real integrate([[maybe_unused]] size_t local) override
       {
         Alert::MemberFunctionException(*this, __func__)
@@ -2284,7 +2663,17 @@ namespace Rodin::Solid
         return m_polytopes.getSpacing();
       }
 
-      /// @brief Integrates every cell on the device.
+      /**
+       * @brief Integrates every cell on the device.
+       * @param values Entry values, the entry of rank r being written at
+       * offset + getEntryPosition(r, count, getSpacing()).
+       * @param offset Position of the first entry.
+       * @param sign Factor of the contributions.
+       * @param accumulate Whether the contributions are added to the values
+       * instead of replacing them.
+       * @param indices Entry indices, test degrees of freedom, written as the
+       * values unless empty.
+       */
       void fill(const ::Kokkos::View<Real*, MemorySpace>& values, size_t offset,
         Real sign, bool accumulate,
         const ::Kokkos::View<Index*, MemorySpace>& indices) const override
@@ -2317,6 +2706,20 @@ namespace Rodin::Solid
 
       /**
        * @brief Integrates the cells of at most Vertices vertices.
+       * @tparam Vertices Maximum vertex count of the cells.
+       * @param mesh Mesh of the spaces.
+       * @param polytopes Integrated polytopes, located by prepare().
+       * @param dofs Device degrees of freedom of the test space.
+       * @param vdim Vector dimension of the test space.
+       * @param state Device coefficients of the current displacement.
+       * @param law Device evaluation of the hyperelastic law.
+       * @param values Entry values.
+       * @param offset Position of the first entry.
+       * @param sign Factor of the contributions.
+       * @param accumulate Whether the contributions are added to the values instead
+       * of replacing them.
+       * @param indices Entry indices, test degrees of freedom, written as the values
+       * unless empty.
        *
        * Local index a * vdim + c is component c of the scalar degree of
        * freedom a.
@@ -2385,27 +2788,51 @@ namespace Rodin::Solid
       template <Index Vertices>
       struct PolytopeKernel
       {
+        /// @brief Maximum number of entries of the local vector of a cell.
         static constexpr Index Capacity =
           DOFsType::getCapacity(Vertices) * RODIN_MAXIMAL_SPACE_DIMENSION;
 
+        /// @brief Device view of the mesh.
         Rodin::Kokkos::Geometry::MeshView view;
+        /// @brief Quadrature tables of the integrated polytopes.
         QuadratureType quadrature;
+        /// @brief Selected attributes; empty selects every polytope of the region.
         typename PolytopesType::AttributesType attributes;
+        /// @brief Position of the first entry of every polytope, relative to offset.
         ::Kokkos::View<Index*, MemorySpace> offsets;
+        /// @brief Distance between consecutive entries of one polytope.
         size_t spacing;
+        /// @brief Integration region.
         Geometry::Region region;
+        /// @brief Dimension of the integrated polytopes.
         Index dimension;
+        /// @brief Device degrees of freedom of the test space.
         DOFsType dofs;
+        /// @brief Vector dimension of the test space.
         Index vdim;
+        /// @brief Device coefficients of the current displacement.
         StateViewType state;
+        /// @brief Device evaluation of the hyperelastic law.
         DeviceLawType law;
+        /// @brief Entry values.
         ::Kokkos::View<Real*, MemorySpace> values;
+        /// @brief Position of the first entry of the integration.
         size_t offset;
+        /// @brief Factor of the contributions.
         Real sign;
+        /// @brief Whether the contributions are added to the values instead of
+        /// replacing them.
         bool accumulate;
+        /// @brief Whether the entry indices are written.
         bool index;
+        /// @brief Entry indices, test degrees of freedom.
         ::Kokkos::View<Index*, MemorySpace> indices;
 
+        /**
+         * @brief Integrates one cell and writes the entries of its local vector.
+         * @param p Index of the cell among the polytopes of the integrated
+         * dimension.
+         */
         KOKKOS_INLINE_FUNCTION void operator()(Index p) const
         {
           const auto polytope = view.getPolytope(dimension, p);
