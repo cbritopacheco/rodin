@@ -32,7 +32,11 @@ Zero loader come from the releases of Intel (`COMPUTE_RUNTIME_VERSION`,
 `IGC_VERSION`, `LEVEL_ZERO_VERSION`): ocloc of Ubuntu 26.04 crashes on a
 kernel of Kokkos-Kernels, and its loader lacks an extension that oneAPI 2026
 calls when Kokkos starts. The image stays on IGC 2.40: 2.41 and 2.42 crash on
-a kernel of oneDPL that hypre compiles just in time. Open MPI does not know SYCL memory, so the image
+a kernel of oneDPL that hypre compiles just in time. The nrm2 of oneMKL 2026
+on the GPU reads past the end of the vector, up to the next multiple of 2048
+entries, which breaks the norms of PETSc and stalls CG and BiCGStab:
+`kokkos-kernels-sycl-nrm2.patch` makes Kokkos-Kernels take its own nrm2 on
+SYCL. Open MPI does not know SYCL memory, so the image
 sets `PETSC_OPTIONS=-use_gpu_aware_mpi 0`, and `HWLOC_COMPONENTS=-levelzero`
 keeps mpirun from crashing. `ONEAPI_DEVICE_SELECTOR=level_zero:gpu` keeps
 PETSc off the OpenCL devices, on which Kokkos refuses to run.

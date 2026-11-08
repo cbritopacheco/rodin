@@ -155,6 +155,17 @@ ENV LD_LIBRARY_PATH=/opt/kokkos/lib:${LD_LIBRARY_PATH}
 # hypre on the device. The MKLConfig of Kokkos-Kernels takes the 64-bit
 # integer interface of oneMKL by default, PETSc the 32-bit one: both export
 # the same BLAS symbols, so Kokkos-Kernels takes the 32-bit one too.
+# The nrm2 of oneMKL 2026 on the GPU reads past the end of the vector, up to
+# the next multiple of 2048 entries: VecNorm of VECKOKKOS then adds the
+# entries of the next vector of VecDuplicateVecs, and CG or BiCGStab stall.
+# Kokkos-Kernels takes its native nrm2 on SYCL instead.
+COPY kokkos-kernels-sycl-nrm2.patch /tmp/
+RUN curl -fsSL https://github.com/kokkos/kokkos-kernels/archive/refs/tags/${KOKKOS_VERSION}.tar.gz \
+      | tar xz -C /tmp \
+    && patch -d /tmp/kokkos-kernels-${KOKKOS_VERSION} -p1 < /tmp/kokkos-kernels-sycl-nrm2.patch \
+    && tar czf /tmp/kokkos-kernels.tar.gz -C /tmp kokkos-kernels-${KOKKOS_VERSION} \
+    && rm -rf /tmp/kokkos-kernels-${KOKKOS_VERSION} /tmp/kokkos-kernels-sycl-nrm2.patch
+
 COPY petsc-sycl-bmg.patch /tmp/
 RUN curl -fsSL https://web.cels.anl.gov/projects/petsc/download/release-snapshots/petsc-${PETSC_VERSION}.tar.gz \
       | tar xz -C /tmp \
@@ -165,14 +176,14 @@ RUN curl -fsSL https://web.cels.anl.gov/projects/petsc/download/release-snapshot
          --with-sycl=1 --with-syclc=icpx --with-sycl-arch=${SYCL_ARCH} \
          --with-cxx-dialect=20 --with-debugging=0 --with-openmp=1 \
          --with-blaslapack-dir=${MKLROOT} \
-         --with-kokkos-dir=/opt/kokkos --download-kokkos-kernels \
+         --with-kokkos-dir=/opt/kokkos --download-kokkos-kernels=/tmp/kokkos-kernels.tar.gz \
          --download-kokkos-kernels-cmake-arguments=-DMKL_INTERFACE=lp64 \
          --download-hypre --download-metis --download-mumps \
          --download-parmetis --download-scalapack --download-superlu_dist \
          --with-make-np=${JOBS} \
     && make PETSC_DIR=$PWD PETSC_ARCH=arch-sycl all \
     && make PETSC_DIR=$PWD PETSC_ARCH=arch-sycl install \
-    && rm -rf /tmp/petsc-${PETSC_VERSION} /tmp/petsc-sycl-bmg.patch
+    && rm -rf /tmp/petsc-${PETSC_VERSION} /tmp/petsc-sycl-bmg.patch /tmp/kokkos-kernels.tar.gz
 
 ENV PETSC_DIR=/opt/petsc
 ENV LD_LIBRARY_PATH=/opt/petsc/lib:${LD_LIBRARY_PATH}
