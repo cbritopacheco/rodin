@@ -155,6 +155,30 @@
   @ref guides-petsc "PETSc guide". The reference pages specify the distinct
   native and PETSc convergence/status interfaces.
 
+  @section guides-solvers-device Solvers on the GPU
+
+  A problem assembled on a Kokkos mesh is solved where its system lives. The
+  default host matrix accepts every solver above. A device CSR
+  (`Kokkos::SparseMatrix`) stays on the GPU for the Kokkos-Kernels `CG` and
+  `GMRES`, hypre `BoomerAMG`, and the direct solvers `CuDSS` on NVIDIA GPUs
+  and `RocSolverRF` on AMD GPUs, the latter after a first factorization on
+  the host. A PETSc system on a Kokkos mesh runs the Krylov iteration and the
+  preconditioners implemented on Kokkos matrices on the GPU, on one process
+  or several. No direct solver runs on an Intel GPU, where a saddle point
+  system goes to PETSc with a Schur field split or to a host factorization.
+
+  | Problem | One GPU | Several GPUs |
+  | :--- | :--- | :--- |
+  | Symmetric positive definite | Kokkos-Kernels `CG`, or `BoomerAMG` | PETSc CG with GAMG or Jacobi |
+  | Nonsymmetric | Kokkos-Kernels `GMRES`, or PETSc BiCGStab | PETSc BiCGStab with Jacobi |
+  | Saddle point | `CuDSS` or `RocSolverRF` while the factors fit in device memory | PETSc FGMRES with a Schur field split |
+
+  The @ref guides-kokkos-solvers "solver section" of the Kokkos guide gives
+  the system types, the parts of the work that stay on the host, and the
+  @ref guides-kokkos-limitations "known limitations" of the GPU libraries,
+  among them the GAMG coarsening to avoid on V100 and the variation of
+  iteration counts between runs on CUDA.
+
   @section guides-solvers-troubleshooting Solve diagnostics
 
   | Observation | Checks before changing algorithms |
