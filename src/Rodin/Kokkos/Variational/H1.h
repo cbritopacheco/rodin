@@ -18,9 +18,8 @@
 #include <memory>
 #include <optional>
 #include <string>
+#include <utility>
 #include <vector>
-
-#include <Eigen/LU>
 
 #include "Rodin/Variational/H1/H1.h"
 #include "Rodin/Variational/H1/Div.h"
@@ -269,7 +268,6 @@ namespace Rodin::Kokkos::Variational
       explicit LagrangeBasis(const ExecutionSpace& execution)
       {
         using Type = ::Rodin::Geometry::Polytope::Type;
-        using Matrix = Eigen::Matrix<long double, Eigen::Dynamic, Eigen::Dynamic>;
         Index nodes = 0;
         Index coefficients = 0;
         for (Index g = 0; g < GeometryCount; ++g)
@@ -320,7 +318,8 @@ namespace Rodin::Kokkos::Variational
           const auto& reference =
             ::Rodin::Variational::H1Element<K, Real>::getNodes(type);
           assert(alpha.size() == n && reference.size() == n);
-          Matrix vandermonde(n, n);
+          // Transpose of the Vandermonde matrix, row-major.
+          std::vector<long double> vandermonde(n * n);
           for (Index i = 0; i < n; ++i)
           {
             const Index rdim = reference[i].size();
@@ -337,10 +336,10 @@ namespace Rodin::Kokkos::Variational
                 for (Index p = 0; p < alpha[m][k]; ++p)
                   monomial *= static_cast<long double>(reference[i](k));
               }
-              vandermonde(i, m) = monomial;
+              vandermonde[m * n + i] = monomial;
             }
           }
-          const Matrix inverse = vandermonde.transpose().fullPivLu().inverse();
+          const auto inverse = invert(std::move(vandermonde), n);
           for (Index m = 0; m < n; ++m)
           {
             for (Index k = 0; k < 3; ++k)
@@ -374,7 +373,7 @@ namespace Rodin::Kokkos::Variational
             for (Index m = 0; m < n; ++m)
             {
               values(m_coefficientOffsets[g] + q * n + m) =
-                static_cast<Real>(inverse(q, m));
+                static_cast<Real>(inverse[q * n + m]);
             }
           }
         }
@@ -495,6 +494,60 @@ namespace Rodin::Kokkos::Variational
 
     private:
       using Powers = ::Kokkos::Array<::Kokkos::Array<Real, K + 1>, 3>;
+
+      /**
+       * @brief Inverts a matrix by Gauss-Jordan elimination with partial
+       * pivoting.
+       * @param a Row-major square matrix.
+       * @param n Order of the matrix.
+       * @return Row-major inverse.
+       *
+       * Eigen marks its functions host and device under nvcc, which then warns
+       * that its long double code calls host functions and loses precision on
+       * the device, although the basis is built on the host only.
+       */
+      static std::vector<long double> invert(std::vector<long double> a, Index n)
+      {
+        std::vector<long double> inverse(n * n, 0);
+        for (Index i = 0; i < n; ++i)
+          inverse[i * n + i] = 1;
+        for (Index j = 0; j < n; ++j)
+        {
+          Index pivot = j;
+          for (Index i = j + 1; i < n; ++i)
+          {
+            if (std::abs(a[i * n + j]) > std::abs(a[pivot * n + j]))
+              pivot = i;
+          }
+          assert(a[pivot * n + j] != 0);
+          if (pivot != j)
+          {
+            for (Index k = 0; k < n; ++k)
+            {
+              std::swap(a[j * n + k], a[pivot * n + k]);
+              std::swap(inverse[j * n + k], inverse[pivot * n + k]);
+            }
+          }
+          const long double scale = 1 / a[j * n + j];
+          for (Index k = 0; k < n; ++k)
+          {
+            a[j * n + k] *= scale;
+            inverse[j * n + k] *= scale;
+          }
+          for (Index i = 0; i < n; ++i)
+          {
+            const long double factor = a[i * n + j];
+            if (i == j || factor == 0)
+              continue;
+            for (Index k = 0; k < n; ++k)
+            {
+              a[i * n + k] -= factor * a[j * n + k];
+              inverse[i * n + k] -= factor * inverse[j * n + k];
+            }
+          }
+        }
+        return inverse;
+      }
 
       /**
        * @brief Maps a reference gradient to the physical polytope.

@@ -9,7 +9,7 @@
 #include <petsc.h>
 
 #include <Rodin/Kokkos/PETSc.h>
-#include <Eigen/SparseLU>
+#include <Rodin/Solver/SparseLU.h>
 
 #include "../Variational/Common.h"
 
@@ -547,10 +547,8 @@ namespace Rodin::Tests::Unit
     Problem sp(su, sv);
     sp =
       Integral(Grad(su), Grad(sv)) - Integral(f, sv) + DirichletBC(su, RealFunction(0));
-    sp.assemble();
-    const auto& system = sp.getLinearSystem();
-    Eigen::SparseLU<Math::SparseMatrix<Real>> lu(system.getOperator());
-    const Math::Vector<Real> expected = lu.solve(system.getVector());
+    Solver::SparseLU(sp).solve();
+    const Math::Vector<Real> expected = su.getSolution().getData();
 
     Problem pp(pu, pv);
     pp =

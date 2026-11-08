@@ -31,6 +31,15 @@ if (Kokkos_ENABLE_SYCL AND "INTEL_BMG" IN_LIST Kokkos_ARCH)
     "$<$<COMPILE_LANGUAGE:CXX>:SHELL:-Xsycl-target-backend \"-options -ze-intel-enable-auto-large-GRF-mode\">")
 endif()
 
+# Under nvcc, Eigen marks its functions __host__ __device__, and its helpers of
+# std::complex call constexpr functions of the standard library: nvcc warns 28
+# times per source that the device cannot call them. Rodin never calls them on
+# the device.
+if (Kokkos_ENABLE_CUDA AND Kokkos_CXX_COMPILER_ID STREQUAL "NVIDIA")
+  target_compile_options(RodinKokkos INTERFACE
+    "$<$<COMPILE_LANGUAGE:CXX>:SHELL:-Xcudafe --diag_suppress=20015>")
+endif()
+
 target_sources(RodinKokkos INTERFACE
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/ForwardDecls.h>
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Context.h>
