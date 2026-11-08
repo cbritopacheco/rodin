@@ -48,7 +48,7 @@ namespace Rodin::Assembly
    * @tparam LinearAlgebraType Target linear algebra type.
    * @tparam Object Variational form type to assemble.
    *
-   * The specializations are listed in @ref KokkosAssemblySpecializations.
+   * @see @ref KokkosAssemblySpecializations "Kokkos Assembly Template Specializations"
    */
   template <class LinearAlgebraType, class Object>
   class Kokkos;
