@@ -193,7 +193,7 @@ namespace Rodin::Math
           /// @brief Destroys all owned PETSc index sets and clears the splits.
           void clear() noexcept
           {
-            PetscErrorCode ierr;
+            [[maybe_unused]] PetscErrorCode ierr;
             for (auto& s : m_splits)
             {
               if (s.is)
@@ -204,7 +204,6 @@ namespace Rodin::Math
               }
             }
             m_splits.clear();
-            (void)ierr;
           }
 
           /**
@@ -213,7 +212,7 @@ namespace Rodin::Math
            */
           void copyFrom(const FieldSplits& other)
           {
-            PetscErrorCode ierr;
+            [[maybe_unused]] PetscErrorCode ierr;
 
             m_splits.reserve(other.m_splits.size());
             for (const auto& s : other.m_splits)
@@ -235,8 +234,6 @@ namespace Rodin::Math
 
               m_splits.push_back(std::move(out));
             }
-
-            (void)ierr;
           }
 
           /**

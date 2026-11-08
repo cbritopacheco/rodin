@@ -2275,7 +2275,7 @@ namespace Rodin::Assembly
 
                 std::unique_ptr<LocalBilinearFormIntegratorBaseType> integrator(
                   bfi.copy());
-                OperatorType* Alocal = nullptr;
+                [[maybe_unused]] OperatorType* Alocal = nullptr;
                 if constexpr (!IsSparse)
                   Alocal = &Achunks[static_cast<size_t>(tid)];
 
@@ -2381,7 +2381,7 @@ namespace Rodin::Assembly
 
                 std::unique_ptr<GlobalBilinearFormIntegratorBaseType> integrator(
                   bfi.copy());
-                OperatorType* Alocal = nullptr;
+                [[maybe_unused]] OperatorType* Alocal = nullptr;
                 if constexpr (!IsSparse)
                   Alocal = &Achunks[static_cast<size_t>(tid)];
 

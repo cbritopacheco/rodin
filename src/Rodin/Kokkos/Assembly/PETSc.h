@@ -2851,7 +2851,7 @@ namespace Rodin::Assembly::Internal
   inline void prepareDeviceSystem(PETSc::Math::LinearSystem& axb, size_t rows,
     size_t globalRows, size_t cols, size_t globalCols, bool doVector)
   {
-    PetscErrorCode ierr;
+    [[maybe_unused]] PetscErrorCode ierr;
     const PetscInt m = static_cast<PetscInt>(rows);
     const PetscInt n = static_cast<PetscInt>(cols);
     const PetscInt M = static_cast<PetscInt>(globalRows);
@@ -2866,7 +2866,6 @@ namespace Rodin::Assembly::Internal
     ierr = PETSc::Assembly::VectorSetup(axb.getSolution())
              .prepare({n, N, VECKOKKOS, false, false});
     assert(ierr == PETSC_SUCCESS);
-    (void)ierr;
   }
 
   /**

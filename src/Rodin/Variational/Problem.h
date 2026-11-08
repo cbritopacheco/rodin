@@ -288,6 +288,8 @@ namespace Rodin::Variational
   class ProblemUVBase : public ProblemBase<LinearSystem>
   {
     public:
+      using ProblemBase<LinearSystem>::assemble;
+
       /// @brief Trial function type.
       using TrialFunctionType = U;
 

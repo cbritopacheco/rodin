@@ -666,6 +666,8 @@ namespace Rodin::IO
       /// @brief Parent class type.
       using Parent = MeshLoaderBase<Context::Local>;
 
+      using Parent::load;
+
       /**
        * @brief Constructs a MEDIT loader bound to a local mesh.
        * @param[in,out] mesh Mesh object populated by load().
@@ -780,6 +782,8 @@ namespace Rodin::IO
 
       /// @brief Parent class type.
       using Parent = MeshPrinterBase<ContextType>;
+
+      using Parent::print;
 
       /**
        * @brief Constructs a MEDIT mesh printer.
@@ -1128,6 +1132,8 @@ namespace Rodin::IO
 
       /// @brief Parent class type.
       using Parent = Printer<ObjectType>;
+
+      using Parent::print;
 
       /**
        * @brief Constructs a MEDIT grid-function printer base.
