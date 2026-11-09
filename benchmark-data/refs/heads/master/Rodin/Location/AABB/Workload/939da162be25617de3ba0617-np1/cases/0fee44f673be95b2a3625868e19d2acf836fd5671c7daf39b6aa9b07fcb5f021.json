@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "component": "Rodin/Location/AABB/Workload",
+  "configuration": "939da162be25617de3ba0617-np1",
+  "name": "Tetrahedron/3/8/0/3/interior/1",
+  "metric": "process_cpu_time",
+  "entries": [
+    {
+      "commit": "08f2b1df730e2f6c6ec854001b199f67c990ac38",
+      "date": "2026-11-09T20:14:21.513262+00:00",
+      "run": "42617234567.1",
+      "results": [
+        {
+          "name": "Tetrahedron/3/8/0/3/interior/1",
+          "value": 7371.27652692,
+          "unit": "ns",
+          "metric": "process_cpu_time",
+          "samples": [
+            7371.27652692
+          ],
+          "records": [
+            {
+              "geometry": "Tetrahedron",
+              "degree": "3",
+              "resolution": "8",
+              "cells": "2058",
+              "distortion": "0.000000",
+              "warp_degree": "3",
+              "query": "interior",
+              "pruning": "1",
+              "samples": "64",
+              "ns": "7371.27652692"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "format": "csv",
+  "window": 20
+}

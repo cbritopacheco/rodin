@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "component": "Rodin/Location/AABB/Workload",
+  "configuration": "939da162be25617de3ba0617-np1",
+  "name": "Wedge/3/8/4/3/build/1",
+  "metric": "process_cpu_time",
+  "entries": [
+    {
+      "commit": "08f2b1df730e2f6c6ec854001b199f67c990ac38",
+      "date": "2026-11-09T20:14:21.513262+00:00",
+      "run": "42617234567.1",
+      "results": [
+        {
+          "name": "Wedge/3/8/4/3/build/1",
+          "value": 31925000.0,
+          "unit": "ns",
+          "metric": "process_cpu_time",
+          "samples": [
+            31925000.0
+          ],
+          "records": [
+            {
+              "geometry": "Wedge",
+              "degree": "3",
+              "resolution": "8",
+              "cells": "686",
+              "distortion": "4.000000",
+              "warp_degree": "3",
+              "query": "build",
+              "pruning": "1",
+              "samples": "1",
+              "ns": "31925000"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "format": "csv",
+  "window": 20
+}

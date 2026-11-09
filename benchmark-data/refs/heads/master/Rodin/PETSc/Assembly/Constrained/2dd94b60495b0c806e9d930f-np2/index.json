@@ -1,0 +1,1172 @@
+{
+  "schema": 1,
+  "definition": {
+    "kind": "benchmark",
+    "mode": "distributed",
+    "compiler": "gcc-14",
+    "runner": "ubuntu-24.04",
+    "cmake": {
+      "CMAKE_BUILD_TYPE": "Release",
+      "CMAKE_CXX_COMPILER": "g++-14",
+      "CMAKE_C_COMPILER": "gcc-14",
+      "CMAKE_SUPPRESS_REGENERATION": "ON",
+      "RODIN_BUILD_SRC": "ON",
+      "RODIN_BUILD_BENCHMARKS": "ON",
+      "RODIN_BUILD_UNIT_TESTS": "OFF",
+      "RODIN_BUILD_MANUFACTURED_TESTS": "OFF",
+      "RODIN_BUILD_CONVERGENCE_TESTS": "OFF",
+      "RODIN_BUILD_EXAMPLES": "OFF",
+      "RODIN_BUILD_DOC": "OFF",
+      "RODIN_INSTALL_RESOURCES": "OFF",
+      "RODIN_CODE_COVERAGE": "OFF",
+      "RODIN_MULTITHREADED": "OFF",
+      "RODIN_USE_ASAN": "OFF",
+      "RODIN_USE_UBSAN": "OFF",
+      "RODIN_USE_MPI": "ON",
+      "RODIN_USE_PETSC": "ON"
+    },
+    "targets": [
+      "RodinPETScConstrainedAssemblyBenchmarks",
+      "RodinPETScMassAssemblyBenchmarks",
+      "RodinPETScPhysicsAssemblyBenchmarks"
+    ],
+    "stage": "components"
+  },
+  "ranks": 2,
+  "cases": [
+    {
+      "id": "e8d53521d84bd71882037d9bf7888755f77cda78ad9cee19d6daa193497aca33",
+      "name": "Conductivity/Constrained/H1/P1/Real/Hexahedron/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/e8d53521d84bd71882037d9bf7888755f77cda78ad9cee19d6daa193497aca33.json"
+    },
+    {
+      "id": "55a44db6258d8f595a43d84fb32042ac13568f1f3180d5cefccc25b127014dff",
+      "name": "Conductivity/Constrained/H1/P1/Real/Hexahedron/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/55a44db6258d8f595a43d84fb32042ac13568f1f3180d5cefccc25b127014dff.json"
+    },
+    {
+      "id": "4ea70a78c7b6fdc3381aeed5936451afc41857103c77d1e4f8f5c0db29720ff1",
+      "name": "Conductivity/Constrained/H1/P1/Real/Hexahedron/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/4ea70a78c7b6fdc3381aeed5936451afc41857103c77d1e4f8f5c0db29720ff1.json"
+    },
+    {
+      "id": "b3ce56c78cef3ccbcb17ffec204a1a1080a03193da2f0626fcf6085cb733f34f",
+      "name": "Conductivity/Constrained/H1/P1/Real/Pyramid/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/b3ce56c78cef3ccbcb17ffec204a1a1080a03193da2f0626fcf6085cb733f34f.json"
+    },
+    {
+      "id": "5baa3e6683fbcc1df9cb248fd8909800c57c4a6910661052140bd93b24e8b26d",
+      "name": "Conductivity/Constrained/H1/P1/Real/Pyramid/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/5baa3e6683fbcc1df9cb248fd8909800c57c4a6910661052140bd93b24e8b26d.json"
+    },
+    {
+      "id": "1a5ea3cb6d1c036a627bb3ab3dba73c118038b6c320046aace30c3c79426a8d0",
+      "name": "Conductivity/Constrained/H1/P1/Real/Pyramid/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/1a5ea3cb6d1c036a627bb3ab3dba73c118038b6c320046aace30c3c79426a8d0.json"
+    },
+    {
+      "id": "449ceceb38740455ce90653ed1ca6bca419cf0e97d196921c9e17f0dfb094eea",
+      "name": "Conductivity/Constrained/H1/P1/Real/Quadrilateral/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/449ceceb38740455ce90653ed1ca6bca419cf0e97d196921c9e17f0dfb094eea.json"
+    },
+    {
+      "id": "e14cdcb21ced018d4c9a18857c5db8489cb9c9aef2e592108b86abd599a7abc0",
+      "name": "Conductivity/Constrained/H1/P1/Real/Quadrilateral/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/e14cdcb21ced018d4c9a18857c5db8489cb9c9aef2e592108b86abd599a7abc0.json"
+    },
+    {
+      "id": "af7b060c23f8a4aa3614e57d7d29db51f5f467406f9361e8afef54359aad71d1",
+      "name": "Conductivity/Constrained/H1/P1/Real/Quadrilateral/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/af7b060c23f8a4aa3614e57d7d29db51f5f467406f9361e8afef54359aad71d1.json"
+    },
+    {
+      "id": "4abc36689704108c916b304590072dfb3498c9fa1a7f2ccb8d175654a98c5196",
+      "name": "Conductivity/Constrained/H1/P1/Real/Segment/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/4abc36689704108c916b304590072dfb3498c9fa1a7f2ccb8d175654a98c5196.json"
+    },
+    {
+      "id": "192f2784bef650347b78294cda4308889ae4973141a0d59eb248543b44eb1b7c",
+      "name": "Conductivity/Constrained/H1/P1/Real/Segment/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/192f2784bef650347b78294cda4308889ae4973141a0d59eb248543b44eb1b7c.json"
+    },
+    {
+      "id": "a941ddca3c1b476eb26b981f90f55c333202471a7ab636477b4a386d96406ca5",
+      "name": "Conductivity/Constrained/H1/P1/Real/Segment/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/a941ddca3c1b476eb26b981f90f55c333202471a7ab636477b4a386d96406ca5.json"
+    },
+    {
+      "id": "8644d3103978976db899bd8ca132a1f164d9b803c8f453cf6d181a49f1726347",
+      "name": "Conductivity/Constrained/H1/P1/Real/Tetrahedron/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/8644d3103978976db899bd8ca132a1f164d9b803c8f453cf6d181a49f1726347.json"
+    },
+    {
+      "id": "de0a29098e3d231b29ea7b83bb0a096c89fdb3c06eb82445818771919230ee56",
+      "name": "Conductivity/Constrained/H1/P1/Real/Tetrahedron/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/de0a29098e3d231b29ea7b83bb0a096c89fdb3c06eb82445818771919230ee56.json"
+    },
+    {
+      "id": "dc218cffdc94043f135496c5efa25cd88ac17624e71b9157da992a34122a6a91",
+      "name": "Conductivity/Constrained/H1/P1/Real/Tetrahedron/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/dc218cffdc94043f135496c5efa25cd88ac17624e71b9157da992a34122a6a91.json"
+    },
+    {
+      "id": "17872e2c7126a6545321ada320c9176c6241355beb27628a5dc2637f36a7e84a",
+      "name": "Conductivity/Constrained/H1/P1/Real/Triangle/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/17872e2c7126a6545321ada320c9176c6241355beb27628a5dc2637f36a7e84a.json"
+    },
+    {
+      "id": "39b1e4ad307a96b40d924d0b3d4ba940740b5ced8118666f0c5bbb5d5422cf97",
+      "name": "Conductivity/Constrained/H1/P1/Real/Triangle/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/39b1e4ad307a96b40d924d0b3d4ba940740b5ced8118666f0c5bbb5d5422cf97.json"
+    },
+    {
+      "id": "8e815030451a82d09517962693c0c38e1ff342592c3d5800d242fadce2833c4c",
+      "name": "Conductivity/Constrained/H1/P1/Real/Triangle/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/8e815030451a82d09517962693c0c38e1ff342592c3d5800d242fadce2833c4c.json"
+    },
+    {
+      "id": "90aa1c3b03901393ba2a1158def69a88bd41b010ccbb252942b1c94fb0a27537",
+      "name": "Conductivity/Constrained/H1/P1/Real/Wedge/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/90aa1c3b03901393ba2a1158def69a88bd41b010ccbb252942b1c94fb0a27537.json"
+    },
+    {
+      "id": "ddb6c40f4dc39de8fb79d5308b4ddac189c2d1236f1935894341bc4e220475e3",
+      "name": "Conductivity/Constrained/H1/P1/Real/Wedge/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/ddb6c40f4dc39de8fb79d5308b4ddac189c2d1236f1935894341bc4e220475e3.json"
+    },
+    {
+      "id": "733631e1979f9e238bdd096ec249396433770a1ea3f0f011eccac25985880cd1",
+      "name": "Conductivity/Constrained/H1/P1/Real/Wedge/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/733631e1979f9e238bdd096ec249396433770a1ea3f0f011eccac25985880cd1.json"
+    },
+    {
+      "id": "1da6502f0fd4eccf92188e31208bc2d41cfaa0af1894ee304cdd53bf823b5ec5",
+      "name": "Conductivity/Constrained/H1/P2/Real/Hexahedron/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/1da6502f0fd4eccf92188e31208bc2d41cfaa0af1894ee304cdd53bf823b5ec5.json"
+    },
+    {
+      "id": "b3e1923b1658bf0878dde7a048d2328f28b098278452fbbd304f8db43bb2ae4f",
+      "name": "Conductivity/Constrained/H1/P2/Real/Hexahedron/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/b3e1923b1658bf0878dde7a048d2328f28b098278452fbbd304f8db43bb2ae4f.json"
+    },
+    {
+      "id": "b6952fbc039d9f9300ad8dd76a385a1c6f35f3dccdccbbe04d3d53e3c1811523",
+      "name": "Conductivity/Constrained/H1/P2/Real/Hexahedron/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/b6952fbc039d9f9300ad8dd76a385a1c6f35f3dccdccbbe04d3d53e3c1811523.json"
+    },
+    {
+      "id": "f983e2b87eebdb1705ada958a0059f5c9d038b10b1222fd9b7fea389f219821a",
+      "name": "Conductivity/Constrained/H1/P2/Real/Pyramid/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/f983e2b87eebdb1705ada958a0059f5c9d038b10b1222fd9b7fea389f219821a.json"
+    },
+    {
+      "id": "fda45af575af5a5f15de2edfe643de2287f6feeb13626a14617056222401a85b",
+      "name": "Conductivity/Constrained/H1/P2/Real/Pyramid/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/fda45af575af5a5f15de2edfe643de2287f6feeb13626a14617056222401a85b.json"
+    },
+    {
+      "id": "52392efa3736071d4c2019126d04957a3324e43cef081fe25abe9a724ddca6b6",
+      "name": "Conductivity/Constrained/H1/P2/Real/Pyramid/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/52392efa3736071d4c2019126d04957a3324e43cef081fe25abe9a724ddca6b6.json"
+    },
+    {
+      "id": "b54c61aeb5d1006466d9ed2cd1512e9a02f2205f0c05244960bce66ef9511bc4",
+      "name": "Conductivity/Constrained/H1/P2/Real/Quadrilateral/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/b54c61aeb5d1006466d9ed2cd1512e9a02f2205f0c05244960bce66ef9511bc4.json"
+    },
+    {
+      "id": "48738c7445bb9a5a28063ecf1f93f6f6220f929fa3d8d90a0405f88a0af18d83",
+      "name": "Conductivity/Constrained/H1/P2/Real/Quadrilateral/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/48738c7445bb9a5a28063ecf1f93f6f6220f929fa3d8d90a0405f88a0af18d83.json"
+    },
+    {
+      "id": "67839e7c6243a04364b7db217731b9103d54ff8ffd44b3426dcfb02a814230a8",
+      "name": "Conductivity/Constrained/H1/P2/Real/Quadrilateral/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/67839e7c6243a04364b7db217731b9103d54ff8ffd44b3426dcfb02a814230a8.json"
+    },
+    {
+      "id": "7cc4a40909a4bff9c299ed00b6bdbe9226eac7b7a53abd872520ff2915cebb2d",
+      "name": "Conductivity/Constrained/H1/P2/Real/Segment/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/7cc4a40909a4bff9c299ed00b6bdbe9226eac7b7a53abd872520ff2915cebb2d.json"
+    },
+    {
+      "id": "3420d588282b19d3a336e6bae9b5861d611027781b5a560198c7597d07bab715",
+      "name": "Conductivity/Constrained/H1/P2/Real/Segment/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/3420d588282b19d3a336e6bae9b5861d611027781b5a560198c7597d07bab715.json"
+    },
+    {
+      "id": "286bd5ba015579c0b14ca67cae2b539bf2161e30b34d48d8e12e013472d8a549",
+      "name": "Conductivity/Constrained/H1/P2/Real/Segment/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/286bd5ba015579c0b14ca67cae2b539bf2161e30b34d48d8e12e013472d8a549.json"
+    },
+    {
+      "id": "354fcd5d107f3d849efc5b54cfda75524a5d651b8a1ce79c97af70e36cbdad4c",
+      "name": "Conductivity/Constrained/H1/P2/Real/Tetrahedron/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/354fcd5d107f3d849efc5b54cfda75524a5d651b8a1ce79c97af70e36cbdad4c.json"
+    },
+    {
+      "id": "0d2dc97fcb9d177103e81a0884527ae2ad952fd6b926e5a063f282ea38b32531",
+      "name": "Conductivity/Constrained/H1/P2/Real/Tetrahedron/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/0d2dc97fcb9d177103e81a0884527ae2ad952fd6b926e5a063f282ea38b32531.json"
+    },
+    {
+      "id": "c295e23aa9231501410af18e4c7e25540b218a4f61552768ecafb3c9d2823af8",
+      "name": "Conductivity/Constrained/H1/P2/Real/Tetrahedron/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/c295e23aa9231501410af18e4c7e25540b218a4f61552768ecafb3c9d2823af8.json"
+    },
+    {
+      "id": "131298dd98954d006482567a4884e07e81e8d10d90ddc530767bbbc21643ffad",
+      "name": "Conductivity/Constrained/H1/P2/Real/Triangle/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/131298dd98954d006482567a4884e07e81e8d10d90ddc530767bbbc21643ffad.json"
+    },
+    {
+      "id": "811e38be4d21548eb8be1d395242063c9395176df45efa6456a7c38f01d516aa",
+      "name": "Conductivity/Constrained/H1/P2/Real/Triangle/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/811e38be4d21548eb8be1d395242063c9395176df45efa6456a7c38f01d516aa.json"
+    },
+    {
+      "id": "e5da8c714940c04cca6cf6f18ec982ab7ffa81205f691cebff4428045dcc923a",
+      "name": "Conductivity/Constrained/H1/P2/Real/Triangle/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/e5da8c714940c04cca6cf6f18ec982ab7ffa81205f691cebff4428045dcc923a.json"
+    },
+    {
+      "id": "31c5e932df89816f0d5a9f37cb500612ea0b564a16b5183f86be6cfcec3d7426",
+      "name": "Conductivity/Constrained/H1/P2/Real/Wedge/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/31c5e932df89816f0d5a9f37cb500612ea0b564a16b5183f86be6cfcec3d7426.json"
+    },
+    {
+      "id": "721de4511cf99c8678d1718099475beef1e09feeb9be15c6a9f06d93cc2504d7",
+      "name": "Conductivity/Constrained/H1/P2/Real/Wedge/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/721de4511cf99c8678d1718099475beef1e09feeb9be15c6a9f06d93cc2504d7.json"
+    },
+    {
+      "id": "3e0f627dc2fa30892e4883619a04ff079da57832b3968377b6ff086944613b3e",
+      "name": "Conductivity/Constrained/H1/P2/Real/Wedge/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/3e0f627dc2fa30892e4883619a04ff079da57832b3968377b6ff086944613b3e.json"
+    },
+    {
+      "id": "7429c93b95f2b457281d33a916c4eaf755f5ad2ff2ceea9b5b4213609d5ffe69",
+      "name": "Conductivity/Constrained/H1/P3/Real/Hexahedron/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/7429c93b95f2b457281d33a916c4eaf755f5ad2ff2ceea9b5b4213609d5ffe69.json"
+    },
+    {
+      "id": "97e45c06893ea38edadc309a10b9fcd66229ba3fa4fcbb5d96b708a3de1d3f10",
+      "name": "Conductivity/Constrained/H1/P3/Real/Hexahedron/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/97e45c06893ea38edadc309a10b9fcd66229ba3fa4fcbb5d96b708a3de1d3f10.json"
+    },
+    {
+      "id": "ffd4c1c0c03d3c675933c6157c4ffe0e3cc264aa5d91a13c2353f98a3128fcdc",
+      "name": "Conductivity/Constrained/H1/P3/Real/Hexahedron/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/ffd4c1c0c03d3c675933c6157c4ffe0e3cc264aa5d91a13c2353f98a3128fcdc.json"
+    },
+    {
+      "id": "48f9be7bf3fb25a20c5c95becb0eb07fc3b913815fdaf7c072e0cbd7715bd884",
+      "name": "Conductivity/Constrained/H1/P3/Real/Pyramid/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/48f9be7bf3fb25a20c5c95becb0eb07fc3b913815fdaf7c072e0cbd7715bd884.json"
+    },
+    {
+      "id": "cde0ff12b3eae2e67e926e7cd86214817022eebbb94e614c8910c0191b115c9e",
+      "name": "Conductivity/Constrained/H1/P3/Real/Pyramid/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/cde0ff12b3eae2e67e926e7cd86214817022eebbb94e614c8910c0191b115c9e.json"
+    },
+    {
+      "id": "ff47ba7a986f9f381c79f263240f45638ca79ab0b9d5bd644de3b23a21da2ed5",
+      "name": "Conductivity/Constrained/H1/P3/Real/Pyramid/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/ff47ba7a986f9f381c79f263240f45638ca79ab0b9d5bd644de3b23a21da2ed5.json"
+    },
+    {
+      "id": "de556ffabc9944c54dce18f6a0ca8d0ea82d7795531154f7c9517bb22fd0e06e",
+      "name": "Conductivity/Constrained/H1/P3/Real/Quadrilateral/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/de556ffabc9944c54dce18f6a0ca8d0ea82d7795531154f7c9517bb22fd0e06e.json"
+    },
+    {
+      "id": "59618e9e1f033a597ce2650c79b1aa6f8845eeded98c2351151209ce69e70506",
+      "name": "Conductivity/Constrained/H1/P3/Real/Quadrilateral/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/59618e9e1f033a597ce2650c79b1aa6f8845eeded98c2351151209ce69e70506.json"
+    },
+    {
+      "id": "4206fea8d9e68cfbe02af39ebf63b9f001935e30486ddc7f53f6e7b7af158a8f",
+      "name": "Conductivity/Constrained/H1/P3/Real/Quadrilateral/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/4206fea8d9e68cfbe02af39ebf63b9f001935e30486ddc7f53f6e7b7af158a8f.json"
+    },
+    {
+      "id": "100650c76d34695e47260d7185db7c1ffca131ee857834949bec24668c2f1969",
+      "name": "Conductivity/Constrained/H1/P3/Real/Segment/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/100650c76d34695e47260d7185db7c1ffca131ee857834949bec24668c2f1969.json"
+    },
+    {
+      "id": "e1f3f6d12adc0bd2ef3c6433d53cc383bd08b175da36be80bf4638650f3bafcb",
+      "name": "Conductivity/Constrained/H1/P3/Real/Segment/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/e1f3f6d12adc0bd2ef3c6433d53cc383bd08b175da36be80bf4638650f3bafcb.json"
+    },
+    {
+      "id": "2245f0fd19f9c3fac935689d810931ecec86bf7243c31ef4d02dc7d2b53c9665",
+      "name": "Conductivity/Constrained/H1/P3/Real/Segment/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/2245f0fd19f9c3fac935689d810931ecec86bf7243c31ef4d02dc7d2b53c9665.json"
+    },
+    {
+      "id": "6fbf24e1b919744410162691a36b9c50d361666ea6c293c552d3decd09996457",
+      "name": "Conductivity/Constrained/H1/P3/Real/Tetrahedron/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/6fbf24e1b919744410162691a36b9c50d361666ea6c293c552d3decd09996457.json"
+    },
+    {
+      "id": "3c624eca801144b30089246c44f59b957155a76c2fea59d9426ee0721f6cbb51",
+      "name": "Conductivity/Constrained/H1/P3/Real/Tetrahedron/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/3c624eca801144b30089246c44f59b957155a76c2fea59d9426ee0721f6cbb51.json"
+    },
+    {
+      "id": "a2b2178f041ff6511a1947c799b1597e8e4a5d5e8b4f458151063f492216af1d",
+      "name": "Conductivity/Constrained/H1/P3/Real/Tetrahedron/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/a2b2178f041ff6511a1947c799b1597e8e4a5d5e8b4f458151063f492216af1d.json"
+    },
+    {
+      "id": "3613da8d9807438c13b32431b9fae76cce82e66dc23cc2b990b26d8e6b9eefbc",
+      "name": "Conductivity/Constrained/H1/P3/Real/Triangle/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/3613da8d9807438c13b32431b9fae76cce82e66dc23cc2b990b26d8e6b9eefbc.json"
+    },
+    {
+      "id": "75bdc843da4ea6311b58931b3809bdfad432aa1a0a763b6cabfabe5dcc779117",
+      "name": "Conductivity/Constrained/H1/P3/Real/Triangle/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/75bdc843da4ea6311b58931b3809bdfad432aa1a0a763b6cabfabe5dcc779117.json"
+    },
+    {
+      "id": "b79ad88a1c80bdba863e1bdcabe63a832031ea8005f2f4d441c8a3b81c779bf9",
+      "name": "Conductivity/Constrained/H1/P3/Real/Triangle/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/b79ad88a1c80bdba863e1bdcabe63a832031ea8005f2f4d441c8a3b81c779bf9.json"
+    },
+    {
+      "id": "aca8ca7c85e81b8a5db534f050a1911666d0f36365c81901cb7424424d09fd27",
+      "name": "Conductivity/Constrained/H1/P3/Real/Wedge/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/aca8ca7c85e81b8a5db534f050a1911666d0f36365c81901cb7424424d09fd27.json"
+    },
+    {
+      "id": "16619bcfc13b5f2cd03656e2ff4ee70cc20be7d04041010313989e2825e9f2bc",
+      "name": "Conductivity/Constrained/H1/P3/Real/Wedge/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/16619bcfc13b5f2cd03656e2ff4ee70cc20be7d04041010313989e2825e9f2bc.json"
+    },
+    {
+      "id": "2e20b2d262c403304c1358657a9cdbcb6f4be6a3145b835ed91245dc9c9326b3",
+      "name": "Conductivity/Constrained/H1/P3/Real/Wedge/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/2e20b2d262c403304c1358657a9cdbcb6f4be6a3145b835ed91245dc9c9326b3.json"
+    },
+    {
+      "id": "192d958c6213f111a66de97f008d122890af5ff2282742422cb6e9fbb447536f",
+      "name": "Poisson/Constrained/H1/P1/Real/Hexahedron/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/192d958c6213f111a66de97f008d122890af5ff2282742422cb6e9fbb447536f.json"
+    },
+    {
+      "id": "97c3e514b1b7df53c30515ed588485bef19b55991fe78fbd8069b09a54d397c5",
+      "name": "Poisson/Constrained/H1/P1/Real/Hexahedron/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/97c3e514b1b7df53c30515ed588485bef19b55991fe78fbd8069b09a54d397c5.json"
+    },
+    {
+      "id": "71870d1f5fe1dc39b47d48cd5874784253838f60f22286025e11db1ac497ded2",
+      "name": "Poisson/Constrained/H1/P1/Real/Hexahedron/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/71870d1f5fe1dc39b47d48cd5874784253838f60f22286025e11db1ac497ded2.json"
+    },
+    {
+      "id": "bea1156c38a076cc5a100c0c1e533c5b9afd285b51457a9bc26512634fc6f431",
+      "name": "Poisson/Constrained/H1/P1/Real/Pyramid/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/bea1156c38a076cc5a100c0c1e533c5b9afd285b51457a9bc26512634fc6f431.json"
+    },
+    {
+      "id": "ee3880e24c6fc8c57bfb11d125cb5952bdcca0bc7730f62fa54d6d2e9f7a67ba",
+      "name": "Poisson/Constrained/H1/P1/Real/Pyramid/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/ee3880e24c6fc8c57bfb11d125cb5952bdcca0bc7730f62fa54d6d2e9f7a67ba.json"
+    },
+    {
+      "id": "4e088586e4384f17785d446c13f5578650a42435175895049dc7eb2f27207b1e",
+      "name": "Poisson/Constrained/H1/P1/Real/Pyramid/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/4e088586e4384f17785d446c13f5578650a42435175895049dc7eb2f27207b1e.json"
+    },
+    {
+      "id": "1ea5faf466f0972e1df3b32224966c0c85b0608211d7ba71627e78c38d803731",
+      "name": "Poisson/Constrained/H1/P1/Real/Quadrilateral/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/1ea5faf466f0972e1df3b32224966c0c85b0608211d7ba71627e78c38d803731.json"
+    },
+    {
+      "id": "806160a2126bd08baf1cfd7f6330d6556d6ad22c55d8342b5e67c5108769b74a",
+      "name": "Poisson/Constrained/H1/P1/Real/Quadrilateral/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/806160a2126bd08baf1cfd7f6330d6556d6ad22c55d8342b5e67c5108769b74a.json"
+    },
+    {
+      "id": "3097ffffb3a2c2413b15502246313274686c111004182e3cfd14d931a339cbf6",
+      "name": "Poisson/Constrained/H1/P1/Real/Quadrilateral/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/3097ffffb3a2c2413b15502246313274686c111004182e3cfd14d931a339cbf6.json"
+    },
+    {
+      "id": "d1f1aeb0cee061577b8cbd1711da6c71498f7d2936b75a2f5305c8ca6e5e4d11",
+      "name": "Poisson/Constrained/H1/P1/Real/Segment/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/d1f1aeb0cee061577b8cbd1711da6c71498f7d2936b75a2f5305c8ca6e5e4d11.json"
+    },
+    {
+      "id": "41e5518ca520de704e90ec5327ee0a4a3ed8f34c9ad42dd464172d0907f6d721",
+      "name": "Poisson/Constrained/H1/P1/Real/Segment/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/41e5518ca520de704e90ec5327ee0a4a3ed8f34c9ad42dd464172d0907f6d721.json"
+    },
+    {
+      "id": "99a9c4b2013b3f63b69561dc9f97407c7897c417187d9399ac153c963688e2fa",
+      "name": "Poisson/Constrained/H1/P1/Real/Segment/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/99a9c4b2013b3f63b69561dc9f97407c7897c417187d9399ac153c963688e2fa.json"
+    },
+    {
+      "id": "a32cc0e8ada651b1e03994048a84d613bb28b9f4c44dec44ed7610a2e2b5cd47",
+      "name": "Poisson/Constrained/H1/P1/Real/Tetrahedron/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/a32cc0e8ada651b1e03994048a84d613bb28b9f4c44dec44ed7610a2e2b5cd47.json"
+    },
+    {
+      "id": "23a6614b5a0055d9e60179d7c187d7e539b27c270bfb87bb33eca8baf26e547f",
+      "name": "Poisson/Constrained/H1/P1/Real/Tetrahedron/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/23a6614b5a0055d9e60179d7c187d7e539b27c270bfb87bb33eca8baf26e547f.json"
+    },
+    {
+      "id": "47df38c5f50783a776ec713c78bbe8d5b2d72bf647015585c7ac3ffa28848f22",
+      "name": "Poisson/Constrained/H1/P1/Real/Tetrahedron/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/47df38c5f50783a776ec713c78bbe8d5b2d72bf647015585c7ac3ffa28848f22.json"
+    },
+    {
+      "id": "66ebddfc36ecf132756877065aaa7ceee4854be96cc0f23564d596acc394337b",
+      "name": "Poisson/Constrained/H1/P1/Real/Triangle/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/66ebddfc36ecf132756877065aaa7ceee4854be96cc0f23564d596acc394337b.json"
+    },
+    {
+      "id": "612178f85768cb0576031017fb0e7f965333d52ac9cbda4554ea587ef398a71c",
+      "name": "Poisson/Constrained/H1/P1/Real/Triangle/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/612178f85768cb0576031017fb0e7f965333d52ac9cbda4554ea587ef398a71c.json"
+    },
+    {
+      "id": "4f7d86d5019d56b513355dc81a3f78bf4433654cdebad744f1eb5c34b5de77f2",
+      "name": "Poisson/Constrained/H1/P1/Real/Triangle/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/4f7d86d5019d56b513355dc81a3f78bf4433654cdebad744f1eb5c34b5de77f2.json"
+    },
+    {
+      "id": "96581c04dad836ce29d35698e24f310870da2a1680f79e4d37dfd87103244974",
+      "name": "Poisson/Constrained/H1/P1/Real/Wedge/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/96581c04dad836ce29d35698e24f310870da2a1680f79e4d37dfd87103244974.json"
+    },
+    {
+      "id": "c9a9ac69e387ebafed85c2e3f46504e78c214b3c6125bda01431d3a0b791e414",
+      "name": "Poisson/Constrained/H1/P1/Real/Wedge/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/c9a9ac69e387ebafed85c2e3f46504e78c214b3c6125bda01431d3a0b791e414.json"
+    },
+    {
+      "id": "25585e5f2fbc9c78167f5cfe898e970fc95cf4af8ab936a32bca01182d5139c4",
+      "name": "Poisson/Constrained/H1/P1/Real/Wedge/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/25585e5f2fbc9c78167f5cfe898e970fc95cf4af8ab936a32bca01182d5139c4.json"
+    },
+    {
+      "id": "42a565034b72cea5c13592121ef2f955320d6639839c1db39e63b8a323f15132",
+      "name": "Poisson/Constrained/H1/P2/Real/Hexahedron/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/42a565034b72cea5c13592121ef2f955320d6639839c1db39e63b8a323f15132.json"
+    },
+    {
+      "id": "c83007365ec4848846188ba4d22826282e21fed4cd88452b85b374eba31a67f8",
+      "name": "Poisson/Constrained/H1/P2/Real/Hexahedron/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/c83007365ec4848846188ba4d22826282e21fed4cd88452b85b374eba31a67f8.json"
+    },
+    {
+      "id": "2ab39af1620108812eaf72f73c751dbfb3499c944486b5b5d58ff1497cce434f",
+      "name": "Poisson/Constrained/H1/P2/Real/Hexahedron/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/2ab39af1620108812eaf72f73c751dbfb3499c944486b5b5d58ff1497cce434f.json"
+    },
+    {
+      "id": "8f157077deebec12be2501bea4bc61b9310aad12f75d06dcd88234372533e493",
+      "name": "Poisson/Constrained/H1/P2/Real/Pyramid/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/8f157077deebec12be2501bea4bc61b9310aad12f75d06dcd88234372533e493.json"
+    },
+    {
+      "id": "a3a8a3ecc9d6a229ad4d103121c283d7036b571b9dc45448500dee0d58a6a33c",
+      "name": "Poisson/Constrained/H1/P2/Real/Pyramid/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/a3a8a3ecc9d6a229ad4d103121c283d7036b571b9dc45448500dee0d58a6a33c.json"
+    },
+    {
+      "id": "6cc7a423f31f2e79cdf1322adbf8d38d28eb89bb6b4daf0b338d4a1ee480f433",
+      "name": "Poisson/Constrained/H1/P2/Real/Pyramid/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/6cc7a423f31f2e79cdf1322adbf8d38d28eb89bb6b4daf0b338d4a1ee480f433.json"
+    },
+    {
+      "id": "79a71b59d9228e11575bac499fe1e6c2186ea5f5140bd561c13947eb9803df5d",
+      "name": "Poisson/Constrained/H1/P2/Real/Quadrilateral/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/79a71b59d9228e11575bac499fe1e6c2186ea5f5140bd561c13947eb9803df5d.json"
+    },
+    {
+      "id": "ec21a5da8f1d0ee1d60860120a5d8073d23eec13fcfea42566b021a5c953bc6e",
+      "name": "Poisson/Constrained/H1/P2/Real/Quadrilateral/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/ec21a5da8f1d0ee1d60860120a5d8073d23eec13fcfea42566b021a5c953bc6e.json"
+    },
+    {
+      "id": "b46aec287d1aa4423d655a86e42b0c32c052246af9c0ee89781a2b156fa84b5e",
+      "name": "Poisson/Constrained/H1/P2/Real/Quadrilateral/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/b46aec287d1aa4423d655a86e42b0c32c052246af9c0ee89781a2b156fa84b5e.json"
+    },
+    {
+      "id": "daa98190796bdcfe279f12a464f607e8233efef7a2b40d197c3dcc215fc3271d",
+      "name": "Poisson/Constrained/H1/P2/Real/Segment/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/daa98190796bdcfe279f12a464f607e8233efef7a2b40d197c3dcc215fc3271d.json"
+    },
+    {
+      "id": "796807cc27fa962f54e90d5687fc7273e966b8727e37179f1254ce98b89c56b6",
+      "name": "Poisson/Constrained/H1/P2/Real/Segment/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/796807cc27fa962f54e90d5687fc7273e966b8727e37179f1254ce98b89c56b6.json"
+    },
+    {
+      "id": "3fd49e8ac4c29f3dbabda66fffc40b51afa7b63c64d4219567122e97ebf43665",
+      "name": "Poisson/Constrained/H1/P2/Real/Segment/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/3fd49e8ac4c29f3dbabda66fffc40b51afa7b63c64d4219567122e97ebf43665.json"
+    },
+    {
+      "id": "d6891ae11f961499ce0fc3bf373aaf57f6684a791cdb8ea64e3c53540c0fd1b4",
+      "name": "Poisson/Constrained/H1/P2/Real/Tetrahedron/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/d6891ae11f961499ce0fc3bf373aaf57f6684a791cdb8ea64e3c53540c0fd1b4.json"
+    },
+    {
+      "id": "08d10ef886f968f05b3d9477bf00af354b8e09a0106d78fca25fac2bf9614f2c",
+      "name": "Poisson/Constrained/H1/P2/Real/Tetrahedron/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/08d10ef886f968f05b3d9477bf00af354b8e09a0106d78fca25fac2bf9614f2c.json"
+    },
+    {
+      "id": "2ac41ba65cc2f32357e1153dd591c4b33502c35ef01254bff270399149014bba",
+      "name": "Poisson/Constrained/H1/P2/Real/Tetrahedron/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/2ac41ba65cc2f32357e1153dd591c4b33502c35ef01254bff270399149014bba.json"
+    },
+    {
+      "id": "55ec1b4736c6924ed986898c41e5029d4519a66de597e26f5412273b6fa21403",
+      "name": "Poisson/Constrained/H1/P2/Real/Triangle/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/55ec1b4736c6924ed986898c41e5029d4519a66de597e26f5412273b6fa21403.json"
+    },
+    {
+      "id": "4f5d9c0deb59bc0790417526a564e93d1f9490515ba9079b8f280ba5bd776e9c",
+      "name": "Poisson/Constrained/H1/P2/Real/Triangle/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/4f5d9c0deb59bc0790417526a564e93d1f9490515ba9079b8f280ba5bd776e9c.json"
+    },
+    {
+      "id": "f0b799c62a7f78297d413598a4f65caea2e58d24201dcbe432f5f7723a9306d0",
+      "name": "Poisson/Constrained/H1/P2/Real/Triangle/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/f0b799c62a7f78297d413598a4f65caea2e58d24201dcbe432f5f7723a9306d0.json"
+    },
+    {
+      "id": "741733df3f1b357f9207a69c966cff5f1147e89e1518e68b8c236714309d6de6",
+      "name": "Poisson/Constrained/H1/P2/Real/Wedge/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/741733df3f1b357f9207a69c966cff5f1147e89e1518e68b8c236714309d6de6.json"
+    },
+    {
+      "id": "3ab14a8112b62aeab63749a37308a057b45e66d4d0e3aad7a8e18cf81cd51dae",
+      "name": "Poisson/Constrained/H1/P2/Real/Wedge/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/3ab14a8112b62aeab63749a37308a057b45e66d4d0e3aad7a8e18cf81cd51dae.json"
+    },
+    {
+      "id": "4ffc9249ee6483267bd36c4adde960c6c4b61ada9bb31994d012c8263711175a",
+      "name": "Poisson/Constrained/H1/P2/Real/Wedge/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/4ffc9249ee6483267bd36c4adde960c6c4b61ada9bb31994d012c8263711175a.json"
+    },
+    {
+      "id": "eaa4975c7ef1ec5fcf80d292ddee55c690f4963eaf55bc4eff5eecbd08f0c60a",
+      "name": "Poisson/Constrained/H1/P3/Real/Hexahedron/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/eaa4975c7ef1ec5fcf80d292ddee55c690f4963eaf55bc4eff5eecbd08f0c60a.json"
+    },
+    {
+      "id": "7fc66e656d06eff7dd6593cd4ee00c7b37d8d9801e7ea8b622441c82f393bd0e",
+      "name": "Poisson/Constrained/H1/P3/Real/Hexahedron/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/7fc66e656d06eff7dd6593cd4ee00c7b37d8d9801e7ea8b622441c82f393bd0e.json"
+    },
+    {
+      "id": "9db439b8c321e05ef01f588b8b8014b3254c20d8c7486606cc99048e8f12b1f7",
+      "name": "Poisson/Constrained/H1/P3/Real/Hexahedron/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/9db439b8c321e05ef01f588b8b8014b3254c20d8c7486606cc99048e8f12b1f7.json"
+    },
+    {
+      "id": "aa7fc927c28edad9dd9daec4ad6c95b19688128251699e3c1debf6e3e29edba9",
+      "name": "Poisson/Constrained/H1/P3/Real/Pyramid/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/aa7fc927c28edad9dd9daec4ad6c95b19688128251699e3c1debf6e3e29edba9.json"
+    },
+    {
+      "id": "8a3a745064cbba3fb626c4c2acbaf12f3461f149c46eecc89e340085af000a7a",
+      "name": "Poisson/Constrained/H1/P3/Real/Pyramid/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/8a3a745064cbba3fb626c4c2acbaf12f3461f149c46eecc89e340085af000a7a.json"
+    },
+    {
+      "id": "576c0b2ff0a9f653ccabe20859f87ea5b0b409d16eb3e27e3f42e7187d36c945",
+      "name": "Poisson/Constrained/H1/P3/Real/Pyramid/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/576c0b2ff0a9f653ccabe20859f87ea5b0b409d16eb3e27e3f42e7187d36c945.json"
+    },
+    {
+      "id": "cfbcef4f408ea384486f4f4f8732cc39348e9f96d36e21db6ff9bee49cc08dfb",
+      "name": "Poisson/Constrained/H1/P3/Real/Quadrilateral/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/cfbcef4f408ea384486f4f4f8732cc39348e9f96d36e21db6ff9bee49cc08dfb.json"
+    },
+    {
+      "id": "a8a95611b92f7f45e87306fabb1186d49cfb90cbf839ffb9a22a8c6d52b4ddc1",
+      "name": "Poisson/Constrained/H1/P3/Real/Quadrilateral/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/a8a95611b92f7f45e87306fabb1186d49cfb90cbf839ffb9a22a8c6d52b4ddc1.json"
+    },
+    {
+      "id": "1973ae757e88ea4038498d106842b3af41046a9584b8f7658fba5ce604a8a02d",
+      "name": "Poisson/Constrained/H1/P3/Real/Quadrilateral/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/1973ae757e88ea4038498d106842b3af41046a9584b8f7658fba5ce604a8a02d.json"
+    },
+    {
+      "id": "367b52e48350eebfa3e6289203c40dd655c148c6b18f2853516b6b500e8bada9",
+      "name": "Poisson/Constrained/H1/P3/Real/Segment/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/367b52e48350eebfa3e6289203c40dd655c148c6b18f2853516b6b500e8bada9.json"
+    },
+    {
+      "id": "33e469230e913af5c6e188fb8f7277beb0e905786d256beb65e230fb438b3d42",
+      "name": "Poisson/Constrained/H1/P3/Real/Segment/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/33e469230e913af5c6e188fb8f7277beb0e905786d256beb65e230fb438b3d42.json"
+    },
+    {
+      "id": "112b55c3e65f2c549e0c9c97c125efdfad94d169d11491ddfa85b57c2b1f1454",
+      "name": "Poisson/Constrained/H1/P3/Real/Segment/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/112b55c3e65f2c549e0c9c97c125efdfad94d169d11491ddfa85b57c2b1f1454.json"
+    },
+    {
+      "id": "7e457ceeed536c5e249ad83f3f321286fb39dc5bee029bd0312fd90127e47486",
+      "name": "Poisson/Constrained/H1/P3/Real/Tetrahedron/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/7e457ceeed536c5e249ad83f3f321286fb39dc5bee029bd0312fd90127e47486.json"
+    },
+    {
+      "id": "415fe0007e1c7c67fa2e0e61a6384a893036f091358fedeb6e22894678a11cb2",
+      "name": "Poisson/Constrained/H1/P3/Real/Tetrahedron/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/415fe0007e1c7c67fa2e0e61a6384a893036f091358fedeb6e22894678a11cb2.json"
+    },
+    {
+      "id": "d547c6d0d8d834b3ec0d832c8891b82c36547eea3566cd3a754fb5daa1e40f34",
+      "name": "Poisson/Constrained/H1/P3/Real/Tetrahedron/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/d547c6d0d8d834b3ec0d832c8891b82c36547eea3566cd3a754fb5daa1e40f34.json"
+    },
+    {
+      "id": "a623c306e283bcd085821703213947c773695e3f7122609d9c0ce0d7532e62cf",
+      "name": "Poisson/Constrained/H1/P3/Real/Triangle/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/a623c306e283bcd085821703213947c773695e3f7122609d9c0ce0d7532e62cf.json"
+    },
+    {
+      "id": "ff5b1692486d8dfd01218717d28c8ad3be24d66986b65fa98d486d3c3b801312",
+      "name": "Poisson/Constrained/H1/P3/Real/Triangle/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/ff5b1692486d8dfd01218717d28c8ad3be24d66986b65fa98d486d3c3b801312.json"
+    },
+    {
+      "id": "6e03c44883554a85e4a0e48dad3d0784939725746cf3f75025bb4987a86b8670",
+      "name": "Poisson/Constrained/H1/P3/Real/Triangle/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/6e03c44883554a85e4a0e48dad3d0784939725746cf3f75025bb4987a86b8670.json"
+    },
+    {
+      "id": "8ae2e507d85a5b858cdf5195e36e54c98bd6348f0f1b11142de8fa9663866b22",
+      "name": "Poisson/Constrained/H1/P3/Real/Wedge/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/8ae2e507d85a5b858cdf5195e36e54c98bd6348f0f1b11142de8fa9663866b22.json"
+    },
+    {
+      "id": "65ab5f167020b3a6bfa6ae3cbb0d5d5ddcb39cf62a4569b5a3777396dd17ac88",
+      "name": "Poisson/Constrained/H1/P3/Real/Wedge/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/65ab5f167020b3a6bfa6ae3cbb0d5d5ddcb39cf62a4569b5a3777396dd17ac88.json"
+    },
+    {
+      "id": "0634483c52b6ce51408ec226c085d4cc5eed9f5a2436e5fe412230d52485484b",
+      "name": "Poisson/Constrained/H1/P3/Real/Wedge/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/0634483c52b6ce51408ec226c085d4cc5eed9f5a2436e5fe412230d52485484b.json"
+    },
+    {
+      "id": "a4b322353909badf9e09476a2470b249ffd1beaeb98880705516132361c4c198",
+      "name": "ReactionDiffusion/Constrained/H1/P1/Real/Hexahedron/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/a4b322353909badf9e09476a2470b249ffd1beaeb98880705516132361c4c198.json"
+    },
+    {
+      "id": "afaa958f11d5fdb9cedcc507315b865658ec6d9cad77adc50c3febce972773a5",
+      "name": "ReactionDiffusion/Constrained/H1/P1/Real/Hexahedron/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/afaa958f11d5fdb9cedcc507315b865658ec6d9cad77adc50c3febce972773a5.json"
+    },
+    {
+      "id": "59771573b7dae33b5c450a2e603c39576514a8091106a665959972721ebccfd4",
+      "name": "ReactionDiffusion/Constrained/H1/P1/Real/Hexahedron/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/59771573b7dae33b5c450a2e603c39576514a8091106a665959972721ebccfd4.json"
+    },
+    {
+      "id": "0c073bd0e77ba2fec83c9e135fb6c31edd8a27cbe6f7e4ea08d9173c14ea368b",
+      "name": "ReactionDiffusion/Constrained/H1/P1/Real/Pyramid/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/0c073bd0e77ba2fec83c9e135fb6c31edd8a27cbe6f7e4ea08d9173c14ea368b.json"
+    },
+    {
+      "id": "ff1e91ebbb6c4953771aecb2f57cb1b870c854f46382e6d0e6ef0e759d2c4df2",
+      "name": "ReactionDiffusion/Constrained/H1/P1/Real/Pyramid/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/ff1e91ebbb6c4953771aecb2f57cb1b870c854f46382e6d0e6ef0e759d2c4df2.json"
+    },
+    {
+      "id": "bb6bbca4a506926a1df3d65255a7e37b4177eebc41ef0e88973764116239279c",
+      "name": "ReactionDiffusion/Constrained/H1/P1/Real/Pyramid/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/bb6bbca4a506926a1df3d65255a7e37b4177eebc41ef0e88973764116239279c.json"
+    },
+    {
+      "id": "e2eedb2bbb4309dac4e61551175b124857a2da045d2a72e63d398ce4207cfd50",
+      "name": "ReactionDiffusion/Constrained/H1/P1/Real/Quadrilateral/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/e2eedb2bbb4309dac4e61551175b124857a2da045d2a72e63d398ce4207cfd50.json"
+    },
+    {
+      "id": "06ae85b3d7d37ccefb3b748160b2dcc0456aa77f3c2f8e10aec9056b3afedae4",
+      "name": "ReactionDiffusion/Constrained/H1/P1/Real/Quadrilateral/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/06ae85b3d7d37ccefb3b748160b2dcc0456aa77f3c2f8e10aec9056b3afedae4.json"
+    },
+    {
+      "id": "1db930ae7bfd72600a9f1f94c9efaebf0f789d644877b1a5fd7679de61d72b21",
+      "name": "ReactionDiffusion/Constrained/H1/P1/Real/Quadrilateral/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/1db930ae7bfd72600a9f1f94c9efaebf0f789d644877b1a5fd7679de61d72b21.json"
+    },
+    {
+      "id": "0d0691455428718f17c415e0ee944618aced040770bafa71039ecdd6981d25c7",
+      "name": "ReactionDiffusion/Constrained/H1/P1/Real/Segment/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/0d0691455428718f17c415e0ee944618aced040770bafa71039ecdd6981d25c7.json"
+    },
+    {
+      "id": "c0af2b5628524ae26c512781b49585d9ff8a9a7ffd07a0a7f89eb6ae529b8dd6",
+      "name": "ReactionDiffusion/Constrained/H1/P1/Real/Segment/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/c0af2b5628524ae26c512781b49585d9ff8a9a7ffd07a0a7f89eb6ae529b8dd6.json"
+    },
+    {
+      "id": "5b57026eea519563a6bd3a1e138b5c043a7f15abbae54364e392066ca0c26f30",
+      "name": "ReactionDiffusion/Constrained/H1/P1/Real/Segment/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/5b57026eea519563a6bd3a1e138b5c043a7f15abbae54364e392066ca0c26f30.json"
+    },
+    {
+      "id": "09e577271f02ea19b9772cd2445cdce5c655c74b4d99dd51f60d96cbe02f0997",
+      "name": "ReactionDiffusion/Constrained/H1/P1/Real/Tetrahedron/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/09e577271f02ea19b9772cd2445cdce5c655c74b4d99dd51f60d96cbe02f0997.json"
+    },
+    {
+      "id": "810f2bd4fea2aa8a33c4f7ab3f9b8d45a6f4db57fdb2cb76270ea31782d32ab4",
+      "name": "ReactionDiffusion/Constrained/H1/P1/Real/Tetrahedron/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/810f2bd4fea2aa8a33c4f7ab3f9b8d45a6f4db57fdb2cb76270ea31782d32ab4.json"
+    },
+    {
+      "id": "4e1c56d9045bdaa9ce947fb954595dc3a6ced7ce677a138d48d0e17a625f41e9",
+      "name": "ReactionDiffusion/Constrained/H1/P1/Real/Tetrahedron/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/4e1c56d9045bdaa9ce947fb954595dc3a6ced7ce677a138d48d0e17a625f41e9.json"
+    },
+    {
+      "id": "ede30cc6703ecb10c058777f82f741be5980fb98933acc50f062d5006c130c5a",
+      "name": "ReactionDiffusion/Constrained/H1/P1/Real/Triangle/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/ede30cc6703ecb10c058777f82f741be5980fb98933acc50f062d5006c130c5a.json"
+    },
+    {
+      "id": "958c567ac1f610c87ae8dfc9bc53c2ae3834accdfb09d5fc76e2eb248ad1ce6a",
+      "name": "ReactionDiffusion/Constrained/H1/P1/Real/Triangle/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/958c567ac1f610c87ae8dfc9bc53c2ae3834accdfb09d5fc76e2eb248ad1ce6a.json"
+    },
+    {
+      "id": "c4af44c8e80b9ba646a2247471b5fa27cdba177c071f63c878fdf460838301fe",
+      "name": "ReactionDiffusion/Constrained/H1/P1/Real/Triangle/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/c4af44c8e80b9ba646a2247471b5fa27cdba177c071f63c878fdf460838301fe.json"
+    },
+    {
+      "id": "49de10a1b0c78058ca067ad3cd7dac1dd06b546c07ae47b6ca0612eb926a19c4",
+      "name": "ReactionDiffusion/Constrained/H1/P1/Real/Wedge/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/49de10a1b0c78058ca067ad3cd7dac1dd06b546c07ae47b6ca0612eb926a19c4.json"
+    },
+    {
+      "id": "be76b0e67cac46551c6b3c1e57173554862b69824a75be6ee828fe8cd5ed7eee",
+      "name": "ReactionDiffusion/Constrained/H1/P1/Real/Wedge/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/be76b0e67cac46551c6b3c1e57173554862b69824a75be6ee828fe8cd5ed7eee.json"
+    },
+    {
+      "id": "abafba341e593d96ac6ab1f69b12b89cad03d8087f46d77fe4d566e1ff5f04bb",
+      "name": "ReactionDiffusion/Constrained/H1/P1/Real/Wedge/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/abafba341e593d96ac6ab1f69b12b89cad03d8087f46d77fe4d566e1ff5f04bb.json"
+    },
+    {
+      "id": "bc0575e8097dc617fa93b943671f08fcb43fed791eafa30e9a34d52fe9f3a115",
+      "name": "ReactionDiffusion/Constrained/H1/P2/Real/Hexahedron/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/bc0575e8097dc617fa93b943671f08fcb43fed791eafa30e9a34d52fe9f3a115.json"
+    },
+    {
+      "id": "c38f69fb0fe89a7e03d1fee03500b409f9943c24a0753c7b0811bb762052e59f",
+      "name": "ReactionDiffusion/Constrained/H1/P2/Real/Hexahedron/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/c38f69fb0fe89a7e03d1fee03500b409f9943c24a0753c7b0811bb762052e59f.json"
+    },
+    {
+      "id": "63ae91fc5c91fb11216c03c8f7c6037cf9bee1f89431f22c04b786075ffca19d",
+      "name": "ReactionDiffusion/Constrained/H1/P2/Real/Hexahedron/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/63ae91fc5c91fb11216c03c8f7c6037cf9bee1f89431f22c04b786075ffca19d.json"
+    },
+    {
+      "id": "cfce2a6bd1ed65adcbe0b58e3a0f556116ba74981d9d295c21675859bf082e52",
+      "name": "ReactionDiffusion/Constrained/H1/P2/Real/Pyramid/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/cfce2a6bd1ed65adcbe0b58e3a0f556116ba74981d9d295c21675859bf082e52.json"
+    },
+    {
+      "id": "0ed833d7eedb888562265d21f4b363942560ff6123731527a3e304d7ee086647",
+      "name": "ReactionDiffusion/Constrained/H1/P2/Real/Pyramid/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/0ed833d7eedb888562265d21f4b363942560ff6123731527a3e304d7ee086647.json"
+    },
+    {
+      "id": "01eb33647d2683e2820ff11027930a60dae0b83d051903f064b461bccc43148b",
+      "name": "ReactionDiffusion/Constrained/H1/P2/Real/Pyramid/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/01eb33647d2683e2820ff11027930a60dae0b83d051903f064b461bccc43148b.json"
+    },
+    {
+      "id": "f6ffb3bae4579d2178a9fad49ca3a6d47c0fc31cbde03064f2057c6da168e8e8",
+      "name": "ReactionDiffusion/Constrained/H1/P2/Real/Quadrilateral/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/f6ffb3bae4579d2178a9fad49ca3a6d47c0fc31cbde03064f2057c6da168e8e8.json"
+    },
+    {
+      "id": "9483959d6dd5882f02206ac792509aca9bb3180afa3c61673479390f217d13a1",
+      "name": "ReactionDiffusion/Constrained/H1/P2/Real/Quadrilateral/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/9483959d6dd5882f02206ac792509aca9bb3180afa3c61673479390f217d13a1.json"
+    },
+    {
+      "id": "185b100484fa4795dab6ad396e205d2d8f0ddcc898c775179586d369c43473c7",
+      "name": "ReactionDiffusion/Constrained/H1/P2/Real/Quadrilateral/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/185b100484fa4795dab6ad396e205d2d8f0ddcc898c775179586d369c43473c7.json"
+    },
+    {
+      "id": "bde5136a71612a4f691d9405dfa9900b291ee44e95d88e161dcd8bfc923c9e11",
+      "name": "ReactionDiffusion/Constrained/H1/P2/Real/Segment/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/bde5136a71612a4f691d9405dfa9900b291ee44e95d88e161dcd8bfc923c9e11.json"
+    },
+    {
+      "id": "ee588dd8b4a13cf345d0e3602162b22c2aea94bf5ee23a1ca76751a4020b6935",
+      "name": "ReactionDiffusion/Constrained/H1/P2/Real/Segment/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/ee588dd8b4a13cf345d0e3602162b22c2aea94bf5ee23a1ca76751a4020b6935.json"
+    },
+    {
+      "id": "34de4750a123e2d5c4b1291842b89b00eebca923e80e17779b4ff3137a624186",
+      "name": "ReactionDiffusion/Constrained/H1/P2/Real/Segment/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/34de4750a123e2d5c4b1291842b89b00eebca923e80e17779b4ff3137a624186.json"
+    },
+    {
+      "id": "6bee36f1b485ed2053d7dc7cb675df435bd874d35d3c373886009e69756abfa3",
+      "name": "ReactionDiffusion/Constrained/H1/P2/Real/Tetrahedron/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/6bee36f1b485ed2053d7dc7cb675df435bd874d35d3c373886009e69756abfa3.json"
+    },
+    {
+      "id": "aa9fd823748101f75d4301ffb665e9268e7c5742ba6bcf9aa8022fb59a92e7e2",
+      "name": "ReactionDiffusion/Constrained/H1/P2/Real/Tetrahedron/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/aa9fd823748101f75d4301ffb665e9268e7c5742ba6bcf9aa8022fb59a92e7e2.json"
+    },
+    {
+      "id": "7d916db4f0e3e5eb05dae79a4b219eb22c0862afce05a1820a897c1f2b70b5ac",
+      "name": "ReactionDiffusion/Constrained/H1/P2/Real/Tetrahedron/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/7d916db4f0e3e5eb05dae79a4b219eb22c0862afce05a1820a897c1f2b70b5ac.json"
+    },
+    {
+      "id": "582dd1fbc653530a8978f3bffee11da9a1f9090c095e2bcbae03021d5f43efca",
+      "name": "ReactionDiffusion/Constrained/H1/P2/Real/Triangle/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/582dd1fbc653530a8978f3bffee11da9a1f9090c095e2bcbae03021d5f43efca.json"
+    },
+    {
+      "id": "467a97dbb59bd5c7869f1bb32822c50f6f838921eb2438b61f9f595b05468a11",
+      "name": "ReactionDiffusion/Constrained/H1/P2/Real/Triangle/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/467a97dbb59bd5c7869f1bb32822c50f6f838921eb2438b61f9f595b05468a11.json"
+    },
+    {
+      "id": "f3a3366d97b2853796cabbbcb7077f55db6d87c638963cacb79f2f11f15e524a",
+      "name": "ReactionDiffusion/Constrained/H1/P2/Real/Triangle/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/f3a3366d97b2853796cabbbcb7077f55db6d87c638963cacb79f2f11f15e524a.json"
+    },
+    {
+      "id": "c77a9d24c917a179524ce7b889238d2009127b123d9ce578f4e25ba4fdcb3480",
+      "name": "ReactionDiffusion/Constrained/H1/P2/Real/Wedge/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/c77a9d24c917a179524ce7b889238d2009127b123d9ce578f4e25ba4fdcb3480.json"
+    },
+    {
+      "id": "8c226ade53f6b13575325eb3b4f134a49cde2f7feb7a39e47bd2ba846b9b1ed5",
+      "name": "ReactionDiffusion/Constrained/H1/P2/Real/Wedge/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/8c226ade53f6b13575325eb3b4f134a49cde2f7feb7a39e47bd2ba846b9b1ed5.json"
+    },
+    {
+      "id": "d69c3f49ff86dc8d4bc8af4120726d83ae0ad1d91c823abe52bc69a0e2778619",
+      "name": "ReactionDiffusion/Constrained/H1/P2/Real/Wedge/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/d69c3f49ff86dc8d4bc8af4120726d83ae0ad1d91c823abe52bc69a0e2778619.json"
+    },
+    {
+      "id": "a921783faff43deffb6dccbc2675515da7afa7fac0ef234b6ca414debc614ead",
+      "name": "ReactionDiffusion/Constrained/H1/P3/Real/Hexahedron/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/a921783faff43deffb6dccbc2675515da7afa7fac0ef234b6ca414debc614ead.json"
+    },
+    {
+      "id": "6d9c6d07b3cdd1f4dc6f194c7d9d15f3b526c4e21cd5876cf0fc6f30a65d9030",
+      "name": "ReactionDiffusion/Constrained/H1/P3/Real/Hexahedron/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/6d9c6d07b3cdd1f4dc6f194c7d9d15f3b526c4e21cd5876cf0fc6f30a65d9030.json"
+    },
+    {
+      "id": "404eaba3e4ac43d8f42ee2cd51b1405849140ff6b82d1f2893fb9036fb2175ec",
+      "name": "ReactionDiffusion/Constrained/H1/P3/Real/Hexahedron/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/404eaba3e4ac43d8f42ee2cd51b1405849140ff6b82d1f2893fb9036fb2175ec.json"
+    },
+    {
+      "id": "d4d3894f5b39e21c1815007c20cfbfb8d6298c22dc4b30c36ef3bfde0a70d1d2",
+      "name": "ReactionDiffusion/Constrained/H1/P3/Real/Pyramid/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/d4d3894f5b39e21c1815007c20cfbfb8d6298c22dc4b30c36ef3bfde0a70d1d2.json"
+    },
+    {
+      "id": "fc4b81f3e4dbf0cb173d96e76ae6ec0b4f5156d4c85fc12ed18de9f3b43b45a3",
+      "name": "ReactionDiffusion/Constrained/H1/P3/Real/Pyramid/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/fc4b81f3e4dbf0cb173d96e76ae6ec0b4f5156d4c85fc12ed18de9f3b43b45a3.json"
+    },
+    {
+      "id": "63fa90370f1d4ebe9ef4f20374f5e6e093c62f68c1461e31eec75437e2599731",
+      "name": "ReactionDiffusion/Constrained/H1/P3/Real/Pyramid/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/63fa90370f1d4ebe9ef4f20374f5e6e093c62f68c1461e31eec75437e2599731.json"
+    },
+    {
+      "id": "2614b6a8a388c2e65c977df889ed6952d956ea7e3b8ce736023ee3394cecdb90",
+      "name": "ReactionDiffusion/Constrained/H1/P3/Real/Quadrilateral/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/2614b6a8a388c2e65c977df889ed6952d956ea7e3b8ce736023ee3394cecdb90.json"
+    },
+    {
+      "id": "b5cbe8ba30e1060a118c73621efd54e40099e3210a1b8661b4a34d7d609c2804",
+      "name": "ReactionDiffusion/Constrained/H1/P3/Real/Quadrilateral/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/b5cbe8ba30e1060a118c73621efd54e40099e3210a1b8661b4a34d7d609c2804.json"
+    },
+    {
+      "id": "44ae62d89d19196b801900508541d7b86d468e45ec0a83bca6ad9ff80eba8de5",
+      "name": "ReactionDiffusion/Constrained/H1/P3/Real/Quadrilateral/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/44ae62d89d19196b801900508541d7b86d468e45ec0a83bca6ad9ff80eba8de5.json"
+    },
+    {
+      "id": "aaab6ac96e4deea57ec7437a61728207ecc05de7e00e148d3c61eb5b49cfce6f",
+      "name": "ReactionDiffusion/Constrained/H1/P3/Real/Segment/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/aaab6ac96e4deea57ec7437a61728207ecc05de7e00e148d3c61eb5b49cfce6f.json"
+    },
+    {
+      "id": "09671754d1d8c700610538227400e736d08a2c7218174e1339324b7ed31fc949",
+      "name": "ReactionDiffusion/Constrained/H1/P3/Real/Segment/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/09671754d1d8c700610538227400e736d08a2c7218174e1339324b7ed31fc949.json"
+    },
+    {
+      "id": "07ad7da4c086e92042801c79e2c8bb5fde51d5eaeccc6f4127d9b376ddcadb35",
+      "name": "ReactionDiffusion/Constrained/H1/P3/Real/Segment/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/07ad7da4c086e92042801c79e2c8bb5fde51d5eaeccc6f4127d9b376ddcadb35.json"
+    },
+    {
+      "id": "b3298ae6556eab07825200881aa246249f0f61e3df680ba496e9a0d48bb0f8ea",
+      "name": "ReactionDiffusion/Constrained/H1/P3/Real/Tetrahedron/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/b3298ae6556eab07825200881aa246249f0f61e3df680ba496e9a0d48bb0f8ea.json"
+    },
+    {
+      "id": "db79f569b789e8359f20edadc247b675e03a80ea2f98f1ce26ae79c5b8773e98",
+      "name": "ReactionDiffusion/Constrained/H1/P3/Real/Tetrahedron/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/db79f569b789e8359f20edadc247b675e03a80ea2f98f1ce26ae79c5b8773e98.json"
+    },
+    {
+      "id": "6868abc9926aaadcc0fb1b73474beaf659065c5759cc7317375d2c6a2eabb6a9",
+      "name": "ReactionDiffusion/Constrained/H1/P3/Real/Tetrahedron/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/6868abc9926aaadcc0fb1b73474beaf659065c5759cc7317375d2c6a2eabb6a9.json"
+    },
+    {
+      "id": "5e8357b705dc9baeaaab3d950c12173385a5151e8757351d86a5181f5dd84a71",
+      "name": "ReactionDiffusion/Constrained/H1/P3/Real/Triangle/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/5e8357b705dc9baeaaab3d950c12173385a5151e8757351d86a5181f5dd84a71.json"
+    },
+    {
+      "id": "defa098c0c9cdbcc46bdf0af16ff0ad18e142510799a2a49af13147cca3c632a",
+      "name": "ReactionDiffusion/Constrained/H1/P3/Real/Triangle/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/defa098c0c9cdbcc46bdf0af16ff0ad18e142510799a2a49af13147cca3c632a.json"
+    },
+    {
+      "id": "0b720276d372ebb54fadfacd5adf5e6d16da3a247721329d727db666b6799949",
+      "name": "ReactionDiffusion/Constrained/H1/P3/Real/Triangle/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/0b720276d372ebb54fadfacd5adf5e6d16da3a247721329d727db666b6799949.json"
+    },
+    {
+      "id": "bbf0e65f42de6b580e77a8576360a5a8653011fdefa8c6682dd20f47a09f231e",
+      "name": "ReactionDiffusion/Constrained/H1/P3/Real/Wedge/3/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/bbf0e65f42de6b580e77a8576360a5a8653011fdefa8c6682dd20f47a09f231e.json"
+    },
+    {
+      "id": "b595e212b01f4bc85a89b705aa75661dc7b3688146f3cb4a31a6fef4c681f2f2",
+      "name": "ReactionDiffusion/Constrained/H1/P3/Real/Wedge/5/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/b595e212b01f4bc85a89b705aa75661dc7b3688146f3cb4a31a6fef4c681f2f2.json"
+    },
+    {
+      "id": "4ef8b598cb514429e6a5f9a72cd65f80fedb228058e81ec39c0538c9e0fb4ffc",
+      "name": "ReactionDiffusion/Constrained/H1/P3/Real/Wedge/9/iterations:3/manual_time",
+      "metric": "manual_time",
+      "url": "cases/4ef8b598cb514429e6a5f9a72cd65f80fedb228058e81ec39c0538c9e0fb4ffc.json"
+    }
+  ]
+}

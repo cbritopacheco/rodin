@@ -1,0 +1,796 @@
+{
+  "schema": 1,
+  "definition": {
+    "kind": "benchmark",
+    "mode": "local",
+    "compiler": "gcc-14",
+    "runner": "ubuntu-24.04",
+    "cmake": {
+      "CMAKE_BUILD_TYPE": "Release",
+      "CMAKE_CXX_COMPILER": "g++-14",
+      "CMAKE_C_COMPILER": "gcc-14",
+      "CMAKE_SUPPRESS_REGENERATION": "ON",
+      "RODIN_BUILD_SRC": "ON",
+      "RODIN_BUILD_BENCHMARKS": "ON",
+      "RODIN_BUILD_UNIT_TESTS": "OFF",
+      "RODIN_BUILD_MANUFACTURED_TESTS": "OFF",
+      "RODIN_BUILD_CONVERGENCE_TESTS": "OFF",
+      "RODIN_BUILD_EXAMPLES": "OFF",
+      "RODIN_BUILD_DOC": "OFF",
+      "RODIN_INSTALL_RESOURCES": "OFF",
+      "RODIN_CODE_COVERAGE": "OFF",
+      "RODIN_MULTITHREADED": "OFF",
+      "RODIN_USE_ASAN": "OFF",
+      "RODIN_USE_UBSAN": "OFF",
+      "RODIN_USE_MPI": "OFF",
+      "RODIN_USE_PETSC": "OFF"
+    },
+    "targets": [
+      "RodinConstrainedSolveBenchmarks",
+      "RodinCoupledReactionDiffusionSolveBenchmarks",
+      "RodinDiagonalPreconditionerBenchmarks",
+      "RodinHelmholtzSolveBenchmarks",
+      "RodinStokesGMRESBenchmarks"
+    ],
+    "stage": "components"
+  },
+  "ranks": 1,
+  "cases": [
+    {
+      "id": "d6e3428e804e2a179701fde1aeaa48ce63feef5d0f49907e6fc0d3940a224691",
+      "name": "Helmholtz/GMRES/LowWave/H1/P1/Complex/Hexahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/d6e3428e804e2a179701fde1aeaa48ce63feef5d0f49907e6fc0d3940a224691.json"
+    },
+    {
+      "id": "da82ad58cc41a633f887d8e80e37a24e99d0062b0debfc3551dd5647725730ab",
+      "name": "Helmholtz/GMRES/LowWave/H1/P1/Complex/Hexahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/da82ad58cc41a633f887d8e80e37a24e99d0062b0debfc3551dd5647725730ab.json"
+    },
+    {
+      "id": "dab769004b26cebfa643e5c8e48d2d4516c0839807e18dd3b834b79ca36edf46",
+      "name": "Helmholtz/GMRES/LowWave/H1/P1/Complex/Hexahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/dab769004b26cebfa643e5c8e48d2d4516c0839807e18dd3b834b79ca36edf46.json"
+    },
+    {
+      "id": "0180aff69c79b1638919dd90e1ceb3268f8fbd7ed38b8e2f3d7ec04078c22172",
+      "name": "Helmholtz/GMRES/LowWave/H1/P1/Complex/Pyramid/3/real_time",
+      "metric": "real_time",
+      "url": "cases/0180aff69c79b1638919dd90e1ceb3268f8fbd7ed38b8e2f3d7ec04078c22172.json"
+    },
+    {
+      "id": "54519b6161b84a870bf921f7c63686807c94d7daa42a3e5a069849c4b09ae9a2",
+      "name": "Helmholtz/GMRES/LowWave/H1/P1/Complex/Pyramid/5/real_time",
+      "metric": "real_time",
+      "url": "cases/54519b6161b84a870bf921f7c63686807c94d7daa42a3e5a069849c4b09ae9a2.json"
+    },
+    {
+      "id": "da9bdf69193423cd7d25c5e8163401871a95ac463809f1c3bfd8ca89cbebbc9c",
+      "name": "Helmholtz/GMRES/LowWave/H1/P1/Complex/Pyramid/9/real_time",
+      "metric": "real_time",
+      "url": "cases/da9bdf69193423cd7d25c5e8163401871a95ac463809f1c3bfd8ca89cbebbc9c.json"
+    },
+    {
+      "id": "ec181e313d933850b20a6e074184f80dce4a9beddde7f42f54437c14b537196b",
+      "name": "Helmholtz/GMRES/LowWave/H1/P1/Complex/Quadrilateral/3/real_time",
+      "metric": "real_time",
+      "url": "cases/ec181e313d933850b20a6e074184f80dce4a9beddde7f42f54437c14b537196b.json"
+    },
+    {
+      "id": "67960125e1110e6ca3f5b9bb57fb501c186334836f3b96904bc652b7077640a0",
+      "name": "Helmholtz/GMRES/LowWave/H1/P1/Complex/Quadrilateral/5/real_time",
+      "metric": "real_time",
+      "url": "cases/67960125e1110e6ca3f5b9bb57fb501c186334836f3b96904bc652b7077640a0.json"
+    },
+    {
+      "id": "de6ead6a4fa08d4c43e2dcd39d41944ddb62821c0622221e177a589396bd2a95",
+      "name": "Helmholtz/GMRES/LowWave/H1/P1/Complex/Quadrilateral/9/real_time",
+      "metric": "real_time",
+      "url": "cases/de6ead6a4fa08d4c43e2dcd39d41944ddb62821c0622221e177a589396bd2a95.json"
+    },
+    {
+      "id": "1b0dae5ac1a54ccd72286932007100de8ebd926431de3952713971c22a4b2d72",
+      "name": "Helmholtz/GMRES/LowWave/H1/P1/Complex/Segment/3/real_time",
+      "metric": "real_time",
+      "url": "cases/1b0dae5ac1a54ccd72286932007100de8ebd926431de3952713971c22a4b2d72.json"
+    },
+    {
+      "id": "4b2551e6c714a8d834c91db683f32f0e67534661a13cc73d0e770d2679ca5e61",
+      "name": "Helmholtz/GMRES/LowWave/H1/P1/Complex/Segment/5/real_time",
+      "metric": "real_time",
+      "url": "cases/4b2551e6c714a8d834c91db683f32f0e67534661a13cc73d0e770d2679ca5e61.json"
+    },
+    {
+      "id": "9c892dd7059c76b832fadc036543ab8995da54dcdd00077fe4fd82b275b7da05",
+      "name": "Helmholtz/GMRES/LowWave/H1/P1/Complex/Segment/9/real_time",
+      "metric": "real_time",
+      "url": "cases/9c892dd7059c76b832fadc036543ab8995da54dcdd00077fe4fd82b275b7da05.json"
+    },
+    {
+      "id": "4d47fc89f708bf05b920b0b4689c35057b2a850e00985f3d43dba436db0a7a21",
+      "name": "Helmholtz/GMRES/LowWave/H1/P1/Complex/Tetrahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/4d47fc89f708bf05b920b0b4689c35057b2a850e00985f3d43dba436db0a7a21.json"
+    },
+    {
+      "id": "ab875fde8b5e2376d0d0040950c148eccb0c7c68b99c3bd471d78e2d71c7262b",
+      "name": "Helmholtz/GMRES/LowWave/H1/P1/Complex/Tetrahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/ab875fde8b5e2376d0d0040950c148eccb0c7c68b99c3bd471d78e2d71c7262b.json"
+    },
+    {
+      "id": "32c13189d8fc9a551dc9ae642721de68119a704f78eb9de9bee29127f0701b52",
+      "name": "Helmholtz/GMRES/LowWave/H1/P1/Complex/Tetrahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/32c13189d8fc9a551dc9ae642721de68119a704f78eb9de9bee29127f0701b52.json"
+    },
+    {
+      "id": "418b7a746884cb8ef63e25b14a601941faf75f9e293ffafdf73db50f73f03641",
+      "name": "Helmholtz/GMRES/LowWave/H1/P1/Complex/Triangle/3/real_time",
+      "metric": "real_time",
+      "url": "cases/418b7a746884cb8ef63e25b14a601941faf75f9e293ffafdf73db50f73f03641.json"
+    },
+    {
+      "id": "59f609c16ab4f4e7919adc49275e0475f8a6a9338ba5485d1a5cf9e80d3bf4af",
+      "name": "Helmholtz/GMRES/LowWave/H1/P1/Complex/Triangle/5/real_time",
+      "metric": "real_time",
+      "url": "cases/59f609c16ab4f4e7919adc49275e0475f8a6a9338ba5485d1a5cf9e80d3bf4af.json"
+    },
+    {
+      "id": "e5dda8e27af800d0c80552c77d4f6733c64f348652d8e0cdd3f5599069f7ca25",
+      "name": "Helmholtz/GMRES/LowWave/H1/P1/Complex/Triangle/9/real_time",
+      "metric": "real_time",
+      "url": "cases/e5dda8e27af800d0c80552c77d4f6733c64f348652d8e0cdd3f5599069f7ca25.json"
+    },
+    {
+      "id": "7d45d2bea285f92745ac938c7fdca3fb671cb069cd3e8d628e98aa6dd4dde7cb",
+      "name": "Helmholtz/GMRES/LowWave/H1/P1/Complex/Wedge/3/real_time",
+      "metric": "real_time",
+      "url": "cases/7d45d2bea285f92745ac938c7fdca3fb671cb069cd3e8d628e98aa6dd4dde7cb.json"
+    },
+    {
+      "id": "959cbd42db7923132e7c29cd28da10a29f42a34a33f5bff4bd576f8b75ffce36",
+      "name": "Helmholtz/GMRES/LowWave/H1/P1/Complex/Wedge/5/real_time",
+      "metric": "real_time",
+      "url": "cases/959cbd42db7923132e7c29cd28da10a29f42a34a33f5bff4bd576f8b75ffce36.json"
+    },
+    {
+      "id": "1f715d11fe59e9eb182f12382dca34ae21ab8c152ff863ce22074c545b11060c",
+      "name": "Helmholtz/GMRES/LowWave/H1/P1/Complex/Wedge/9/real_time",
+      "metric": "real_time",
+      "url": "cases/1f715d11fe59e9eb182f12382dca34ae21ab8c152ff863ce22074c545b11060c.json"
+    },
+    {
+      "id": "ff9a86824a8c0407190fdf3eb10b290be0f422002aba21d45932d4b5622ccf0b",
+      "name": "Helmholtz/GMRES/LowWave/H1/P2/Complex/Hexahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/ff9a86824a8c0407190fdf3eb10b290be0f422002aba21d45932d4b5622ccf0b.json"
+    },
+    {
+      "id": "7a4ca64bf6c7bbb849cfdeeda8fe2cbd6d3675c7c94250a2b7377b14470774ad",
+      "name": "Helmholtz/GMRES/LowWave/H1/P2/Complex/Hexahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/7a4ca64bf6c7bbb849cfdeeda8fe2cbd6d3675c7c94250a2b7377b14470774ad.json"
+    },
+    {
+      "id": "f1a2afec0cc681125470208d6c87c4a155446d6daff8553f287372afc9939a2e",
+      "name": "Helmholtz/GMRES/LowWave/H1/P2/Complex/Hexahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/f1a2afec0cc681125470208d6c87c4a155446d6daff8553f287372afc9939a2e.json"
+    },
+    {
+      "id": "82ba181e4a3e2834291228311effb6a3c759433ed2eaac8bb55eb149e9a267f9",
+      "name": "Helmholtz/GMRES/LowWave/H1/P2/Complex/Pyramid/3/real_time",
+      "metric": "real_time",
+      "url": "cases/82ba181e4a3e2834291228311effb6a3c759433ed2eaac8bb55eb149e9a267f9.json"
+    },
+    {
+      "id": "78c91e3b3793042e6d9d576152d43a0d3b9e2dab3b46dd3377ff21eadd659a2d",
+      "name": "Helmholtz/GMRES/LowWave/H1/P2/Complex/Pyramid/5/real_time",
+      "metric": "real_time",
+      "url": "cases/78c91e3b3793042e6d9d576152d43a0d3b9e2dab3b46dd3377ff21eadd659a2d.json"
+    },
+    {
+      "id": "1d4fbd0626d75293450d1544238201d90acfd41d2e46a0c5a18e5474129e080f",
+      "name": "Helmholtz/GMRES/LowWave/H1/P2/Complex/Pyramid/9/real_time",
+      "metric": "real_time",
+      "url": "cases/1d4fbd0626d75293450d1544238201d90acfd41d2e46a0c5a18e5474129e080f.json"
+    },
+    {
+      "id": "aefd139154b8d896f55cde7476ab1f343d0451120e88f0e2c19b2c8148701c8b",
+      "name": "Helmholtz/GMRES/LowWave/H1/P2/Complex/Quadrilateral/3/real_time",
+      "metric": "real_time",
+      "url": "cases/aefd139154b8d896f55cde7476ab1f343d0451120e88f0e2c19b2c8148701c8b.json"
+    },
+    {
+      "id": "2a29fc4b59b99ce961edaa84977d9241c63af394d27a411b00102743a3d9e492",
+      "name": "Helmholtz/GMRES/LowWave/H1/P2/Complex/Quadrilateral/5/real_time",
+      "metric": "real_time",
+      "url": "cases/2a29fc4b59b99ce961edaa84977d9241c63af394d27a411b00102743a3d9e492.json"
+    },
+    {
+      "id": "9045ba1bf17d71fbd9d625f4d7de280779dab8518d5ded44f945926c91fa2136",
+      "name": "Helmholtz/GMRES/LowWave/H1/P2/Complex/Quadrilateral/9/real_time",
+      "metric": "real_time",
+      "url": "cases/9045ba1bf17d71fbd9d625f4d7de280779dab8518d5ded44f945926c91fa2136.json"
+    },
+    {
+      "id": "c979de0f5de579f23918686a9453c3c18daf7382d790f899b96773f0c207c553",
+      "name": "Helmholtz/GMRES/LowWave/H1/P2/Complex/Segment/3/real_time",
+      "metric": "real_time",
+      "url": "cases/c979de0f5de579f23918686a9453c3c18daf7382d790f899b96773f0c207c553.json"
+    },
+    {
+      "id": "474450a7333a1771cd3a9ccbab0291f491e300484c2a1cc6cc045163bf64d1e2",
+      "name": "Helmholtz/GMRES/LowWave/H1/P2/Complex/Segment/5/real_time",
+      "metric": "real_time",
+      "url": "cases/474450a7333a1771cd3a9ccbab0291f491e300484c2a1cc6cc045163bf64d1e2.json"
+    },
+    {
+      "id": "91ae6173a11764c997d57d659a5d683bee90b34fc284eb0e28da69fb66012960",
+      "name": "Helmholtz/GMRES/LowWave/H1/P2/Complex/Segment/9/real_time",
+      "metric": "real_time",
+      "url": "cases/91ae6173a11764c997d57d659a5d683bee90b34fc284eb0e28da69fb66012960.json"
+    },
+    {
+      "id": "dc24272cbb8e82fab01dc2685dda980ba74bf87ac437670f779ce25c3ad83eae",
+      "name": "Helmholtz/GMRES/LowWave/H1/P2/Complex/Tetrahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/dc24272cbb8e82fab01dc2685dda980ba74bf87ac437670f779ce25c3ad83eae.json"
+    },
+    {
+      "id": "34688d0c7314e19ceefda8abf0983f6df40f9962a884dd061725e6e327f1fdcf",
+      "name": "Helmholtz/GMRES/LowWave/H1/P2/Complex/Tetrahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/34688d0c7314e19ceefda8abf0983f6df40f9962a884dd061725e6e327f1fdcf.json"
+    },
+    {
+      "id": "e379fa505dae25f41ebe917323401437b26320ad9cf889dcb024cda8c57d4175",
+      "name": "Helmholtz/GMRES/LowWave/H1/P2/Complex/Tetrahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/e379fa505dae25f41ebe917323401437b26320ad9cf889dcb024cda8c57d4175.json"
+    },
+    {
+      "id": "637f4dc91439455dce4c674e2bbe4064fe4360d8bcb8b8b7856156d01c0200ca",
+      "name": "Helmholtz/GMRES/LowWave/H1/P2/Complex/Triangle/3/real_time",
+      "metric": "real_time",
+      "url": "cases/637f4dc91439455dce4c674e2bbe4064fe4360d8bcb8b8b7856156d01c0200ca.json"
+    },
+    {
+      "id": "c2676e7cfd8495b95310013d7afc2b994f5c2bcdb6e22cbc4f5a715966129559",
+      "name": "Helmholtz/GMRES/LowWave/H1/P2/Complex/Triangle/5/real_time",
+      "metric": "real_time",
+      "url": "cases/c2676e7cfd8495b95310013d7afc2b994f5c2bcdb6e22cbc4f5a715966129559.json"
+    },
+    {
+      "id": "592ab8ac34948e7221d05abfa44253c1bcc9ebe8a129736486534f055ff5e7f6",
+      "name": "Helmholtz/GMRES/LowWave/H1/P2/Complex/Triangle/9/real_time",
+      "metric": "real_time",
+      "url": "cases/592ab8ac34948e7221d05abfa44253c1bcc9ebe8a129736486534f055ff5e7f6.json"
+    },
+    {
+      "id": "49d6a3f6efea174910a44f08e929c71863e199f2017eea8af22cf5a3a1f3fe3f",
+      "name": "Helmholtz/GMRES/LowWave/H1/P2/Complex/Wedge/3/real_time",
+      "metric": "real_time",
+      "url": "cases/49d6a3f6efea174910a44f08e929c71863e199f2017eea8af22cf5a3a1f3fe3f.json"
+    },
+    {
+      "id": "4df64c43f04551028f9d4c983d430872ed0f728f257aa2242c67a826a03994ba",
+      "name": "Helmholtz/GMRES/LowWave/H1/P2/Complex/Wedge/5/real_time",
+      "metric": "real_time",
+      "url": "cases/4df64c43f04551028f9d4c983d430872ed0f728f257aa2242c67a826a03994ba.json"
+    },
+    {
+      "id": "b9f279a9a8037f2b782544df9d12223272e605eaae7632ad97b77bef9d0d5e32",
+      "name": "Helmholtz/GMRES/LowWave/H1/P2/Complex/Wedge/9/real_time",
+      "metric": "real_time",
+      "url": "cases/b9f279a9a8037f2b782544df9d12223272e605eaae7632ad97b77bef9d0d5e32.json"
+    },
+    {
+      "id": "1744f4f4d311b0ffd80faa84a1d7e8628813f526e9aff8f10cf386775839b8c5",
+      "name": "Helmholtz/GMRES/LowWave/H1/P3/Complex/Hexahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/1744f4f4d311b0ffd80faa84a1d7e8628813f526e9aff8f10cf386775839b8c5.json"
+    },
+    {
+      "id": "7ea679e194e47c88316568718dfc91fb34d52625c7bb301fb24b63c317f79a53",
+      "name": "Helmholtz/GMRES/LowWave/H1/P3/Complex/Hexahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/7ea679e194e47c88316568718dfc91fb34d52625c7bb301fb24b63c317f79a53.json"
+    },
+    {
+      "id": "6b56092a8a597ea6ce951744968f899789cc494337e64e648ee1d69d3396732e",
+      "name": "Helmholtz/GMRES/LowWave/H1/P3/Complex/Hexahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/6b56092a8a597ea6ce951744968f899789cc494337e64e648ee1d69d3396732e.json"
+    },
+    {
+      "id": "64768034a8403fde9b316b757a75e2e82933a53b4fbd48c05b1506a99c3e6919",
+      "name": "Helmholtz/GMRES/LowWave/H1/P3/Complex/Pyramid/3/real_time",
+      "metric": "real_time",
+      "url": "cases/64768034a8403fde9b316b757a75e2e82933a53b4fbd48c05b1506a99c3e6919.json"
+    },
+    {
+      "id": "7c656fdaecd81bdf1afc559e78ce34bd8598ac98bea5715f0ae6d6c92a854beb",
+      "name": "Helmholtz/GMRES/LowWave/H1/P3/Complex/Pyramid/5/real_time",
+      "metric": "real_time",
+      "url": "cases/7c656fdaecd81bdf1afc559e78ce34bd8598ac98bea5715f0ae6d6c92a854beb.json"
+    },
+    {
+      "id": "f23d418e4a5df28139476ca6775d2f219ee08598b64138977ffb4dd1fe97eef9",
+      "name": "Helmholtz/GMRES/LowWave/H1/P3/Complex/Pyramid/9/real_time",
+      "metric": "real_time",
+      "url": "cases/f23d418e4a5df28139476ca6775d2f219ee08598b64138977ffb4dd1fe97eef9.json"
+    },
+    {
+      "id": "a7948e0572382b36b02d55595169ac9108b9f4140435e353f8ccf38d7d12c5d0",
+      "name": "Helmholtz/GMRES/LowWave/H1/P3/Complex/Quadrilateral/3/real_time",
+      "metric": "real_time",
+      "url": "cases/a7948e0572382b36b02d55595169ac9108b9f4140435e353f8ccf38d7d12c5d0.json"
+    },
+    {
+      "id": "84f7525e6a6de8f2be0fd6b796f11f27194cc4e51b1363e979d92e22fbe2c73d",
+      "name": "Helmholtz/GMRES/LowWave/H1/P3/Complex/Quadrilateral/5/real_time",
+      "metric": "real_time",
+      "url": "cases/84f7525e6a6de8f2be0fd6b796f11f27194cc4e51b1363e979d92e22fbe2c73d.json"
+    },
+    {
+      "id": "9e2deb9dde0d21c8ce7e86d818ee33f70ce543a4cd8a1a86d8b945e7da8283a5",
+      "name": "Helmholtz/GMRES/LowWave/H1/P3/Complex/Quadrilateral/9/real_time",
+      "metric": "real_time",
+      "url": "cases/9e2deb9dde0d21c8ce7e86d818ee33f70ce543a4cd8a1a86d8b945e7da8283a5.json"
+    },
+    {
+      "id": "fd51f776bf1f9002d338a99095467371a075a696f66a0eaa7a52a1adf2af6dec",
+      "name": "Helmholtz/GMRES/LowWave/H1/P3/Complex/Segment/3/real_time",
+      "metric": "real_time",
+      "url": "cases/fd51f776bf1f9002d338a99095467371a075a696f66a0eaa7a52a1adf2af6dec.json"
+    },
+    {
+      "id": "1af8810739d8cf64ad1ff44e5c9dd2501a8c7e390b8222600e118177b346735a",
+      "name": "Helmholtz/GMRES/LowWave/H1/P3/Complex/Segment/5/real_time",
+      "metric": "real_time",
+      "url": "cases/1af8810739d8cf64ad1ff44e5c9dd2501a8c7e390b8222600e118177b346735a.json"
+    },
+    {
+      "id": "04e3ba03c41758f6c7e78517de00fc130caf55e93917c4c2b65b9cd01d3092cc",
+      "name": "Helmholtz/GMRES/LowWave/H1/P3/Complex/Segment/9/real_time",
+      "metric": "real_time",
+      "url": "cases/04e3ba03c41758f6c7e78517de00fc130caf55e93917c4c2b65b9cd01d3092cc.json"
+    },
+    {
+      "id": "e7621749eaea43cb62ef5943eb59e5fc56ea713f19fccbd71830efedaad88581",
+      "name": "Helmholtz/GMRES/LowWave/H1/P3/Complex/Tetrahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/e7621749eaea43cb62ef5943eb59e5fc56ea713f19fccbd71830efedaad88581.json"
+    },
+    {
+      "id": "2dae4bf9e2b1726fba7b552a62ce0ce5e7a9ed1e0771c7468d47b5920ffce998",
+      "name": "Helmholtz/GMRES/LowWave/H1/P3/Complex/Tetrahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/2dae4bf9e2b1726fba7b552a62ce0ce5e7a9ed1e0771c7468d47b5920ffce998.json"
+    },
+    {
+      "id": "c1d178dff14e8a655de62778394e4cbfe812e7bf6eca46f8545b7c85e122f86c",
+      "name": "Helmholtz/GMRES/LowWave/H1/P3/Complex/Tetrahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/c1d178dff14e8a655de62778394e4cbfe812e7bf6eca46f8545b7c85e122f86c.json"
+    },
+    {
+      "id": "78233f8e5471e5547aa690c464f8f5cf00fb02ba0f0b4cb2dbc4624b016236a3",
+      "name": "Helmholtz/GMRES/LowWave/H1/P3/Complex/Triangle/3/real_time",
+      "metric": "real_time",
+      "url": "cases/78233f8e5471e5547aa690c464f8f5cf00fb02ba0f0b4cb2dbc4624b016236a3.json"
+    },
+    {
+      "id": "6593213fe7c6c0637bea2c5d478a3d7eaf6131398ca758be22da595b86bf9cf4",
+      "name": "Helmholtz/GMRES/LowWave/H1/P3/Complex/Triangle/5/real_time",
+      "metric": "real_time",
+      "url": "cases/6593213fe7c6c0637bea2c5d478a3d7eaf6131398ca758be22da595b86bf9cf4.json"
+    },
+    {
+      "id": "4bc8f688e6bf2611ba6bc1b3ee7e6fb2f76c3f688193a2529f06f8ea7dd123a8",
+      "name": "Helmholtz/GMRES/LowWave/H1/P3/Complex/Triangle/9/real_time",
+      "metric": "real_time",
+      "url": "cases/4bc8f688e6bf2611ba6bc1b3ee7e6fb2f76c3f688193a2529f06f8ea7dd123a8.json"
+    },
+    {
+      "id": "e01586c4c3f526a84061f8b13f93b3883ed1506fd800627778f00c6ba9913d3e",
+      "name": "Helmholtz/GMRES/LowWave/H1/P3/Complex/Wedge/3/real_time",
+      "metric": "real_time",
+      "url": "cases/e01586c4c3f526a84061f8b13f93b3883ed1506fd800627778f00c6ba9913d3e.json"
+    },
+    {
+      "id": "e3c136087ababc7a4d9e00de56edf2a38401b80288567562819869c01895f576",
+      "name": "Helmholtz/GMRES/LowWave/H1/P3/Complex/Wedge/5/real_time",
+      "metric": "real_time",
+      "url": "cases/e3c136087ababc7a4d9e00de56edf2a38401b80288567562819869c01895f576.json"
+    },
+    {
+      "id": "8a3da94e20d93cfdff81b398b86b83cfe25e29890d56ea4d7dd391e44962fe9b",
+      "name": "Helmholtz/GMRES/LowWave/H1/P3/Complex/Wedge/9/real_time",
+      "metric": "real_time",
+      "url": "cases/8a3da94e20d93cfdff81b398b86b83cfe25e29890d56ea4d7dd391e44962fe9b.json"
+    },
+    {
+      "id": "0cfc6e52289e09c223a117677808ba75f6fb0f09e0a091f29e183c892471b238",
+      "name": "Helmholtz/GMRES/Shifted/H1/P1/Complex/Hexahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/0cfc6e52289e09c223a117677808ba75f6fb0f09e0a091f29e183c892471b238.json"
+    },
+    {
+      "id": "2ab17c10f97de7499fd2eb9c6e96768c11f0ba5be34c9f1611734c13c4dc53db",
+      "name": "Helmholtz/GMRES/Shifted/H1/P1/Complex/Hexahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/2ab17c10f97de7499fd2eb9c6e96768c11f0ba5be34c9f1611734c13c4dc53db.json"
+    },
+    {
+      "id": "e3a34c292bfd339d057dfcdb5d5b2b9fecd2b70878246c7ae12a3b0e8dd7c931",
+      "name": "Helmholtz/GMRES/Shifted/H1/P1/Complex/Hexahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/e3a34c292bfd339d057dfcdb5d5b2b9fecd2b70878246c7ae12a3b0e8dd7c931.json"
+    },
+    {
+      "id": "f4c2554627416c74f687852a278ee07e304cdd687aeae7e8f4a2b468057f759d",
+      "name": "Helmholtz/GMRES/Shifted/H1/P1/Complex/Pyramid/3/real_time",
+      "metric": "real_time",
+      "url": "cases/f4c2554627416c74f687852a278ee07e304cdd687aeae7e8f4a2b468057f759d.json"
+    },
+    {
+      "id": "f6bc841b5dee3b26f907b5ae369add5d2573ca9f64da206862cfb0e73f484aec",
+      "name": "Helmholtz/GMRES/Shifted/H1/P1/Complex/Pyramid/5/real_time",
+      "metric": "real_time",
+      "url": "cases/f6bc841b5dee3b26f907b5ae369add5d2573ca9f64da206862cfb0e73f484aec.json"
+    },
+    {
+      "id": "cce25b2a1644a1943cfa37240406ac2149abfe3aec71877203eb6b1be5f49e00",
+      "name": "Helmholtz/GMRES/Shifted/H1/P1/Complex/Pyramid/9/real_time",
+      "metric": "real_time",
+      "url": "cases/cce25b2a1644a1943cfa37240406ac2149abfe3aec71877203eb6b1be5f49e00.json"
+    },
+    {
+      "id": "447d786b5210712fb95425325ed8afbacdabb662c25597c82f1f1e2413639ea9",
+      "name": "Helmholtz/GMRES/Shifted/H1/P1/Complex/Quadrilateral/3/real_time",
+      "metric": "real_time",
+      "url": "cases/447d786b5210712fb95425325ed8afbacdabb662c25597c82f1f1e2413639ea9.json"
+    },
+    {
+      "id": "b822929ae98b29415da8e39157f5817d18853dd6baa6c2ec0f7aeee91c522a5f",
+      "name": "Helmholtz/GMRES/Shifted/H1/P1/Complex/Quadrilateral/5/real_time",
+      "metric": "real_time",
+      "url": "cases/b822929ae98b29415da8e39157f5817d18853dd6baa6c2ec0f7aeee91c522a5f.json"
+    },
+    {
+      "id": "2ea583091141f2e3de5642e4538b557cdab8f031e9f9e0dd952d0108e5974864",
+      "name": "Helmholtz/GMRES/Shifted/H1/P1/Complex/Quadrilateral/9/real_time",
+      "metric": "real_time",
+      "url": "cases/2ea583091141f2e3de5642e4538b557cdab8f031e9f9e0dd952d0108e5974864.json"
+    },
+    {
+      "id": "6a92848e4c66b5a004c8e689b90ed066bcd2801afa5467280603c7e1e8580e73",
+      "name": "Helmholtz/GMRES/Shifted/H1/P1/Complex/Segment/3/real_time",
+      "metric": "real_time",
+      "url": "cases/6a92848e4c66b5a004c8e689b90ed066bcd2801afa5467280603c7e1e8580e73.json"
+    },
+    {
+      "id": "bb850a3d5d6082514412a1ef048638650c642ae97716242307339de8359a6f99",
+      "name": "Helmholtz/GMRES/Shifted/H1/P1/Complex/Segment/5/real_time",
+      "metric": "real_time",
+      "url": "cases/bb850a3d5d6082514412a1ef048638650c642ae97716242307339de8359a6f99.json"
+    },
+    {
+      "id": "4b4ffcbbad5004042d89d6ebe3a7c57f09c664fc7765c2a7cf57780ad7ff708f",
+      "name": "Helmholtz/GMRES/Shifted/H1/P1/Complex/Segment/9/real_time",
+      "metric": "real_time",
+      "url": "cases/4b4ffcbbad5004042d89d6ebe3a7c57f09c664fc7765c2a7cf57780ad7ff708f.json"
+    },
+    {
+      "id": "39f52a1b7649da4ec9dfb2c4a2b8a6df9534ab8da237201d471e55b54bee3976",
+      "name": "Helmholtz/GMRES/Shifted/H1/P1/Complex/Tetrahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/39f52a1b7649da4ec9dfb2c4a2b8a6df9534ab8da237201d471e55b54bee3976.json"
+    },
+    {
+      "id": "c704157b9a8b1c2c3b1a4d2c5ad66457111c7015cf233db15794dab9a671380d",
+      "name": "Helmholtz/GMRES/Shifted/H1/P1/Complex/Tetrahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/c704157b9a8b1c2c3b1a4d2c5ad66457111c7015cf233db15794dab9a671380d.json"
+    },
+    {
+      "id": "f23cece69e3a8bc32966cd711a636c5d9399cad68a48f6d288548fdfc3f19d96",
+      "name": "Helmholtz/GMRES/Shifted/H1/P1/Complex/Tetrahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/f23cece69e3a8bc32966cd711a636c5d9399cad68a48f6d288548fdfc3f19d96.json"
+    },
+    {
+      "id": "fd4ed257554e9fd3f9e03d031e8909ea44a72faf78ecf453192c2b7aadd50233",
+      "name": "Helmholtz/GMRES/Shifted/H1/P1/Complex/Triangle/3/real_time",
+      "metric": "real_time",
+      "url": "cases/fd4ed257554e9fd3f9e03d031e8909ea44a72faf78ecf453192c2b7aadd50233.json"
+    },
+    {
+      "id": "dc37b4cd75ba447abab712de1460c38cea4e5732e3fe726a3a338e981983ef49",
+      "name": "Helmholtz/GMRES/Shifted/H1/P1/Complex/Triangle/5/real_time",
+      "metric": "real_time",
+      "url": "cases/dc37b4cd75ba447abab712de1460c38cea4e5732e3fe726a3a338e981983ef49.json"
+    },
+    {
+      "id": "3ebcee997e59a31ce56b0dc8a35e13de3ff88fa2ad7de52de15d6ec1a7ea5af0",
+      "name": "Helmholtz/GMRES/Shifted/H1/P1/Complex/Triangle/9/real_time",
+      "metric": "real_time",
+      "url": "cases/3ebcee997e59a31ce56b0dc8a35e13de3ff88fa2ad7de52de15d6ec1a7ea5af0.json"
+    },
+    {
+      "id": "5e6ccd083dc99b24d01482ba29d99d6a3cc23fd36b28136ac9a1760f61aa154b",
+      "name": "Helmholtz/GMRES/Shifted/H1/P1/Complex/Wedge/3/real_time",
+      "metric": "real_time",
+      "url": "cases/5e6ccd083dc99b24d01482ba29d99d6a3cc23fd36b28136ac9a1760f61aa154b.json"
+    },
+    {
+      "id": "feae9453d508b0eb8af9b7592d87861e88311ef8c0d358f8d6d793f295fc58ba",
+      "name": "Helmholtz/GMRES/Shifted/H1/P1/Complex/Wedge/5/real_time",
+      "metric": "real_time",
+      "url": "cases/feae9453d508b0eb8af9b7592d87861e88311ef8c0d358f8d6d793f295fc58ba.json"
+    },
+    {
+      "id": "6e619d1c4102f980ed8b8849d95435d3c3a80ec3d4ec93252d6bff8a3665deaf",
+      "name": "Helmholtz/GMRES/Shifted/H1/P1/Complex/Wedge/9/real_time",
+      "metric": "real_time",
+      "url": "cases/6e619d1c4102f980ed8b8849d95435d3c3a80ec3d4ec93252d6bff8a3665deaf.json"
+    },
+    {
+      "id": "ae9628689e4fec401f95f9854cac927292449e650f355793c692b5e14992a079",
+      "name": "Helmholtz/GMRES/Shifted/H1/P2/Complex/Hexahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/ae9628689e4fec401f95f9854cac927292449e650f355793c692b5e14992a079.json"
+    },
+    {
+      "id": "5521b1295b91ef94e0f458428d93fe41e8f0f0862e1021068a32c63582ad8188",
+      "name": "Helmholtz/GMRES/Shifted/H1/P2/Complex/Hexahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/5521b1295b91ef94e0f458428d93fe41e8f0f0862e1021068a32c63582ad8188.json"
+    },
+    {
+      "id": "89e6fba86a91bce3207e894c29f95920bad7d0acfa7174f0f62cd58ab2bacfd2",
+      "name": "Helmholtz/GMRES/Shifted/H1/P2/Complex/Hexahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/89e6fba86a91bce3207e894c29f95920bad7d0acfa7174f0f62cd58ab2bacfd2.json"
+    },
+    {
+      "id": "d31eb08e0b9390e3836323b6616c3b4f4f1fbca108dfa7ec34787f5690ccd685",
+      "name": "Helmholtz/GMRES/Shifted/H1/P2/Complex/Pyramid/3/real_time",
+      "metric": "real_time",
+      "url": "cases/d31eb08e0b9390e3836323b6616c3b4f4f1fbca108dfa7ec34787f5690ccd685.json"
+    },
+    {
+      "id": "5036c138a5e69180718ed5a4ffd4d8111724b41f4c509b1076cd46ed1ecbb558",
+      "name": "Helmholtz/GMRES/Shifted/H1/P2/Complex/Pyramid/5/real_time",
+      "metric": "real_time",
+      "url": "cases/5036c138a5e69180718ed5a4ffd4d8111724b41f4c509b1076cd46ed1ecbb558.json"
+    },
+    {
+      "id": "932e7eec4d6c21ca288d32d117f54ab24c7da187ed96f168a416bd5497140fda",
+      "name": "Helmholtz/GMRES/Shifted/H1/P2/Complex/Pyramid/9/real_time",
+      "metric": "real_time",
+      "url": "cases/932e7eec4d6c21ca288d32d117f54ab24c7da187ed96f168a416bd5497140fda.json"
+    },
+    {
+      "id": "c19beee407b44b3d0e27befb5eadf9b72ebe689e5debc1483882ee55533c03db",
+      "name": "Helmholtz/GMRES/Shifted/H1/P2/Complex/Quadrilateral/3/real_time",
+      "metric": "real_time",
+      "url": "cases/c19beee407b44b3d0e27befb5eadf9b72ebe689e5debc1483882ee55533c03db.json"
+    },
+    {
+      "id": "18e03e2aeedc4ffa749a9215ce09841fe3e08b0af0b660657b8be670ac4becb1",
+      "name": "Helmholtz/GMRES/Shifted/H1/P2/Complex/Quadrilateral/5/real_time",
+      "metric": "real_time",
+      "url": "cases/18e03e2aeedc4ffa749a9215ce09841fe3e08b0af0b660657b8be670ac4becb1.json"
+    },
+    {
+      "id": "7829ecb0413aa864050e68dfb378fb7a735b959964ec56d6ad31d74d17eb8ae9",
+      "name": "Helmholtz/GMRES/Shifted/H1/P2/Complex/Quadrilateral/9/real_time",
+      "metric": "real_time",
+      "url": "cases/7829ecb0413aa864050e68dfb378fb7a735b959964ec56d6ad31d74d17eb8ae9.json"
+    },
+    {
+      "id": "5f982619a722d8a7b281017a49635f8bef9628a9e7c11ed1d31b021fe7ff8b2a",
+      "name": "Helmholtz/GMRES/Shifted/H1/P2/Complex/Segment/3/real_time",
+      "metric": "real_time",
+      "url": "cases/5f982619a722d8a7b281017a49635f8bef9628a9e7c11ed1d31b021fe7ff8b2a.json"
+    },
+    {
+      "id": "6cba0f11d18108b925d7e82e2895ebb9a29e4bb453885ea867cf3760ab8b855e",
+      "name": "Helmholtz/GMRES/Shifted/H1/P2/Complex/Segment/5/real_time",
+      "metric": "real_time",
+      "url": "cases/6cba0f11d18108b925d7e82e2895ebb9a29e4bb453885ea867cf3760ab8b855e.json"
+    },
+    {
+      "id": "ef15ff8004d481e34956978cdd9da6029fe857810ab45c14b90fa316d2ff1674",
+      "name": "Helmholtz/GMRES/Shifted/H1/P2/Complex/Segment/9/real_time",
+      "metric": "real_time",
+      "url": "cases/ef15ff8004d481e34956978cdd9da6029fe857810ab45c14b90fa316d2ff1674.json"
+    },
+    {
+      "id": "3ff9a1141d080bcd1d5fc4be7e7571e1b0f6093d9583a823c0ea367be7642bd1",
+      "name": "Helmholtz/GMRES/Shifted/H1/P2/Complex/Tetrahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/3ff9a1141d080bcd1d5fc4be7e7571e1b0f6093d9583a823c0ea367be7642bd1.json"
+    },
+    {
+      "id": "7cad126887e3508769555399991d9b5bee897196103c8863c836ee309c197f42",
+      "name": "Helmholtz/GMRES/Shifted/H1/P2/Complex/Tetrahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/7cad126887e3508769555399991d9b5bee897196103c8863c836ee309c197f42.json"
+    },
+    {
+      "id": "d28d2ee007f2d0f3ecb65aa7f393625782decaa9f53c4a3f8a99696b02143fed",
+      "name": "Helmholtz/GMRES/Shifted/H1/P2/Complex/Tetrahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/d28d2ee007f2d0f3ecb65aa7f393625782decaa9f53c4a3f8a99696b02143fed.json"
+    },
+    {
+      "id": "98d50a035927d811494e9e8ba49d382adc73506bc147ad2e14bc5062eb8ad1de",
+      "name": "Helmholtz/GMRES/Shifted/H1/P2/Complex/Triangle/3/real_time",
+      "metric": "real_time",
+      "url": "cases/98d50a035927d811494e9e8ba49d382adc73506bc147ad2e14bc5062eb8ad1de.json"
+    },
+    {
+      "id": "e222dc38fbd5113a7ee5ae4a87e8374494d779853defcf8cf6b6009f3851f04e",
+      "name": "Helmholtz/GMRES/Shifted/H1/P2/Complex/Triangle/5/real_time",
+      "metric": "real_time",
+      "url": "cases/e222dc38fbd5113a7ee5ae4a87e8374494d779853defcf8cf6b6009f3851f04e.json"
+    },
+    {
+      "id": "88935536f1f98fbbedcc72b682b3cbef13507bd0a53ede391c9dd6398e75f5c7",
+      "name": "Helmholtz/GMRES/Shifted/H1/P2/Complex/Triangle/9/real_time",
+      "metric": "real_time",
+      "url": "cases/88935536f1f98fbbedcc72b682b3cbef13507bd0a53ede391c9dd6398e75f5c7.json"
+    },
+    {
+      "id": "30695ee014281b54152a4648a568dbe274d8af9c899b9338f35ce231d3518b86",
+      "name": "Helmholtz/GMRES/Shifted/H1/P2/Complex/Wedge/3/real_time",
+      "metric": "real_time",
+      "url": "cases/30695ee014281b54152a4648a568dbe274d8af9c899b9338f35ce231d3518b86.json"
+    },
+    {
+      "id": "e17ef59eedbc88a7817eae69b7037c2765de77e2deffce57b980a3983318f8fa",
+      "name": "Helmholtz/GMRES/Shifted/H1/P2/Complex/Wedge/5/real_time",
+      "metric": "real_time",
+      "url": "cases/e17ef59eedbc88a7817eae69b7037c2765de77e2deffce57b980a3983318f8fa.json"
+    },
+    {
+      "id": "72c1c53fd50db6743a5c637b700321eed3dc1c42573159355c3021953c831936",
+      "name": "Helmholtz/GMRES/Shifted/H1/P2/Complex/Wedge/9/real_time",
+      "metric": "real_time",
+      "url": "cases/72c1c53fd50db6743a5c637b700321eed3dc1c42573159355c3021953c831936.json"
+    },
+    {
+      "id": "11ecc0c4185e78bab3ef93216cb6e489f2e13d75e2d6d09f40a28e89ebe7d859",
+      "name": "Helmholtz/GMRES/Shifted/H1/P3/Complex/Hexahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/11ecc0c4185e78bab3ef93216cb6e489f2e13d75e2d6d09f40a28e89ebe7d859.json"
+    },
+    {
+      "id": "c912c28846467e0e1588747c2d4b9aa15dfcc8b0e707e00c7a60b240854b0d13",
+      "name": "Helmholtz/GMRES/Shifted/H1/P3/Complex/Hexahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/c912c28846467e0e1588747c2d4b9aa15dfcc8b0e707e00c7a60b240854b0d13.json"
+    },
+    {
+      "id": "dc966f9d048df020af927badff844bb493ecde0b0ba709473c53cb89ba07fb0b",
+      "name": "Helmholtz/GMRES/Shifted/H1/P3/Complex/Hexahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/dc966f9d048df020af927badff844bb493ecde0b0ba709473c53cb89ba07fb0b.json"
+    },
+    {
+      "id": "0deced847f707da3534a947d4e5a626bb7cb4ff71c08476a878e2b82faf03c46",
+      "name": "Helmholtz/GMRES/Shifted/H1/P3/Complex/Pyramid/3/real_time",
+      "metric": "real_time",
+      "url": "cases/0deced847f707da3534a947d4e5a626bb7cb4ff71c08476a878e2b82faf03c46.json"
+    },
+    {
+      "id": "5cd57ecdbe486ae0755df66804973221c3e6f5ef30dc103f03438377e29d8230",
+      "name": "Helmholtz/GMRES/Shifted/H1/P3/Complex/Pyramid/5/real_time",
+      "metric": "real_time",
+      "url": "cases/5cd57ecdbe486ae0755df66804973221c3e6f5ef30dc103f03438377e29d8230.json"
+    },
+    {
+      "id": "91d8ea96cd25ae87ff7a9c993109462d5607b51684cf075397b9b44319ce8d26",
+      "name": "Helmholtz/GMRES/Shifted/H1/P3/Complex/Pyramid/9/real_time",
+      "metric": "real_time",
+      "url": "cases/91d8ea96cd25ae87ff7a9c993109462d5607b51684cf075397b9b44319ce8d26.json"
+    },
+    {
+      "id": "0ddf45cfee36cec95e727b29e788f29c9548e8d5b5c20f3c86dc0807de8cc526",
+      "name": "Helmholtz/GMRES/Shifted/H1/P3/Complex/Quadrilateral/3/real_time",
+      "metric": "real_time",
+      "url": "cases/0ddf45cfee36cec95e727b29e788f29c9548e8d5b5c20f3c86dc0807de8cc526.json"
+    },
+    {
+      "id": "a5769736b90a2c9e6b412c06d6e72894dfddabc7f68fbe3b83a7a53a09622d49",
+      "name": "Helmholtz/GMRES/Shifted/H1/P3/Complex/Quadrilateral/5/real_time",
+      "metric": "real_time",
+      "url": "cases/a5769736b90a2c9e6b412c06d6e72894dfddabc7f68fbe3b83a7a53a09622d49.json"
+    },
+    {
+      "id": "d26f681d91ebef2caa070f3fc3f9086b420937b0f2a82c4b6e8224fc34ed9144",
+      "name": "Helmholtz/GMRES/Shifted/H1/P3/Complex/Quadrilateral/9/real_time",
+      "metric": "real_time",
+      "url": "cases/d26f681d91ebef2caa070f3fc3f9086b420937b0f2a82c4b6e8224fc34ed9144.json"
+    },
+    {
+      "id": "6ec3c5bb04d923d28e2be57dd662e233cd304dbff89ebddf0b5045d9ff236f71",
+      "name": "Helmholtz/GMRES/Shifted/H1/P3/Complex/Segment/3/real_time",
+      "metric": "real_time",
+      "url": "cases/6ec3c5bb04d923d28e2be57dd662e233cd304dbff89ebddf0b5045d9ff236f71.json"
+    },
+    {
+      "id": "0449ad963fcc1133ec7b91f0bd6182dc3bddc560ea3fd3f500c1619346ed4b72",
+      "name": "Helmholtz/GMRES/Shifted/H1/P3/Complex/Segment/5/real_time",
+      "metric": "real_time",
+      "url": "cases/0449ad963fcc1133ec7b91f0bd6182dc3bddc560ea3fd3f500c1619346ed4b72.json"
+    },
+    {
+      "id": "5cfab400beaff0347134ee97e03d253c69bba527c15a3a9e9b598c3f70418d10",
+      "name": "Helmholtz/GMRES/Shifted/H1/P3/Complex/Segment/9/real_time",
+      "metric": "real_time",
+      "url": "cases/5cfab400beaff0347134ee97e03d253c69bba527c15a3a9e9b598c3f70418d10.json"
+    },
+    {
+      "id": "656697b76f8b564dcfc94e08d9450d9e0bdf7cfe2fe80c5ab7fb2426d6536538",
+      "name": "Helmholtz/GMRES/Shifted/H1/P3/Complex/Tetrahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/656697b76f8b564dcfc94e08d9450d9e0bdf7cfe2fe80c5ab7fb2426d6536538.json"
+    },
+    {
+      "id": "9cb8a1c1c69b46b0080dde05751ef517665de9751547e51c301ecc0c9506f8d2",
+      "name": "Helmholtz/GMRES/Shifted/H1/P3/Complex/Tetrahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/9cb8a1c1c69b46b0080dde05751ef517665de9751547e51c301ecc0c9506f8d2.json"
+    },
+    {
+      "id": "a9d3ff01a4f03a1303e1aa6215877baf2b3b4fb7327df2f8974b72bc64c341a4",
+      "name": "Helmholtz/GMRES/Shifted/H1/P3/Complex/Tetrahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/a9d3ff01a4f03a1303e1aa6215877baf2b3b4fb7327df2f8974b72bc64c341a4.json"
+    },
+    {
+      "id": "7e14a934802a0fef7a6474251839c34f767414afaa9fd76aaa188f5ea6b9ebbb",
+      "name": "Helmholtz/GMRES/Shifted/H1/P3/Complex/Triangle/3/real_time",
+      "metric": "real_time",
+      "url": "cases/7e14a934802a0fef7a6474251839c34f767414afaa9fd76aaa188f5ea6b9ebbb.json"
+    },
+    {
+      "id": "6a70366846ad280ef43dd1be83c34fed5853f86aa17ac0639c93b82b8611dc15",
+      "name": "Helmholtz/GMRES/Shifted/H1/P3/Complex/Triangle/5/real_time",
+      "metric": "real_time",
+      "url": "cases/6a70366846ad280ef43dd1be83c34fed5853f86aa17ac0639c93b82b8611dc15.json"
+    },
+    {
+      "id": "86c873ec3b913a8f28f0b5c9552ffdb79aa895a04369ede6cd07134dc63f2d07",
+      "name": "Helmholtz/GMRES/Shifted/H1/P3/Complex/Triangle/9/real_time",
+      "metric": "real_time",
+      "url": "cases/86c873ec3b913a8f28f0b5c9552ffdb79aa895a04369ede6cd07134dc63f2d07.json"
+    },
+    {
+      "id": "18b73e810cc644163f349d435dfe42c35cec459ca588ccdb0434c18216a11de7",
+      "name": "Helmholtz/GMRES/Shifted/H1/P3/Complex/Wedge/3/real_time",
+      "metric": "real_time",
+      "url": "cases/18b73e810cc644163f349d435dfe42c35cec459ca588ccdb0434c18216a11de7.json"
+    },
+    {
+      "id": "a6bc118274962a1be0ff0052c108b66506f00886f80e0caffad6afb4d3e83a91",
+      "name": "Helmholtz/GMRES/Shifted/H1/P3/Complex/Wedge/5/real_time",
+      "metric": "real_time",
+      "url": "cases/a6bc118274962a1be0ff0052c108b66506f00886f80e0caffad6afb4d3e83a91.json"
+    },
+    {
+      "id": "9e900babcb0bfd96c1e34eb0d095c65013ae06171df15ee6d3fc6c2b64108a0d",
+      "name": "Helmholtz/GMRES/Shifted/H1/P3/Complex/Wedge/9/real_time",
+      "metric": "real_time",
+      "url": "cases/9e900babcb0bfd96c1e34eb0d095c65013ae06171df15ee6d3fc6c2b64108a0d.json"
+    }
+  ]
+}

@@ -1,0 +1,3307 @@
+{
+  "schema": 1,
+  "definition": {
+    "kind": "benchmark",
+    "mode": "local",
+    "compiler": "gcc-14",
+    "runner": "ubuntu-24.04",
+    "cmake": {
+      "CMAKE_BUILD_TYPE": "Release",
+      "CMAKE_CXX_COMPILER": "g++-14",
+      "CMAKE_C_COMPILER": "gcc-14",
+      "CMAKE_SUPPRESS_REGENERATION": "ON",
+      "RODIN_BUILD_SRC": "ON",
+      "RODIN_BUILD_BENCHMARKS": "ON",
+      "RODIN_BUILD_UNIT_TESTS": "OFF",
+      "RODIN_BUILD_MANUFACTURED_TESTS": "OFF",
+      "RODIN_BUILD_CONVERGENCE_TESTS": "OFF",
+      "RODIN_BUILD_EXAMPLES": "OFF",
+      "RODIN_BUILD_DOC": "OFF",
+      "RODIN_INSTALL_RESOURCES": "OFF",
+      "RODIN_CODE_COVERAGE": "OFF",
+      "RODIN_MULTITHREADED": "OFF",
+      "RODIN_USE_ASAN": "OFF",
+      "RODIN_USE_UBSAN": "OFF",
+      "RODIN_USE_MPI": "OFF",
+      "RODIN_USE_PETSC": "OFF"
+    },
+    "targets": [
+      "RodinBulkP1JacobianBenchmarks",
+      "RodinGeometryConnectivityBenchmarks",
+      "RodinGeometryParametricTransformationBenchmarks",
+      "RodinGeometryUniformGridBenchmarks",
+      "RodinMappedPointBenchmarks",
+      "RodinMappedQuadratureCacheBenchmarks",
+      "RodinReferenceGeometryBenchmarks",
+      "RodinTransformationLifecycleBenchmarks"
+    ],
+    "stage": "components"
+  },
+  "ranks": 1,
+  "cases": [
+    {
+      "id": "71b67d3a118093900395d1312027f8b9fd569b35573e4a7053e68ccc1c614188",
+      "name": "BulkP1Geometry/BulkJacobian/Affine/Hexahedron/3/15/real_time",
+      "metric": "real_time",
+      "url": "cases/71b67d3a118093900395d1312027f8b9fd569b35573e4a7053e68ccc1c614188.json"
+    },
+    {
+      "id": "c265d4c9b41a58d96a3efc9532f63330ba5769e87e6ca77c0a770d0eb078730f",
+      "name": "BulkP1Geometry/BulkJacobian/Affine/Hexahedron/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/c265d4c9b41a58d96a3efc9532f63330ba5769e87e6ca77c0a770d0eb078730f.json"
+    },
+    {
+      "id": "b16ae5b1913c9642e23d0a533e05d75a4a75d2d40cbaa8584888d64be35ffa1e",
+      "name": "BulkP1Geometry/BulkJacobian/Affine/Hexahedron/3/2/real_time",
+      "metric": "real_time",
+      "url": "cases/b16ae5b1913c9642e23d0a533e05d75a4a75d2d40cbaa8584888d64be35ffa1e.json"
+    },
+    {
+      "id": "1dc80255f9e2ff2b4562a6b85fb6227869af4a4a2c7614131ab3e4bf2b7c8d0b",
+      "name": "BulkP1Geometry/BulkJacobian/Affine/Hexahedron/3/8/real_time",
+      "metric": "real_time",
+      "url": "cases/1dc80255f9e2ff2b4562a6b85fb6227869af4a4a2c7614131ab3e4bf2b7c8d0b.json"
+    },
+    {
+      "id": "908ced12886644fbea1982863a21c178b8894c83d0252fce00dbce0772c85027",
+      "name": "BulkP1Geometry/BulkJacobian/Affine/Point/1/15/real_time",
+      "metric": "real_time",
+      "url": "cases/908ced12886644fbea1982863a21c178b8894c83d0252fce00dbce0772c85027.json"
+    },
+    {
+      "id": "b65c205e3e00ec6b4da564c0b235b2e51df374baf60b038cc7a7a7a849c95067",
+      "name": "BulkP1Geometry/BulkJacobian/Affine/Point/1/16/real_time",
+      "metric": "real_time",
+      "url": "cases/b65c205e3e00ec6b4da564c0b235b2e51df374baf60b038cc7a7a7a849c95067.json"
+    },
+    {
+      "id": "8c84007405d40af8e77e1e00abcf4f572ac40479100a31d1f7a49a4c0a7bebe3",
+      "name": "BulkP1Geometry/BulkJacobian/Affine/Point/1/2/real_time",
+      "metric": "real_time",
+      "url": "cases/8c84007405d40af8e77e1e00abcf4f572ac40479100a31d1f7a49a4c0a7bebe3.json"
+    },
+    {
+      "id": "cc5931df2522ff3cad48c262dc573b9c8e935f35773b538d0234b51abc52f721",
+      "name": "BulkP1Geometry/BulkJacobian/Affine/Point/1/8/real_time",
+      "metric": "real_time",
+      "url": "cases/cc5931df2522ff3cad48c262dc573b9c8e935f35773b538d0234b51abc52f721.json"
+    },
+    {
+      "id": "bdabe4a350aca96a8a36fc8d4dc23e406ed8d6442ec3dca8d3ae6a49b611b9ae",
+      "name": "BulkP1Geometry/BulkJacobian/Affine/Point/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/bdabe4a350aca96a8a36fc8d4dc23e406ed8d6442ec3dca8d3ae6a49b611b9ae.json"
+    },
+    {
+      "id": "4958d0f79233c8b2bfd93c46e33e80489260ef58c623561c98eb18faf86df217",
+      "name": "BulkP1Geometry/BulkJacobian/Affine/Point/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/4958d0f79233c8b2bfd93c46e33e80489260ef58c623561c98eb18faf86df217.json"
+    },
+    {
+      "id": "2fb028bf50a582da4c5747e8ccf23578e81d9fb1f0301efc31f93acdea26bd72",
+      "name": "BulkP1Geometry/BulkJacobian/Affine/Point/2/2/real_time",
+      "metric": "real_time",
+      "url": "cases/2fb028bf50a582da4c5747e8ccf23578e81d9fb1f0301efc31f93acdea26bd72.json"
+    },
+    {
+      "id": "cc8c427d92d1f6c539377b124c16ba14825897a6d1cb64b1f9ead62b68372ee2",
+      "name": "BulkP1Geometry/BulkJacobian/Affine/Point/2/8/real_time",
+      "metric": "real_time",
+      "url": "cases/cc8c427d92d1f6c539377b124c16ba14825897a6d1cb64b1f9ead62b68372ee2.json"
+    },
+    {
+      "id": "615fd109da3a36012c7675c6a991122a9492c29a3f507cfbf75af1b530ff269c",
+      "name": "BulkP1Geometry/BulkJacobian/Affine/Point/3/15/real_time",
+      "metric": "real_time",
+      "url": "cases/615fd109da3a36012c7675c6a991122a9492c29a3f507cfbf75af1b530ff269c.json"
+    },
+    {
+      "id": "100341bb61a1927619aa18d4274427d20f2b003c40fd63ae5250d369f29e9a8d",
+      "name": "BulkP1Geometry/BulkJacobian/Affine/Point/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/100341bb61a1927619aa18d4274427d20f2b003c40fd63ae5250d369f29e9a8d.json"
+    },
+    {
+      "id": "94526a1f3021444bc669a21fe05415e4935e6ad30a0bcdba1bc6939ce8f9ec59",
+      "name": "BulkP1Geometry/BulkJacobian/Affine/Point/3/2/real_time",
+      "metric": "real_time",
+      "url": "cases/94526a1f3021444bc669a21fe05415e4935e6ad30a0bcdba1bc6939ce8f9ec59.json"
+    },
+    {
+      "id": "93e20d9923b26d3a3b33a25ae2fe8fad8c8c6dc72108aac11a0b108a753f0c63",
+      "name": "BulkP1Geometry/BulkJacobian/Affine/Point/3/8/real_time",
+      "metric": "real_time",
+      "url": "cases/93e20d9923b26d3a3b33a25ae2fe8fad8c8c6dc72108aac11a0b108a753f0c63.json"
+    },
+    {
+      "id": "c9bafd54cd321a14ab5b99d1167d9f431dae3875f317c7ca4916a4f66db7c234",
+      "name": "BulkP1Geometry/BulkJacobian/Affine/Pyramid/3/10/real_time",
+      "metric": "real_time",
+      "url": "cases/c9bafd54cd321a14ab5b99d1167d9f431dae3875f317c7ca4916a4f66db7c234.json"
+    },
+    {
+      "id": "a3f45c36adbfef8de8a66546b86d536b6e291f407a89af6b44b3c9f2c5cec395",
+      "name": "BulkP1Geometry/BulkJacobian/Affine/Pyramid/3/11/real_time",
+      "metric": "real_time",
+      "url": "cases/a3f45c36adbfef8de8a66546b86d536b6e291f407a89af6b44b3c9f2c5cec395.json"
+    },
+    {
+      "id": "314240b0be68c8e237da939cd84a9fcda0fccc8090d365d51e3449bdf0cd0893",
+      "name": "BulkP1Geometry/BulkJacobian/Affine/Pyramid/3/15/real_time",
+      "metric": "real_time",
+      "url": "cases/314240b0be68c8e237da939cd84a9fcda0fccc8090d365d51e3449bdf0cd0893.json"
+    },
+    {
+      "id": "c791a8d3199b277e62d22e7b0d7552c7c9f5bd40a040bba24097ec1b79267827",
+      "name": "BulkP1Geometry/BulkJacobian/Affine/Pyramid/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/c791a8d3199b277e62d22e7b0d7552c7c9f5bd40a040bba24097ec1b79267827.json"
+    },
+    {
+      "id": "de97c6cdcfb96f53d85fb9710aae3c4d8a552b0284bd284c54511bb2bd654c8a",
+      "name": "BulkP1Geometry/BulkJacobian/Affine/Pyramid/3/2/real_time",
+      "metric": "real_time",
+      "url": "cases/de97c6cdcfb96f53d85fb9710aae3c4d8a552b0284bd284c54511bb2bd654c8a.json"
+    },
+    {
+      "id": "1385c96b366454cbe1da76fce84d95225488031317db74f9d8cd364fd5f8cfe5",
+      "name": "BulkP1Geometry/BulkJacobian/Affine/Pyramid/3/8/real_time",
+      "metric": "real_time",
+      "url": "cases/1385c96b366454cbe1da76fce84d95225488031317db74f9d8cd364fd5f8cfe5.json"
+    },
+    {
+      "id": "b135a59426cfa76bfadc137362afc7f9e5873995912977fffe4e74d6608d013f",
+      "name": "BulkP1Geometry/BulkJacobian/Affine/Quadrilateral/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/b135a59426cfa76bfadc137362afc7f9e5873995912977fffe4e74d6608d013f.json"
+    },
+    {
+      "id": "611e7b81c6b822c77c5cd57f5a26c610941c9104838bf063b0a2c37dfc6520f5",
+      "name": "BulkP1Geometry/BulkJacobian/Affine/Quadrilateral/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/611e7b81c6b822c77c5cd57f5a26c610941c9104838bf063b0a2c37dfc6520f5.json"
+    },
+    {
+      "id": "e5d5eeffb99e6c9b263c0d059933f59f03cadc986b794603091341a8c1f732cb",
+      "name": "BulkP1Geometry/BulkJacobian/Affine/Quadrilateral/2/2/real_time",
+      "metric": "real_time",
+      "url": "cases/e5d5eeffb99e6c9b263c0d059933f59f03cadc986b794603091341a8c1f732cb.json"
+    },
+    {
+      "id": "8406e99ab3ca55456923f49bbf518afe6c6124b0009e12bd104d4809209c40d3",
+      "name": "BulkP1Geometry/BulkJacobian/Affine/Quadrilateral/2/8/real_time",
+      "metric": "real_time",
+      "url": "cases/8406e99ab3ca55456923f49bbf518afe6c6124b0009e12bd104d4809209c40d3.json"
+    },
+    {
+      "id": "36934659850db84ff82b42255b2a933c8f74543dc6e63e54569e02f5e2824c7c",
+      "name": "BulkP1Geometry/BulkJacobian/Affine/Quadrilateral/3/15/real_time",
+      "metric": "real_time",
+      "url": "cases/36934659850db84ff82b42255b2a933c8f74543dc6e63e54569e02f5e2824c7c.json"
+    },
+    {
+      "id": "e28c919395bbfc7564d1ff77e338072648294da1261878ed813f659037b920a1",
+      "name": "BulkP1Geometry/BulkJacobian/Affine/Quadrilateral/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/e28c919395bbfc7564d1ff77e338072648294da1261878ed813f659037b920a1.json"
+    },
+    {
+      "id": "a7fc5b6b6d38b92a1d17225e7a442e5d570c7ec32566715bd377bcdf15d684fb",
+      "name": "BulkP1Geometry/BulkJacobian/Affine/Quadrilateral/3/2/real_time",
+      "metric": "real_time",
+      "url": "cases/a7fc5b6b6d38b92a1d17225e7a442e5d570c7ec32566715bd377bcdf15d684fb.json"
+    },
+    {
+      "id": "3a988f18c8a033f0713889337ab1d063414acac17a3c565f6e9d65645308c84a",
+      "name": "BulkP1Geometry/BulkJacobian/Affine/Quadrilateral/3/8/real_time",
+      "metric": "real_time",
+      "url": "cases/3a988f18c8a033f0713889337ab1d063414acac17a3c565f6e9d65645308c84a.json"
+    },
+    {
+      "id": "46190d22e7d1bcb144178453bb27b1297787f6163223e116d7c359c1a284df5a",
+      "name": "BulkP1Geometry/BulkJacobian/Affine/Segment/1/15/real_time",
+      "metric": "real_time",
+      "url": "cases/46190d22e7d1bcb144178453bb27b1297787f6163223e116d7c359c1a284df5a.json"
+    },
+    {
+      "id": "a4a5d70924d25b1b4a05d39977e0afd5f05fdf1ed057f64156fdacf5b1cedbdf",
+      "name": "BulkP1Geometry/BulkJacobian/Affine/Segment/1/16/real_time",
+      "metric": "real_time",
+      "url": "cases/a4a5d70924d25b1b4a05d39977e0afd5f05fdf1ed057f64156fdacf5b1cedbdf.json"
+    },
+    {
+      "id": "1b99d8d974680258f145bcc0310a423bb63d4533ad0467ceda450db44ac4e584",
+      "name": "BulkP1Geometry/BulkJacobian/Affine/Segment/1/2/real_time",
+      "metric": "real_time",
+      "url": "cases/1b99d8d974680258f145bcc0310a423bb63d4533ad0467ceda450db44ac4e584.json"
+    },
+    {
+      "id": "f15babae290ba25fe71144090559860d4779c7cf5826cc573b12c23feba1d581",
+      "name": "BulkP1Geometry/BulkJacobian/Affine/Segment/1/8/real_time",
+      "metric": "real_time",
+      "url": "cases/f15babae290ba25fe71144090559860d4779c7cf5826cc573b12c23feba1d581.json"
+    },
+    {
+      "id": "44a42d663740e717e5aeb04807874b9efb13e848675d6e4dd0d88251806875f8",
+      "name": "BulkP1Geometry/BulkJacobian/Affine/Segment/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/44a42d663740e717e5aeb04807874b9efb13e848675d6e4dd0d88251806875f8.json"
+    },
+    {
+      "id": "51e506a11407c40a7bf8362dad92ed56eea22f83c8d33ba10412c30e64dfef79",
+      "name": "BulkP1Geometry/BulkJacobian/Affine/Segment/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/51e506a11407c40a7bf8362dad92ed56eea22f83c8d33ba10412c30e64dfef79.json"
+    },
+    {
+      "id": "24567699d6ec06b01c686a00802ec776a4bf64bbba8702f14733f7a0d7eeb28e",
+      "name": "BulkP1Geometry/BulkJacobian/Affine/Segment/2/2/real_time",
+      "metric": "real_time",
+      "url": "cases/24567699d6ec06b01c686a00802ec776a4bf64bbba8702f14733f7a0d7eeb28e.json"
+    },
+    {
+      "id": "b7e772e948fc22283ef791ec6cc0764c8e31930daa536def5a6c6a8b338f9465",
+      "name": "BulkP1Geometry/BulkJacobian/Affine/Segment/2/8/real_time",
+      "metric": "real_time",
+      "url": "cases/b7e772e948fc22283ef791ec6cc0764c8e31930daa536def5a6c6a8b338f9465.json"
+    },
+    {
+      "id": "624da80fe4222727acab06df1ad6aba16ef0d6f92c3befc73f5626e963686f35",
+      "name": "BulkP1Geometry/BulkJacobian/Affine/Segment/3/15/real_time",
+      "metric": "real_time",
+      "url": "cases/624da80fe4222727acab06df1ad6aba16ef0d6f92c3befc73f5626e963686f35.json"
+    },
+    {
+      "id": "90ff428a7b41dc0119d1f5a5db7268c78e2683dc45dea19351d58961c9e812a3",
+      "name": "BulkP1Geometry/BulkJacobian/Affine/Segment/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/90ff428a7b41dc0119d1f5a5db7268c78e2683dc45dea19351d58961c9e812a3.json"
+    },
+    {
+      "id": "7a00f1c5b76b133985e4944fabe9af43ceb970e5c627153eb3716067f62fabff",
+      "name": "BulkP1Geometry/BulkJacobian/Affine/Segment/3/2/real_time",
+      "metric": "real_time",
+      "url": "cases/7a00f1c5b76b133985e4944fabe9af43ceb970e5c627153eb3716067f62fabff.json"
+    },
+    {
+      "id": "d5b3a062f9bd0962f30a76e570c30b9059d987ecd7ec07ae69442f342cac82cb",
+      "name": "BulkP1Geometry/BulkJacobian/Affine/Segment/3/8/real_time",
+      "metric": "real_time",
+      "url": "cases/d5b3a062f9bd0962f30a76e570c30b9059d987ecd7ec07ae69442f342cac82cb.json"
+    },
+    {
+      "id": "4dd6f6f135b0667889fa1062423b6a7e6e283a592a081db9c47635483805229b",
+      "name": "BulkP1Geometry/BulkJacobian/Affine/Tetrahedron/3/15/real_time",
+      "metric": "real_time",
+      "url": "cases/4dd6f6f135b0667889fa1062423b6a7e6e283a592a081db9c47635483805229b.json"
+    },
+    {
+      "id": "a680dd6f3816363d487e72956ba37384905044ccd9a1c830a7f44e0b0458db7a",
+      "name": "BulkP1Geometry/BulkJacobian/Affine/Tetrahedron/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/a680dd6f3816363d487e72956ba37384905044ccd9a1c830a7f44e0b0458db7a.json"
+    },
+    {
+      "id": "df61220351870aabaa0b5bb372debfd01592ce850a95332238b1b82a83f56830",
+      "name": "BulkP1Geometry/BulkJacobian/Affine/Tetrahedron/3/2/real_time",
+      "metric": "real_time",
+      "url": "cases/df61220351870aabaa0b5bb372debfd01592ce850a95332238b1b82a83f56830.json"
+    },
+    {
+      "id": "f593dd5adde93fe138b9ff2c0289903429bbfd090425d28b4fb895f9a460a8be",
+      "name": "BulkP1Geometry/BulkJacobian/Affine/Tetrahedron/3/8/real_time",
+      "metric": "real_time",
+      "url": "cases/f593dd5adde93fe138b9ff2c0289903429bbfd090425d28b4fb895f9a460a8be.json"
+    },
+    {
+      "id": "c60fb4e1bdadba7d763d77bff96a1c0358d8ef654fb2ed40143dffe1f04c952c",
+      "name": "BulkP1Geometry/BulkJacobian/Affine/Triangle/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/c60fb4e1bdadba7d763d77bff96a1c0358d8ef654fb2ed40143dffe1f04c952c.json"
+    },
+    {
+      "id": "41e3fa54ad0facc8b15cb31be570fab0dff842623bd09fe8dd9184772b9d8786",
+      "name": "BulkP1Geometry/BulkJacobian/Affine/Triangle/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/41e3fa54ad0facc8b15cb31be570fab0dff842623bd09fe8dd9184772b9d8786.json"
+    },
+    {
+      "id": "234ad1abb2a9df442d7454a15eedbb7abb910c7dea640de9c85af5583b53e9e9",
+      "name": "BulkP1Geometry/BulkJacobian/Affine/Triangle/2/2/real_time",
+      "metric": "real_time",
+      "url": "cases/234ad1abb2a9df442d7454a15eedbb7abb910c7dea640de9c85af5583b53e9e9.json"
+    },
+    {
+      "id": "c61c2c5880c142f7369086e65f3f12b2167c3112f72cf579c7f421424a42748c",
+      "name": "BulkP1Geometry/BulkJacobian/Affine/Triangle/2/8/real_time",
+      "metric": "real_time",
+      "url": "cases/c61c2c5880c142f7369086e65f3f12b2167c3112f72cf579c7f421424a42748c.json"
+    },
+    {
+      "id": "4a723d0028f79998076d4e083156a9567c38fd1448ae441d35a808269984cd8a",
+      "name": "BulkP1Geometry/BulkJacobian/Affine/Triangle/3/15/real_time",
+      "metric": "real_time",
+      "url": "cases/4a723d0028f79998076d4e083156a9567c38fd1448ae441d35a808269984cd8a.json"
+    },
+    {
+      "id": "d107118f57dab7fe7f2104496710267b7b174b79fe69ed917da4ae77d872d79c",
+      "name": "BulkP1Geometry/BulkJacobian/Affine/Triangle/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/d107118f57dab7fe7f2104496710267b7b174b79fe69ed917da4ae77d872d79c.json"
+    },
+    {
+      "id": "5960fc16ed71fe1dd1faa27c9d5bb667ef9658f91a67977015fc6a4da4ca3db4",
+      "name": "BulkP1Geometry/BulkJacobian/Affine/Triangle/3/2/real_time",
+      "metric": "real_time",
+      "url": "cases/5960fc16ed71fe1dd1faa27c9d5bb667ef9658f91a67977015fc6a4da4ca3db4.json"
+    },
+    {
+      "id": "b0563c58966288296af33a883a404d4772adae7c8f9b74166957559600ccb747",
+      "name": "BulkP1Geometry/BulkJacobian/Affine/Triangle/3/8/real_time",
+      "metric": "real_time",
+      "url": "cases/b0563c58966288296af33a883a404d4772adae7c8f9b74166957559600ccb747.json"
+    },
+    {
+      "id": "4938de474ba61b8486498fa7919857b9dd733215bf7da3a96c3bf580bd79a3e5",
+      "name": "BulkP1Geometry/BulkJacobian/Affine/Wedge/3/15/real_time",
+      "metric": "real_time",
+      "url": "cases/4938de474ba61b8486498fa7919857b9dd733215bf7da3a96c3bf580bd79a3e5.json"
+    },
+    {
+      "id": "b9cdad50faed92170965a7cea13c0a16d2eca36a52fdfad6394d85b3e231b9d2",
+      "name": "BulkP1Geometry/BulkJacobian/Affine/Wedge/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/b9cdad50faed92170965a7cea13c0a16d2eca36a52fdfad6394d85b3e231b9d2.json"
+    },
+    {
+      "id": "63877af5a354da0dfaebe79309919152dbc4bbba671b6eb1880e570510989e9d",
+      "name": "BulkP1Geometry/BulkJacobian/Affine/Wedge/3/2/real_time",
+      "metric": "real_time",
+      "url": "cases/63877af5a354da0dfaebe79309919152dbc4bbba671b6eb1880e570510989e9d.json"
+    },
+    {
+      "id": "d3459dba0cc7a842c121a2ee2f39ec32a2fae30ab085313f0f4cf2ed583b86c6",
+      "name": "BulkP1Geometry/BulkJacobian/Affine/Wedge/3/8/real_time",
+      "metric": "real_time",
+      "url": "cases/d3459dba0cc7a842c121a2ee2f39ec32a2fae30ab085313f0f4cf2ed583b86c6.json"
+    },
+    {
+      "id": "4fc2f4f005cbe930def24600222386aed3b9b1051fa645e8f52caaa0b0af5e94",
+      "name": "BulkP1Geometry/BulkJacobian/GaussianFactor/Affine/Tetrahedron/3/10/real_time",
+      "metric": "real_time",
+      "url": "cases/4fc2f4f005cbe930def24600222386aed3b9b1051fa645e8f52caaa0b0af5e94.json"
+    },
+    {
+      "id": "6dd65d49fe019fe8c1312739d52ea8bdccdca53ec182b461b807676a5f69d7d6",
+      "name": "BulkP1Geometry/BulkJacobian/GaussianFactor/Affine/Tetrahedron/3/12/real_time",
+      "metric": "real_time",
+      "url": "cases/6dd65d49fe019fe8c1312739d52ea8bdccdca53ec182b461b807676a5f69d7d6.json"
+    },
+    {
+      "id": "cb099b48a5d709ea975ddde2fd0d813903b21f84ee3aac74675818d91b1f6512",
+      "name": "BulkP1Geometry/BulkJacobian/GaussianFactor/Affine/Tetrahedron/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/cb099b48a5d709ea975ddde2fd0d813903b21f84ee3aac74675818d91b1f6512.json"
+    },
+    {
+      "id": "831f3e9d357cbc793b5e8a87ff4f312688b803feff17377f6f886b808d5a16dd",
+      "name": "BulkP1Geometry/BulkJacobian/GaussianFactor/Affine/Tetrahedron/3/3/real_time",
+      "metric": "real_time",
+      "url": "cases/831f3e9d357cbc793b5e8a87ff4f312688b803feff17377f6f886b808d5a16dd.json"
+    },
+    {
+      "id": "786946ee3ae690fbcc9ce9b1af0bcd4dc6a02a5bff8cf20a37d1f9293e07d69d",
+      "name": "BulkP1Geometry/BulkJacobian/GaussianFactor/Affine/Tetrahedron/3/4/real_time",
+      "metric": "real_time",
+      "url": "cases/786946ee3ae690fbcc9ce9b1af0bcd4dc6a02a5bff8cf20a37d1f9293e07d69d.json"
+    },
+    {
+      "id": "f364cd5dff18317184863373090e58f9a87266395b937be93dd1b46e3e6e4317",
+      "name": "BulkP1Geometry/BulkJacobian/GaussianFactor/Affine/Tetrahedron/3/5/real_time",
+      "metric": "real_time",
+      "url": "cases/f364cd5dff18317184863373090e58f9a87266395b937be93dd1b46e3e6e4317.json"
+    },
+    {
+      "id": "273c009ec85bd0c881cdff94ddf7ae9c109ec4e5b26d8f332ce8576af44c0a35",
+      "name": "BulkP1Geometry/BulkJacobian/GaussianFactor/Affine/Tetrahedron/3/6/real_time",
+      "metric": "real_time",
+      "url": "cases/273c009ec85bd0c881cdff94ddf7ae9c109ec4e5b26d8f332ce8576af44c0a35.json"
+    },
+    {
+      "id": "030d8efcd2a53ca758f5463ef57ee9ed295ac7f1fc6d2c9dd8fa94581b88f066",
+      "name": "BulkP1Geometry/BulkJacobian/GaussianFactor/Affine/Tetrahedron/3/7/real_time",
+      "metric": "real_time",
+      "url": "cases/030d8efcd2a53ca758f5463ef57ee9ed295ac7f1fc6d2c9dd8fa94581b88f066.json"
+    },
+    {
+      "id": "378739659a2b2eaaee1389d6e309d98470ae71de4efe46f6af7783a56f28c6e5",
+      "name": "BulkP1Geometry/BulkJacobian/GaussianFactor/Affine/Tetrahedron/3/8/real_time",
+      "metric": "real_time",
+      "url": "cases/378739659a2b2eaaee1389d6e309d98470ae71de4efe46f6af7783a56f28c6e5.json"
+    },
+    {
+      "id": "f587c8969b26150f5aaddffff571c8581d2db519e92427cdc11d55484ecb51a5",
+      "name": "BulkP1Geometry/BulkJacobian/GaussianFactor/Affine/Tetrahedron/3/9/real_time",
+      "metric": "real_time",
+      "url": "cases/f587c8969b26150f5aaddffff571c8581d2db519e92427cdc11d55484ecb51a5.json"
+    },
+    {
+      "id": "ca921bf6838c3ea1701dba85280498ee03ea2b67a1da3aeca5f83f7fe27f4419",
+      "name": "BulkP1Geometry/BulkJacobian/GaussianFactor/PerturbedControls/Tetrahedron/3/10/real_time",
+      "metric": "real_time",
+      "url": "cases/ca921bf6838c3ea1701dba85280498ee03ea2b67a1da3aeca5f83f7fe27f4419.json"
+    },
+    {
+      "id": "ddfcece2bf35870c55d05502c4f41b5aacaae981a70e9e29268e51617a4d4bae",
+      "name": "BulkP1Geometry/BulkJacobian/GaussianFactor/PerturbedControls/Tetrahedron/3/12/real_time",
+      "metric": "real_time",
+      "url": "cases/ddfcece2bf35870c55d05502c4f41b5aacaae981a70e9e29268e51617a4d4bae.json"
+    },
+    {
+      "id": "f367f2724ab9494d2a05316a09fb2dc1179aa0d01fb2e8b5f6bff56212e34512",
+      "name": "BulkP1Geometry/BulkJacobian/GaussianFactor/PerturbedControls/Tetrahedron/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/f367f2724ab9494d2a05316a09fb2dc1179aa0d01fb2e8b5f6bff56212e34512.json"
+    },
+    {
+      "id": "e652d98e8324d7598fd7ae2a58f9f0f794f5facafd991c9c7980ca87be0c5fe3",
+      "name": "BulkP1Geometry/BulkJacobian/GaussianFactor/PerturbedControls/Tetrahedron/3/3/real_time",
+      "metric": "real_time",
+      "url": "cases/e652d98e8324d7598fd7ae2a58f9f0f794f5facafd991c9c7980ca87be0c5fe3.json"
+    },
+    {
+      "id": "bcfb5aa9896485cfce88f556e864cf0dc75f8642502120328e4ea1d9bc479050",
+      "name": "BulkP1Geometry/BulkJacobian/GaussianFactor/PerturbedControls/Tetrahedron/3/4/real_time",
+      "metric": "real_time",
+      "url": "cases/bcfb5aa9896485cfce88f556e864cf0dc75f8642502120328e4ea1d9bc479050.json"
+    },
+    {
+      "id": "67ec0b949e8595a2d2e508490b89c1f3bbea5f6b88467a126413605e8f646a5c",
+      "name": "BulkP1Geometry/BulkJacobian/GaussianFactor/PerturbedControls/Tetrahedron/3/5/real_time",
+      "metric": "real_time",
+      "url": "cases/67ec0b949e8595a2d2e508490b89c1f3bbea5f6b88467a126413605e8f646a5c.json"
+    },
+    {
+      "id": "96736322a58be15152f2eceea2decf5de79d675dd212828b953afa41302457cf",
+      "name": "BulkP1Geometry/BulkJacobian/GaussianFactor/PerturbedControls/Tetrahedron/3/6/real_time",
+      "metric": "real_time",
+      "url": "cases/96736322a58be15152f2eceea2decf5de79d675dd212828b953afa41302457cf.json"
+    },
+    {
+      "id": "3051291dc4d135a5e0e9e39dd23b4ccd889d5dcfffd311d5b8dc4ab7e3e034d0",
+      "name": "BulkP1Geometry/BulkJacobian/GaussianFactor/PerturbedControls/Tetrahedron/3/7/real_time",
+      "metric": "real_time",
+      "url": "cases/3051291dc4d135a5e0e9e39dd23b4ccd889d5dcfffd311d5b8dc4ab7e3e034d0.json"
+    },
+    {
+      "id": "b4e23596d4c231de6f34c1ba22272715c73e78b19f621d7d2013e6c6e13d500f",
+      "name": "BulkP1Geometry/BulkJacobian/GaussianFactor/PerturbedControls/Tetrahedron/3/8/real_time",
+      "metric": "real_time",
+      "url": "cases/b4e23596d4c231de6f34c1ba22272715c73e78b19f621d7d2013e6c6e13d500f.json"
+    },
+    {
+      "id": "b96ca7211e00d39616590d341f4fe4fb9f17dc355344fb71c6fe461722d2cabe",
+      "name": "BulkP1Geometry/BulkJacobian/GaussianFactor/PerturbedControls/Tetrahedron/3/9/real_time",
+      "metric": "real_time",
+      "url": "cases/b96ca7211e00d39616590d341f4fe4fb9f17dc355344fb71c6fe461722d2cabe.json"
+    },
+    {
+      "id": "e58843ea2f470baac81a484c281e2cce78f9297de4f534f76103a8c1f229616c",
+      "name": "BulkP1Geometry/BulkJacobian/PerturbedControls/Hexahedron/3/15/real_time",
+      "metric": "real_time",
+      "url": "cases/e58843ea2f470baac81a484c281e2cce78f9297de4f534f76103a8c1f229616c.json"
+    },
+    {
+      "id": "e7b630d9eac19d18834030b5cced9a0ff7be05b788a5d2e510af9e5fab873401",
+      "name": "BulkP1Geometry/BulkJacobian/PerturbedControls/Hexahedron/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/e7b630d9eac19d18834030b5cced9a0ff7be05b788a5d2e510af9e5fab873401.json"
+    },
+    {
+      "id": "dc42b6ebd05a8d7397fa6b598f2ea70928aefd107f89359b425f1db5bea7200b",
+      "name": "BulkP1Geometry/BulkJacobian/PerturbedControls/Hexahedron/3/2/real_time",
+      "metric": "real_time",
+      "url": "cases/dc42b6ebd05a8d7397fa6b598f2ea70928aefd107f89359b425f1db5bea7200b.json"
+    },
+    {
+      "id": "2de5522faeb8d644b3e4267139b8149aa6765de7e444d59a4c7581601993fece",
+      "name": "BulkP1Geometry/BulkJacobian/PerturbedControls/Hexahedron/3/8/real_time",
+      "metric": "real_time",
+      "url": "cases/2de5522faeb8d644b3e4267139b8149aa6765de7e444d59a4c7581601993fece.json"
+    },
+    {
+      "id": "5919f3be61822b93c0c34b1b4bc0eb4785c09b16a672f4fc6821a036844f1d64",
+      "name": "BulkP1Geometry/BulkJacobian/PerturbedControls/Point/1/15/real_time",
+      "metric": "real_time",
+      "url": "cases/5919f3be61822b93c0c34b1b4bc0eb4785c09b16a672f4fc6821a036844f1d64.json"
+    },
+    {
+      "id": "ee83d7ac7fc209ca1628c81749193a48afab3eaa57edef82fdd9b0a966ae31e2",
+      "name": "BulkP1Geometry/BulkJacobian/PerturbedControls/Point/1/16/real_time",
+      "metric": "real_time",
+      "url": "cases/ee83d7ac7fc209ca1628c81749193a48afab3eaa57edef82fdd9b0a966ae31e2.json"
+    },
+    {
+      "id": "be507c3172b9f44731ad78300b1387a110daf25e8f9786b55526fd766503daa2",
+      "name": "BulkP1Geometry/BulkJacobian/PerturbedControls/Point/1/2/real_time",
+      "metric": "real_time",
+      "url": "cases/be507c3172b9f44731ad78300b1387a110daf25e8f9786b55526fd766503daa2.json"
+    },
+    {
+      "id": "ad24f2291cf93ab7a21ca80b43ce57d8234f8d601b5ace55217d40720191e3aa",
+      "name": "BulkP1Geometry/BulkJacobian/PerturbedControls/Point/1/8/real_time",
+      "metric": "real_time",
+      "url": "cases/ad24f2291cf93ab7a21ca80b43ce57d8234f8d601b5ace55217d40720191e3aa.json"
+    },
+    {
+      "id": "ec242444647d3edf3e2288f6a6e6e7aa0d63ff1af41b49d377a7a7b189695592",
+      "name": "BulkP1Geometry/BulkJacobian/PerturbedControls/Point/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/ec242444647d3edf3e2288f6a6e6e7aa0d63ff1af41b49d377a7a7b189695592.json"
+    },
+    {
+      "id": "faaa9807bb6045847ced05794cbb20e230e653ed0eced0c494e27b64b5ffdd79",
+      "name": "BulkP1Geometry/BulkJacobian/PerturbedControls/Point/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/faaa9807bb6045847ced05794cbb20e230e653ed0eced0c494e27b64b5ffdd79.json"
+    },
+    {
+      "id": "e806dad0ffacfcaa38a94a1cc20c417354a882e77569f25f4a475ba3d334b256",
+      "name": "BulkP1Geometry/BulkJacobian/PerturbedControls/Point/2/2/real_time",
+      "metric": "real_time",
+      "url": "cases/e806dad0ffacfcaa38a94a1cc20c417354a882e77569f25f4a475ba3d334b256.json"
+    },
+    {
+      "id": "167588dc82bec2e88fd654e7ce6192f01d25a5cdeeb6b3adbbb0b27f8a8e0ddb",
+      "name": "BulkP1Geometry/BulkJacobian/PerturbedControls/Point/2/8/real_time",
+      "metric": "real_time",
+      "url": "cases/167588dc82bec2e88fd654e7ce6192f01d25a5cdeeb6b3adbbb0b27f8a8e0ddb.json"
+    },
+    {
+      "id": "cf0a07c320e98de779d37cb1d337b407ae377ea1a5d4e24ca1ef2409d2945409",
+      "name": "BulkP1Geometry/BulkJacobian/PerturbedControls/Point/3/15/real_time",
+      "metric": "real_time",
+      "url": "cases/cf0a07c320e98de779d37cb1d337b407ae377ea1a5d4e24ca1ef2409d2945409.json"
+    },
+    {
+      "id": "39ed44fc33be8336ca6e22727fc72cd8dea5941b2b4b8c434a36efc43cf2856e",
+      "name": "BulkP1Geometry/BulkJacobian/PerturbedControls/Point/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/39ed44fc33be8336ca6e22727fc72cd8dea5941b2b4b8c434a36efc43cf2856e.json"
+    },
+    {
+      "id": "c959cf48fd52786dbcad8cbba62ec7804f28d532b0e0c9cc6fb4b662c053c36e",
+      "name": "BulkP1Geometry/BulkJacobian/PerturbedControls/Point/3/2/real_time",
+      "metric": "real_time",
+      "url": "cases/c959cf48fd52786dbcad8cbba62ec7804f28d532b0e0c9cc6fb4b662c053c36e.json"
+    },
+    {
+      "id": "facaba048db1f353a40f932c01f4465f92b80909a9093703c0e5db9a351caac0",
+      "name": "BulkP1Geometry/BulkJacobian/PerturbedControls/Point/3/8/real_time",
+      "metric": "real_time",
+      "url": "cases/facaba048db1f353a40f932c01f4465f92b80909a9093703c0e5db9a351caac0.json"
+    },
+    {
+      "id": "bac26b7e7dff99a769f1f65e722d4e5c22f32cee2891d96a121af8e3b172af81",
+      "name": "BulkP1Geometry/BulkJacobian/PerturbedControls/Pyramid/3/10/real_time",
+      "metric": "real_time",
+      "url": "cases/bac26b7e7dff99a769f1f65e722d4e5c22f32cee2891d96a121af8e3b172af81.json"
+    },
+    {
+      "id": "ec475bc3ec20b7e5a846148938e1362cf232a36e0171a874066b485aa596e000",
+      "name": "BulkP1Geometry/BulkJacobian/PerturbedControls/Pyramid/3/11/real_time",
+      "metric": "real_time",
+      "url": "cases/ec475bc3ec20b7e5a846148938e1362cf232a36e0171a874066b485aa596e000.json"
+    },
+    {
+      "id": "ace03b2059e73b07e9a1f47398f180f183dd89742c23aeca426830637c3768cf",
+      "name": "BulkP1Geometry/BulkJacobian/PerturbedControls/Pyramid/3/15/real_time",
+      "metric": "real_time",
+      "url": "cases/ace03b2059e73b07e9a1f47398f180f183dd89742c23aeca426830637c3768cf.json"
+    },
+    {
+      "id": "d687de9b815ddae22bcdfd3164f1105f89285721e68b3d4b980430522c2c420e",
+      "name": "BulkP1Geometry/BulkJacobian/PerturbedControls/Pyramid/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/d687de9b815ddae22bcdfd3164f1105f89285721e68b3d4b980430522c2c420e.json"
+    },
+    {
+      "id": "07c537978a5755287c7285fe26b5999dbee9e9671631875fa42a08e3f879a968",
+      "name": "BulkP1Geometry/BulkJacobian/PerturbedControls/Pyramid/3/2/real_time",
+      "metric": "real_time",
+      "url": "cases/07c537978a5755287c7285fe26b5999dbee9e9671631875fa42a08e3f879a968.json"
+    },
+    {
+      "id": "cc92e1ea6f862f0f2965ea167d5c5e237bf21cf37422c2f06cb54ef2b6c030d9",
+      "name": "BulkP1Geometry/BulkJacobian/PerturbedControls/Pyramid/3/8/real_time",
+      "metric": "real_time",
+      "url": "cases/cc92e1ea6f862f0f2965ea167d5c5e237bf21cf37422c2f06cb54ef2b6c030d9.json"
+    },
+    {
+      "id": "ffcc764eadc88b15507106060735ab6d86e638b2f10cd547e47958191af6d658",
+      "name": "BulkP1Geometry/BulkJacobian/PerturbedControls/Quadrilateral/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/ffcc764eadc88b15507106060735ab6d86e638b2f10cd547e47958191af6d658.json"
+    },
+    {
+      "id": "38268bc535f8410dca87163538faad09787b0369d6c8e7d76e9024a090839a3e",
+      "name": "BulkP1Geometry/BulkJacobian/PerturbedControls/Quadrilateral/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/38268bc535f8410dca87163538faad09787b0369d6c8e7d76e9024a090839a3e.json"
+    },
+    {
+      "id": "a85a4c352ca25d524e300facb302b0703db7297dc72854dbc33ef748bfe9f9c5",
+      "name": "BulkP1Geometry/BulkJacobian/PerturbedControls/Quadrilateral/2/2/real_time",
+      "metric": "real_time",
+      "url": "cases/a85a4c352ca25d524e300facb302b0703db7297dc72854dbc33ef748bfe9f9c5.json"
+    },
+    {
+      "id": "1e964fa82c4b7a37be5bd05c0deadc26d2beb5f7dca358a63ddf1b46e951972b",
+      "name": "BulkP1Geometry/BulkJacobian/PerturbedControls/Quadrilateral/2/8/real_time",
+      "metric": "real_time",
+      "url": "cases/1e964fa82c4b7a37be5bd05c0deadc26d2beb5f7dca358a63ddf1b46e951972b.json"
+    },
+    {
+      "id": "7e760149a8e6b393631f28c26b9c250825d3d0aa8853d05fca83ae4bcc899176",
+      "name": "BulkP1Geometry/BulkJacobian/PerturbedControls/Quadrilateral/3/15/real_time",
+      "metric": "real_time",
+      "url": "cases/7e760149a8e6b393631f28c26b9c250825d3d0aa8853d05fca83ae4bcc899176.json"
+    },
+    {
+      "id": "9a526bad5da4d28c8eaa37cbf971181eaaf64e052036f4d34e1c69fcb0b310e4",
+      "name": "BulkP1Geometry/BulkJacobian/PerturbedControls/Quadrilateral/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/9a526bad5da4d28c8eaa37cbf971181eaaf64e052036f4d34e1c69fcb0b310e4.json"
+    },
+    {
+      "id": "5ce81be6c60557e3a116cc5a9495f4e3eca7cbf5081b1596d7f67149c81e3f7f",
+      "name": "BulkP1Geometry/BulkJacobian/PerturbedControls/Quadrilateral/3/2/real_time",
+      "metric": "real_time",
+      "url": "cases/5ce81be6c60557e3a116cc5a9495f4e3eca7cbf5081b1596d7f67149c81e3f7f.json"
+    },
+    {
+      "id": "55adc1abcd80c7d19f174d7bf2728e60aaac50698b97256cd5b2e9716fc20ddd",
+      "name": "BulkP1Geometry/BulkJacobian/PerturbedControls/Quadrilateral/3/8/real_time",
+      "metric": "real_time",
+      "url": "cases/55adc1abcd80c7d19f174d7bf2728e60aaac50698b97256cd5b2e9716fc20ddd.json"
+    },
+    {
+      "id": "e381fbf96f86c318124423af554055c27bd8a25ab5496cc6a34dd88b1bcf372d",
+      "name": "BulkP1Geometry/BulkJacobian/PerturbedControls/Segment/1/15/real_time",
+      "metric": "real_time",
+      "url": "cases/e381fbf96f86c318124423af554055c27bd8a25ab5496cc6a34dd88b1bcf372d.json"
+    },
+    {
+      "id": "1bf337d4e3b68d400287c665a60d842a77a4070134238f9921360ad2aae9ca5c",
+      "name": "BulkP1Geometry/BulkJacobian/PerturbedControls/Segment/1/16/real_time",
+      "metric": "real_time",
+      "url": "cases/1bf337d4e3b68d400287c665a60d842a77a4070134238f9921360ad2aae9ca5c.json"
+    },
+    {
+      "id": "beff3f3ebca2720b6bab8648e9ec9bfbb39993929119b0464f1517ef16ca752a",
+      "name": "BulkP1Geometry/BulkJacobian/PerturbedControls/Segment/1/2/real_time",
+      "metric": "real_time",
+      "url": "cases/beff3f3ebca2720b6bab8648e9ec9bfbb39993929119b0464f1517ef16ca752a.json"
+    },
+    {
+      "id": "f27e2465609f9adb9bda9945df2e0eeb4e1c58134355379b3119955e1e04f5dd",
+      "name": "BulkP1Geometry/BulkJacobian/PerturbedControls/Segment/1/8/real_time",
+      "metric": "real_time",
+      "url": "cases/f27e2465609f9adb9bda9945df2e0eeb4e1c58134355379b3119955e1e04f5dd.json"
+    },
+    {
+      "id": "db066557fe07ed798be7552fdf7546329ac4fc377bfd8663e00c99a36fe927d7",
+      "name": "BulkP1Geometry/BulkJacobian/PerturbedControls/Segment/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/db066557fe07ed798be7552fdf7546329ac4fc377bfd8663e00c99a36fe927d7.json"
+    },
+    {
+      "id": "8d18085ac158ab5f475bcd3327c470f10f95f78d5f9f9a9cf5342be40691e66d",
+      "name": "BulkP1Geometry/BulkJacobian/PerturbedControls/Segment/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/8d18085ac158ab5f475bcd3327c470f10f95f78d5f9f9a9cf5342be40691e66d.json"
+    },
+    {
+      "id": "bf1c3edc98aeede8e5c99803ca6ddecd61dec178fe4534620bf02b20b1845b60",
+      "name": "BulkP1Geometry/BulkJacobian/PerturbedControls/Segment/2/2/real_time",
+      "metric": "real_time",
+      "url": "cases/bf1c3edc98aeede8e5c99803ca6ddecd61dec178fe4534620bf02b20b1845b60.json"
+    },
+    {
+      "id": "f5cd2e11608c34da25d442f2d76b59389d2735af3629d45d897ab7aa4a5bf001",
+      "name": "BulkP1Geometry/BulkJacobian/PerturbedControls/Segment/2/8/real_time",
+      "metric": "real_time",
+      "url": "cases/f5cd2e11608c34da25d442f2d76b59389d2735af3629d45d897ab7aa4a5bf001.json"
+    },
+    {
+      "id": "f2a617d9e4d23a953ff0da688c6de4e80dba395c5b6ae4d287436b9cf7141d8e",
+      "name": "BulkP1Geometry/BulkJacobian/PerturbedControls/Segment/3/15/real_time",
+      "metric": "real_time",
+      "url": "cases/f2a617d9e4d23a953ff0da688c6de4e80dba395c5b6ae4d287436b9cf7141d8e.json"
+    },
+    {
+      "id": "0a7df1638a7f1d868c0fe5c546cf30502e0981f4b13b7347732e637643026e29",
+      "name": "BulkP1Geometry/BulkJacobian/PerturbedControls/Segment/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/0a7df1638a7f1d868c0fe5c546cf30502e0981f4b13b7347732e637643026e29.json"
+    },
+    {
+      "id": "9f7547b7c6cdabc1509384b915704b8fd549bad7921631ca2b303226ed294f8d",
+      "name": "BulkP1Geometry/BulkJacobian/PerturbedControls/Segment/3/2/real_time",
+      "metric": "real_time",
+      "url": "cases/9f7547b7c6cdabc1509384b915704b8fd549bad7921631ca2b303226ed294f8d.json"
+    },
+    {
+      "id": "375bcfc790b49de5501ffa8e34ba693bfcbab08ba417a68f086a24bdb7bb23ac",
+      "name": "BulkP1Geometry/BulkJacobian/PerturbedControls/Segment/3/8/real_time",
+      "metric": "real_time",
+      "url": "cases/375bcfc790b49de5501ffa8e34ba693bfcbab08ba417a68f086a24bdb7bb23ac.json"
+    },
+    {
+      "id": "2a22aa99c2dc75d09335ed6b5e10c17194f5ca04e13a970763f40cf9feb53f01",
+      "name": "BulkP1Geometry/BulkJacobian/PerturbedControls/Tetrahedron/3/15/real_time",
+      "metric": "real_time",
+      "url": "cases/2a22aa99c2dc75d09335ed6b5e10c17194f5ca04e13a970763f40cf9feb53f01.json"
+    },
+    {
+      "id": "cdd5f986829ef6c9026a9f9bcbd375707b1d43e314f495ec9d56fab2b6e93779",
+      "name": "BulkP1Geometry/BulkJacobian/PerturbedControls/Tetrahedron/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/cdd5f986829ef6c9026a9f9bcbd375707b1d43e314f495ec9d56fab2b6e93779.json"
+    },
+    {
+      "id": "7e238d93cf657adbcc726a7bf2d7bd4e7257d8c880d3f83c40a68bb54d7f4584",
+      "name": "BulkP1Geometry/BulkJacobian/PerturbedControls/Tetrahedron/3/2/real_time",
+      "metric": "real_time",
+      "url": "cases/7e238d93cf657adbcc726a7bf2d7bd4e7257d8c880d3f83c40a68bb54d7f4584.json"
+    },
+    {
+      "id": "659b296a2c2c1e945c3db34a8d6729ee901cdfb33bfdc419f107c811d65fad6d",
+      "name": "BulkP1Geometry/BulkJacobian/PerturbedControls/Tetrahedron/3/8/real_time",
+      "metric": "real_time",
+      "url": "cases/659b296a2c2c1e945c3db34a8d6729ee901cdfb33bfdc419f107c811d65fad6d.json"
+    },
+    {
+      "id": "dbbfc0490197104a760655c245ceef6a8a16ed733ab65052e3d3328de3d01a35",
+      "name": "BulkP1Geometry/BulkJacobian/PerturbedControls/Triangle/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/dbbfc0490197104a760655c245ceef6a8a16ed733ab65052e3d3328de3d01a35.json"
+    },
+    {
+      "id": "f74a4489257de735689f3fa2ceee8258de8f7dd97c32b11923862026db18e72f",
+      "name": "BulkP1Geometry/BulkJacobian/PerturbedControls/Triangle/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/f74a4489257de735689f3fa2ceee8258de8f7dd97c32b11923862026db18e72f.json"
+    },
+    {
+      "id": "1c1bdba56ac91e1fd063d057e52cf41c5f60534686c7a6d550035b03600f7998",
+      "name": "BulkP1Geometry/BulkJacobian/PerturbedControls/Triangle/2/2/real_time",
+      "metric": "real_time",
+      "url": "cases/1c1bdba56ac91e1fd063d057e52cf41c5f60534686c7a6d550035b03600f7998.json"
+    },
+    {
+      "id": "a5085d380049a571fc21e044816fde6902087dbf563b4aeeeb587ab4e2be955d",
+      "name": "BulkP1Geometry/BulkJacobian/PerturbedControls/Triangle/2/8/real_time",
+      "metric": "real_time",
+      "url": "cases/a5085d380049a571fc21e044816fde6902087dbf563b4aeeeb587ab4e2be955d.json"
+    },
+    {
+      "id": "da74991a83e71d3fadaf03084f4d53b12dca44617e173bd4ac95e42073450270",
+      "name": "BulkP1Geometry/BulkJacobian/PerturbedControls/Triangle/3/15/real_time",
+      "metric": "real_time",
+      "url": "cases/da74991a83e71d3fadaf03084f4d53b12dca44617e173bd4ac95e42073450270.json"
+    },
+    {
+      "id": "a137c15d766d1233e4f3091d83c5b6b23bfe6b8845c3d8dd1ce50f4e22084efd",
+      "name": "BulkP1Geometry/BulkJacobian/PerturbedControls/Triangle/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/a137c15d766d1233e4f3091d83c5b6b23bfe6b8845c3d8dd1ce50f4e22084efd.json"
+    },
+    {
+      "id": "21950e8912a17bb3fb22d2bc8c6b404f404f5e30588658e6b2192695af2f9c0d",
+      "name": "BulkP1Geometry/BulkJacobian/PerturbedControls/Triangle/3/2/real_time",
+      "metric": "real_time",
+      "url": "cases/21950e8912a17bb3fb22d2bc8c6b404f404f5e30588658e6b2192695af2f9c0d.json"
+    },
+    {
+      "id": "5eab5f7ac75855f5dc39417ac694594663c44544f6b5f26b367690c5e52447a8",
+      "name": "BulkP1Geometry/BulkJacobian/PerturbedControls/Triangle/3/8/real_time",
+      "metric": "real_time",
+      "url": "cases/5eab5f7ac75855f5dc39417ac694594663c44544f6b5f26b367690c5e52447a8.json"
+    },
+    {
+      "id": "2219c4b2883d400027398e0d2832eb3a591fec96eadebcb22506d4b7bf9f6d37",
+      "name": "BulkP1Geometry/BulkJacobian/PerturbedControls/Wedge/3/15/real_time",
+      "metric": "real_time",
+      "url": "cases/2219c4b2883d400027398e0d2832eb3a591fec96eadebcb22506d4b7bf9f6d37.json"
+    },
+    {
+      "id": "252b481232d14d44780fafa6ed2fa30cc33f08e6ef544e94d6a8d53df42446d8",
+      "name": "BulkP1Geometry/BulkJacobian/PerturbedControls/Wedge/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/252b481232d14d44780fafa6ed2fa30cc33f08e6ef544e94d6a8d53df42446d8.json"
+    },
+    {
+      "id": "1651a811cf7d955d334e2c9275d1b70ef2183ba53f3e16a16601f4c6e06644e9",
+      "name": "BulkP1Geometry/BulkJacobian/PerturbedControls/Wedge/3/2/real_time",
+      "metric": "real_time",
+      "url": "cases/1651a811cf7d955d334e2c9275d1b70ef2183ba53f3e16a16601f4c6e06644e9.json"
+    },
+    {
+      "id": "5a8e9433542a9e76c9044c2fba9244ac7e429a8d6a664340b6ee6da001ba008e",
+      "name": "BulkP1Geometry/BulkJacobian/PerturbedControls/Wedge/3/8/real_time",
+      "metric": "real_time",
+      "url": "cases/5a8e9433542a9e76c9044c2fba9244ac7e429a8d6a664340b6ee6da001ba008e.json"
+    },
+    {
+      "id": "7b3b870d918a753fde17e7bf2e5001a650bf97c09f6e0311e6a32abe0a404eca",
+      "name": "BulkP1Geometry/OwnedQuadrature/Affine/Hexahedron/3/15/real_time",
+      "metric": "real_time",
+      "url": "cases/7b3b870d918a753fde17e7bf2e5001a650bf97c09f6e0311e6a32abe0a404eca.json"
+    },
+    {
+      "id": "d0b4a5d29937fe3067ce663f24425f660b3deb153be6ca2c59381a57a9fd6831",
+      "name": "BulkP1Geometry/OwnedQuadrature/Affine/Hexahedron/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/d0b4a5d29937fe3067ce663f24425f660b3deb153be6ca2c59381a57a9fd6831.json"
+    },
+    {
+      "id": "0c0675342dd98262c0ef291d5370b68924eafeb8f5f57f113f2bcba16d88b52c",
+      "name": "BulkP1Geometry/OwnedQuadrature/Affine/Hexahedron/3/2/real_time",
+      "metric": "real_time",
+      "url": "cases/0c0675342dd98262c0ef291d5370b68924eafeb8f5f57f113f2bcba16d88b52c.json"
+    },
+    {
+      "id": "9d91f8b644123eb489441d3258d80068c8ad3818e068ecba19f983956d5003e5",
+      "name": "BulkP1Geometry/OwnedQuadrature/Affine/Hexahedron/3/8/real_time",
+      "metric": "real_time",
+      "url": "cases/9d91f8b644123eb489441d3258d80068c8ad3818e068ecba19f983956d5003e5.json"
+    },
+    {
+      "id": "88e2e1349b6223d2b0c270ef1def5afdada6d4feded6e64ec0f7f02f17f18fba",
+      "name": "BulkP1Geometry/OwnedQuadrature/Affine/Point/1/15/real_time",
+      "metric": "real_time",
+      "url": "cases/88e2e1349b6223d2b0c270ef1def5afdada6d4feded6e64ec0f7f02f17f18fba.json"
+    },
+    {
+      "id": "e939da6d6dac059966e6c79a199b03b675fabfc22b89def205a802daa0130237",
+      "name": "BulkP1Geometry/OwnedQuadrature/Affine/Point/1/16/real_time",
+      "metric": "real_time",
+      "url": "cases/e939da6d6dac059966e6c79a199b03b675fabfc22b89def205a802daa0130237.json"
+    },
+    {
+      "id": "198b1167411c8b7740b5a6bb0c28db92f1c5572d7114b929450447be211bfd0a",
+      "name": "BulkP1Geometry/OwnedQuadrature/Affine/Point/1/2/real_time",
+      "metric": "real_time",
+      "url": "cases/198b1167411c8b7740b5a6bb0c28db92f1c5572d7114b929450447be211bfd0a.json"
+    },
+    {
+      "id": "c2e8cea1ef0a473001f434a9ae4a477cd2aae14ba5d0ecacbe8d9ae336af8bd8",
+      "name": "BulkP1Geometry/OwnedQuadrature/Affine/Point/1/8/real_time",
+      "metric": "real_time",
+      "url": "cases/c2e8cea1ef0a473001f434a9ae4a477cd2aae14ba5d0ecacbe8d9ae336af8bd8.json"
+    },
+    {
+      "id": "0ed7063029dc5c82d1dc19004c45efc10eead8674572de604d2a3eacce9934bf",
+      "name": "BulkP1Geometry/OwnedQuadrature/Affine/Point/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/0ed7063029dc5c82d1dc19004c45efc10eead8674572de604d2a3eacce9934bf.json"
+    },
+    {
+      "id": "852ae5f3777de7d0a9e418e24e570b3da00b2aefcc62a3649209e0d0a2201a56",
+      "name": "BulkP1Geometry/OwnedQuadrature/Affine/Point/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/852ae5f3777de7d0a9e418e24e570b3da00b2aefcc62a3649209e0d0a2201a56.json"
+    },
+    {
+      "id": "3eda7226bb1a0c9b24870f9c724246a3201064e679aef8dba5791855b20f09ea",
+      "name": "BulkP1Geometry/OwnedQuadrature/Affine/Point/2/2/real_time",
+      "metric": "real_time",
+      "url": "cases/3eda7226bb1a0c9b24870f9c724246a3201064e679aef8dba5791855b20f09ea.json"
+    },
+    {
+      "id": "e1d46e9854cd898c7e5ecd2cab42f94a706b2e70bdf210ac955b297db7eb584f",
+      "name": "BulkP1Geometry/OwnedQuadrature/Affine/Point/2/8/real_time",
+      "metric": "real_time",
+      "url": "cases/e1d46e9854cd898c7e5ecd2cab42f94a706b2e70bdf210ac955b297db7eb584f.json"
+    },
+    {
+      "id": "83cbf1536665148b2b83b67988808566b1d4461692cf1d93750f5bad7b9ec131",
+      "name": "BulkP1Geometry/OwnedQuadrature/Affine/Point/3/15/real_time",
+      "metric": "real_time",
+      "url": "cases/83cbf1536665148b2b83b67988808566b1d4461692cf1d93750f5bad7b9ec131.json"
+    },
+    {
+      "id": "24eacc4b572eaea885e3d1a592596fdcdb1db2b4b8f453185f62b3ca2b15f382",
+      "name": "BulkP1Geometry/OwnedQuadrature/Affine/Point/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/24eacc4b572eaea885e3d1a592596fdcdb1db2b4b8f453185f62b3ca2b15f382.json"
+    },
+    {
+      "id": "ff73cd9ee057604eeee946c774ef9670f3caa2add9d83a5ad2499ada4d43bf3e",
+      "name": "BulkP1Geometry/OwnedQuadrature/Affine/Point/3/2/real_time",
+      "metric": "real_time",
+      "url": "cases/ff73cd9ee057604eeee946c774ef9670f3caa2add9d83a5ad2499ada4d43bf3e.json"
+    },
+    {
+      "id": "6939db6d1e422f7f69be070281618f436ecc5ac7b72fe2b72f722b3c12acbb32",
+      "name": "BulkP1Geometry/OwnedQuadrature/Affine/Point/3/8/real_time",
+      "metric": "real_time",
+      "url": "cases/6939db6d1e422f7f69be070281618f436ecc5ac7b72fe2b72f722b3c12acbb32.json"
+    },
+    {
+      "id": "b53a8b1568e34d35c50a4601302587e2cc33fbfd5926f6bcde6806d19906d28d",
+      "name": "BulkP1Geometry/OwnedQuadrature/Affine/Pyramid/3/10/real_time",
+      "metric": "real_time",
+      "url": "cases/b53a8b1568e34d35c50a4601302587e2cc33fbfd5926f6bcde6806d19906d28d.json"
+    },
+    {
+      "id": "fb20a5a94afc639ec7e2a38ba49c42133fad80e9b3c045c1e476d2c34805c9b4",
+      "name": "BulkP1Geometry/OwnedQuadrature/Affine/Pyramid/3/11/real_time",
+      "metric": "real_time",
+      "url": "cases/fb20a5a94afc639ec7e2a38ba49c42133fad80e9b3c045c1e476d2c34805c9b4.json"
+    },
+    {
+      "id": "e3c6768803a9f4f8add5a4f03bfd8baafb99a4b059532989818e11b94584b67e",
+      "name": "BulkP1Geometry/OwnedQuadrature/Affine/Pyramid/3/15/real_time",
+      "metric": "real_time",
+      "url": "cases/e3c6768803a9f4f8add5a4f03bfd8baafb99a4b059532989818e11b94584b67e.json"
+    },
+    {
+      "id": "33dd9e6002d4e6c500af7f845e7e184ae79a6d71c308ebe47b4e146d37e93441",
+      "name": "BulkP1Geometry/OwnedQuadrature/Affine/Pyramid/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/33dd9e6002d4e6c500af7f845e7e184ae79a6d71c308ebe47b4e146d37e93441.json"
+    },
+    {
+      "id": "1028987830601c71cf4a96a9d61fc183edc7b5c573e55a89f06a68ff540b4ca0",
+      "name": "BulkP1Geometry/OwnedQuadrature/Affine/Pyramid/3/2/real_time",
+      "metric": "real_time",
+      "url": "cases/1028987830601c71cf4a96a9d61fc183edc7b5c573e55a89f06a68ff540b4ca0.json"
+    },
+    {
+      "id": "125422ed5c209f9102fd6191e78a7e1fd262d6a9124b9b5213bf91a34243c111",
+      "name": "BulkP1Geometry/OwnedQuadrature/Affine/Pyramid/3/8/real_time",
+      "metric": "real_time",
+      "url": "cases/125422ed5c209f9102fd6191e78a7e1fd262d6a9124b9b5213bf91a34243c111.json"
+    },
+    {
+      "id": "b8b9198f454632b84b65f7be5db33ddba12c8e228ef78508bef001f948036eaf",
+      "name": "BulkP1Geometry/OwnedQuadrature/Affine/Quadrilateral/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/b8b9198f454632b84b65f7be5db33ddba12c8e228ef78508bef001f948036eaf.json"
+    },
+    {
+      "id": "6a920bf14b8c402338381387c4eeedb29865e1a32cdd65b9cce7b20cfbf037b0",
+      "name": "BulkP1Geometry/OwnedQuadrature/Affine/Quadrilateral/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/6a920bf14b8c402338381387c4eeedb29865e1a32cdd65b9cce7b20cfbf037b0.json"
+    },
+    {
+      "id": "48926e40b627fc5344e5806ea877b400e0f39042c54156cf5dbf71d9cc7c8296",
+      "name": "BulkP1Geometry/OwnedQuadrature/Affine/Quadrilateral/2/2/real_time",
+      "metric": "real_time",
+      "url": "cases/48926e40b627fc5344e5806ea877b400e0f39042c54156cf5dbf71d9cc7c8296.json"
+    },
+    {
+      "id": "793abb13d4a9e7abf0aa2e0a757b66ab1bc69454b658e680de204bd2bfaef456",
+      "name": "BulkP1Geometry/OwnedQuadrature/Affine/Quadrilateral/2/8/real_time",
+      "metric": "real_time",
+      "url": "cases/793abb13d4a9e7abf0aa2e0a757b66ab1bc69454b658e680de204bd2bfaef456.json"
+    },
+    {
+      "id": "1301d168a701c083b0753e192bacb367087431e95cf0aaed6ddce933b6378b18",
+      "name": "BulkP1Geometry/OwnedQuadrature/Affine/Quadrilateral/3/15/real_time",
+      "metric": "real_time",
+      "url": "cases/1301d168a701c083b0753e192bacb367087431e95cf0aaed6ddce933b6378b18.json"
+    },
+    {
+      "id": "6c368e840692f6902cc241fa2078848479da06ee0d30e015ebd4a493719a751a",
+      "name": "BulkP1Geometry/OwnedQuadrature/Affine/Quadrilateral/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/6c368e840692f6902cc241fa2078848479da06ee0d30e015ebd4a493719a751a.json"
+    },
+    {
+      "id": "bad861b28b875600f5d039f73eded5bd1f2b720e32e29da0b22e1cbcf05b946c",
+      "name": "BulkP1Geometry/OwnedQuadrature/Affine/Quadrilateral/3/2/real_time",
+      "metric": "real_time",
+      "url": "cases/bad861b28b875600f5d039f73eded5bd1f2b720e32e29da0b22e1cbcf05b946c.json"
+    },
+    {
+      "id": "2f8088f7fc063cf747e13f9384b241b53962e072eafb3cbb21e9267461ee91a5",
+      "name": "BulkP1Geometry/OwnedQuadrature/Affine/Quadrilateral/3/8/real_time",
+      "metric": "real_time",
+      "url": "cases/2f8088f7fc063cf747e13f9384b241b53962e072eafb3cbb21e9267461ee91a5.json"
+    },
+    {
+      "id": "4c469ca0ceba79ad1c0a990ad3fb3c02d791905e9d1d0fe67ada99daff18ee58",
+      "name": "BulkP1Geometry/OwnedQuadrature/Affine/Segment/1/15/real_time",
+      "metric": "real_time",
+      "url": "cases/4c469ca0ceba79ad1c0a990ad3fb3c02d791905e9d1d0fe67ada99daff18ee58.json"
+    },
+    {
+      "id": "4b16681a0eed533e7012b1f26e76bcb62a5ce13bfa4a0af5b64ebfa479f1d433",
+      "name": "BulkP1Geometry/OwnedQuadrature/Affine/Segment/1/16/real_time",
+      "metric": "real_time",
+      "url": "cases/4b16681a0eed533e7012b1f26e76bcb62a5ce13bfa4a0af5b64ebfa479f1d433.json"
+    },
+    {
+      "id": "6303af35cab1576fbc67f20cd74f5d83b9ff0d728375d53e66e172af0347b9e7",
+      "name": "BulkP1Geometry/OwnedQuadrature/Affine/Segment/1/2/real_time",
+      "metric": "real_time",
+      "url": "cases/6303af35cab1576fbc67f20cd74f5d83b9ff0d728375d53e66e172af0347b9e7.json"
+    },
+    {
+      "id": "01779f9b6d90b777b0c931fb3c0a06c4dd39cf8606d1af236a05eb2ba344ffc5",
+      "name": "BulkP1Geometry/OwnedQuadrature/Affine/Segment/1/8/real_time",
+      "metric": "real_time",
+      "url": "cases/01779f9b6d90b777b0c931fb3c0a06c4dd39cf8606d1af236a05eb2ba344ffc5.json"
+    },
+    {
+      "id": "0f197650bc914aa9680ce33da4a30f09395b277bd81f5715e8dda17f8474b12c",
+      "name": "BulkP1Geometry/OwnedQuadrature/Affine/Segment/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/0f197650bc914aa9680ce33da4a30f09395b277bd81f5715e8dda17f8474b12c.json"
+    },
+    {
+      "id": "dc7171da07e348f7c8a1a43e0aecc9cb4b09be68655f072df0a43a9d5d64cf07",
+      "name": "BulkP1Geometry/OwnedQuadrature/Affine/Segment/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/dc7171da07e348f7c8a1a43e0aecc9cb4b09be68655f072df0a43a9d5d64cf07.json"
+    },
+    {
+      "id": "fcf60cebe9af2205500beae0d1438f06d504ecbeb4ba2686f53d7710f318e550",
+      "name": "BulkP1Geometry/OwnedQuadrature/Affine/Segment/2/2/real_time",
+      "metric": "real_time",
+      "url": "cases/fcf60cebe9af2205500beae0d1438f06d504ecbeb4ba2686f53d7710f318e550.json"
+    },
+    {
+      "id": "c16cab21af9e6efc034cc7d94f4fa523b783edb3adff8cc6773147d6aa83605c",
+      "name": "BulkP1Geometry/OwnedQuadrature/Affine/Segment/2/8/real_time",
+      "metric": "real_time",
+      "url": "cases/c16cab21af9e6efc034cc7d94f4fa523b783edb3adff8cc6773147d6aa83605c.json"
+    },
+    {
+      "id": "d161b27803e277b330a7032c47ea68d1cdf30bfb58850363e1154e1a4f303310",
+      "name": "BulkP1Geometry/OwnedQuadrature/Affine/Segment/3/15/real_time",
+      "metric": "real_time",
+      "url": "cases/d161b27803e277b330a7032c47ea68d1cdf30bfb58850363e1154e1a4f303310.json"
+    },
+    {
+      "id": "ffc73acc7069556e86af6c9e9c2a717c0275b827b3dedc468c7b13f398d72012",
+      "name": "BulkP1Geometry/OwnedQuadrature/Affine/Segment/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/ffc73acc7069556e86af6c9e9c2a717c0275b827b3dedc468c7b13f398d72012.json"
+    },
+    {
+      "id": "cc9099ce519ec76802d3b18739bb6c8223f13d287e604d34cefe09fa49dbec02",
+      "name": "BulkP1Geometry/OwnedQuadrature/Affine/Segment/3/2/real_time",
+      "metric": "real_time",
+      "url": "cases/cc9099ce519ec76802d3b18739bb6c8223f13d287e604d34cefe09fa49dbec02.json"
+    },
+    {
+      "id": "ddadbba79b37c00e2f2bfb7623a5c36a8c6d1fea5846e2ecbe829a3d9332a180",
+      "name": "BulkP1Geometry/OwnedQuadrature/Affine/Segment/3/8/real_time",
+      "metric": "real_time",
+      "url": "cases/ddadbba79b37c00e2f2bfb7623a5c36a8c6d1fea5846e2ecbe829a3d9332a180.json"
+    },
+    {
+      "id": "7289ee99bbe7c771e0c01a6a42cddc71964f52abd14deb842dd3278906456542",
+      "name": "BulkP1Geometry/OwnedQuadrature/Affine/Tetrahedron/3/15/real_time",
+      "metric": "real_time",
+      "url": "cases/7289ee99bbe7c771e0c01a6a42cddc71964f52abd14deb842dd3278906456542.json"
+    },
+    {
+      "id": "fe786725cd1f086d2d10710aaab2c957dbcb10192101770829fcce17cab0c907",
+      "name": "BulkP1Geometry/OwnedQuadrature/Affine/Tetrahedron/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/fe786725cd1f086d2d10710aaab2c957dbcb10192101770829fcce17cab0c907.json"
+    },
+    {
+      "id": "a57681a693a15dc4597a129c5f0986b3d9ba3f8bab194259fe1d5a4d1db061f2",
+      "name": "BulkP1Geometry/OwnedQuadrature/Affine/Tetrahedron/3/2/real_time",
+      "metric": "real_time",
+      "url": "cases/a57681a693a15dc4597a129c5f0986b3d9ba3f8bab194259fe1d5a4d1db061f2.json"
+    },
+    {
+      "id": "81642281a2b8f37c16f3dc3196f087f746676aa22ad4a76beb8fde2afa3911dc",
+      "name": "BulkP1Geometry/OwnedQuadrature/Affine/Tetrahedron/3/8/real_time",
+      "metric": "real_time",
+      "url": "cases/81642281a2b8f37c16f3dc3196f087f746676aa22ad4a76beb8fde2afa3911dc.json"
+    },
+    {
+      "id": "f5295038ac84f962f34bbf9c2fd03ef5d6fa094659e3743e1697f038b84255b5",
+      "name": "BulkP1Geometry/OwnedQuadrature/Affine/Triangle/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/f5295038ac84f962f34bbf9c2fd03ef5d6fa094659e3743e1697f038b84255b5.json"
+    },
+    {
+      "id": "257c0cfe5f66ccd6eb0a9279860cadf6962d200f26ab828f320bfc3ce6f475c2",
+      "name": "BulkP1Geometry/OwnedQuadrature/Affine/Triangle/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/257c0cfe5f66ccd6eb0a9279860cadf6962d200f26ab828f320bfc3ce6f475c2.json"
+    },
+    {
+      "id": "ccdcd0dc9e4fe4482e8520eda74d01f6e2e8778ae793bf13b59b2da28d14c3d0",
+      "name": "BulkP1Geometry/OwnedQuadrature/Affine/Triangle/2/2/real_time",
+      "metric": "real_time",
+      "url": "cases/ccdcd0dc9e4fe4482e8520eda74d01f6e2e8778ae793bf13b59b2da28d14c3d0.json"
+    },
+    {
+      "id": "04c63081a1e2160b287ce6bba7c2c0449f6fb93c9be9d10aa9c3e107af4813c3",
+      "name": "BulkP1Geometry/OwnedQuadrature/Affine/Triangle/2/8/real_time",
+      "metric": "real_time",
+      "url": "cases/04c63081a1e2160b287ce6bba7c2c0449f6fb93c9be9d10aa9c3e107af4813c3.json"
+    },
+    {
+      "id": "66c4511a7b59cb071efa4e300fc226da77d196b50fd920c9e5e5515ba04ae20a",
+      "name": "BulkP1Geometry/OwnedQuadrature/Affine/Triangle/3/15/real_time",
+      "metric": "real_time",
+      "url": "cases/66c4511a7b59cb071efa4e300fc226da77d196b50fd920c9e5e5515ba04ae20a.json"
+    },
+    {
+      "id": "43b15769847a6769c4875a26085a0d13be65fa469049f097635c5c499eb12750",
+      "name": "BulkP1Geometry/OwnedQuadrature/Affine/Triangle/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/43b15769847a6769c4875a26085a0d13be65fa469049f097635c5c499eb12750.json"
+    },
+    {
+      "id": "c921301de82ce3394317de071f236463d9670de6e14580bd5fa4de7a1a3bdeb4",
+      "name": "BulkP1Geometry/OwnedQuadrature/Affine/Triangle/3/2/real_time",
+      "metric": "real_time",
+      "url": "cases/c921301de82ce3394317de071f236463d9670de6e14580bd5fa4de7a1a3bdeb4.json"
+    },
+    {
+      "id": "8f882ad2febe4945032ad1cebab1422e823f7c6a0de571b66a1cc8c0000175fe",
+      "name": "BulkP1Geometry/OwnedQuadrature/Affine/Triangle/3/8/real_time",
+      "metric": "real_time",
+      "url": "cases/8f882ad2febe4945032ad1cebab1422e823f7c6a0de571b66a1cc8c0000175fe.json"
+    },
+    {
+      "id": "4c845352e413c8a2b1691c4b351abe85e3e587c6415d895f12dec35a27b7cced",
+      "name": "BulkP1Geometry/OwnedQuadrature/Affine/Wedge/3/15/real_time",
+      "metric": "real_time",
+      "url": "cases/4c845352e413c8a2b1691c4b351abe85e3e587c6415d895f12dec35a27b7cced.json"
+    },
+    {
+      "id": "51f21e9618c082f17730c285fa7e0b2f3274187a1544e97f8bd8ce3a53baa134",
+      "name": "BulkP1Geometry/OwnedQuadrature/Affine/Wedge/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/51f21e9618c082f17730c285fa7e0b2f3274187a1544e97f8bd8ce3a53baa134.json"
+    },
+    {
+      "id": "fa0e1af53bb0fd7617313d9c74c6834f0fa6793e0f1e0e196d276c58d8719740",
+      "name": "BulkP1Geometry/OwnedQuadrature/Affine/Wedge/3/2/real_time",
+      "metric": "real_time",
+      "url": "cases/fa0e1af53bb0fd7617313d9c74c6834f0fa6793e0f1e0e196d276c58d8719740.json"
+    },
+    {
+      "id": "8cc7af9d63c0f9378ceb9db07532c940562cbbf8e14530c84470713bed22e0c0",
+      "name": "BulkP1Geometry/OwnedQuadrature/Affine/Wedge/3/8/real_time",
+      "metric": "real_time",
+      "url": "cases/8cc7af9d63c0f9378ceb9db07532c940562cbbf8e14530c84470713bed22e0c0.json"
+    },
+    {
+      "id": "5dd7b9bcc55e51934284d930c1f1e40835d54adb8eaab18132987f646a6eee47",
+      "name": "BulkP1Geometry/OwnedQuadrature/GaussianFactor/Affine/Tetrahedron/3/10/real_time",
+      "metric": "real_time",
+      "url": "cases/5dd7b9bcc55e51934284d930c1f1e40835d54adb8eaab18132987f646a6eee47.json"
+    },
+    {
+      "id": "1b74250da5c2502762d0544443574ae60b1f53df7b32a2358cb2917362736c27",
+      "name": "BulkP1Geometry/OwnedQuadrature/GaussianFactor/Affine/Tetrahedron/3/12/real_time",
+      "metric": "real_time",
+      "url": "cases/1b74250da5c2502762d0544443574ae60b1f53df7b32a2358cb2917362736c27.json"
+    },
+    {
+      "id": "7b64bb324d6fc37d1c0cd7da7f29d34db2b8ebc5ff21fb16e4fe9c737610f2d0",
+      "name": "BulkP1Geometry/OwnedQuadrature/GaussianFactor/Affine/Tetrahedron/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/7b64bb324d6fc37d1c0cd7da7f29d34db2b8ebc5ff21fb16e4fe9c737610f2d0.json"
+    },
+    {
+      "id": "52ebb9aece448303ad3a4bd67fdf1d57115d6badec2d4c2a094cb4d7e7dc447e",
+      "name": "BulkP1Geometry/OwnedQuadrature/GaussianFactor/Affine/Tetrahedron/3/3/real_time",
+      "metric": "real_time",
+      "url": "cases/52ebb9aece448303ad3a4bd67fdf1d57115d6badec2d4c2a094cb4d7e7dc447e.json"
+    },
+    {
+      "id": "4191157d802cccfa7ef8b3c23d6da843162b03bfb469482422c269c81d9c12c7",
+      "name": "BulkP1Geometry/OwnedQuadrature/GaussianFactor/Affine/Tetrahedron/3/4/real_time",
+      "metric": "real_time",
+      "url": "cases/4191157d802cccfa7ef8b3c23d6da843162b03bfb469482422c269c81d9c12c7.json"
+    },
+    {
+      "id": "104ff911111ae635c74c949de860d04325aac2150162c8f167249547d17df17e",
+      "name": "BulkP1Geometry/OwnedQuadrature/GaussianFactor/Affine/Tetrahedron/3/5/real_time",
+      "metric": "real_time",
+      "url": "cases/104ff911111ae635c74c949de860d04325aac2150162c8f167249547d17df17e.json"
+    },
+    {
+      "id": "0b5e67660703987f23ee1aab829e9a01d2a42d89f311a1f796731736468ed028",
+      "name": "BulkP1Geometry/OwnedQuadrature/GaussianFactor/Affine/Tetrahedron/3/6/real_time",
+      "metric": "real_time",
+      "url": "cases/0b5e67660703987f23ee1aab829e9a01d2a42d89f311a1f796731736468ed028.json"
+    },
+    {
+      "id": "0b16cf4108d8554c3d36cc8228f45a2d58c942fa4fa994dc70dd80ec79a20031",
+      "name": "BulkP1Geometry/OwnedQuadrature/GaussianFactor/Affine/Tetrahedron/3/7/real_time",
+      "metric": "real_time",
+      "url": "cases/0b16cf4108d8554c3d36cc8228f45a2d58c942fa4fa994dc70dd80ec79a20031.json"
+    },
+    {
+      "id": "0327eb5b1ef5c097f2b58e1ff4b481a2011ff0d38654ae99adf35f0012835f7d",
+      "name": "BulkP1Geometry/OwnedQuadrature/GaussianFactor/Affine/Tetrahedron/3/8/real_time",
+      "metric": "real_time",
+      "url": "cases/0327eb5b1ef5c097f2b58e1ff4b481a2011ff0d38654ae99adf35f0012835f7d.json"
+    },
+    {
+      "id": "7c3f78af261c3c38baf16df52c80d99096c80dc51cab7220c841ff021e3a47fc",
+      "name": "BulkP1Geometry/OwnedQuadrature/GaussianFactor/Affine/Tetrahedron/3/9/real_time",
+      "metric": "real_time",
+      "url": "cases/7c3f78af261c3c38baf16df52c80d99096c80dc51cab7220c841ff021e3a47fc.json"
+    },
+    {
+      "id": "79667323959f63fdeb9c883a2ef4136f5614913260cc9e8d4ef21a6f9893eeaa",
+      "name": "BulkP1Geometry/OwnedQuadrature/GaussianFactor/PerturbedControls/Tetrahedron/3/10/real_time",
+      "metric": "real_time",
+      "url": "cases/79667323959f63fdeb9c883a2ef4136f5614913260cc9e8d4ef21a6f9893eeaa.json"
+    },
+    {
+      "id": "313bcd8812dbedfa3500f538b427ec6ab6dd0bd2073a31f4c63e92680d17aaee",
+      "name": "BulkP1Geometry/OwnedQuadrature/GaussianFactor/PerturbedControls/Tetrahedron/3/12/real_time",
+      "metric": "real_time",
+      "url": "cases/313bcd8812dbedfa3500f538b427ec6ab6dd0bd2073a31f4c63e92680d17aaee.json"
+    },
+    {
+      "id": "405b039c9c9f2decf152da9235b5d20d12eda7d5fa35f37f0a72fe17026f53e0",
+      "name": "BulkP1Geometry/OwnedQuadrature/GaussianFactor/PerturbedControls/Tetrahedron/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/405b039c9c9f2decf152da9235b5d20d12eda7d5fa35f37f0a72fe17026f53e0.json"
+    },
+    {
+      "id": "992a2123366b7514d06fcdd7f5a4b3881b56c86da7e378869a4a784c671c30d7",
+      "name": "BulkP1Geometry/OwnedQuadrature/GaussianFactor/PerturbedControls/Tetrahedron/3/3/real_time",
+      "metric": "real_time",
+      "url": "cases/992a2123366b7514d06fcdd7f5a4b3881b56c86da7e378869a4a784c671c30d7.json"
+    },
+    {
+      "id": "bb4a7bb3037ee5ff0fdae4a51c944256b95e58354937fda622ac147639f8e6ca",
+      "name": "BulkP1Geometry/OwnedQuadrature/GaussianFactor/PerturbedControls/Tetrahedron/3/4/real_time",
+      "metric": "real_time",
+      "url": "cases/bb4a7bb3037ee5ff0fdae4a51c944256b95e58354937fda622ac147639f8e6ca.json"
+    },
+    {
+      "id": "53437f53c5a19d452eda6881e0e8c7e2f94079068bb4d02112ce6753c47f2cf0",
+      "name": "BulkP1Geometry/OwnedQuadrature/GaussianFactor/PerturbedControls/Tetrahedron/3/5/real_time",
+      "metric": "real_time",
+      "url": "cases/53437f53c5a19d452eda6881e0e8c7e2f94079068bb4d02112ce6753c47f2cf0.json"
+    },
+    {
+      "id": "3c254cf1532b7818e9e5e7d0c4748d7eaabb2ff29e815ce4478b856caf72977d",
+      "name": "BulkP1Geometry/OwnedQuadrature/GaussianFactor/PerturbedControls/Tetrahedron/3/6/real_time",
+      "metric": "real_time",
+      "url": "cases/3c254cf1532b7818e9e5e7d0c4748d7eaabb2ff29e815ce4478b856caf72977d.json"
+    },
+    {
+      "id": "026cec02ad81ce13660cf8f96d688ccd6c8b14f8b3dce4ce6bf8ea4e26a11728",
+      "name": "BulkP1Geometry/OwnedQuadrature/GaussianFactor/PerturbedControls/Tetrahedron/3/7/real_time",
+      "metric": "real_time",
+      "url": "cases/026cec02ad81ce13660cf8f96d688ccd6c8b14f8b3dce4ce6bf8ea4e26a11728.json"
+    },
+    {
+      "id": "686b4bd9b5ebf285e59e00713082e6d394a110d01cbdb573060a17f2d3f93744",
+      "name": "BulkP1Geometry/OwnedQuadrature/GaussianFactor/PerturbedControls/Tetrahedron/3/8/real_time",
+      "metric": "real_time",
+      "url": "cases/686b4bd9b5ebf285e59e00713082e6d394a110d01cbdb573060a17f2d3f93744.json"
+    },
+    {
+      "id": "bbe2673ce289cc614c4f01ba956bb5c1adb2e3a198ec5669f387614b92bc90d4",
+      "name": "BulkP1Geometry/OwnedQuadrature/GaussianFactor/PerturbedControls/Tetrahedron/3/9/real_time",
+      "metric": "real_time",
+      "url": "cases/bbe2673ce289cc614c4f01ba956bb5c1adb2e3a198ec5669f387614b92bc90d4.json"
+    },
+    {
+      "id": "b7f62b3d763773ff983cd58d5182d62edd9a722f373896087de95a3c14668487",
+      "name": "BulkP1Geometry/OwnedQuadrature/PerturbedControls/Hexahedron/3/15/real_time",
+      "metric": "real_time",
+      "url": "cases/b7f62b3d763773ff983cd58d5182d62edd9a722f373896087de95a3c14668487.json"
+    },
+    {
+      "id": "fe776a8766381242670d4430124b459286cd36575523c9690b9e552abe666e98",
+      "name": "BulkP1Geometry/OwnedQuadrature/PerturbedControls/Hexahedron/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/fe776a8766381242670d4430124b459286cd36575523c9690b9e552abe666e98.json"
+    },
+    {
+      "id": "a9de705166ceea6571bf709572a3f7fd438df101d5f18339a4f90963c98dbe72",
+      "name": "BulkP1Geometry/OwnedQuadrature/PerturbedControls/Hexahedron/3/2/real_time",
+      "metric": "real_time",
+      "url": "cases/a9de705166ceea6571bf709572a3f7fd438df101d5f18339a4f90963c98dbe72.json"
+    },
+    {
+      "id": "8c40a7b43e7c615c19fd2ce1328ee7a9066196fc18d8b6fb32cf2f6149db1cef",
+      "name": "BulkP1Geometry/OwnedQuadrature/PerturbedControls/Hexahedron/3/8/real_time",
+      "metric": "real_time",
+      "url": "cases/8c40a7b43e7c615c19fd2ce1328ee7a9066196fc18d8b6fb32cf2f6149db1cef.json"
+    },
+    {
+      "id": "867b580b3b18304b655b12af0267912e95774be4d29d66e90f76aeca4ed25be6",
+      "name": "BulkP1Geometry/OwnedQuadrature/PerturbedControls/Point/1/15/real_time",
+      "metric": "real_time",
+      "url": "cases/867b580b3b18304b655b12af0267912e95774be4d29d66e90f76aeca4ed25be6.json"
+    },
+    {
+      "id": "220f43c0b4de65e76a7c0b54772d1453905bf231c93e8c1d9e296ab001efb465",
+      "name": "BulkP1Geometry/OwnedQuadrature/PerturbedControls/Point/1/16/real_time",
+      "metric": "real_time",
+      "url": "cases/220f43c0b4de65e76a7c0b54772d1453905bf231c93e8c1d9e296ab001efb465.json"
+    },
+    {
+      "id": "f7ba6273c58d5ec8fb0c65df41f99e437b6ffa0e314b68e869932eeb78b2e8d5",
+      "name": "BulkP1Geometry/OwnedQuadrature/PerturbedControls/Point/1/2/real_time",
+      "metric": "real_time",
+      "url": "cases/f7ba6273c58d5ec8fb0c65df41f99e437b6ffa0e314b68e869932eeb78b2e8d5.json"
+    },
+    {
+      "id": "1f87c9d0eeb55e62d69ea94e948e1f5f7d3e17c3144d51ef31985c0ac843239b",
+      "name": "BulkP1Geometry/OwnedQuadrature/PerturbedControls/Point/1/8/real_time",
+      "metric": "real_time",
+      "url": "cases/1f87c9d0eeb55e62d69ea94e948e1f5f7d3e17c3144d51ef31985c0ac843239b.json"
+    },
+    {
+      "id": "3c43ceae017b5a1bd376795d58a6487047d75d679bb48e1d2496b4ad3e747e18",
+      "name": "BulkP1Geometry/OwnedQuadrature/PerturbedControls/Point/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/3c43ceae017b5a1bd376795d58a6487047d75d679bb48e1d2496b4ad3e747e18.json"
+    },
+    {
+      "id": "5ae0e83b3d0d694b455c5798de558cb5c8cbba059de6c8a34e2e968f6f2a05d6",
+      "name": "BulkP1Geometry/OwnedQuadrature/PerturbedControls/Point/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/5ae0e83b3d0d694b455c5798de558cb5c8cbba059de6c8a34e2e968f6f2a05d6.json"
+    },
+    {
+      "id": "d637451d043c7c349ea9886c6ce44d83cf924b507d2dd3280c3cd313199d4977",
+      "name": "BulkP1Geometry/OwnedQuadrature/PerturbedControls/Point/2/2/real_time",
+      "metric": "real_time",
+      "url": "cases/d637451d043c7c349ea9886c6ce44d83cf924b507d2dd3280c3cd313199d4977.json"
+    },
+    {
+      "id": "fd0473f6c3b8e3a4dbc74d1909696aac202d29465b8ae32f74aa8b08b8b5c427",
+      "name": "BulkP1Geometry/OwnedQuadrature/PerturbedControls/Point/2/8/real_time",
+      "metric": "real_time",
+      "url": "cases/fd0473f6c3b8e3a4dbc74d1909696aac202d29465b8ae32f74aa8b08b8b5c427.json"
+    },
+    {
+      "id": "386d232c1ef30f9322654cca7ee980f2dfcdb8e84bec44378168c0002e27c38d",
+      "name": "BulkP1Geometry/OwnedQuadrature/PerturbedControls/Point/3/15/real_time",
+      "metric": "real_time",
+      "url": "cases/386d232c1ef30f9322654cca7ee980f2dfcdb8e84bec44378168c0002e27c38d.json"
+    },
+    {
+      "id": "3d5d08ca51ab3762a0dd58b9165a7733490c459ebd222870cef3373a5ee052c4",
+      "name": "BulkP1Geometry/OwnedQuadrature/PerturbedControls/Point/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/3d5d08ca51ab3762a0dd58b9165a7733490c459ebd222870cef3373a5ee052c4.json"
+    },
+    {
+      "id": "1f664b1275b3151c8c9b8e3f123cef4d69b1d08247307e284eb6c9a79175e178",
+      "name": "BulkP1Geometry/OwnedQuadrature/PerturbedControls/Point/3/2/real_time",
+      "metric": "real_time",
+      "url": "cases/1f664b1275b3151c8c9b8e3f123cef4d69b1d08247307e284eb6c9a79175e178.json"
+    },
+    {
+      "id": "c317008135bbd19cb079daff6a095861c0615df27aec033f2c5f3321603ac0aa",
+      "name": "BulkP1Geometry/OwnedQuadrature/PerturbedControls/Point/3/8/real_time",
+      "metric": "real_time",
+      "url": "cases/c317008135bbd19cb079daff6a095861c0615df27aec033f2c5f3321603ac0aa.json"
+    },
+    {
+      "id": "9b3f5b249d6cf2c572804eb64a16ddaecb1bf69f8505c10943b4c43951b3fd04",
+      "name": "BulkP1Geometry/OwnedQuadrature/PerturbedControls/Pyramid/3/10/real_time",
+      "metric": "real_time",
+      "url": "cases/9b3f5b249d6cf2c572804eb64a16ddaecb1bf69f8505c10943b4c43951b3fd04.json"
+    },
+    {
+      "id": "5552d32fa4bd6938b2b11cecba4d9c064b4387e6ab5dd76c91bc671c428fb03a",
+      "name": "BulkP1Geometry/OwnedQuadrature/PerturbedControls/Pyramid/3/11/real_time",
+      "metric": "real_time",
+      "url": "cases/5552d32fa4bd6938b2b11cecba4d9c064b4387e6ab5dd76c91bc671c428fb03a.json"
+    },
+    {
+      "id": "f6efe7026654ce83c1025b19953e4066dd0610bf26ecc88728ad7f10ae779f48",
+      "name": "BulkP1Geometry/OwnedQuadrature/PerturbedControls/Pyramid/3/15/real_time",
+      "metric": "real_time",
+      "url": "cases/f6efe7026654ce83c1025b19953e4066dd0610bf26ecc88728ad7f10ae779f48.json"
+    },
+    {
+      "id": "754e1797b50f974e8f2e8308b742b220f12f723dbc173ae0029b68dfbd0fae9b",
+      "name": "BulkP1Geometry/OwnedQuadrature/PerturbedControls/Pyramid/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/754e1797b50f974e8f2e8308b742b220f12f723dbc173ae0029b68dfbd0fae9b.json"
+    },
+    {
+      "id": "c223be5a966346e5cb0a4a1d9be8c4bf317ce5c1cac416f8a68c3d59dd718d9f",
+      "name": "BulkP1Geometry/OwnedQuadrature/PerturbedControls/Pyramid/3/2/real_time",
+      "metric": "real_time",
+      "url": "cases/c223be5a966346e5cb0a4a1d9be8c4bf317ce5c1cac416f8a68c3d59dd718d9f.json"
+    },
+    {
+      "id": "dbb6ab5ebd6b5839664d08a9132da51a6d6107481af78a632f2f72e729fdda04",
+      "name": "BulkP1Geometry/OwnedQuadrature/PerturbedControls/Pyramid/3/8/real_time",
+      "metric": "real_time",
+      "url": "cases/dbb6ab5ebd6b5839664d08a9132da51a6d6107481af78a632f2f72e729fdda04.json"
+    },
+    {
+      "id": "62b0e8dc5a3f62a7842accd3e1dd8dd82b704038065f99f17bad06be81144141",
+      "name": "BulkP1Geometry/OwnedQuadrature/PerturbedControls/Quadrilateral/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/62b0e8dc5a3f62a7842accd3e1dd8dd82b704038065f99f17bad06be81144141.json"
+    },
+    {
+      "id": "66390ddb8a78e7eff325a02545c8885e0ec5037025479a9e571931d7e6a9bfc3",
+      "name": "BulkP1Geometry/OwnedQuadrature/PerturbedControls/Quadrilateral/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/66390ddb8a78e7eff325a02545c8885e0ec5037025479a9e571931d7e6a9bfc3.json"
+    },
+    {
+      "id": "d4b97b2855b8e9512dbfcb4ecd3d1721d0398eefdcce4fa72ae60c5ea0022e3b",
+      "name": "BulkP1Geometry/OwnedQuadrature/PerturbedControls/Quadrilateral/2/2/real_time",
+      "metric": "real_time",
+      "url": "cases/d4b97b2855b8e9512dbfcb4ecd3d1721d0398eefdcce4fa72ae60c5ea0022e3b.json"
+    },
+    {
+      "id": "4dccab5aa76c5695085e1b1b76fcad6d91ff2cd38a918629651e4cb84a169d56",
+      "name": "BulkP1Geometry/OwnedQuadrature/PerturbedControls/Quadrilateral/2/8/real_time",
+      "metric": "real_time",
+      "url": "cases/4dccab5aa76c5695085e1b1b76fcad6d91ff2cd38a918629651e4cb84a169d56.json"
+    },
+    {
+      "id": "138dbf04a0bd3ac628f98fea641fdc7e7e49db5c3940f9878027e0f1d99be9a6",
+      "name": "BulkP1Geometry/OwnedQuadrature/PerturbedControls/Quadrilateral/3/15/real_time",
+      "metric": "real_time",
+      "url": "cases/138dbf04a0bd3ac628f98fea641fdc7e7e49db5c3940f9878027e0f1d99be9a6.json"
+    },
+    {
+      "id": "47ff4b45db286ad71ef037c46fdf3c44f213047abde976e6069f9b3474b89caf",
+      "name": "BulkP1Geometry/OwnedQuadrature/PerturbedControls/Quadrilateral/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/47ff4b45db286ad71ef037c46fdf3c44f213047abde976e6069f9b3474b89caf.json"
+    },
+    {
+      "id": "ce13de94985e4b35f359fb53bf8efb59cd34691f69be3dd306e7c33b4e12ea86",
+      "name": "BulkP1Geometry/OwnedQuadrature/PerturbedControls/Quadrilateral/3/2/real_time",
+      "metric": "real_time",
+      "url": "cases/ce13de94985e4b35f359fb53bf8efb59cd34691f69be3dd306e7c33b4e12ea86.json"
+    },
+    {
+      "id": "3d81020afb8f712b215f9dfdb5dcffbcebd9a43f51f09d552696ad2a4dd7e1fd",
+      "name": "BulkP1Geometry/OwnedQuadrature/PerturbedControls/Quadrilateral/3/8/real_time",
+      "metric": "real_time",
+      "url": "cases/3d81020afb8f712b215f9dfdb5dcffbcebd9a43f51f09d552696ad2a4dd7e1fd.json"
+    },
+    {
+      "id": "12351089dc31612081328fd41aecccb33a0f9f35994482f8d7ef26c13e723d53",
+      "name": "BulkP1Geometry/OwnedQuadrature/PerturbedControls/Segment/1/15/real_time",
+      "metric": "real_time",
+      "url": "cases/12351089dc31612081328fd41aecccb33a0f9f35994482f8d7ef26c13e723d53.json"
+    },
+    {
+      "id": "f95dbc8e0050eb16d9dd13fc44579e4f220c81804c7cf1bb1c35626dcb26fbec",
+      "name": "BulkP1Geometry/OwnedQuadrature/PerturbedControls/Segment/1/16/real_time",
+      "metric": "real_time",
+      "url": "cases/f95dbc8e0050eb16d9dd13fc44579e4f220c81804c7cf1bb1c35626dcb26fbec.json"
+    },
+    {
+      "id": "239fc50833aacfbff74e4b81e0794f93abb266c43ac2de3dc459712451d3fc52",
+      "name": "BulkP1Geometry/OwnedQuadrature/PerturbedControls/Segment/1/2/real_time",
+      "metric": "real_time",
+      "url": "cases/239fc50833aacfbff74e4b81e0794f93abb266c43ac2de3dc459712451d3fc52.json"
+    },
+    {
+      "id": "8e3f579c466573ff55e6f1de8235d5257c16ee740a3c24b26ff242799faaf112",
+      "name": "BulkP1Geometry/OwnedQuadrature/PerturbedControls/Segment/1/8/real_time",
+      "metric": "real_time",
+      "url": "cases/8e3f579c466573ff55e6f1de8235d5257c16ee740a3c24b26ff242799faaf112.json"
+    },
+    {
+      "id": "1a8689f879419c9d7b2cacc75e9681f5c29b9afacad567bb8cfc266762f23c96",
+      "name": "BulkP1Geometry/OwnedQuadrature/PerturbedControls/Segment/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/1a8689f879419c9d7b2cacc75e9681f5c29b9afacad567bb8cfc266762f23c96.json"
+    },
+    {
+      "id": "0568c9ab601d0056015304b0e5a234e5d613d93414dcabac27eef456783ad937",
+      "name": "BulkP1Geometry/OwnedQuadrature/PerturbedControls/Segment/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/0568c9ab601d0056015304b0e5a234e5d613d93414dcabac27eef456783ad937.json"
+    },
+    {
+      "id": "6b55d8f5e255cade59f264d5088ca7a4932d5295fac82050d94dc862b0d6e5c2",
+      "name": "BulkP1Geometry/OwnedQuadrature/PerturbedControls/Segment/2/2/real_time",
+      "metric": "real_time",
+      "url": "cases/6b55d8f5e255cade59f264d5088ca7a4932d5295fac82050d94dc862b0d6e5c2.json"
+    },
+    {
+      "id": "d8f17530e1e718a268017aed59f437fefcb27b3be8c1d2755dabfd17f11767cc",
+      "name": "BulkP1Geometry/OwnedQuadrature/PerturbedControls/Segment/2/8/real_time",
+      "metric": "real_time",
+      "url": "cases/d8f17530e1e718a268017aed59f437fefcb27b3be8c1d2755dabfd17f11767cc.json"
+    },
+    {
+      "id": "4f5b5bb4d058469296de2356587a842798892ebc70f28566edc2ccb98e896d30",
+      "name": "BulkP1Geometry/OwnedQuadrature/PerturbedControls/Segment/3/15/real_time",
+      "metric": "real_time",
+      "url": "cases/4f5b5bb4d058469296de2356587a842798892ebc70f28566edc2ccb98e896d30.json"
+    },
+    {
+      "id": "426bb9dfd1c4e0eafe1e447be0cc7a6e64436fb932e2458333a4b80af3daca06",
+      "name": "BulkP1Geometry/OwnedQuadrature/PerturbedControls/Segment/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/426bb9dfd1c4e0eafe1e447be0cc7a6e64436fb932e2458333a4b80af3daca06.json"
+    },
+    {
+      "id": "724ddb0a3be15c121e8ba5c7a80eed324f4738ad4563e367b9788ac6aeb9c851",
+      "name": "BulkP1Geometry/OwnedQuadrature/PerturbedControls/Segment/3/2/real_time",
+      "metric": "real_time",
+      "url": "cases/724ddb0a3be15c121e8ba5c7a80eed324f4738ad4563e367b9788ac6aeb9c851.json"
+    },
+    {
+      "id": "63fc74df548c402f35f1d40f58a6863de9a35604a52adce45ac97ffe6674f033",
+      "name": "BulkP1Geometry/OwnedQuadrature/PerturbedControls/Segment/3/8/real_time",
+      "metric": "real_time",
+      "url": "cases/63fc74df548c402f35f1d40f58a6863de9a35604a52adce45ac97ffe6674f033.json"
+    },
+    {
+      "id": "f2a6838785ba26a5dc60d5119f197e0ef04a0abe6eed1ca3b1dc6f8b6d238c1a",
+      "name": "BulkP1Geometry/OwnedQuadrature/PerturbedControls/Tetrahedron/3/15/real_time",
+      "metric": "real_time",
+      "url": "cases/f2a6838785ba26a5dc60d5119f197e0ef04a0abe6eed1ca3b1dc6f8b6d238c1a.json"
+    },
+    {
+      "id": "569493db892bb7bf9c0395f8c5709648cd58084052c37616c83d6b03cb74c6f6",
+      "name": "BulkP1Geometry/OwnedQuadrature/PerturbedControls/Tetrahedron/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/569493db892bb7bf9c0395f8c5709648cd58084052c37616c83d6b03cb74c6f6.json"
+    },
+    {
+      "id": "22d640cdd9da43d7c0aee3c3c0b1288a685354aee2db2d9afaccddbafff2659f",
+      "name": "BulkP1Geometry/OwnedQuadrature/PerturbedControls/Tetrahedron/3/2/real_time",
+      "metric": "real_time",
+      "url": "cases/22d640cdd9da43d7c0aee3c3c0b1288a685354aee2db2d9afaccddbafff2659f.json"
+    },
+    {
+      "id": "7661dc7b0d574f5599a21f26bce14d9dc58b3dd5b9824a8541d9fc89b22b36fe",
+      "name": "BulkP1Geometry/OwnedQuadrature/PerturbedControls/Tetrahedron/3/8/real_time",
+      "metric": "real_time",
+      "url": "cases/7661dc7b0d574f5599a21f26bce14d9dc58b3dd5b9824a8541d9fc89b22b36fe.json"
+    },
+    {
+      "id": "15b3a49ff5df8e4af45c58652a98324f753bf80f5676642e8ab46b66fa1ccdda",
+      "name": "BulkP1Geometry/OwnedQuadrature/PerturbedControls/Triangle/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/15b3a49ff5df8e4af45c58652a98324f753bf80f5676642e8ab46b66fa1ccdda.json"
+    },
+    {
+      "id": "0fd8d2e254e0b5a217b8f8ac91eaeb5498634395ec4cf978c1b4427be03eca9b",
+      "name": "BulkP1Geometry/OwnedQuadrature/PerturbedControls/Triangle/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/0fd8d2e254e0b5a217b8f8ac91eaeb5498634395ec4cf978c1b4427be03eca9b.json"
+    },
+    {
+      "id": "de238106ffcdde91fd201d18be482d74ea619a1bd8590ce992712852378e361e",
+      "name": "BulkP1Geometry/OwnedQuadrature/PerturbedControls/Triangle/2/2/real_time",
+      "metric": "real_time",
+      "url": "cases/de238106ffcdde91fd201d18be482d74ea619a1bd8590ce992712852378e361e.json"
+    },
+    {
+      "id": "6baf99dfef9dbec8e67274ea29c8281ed3ca95e73aa94eda9d075d6afaf0be23",
+      "name": "BulkP1Geometry/OwnedQuadrature/PerturbedControls/Triangle/2/8/real_time",
+      "metric": "real_time",
+      "url": "cases/6baf99dfef9dbec8e67274ea29c8281ed3ca95e73aa94eda9d075d6afaf0be23.json"
+    },
+    {
+      "id": "48d9ae523e0c8cbcad221effc8c52e357f621e57963b126d49bbfaca017fde32",
+      "name": "BulkP1Geometry/OwnedQuadrature/PerturbedControls/Triangle/3/15/real_time",
+      "metric": "real_time",
+      "url": "cases/48d9ae523e0c8cbcad221effc8c52e357f621e57963b126d49bbfaca017fde32.json"
+    },
+    {
+      "id": "fbbb3832e4e3afe3dc760a94163f43e3c9765b3419717857a59c524dedbe6fcc",
+      "name": "BulkP1Geometry/OwnedQuadrature/PerturbedControls/Triangle/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/fbbb3832e4e3afe3dc760a94163f43e3c9765b3419717857a59c524dedbe6fcc.json"
+    },
+    {
+      "id": "ea5b161eda7d355ef3f7cc7430c2be535b7442f3ad65775e59eb27370d0ef306",
+      "name": "BulkP1Geometry/OwnedQuadrature/PerturbedControls/Triangle/3/2/real_time",
+      "metric": "real_time",
+      "url": "cases/ea5b161eda7d355ef3f7cc7430c2be535b7442f3ad65775e59eb27370d0ef306.json"
+    },
+    {
+      "id": "6a50c4cca80516e15db898a807a3da702a7e9af19a87c3b940fd2389adbb5deb",
+      "name": "BulkP1Geometry/OwnedQuadrature/PerturbedControls/Triangle/3/8/real_time",
+      "metric": "real_time",
+      "url": "cases/6a50c4cca80516e15db898a807a3da702a7e9af19a87c3b940fd2389adbb5deb.json"
+    },
+    {
+      "id": "8ccdcbf343d03a5b3bd1a8ef445fff0eab8e6c2cf700f0b4812bc900614b55b5",
+      "name": "BulkP1Geometry/OwnedQuadrature/PerturbedControls/Wedge/3/15/real_time",
+      "metric": "real_time",
+      "url": "cases/8ccdcbf343d03a5b3bd1a8ef445fff0eab8e6c2cf700f0b4812bc900614b55b5.json"
+    },
+    {
+      "id": "0ee52f650a7bf7cdd6eabbed8a93fd7278f7d1ce840ceabfd35b8d0b86bca499",
+      "name": "BulkP1Geometry/OwnedQuadrature/PerturbedControls/Wedge/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/0ee52f650a7bf7cdd6eabbed8a93fd7278f7d1ce840ceabfd35b8d0b86bca499.json"
+    },
+    {
+      "id": "a55a284988ec88b8af0532a3c56daa0b558795dd79f8bccdd305d4ae7d3c6dc4",
+      "name": "BulkP1Geometry/OwnedQuadrature/PerturbedControls/Wedge/3/2/real_time",
+      "metric": "real_time",
+      "url": "cases/a55a284988ec88b8af0532a3c56daa0b558795dd79f8bccdd305d4ae7d3c6dc4.json"
+    },
+    {
+      "id": "413d0d368b3b1c3b968b21249185536f809078d0ad3cda5b2b21fd81016c60fa",
+      "name": "BulkP1Geometry/OwnedQuadrature/PerturbedControls/Wedge/3/8/real_time",
+      "metric": "real_time",
+      "url": "cases/413d0d368b3b1c3b968b21249185536f809078d0ad3cda5b2b21fd81016c60fa.json"
+    },
+    {
+      "id": "1cf5e3d93cf54a47206735eee194a33d965014b0a23e17c3a761e7f142394956",
+      "name": "BulkP1Geometry/PreparedPoint/Affine/Hexahedron/3/15/real_time",
+      "metric": "real_time",
+      "url": "cases/1cf5e3d93cf54a47206735eee194a33d965014b0a23e17c3a761e7f142394956.json"
+    },
+    {
+      "id": "09448af61421606b6d9022888d5caa4a58342deb55d505bed62e7449d9556dda",
+      "name": "BulkP1Geometry/PreparedPoint/Affine/Hexahedron/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/09448af61421606b6d9022888d5caa4a58342deb55d505bed62e7449d9556dda.json"
+    },
+    {
+      "id": "10009401beffe5e1526e5f17c68cc70d4020a8d4eb7855b98bf0fe39cccc871c",
+      "name": "BulkP1Geometry/PreparedPoint/Affine/Hexahedron/3/2/real_time",
+      "metric": "real_time",
+      "url": "cases/10009401beffe5e1526e5f17c68cc70d4020a8d4eb7855b98bf0fe39cccc871c.json"
+    },
+    {
+      "id": "9881b1e424b53633eaaf63bbd1025ec62fe59c04968e287eb13b5f4402aa592c",
+      "name": "BulkP1Geometry/PreparedPoint/Affine/Hexahedron/3/8/real_time",
+      "metric": "real_time",
+      "url": "cases/9881b1e424b53633eaaf63bbd1025ec62fe59c04968e287eb13b5f4402aa592c.json"
+    },
+    {
+      "id": "a4aa252290ec6cdf0b72db14e356620fc5c582378899004df7bc46d5982f278e",
+      "name": "BulkP1Geometry/PreparedPoint/Affine/Point/1/15/real_time",
+      "metric": "real_time",
+      "url": "cases/a4aa252290ec6cdf0b72db14e356620fc5c582378899004df7bc46d5982f278e.json"
+    },
+    {
+      "id": "521754ed3ea25518f5df810eff0f679e0fe56e5cd61d34b9342afbfbb5f6bd2b",
+      "name": "BulkP1Geometry/PreparedPoint/Affine/Point/1/16/real_time",
+      "metric": "real_time",
+      "url": "cases/521754ed3ea25518f5df810eff0f679e0fe56e5cd61d34b9342afbfbb5f6bd2b.json"
+    },
+    {
+      "id": "16b390d2b582e46aabb411a18e0e21339376582381d8bff2b84f5f153a3e24a6",
+      "name": "BulkP1Geometry/PreparedPoint/Affine/Point/1/2/real_time",
+      "metric": "real_time",
+      "url": "cases/16b390d2b582e46aabb411a18e0e21339376582381d8bff2b84f5f153a3e24a6.json"
+    },
+    {
+      "id": "157da02d643604f2baa3255a51ef679d5bc33fc52d5b16278acfad3e5978cd73",
+      "name": "BulkP1Geometry/PreparedPoint/Affine/Point/1/8/real_time",
+      "metric": "real_time",
+      "url": "cases/157da02d643604f2baa3255a51ef679d5bc33fc52d5b16278acfad3e5978cd73.json"
+    },
+    {
+      "id": "3a7404e78de4bbb1231f5e092e1e10af71dae9de767f51992ec7950e64e19b08",
+      "name": "BulkP1Geometry/PreparedPoint/Affine/Point/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/3a7404e78de4bbb1231f5e092e1e10af71dae9de767f51992ec7950e64e19b08.json"
+    },
+    {
+      "id": "97cd37adf1df40f4afcc2fb5a566374bc3f63a70442fe27144d09994a433ca6d",
+      "name": "BulkP1Geometry/PreparedPoint/Affine/Point/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/97cd37adf1df40f4afcc2fb5a566374bc3f63a70442fe27144d09994a433ca6d.json"
+    },
+    {
+      "id": "2ae7a160e49c214474b905c79a845ed8d65ea2e979b7e37edf041ea6c8e37c69",
+      "name": "BulkP1Geometry/PreparedPoint/Affine/Point/2/2/real_time",
+      "metric": "real_time",
+      "url": "cases/2ae7a160e49c214474b905c79a845ed8d65ea2e979b7e37edf041ea6c8e37c69.json"
+    },
+    {
+      "id": "8d3fca8238ea708b5d1f157cf0f6566fbd7f9e5267f732544050d3abfef0c5a1",
+      "name": "BulkP1Geometry/PreparedPoint/Affine/Point/2/8/real_time",
+      "metric": "real_time",
+      "url": "cases/8d3fca8238ea708b5d1f157cf0f6566fbd7f9e5267f732544050d3abfef0c5a1.json"
+    },
+    {
+      "id": "2f66d3ec6fecafd1f2da2a61e4229b54b3c6b778920f688d472e599bc6193aea",
+      "name": "BulkP1Geometry/PreparedPoint/Affine/Point/3/15/real_time",
+      "metric": "real_time",
+      "url": "cases/2f66d3ec6fecafd1f2da2a61e4229b54b3c6b778920f688d472e599bc6193aea.json"
+    },
+    {
+      "id": "9c6d043639484d289aadfaffcd5c8549b2272b2d11d1ebedbdea23f32bafd32a",
+      "name": "BulkP1Geometry/PreparedPoint/Affine/Point/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/9c6d043639484d289aadfaffcd5c8549b2272b2d11d1ebedbdea23f32bafd32a.json"
+    },
+    {
+      "id": "c4f76e18ea0ec95a085a66bdf68b162dcf1889cbdd5e93b908a2148a2da424d2",
+      "name": "BulkP1Geometry/PreparedPoint/Affine/Point/3/2/real_time",
+      "metric": "real_time",
+      "url": "cases/c4f76e18ea0ec95a085a66bdf68b162dcf1889cbdd5e93b908a2148a2da424d2.json"
+    },
+    {
+      "id": "4164d3577b9ec8e7920a9726b23439d7e7142020d5c044d0afdd7c2d2fba1286",
+      "name": "BulkP1Geometry/PreparedPoint/Affine/Point/3/8/real_time",
+      "metric": "real_time",
+      "url": "cases/4164d3577b9ec8e7920a9726b23439d7e7142020d5c044d0afdd7c2d2fba1286.json"
+    },
+    {
+      "id": "e6fdad8e1577ca7b29a2b2f655f32bfc9fe304736f4364d3a6b392914c26ef48",
+      "name": "BulkP1Geometry/PreparedPoint/Affine/Pyramid/3/10/real_time",
+      "metric": "real_time",
+      "url": "cases/e6fdad8e1577ca7b29a2b2f655f32bfc9fe304736f4364d3a6b392914c26ef48.json"
+    },
+    {
+      "id": "524b07a8880e8777edd5b21edc8f9a3ac907d8e81273ce284c69b9d24fca2923",
+      "name": "BulkP1Geometry/PreparedPoint/Affine/Pyramid/3/11/real_time",
+      "metric": "real_time",
+      "url": "cases/524b07a8880e8777edd5b21edc8f9a3ac907d8e81273ce284c69b9d24fca2923.json"
+    },
+    {
+      "id": "fc32a85b0acefccdfd7e60dc665c1203f06f3adf1fbc126dbda752493627ee14",
+      "name": "BulkP1Geometry/PreparedPoint/Affine/Pyramid/3/15/real_time",
+      "metric": "real_time",
+      "url": "cases/fc32a85b0acefccdfd7e60dc665c1203f06f3adf1fbc126dbda752493627ee14.json"
+    },
+    {
+      "id": "5464633647dce6a1bc7d232c2a9b66d0a9f3fdb7cadd31fdd62df8b74d0d1e20",
+      "name": "BulkP1Geometry/PreparedPoint/Affine/Pyramid/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/5464633647dce6a1bc7d232c2a9b66d0a9f3fdb7cadd31fdd62df8b74d0d1e20.json"
+    },
+    {
+      "id": "085e838286aa37cf58688b50ad882e99d8e8315243c8f0f31daf366becf996fb",
+      "name": "BulkP1Geometry/PreparedPoint/Affine/Pyramid/3/2/real_time",
+      "metric": "real_time",
+      "url": "cases/085e838286aa37cf58688b50ad882e99d8e8315243c8f0f31daf366becf996fb.json"
+    },
+    {
+      "id": "d559b5ec9a06e504949616a75baaeccd68756577ed9c8dcd3b46f982a70aae77",
+      "name": "BulkP1Geometry/PreparedPoint/Affine/Pyramid/3/8/real_time",
+      "metric": "real_time",
+      "url": "cases/d559b5ec9a06e504949616a75baaeccd68756577ed9c8dcd3b46f982a70aae77.json"
+    },
+    {
+      "id": "96bc540db4a628e03a1ad1594bc8cecd35264aec151dcaa4c912fc1401492928",
+      "name": "BulkP1Geometry/PreparedPoint/Affine/Quadrilateral/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/96bc540db4a628e03a1ad1594bc8cecd35264aec151dcaa4c912fc1401492928.json"
+    },
+    {
+      "id": "31566ce2123130594e7b9e0b6171ab3f7412256eb793184eee8a029678d3ca2d",
+      "name": "BulkP1Geometry/PreparedPoint/Affine/Quadrilateral/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/31566ce2123130594e7b9e0b6171ab3f7412256eb793184eee8a029678d3ca2d.json"
+    },
+    {
+      "id": "063395fd557a27528d5d63693d206cb686f479ceb0efd39f7ff96ffe90d444f2",
+      "name": "BulkP1Geometry/PreparedPoint/Affine/Quadrilateral/2/2/real_time",
+      "metric": "real_time",
+      "url": "cases/063395fd557a27528d5d63693d206cb686f479ceb0efd39f7ff96ffe90d444f2.json"
+    },
+    {
+      "id": "25d578270b62a8996dc7f5ac7ffd11ad513e0a10e6c9904e176f9a6e661cb731",
+      "name": "BulkP1Geometry/PreparedPoint/Affine/Quadrilateral/2/8/real_time",
+      "metric": "real_time",
+      "url": "cases/25d578270b62a8996dc7f5ac7ffd11ad513e0a10e6c9904e176f9a6e661cb731.json"
+    },
+    {
+      "id": "02a761abda89ab0826fc92668d174e567b6386fa8c3f6f4e7b47043603ad24e4",
+      "name": "BulkP1Geometry/PreparedPoint/Affine/Quadrilateral/3/15/real_time",
+      "metric": "real_time",
+      "url": "cases/02a761abda89ab0826fc92668d174e567b6386fa8c3f6f4e7b47043603ad24e4.json"
+    },
+    {
+      "id": "32e805c5eec0b77a4a6e70c182148cdc1e839113c66017ff316589a552b40e36",
+      "name": "BulkP1Geometry/PreparedPoint/Affine/Quadrilateral/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/32e805c5eec0b77a4a6e70c182148cdc1e839113c66017ff316589a552b40e36.json"
+    },
+    {
+      "id": "8b3ed94cfd98c9728e192e2c371a21616098638f40b0274b9a1cacd9a8e358f2",
+      "name": "BulkP1Geometry/PreparedPoint/Affine/Quadrilateral/3/2/real_time",
+      "metric": "real_time",
+      "url": "cases/8b3ed94cfd98c9728e192e2c371a21616098638f40b0274b9a1cacd9a8e358f2.json"
+    },
+    {
+      "id": "2a68b0ada8741987c1392799896f80913533b6c3b9093809fae9694de60da708",
+      "name": "BulkP1Geometry/PreparedPoint/Affine/Quadrilateral/3/8/real_time",
+      "metric": "real_time",
+      "url": "cases/2a68b0ada8741987c1392799896f80913533b6c3b9093809fae9694de60da708.json"
+    },
+    {
+      "id": "08579fc243c2a0de597c969ecc48f72c174701c671064adbed50b3e11a807fd7",
+      "name": "BulkP1Geometry/PreparedPoint/Affine/Segment/1/15/real_time",
+      "metric": "real_time",
+      "url": "cases/08579fc243c2a0de597c969ecc48f72c174701c671064adbed50b3e11a807fd7.json"
+    },
+    {
+      "id": "f288d484a2caf74c9b63c452becf715ebf270ca771dc4adee704d97e6c80e83e",
+      "name": "BulkP1Geometry/PreparedPoint/Affine/Segment/1/16/real_time",
+      "metric": "real_time",
+      "url": "cases/f288d484a2caf74c9b63c452becf715ebf270ca771dc4adee704d97e6c80e83e.json"
+    },
+    {
+      "id": "1e00ef7b274f06bb82c833a4418185a05f7f3bbd6d0a73c3ac02442e80628687",
+      "name": "BulkP1Geometry/PreparedPoint/Affine/Segment/1/2/real_time",
+      "metric": "real_time",
+      "url": "cases/1e00ef7b274f06bb82c833a4418185a05f7f3bbd6d0a73c3ac02442e80628687.json"
+    },
+    {
+      "id": "d9be4d1552dd76383d57d9f71bff1957e2520a2140dbd39a199c2209f125a83b",
+      "name": "BulkP1Geometry/PreparedPoint/Affine/Segment/1/8/real_time",
+      "metric": "real_time",
+      "url": "cases/d9be4d1552dd76383d57d9f71bff1957e2520a2140dbd39a199c2209f125a83b.json"
+    },
+    {
+      "id": "f872588366fbc6cf65720ddcca06fa28ae65860820a0c1c975896f6dc68d9893",
+      "name": "BulkP1Geometry/PreparedPoint/Affine/Segment/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/f872588366fbc6cf65720ddcca06fa28ae65860820a0c1c975896f6dc68d9893.json"
+    },
+    {
+      "id": "75f6f87b4a47a1f4d1627bbed9db5cc9f2d70963833bb55d86bed954b5b0c6b0",
+      "name": "BulkP1Geometry/PreparedPoint/Affine/Segment/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/75f6f87b4a47a1f4d1627bbed9db5cc9f2d70963833bb55d86bed954b5b0c6b0.json"
+    },
+    {
+      "id": "664723d5749c30d151787a66f92f91b94afdc3253b9dade5a3af391142c9f6ce",
+      "name": "BulkP1Geometry/PreparedPoint/Affine/Segment/2/2/real_time",
+      "metric": "real_time",
+      "url": "cases/664723d5749c30d151787a66f92f91b94afdc3253b9dade5a3af391142c9f6ce.json"
+    },
+    {
+      "id": "b5b14a66394fb548309d866508c5eae398babe3300543a9ebf391dc1a3cb55cd",
+      "name": "BulkP1Geometry/PreparedPoint/Affine/Segment/2/8/real_time",
+      "metric": "real_time",
+      "url": "cases/b5b14a66394fb548309d866508c5eae398babe3300543a9ebf391dc1a3cb55cd.json"
+    },
+    {
+      "id": "783467c4678b5414eaf840444e8e2184ba193659b1bd10b6d24ef49178601b9b",
+      "name": "BulkP1Geometry/PreparedPoint/Affine/Segment/3/15/real_time",
+      "metric": "real_time",
+      "url": "cases/783467c4678b5414eaf840444e8e2184ba193659b1bd10b6d24ef49178601b9b.json"
+    },
+    {
+      "id": "f586b808cc7301ae1adcb03059a7edb9ee233b37941e65baea58a7b374545fbf",
+      "name": "BulkP1Geometry/PreparedPoint/Affine/Segment/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/f586b808cc7301ae1adcb03059a7edb9ee233b37941e65baea58a7b374545fbf.json"
+    },
+    {
+      "id": "751ff424965e330d24034e90d302a1228a4b1767812d6d07a15068ff09bf2f23",
+      "name": "BulkP1Geometry/PreparedPoint/Affine/Segment/3/2/real_time",
+      "metric": "real_time",
+      "url": "cases/751ff424965e330d24034e90d302a1228a4b1767812d6d07a15068ff09bf2f23.json"
+    },
+    {
+      "id": "dbc8e685fa28a1ded1e46e1493218d5964b15ebcb4a471f2dbbfd084cd7da287",
+      "name": "BulkP1Geometry/PreparedPoint/Affine/Segment/3/8/real_time",
+      "metric": "real_time",
+      "url": "cases/dbc8e685fa28a1ded1e46e1493218d5964b15ebcb4a471f2dbbfd084cd7da287.json"
+    },
+    {
+      "id": "1218b8019b1c1d2e6152d783d5fc6c79514e3282764934a1812c94b692fef9b7",
+      "name": "BulkP1Geometry/PreparedPoint/Affine/Tetrahedron/3/15/real_time",
+      "metric": "real_time",
+      "url": "cases/1218b8019b1c1d2e6152d783d5fc6c79514e3282764934a1812c94b692fef9b7.json"
+    },
+    {
+      "id": "57bb742e633365c078f55595c40e13ceb85639cd2aebd01b4252e9264067d00e",
+      "name": "BulkP1Geometry/PreparedPoint/Affine/Tetrahedron/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/57bb742e633365c078f55595c40e13ceb85639cd2aebd01b4252e9264067d00e.json"
+    },
+    {
+      "id": "7e0737058127f28e51af0d51229e10db007d7243bb3dd24119eb0dc85a24d2d3",
+      "name": "BulkP1Geometry/PreparedPoint/Affine/Tetrahedron/3/2/real_time",
+      "metric": "real_time",
+      "url": "cases/7e0737058127f28e51af0d51229e10db007d7243bb3dd24119eb0dc85a24d2d3.json"
+    },
+    {
+      "id": "9024849e86255bc59fd9f5e1d2eabdd7224e0ebcc74e73f0b607aa634e24a5e8",
+      "name": "BulkP1Geometry/PreparedPoint/Affine/Tetrahedron/3/8/real_time",
+      "metric": "real_time",
+      "url": "cases/9024849e86255bc59fd9f5e1d2eabdd7224e0ebcc74e73f0b607aa634e24a5e8.json"
+    },
+    {
+      "id": "fa70a44f0182ac4e3240cd8ccfd4b3563ac09e623efce9eaa275e34469be281f",
+      "name": "BulkP1Geometry/PreparedPoint/Affine/Triangle/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/fa70a44f0182ac4e3240cd8ccfd4b3563ac09e623efce9eaa275e34469be281f.json"
+    },
+    {
+      "id": "fdeecd7d5b75e569c984b8351beb0446117cf9d63c72f71d1e3ee332cb4bfa9b",
+      "name": "BulkP1Geometry/PreparedPoint/Affine/Triangle/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/fdeecd7d5b75e569c984b8351beb0446117cf9d63c72f71d1e3ee332cb4bfa9b.json"
+    },
+    {
+      "id": "46ea98b92cf7406f5018dd251d4f847c6e79fbbf6ffab6e0e9737acb19ac8ee5",
+      "name": "BulkP1Geometry/PreparedPoint/Affine/Triangle/2/2/real_time",
+      "metric": "real_time",
+      "url": "cases/46ea98b92cf7406f5018dd251d4f847c6e79fbbf6ffab6e0e9737acb19ac8ee5.json"
+    },
+    {
+      "id": "60e6faf373835f7cb20598a9b3cb7ee8f37e73fbb336bdf39b3c5265feddd8ab",
+      "name": "BulkP1Geometry/PreparedPoint/Affine/Triangle/2/8/real_time",
+      "metric": "real_time",
+      "url": "cases/60e6faf373835f7cb20598a9b3cb7ee8f37e73fbb336bdf39b3c5265feddd8ab.json"
+    },
+    {
+      "id": "7ae9374157377e901d495d952023e22f155fd549c1a70511c9ade140cfcc024b",
+      "name": "BulkP1Geometry/PreparedPoint/Affine/Triangle/3/15/real_time",
+      "metric": "real_time",
+      "url": "cases/7ae9374157377e901d495d952023e22f155fd549c1a70511c9ade140cfcc024b.json"
+    },
+    {
+      "id": "886eeef387e0788834feb479566cd2a398d7d75844e438abdb27d34b1e257300",
+      "name": "BulkP1Geometry/PreparedPoint/Affine/Triangle/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/886eeef387e0788834feb479566cd2a398d7d75844e438abdb27d34b1e257300.json"
+    },
+    {
+      "id": "36dda5d48a548e00676f93d854f9bd21428331e2bb97cc414990b61cfc0c8157",
+      "name": "BulkP1Geometry/PreparedPoint/Affine/Triangle/3/2/real_time",
+      "metric": "real_time",
+      "url": "cases/36dda5d48a548e00676f93d854f9bd21428331e2bb97cc414990b61cfc0c8157.json"
+    },
+    {
+      "id": "8faabac67683a48b0eb320fb2defd4d8d20273ebc5787ea3f7e6d922802e0da1",
+      "name": "BulkP1Geometry/PreparedPoint/Affine/Triangle/3/8/real_time",
+      "metric": "real_time",
+      "url": "cases/8faabac67683a48b0eb320fb2defd4d8d20273ebc5787ea3f7e6d922802e0da1.json"
+    },
+    {
+      "id": "e02176e480791b22fb123a50c5d2b048343600cde6aa8cba50d5a79449e5008b",
+      "name": "BulkP1Geometry/PreparedPoint/Affine/Wedge/3/15/real_time",
+      "metric": "real_time",
+      "url": "cases/e02176e480791b22fb123a50c5d2b048343600cde6aa8cba50d5a79449e5008b.json"
+    },
+    {
+      "id": "51a2ebd7edd7473c2e5c3d0cbe153176fe03102ffa628a4735364abc81da2912",
+      "name": "BulkP1Geometry/PreparedPoint/Affine/Wedge/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/51a2ebd7edd7473c2e5c3d0cbe153176fe03102ffa628a4735364abc81da2912.json"
+    },
+    {
+      "id": "f97874fea3d3400ea0f179d3d69fef412c4f21f9921fd977bdb854471d93df64",
+      "name": "BulkP1Geometry/PreparedPoint/Affine/Wedge/3/2/real_time",
+      "metric": "real_time",
+      "url": "cases/f97874fea3d3400ea0f179d3d69fef412c4f21f9921fd977bdb854471d93df64.json"
+    },
+    {
+      "id": "3c6ef157d177c8e1bde062ef7e85f26deb1b61ed51d473da80265754e96be16c",
+      "name": "BulkP1Geometry/PreparedPoint/Affine/Wedge/3/8/real_time",
+      "metric": "real_time",
+      "url": "cases/3c6ef157d177c8e1bde062ef7e85f26deb1b61ed51d473da80265754e96be16c.json"
+    },
+    {
+      "id": "ae1730869c08e426a001584ce64c2bc951e7597f8b1d54ad3179fd2a8aa8b34e",
+      "name": "BulkP1Geometry/PreparedPoint/GaussianFactor/Affine/Tetrahedron/3/10/real_time",
+      "metric": "real_time",
+      "url": "cases/ae1730869c08e426a001584ce64c2bc951e7597f8b1d54ad3179fd2a8aa8b34e.json"
+    },
+    {
+      "id": "7c340bb54f5a952d6db1049063a59aec3caf6ff321aae4be975e275484cc255e",
+      "name": "BulkP1Geometry/PreparedPoint/GaussianFactor/Affine/Tetrahedron/3/12/real_time",
+      "metric": "real_time",
+      "url": "cases/7c340bb54f5a952d6db1049063a59aec3caf6ff321aae4be975e275484cc255e.json"
+    },
+    {
+      "id": "5a058c9169ab7694106f65f92dc75a952e43a7c0501e321768db0a676c3d8082",
+      "name": "BulkP1Geometry/PreparedPoint/GaussianFactor/Affine/Tetrahedron/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/5a058c9169ab7694106f65f92dc75a952e43a7c0501e321768db0a676c3d8082.json"
+    },
+    {
+      "id": "fb9c9ad16d17055f93b149d5317e0b8acdeb0367665c4786eac67ed9cd847a36",
+      "name": "BulkP1Geometry/PreparedPoint/GaussianFactor/Affine/Tetrahedron/3/3/real_time",
+      "metric": "real_time",
+      "url": "cases/fb9c9ad16d17055f93b149d5317e0b8acdeb0367665c4786eac67ed9cd847a36.json"
+    },
+    {
+      "id": "e73a3cde2565d3fa81172236eafc6b0a013284b2575e48740158b4d551907461",
+      "name": "BulkP1Geometry/PreparedPoint/GaussianFactor/Affine/Tetrahedron/3/4/real_time",
+      "metric": "real_time",
+      "url": "cases/e73a3cde2565d3fa81172236eafc6b0a013284b2575e48740158b4d551907461.json"
+    },
+    {
+      "id": "3a426b19df315f64870bf3dbca84b3ce68cacecc7b48ec648cd3bf8579223599",
+      "name": "BulkP1Geometry/PreparedPoint/GaussianFactor/Affine/Tetrahedron/3/5/real_time",
+      "metric": "real_time",
+      "url": "cases/3a426b19df315f64870bf3dbca84b3ce68cacecc7b48ec648cd3bf8579223599.json"
+    },
+    {
+      "id": "e6f4bd8c8267842b2d8dfab86322f4213391b5e2f0c20444146f90aabc2beb35",
+      "name": "BulkP1Geometry/PreparedPoint/GaussianFactor/Affine/Tetrahedron/3/6/real_time",
+      "metric": "real_time",
+      "url": "cases/e6f4bd8c8267842b2d8dfab86322f4213391b5e2f0c20444146f90aabc2beb35.json"
+    },
+    {
+      "id": "f1e61b01c78b3ed04122258aeae3af00bcf1bbb5c55402829c9f3b9120008b19",
+      "name": "BulkP1Geometry/PreparedPoint/GaussianFactor/Affine/Tetrahedron/3/7/real_time",
+      "metric": "real_time",
+      "url": "cases/f1e61b01c78b3ed04122258aeae3af00bcf1bbb5c55402829c9f3b9120008b19.json"
+    },
+    {
+      "id": "f13e33a2ed469755121bbcf2619953591573a3582e539f8f7ad91febd3a3445e",
+      "name": "BulkP1Geometry/PreparedPoint/GaussianFactor/Affine/Tetrahedron/3/8/real_time",
+      "metric": "real_time",
+      "url": "cases/f13e33a2ed469755121bbcf2619953591573a3582e539f8f7ad91febd3a3445e.json"
+    },
+    {
+      "id": "00583126c2da3f4e466652fbab337f9f6cde2970409c637169c38a223e45ba43",
+      "name": "BulkP1Geometry/PreparedPoint/GaussianFactor/Affine/Tetrahedron/3/9/real_time",
+      "metric": "real_time",
+      "url": "cases/00583126c2da3f4e466652fbab337f9f6cde2970409c637169c38a223e45ba43.json"
+    },
+    {
+      "id": "c2cd08ce7a17d4e31b7db7a645428f58b3898ee5674ba1d5112a970a51848949",
+      "name": "BulkP1Geometry/PreparedPoint/GaussianFactor/PerturbedControls/Tetrahedron/3/10/real_time",
+      "metric": "real_time",
+      "url": "cases/c2cd08ce7a17d4e31b7db7a645428f58b3898ee5674ba1d5112a970a51848949.json"
+    },
+    {
+      "id": "23e2eaec784bd718ad9b186584284a1de45dfb45eb53f5e567a04ef5d674df8b",
+      "name": "BulkP1Geometry/PreparedPoint/GaussianFactor/PerturbedControls/Tetrahedron/3/12/real_time",
+      "metric": "real_time",
+      "url": "cases/23e2eaec784bd718ad9b186584284a1de45dfb45eb53f5e567a04ef5d674df8b.json"
+    },
+    {
+      "id": "f4d1db8321d37b7ae2f2bb16ba6d2b6190344d15d15e41f940b851fc1c63bf5d",
+      "name": "BulkP1Geometry/PreparedPoint/GaussianFactor/PerturbedControls/Tetrahedron/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/f4d1db8321d37b7ae2f2bb16ba6d2b6190344d15d15e41f940b851fc1c63bf5d.json"
+    },
+    {
+      "id": "785f1b867f2ecdbb1ffbe023b15a57e8df88ac45678f0eccf3c84313add5cf23",
+      "name": "BulkP1Geometry/PreparedPoint/GaussianFactor/PerturbedControls/Tetrahedron/3/3/real_time",
+      "metric": "real_time",
+      "url": "cases/785f1b867f2ecdbb1ffbe023b15a57e8df88ac45678f0eccf3c84313add5cf23.json"
+    },
+    {
+      "id": "d1dd762dec4e5529d11ff9d493b17e9024f3984f9ad2b91f86214a232bb2fbb5",
+      "name": "BulkP1Geometry/PreparedPoint/GaussianFactor/PerturbedControls/Tetrahedron/3/4/real_time",
+      "metric": "real_time",
+      "url": "cases/d1dd762dec4e5529d11ff9d493b17e9024f3984f9ad2b91f86214a232bb2fbb5.json"
+    },
+    {
+      "id": "8172945b36549489dd3f3a3682a64666298306bea07d2bc827bc0a17228e6613",
+      "name": "BulkP1Geometry/PreparedPoint/GaussianFactor/PerturbedControls/Tetrahedron/3/5/real_time",
+      "metric": "real_time",
+      "url": "cases/8172945b36549489dd3f3a3682a64666298306bea07d2bc827bc0a17228e6613.json"
+    },
+    {
+      "id": "f95de6497aa544fd3cf82eac50ce52392d0cc28c02c6f7489994008d7c313460",
+      "name": "BulkP1Geometry/PreparedPoint/GaussianFactor/PerturbedControls/Tetrahedron/3/6/real_time",
+      "metric": "real_time",
+      "url": "cases/f95de6497aa544fd3cf82eac50ce52392d0cc28c02c6f7489994008d7c313460.json"
+    },
+    {
+      "id": "35da5e3d9cb3b6b86b09e986938206a2187b86ea2e95b194b71851ccfa199444",
+      "name": "BulkP1Geometry/PreparedPoint/GaussianFactor/PerturbedControls/Tetrahedron/3/7/real_time",
+      "metric": "real_time",
+      "url": "cases/35da5e3d9cb3b6b86b09e986938206a2187b86ea2e95b194b71851ccfa199444.json"
+    },
+    {
+      "id": "4b48a10a335d311280a699194ebc814eb26df54404e168c59f357a7bef0b286c",
+      "name": "BulkP1Geometry/PreparedPoint/GaussianFactor/PerturbedControls/Tetrahedron/3/8/real_time",
+      "metric": "real_time",
+      "url": "cases/4b48a10a335d311280a699194ebc814eb26df54404e168c59f357a7bef0b286c.json"
+    },
+    {
+      "id": "d0762d0a9820713e3f798a4bbac0b0675db8907b459b11942f475dab063451c3",
+      "name": "BulkP1Geometry/PreparedPoint/GaussianFactor/PerturbedControls/Tetrahedron/3/9/real_time",
+      "metric": "real_time",
+      "url": "cases/d0762d0a9820713e3f798a4bbac0b0675db8907b459b11942f475dab063451c3.json"
+    },
+    {
+      "id": "74182e6682167f031527ca5d847a7816b6a7be38107c3cf3cb9c570d7bf985f9",
+      "name": "BulkP1Geometry/PreparedPoint/PerturbedControls/Hexahedron/3/15/real_time",
+      "metric": "real_time",
+      "url": "cases/74182e6682167f031527ca5d847a7816b6a7be38107c3cf3cb9c570d7bf985f9.json"
+    },
+    {
+      "id": "55e5a06686cd3cca8ccf76acda41679d3dd3eced80f85d43f9ef32652e42db9b",
+      "name": "BulkP1Geometry/PreparedPoint/PerturbedControls/Hexahedron/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/55e5a06686cd3cca8ccf76acda41679d3dd3eced80f85d43f9ef32652e42db9b.json"
+    },
+    {
+      "id": "8172cef556801f863cdfe419a772b2262d362c386c9ff0dd2e935674a38ff8df",
+      "name": "BulkP1Geometry/PreparedPoint/PerturbedControls/Hexahedron/3/2/real_time",
+      "metric": "real_time",
+      "url": "cases/8172cef556801f863cdfe419a772b2262d362c386c9ff0dd2e935674a38ff8df.json"
+    },
+    {
+      "id": "e678ab7cf8f293b43e59a8382d6ecd24cc89b592f97271fcd31ff29dacb0240d",
+      "name": "BulkP1Geometry/PreparedPoint/PerturbedControls/Hexahedron/3/8/real_time",
+      "metric": "real_time",
+      "url": "cases/e678ab7cf8f293b43e59a8382d6ecd24cc89b592f97271fcd31ff29dacb0240d.json"
+    },
+    {
+      "id": "8de18f6284babdb6c1fa2c3b02fa1d27b509a3dea2882be821956dfcb1d9264b",
+      "name": "BulkP1Geometry/PreparedPoint/PerturbedControls/Point/1/15/real_time",
+      "metric": "real_time",
+      "url": "cases/8de18f6284babdb6c1fa2c3b02fa1d27b509a3dea2882be821956dfcb1d9264b.json"
+    },
+    {
+      "id": "4a20e79dd180fcc85891c41c56da23448eaaa8d65d9e598d864ac5706c6b91c7",
+      "name": "BulkP1Geometry/PreparedPoint/PerturbedControls/Point/1/16/real_time",
+      "metric": "real_time",
+      "url": "cases/4a20e79dd180fcc85891c41c56da23448eaaa8d65d9e598d864ac5706c6b91c7.json"
+    },
+    {
+      "id": "5d2ec44d76eb4c094028c4c33f14da773afdf0c35b6f5faba8fff6d437cb7008",
+      "name": "BulkP1Geometry/PreparedPoint/PerturbedControls/Point/1/2/real_time",
+      "metric": "real_time",
+      "url": "cases/5d2ec44d76eb4c094028c4c33f14da773afdf0c35b6f5faba8fff6d437cb7008.json"
+    },
+    {
+      "id": "c3427d7411c3e9cb14bad29f8edc97c644e73107472f41a2c852589f731be8fc",
+      "name": "BulkP1Geometry/PreparedPoint/PerturbedControls/Point/1/8/real_time",
+      "metric": "real_time",
+      "url": "cases/c3427d7411c3e9cb14bad29f8edc97c644e73107472f41a2c852589f731be8fc.json"
+    },
+    {
+      "id": "ceebfec9bdf59af07169cb47a8b115f1b13ae9bed075b18a881a8b2824a0f8ee",
+      "name": "BulkP1Geometry/PreparedPoint/PerturbedControls/Point/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/ceebfec9bdf59af07169cb47a8b115f1b13ae9bed075b18a881a8b2824a0f8ee.json"
+    },
+    {
+      "id": "6012c63ae2b2dd3cb48064044e6a9456b1e9a0c5e9ea8137ea2d31cc0d57a8c0",
+      "name": "BulkP1Geometry/PreparedPoint/PerturbedControls/Point/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/6012c63ae2b2dd3cb48064044e6a9456b1e9a0c5e9ea8137ea2d31cc0d57a8c0.json"
+    },
+    {
+      "id": "4de212074a258fd0f55d6f65c38884873d17decbab24cf31a834eb54d908052d",
+      "name": "BulkP1Geometry/PreparedPoint/PerturbedControls/Point/2/2/real_time",
+      "metric": "real_time",
+      "url": "cases/4de212074a258fd0f55d6f65c38884873d17decbab24cf31a834eb54d908052d.json"
+    },
+    {
+      "id": "b1c65628aeed3269db60ab8e5b04a3d89f35a02ef1a025d9045b73e6722e4e25",
+      "name": "BulkP1Geometry/PreparedPoint/PerturbedControls/Point/2/8/real_time",
+      "metric": "real_time",
+      "url": "cases/b1c65628aeed3269db60ab8e5b04a3d89f35a02ef1a025d9045b73e6722e4e25.json"
+    },
+    {
+      "id": "4577ae4f90af180134a74e65c3dd3e6b59350d3970e0bc5ed384aab7cdc0029c",
+      "name": "BulkP1Geometry/PreparedPoint/PerturbedControls/Point/3/15/real_time",
+      "metric": "real_time",
+      "url": "cases/4577ae4f90af180134a74e65c3dd3e6b59350d3970e0bc5ed384aab7cdc0029c.json"
+    },
+    {
+      "id": "bd1538acc13e46b5b03646b89f02a11f0d9cf7d103058c67c7b007156f80d771",
+      "name": "BulkP1Geometry/PreparedPoint/PerturbedControls/Point/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/bd1538acc13e46b5b03646b89f02a11f0d9cf7d103058c67c7b007156f80d771.json"
+    },
+    {
+      "id": "20a79635af9792545061c72874a9c520f6f635b5c38e9090fa27faeb3b43ea73",
+      "name": "BulkP1Geometry/PreparedPoint/PerturbedControls/Point/3/2/real_time",
+      "metric": "real_time",
+      "url": "cases/20a79635af9792545061c72874a9c520f6f635b5c38e9090fa27faeb3b43ea73.json"
+    },
+    {
+      "id": "a28ced856181870231949ed47a556246bd023bf80217ed53b6d8c9f0a22e5961",
+      "name": "BulkP1Geometry/PreparedPoint/PerturbedControls/Point/3/8/real_time",
+      "metric": "real_time",
+      "url": "cases/a28ced856181870231949ed47a556246bd023bf80217ed53b6d8c9f0a22e5961.json"
+    },
+    {
+      "id": "c210ea904f409c55f280e57a484c2d4a644938a0ff00cadcd0cfbdce0eccf4b6",
+      "name": "BulkP1Geometry/PreparedPoint/PerturbedControls/Pyramid/3/10/real_time",
+      "metric": "real_time",
+      "url": "cases/c210ea904f409c55f280e57a484c2d4a644938a0ff00cadcd0cfbdce0eccf4b6.json"
+    },
+    {
+      "id": "853b355961d7a907a93800ede7a9c71b6c1173240313470f7b61e87d1a551ca7",
+      "name": "BulkP1Geometry/PreparedPoint/PerturbedControls/Pyramid/3/11/real_time",
+      "metric": "real_time",
+      "url": "cases/853b355961d7a907a93800ede7a9c71b6c1173240313470f7b61e87d1a551ca7.json"
+    },
+    {
+      "id": "8c7e85e1c991917b5df6d019ad32adec63497b7a5657d890be848b0078f73b70",
+      "name": "BulkP1Geometry/PreparedPoint/PerturbedControls/Pyramid/3/15/real_time",
+      "metric": "real_time",
+      "url": "cases/8c7e85e1c991917b5df6d019ad32adec63497b7a5657d890be848b0078f73b70.json"
+    },
+    {
+      "id": "ff0b2a56a62386992e29968827c55faad91a46664ede2452e1ae02fac3f9fc45",
+      "name": "BulkP1Geometry/PreparedPoint/PerturbedControls/Pyramid/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/ff0b2a56a62386992e29968827c55faad91a46664ede2452e1ae02fac3f9fc45.json"
+    },
+    {
+      "id": "7a0cd370c8b3121ae8e5df0f40195cdaca18b925457368e56c3dfbc0a038347f",
+      "name": "BulkP1Geometry/PreparedPoint/PerturbedControls/Pyramid/3/2/real_time",
+      "metric": "real_time",
+      "url": "cases/7a0cd370c8b3121ae8e5df0f40195cdaca18b925457368e56c3dfbc0a038347f.json"
+    },
+    {
+      "id": "111a88db0f26c88183fae323b648c9fbc3ef1ba0f86bc44e8c3c58bfda85cace",
+      "name": "BulkP1Geometry/PreparedPoint/PerturbedControls/Pyramid/3/8/real_time",
+      "metric": "real_time",
+      "url": "cases/111a88db0f26c88183fae323b648c9fbc3ef1ba0f86bc44e8c3c58bfda85cace.json"
+    },
+    {
+      "id": "9969a8c3501650aaaeb3abe329baa3282c94bb40ef3f4c244395b75e61ccb2e4",
+      "name": "BulkP1Geometry/PreparedPoint/PerturbedControls/Quadrilateral/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/9969a8c3501650aaaeb3abe329baa3282c94bb40ef3f4c244395b75e61ccb2e4.json"
+    },
+    {
+      "id": "0dea12d1f903c89df81e6adb27c7ad28a32abe24b24d6e95428213fe343c0a83",
+      "name": "BulkP1Geometry/PreparedPoint/PerturbedControls/Quadrilateral/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/0dea12d1f903c89df81e6adb27c7ad28a32abe24b24d6e95428213fe343c0a83.json"
+    },
+    {
+      "id": "710038785d922347f9d4c9b3728e3e67de2e3fd5d927be4868271143302c0ad1",
+      "name": "BulkP1Geometry/PreparedPoint/PerturbedControls/Quadrilateral/2/2/real_time",
+      "metric": "real_time",
+      "url": "cases/710038785d922347f9d4c9b3728e3e67de2e3fd5d927be4868271143302c0ad1.json"
+    },
+    {
+      "id": "82a45427e183faf0a3138da727049ab1399515f4fdfe38d8585a4d7b4a8e084c",
+      "name": "BulkP1Geometry/PreparedPoint/PerturbedControls/Quadrilateral/2/8/real_time",
+      "metric": "real_time",
+      "url": "cases/82a45427e183faf0a3138da727049ab1399515f4fdfe38d8585a4d7b4a8e084c.json"
+    },
+    {
+      "id": "c3387de5c007495aab744f4f634b0394bd3b4c251f93b901422044fa5ed4d50e",
+      "name": "BulkP1Geometry/PreparedPoint/PerturbedControls/Quadrilateral/3/15/real_time",
+      "metric": "real_time",
+      "url": "cases/c3387de5c007495aab744f4f634b0394bd3b4c251f93b901422044fa5ed4d50e.json"
+    },
+    {
+      "id": "4b31a107dfb2dd58ae1bc6285469ecf548ab8eb49cc96eaccd4117d0bb627ba7",
+      "name": "BulkP1Geometry/PreparedPoint/PerturbedControls/Quadrilateral/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/4b31a107dfb2dd58ae1bc6285469ecf548ab8eb49cc96eaccd4117d0bb627ba7.json"
+    },
+    {
+      "id": "f6d305ac4901b5674679c71c8bb3c7976914e39c24281f465b2acdd5544b1535",
+      "name": "BulkP1Geometry/PreparedPoint/PerturbedControls/Quadrilateral/3/2/real_time",
+      "metric": "real_time",
+      "url": "cases/f6d305ac4901b5674679c71c8bb3c7976914e39c24281f465b2acdd5544b1535.json"
+    },
+    {
+      "id": "c63e903fd6ddae727d4ba4f1d51f4119eeceaa8da161f144d92f9d205ac2b7cf",
+      "name": "BulkP1Geometry/PreparedPoint/PerturbedControls/Quadrilateral/3/8/real_time",
+      "metric": "real_time",
+      "url": "cases/c63e903fd6ddae727d4ba4f1d51f4119eeceaa8da161f144d92f9d205ac2b7cf.json"
+    },
+    {
+      "id": "a4d8c3e33cdecae435e8cb2e1f6250a09efd2fb6cd4d9d35b4e8b3783117061f",
+      "name": "BulkP1Geometry/PreparedPoint/PerturbedControls/Segment/1/15/real_time",
+      "metric": "real_time",
+      "url": "cases/a4d8c3e33cdecae435e8cb2e1f6250a09efd2fb6cd4d9d35b4e8b3783117061f.json"
+    },
+    {
+      "id": "8c3981339319a9ab991ede32781697c417d3d2ded21a5caeccb6004accb0af59",
+      "name": "BulkP1Geometry/PreparedPoint/PerturbedControls/Segment/1/16/real_time",
+      "metric": "real_time",
+      "url": "cases/8c3981339319a9ab991ede32781697c417d3d2ded21a5caeccb6004accb0af59.json"
+    },
+    {
+      "id": "cab3fe0a4c477e5bc8aa3995e5e22919a0c342573527c8b18b7bf7cde2d3cd21",
+      "name": "BulkP1Geometry/PreparedPoint/PerturbedControls/Segment/1/2/real_time",
+      "metric": "real_time",
+      "url": "cases/cab3fe0a4c477e5bc8aa3995e5e22919a0c342573527c8b18b7bf7cde2d3cd21.json"
+    },
+    {
+      "id": "6a6b3a947889da11872ac75c54188a9bf704bb97dd886bddeda6ff89c1ae9aa5",
+      "name": "BulkP1Geometry/PreparedPoint/PerturbedControls/Segment/1/8/real_time",
+      "metric": "real_time",
+      "url": "cases/6a6b3a947889da11872ac75c54188a9bf704bb97dd886bddeda6ff89c1ae9aa5.json"
+    },
+    {
+      "id": "7ec8d9a5ea005c512cb5bdf4a09cc859980f22e9b80f4349fbb4e84c7e0e6107",
+      "name": "BulkP1Geometry/PreparedPoint/PerturbedControls/Segment/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/7ec8d9a5ea005c512cb5bdf4a09cc859980f22e9b80f4349fbb4e84c7e0e6107.json"
+    },
+    {
+      "id": "6dc12269242a07fb8edb72c334695b2d5cee40c247114b6512d2a1fc8f625e98",
+      "name": "BulkP1Geometry/PreparedPoint/PerturbedControls/Segment/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/6dc12269242a07fb8edb72c334695b2d5cee40c247114b6512d2a1fc8f625e98.json"
+    },
+    {
+      "id": "d82071a83522d116b5a7f58c7007f5b6409bf82051a75acac6272e2b10d4fa7b",
+      "name": "BulkP1Geometry/PreparedPoint/PerturbedControls/Segment/2/2/real_time",
+      "metric": "real_time",
+      "url": "cases/d82071a83522d116b5a7f58c7007f5b6409bf82051a75acac6272e2b10d4fa7b.json"
+    },
+    {
+      "id": "22d4103ed99c6f3e382ab4c72e2750ec15b3ffa76c9ced3173db73efa2ab8951",
+      "name": "BulkP1Geometry/PreparedPoint/PerturbedControls/Segment/2/8/real_time",
+      "metric": "real_time",
+      "url": "cases/22d4103ed99c6f3e382ab4c72e2750ec15b3ffa76c9ced3173db73efa2ab8951.json"
+    },
+    {
+      "id": "6cda8faaa46eb1147de4cc6aa2aaea07476ade2172805b501ebe9af9fe94200d",
+      "name": "BulkP1Geometry/PreparedPoint/PerturbedControls/Segment/3/15/real_time",
+      "metric": "real_time",
+      "url": "cases/6cda8faaa46eb1147de4cc6aa2aaea07476ade2172805b501ebe9af9fe94200d.json"
+    },
+    {
+      "id": "b81401a768de8f9d7775ee733be8a709c7e891ebf8307e7e910d8c0bfb20a022",
+      "name": "BulkP1Geometry/PreparedPoint/PerturbedControls/Segment/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/b81401a768de8f9d7775ee733be8a709c7e891ebf8307e7e910d8c0bfb20a022.json"
+    },
+    {
+      "id": "d5a170ae7a805ca407cabae137cd05089c79fef92e25a02255d36848ef1a19f5",
+      "name": "BulkP1Geometry/PreparedPoint/PerturbedControls/Segment/3/2/real_time",
+      "metric": "real_time",
+      "url": "cases/d5a170ae7a805ca407cabae137cd05089c79fef92e25a02255d36848ef1a19f5.json"
+    },
+    {
+      "id": "5e3fbe81e2dc825c3aa36bdcf9eeba2bbe83e17910722ff1f447ea186a695d37",
+      "name": "BulkP1Geometry/PreparedPoint/PerturbedControls/Segment/3/8/real_time",
+      "metric": "real_time",
+      "url": "cases/5e3fbe81e2dc825c3aa36bdcf9eeba2bbe83e17910722ff1f447ea186a695d37.json"
+    },
+    {
+      "id": "337da4338c9a954db6b44583bede80097d09a52d62e8fafcfaff77c1c4b286ca",
+      "name": "BulkP1Geometry/PreparedPoint/PerturbedControls/Tetrahedron/3/15/real_time",
+      "metric": "real_time",
+      "url": "cases/337da4338c9a954db6b44583bede80097d09a52d62e8fafcfaff77c1c4b286ca.json"
+    },
+    {
+      "id": "8476e7249662452f40e35ef9c7bb6862d8557ba4929776b3dbb1ce98a4dab66b",
+      "name": "BulkP1Geometry/PreparedPoint/PerturbedControls/Tetrahedron/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/8476e7249662452f40e35ef9c7bb6862d8557ba4929776b3dbb1ce98a4dab66b.json"
+    },
+    {
+      "id": "25f10fbabbdff11e4e4041c319a8b9ef22bc8a33e50f63715a65b45c7febb57d",
+      "name": "BulkP1Geometry/PreparedPoint/PerturbedControls/Tetrahedron/3/2/real_time",
+      "metric": "real_time",
+      "url": "cases/25f10fbabbdff11e4e4041c319a8b9ef22bc8a33e50f63715a65b45c7febb57d.json"
+    },
+    {
+      "id": "81944ebd381aa2ae8a4779b31725e4f4765cb767fb22ff2d00b30ac713cbe9db",
+      "name": "BulkP1Geometry/PreparedPoint/PerturbedControls/Tetrahedron/3/8/real_time",
+      "metric": "real_time",
+      "url": "cases/81944ebd381aa2ae8a4779b31725e4f4765cb767fb22ff2d00b30ac713cbe9db.json"
+    },
+    {
+      "id": "d80d5dcb9ad8f8a9dfabdcd33e9f757d72e469087b64927e256ea69fe194a4ed",
+      "name": "BulkP1Geometry/PreparedPoint/PerturbedControls/Triangle/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/d80d5dcb9ad8f8a9dfabdcd33e9f757d72e469087b64927e256ea69fe194a4ed.json"
+    },
+    {
+      "id": "ab291844b84133d8c126354e3c2cf1439b3fa43f90b11c4b37e03f562c500d4d",
+      "name": "BulkP1Geometry/PreparedPoint/PerturbedControls/Triangle/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/ab291844b84133d8c126354e3c2cf1439b3fa43f90b11c4b37e03f562c500d4d.json"
+    },
+    {
+      "id": "0f82ec9788f23a24557e4582b90a37ba575adc93e0fdb05f5a0ac3dc655664f7",
+      "name": "BulkP1Geometry/PreparedPoint/PerturbedControls/Triangle/2/2/real_time",
+      "metric": "real_time",
+      "url": "cases/0f82ec9788f23a24557e4582b90a37ba575adc93e0fdb05f5a0ac3dc655664f7.json"
+    },
+    {
+      "id": "15a46abe026586dda2d18cbc6e2eb6d678d17ee6ffdb9018d5f36b7b80e21b9e",
+      "name": "BulkP1Geometry/PreparedPoint/PerturbedControls/Triangle/2/8/real_time",
+      "metric": "real_time",
+      "url": "cases/15a46abe026586dda2d18cbc6e2eb6d678d17ee6ffdb9018d5f36b7b80e21b9e.json"
+    },
+    {
+      "id": "78c9e8a33ad3ca20431ad54c7d5cac4d5d66ab8d85588e2fa2ba71f2da789515",
+      "name": "BulkP1Geometry/PreparedPoint/PerturbedControls/Triangle/3/15/real_time",
+      "metric": "real_time",
+      "url": "cases/78c9e8a33ad3ca20431ad54c7d5cac4d5d66ab8d85588e2fa2ba71f2da789515.json"
+    },
+    {
+      "id": "ca14b5b1a5550f5c5072b07c575d2bebf5a2aef225265c871201e08899195c19",
+      "name": "BulkP1Geometry/PreparedPoint/PerturbedControls/Triangle/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/ca14b5b1a5550f5c5072b07c575d2bebf5a2aef225265c871201e08899195c19.json"
+    },
+    {
+      "id": "974140982e1b1e2460f2e0cdbaf5e55c117ef7177f110b34cd2f3778ceaff7c8",
+      "name": "BulkP1Geometry/PreparedPoint/PerturbedControls/Triangle/3/2/real_time",
+      "metric": "real_time",
+      "url": "cases/974140982e1b1e2460f2e0cdbaf5e55c117ef7177f110b34cd2f3778ceaff7c8.json"
+    },
+    {
+      "id": "e783efb0f3cbb1bda6bebc0a629515cba96768e0ed8d2851f349fa1101df4068",
+      "name": "BulkP1Geometry/PreparedPoint/PerturbedControls/Triangle/3/8/real_time",
+      "metric": "real_time",
+      "url": "cases/e783efb0f3cbb1bda6bebc0a629515cba96768e0ed8d2851f349fa1101df4068.json"
+    },
+    {
+      "id": "57de2d0af36a57b80b5b18f8e3b61ccfbda11c6e55e7b2089451491e37e0523c",
+      "name": "BulkP1Geometry/PreparedPoint/PerturbedControls/Wedge/3/15/real_time",
+      "metric": "real_time",
+      "url": "cases/57de2d0af36a57b80b5b18f8e3b61ccfbda11c6e55e7b2089451491e37e0523c.json"
+    },
+    {
+      "id": "23eee9802728d78f21d5e7e164b2b99065b2b69d7d2055c88097d0fd113520db",
+      "name": "BulkP1Geometry/PreparedPoint/PerturbedControls/Wedge/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/23eee9802728d78f21d5e7e164b2b99065b2b69d7d2055c88097d0fd113520db.json"
+    },
+    {
+      "id": "33730bd04250ad5ce0979bcca620f48a2cc04351bb180dc202a78a9d44b327ed",
+      "name": "BulkP1Geometry/PreparedPoint/PerturbedControls/Wedge/3/2/real_time",
+      "metric": "real_time",
+      "url": "cases/33730bd04250ad5ce0979bcca620f48a2cc04351bb180dc202a78a9d44b327ed.json"
+    },
+    {
+      "id": "878201778511bc966400f103e839a7f87ed503832f145ec06251127a8be1d648",
+      "name": "BulkP1Geometry/PreparedPoint/PerturbedControls/Wedge/3/8/real_time",
+      "metric": "real_time",
+      "url": "cases/878201778511bc966400f103e839a7f87ed503832f145ec06251127a8be1d648.json"
+    },
+    {
+      "id": "45ffbc9de706c84d79727d9a39e741393bedb64324b4e74bd3c4f2d5e462f6a1",
+      "name": "BulkP1Geometry/RetainedPoints/Affine/Hexahedron/3/15/real_time",
+      "metric": "real_time",
+      "url": "cases/45ffbc9de706c84d79727d9a39e741393bedb64324b4e74bd3c4f2d5e462f6a1.json"
+    },
+    {
+      "id": "8637f44ffae6657f2d1f8bd3d415e90c1b2e55c120e4aeee5a70938b94d16e1e",
+      "name": "BulkP1Geometry/RetainedPoints/Affine/Hexahedron/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/8637f44ffae6657f2d1f8bd3d415e90c1b2e55c120e4aeee5a70938b94d16e1e.json"
+    },
+    {
+      "id": "c4e18e5d5ad9792c87f801a5f606a86996080057a95f449c6ee5ab10b472c006",
+      "name": "BulkP1Geometry/RetainedPoints/Affine/Hexahedron/3/2/real_time",
+      "metric": "real_time",
+      "url": "cases/c4e18e5d5ad9792c87f801a5f606a86996080057a95f449c6ee5ab10b472c006.json"
+    },
+    {
+      "id": "153fbe91847291590593ea83354fe2cb34534fa466be7fd72595729166970c50",
+      "name": "BulkP1Geometry/RetainedPoints/Affine/Hexahedron/3/8/real_time",
+      "metric": "real_time",
+      "url": "cases/153fbe91847291590593ea83354fe2cb34534fa466be7fd72595729166970c50.json"
+    },
+    {
+      "id": "40d7cb1e5a1165fd4fac53d262dca05ecda3a956b86b5b94ef39ef30b402175a",
+      "name": "BulkP1Geometry/RetainedPoints/Affine/Point/1/15/real_time",
+      "metric": "real_time",
+      "url": "cases/40d7cb1e5a1165fd4fac53d262dca05ecda3a956b86b5b94ef39ef30b402175a.json"
+    },
+    {
+      "id": "cda78b3ea35a847fa46a8b7a4d31f493dfd211df7929132037c154a2069b8c5c",
+      "name": "BulkP1Geometry/RetainedPoints/Affine/Point/1/16/real_time",
+      "metric": "real_time",
+      "url": "cases/cda78b3ea35a847fa46a8b7a4d31f493dfd211df7929132037c154a2069b8c5c.json"
+    },
+    {
+      "id": "5cbcf024f763f8b52d6cebe29a912df411e61ac2ff65b9578d7dd8e7736c5b3c",
+      "name": "BulkP1Geometry/RetainedPoints/Affine/Point/1/2/real_time",
+      "metric": "real_time",
+      "url": "cases/5cbcf024f763f8b52d6cebe29a912df411e61ac2ff65b9578d7dd8e7736c5b3c.json"
+    },
+    {
+      "id": "1dd93afd202805c276d360739ce6293f72ae3eab8524f4d34ca0f3f6f70a7741",
+      "name": "BulkP1Geometry/RetainedPoints/Affine/Point/1/8/real_time",
+      "metric": "real_time",
+      "url": "cases/1dd93afd202805c276d360739ce6293f72ae3eab8524f4d34ca0f3f6f70a7741.json"
+    },
+    {
+      "id": "693e50bfb93c1c9d6c1180f3f6dd8a83463acc057d9f71c7b9b613687c64b398",
+      "name": "BulkP1Geometry/RetainedPoints/Affine/Point/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/693e50bfb93c1c9d6c1180f3f6dd8a83463acc057d9f71c7b9b613687c64b398.json"
+    },
+    {
+      "id": "a76a09f3a92dcd64f7bd4e1eeb55123da08dde1e706cfb165d50d09dba6ba19a",
+      "name": "BulkP1Geometry/RetainedPoints/Affine/Point/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/a76a09f3a92dcd64f7bd4e1eeb55123da08dde1e706cfb165d50d09dba6ba19a.json"
+    },
+    {
+      "id": "e89b2b2575fbfdd7b7aa2f6939b9c3b112f832ae33d8894268593a1cfd725a13",
+      "name": "BulkP1Geometry/RetainedPoints/Affine/Point/2/2/real_time",
+      "metric": "real_time",
+      "url": "cases/e89b2b2575fbfdd7b7aa2f6939b9c3b112f832ae33d8894268593a1cfd725a13.json"
+    },
+    {
+      "id": "b3ca7044e9839bd581c7a8d05d827f77ee167ed7c666df5ed9412674f6d4c20e",
+      "name": "BulkP1Geometry/RetainedPoints/Affine/Point/2/8/real_time",
+      "metric": "real_time",
+      "url": "cases/b3ca7044e9839bd581c7a8d05d827f77ee167ed7c666df5ed9412674f6d4c20e.json"
+    },
+    {
+      "id": "887db08b1a149ff3ffcc8b6d3b88d0fdcedffff2ece6d80c0cea8262660e7bc7",
+      "name": "BulkP1Geometry/RetainedPoints/Affine/Point/3/15/real_time",
+      "metric": "real_time",
+      "url": "cases/887db08b1a149ff3ffcc8b6d3b88d0fdcedffff2ece6d80c0cea8262660e7bc7.json"
+    },
+    {
+      "id": "152d931157c55e60690313d5da92c77d5f2049ea51f5ddbef462854efb9bae58",
+      "name": "BulkP1Geometry/RetainedPoints/Affine/Point/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/152d931157c55e60690313d5da92c77d5f2049ea51f5ddbef462854efb9bae58.json"
+    },
+    {
+      "id": "8f813bc26d9a46cacc67fa3a40af25fc8a997d9388481d40cefdc63642565a19",
+      "name": "BulkP1Geometry/RetainedPoints/Affine/Point/3/2/real_time",
+      "metric": "real_time",
+      "url": "cases/8f813bc26d9a46cacc67fa3a40af25fc8a997d9388481d40cefdc63642565a19.json"
+    },
+    {
+      "id": "0dd8face2d790a17a968c0b24863cb04744cd7a734bc0da9b3d91ccc4c15185c",
+      "name": "BulkP1Geometry/RetainedPoints/Affine/Point/3/8/real_time",
+      "metric": "real_time",
+      "url": "cases/0dd8face2d790a17a968c0b24863cb04744cd7a734bc0da9b3d91ccc4c15185c.json"
+    },
+    {
+      "id": "a4bf67f75e177f0f12e80fb1c9dee105cae006b2f7166150efd3f2d0496f5663",
+      "name": "BulkP1Geometry/RetainedPoints/Affine/Pyramid/3/10/real_time",
+      "metric": "real_time",
+      "url": "cases/a4bf67f75e177f0f12e80fb1c9dee105cae006b2f7166150efd3f2d0496f5663.json"
+    },
+    {
+      "id": "aba26c52ab1e5b09a81554d4e51f8494ab0c4c355d2d3c58c6e372938743101e",
+      "name": "BulkP1Geometry/RetainedPoints/Affine/Pyramid/3/11/real_time",
+      "metric": "real_time",
+      "url": "cases/aba26c52ab1e5b09a81554d4e51f8494ab0c4c355d2d3c58c6e372938743101e.json"
+    },
+    {
+      "id": "3d97f056dfb66d50bd8da5e4f709a118aa05cb1cfc9c4a1d9f534fbf120e908d",
+      "name": "BulkP1Geometry/RetainedPoints/Affine/Pyramid/3/15/real_time",
+      "metric": "real_time",
+      "url": "cases/3d97f056dfb66d50bd8da5e4f709a118aa05cb1cfc9c4a1d9f534fbf120e908d.json"
+    },
+    {
+      "id": "1bc16db1b83605f4b8e5a81c317faa3cbb6834664a98d0f8f844555128d3b22c",
+      "name": "BulkP1Geometry/RetainedPoints/Affine/Pyramid/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/1bc16db1b83605f4b8e5a81c317faa3cbb6834664a98d0f8f844555128d3b22c.json"
+    },
+    {
+      "id": "7dc18910a9dfc80053a1cb859b6cc1348313a89e190e695722dfca7993010f59",
+      "name": "BulkP1Geometry/RetainedPoints/Affine/Pyramid/3/2/real_time",
+      "metric": "real_time",
+      "url": "cases/7dc18910a9dfc80053a1cb859b6cc1348313a89e190e695722dfca7993010f59.json"
+    },
+    {
+      "id": "9fb98161b63c642c281e44090d2713b150b29e8adb4e01bb491416f639a8019c",
+      "name": "BulkP1Geometry/RetainedPoints/Affine/Pyramid/3/8/real_time",
+      "metric": "real_time",
+      "url": "cases/9fb98161b63c642c281e44090d2713b150b29e8adb4e01bb491416f639a8019c.json"
+    },
+    {
+      "id": "8f93e5d466fb5f802ecfe6199d2a15382d06ad22ebfb1add477aece11c9994e8",
+      "name": "BulkP1Geometry/RetainedPoints/Affine/Quadrilateral/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/8f93e5d466fb5f802ecfe6199d2a15382d06ad22ebfb1add477aece11c9994e8.json"
+    },
+    {
+      "id": "a85baf1d9e52c71671688621ab1ce22cf70e91724d5270f5711730d4b516c4f3",
+      "name": "BulkP1Geometry/RetainedPoints/Affine/Quadrilateral/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/a85baf1d9e52c71671688621ab1ce22cf70e91724d5270f5711730d4b516c4f3.json"
+    },
+    {
+      "id": "eaaf6016b11471a4cfd618190a22befe993d55d8a3101b4788d9a3401e57b08e",
+      "name": "BulkP1Geometry/RetainedPoints/Affine/Quadrilateral/2/2/real_time",
+      "metric": "real_time",
+      "url": "cases/eaaf6016b11471a4cfd618190a22befe993d55d8a3101b4788d9a3401e57b08e.json"
+    },
+    {
+      "id": "c5e824b75f2fb4aeea5b5edc433311ef627fbf90da195c2799c4d4665a7507ff",
+      "name": "BulkP1Geometry/RetainedPoints/Affine/Quadrilateral/2/8/real_time",
+      "metric": "real_time",
+      "url": "cases/c5e824b75f2fb4aeea5b5edc433311ef627fbf90da195c2799c4d4665a7507ff.json"
+    },
+    {
+      "id": "71f57570ab715c8deb94b274d8aa67733c1bd1c5dddf26462b6ec16cf67b8cd6",
+      "name": "BulkP1Geometry/RetainedPoints/Affine/Quadrilateral/3/15/real_time",
+      "metric": "real_time",
+      "url": "cases/71f57570ab715c8deb94b274d8aa67733c1bd1c5dddf26462b6ec16cf67b8cd6.json"
+    },
+    {
+      "id": "a0c7ddda882bb4a97926e9be9d6f35f23a48616678ad9e02d603d02ebaf7cd7c",
+      "name": "BulkP1Geometry/RetainedPoints/Affine/Quadrilateral/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/a0c7ddda882bb4a97926e9be9d6f35f23a48616678ad9e02d603d02ebaf7cd7c.json"
+    },
+    {
+      "id": "2224c1739cf22ba99ee7303e83356f99870a8be2c92fad4878e7f2927dcaccc0",
+      "name": "BulkP1Geometry/RetainedPoints/Affine/Quadrilateral/3/2/real_time",
+      "metric": "real_time",
+      "url": "cases/2224c1739cf22ba99ee7303e83356f99870a8be2c92fad4878e7f2927dcaccc0.json"
+    },
+    {
+      "id": "098d0c9f75b1cc0f1f71d5678e482b46bb9a2f6566c9359ea810be0bb551d4f4",
+      "name": "BulkP1Geometry/RetainedPoints/Affine/Quadrilateral/3/8/real_time",
+      "metric": "real_time",
+      "url": "cases/098d0c9f75b1cc0f1f71d5678e482b46bb9a2f6566c9359ea810be0bb551d4f4.json"
+    },
+    {
+      "id": "d88bb659cf918e7a866889ac7f77c2e575a7a511eb83db62c5ee09280b70027d",
+      "name": "BulkP1Geometry/RetainedPoints/Affine/Segment/1/15/real_time",
+      "metric": "real_time",
+      "url": "cases/d88bb659cf918e7a866889ac7f77c2e575a7a511eb83db62c5ee09280b70027d.json"
+    },
+    {
+      "id": "b687bd5b2abfbfd3ef7388d060f1b9217aad04325127d025bc3fb0314f97752b",
+      "name": "BulkP1Geometry/RetainedPoints/Affine/Segment/1/16/real_time",
+      "metric": "real_time",
+      "url": "cases/b687bd5b2abfbfd3ef7388d060f1b9217aad04325127d025bc3fb0314f97752b.json"
+    },
+    {
+      "id": "e2db786263d94ef28968aff176b64d0971e9f9b821d94df9238ebaf851dfdc29",
+      "name": "BulkP1Geometry/RetainedPoints/Affine/Segment/1/2/real_time",
+      "metric": "real_time",
+      "url": "cases/e2db786263d94ef28968aff176b64d0971e9f9b821d94df9238ebaf851dfdc29.json"
+    },
+    {
+      "id": "e4fa10792443a834b8a8b4c8a957e38854231d8fd37007a14092f25eb43c77d8",
+      "name": "BulkP1Geometry/RetainedPoints/Affine/Segment/1/8/real_time",
+      "metric": "real_time",
+      "url": "cases/e4fa10792443a834b8a8b4c8a957e38854231d8fd37007a14092f25eb43c77d8.json"
+    },
+    {
+      "id": "0bd3eecc405777c34b90e75142b36ebd834c49c01ef5b7cbb46c68ec2c347d5a",
+      "name": "BulkP1Geometry/RetainedPoints/Affine/Segment/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/0bd3eecc405777c34b90e75142b36ebd834c49c01ef5b7cbb46c68ec2c347d5a.json"
+    },
+    {
+      "id": "4fa49d342e0c3cded88b7c7697663217d938b68213df03b6866ed6eee8d4aa1c",
+      "name": "BulkP1Geometry/RetainedPoints/Affine/Segment/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/4fa49d342e0c3cded88b7c7697663217d938b68213df03b6866ed6eee8d4aa1c.json"
+    },
+    {
+      "id": "a4b457114cb7c279eb90d90228dd035a9367b2deff92464585f68b8255648384",
+      "name": "BulkP1Geometry/RetainedPoints/Affine/Segment/2/2/real_time",
+      "metric": "real_time",
+      "url": "cases/a4b457114cb7c279eb90d90228dd035a9367b2deff92464585f68b8255648384.json"
+    },
+    {
+      "id": "2d533fdba281035dee1377ce66ad11bcb33643fda608c88eff2e0c6aa5f34b61",
+      "name": "BulkP1Geometry/RetainedPoints/Affine/Segment/2/8/real_time",
+      "metric": "real_time",
+      "url": "cases/2d533fdba281035dee1377ce66ad11bcb33643fda608c88eff2e0c6aa5f34b61.json"
+    },
+    {
+      "id": "2d7b6fe16fdd22c1b785a631fa2a4b8292ea325b857c8bc464c5073069e700b6",
+      "name": "BulkP1Geometry/RetainedPoints/Affine/Segment/3/15/real_time",
+      "metric": "real_time",
+      "url": "cases/2d7b6fe16fdd22c1b785a631fa2a4b8292ea325b857c8bc464c5073069e700b6.json"
+    },
+    {
+      "id": "56ab9d490052db7fc5d278bd1a668da622988c460cbb1dba06b7649f575184ec",
+      "name": "BulkP1Geometry/RetainedPoints/Affine/Segment/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/56ab9d490052db7fc5d278bd1a668da622988c460cbb1dba06b7649f575184ec.json"
+    },
+    {
+      "id": "a6cf93586afd9b7b5a60178893cdf60ecc7ff51aedca948ba29e00b8735d4222",
+      "name": "BulkP1Geometry/RetainedPoints/Affine/Segment/3/2/real_time",
+      "metric": "real_time",
+      "url": "cases/a6cf93586afd9b7b5a60178893cdf60ecc7ff51aedca948ba29e00b8735d4222.json"
+    },
+    {
+      "id": "ef317ac8deb0335209187d4eacc350c2d5839debf0637acf16229c8d97e08f7c",
+      "name": "BulkP1Geometry/RetainedPoints/Affine/Segment/3/8/real_time",
+      "metric": "real_time",
+      "url": "cases/ef317ac8deb0335209187d4eacc350c2d5839debf0637acf16229c8d97e08f7c.json"
+    },
+    {
+      "id": "12ea3217b54d5b0274a9e85bddd1bf09e144b4e8dfa11e2e08b655b344fa93ab",
+      "name": "BulkP1Geometry/RetainedPoints/Affine/Tetrahedron/3/15/real_time",
+      "metric": "real_time",
+      "url": "cases/12ea3217b54d5b0274a9e85bddd1bf09e144b4e8dfa11e2e08b655b344fa93ab.json"
+    },
+    {
+      "id": "484a6c06597425b6debe51b85f5c21b3f95b7629c000a315ef36dba8d7bec95d",
+      "name": "BulkP1Geometry/RetainedPoints/Affine/Tetrahedron/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/484a6c06597425b6debe51b85f5c21b3f95b7629c000a315ef36dba8d7bec95d.json"
+    },
+    {
+      "id": "430d945a023ae2c5abf220b53042fa008f8372072c63363421f4f42de68f8daa",
+      "name": "BulkP1Geometry/RetainedPoints/Affine/Tetrahedron/3/2/real_time",
+      "metric": "real_time",
+      "url": "cases/430d945a023ae2c5abf220b53042fa008f8372072c63363421f4f42de68f8daa.json"
+    },
+    {
+      "id": "185e4910a5b802c085383e56b6679db5b9a244e38250c908dd97d4059c10cccf",
+      "name": "BulkP1Geometry/RetainedPoints/Affine/Tetrahedron/3/8/real_time",
+      "metric": "real_time",
+      "url": "cases/185e4910a5b802c085383e56b6679db5b9a244e38250c908dd97d4059c10cccf.json"
+    },
+    {
+      "id": "e85871aee33059b9ae0f51ee60f04e489fc73145909d327fc0faf61d814d67d0",
+      "name": "BulkP1Geometry/RetainedPoints/Affine/Triangle/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/e85871aee33059b9ae0f51ee60f04e489fc73145909d327fc0faf61d814d67d0.json"
+    },
+    {
+      "id": "bc4e837a5e6a4c04d7dd16cd7c5763b14c5cdf94a7597b75436899eeffc336df",
+      "name": "BulkP1Geometry/RetainedPoints/Affine/Triangle/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/bc4e837a5e6a4c04d7dd16cd7c5763b14c5cdf94a7597b75436899eeffc336df.json"
+    },
+    {
+      "id": "07229cc359e9054b3968170a3f5ca12eaeb19e9192bdc5ad3293bd41aaf1d7f3",
+      "name": "BulkP1Geometry/RetainedPoints/Affine/Triangle/2/2/real_time",
+      "metric": "real_time",
+      "url": "cases/07229cc359e9054b3968170a3f5ca12eaeb19e9192bdc5ad3293bd41aaf1d7f3.json"
+    },
+    {
+      "id": "19836debcc7c88aa71b17562635d241153581aa84ac9f31a7b9ad7da7d95d44b",
+      "name": "BulkP1Geometry/RetainedPoints/Affine/Triangle/2/8/real_time",
+      "metric": "real_time",
+      "url": "cases/19836debcc7c88aa71b17562635d241153581aa84ac9f31a7b9ad7da7d95d44b.json"
+    },
+    {
+      "id": "77fb4efae914574239d447cc7913c85b5527a3efa5f7fd23282c265dad3a521d",
+      "name": "BulkP1Geometry/RetainedPoints/Affine/Triangle/3/15/real_time",
+      "metric": "real_time",
+      "url": "cases/77fb4efae914574239d447cc7913c85b5527a3efa5f7fd23282c265dad3a521d.json"
+    },
+    {
+      "id": "bf9f17a6f42243c3da94eb8db3c5fba4b0e0f17dbded5e4d52996481cff410a8",
+      "name": "BulkP1Geometry/RetainedPoints/Affine/Triangle/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/bf9f17a6f42243c3da94eb8db3c5fba4b0e0f17dbded5e4d52996481cff410a8.json"
+    },
+    {
+      "id": "37873acfc457768485634a8256bf25187cdc7cb00367ca1bc2f883a47b47414b",
+      "name": "BulkP1Geometry/RetainedPoints/Affine/Triangle/3/2/real_time",
+      "metric": "real_time",
+      "url": "cases/37873acfc457768485634a8256bf25187cdc7cb00367ca1bc2f883a47b47414b.json"
+    },
+    {
+      "id": "9f15b10737ad447df7875e32b212c1acbcd2b34a4679ec53ea751bca9f531785",
+      "name": "BulkP1Geometry/RetainedPoints/Affine/Triangle/3/8/real_time",
+      "metric": "real_time",
+      "url": "cases/9f15b10737ad447df7875e32b212c1acbcd2b34a4679ec53ea751bca9f531785.json"
+    },
+    {
+      "id": "bdc8e1da3ee4f83fa297220d51a88de5f722f98c9ac4bc0b8b60489d3c120f99",
+      "name": "BulkP1Geometry/RetainedPoints/Affine/Wedge/3/15/real_time",
+      "metric": "real_time",
+      "url": "cases/bdc8e1da3ee4f83fa297220d51a88de5f722f98c9ac4bc0b8b60489d3c120f99.json"
+    },
+    {
+      "id": "49cd16446e2fab12b29df109d69539b1e47018181270b3991be330150f36d73f",
+      "name": "BulkP1Geometry/RetainedPoints/Affine/Wedge/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/49cd16446e2fab12b29df109d69539b1e47018181270b3991be330150f36d73f.json"
+    },
+    {
+      "id": "7f24916b3879259078411dd836a72bd9c9bd3e675cf0ece4ba2e65c46b125e54",
+      "name": "BulkP1Geometry/RetainedPoints/Affine/Wedge/3/2/real_time",
+      "metric": "real_time",
+      "url": "cases/7f24916b3879259078411dd836a72bd9c9bd3e675cf0ece4ba2e65c46b125e54.json"
+    },
+    {
+      "id": "4c718d3bbd26dac8412bbf8f3ac9b810948bab4fcf74c0c1ef060a6e57bbe495",
+      "name": "BulkP1Geometry/RetainedPoints/Affine/Wedge/3/8/real_time",
+      "metric": "real_time",
+      "url": "cases/4c718d3bbd26dac8412bbf8f3ac9b810948bab4fcf74c0c1ef060a6e57bbe495.json"
+    },
+    {
+      "id": "9601c0e5eb253883a27683d3165c1807527dd16b6a4c9be6e9f2345993ec27f9",
+      "name": "BulkP1Geometry/RetainedPoints/GaussianFactor/Affine/Tetrahedron/3/10/real_time",
+      "metric": "real_time",
+      "url": "cases/9601c0e5eb253883a27683d3165c1807527dd16b6a4c9be6e9f2345993ec27f9.json"
+    },
+    {
+      "id": "f08fa9fa9db704244051973dd86f48e482f35412c70397cc034cb927e6c0fd6f",
+      "name": "BulkP1Geometry/RetainedPoints/GaussianFactor/Affine/Tetrahedron/3/12/real_time",
+      "metric": "real_time",
+      "url": "cases/f08fa9fa9db704244051973dd86f48e482f35412c70397cc034cb927e6c0fd6f.json"
+    },
+    {
+      "id": "fa8b30017d4005d4b2a9b824f808d8db837395bda3e5bc91e182a30a995b0a85",
+      "name": "BulkP1Geometry/RetainedPoints/GaussianFactor/Affine/Tetrahedron/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/fa8b30017d4005d4b2a9b824f808d8db837395bda3e5bc91e182a30a995b0a85.json"
+    },
+    {
+      "id": "90980c3225833432a29e05be4bddcab2babd1b966f58ebb1aeb87693a8e5bb27",
+      "name": "BulkP1Geometry/RetainedPoints/GaussianFactor/Affine/Tetrahedron/3/3/real_time",
+      "metric": "real_time",
+      "url": "cases/90980c3225833432a29e05be4bddcab2babd1b966f58ebb1aeb87693a8e5bb27.json"
+    },
+    {
+      "id": "73aba9bb24f0f0ee56eb5774d03fc404b829fec7c32d19022bdc2220ccfa6d95",
+      "name": "BulkP1Geometry/RetainedPoints/GaussianFactor/Affine/Tetrahedron/3/4/real_time",
+      "metric": "real_time",
+      "url": "cases/73aba9bb24f0f0ee56eb5774d03fc404b829fec7c32d19022bdc2220ccfa6d95.json"
+    },
+    {
+      "id": "c340f3d7ae234e907efd81a9c9c5c51ddf0b552eae865918bf2ac3e135383f46",
+      "name": "BulkP1Geometry/RetainedPoints/GaussianFactor/Affine/Tetrahedron/3/5/real_time",
+      "metric": "real_time",
+      "url": "cases/c340f3d7ae234e907efd81a9c9c5c51ddf0b552eae865918bf2ac3e135383f46.json"
+    },
+    {
+      "id": "ab63d469a7955ab62204ef6a1d9463fd27a3c2d8ebc3d0b0b07da0d07656e130",
+      "name": "BulkP1Geometry/RetainedPoints/GaussianFactor/Affine/Tetrahedron/3/6/real_time",
+      "metric": "real_time",
+      "url": "cases/ab63d469a7955ab62204ef6a1d9463fd27a3c2d8ebc3d0b0b07da0d07656e130.json"
+    },
+    {
+      "id": "74d27216a30f10d735e167823ef798fb32a2968a0ca8081d7dc5dbe16f98232f",
+      "name": "BulkP1Geometry/RetainedPoints/GaussianFactor/Affine/Tetrahedron/3/7/real_time",
+      "metric": "real_time",
+      "url": "cases/74d27216a30f10d735e167823ef798fb32a2968a0ca8081d7dc5dbe16f98232f.json"
+    },
+    {
+      "id": "c7b068550a91848920623b0dff0a67b56aa52f243e6175a51b75cc8c82b0aada",
+      "name": "BulkP1Geometry/RetainedPoints/GaussianFactor/Affine/Tetrahedron/3/8/real_time",
+      "metric": "real_time",
+      "url": "cases/c7b068550a91848920623b0dff0a67b56aa52f243e6175a51b75cc8c82b0aada.json"
+    },
+    {
+      "id": "a81de85d584b748c72b0886e243519dcac4c02abed0d07e82ab6f95c35a76cbb",
+      "name": "BulkP1Geometry/RetainedPoints/GaussianFactor/Affine/Tetrahedron/3/9/real_time",
+      "metric": "real_time",
+      "url": "cases/a81de85d584b748c72b0886e243519dcac4c02abed0d07e82ab6f95c35a76cbb.json"
+    },
+    {
+      "id": "ef95cdf2e6b217c9a18a1c28e9b2fcf33ca30cddae06d884156466b3ea2c2243",
+      "name": "BulkP1Geometry/RetainedPoints/GaussianFactor/PerturbedControls/Tetrahedron/3/10/real_time",
+      "metric": "real_time",
+      "url": "cases/ef95cdf2e6b217c9a18a1c28e9b2fcf33ca30cddae06d884156466b3ea2c2243.json"
+    },
+    {
+      "id": "7c31c99f99b9e7a4904fc14ed8a1bb9d0255ff4328720ccefeea7ce2a4ed3a6d",
+      "name": "BulkP1Geometry/RetainedPoints/GaussianFactor/PerturbedControls/Tetrahedron/3/12/real_time",
+      "metric": "real_time",
+      "url": "cases/7c31c99f99b9e7a4904fc14ed8a1bb9d0255ff4328720ccefeea7ce2a4ed3a6d.json"
+    },
+    {
+      "id": "c37923fee90230e42a0e5dd03184ff3007b99061477eb4c07a081e357ded34ea",
+      "name": "BulkP1Geometry/RetainedPoints/GaussianFactor/PerturbedControls/Tetrahedron/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/c37923fee90230e42a0e5dd03184ff3007b99061477eb4c07a081e357ded34ea.json"
+    },
+    {
+      "id": "b0c058c09b01e83f629eaaed7d7e78a5c4a2c5bf58e049fb70382a4eb54c3298",
+      "name": "BulkP1Geometry/RetainedPoints/GaussianFactor/PerturbedControls/Tetrahedron/3/3/real_time",
+      "metric": "real_time",
+      "url": "cases/b0c058c09b01e83f629eaaed7d7e78a5c4a2c5bf58e049fb70382a4eb54c3298.json"
+    },
+    {
+      "id": "64bc1acf77d2486dcd6d7c535351d0a0a7d4edf9bb96aa6d6ce96d1639172b57",
+      "name": "BulkP1Geometry/RetainedPoints/GaussianFactor/PerturbedControls/Tetrahedron/3/4/real_time",
+      "metric": "real_time",
+      "url": "cases/64bc1acf77d2486dcd6d7c535351d0a0a7d4edf9bb96aa6d6ce96d1639172b57.json"
+    },
+    {
+      "id": "e28524f8749ad1365dbd3ad9e80cd4a998fe9cae0727bd69842ada9bbba62701",
+      "name": "BulkP1Geometry/RetainedPoints/GaussianFactor/PerturbedControls/Tetrahedron/3/5/real_time",
+      "metric": "real_time",
+      "url": "cases/e28524f8749ad1365dbd3ad9e80cd4a998fe9cae0727bd69842ada9bbba62701.json"
+    },
+    {
+      "id": "d038a095caf9c0269e6c95414704bcaf014f9e77ec43083f2c342e9bd67fb1ec",
+      "name": "BulkP1Geometry/RetainedPoints/GaussianFactor/PerturbedControls/Tetrahedron/3/6/real_time",
+      "metric": "real_time",
+      "url": "cases/d038a095caf9c0269e6c95414704bcaf014f9e77ec43083f2c342e9bd67fb1ec.json"
+    },
+    {
+      "id": "19358c56b5d6374df6ba8d0ca9b0a6c131a79f0f4e003b30e4d4553316a88e94",
+      "name": "BulkP1Geometry/RetainedPoints/GaussianFactor/PerturbedControls/Tetrahedron/3/7/real_time",
+      "metric": "real_time",
+      "url": "cases/19358c56b5d6374df6ba8d0ca9b0a6c131a79f0f4e003b30e4d4553316a88e94.json"
+    },
+    {
+      "id": "3c8fe561bc907afd090b1c8b17d5648a6ba14890f6904921e9a28b7f543ef791",
+      "name": "BulkP1Geometry/RetainedPoints/GaussianFactor/PerturbedControls/Tetrahedron/3/8/real_time",
+      "metric": "real_time",
+      "url": "cases/3c8fe561bc907afd090b1c8b17d5648a6ba14890f6904921e9a28b7f543ef791.json"
+    },
+    {
+      "id": "0b60fb18fcc0257838b9d26c4e2be6cdfe99f6fbe66fc91689130dc12dfafe7e",
+      "name": "BulkP1Geometry/RetainedPoints/GaussianFactor/PerturbedControls/Tetrahedron/3/9/real_time",
+      "metric": "real_time",
+      "url": "cases/0b60fb18fcc0257838b9d26c4e2be6cdfe99f6fbe66fc91689130dc12dfafe7e.json"
+    },
+    {
+      "id": "9ce536ce37b262a0cae1a1240a25dde242533da497f96764f8591decec075efa",
+      "name": "BulkP1Geometry/RetainedPoints/PerturbedControls/Hexahedron/3/15/real_time",
+      "metric": "real_time",
+      "url": "cases/9ce536ce37b262a0cae1a1240a25dde242533da497f96764f8591decec075efa.json"
+    },
+    {
+      "id": "fe5ac2f08588de3dde97c6de1654c7c831ba8fc48edeb05b826aa5ccd3cf5970",
+      "name": "BulkP1Geometry/RetainedPoints/PerturbedControls/Hexahedron/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/fe5ac2f08588de3dde97c6de1654c7c831ba8fc48edeb05b826aa5ccd3cf5970.json"
+    },
+    {
+      "id": "d943af32be2ac9280ebba257220f7c5c80db8a28b1075252a6200cdf45e93713",
+      "name": "BulkP1Geometry/RetainedPoints/PerturbedControls/Hexahedron/3/2/real_time",
+      "metric": "real_time",
+      "url": "cases/d943af32be2ac9280ebba257220f7c5c80db8a28b1075252a6200cdf45e93713.json"
+    },
+    {
+      "id": "c452e0828cd799d67ecaf14e0779d01d67c3915387449ec686cc303d608d35a7",
+      "name": "BulkP1Geometry/RetainedPoints/PerturbedControls/Hexahedron/3/8/real_time",
+      "metric": "real_time",
+      "url": "cases/c452e0828cd799d67ecaf14e0779d01d67c3915387449ec686cc303d608d35a7.json"
+    },
+    {
+      "id": "0546946016e1435a395687d02c8450b996f5cf7046f35ab8e35e38d8bef70ff1",
+      "name": "BulkP1Geometry/RetainedPoints/PerturbedControls/Point/1/15/real_time",
+      "metric": "real_time",
+      "url": "cases/0546946016e1435a395687d02c8450b996f5cf7046f35ab8e35e38d8bef70ff1.json"
+    },
+    {
+      "id": "38ef856c4d1739563f4679aa09eae30bb5533f0874bd0bc3805ae255d2e98291",
+      "name": "BulkP1Geometry/RetainedPoints/PerturbedControls/Point/1/16/real_time",
+      "metric": "real_time",
+      "url": "cases/38ef856c4d1739563f4679aa09eae30bb5533f0874bd0bc3805ae255d2e98291.json"
+    },
+    {
+      "id": "a8839cd85c53785a03e1f912955500d3cedbe49c89e04711ffeff123fe9b6a59",
+      "name": "BulkP1Geometry/RetainedPoints/PerturbedControls/Point/1/2/real_time",
+      "metric": "real_time",
+      "url": "cases/a8839cd85c53785a03e1f912955500d3cedbe49c89e04711ffeff123fe9b6a59.json"
+    },
+    {
+      "id": "2fba0058c3873cac0d424f2dee8914ff1eb133c4baefcb3baf47ab52076c571d",
+      "name": "BulkP1Geometry/RetainedPoints/PerturbedControls/Point/1/8/real_time",
+      "metric": "real_time",
+      "url": "cases/2fba0058c3873cac0d424f2dee8914ff1eb133c4baefcb3baf47ab52076c571d.json"
+    },
+    {
+      "id": "1e6d096f6d8e805053bc8c6706702432d5467cca9240c7fbf44431ac2e30ca46",
+      "name": "BulkP1Geometry/RetainedPoints/PerturbedControls/Point/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/1e6d096f6d8e805053bc8c6706702432d5467cca9240c7fbf44431ac2e30ca46.json"
+    },
+    {
+      "id": "9fa0074dddcc80010ae048725a289e56449944a6fc9ed8029a3b980c9b5615c5",
+      "name": "BulkP1Geometry/RetainedPoints/PerturbedControls/Point/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/9fa0074dddcc80010ae048725a289e56449944a6fc9ed8029a3b980c9b5615c5.json"
+    },
+    {
+      "id": "95e41f86397d937907af722069861583f1cc9662aab4ddf3bac34200f5efbb1f",
+      "name": "BulkP1Geometry/RetainedPoints/PerturbedControls/Point/2/2/real_time",
+      "metric": "real_time",
+      "url": "cases/95e41f86397d937907af722069861583f1cc9662aab4ddf3bac34200f5efbb1f.json"
+    },
+    {
+      "id": "fecd1e06c556c9e18a2be578cfbe36d37a7cea682c6bed9225752e319f421da4",
+      "name": "BulkP1Geometry/RetainedPoints/PerturbedControls/Point/2/8/real_time",
+      "metric": "real_time",
+      "url": "cases/fecd1e06c556c9e18a2be578cfbe36d37a7cea682c6bed9225752e319f421da4.json"
+    },
+    {
+      "id": "ddb15f947fe0baa130414ea7ee2ddbbedf01003b8cf0ac39fd0a41d4be8807d8",
+      "name": "BulkP1Geometry/RetainedPoints/PerturbedControls/Point/3/15/real_time",
+      "metric": "real_time",
+      "url": "cases/ddb15f947fe0baa130414ea7ee2ddbbedf01003b8cf0ac39fd0a41d4be8807d8.json"
+    },
+    {
+      "id": "616ebd57db3dc8f6737f4d2c7d1c20932f97b2b748743de8309f4dbc4e107eab",
+      "name": "BulkP1Geometry/RetainedPoints/PerturbedControls/Point/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/616ebd57db3dc8f6737f4d2c7d1c20932f97b2b748743de8309f4dbc4e107eab.json"
+    },
+    {
+      "id": "2323e6b447942f09a697c07c2935dc4dc0b24348a3553eec7a6ef789e2e18977",
+      "name": "BulkP1Geometry/RetainedPoints/PerturbedControls/Point/3/2/real_time",
+      "metric": "real_time",
+      "url": "cases/2323e6b447942f09a697c07c2935dc4dc0b24348a3553eec7a6ef789e2e18977.json"
+    },
+    {
+      "id": "e0e085cdd7768df00d1576e7d945a710353a7f07428d4a4d3ed482305bb5a048",
+      "name": "BulkP1Geometry/RetainedPoints/PerturbedControls/Point/3/8/real_time",
+      "metric": "real_time",
+      "url": "cases/e0e085cdd7768df00d1576e7d945a710353a7f07428d4a4d3ed482305bb5a048.json"
+    },
+    {
+      "id": "d72b0ee17c2baa32e5ba329b6e14bc01e9196e17137c7b9fbd787b45954866eb",
+      "name": "BulkP1Geometry/RetainedPoints/PerturbedControls/Pyramid/3/10/real_time",
+      "metric": "real_time",
+      "url": "cases/d72b0ee17c2baa32e5ba329b6e14bc01e9196e17137c7b9fbd787b45954866eb.json"
+    },
+    {
+      "id": "3c897537c8105b41be583744a75c2b82de11611438ea93965bdeb987e1806a1b",
+      "name": "BulkP1Geometry/RetainedPoints/PerturbedControls/Pyramid/3/11/real_time",
+      "metric": "real_time",
+      "url": "cases/3c897537c8105b41be583744a75c2b82de11611438ea93965bdeb987e1806a1b.json"
+    },
+    {
+      "id": "29a40545466c4c516fa14e7eacbcd9cfe59f1e4668c8c672f457ca007339cd43",
+      "name": "BulkP1Geometry/RetainedPoints/PerturbedControls/Pyramid/3/15/real_time",
+      "metric": "real_time",
+      "url": "cases/29a40545466c4c516fa14e7eacbcd9cfe59f1e4668c8c672f457ca007339cd43.json"
+    },
+    {
+      "id": "7c163b131d6716b03d4768978e5be617f878295512580a3c67a2c72ebd655719",
+      "name": "BulkP1Geometry/RetainedPoints/PerturbedControls/Pyramid/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/7c163b131d6716b03d4768978e5be617f878295512580a3c67a2c72ebd655719.json"
+    },
+    {
+      "id": "fc1ca46c117184c7a45b0f859232213e82021c0a8d69b16790c34bae80b22416",
+      "name": "BulkP1Geometry/RetainedPoints/PerturbedControls/Pyramid/3/2/real_time",
+      "metric": "real_time",
+      "url": "cases/fc1ca46c117184c7a45b0f859232213e82021c0a8d69b16790c34bae80b22416.json"
+    },
+    {
+      "id": "10e42f2dc3f66a66791c6c5fba41b76d3142d103f5aea4e1f470de8a790ec183",
+      "name": "BulkP1Geometry/RetainedPoints/PerturbedControls/Pyramid/3/8/real_time",
+      "metric": "real_time",
+      "url": "cases/10e42f2dc3f66a66791c6c5fba41b76d3142d103f5aea4e1f470de8a790ec183.json"
+    },
+    {
+      "id": "20d739f08f14f6972693eb6bae8ccb5660f1a2de9e2836f4da781f7db2b9cdec",
+      "name": "BulkP1Geometry/RetainedPoints/PerturbedControls/Quadrilateral/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/20d739f08f14f6972693eb6bae8ccb5660f1a2de9e2836f4da781f7db2b9cdec.json"
+    },
+    {
+      "id": "49d42b11e70169f8bf7039bcaef4c0129b8deb3c49bfd451c019b1111921bc2b",
+      "name": "BulkP1Geometry/RetainedPoints/PerturbedControls/Quadrilateral/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/49d42b11e70169f8bf7039bcaef4c0129b8deb3c49bfd451c019b1111921bc2b.json"
+    },
+    {
+      "id": "65884f27f84e1d2bd454ec074c5aa2b0c6bbc8a28bf52e9b9ce82da0b791a9b0",
+      "name": "BulkP1Geometry/RetainedPoints/PerturbedControls/Quadrilateral/2/2/real_time",
+      "metric": "real_time",
+      "url": "cases/65884f27f84e1d2bd454ec074c5aa2b0c6bbc8a28bf52e9b9ce82da0b791a9b0.json"
+    },
+    {
+      "id": "c88a5b6a88863915740e99884d4fa7e588d6d2c73adde00050a1430795f829c3",
+      "name": "BulkP1Geometry/RetainedPoints/PerturbedControls/Quadrilateral/2/8/real_time",
+      "metric": "real_time",
+      "url": "cases/c88a5b6a88863915740e99884d4fa7e588d6d2c73adde00050a1430795f829c3.json"
+    },
+    {
+      "id": "3f96609992e035b251f5439e71a5803695ddba223625f76c517bd86e67edc7ad",
+      "name": "BulkP1Geometry/RetainedPoints/PerturbedControls/Quadrilateral/3/15/real_time",
+      "metric": "real_time",
+      "url": "cases/3f96609992e035b251f5439e71a5803695ddba223625f76c517bd86e67edc7ad.json"
+    },
+    {
+      "id": "62ec4c5d0813c81228ce7160e385cc7ada536ded3f9e006391e00ba2482e3db8",
+      "name": "BulkP1Geometry/RetainedPoints/PerturbedControls/Quadrilateral/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/62ec4c5d0813c81228ce7160e385cc7ada536ded3f9e006391e00ba2482e3db8.json"
+    },
+    {
+      "id": "d4c9e031c4dbbe211fdf7cc78214526beda7de8f707efd9daf71a1b1809cd0b2",
+      "name": "BulkP1Geometry/RetainedPoints/PerturbedControls/Quadrilateral/3/2/real_time",
+      "metric": "real_time",
+      "url": "cases/d4c9e031c4dbbe211fdf7cc78214526beda7de8f707efd9daf71a1b1809cd0b2.json"
+    },
+    {
+      "id": "143d640aabebb777d94cd173967db59a2987b9c3eecb715dbe1e2812796f768c",
+      "name": "BulkP1Geometry/RetainedPoints/PerturbedControls/Quadrilateral/3/8/real_time",
+      "metric": "real_time",
+      "url": "cases/143d640aabebb777d94cd173967db59a2987b9c3eecb715dbe1e2812796f768c.json"
+    },
+    {
+      "id": "13085754a69779bdcce55c7da79e82fa7f3d0b5e35ae4fafa5b3dc088ddad446",
+      "name": "BulkP1Geometry/RetainedPoints/PerturbedControls/Segment/1/15/real_time",
+      "metric": "real_time",
+      "url": "cases/13085754a69779bdcce55c7da79e82fa7f3d0b5e35ae4fafa5b3dc088ddad446.json"
+    },
+    {
+      "id": "81f4e80e89f7d76f2165ee7c41756d89b9ac0a0deb7aed4649e4cdad1791e207",
+      "name": "BulkP1Geometry/RetainedPoints/PerturbedControls/Segment/1/16/real_time",
+      "metric": "real_time",
+      "url": "cases/81f4e80e89f7d76f2165ee7c41756d89b9ac0a0deb7aed4649e4cdad1791e207.json"
+    },
+    {
+      "id": "f7028219904cab55f1763a259698fa103d6a6ce060dbe05a5f68525b7ee5f413",
+      "name": "BulkP1Geometry/RetainedPoints/PerturbedControls/Segment/1/2/real_time",
+      "metric": "real_time",
+      "url": "cases/f7028219904cab55f1763a259698fa103d6a6ce060dbe05a5f68525b7ee5f413.json"
+    },
+    {
+      "id": "323cdd095be0b379ce656f12a8f4a0c25151901215846027398f11dd151a9051",
+      "name": "BulkP1Geometry/RetainedPoints/PerturbedControls/Segment/1/8/real_time",
+      "metric": "real_time",
+      "url": "cases/323cdd095be0b379ce656f12a8f4a0c25151901215846027398f11dd151a9051.json"
+    },
+    {
+      "id": "cf385445dd306256d702bd172ec82dda7cb2f52bc27707a96e0365ec56c1cd99",
+      "name": "BulkP1Geometry/RetainedPoints/PerturbedControls/Segment/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/cf385445dd306256d702bd172ec82dda7cb2f52bc27707a96e0365ec56c1cd99.json"
+    },
+    {
+      "id": "0c4f0fe70a6e0a47378e3b529bf727d4183a1b582cda354aed0885ef689a3aa4",
+      "name": "BulkP1Geometry/RetainedPoints/PerturbedControls/Segment/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/0c4f0fe70a6e0a47378e3b529bf727d4183a1b582cda354aed0885ef689a3aa4.json"
+    },
+    {
+      "id": "ef0959c5a98c1fa940735037f0263e6660a849b0cdabeb5c71aff32c6ee5ebbc",
+      "name": "BulkP1Geometry/RetainedPoints/PerturbedControls/Segment/2/2/real_time",
+      "metric": "real_time",
+      "url": "cases/ef0959c5a98c1fa940735037f0263e6660a849b0cdabeb5c71aff32c6ee5ebbc.json"
+    },
+    {
+      "id": "377a344c5dc2bee4d08e0a98e1b2ebdc4fe94ff9b7412f84e7c5dc82ae7cc6bd",
+      "name": "BulkP1Geometry/RetainedPoints/PerturbedControls/Segment/2/8/real_time",
+      "metric": "real_time",
+      "url": "cases/377a344c5dc2bee4d08e0a98e1b2ebdc4fe94ff9b7412f84e7c5dc82ae7cc6bd.json"
+    },
+    {
+      "id": "73af84eae71ecfc2543a6ea52f376a264af2da527dc529f971ff10993096560b",
+      "name": "BulkP1Geometry/RetainedPoints/PerturbedControls/Segment/3/15/real_time",
+      "metric": "real_time",
+      "url": "cases/73af84eae71ecfc2543a6ea52f376a264af2da527dc529f971ff10993096560b.json"
+    },
+    {
+      "id": "7c31a284a004cd1f136b1ca3b505e9a136ee8b1f663defcbbe372b8b88460b21",
+      "name": "BulkP1Geometry/RetainedPoints/PerturbedControls/Segment/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/7c31a284a004cd1f136b1ca3b505e9a136ee8b1f663defcbbe372b8b88460b21.json"
+    },
+    {
+      "id": "3688fcd2167dab0f6d1b4bfb376de0a9a6787af66d642b421b065153d4b123fb",
+      "name": "BulkP1Geometry/RetainedPoints/PerturbedControls/Segment/3/2/real_time",
+      "metric": "real_time",
+      "url": "cases/3688fcd2167dab0f6d1b4bfb376de0a9a6787af66d642b421b065153d4b123fb.json"
+    },
+    {
+      "id": "ef442c6617e8abbb78a54eb03bd289eef439ecd50993b3aaa3e6b23ce0bed6f8",
+      "name": "BulkP1Geometry/RetainedPoints/PerturbedControls/Segment/3/8/real_time",
+      "metric": "real_time",
+      "url": "cases/ef442c6617e8abbb78a54eb03bd289eef439ecd50993b3aaa3e6b23ce0bed6f8.json"
+    },
+    {
+      "id": "6d0eec8ce2b054fd7f0f28bec32b5a361bc44b3cfcd41e92756eaf2b85c54272",
+      "name": "BulkP1Geometry/RetainedPoints/PerturbedControls/Tetrahedron/3/15/real_time",
+      "metric": "real_time",
+      "url": "cases/6d0eec8ce2b054fd7f0f28bec32b5a361bc44b3cfcd41e92756eaf2b85c54272.json"
+    },
+    {
+      "id": "d1ee3128ba023b6a0b35f121755341f558fdc552a73f73be38d4d7976d1fd3bb",
+      "name": "BulkP1Geometry/RetainedPoints/PerturbedControls/Tetrahedron/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/d1ee3128ba023b6a0b35f121755341f558fdc552a73f73be38d4d7976d1fd3bb.json"
+    },
+    {
+      "id": "4dfe9401edd5d9e720e22e468892ec09be2bdf1c2dfadd6f087478751047dc8a",
+      "name": "BulkP1Geometry/RetainedPoints/PerturbedControls/Tetrahedron/3/2/real_time",
+      "metric": "real_time",
+      "url": "cases/4dfe9401edd5d9e720e22e468892ec09be2bdf1c2dfadd6f087478751047dc8a.json"
+    },
+    {
+      "id": "cb1f55dbfed2f43a74f5c5544537b0493cba41540e9b51f4199882152c4f40b4",
+      "name": "BulkP1Geometry/RetainedPoints/PerturbedControls/Tetrahedron/3/8/real_time",
+      "metric": "real_time",
+      "url": "cases/cb1f55dbfed2f43a74f5c5544537b0493cba41540e9b51f4199882152c4f40b4.json"
+    },
+    {
+      "id": "f8476a460437012ca7e705c34f947914344e3b371ffcc90c4cc6e270e05cfa33",
+      "name": "BulkP1Geometry/RetainedPoints/PerturbedControls/Triangle/2/15/real_time",
+      "metric": "real_time",
+      "url": "cases/f8476a460437012ca7e705c34f947914344e3b371ffcc90c4cc6e270e05cfa33.json"
+    },
+    {
+      "id": "694e8a9324e3eb07db86eca1349f28d793629420ecb38dec069259ca3ffd35d4",
+      "name": "BulkP1Geometry/RetainedPoints/PerturbedControls/Triangle/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/694e8a9324e3eb07db86eca1349f28d793629420ecb38dec069259ca3ffd35d4.json"
+    },
+    {
+      "id": "e293a80b43e44e24abc72cc377301e5dc86b4cad0b132d7ca9e2d74c212bb060",
+      "name": "BulkP1Geometry/RetainedPoints/PerturbedControls/Triangle/2/2/real_time",
+      "metric": "real_time",
+      "url": "cases/e293a80b43e44e24abc72cc377301e5dc86b4cad0b132d7ca9e2d74c212bb060.json"
+    },
+    {
+      "id": "94cfaa768dedecaed78a014b0598fed702cae5f17b90f740e98e6e2090a770d0",
+      "name": "BulkP1Geometry/RetainedPoints/PerturbedControls/Triangle/2/8/real_time",
+      "metric": "real_time",
+      "url": "cases/94cfaa768dedecaed78a014b0598fed702cae5f17b90f740e98e6e2090a770d0.json"
+    },
+    {
+      "id": "01e1facad29356fa95221ef4213978fd33dad5006db00e8fee84c12d6188d6bd",
+      "name": "BulkP1Geometry/RetainedPoints/PerturbedControls/Triangle/3/15/real_time",
+      "metric": "real_time",
+      "url": "cases/01e1facad29356fa95221ef4213978fd33dad5006db00e8fee84c12d6188d6bd.json"
+    },
+    {
+      "id": "e8a7b2a8fe2e48f561f092de5349f56385719052d6943f00de566d558784ec09",
+      "name": "BulkP1Geometry/RetainedPoints/PerturbedControls/Triangle/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/e8a7b2a8fe2e48f561f092de5349f56385719052d6943f00de566d558784ec09.json"
+    },
+    {
+      "id": "9707993d40380357edf7c9d6037a5d3667e2abbf8530e4239c9dcd1a9d5dadf5",
+      "name": "BulkP1Geometry/RetainedPoints/PerturbedControls/Triangle/3/2/real_time",
+      "metric": "real_time",
+      "url": "cases/9707993d40380357edf7c9d6037a5d3667e2abbf8530e4239c9dcd1a9d5dadf5.json"
+    },
+    {
+      "id": "5a163bcf5c85d9e4a992b6a648443880291fe599e88e8973b7c4486c4757b016",
+      "name": "BulkP1Geometry/RetainedPoints/PerturbedControls/Triangle/3/8/real_time",
+      "metric": "real_time",
+      "url": "cases/5a163bcf5c85d9e4a992b6a648443880291fe599e88e8973b7c4486c4757b016.json"
+    },
+    {
+      "id": "861e4cdfc533963bfa139c67f375106eb88e488570826068fc4225fedca1d22a",
+      "name": "BulkP1Geometry/RetainedPoints/PerturbedControls/Wedge/3/15/real_time",
+      "metric": "real_time",
+      "url": "cases/861e4cdfc533963bfa139c67f375106eb88e488570826068fc4225fedca1d22a.json"
+    },
+    {
+      "id": "b75af37fd0f82b26fc9c90718baf6c4ca474122cfd5cb13120f2292cde6d4815",
+      "name": "BulkP1Geometry/RetainedPoints/PerturbedControls/Wedge/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/b75af37fd0f82b26fc9c90718baf6c4ca474122cfd5cb13120f2292cde6d4815.json"
+    },
+    {
+      "id": "722b8bc80e65e0fa81e6870f0641eaf9d6b8bfd0dd09f4636537320f13d79fcf",
+      "name": "BulkP1Geometry/RetainedPoints/PerturbedControls/Wedge/3/2/real_time",
+      "metric": "real_time",
+      "url": "cases/722b8bc80e65e0fa81e6870f0641eaf9d6b8bfd0dd09f4636537320f13d79fcf.json"
+    },
+    {
+      "id": "fede5a1468d21944f7e522ab5da236d7355ce153f3c6272ed2b4e67b3182a0c3",
+      "name": "BulkP1Geometry/RetainedPoints/PerturbedControls/Wedge/3/8/real_time",
+      "metric": "real_time",
+      "url": "cases/fede5a1468d21944f7e522ab5da236d7355ce153f3c6272ed2b4e67b3182a0c3.json"
+    }
+  ]
+}

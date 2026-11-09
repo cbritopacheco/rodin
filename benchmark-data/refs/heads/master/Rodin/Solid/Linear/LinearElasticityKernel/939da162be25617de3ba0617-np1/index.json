@@ -1,0 +1,373 @@
+{
+  "schema": 1,
+  "definition": {
+    "kind": "benchmark",
+    "mode": "local",
+    "compiler": "gcc-14",
+    "runner": "ubuntu-24.04",
+    "cmake": {
+      "CMAKE_BUILD_TYPE": "Release",
+      "CMAKE_CXX_COMPILER": "g++-14",
+      "CMAKE_C_COMPILER": "gcc-14",
+      "CMAKE_SUPPRESS_REGENERATION": "ON",
+      "RODIN_BUILD_SRC": "ON",
+      "RODIN_BUILD_BENCHMARKS": "ON",
+      "RODIN_BUILD_UNIT_TESTS": "OFF",
+      "RODIN_BUILD_MANUFACTURED_TESTS": "OFF",
+      "RODIN_BUILD_CONVERGENCE_TESTS": "OFF",
+      "RODIN_BUILD_EXAMPLES": "OFF",
+      "RODIN_BUILD_DOC": "OFF",
+      "RODIN_INSTALL_RESOURCES": "OFF",
+      "RODIN_CODE_COVERAGE": "OFF",
+      "RODIN_MULTITHREADED": "OFF",
+      "RODIN_USE_ASAN": "OFF",
+      "RODIN_USE_UBSAN": "OFF",
+      "RODIN_USE_MPI": "OFF",
+      "RODIN_USE_PETSC": "OFF"
+    },
+    "targets": [
+      "RodinHyperElasticityKernelBenchmarks",
+      "RodinLinearElasticityKernelBenchmarks"
+    ],
+    "stage": "components"
+  },
+  "ranks": 1,
+  "cases": [
+    {
+      "id": "4b5460d8b552c7099a8b066806324ec2c6699cf4b501d4bc63375b629581e6b7",
+      "name": "LinearElasticity/CellKernel/P1/CurvedQ2/FirstKernel/Hexahedron",
+      "metric": "cpu_time",
+      "url": "cases/4b5460d8b552c7099a8b066806324ec2c6699cf4b501d4bc63375b629581e6b7.json"
+    },
+    {
+      "id": "e7ab051dc539006302ddcd26f22415bce5cae50f480a6db6a66ad0a66d90b293",
+      "name": "LinearElasticity/CellKernel/P1/CurvedQ2/FirstKernel/Pyramid",
+      "metric": "cpu_time",
+      "url": "cases/e7ab051dc539006302ddcd26f22415bce5cae50f480a6db6a66ad0a66d90b293.json"
+    },
+    {
+      "id": "1f7e231c64512c32e2edc422352eb0a1815e9e48756eb7cbe4682180f67afbb2",
+      "name": "LinearElasticity/CellKernel/P1/CurvedQ2/FirstKernel/Quadrilateral",
+      "metric": "cpu_time",
+      "url": "cases/1f7e231c64512c32e2edc422352eb0a1815e9e48756eb7cbe4682180f67afbb2.json"
+    },
+    {
+      "id": "03ad17538c8426814485e6a3c2961d46428a751e693eb0b07ae23b60c2974062",
+      "name": "LinearElasticity/CellKernel/P1/CurvedQ2/FirstKernel/Segment",
+      "metric": "cpu_time",
+      "url": "cases/03ad17538c8426814485e6a3c2961d46428a751e693eb0b07ae23b60c2974062.json"
+    },
+    {
+      "id": "11a286059e6f87b43900b3e9179e0178e9073f993c32a55a8750448a47cc9ec2",
+      "name": "LinearElasticity/CellKernel/P1/CurvedQ2/FirstKernel/Tetrahedron",
+      "metric": "cpu_time",
+      "url": "cases/11a286059e6f87b43900b3e9179e0178e9073f993c32a55a8750448a47cc9ec2.json"
+    },
+    {
+      "id": "07b7a3d22746b87e309229d422eac9620ac748d470bb4dbef83115fbe2209275",
+      "name": "LinearElasticity/CellKernel/P1/CurvedQ2/FirstKernel/Triangle",
+      "metric": "cpu_time",
+      "url": "cases/07b7a3d22746b87e309229d422eac9620ac748d470bb4dbef83115fbe2209275.json"
+    },
+    {
+      "id": "168f61d3e3550ea475c60cfdfc181bd1c67316f054f24490f4648fdb79a2f1b2",
+      "name": "LinearElasticity/CellKernel/P1/CurvedQ2/FirstKernel/Wedge",
+      "metric": "cpu_time",
+      "url": "cases/168f61d3e3550ea475c60cfdfc181bd1c67316f054f24490f4648fdb79a2f1b2.json"
+    },
+    {
+      "id": "4b53459cd8d5b80320aff1f2105f59e53f7dcdd25e697b41acf0fb32196aff2f",
+      "name": "LinearElasticity/CellKernel/P1/CurvedQ2/Warm/Hexahedron",
+      "metric": "cpu_time",
+      "url": "cases/4b53459cd8d5b80320aff1f2105f59e53f7dcdd25e697b41acf0fb32196aff2f.json"
+    },
+    {
+      "id": "d1018e029723bac9b102a77b93562e89ce92776487ecfac6f9c356a6021af21a",
+      "name": "LinearElasticity/CellKernel/P1/CurvedQ2/Warm/Pyramid",
+      "metric": "cpu_time",
+      "url": "cases/d1018e029723bac9b102a77b93562e89ce92776487ecfac6f9c356a6021af21a.json"
+    },
+    {
+      "id": "017424d730ed05849c52cf27b76884a3bd1953df87e34b2bf2a8df92906d5758",
+      "name": "LinearElasticity/CellKernel/P1/CurvedQ2/Warm/Quadrilateral",
+      "metric": "cpu_time",
+      "url": "cases/017424d730ed05849c52cf27b76884a3bd1953df87e34b2bf2a8df92906d5758.json"
+    },
+    {
+      "id": "7e528dd7777dc0a24b4a2884dad343db18cdf639c03c30df764bf13317e68b0e",
+      "name": "LinearElasticity/CellKernel/P1/CurvedQ2/Warm/Segment",
+      "metric": "cpu_time",
+      "url": "cases/7e528dd7777dc0a24b4a2884dad343db18cdf639c03c30df764bf13317e68b0e.json"
+    },
+    {
+      "id": "182ee5fb5263d72305db1274f584a00bfc67483e88cc8a6897c50cc3e0e8fad3",
+      "name": "LinearElasticity/CellKernel/P1/CurvedQ2/Warm/Tetrahedron",
+      "metric": "cpu_time",
+      "url": "cases/182ee5fb5263d72305db1274f584a00bfc67483e88cc8a6897c50cc3e0e8fad3.json"
+    },
+    {
+      "id": "0ffab8bee265652f7808811d8a35869b66e13fc1b35229a05e0b344d2eca1455",
+      "name": "LinearElasticity/CellKernel/P1/CurvedQ2/Warm/Triangle",
+      "metric": "cpu_time",
+      "url": "cases/0ffab8bee265652f7808811d8a35869b66e13fc1b35229a05e0b344d2eca1455.json"
+    },
+    {
+      "id": "ae17270fee2914b9374352fb18ff68a4e2c3ba7d141aef4e740a15fb96dd4f87",
+      "name": "LinearElasticity/CellKernel/P1/CurvedQ2/Warm/Wedge",
+      "metric": "cpu_time",
+      "url": "cases/ae17270fee2914b9374352fb18ff68a4e2c3ba7d141aef4e740a15fb96dd4f87.json"
+    },
+    {
+      "id": "e24e569676031635c22cd6b2744a2a04a3789f342681ceb05165ca1e00d440db",
+      "name": "LinearElasticity/CellKernel/P1/Native/FirstKernel/Hexahedron",
+      "metric": "cpu_time",
+      "url": "cases/e24e569676031635c22cd6b2744a2a04a3789f342681ceb05165ca1e00d440db.json"
+    },
+    {
+      "id": "e3bd58293924eb8b917f961a953380b436b6f3dd0e5c3a9cf0163245b317cbba",
+      "name": "LinearElasticity/CellKernel/P1/Native/FirstKernel/Pyramid",
+      "metric": "cpu_time",
+      "url": "cases/e3bd58293924eb8b917f961a953380b436b6f3dd0e5c3a9cf0163245b317cbba.json"
+    },
+    {
+      "id": "d8a1c76916bd444e5b51245147cbd88ed9c8cfac9772020d6b7afebd05e710bd",
+      "name": "LinearElasticity/CellKernel/P1/Native/FirstKernel/Quadrilateral",
+      "metric": "cpu_time",
+      "url": "cases/d8a1c76916bd444e5b51245147cbd88ed9c8cfac9772020d6b7afebd05e710bd.json"
+    },
+    {
+      "id": "fce2c5db2746b84bbf6ae906e88ad727f8e8dc765352bd7c9a17fff4c10812f6",
+      "name": "LinearElasticity/CellKernel/P1/Native/FirstKernel/Segment",
+      "metric": "cpu_time",
+      "url": "cases/fce2c5db2746b84bbf6ae906e88ad727f8e8dc765352bd7c9a17fff4c10812f6.json"
+    },
+    {
+      "id": "3bbdd559a945c4c14aed563a747a906f4485347c613c15d205a714181ddb6de9",
+      "name": "LinearElasticity/CellKernel/P1/Native/FirstKernel/Tetrahedron",
+      "metric": "cpu_time",
+      "url": "cases/3bbdd559a945c4c14aed563a747a906f4485347c613c15d205a714181ddb6de9.json"
+    },
+    {
+      "id": "222d4b0caf3eaf52d3c20750ba8c6c4fdbb4977c9d2a46963b196f5c684ea169",
+      "name": "LinearElasticity/CellKernel/P1/Native/FirstKernel/Triangle",
+      "metric": "cpu_time",
+      "url": "cases/222d4b0caf3eaf52d3c20750ba8c6c4fdbb4977c9d2a46963b196f5c684ea169.json"
+    },
+    {
+      "id": "893826b38aa66f585dea4285320ed3190c41ee63891bcbff4e2817b90174b96b",
+      "name": "LinearElasticity/CellKernel/P1/Native/FirstKernel/Wedge",
+      "metric": "cpu_time",
+      "url": "cases/893826b38aa66f585dea4285320ed3190c41ee63891bcbff4e2817b90174b96b.json"
+    },
+    {
+      "id": "69f855f6130606a64c675689c6d2bdea4f55ffdbe078ff71b2101fd2086fbde0",
+      "name": "LinearElasticity/CellKernel/P1/Native/Warm/Hexahedron",
+      "metric": "cpu_time",
+      "url": "cases/69f855f6130606a64c675689c6d2bdea4f55ffdbe078ff71b2101fd2086fbde0.json"
+    },
+    {
+      "id": "e70894b0137c06e6a1ab6e0687fc23cb90b96eb7ad805f8336b1d8b2d909ec28",
+      "name": "LinearElasticity/CellKernel/P1/Native/Warm/Pyramid",
+      "metric": "cpu_time",
+      "url": "cases/e70894b0137c06e6a1ab6e0687fc23cb90b96eb7ad805f8336b1d8b2d909ec28.json"
+    },
+    {
+      "id": "86b0be9850211b342c978efe1d436690b6a11ec559e14743c79a9f683b4cccb0",
+      "name": "LinearElasticity/CellKernel/P1/Native/Warm/Quadrilateral",
+      "metric": "cpu_time",
+      "url": "cases/86b0be9850211b342c978efe1d436690b6a11ec559e14743c79a9f683b4cccb0.json"
+    },
+    {
+      "id": "3fa6996525281607ad5bec93654751749486856b4713a99b70a5087aa4eaad56",
+      "name": "LinearElasticity/CellKernel/P1/Native/Warm/Segment",
+      "metric": "cpu_time",
+      "url": "cases/3fa6996525281607ad5bec93654751749486856b4713a99b70a5087aa4eaad56.json"
+    },
+    {
+      "id": "2ff84358047e7f36b0b5a7e6e50c03a6b26053a95eb80011e64ad582f27a4a06",
+      "name": "LinearElasticity/CellKernel/P1/Native/Warm/Tetrahedron",
+      "metric": "cpu_time",
+      "url": "cases/2ff84358047e7f36b0b5a7e6e50c03a6b26053a95eb80011e64ad582f27a4a06.json"
+    },
+    {
+      "id": "4b120515e9b768a0b438630ba137dc4b5ecbfd9330c6a72b8c22ab72c76320fe",
+      "name": "LinearElasticity/CellKernel/P1/Native/Warm/Triangle",
+      "metric": "cpu_time",
+      "url": "cases/4b120515e9b768a0b438630ba137dc4b5ecbfd9330c6a72b8c22ab72c76320fe.json"
+    },
+    {
+      "id": "3eda83e1b7f5bc22751503a4f9e23b9e733fe97ac2ec3f7e41fdf33fa841b581",
+      "name": "LinearElasticity/CellKernel/P1/Native/Warm/Wedge",
+      "metric": "cpu_time",
+      "url": "cases/3eda83e1b7f5bc22751503a4f9e23b9e733fe97ac2ec3f7e41fdf33fa841b581.json"
+    },
+    {
+      "id": "7ec8b1dfd7abf888b924c4f8048dda53ad0788470341d2003366438daa4fc9ce",
+      "name": "LinearElasticity/CellKernel/P2/CurvedQ2/FirstKernel/Hexahedron",
+      "metric": "cpu_time",
+      "url": "cases/7ec8b1dfd7abf888b924c4f8048dda53ad0788470341d2003366438daa4fc9ce.json"
+    },
+    {
+      "id": "07fb3343a83d8c27b9f1ac0e08a9d640d1ab8a11c12969f865fde2505ec05c2d",
+      "name": "LinearElasticity/CellKernel/P2/CurvedQ2/FirstKernel/Pyramid",
+      "metric": "cpu_time",
+      "url": "cases/07fb3343a83d8c27b9f1ac0e08a9d640d1ab8a11c12969f865fde2505ec05c2d.json"
+    },
+    {
+      "id": "d550bcc39234b5ee5dad64a82c13cb441efd221a54aba4af239dcadf2d3e799b",
+      "name": "LinearElasticity/CellKernel/P2/CurvedQ2/FirstKernel/Quadrilateral",
+      "metric": "cpu_time",
+      "url": "cases/d550bcc39234b5ee5dad64a82c13cb441efd221a54aba4af239dcadf2d3e799b.json"
+    },
+    {
+      "id": "af62ebc1321c2a0afa02f3c6462e8d6804d3a9613be8dee60cd26cb85058a390",
+      "name": "LinearElasticity/CellKernel/P2/CurvedQ2/FirstKernel/Segment",
+      "metric": "cpu_time",
+      "url": "cases/af62ebc1321c2a0afa02f3c6462e8d6804d3a9613be8dee60cd26cb85058a390.json"
+    },
+    {
+      "id": "da8835d89d1b662a40ad2cc3de8ef04a8065d63d2a270daa00c4620a7e6ad32c",
+      "name": "LinearElasticity/CellKernel/P2/CurvedQ2/FirstKernel/Tetrahedron",
+      "metric": "cpu_time",
+      "url": "cases/da8835d89d1b662a40ad2cc3de8ef04a8065d63d2a270daa00c4620a7e6ad32c.json"
+    },
+    {
+      "id": "bd06bbf7573fe2da8cdcc0871e40fb97ba6ab050be4c612cc82004750725a7f4",
+      "name": "LinearElasticity/CellKernel/P2/CurvedQ2/FirstKernel/Triangle",
+      "metric": "cpu_time",
+      "url": "cases/bd06bbf7573fe2da8cdcc0871e40fb97ba6ab050be4c612cc82004750725a7f4.json"
+    },
+    {
+      "id": "67184a6a7c925bdfac7d88d8a341716f6bffc77d7acc514082d7b7beb28e8bce",
+      "name": "LinearElasticity/CellKernel/P2/CurvedQ2/FirstKernel/Wedge",
+      "metric": "cpu_time",
+      "url": "cases/67184a6a7c925bdfac7d88d8a341716f6bffc77d7acc514082d7b7beb28e8bce.json"
+    },
+    {
+      "id": "acf57793122b6106cca49c6f04cd3a469c6b875c01df163fa7c6ca6684e66909",
+      "name": "LinearElasticity/CellKernel/P2/CurvedQ2/Warm/Hexahedron",
+      "metric": "cpu_time",
+      "url": "cases/acf57793122b6106cca49c6f04cd3a469c6b875c01df163fa7c6ca6684e66909.json"
+    },
+    {
+      "id": "06556333ce973a658a0c61b1344e29971709d73a9c5f761c23f787d2101fbb0d",
+      "name": "LinearElasticity/CellKernel/P2/CurvedQ2/Warm/Pyramid",
+      "metric": "cpu_time",
+      "url": "cases/06556333ce973a658a0c61b1344e29971709d73a9c5f761c23f787d2101fbb0d.json"
+    },
+    {
+      "id": "fe96da5f8f11622134be1b2053ff84a6b0c8b73edcdbd0045687d4de0f8f2fee",
+      "name": "LinearElasticity/CellKernel/P2/CurvedQ2/Warm/Quadrilateral",
+      "metric": "cpu_time",
+      "url": "cases/fe96da5f8f11622134be1b2053ff84a6b0c8b73edcdbd0045687d4de0f8f2fee.json"
+    },
+    {
+      "id": "56d4d930526737f15e87f187c82a98d70011a7f0d8cc01c446fcb0770a471612",
+      "name": "LinearElasticity/CellKernel/P2/CurvedQ2/Warm/Segment",
+      "metric": "cpu_time",
+      "url": "cases/56d4d930526737f15e87f187c82a98d70011a7f0d8cc01c446fcb0770a471612.json"
+    },
+    {
+      "id": "3b30e87f6fde02162c53bfd8f2a87768db26e14a7490c9e3f7c7a1114ed00a20",
+      "name": "LinearElasticity/CellKernel/P2/CurvedQ2/Warm/Tetrahedron",
+      "metric": "cpu_time",
+      "url": "cases/3b30e87f6fde02162c53bfd8f2a87768db26e14a7490c9e3f7c7a1114ed00a20.json"
+    },
+    {
+      "id": "6b9b212b3c9109cc9b7f6ea288894b87c6a74a4defc36fbbbadb87517d9e507c",
+      "name": "LinearElasticity/CellKernel/P2/CurvedQ2/Warm/Triangle",
+      "metric": "cpu_time",
+      "url": "cases/6b9b212b3c9109cc9b7f6ea288894b87c6a74a4defc36fbbbadb87517d9e507c.json"
+    },
+    {
+      "id": "6c3d9d0ffcb506fb5b51b03acc2ec64c555c87df2d1d33f9cff937233d8add72",
+      "name": "LinearElasticity/CellKernel/P2/CurvedQ2/Warm/Wedge",
+      "metric": "cpu_time",
+      "url": "cases/6c3d9d0ffcb506fb5b51b03acc2ec64c555c87df2d1d33f9cff937233d8add72.json"
+    },
+    {
+      "id": "f98d3d5f06beb4ed7fdf1dea5158050ec375f9baf09bd77bc53ef571b64eac23",
+      "name": "LinearElasticity/CellKernel/P2/Native/FirstKernel/Hexahedron",
+      "metric": "cpu_time",
+      "url": "cases/f98d3d5f06beb4ed7fdf1dea5158050ec375f9baf09bd77bc53ef571b64eac23.json"
+    },
+    {
+      "id": "0782e5f84e8d12b5dfb955786ae0ad894b50927a5facfab8ec8543069ffd441f",
+      "name": "LinearElasticity/CellKernel/P2/Native/FirstKernel/Pyramid",
+      "metric": "cpu_time",
+      "url": "cases/0782e5f84e8d12b5dfb955786ae0ad894b50927a5facfab8ec8543069ffd441f.json"
+    },
+    {
+      "id": "811abaf83a9bf95b2d023b8b972c35f94db537d7302a59944b88ac022dd059ff",
+      "name": "LinearElasticity/CellKernel/P2/Native/FirstKernel/Quadrilateral",
+      "metric": "cpu_time",
+      "url": "cases/811abaf83a9bf95b2d023b8b972c35f94db537d7302a59944b88ac022dd059ff.json"
+    },
+    {
+      "id": "92bbca844e5a681566e9dc1812ee5a2a94f8276841cb18b20300cd1354615dd7",
+      "name": "LinearElasticity/CellKernel/P2/Native/FirstKernel/Segment",
+      "metric": "cpu_time",
+      "url": "cases/92bbca844e5a681566e9dc1812ee5a2a94f8276841cb18b20300cd1354615dd7.json"
+    },
+    {
+      "id": "d44c42a3753a239e2278aa184febfc12f916b01f5194b4c205f8ce8c84578906",
+      "name": "LinearElasticity/CellKernel/P2/Native/FirstKernel/Tetrahedron",
+      "metric": "cpu_time",
+      "url": "cases/d44c42a3753a239e2278aa184febfc12f916b01f5194b4c205f8ce8c84578906.json"
+    },
+    {
+      "id": "02cb2ea345ba077902cbc322eca56318149204a6aca57f4402b039ca50870c13",
+      "name": "LinearElasticity/CellKernel/P2/Native/FirstKernel/Triangle",
+      "metric": "cpu_time",
+      "url": "cases/02cb2ea345ba077902cbc322eca56318149204a6aca57f4402b039ca50870c13.json"
+    },
+    {
+      "id": "595f298c27445b828912ace34a850a53720a0964aaf361d6fec5f0efb8be36ca",
+      "name": "LinearElasticity/CellKernel/P2/Native/FirstKernel/Wedge",
+      "metric": "cpu_time",
+      "url": "cases/595f298c27445b828912ace34a850a53720a0964aaf361d6fec5f0efb8be36ca.json"
+    },
+    {
+      "id": "cbaa6d5caed0e50b9a1289f14f32a84f0551d45afddabaefc511df15f767a95b",
+      "name": "LinearElasticity/CellKernel/P2/Native/Warm/Hexahedron",
+      "metric": "cpu_time",
+      "url": "cases/cbaa6d5caed0e50b9a1289f14f32a84f0551d45afddabaefc511df15f767a95b.json"
+    },
+    {
+      "id": "03b308aad9d9fae063c53a1de4fb4870ec96970168793a5bd605e3289d30f65c",
+      "name": "LinearElasticity/CellKernel/P2/Native/Warm/Pyramid",
+      "metric": "cpu_time",
+      "url": "cases/03b308aad9d9fae063c53a1de4fb4870ec96970168793a5bd605e3289d30f65c.json"
+    },
+    {
+      "id": "602251947c6adb8a308cacccccaf7680e66db84d9c7e73986645ff1f9b40c94d",
+      "name": "LinearElasticity/CellKernel/P2/Native/Warm/Quadrilateral",
+      "metric": "cpu_time",
+      "url": "cases/602251947c6adb8a308cacccccaf7680e66db84d9c7e73986645ff1f9b40c94d.json"
+    },
+    {
+      "id": "2c26834e1cf43ae8a64038cc9800113ff7ccdd315f6791f856b2b97a6e2f161f",
+      "name": "LinearElasticity/CellKernel/P2/Native/Warm/Segment",
+      "metric": "cpu_time",
+      "url": "cases/2c26834e1cf43ae8a64038cc9800113ff7ccdd315f6791f856b2b97a6e2f161f.json"
+    },
+    {
+      "id": "3dde602e26530b5b38d31475fe547a0a163f569db8e8ac5e271a8b9d8bfac41a",
+      "name": "LinearElasticity/CellKernel/P2/Native/Warm/Tetrahedron",
+      "metric": "cpu_time",
+      "url": "cases/3dde602e26530b5b38d31475fe547a0a163f569db8e8ac5e271a8b9d8bfac41a.json"
+    },
+    {
+      "id": "7e31eb02e0e80648a5f92ed7e161562ae684e45163823327e526b5cb85cee53c",
+      "name": "LinearElasticity/CellKernel/P2/Native/Warm/Triangle",
+      "metric": "cpu_time",
+      "url": "cases/7e31eb02e0e80648a5f92ed7e161562ae684e45163823327e526b5cb85cee53c.json"
+    },
+    {
+      "id": "444ff9dd6193825c04d04a18641c2af76062054afedad5dd40704bf8fa3e1d13",
+      "name": "LinearElasticity/CellKernel/P2/Native/Warm/Wedge",
+      "metric": "cpu_time",
+      "url": "cases/444ff9dd6193825c04d04a18641c2af76062054afedad5dd40704bf8fa3e1d13.json"
+    }
+  ]
+}

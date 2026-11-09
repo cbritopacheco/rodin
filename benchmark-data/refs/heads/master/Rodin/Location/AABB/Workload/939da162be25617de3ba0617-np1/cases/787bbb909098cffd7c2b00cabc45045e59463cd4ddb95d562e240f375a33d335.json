@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "component": "Rodin/Location/AABB/Workload",
+  "configuration": "939da162be25617de3ba0617-np1",
+  "name": "Segment/4/64/4/4/shared/0",
+  "metric": "process_cpu_time",
+  "entries": [
+    {
+      "commit": "08f2b1df730e2f6c6ec854001b199f67c990ac38",
+      "date": "2026-11-09T20:14:21.513262+00:00",
+      "run": "42617234567.1",
+      "results": [
+        {
+          "name": "Segment/4/64/4/4/shared/0",
+          "value": 885.523396244,
+          "unit": "ns",
+          "metric": "process_cpu_time",
+          "samples": [
+            885.523396244
+          ],
+          "records": [
+            {
+              "geometry": "Segment",
+              "degree": "4",
+              "resolution": "64",
+              "cells": "63",
+              "distortion": "4.000000",
+              "warp_degree": "4",
+              "query": "shared",
+              "pruning": "0",
+              "samples": "62",
+              "ns": "885.523396244"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "format": "csv",
+  "window": 20
+}

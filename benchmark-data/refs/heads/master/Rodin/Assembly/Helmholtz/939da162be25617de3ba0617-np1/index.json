@@ -1,0 +1,804 @@
+{
+  "schema": 1,
+  "definition": {
+    "kind": "benchmark",
+    "mode": "local",
+    "compiler": "gcc-14",
+    "runner": "ubuntu-24.04",
+    "cmake": {
+      "CMAKE_BUILD_TYPE": "Release",
+      "CMAKE_CXX_COMPILER": "g++-14",
+      "CMAKE_C_COMPILER": "gcc-14",
+      "CMAKE_SUPPRESS_REGENERATION": "ON",
+      "RODIN_BUILD_SRC": "ON",
+      "RODIN_BUILD_BENCHMARKS": "ON",
+      "RODIN_BUILD_UNIT_TESTS": "OFF",
+      "RODIN_BUILD_MANUFACTURED_TESTS": "OFF",
+      "RODIN_BUILD_CONVERGENCE_TESTS": "OFF",
+      "RODIN_BUILD_EXAMPLES": "OFF",
+      "RODIN_BUILD_DOC": "OFF",
+      "RODIN_INSTALL_RESOURCES": "OFF",
+      "RODIN_CODE_COVERAGE": "OFF",
+      "RODIN_MULTITHREADED": "OFF",
+      "RODIN_USE_ASAN": "OFF",
+      "RODIN_USE_UBSAN": "OFF",
+      "RODIN_USE_MPI": "OFF",
+      "RODIN_USE_PETSC": "OFF"
+    },
+    "targets": [
+      "RodinAssemblyBenchmarks",
+      "RodinConstrainedAssemblyBenchmarks",
+      "RodinConvectionAssemblyBenchmarks",
+      "RodinCoupledReactionDiffusionAssemblyBenchmarks",
+      "RodinHelmholtzAssemblyBenchmarks",
+      "RodinMassAssemblyBenchmarks",
+      "RodinMassOperandOrderAssemblyBenchmarks",
+      "RodinMatrixMassAssemblyBenchmarks",
+      "RodinNonlinearPoissonAssemblyBenchmarks",
+      "RodinPhysicsAssemblyBenchmarks",
+      "RodinPhysicsStageBenchmarks",
+      "RodinSpatialMatrixBenchmarks",
+      "RodinStokesAssemblyBenchmarks"
+    ],
+    "stage": "components"
+  },
+  "ranks": 1,
+  "cases": [
+    {
+      "id": "e918c0ea5319067d6ce390644174b01b5ad3a8904847d19453f95b3e1b99e091",
+      "name": "Helmholtz/Assembly/LowWave/H1/P1/Complex/Hexahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/e918c0ea5319067d6ce390644174b01b5ad3a8904847d19453f95b3e1b99e091.json"
+    },
+    {
+      "id": "0692ccc7ebc4c409827ea7229de5ba9b21ad4a18184a2b3f42b19c3087055f9d",
+      "name": "Helmholtz/Assembly/LowWave/H1/P1/Complex/Hexahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/0692ccc7ebc4c409827ea7229de5ba9b21ad4a18184a2b3f42b19c3087055f9d.json"
+    },
+    {
+      "id": "e6a93e90bcf3bf50090f179446cbacecbde5206e89a78558fd1b7d0fc0b89a88",
+      "name": "Helmholtz/Assembly/LowWave/H1/P1/Complex/Hexahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/e6a93e90bcf3bf50090f179446cbacecbde5206e89a78558fd1b7d0fc0b89a88.json"
+    },
+    {
+      "id": "9d3bdc44c5c76365b73e6f9229d23be85ef46038a2d77c948f8fb53523eac313",
+      "name": "Helmholtz/Assembly/LowWave/H1/P1/Complex/Pyramid/3/real_time",
+      "metric": "real_time",
+      "url": "cases/9d3bdc44c5c76365b73e6f9229d23be85ef46038a2d77c948f8fb53523eac313.json"
+    },
+    {
+      "id": "f2134b3f3bf70c7ad5547a8280c725dc431be8a2fb1e3e67d485df7cefa49f23",
+      "name": "Helmholtz/Assembly/LowWave/H1/P1/Complex/Pyramid/5/real_time",
+      "metric": "real_time",
+      "url": "cases/f2134b3f3bf70c7ad5547a8280c725dc431be8a2fb1e3e67d485df7cefa49f23.json"
+    },
+    {
+      "id": "2cbfbfa6225af7d2caec748fc98769628b224ab512df8d2c2b07375bb72cfc66",
+      "name": "Helmholtz/Assembly/LowWave/H1/P1/Complex/Pyramid/9/real_time",
+      "metric": "real_time",
+      "url": "cases/2cbfbfa6225af7d2caec748fc98769628b224ab512df8d2c2b07375bb72cfc66.json"
+    },
+    {
+      "id": "34f8249dd93b6a9476f0c313c1474a9b54e3687c91522ab51be1545aa96eac37",
+      "name": "Helmholtz/Assembly/LowWave/H1/P1/Complex/Quadrilateral/3/real_time",
+      "metric": "real_time",
+      "url": "cases/34f8249dd93b6a9476f0c313c1474a9b54e3687c91522ab51be1545aa96eac37.json"
+    },
+    {
+      "id": "d8a01f58934793bf0bc9f716f7f96f066026984fd8e56457be10d2505d1ddf63",
+      "name": "Helmholtz/Assembly/LowWave/H1/P1/Complex/Quadrilateral/5/real_time",
+      "metric": "real_time",
+      "url": "cases/d8a01f58934793bf0bc9f716f7f96f066026984fd8e56457be10d2505d1ddf63.json"
+    },
+    {
+      "id": "81bbb3ed7276b4d19f0b07c6c898981d15709a306ff83b8840a425591aa8ffee",
+      "name": "Helmholtz/Assembly/LowWave/H1/P1/Complex/Quadrilateral/9/real_time",
+      "metric": "real_time",
+      "url": "cases/81bbb3ed7276b4d19f0b07c6c898981d15709a306ff83b8840a425591aa8ffee.json"
+    },
+    {
+      "id": "f797700737c02467f202a8c7900b01c0db94275e68473fea1a989e2794a6c8bf",
+      "name": "Helmholtz/Assembly/LowWave/H1/P1/Complex/Segment/3/real_time",
+      "metric": "real_time",
+      "url": "cases/f797700737c02467f202a8c7900b01c0db94275e68473fea1a989e2794a6c8bf.json"
+    },
+    {
+      "id": "db5aaf89399d4a0c02efab63df998b0e771764c97abd91253609aeb03c5e6d26",
+      "name": "Helmholtz/Assembly/LowWave/H1/P1/Complex/Segment/5/real_time",
+      "metric": "real_time",
+      "url": "cases/db5aaf89399d4a0c02efab63df998b0e771764c97abd91253609aeb03c5e6d26.json"
+    },
+    {
+      "id": "7248e767591ed1fde37fe2ff303442a614052a7a715203dffeefba1b9d5c38b0",
+      "name": "Helmholtz/Assembly/LowWave/H1/P1/Complex/Segment/9/real_time",
+      "metric": "real_time",
+      "url": "cases/7248e767591ed1fde37fe2ff303442a614052a7a715203dffeefba1b9d5c38b0.json"
+    },
+    {
+      "id": "e62e1c01f039c4ef086c19971b15880d29e33c39c230a59e238f2eda13ccd974",
+      "name": "Helmholtz/Assembly/LowWave/H1/P1/Complex/Tetrahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/e62e1c01f039c4ef086c19971b15880d29e33c39c230a59e238f2eda13ccd974.json"
+    },
+    {
+      "id": "1ecb29afa501630e6342d2601c2e2aaf2ac90580a2d5d3329679ce9fe458cb46",
+      "name": "Helmholtz/Assembly/LowWave/H1/P1/Complex/Tetrahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/1ecb29afa501630e6342d2601c2e2aaf2ac90580a2d5d3329679ce9fe458cb46.json"
+    },
+    {
+      "id": "55317beb7ecd4d0d066978433a5bae5742041a496caec4b242cf14240d4a9b5d",
+      "name": "Helmholtz/Assembly/LowWave/H1/P1/Complex/Tetrahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/55317beb7ecd4d0d066978433a5bae5742041a496caec4b242cf14240d4a9b5d.json"
+    },
+    {
+      "id": "ebe5ec0033dcdf9628ccc2f67f9413c86a7fcbbe5a5396537790f6777a44aba9",
+      "name": "Helmholtz/Assembly/LowWave/H1/P1/Complex/Triangle/3/real_time",
+      "metric": "real_time",
+      "url": "cases/ebe5ec0033dcdf9628ccc2f67f9413c86a7fcbbe5a5396537790f6777a44aba9.json"
+    },
+    {
+      "id": "c0798dc319d587836a14255f6f283ce6b6bed1b522a48e438b6ec20aea9cea3b",
+      "name": "Helmholtz/Assembly/LowWave/H1/P1/Complex/Triangle/5/real_time",
+      "metric": "real_time",
+      "url": "cases/c0798dc319d587836a14255f6f283ce6b6bed1b522a48e438b6ec20aea9cea3b.json"
+    },
+    {
+      "id": "05ce4413f38880e32d8064ea84211c487d9c2109f8a23d38301349ebfd7b255a",
+      "name": "Helmholtz/Assembly/LowWave/H1/P1/Complex/Triangle/9/real_time",
+      "metric": "real_time",
+      "url": "cases/05ce4413f38880e32d8064ea84211c487d9c2109f8a23d38301349ebfd7b255a.json"
+    },
+    {
+      "id": "bd1ce069c576fb1553ba951355d3afdf97441a3a8de5717de1cdfb61096f17de",
+      "name": "Helmholtz/Assembly/LowWave/H1/P1/Complex/Wedge/3/real_time",
+      "metric": "real_time",
+      "url": "cases/bd1ce069c576fb1553ba951355d3afdf97441a3a8de5717de1cdfb61096f17de.json"
+    },
+    {
+      "id": "c29f2ed79e09b05e79446394b3c9fa83af0a5abef222d6b7d4cabf016935b9c6",
+      "name": "Helmholtz/Assembly/LowWave/H1/P1/Complex/Wedge/5/real_time",
+      "metric": "real_time",
+      "url": "cases/c29f2ed79e09b05e79446394b3c9fa83af0a5abef222d6b7d4cabf016935b9c6.json"
+    },
+    {
+      "id": "b081920705b765176bf7f40ea4468024493ffa90f5bb47cfbe91632117d1ccb4",
+      "name": "Helmholtz/Assembly/LowWave/H1/P1/Complex/Wedge/9/real_time",
+      "metric": "real_time",
+      "url": "cases/b081920705b765176bf7f40ea4468024493ffa90f5bb47cfbe91632117d1ccb4.json"
+    },
+    {
+      "id": "b68b404f082c9ab3bcb0b3da10815b1960b1d19c075727d5f98c32197b759b47",
+      "name": "Helmholtz/Assembly/LowWave/H1/P2/Complex/Hexahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/b68b404f082c9ab3bcb0b3da10815b1960b1d19c075727d5f98c32197b759b47.json"
+    },
+    {
+      "id": "d254bf6129e4f905338ebf3301d4c4c4b6d84243dc19c7cbf969359468566fb0",
+      "name": "Helmholtz/Assembly/LowWave/H1/P2/Complex/Hexahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/d254bf6129e4f905338ebf3301d4c4c4b6d84243dc19c7cbf969359468566fb0.json"
+    },
+    {
+      "id": "e1f47ef475c991f2f575b1628f1e67f81ebb8cba9294ca1aa40199ea51cc1c88",
+      "name": "Helmholtz/Assembly/LowWave/H1/P2/Complex/Hexahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/e1f47ef475c991f2f575b1628f1e67f81ebb8cba9294ca1aa40199ea51cc1c88.json"
+    },
+    {
+      "id": "ec1e73878f5017397983447d33a8afdc61563733da155a10f31decec77c9db3b",
+      "name": "Helmholtz/Assembly/LowWave/H1/P2/Complex/Pyramid/3/real_time",
+      "metric": "real_time",
+      "url": "cases/ec1e73878f5017397983447d33a8afdc61563733da155a10f31decec77c9db3b.json"
+    },
+    {
+      "id": "32b534cf78299a37fdb66ffadd8eab1f2bd8de9fbc14eb1d7742b71fd1676653",
+      "name": "Helmholtz/Assembly/LowWave/H1/P2/Complex/Pyramid/5/real_time",
+      "metric": "real_time",
+      "url": "cases/32b534cf78299a37fdb66ffadd8eab1f2bd8de9fbc14eb1d7742b71fd1676653.json"
+    },
+    {
+      "id": "f5ccb507e0eae681a76bb739988d686225c3c49d147a3d99454b2d6fbb0ade33",
+      "name": "Helmholtz/Assembly/LowWave/H1/P2/Complex/Pyramid/9/real_time",
+      "metric": "real_time",
+      "url": "cases/f5ccb507e0eae681a76bb739988d686225c3c49d147a3d99454b2d6fbb0ade33.json"
+    },
+    {
+      "id": "560d31138ce6760754c113b8f8f47f270a403151aeac8c3acb891b0f5237417d",
+      "name": "Helmholtz/Assembly/LowWave/H1/P2/Complex/Quadrilateral/3/real_time",
+      "metric": "real_time",
+      "url": "cases/560d31138ce6760754c113b8f8f47f270a403151aeac8c3acb891b0f5237417d.json"
+    },
+    {
+      "id": "e91dd10a11b82602faf0b8913366ff562041ec077dc4c106794124678b104b29",
+      "name": "Helmholtz/Assembly/LowWave/H1/P2/Complex/Quadrilateral/5/real_time",
+      "metric": "real_time",
+      "url": "cases/e91dd10a11b82602faf0b8913366ff562041ec077dc4c106794124678b104b29.json"
+    },
+    {
+      "id": "9687b70b2fa15b814013f620263b6b4e8777e55a1ebf7e2010910a2fd3892039",
+      "name": "Helmholtz/Assembly/LowWave/H1/P2/Complex/Quadrilateral/9/real_time",
+      "metric": "real_time",
+      "url": "cases/9687b70b2fa15b814013f620263b6b4e8777e55a1ebf7e2010910a2fd3892039.json"
+    },
+    {
+      "id": "6b770b49d7be40e9527d4f1a7bb8e1eebba135e5aee72c356f4cd801722841de",
+      "name": "Helmholtz/Assembly/LowWave/H1/P2/Complex/Segment/3/real_time",
+      "metric": "real_time",
+      "url": "cases/6b770b49d7be40e9527d4f1a7bb8e1eebba135e5aee72c356f4cd801722841de.json"
+    },
+    {
+      "id": "89459863ff20add964850540e79a8769682407f320684248a29c49e19f632812",
+      "name": "Helmholtz/Assembly/LowWave/H1/P2/Complex/Segment/5/real_time",
+      "metric": "real_time",
+      "url": "cases/89459863ff20add964850540e79a8769682407f320684248a29c49e19f632812.json"
+    },
+    {
+      "id": "008bf4293ed4e2b3b9c57ab552ea091a13add5332d85f463c2b6473295b3ce03",
+      "name": "Helmholtz/Assembly/LowWave/H1/P2/Complex/Segment/9/real_time",
+      "metric": "real_time",
+      "url": "cases/008bf4293ed4e2b3b9c57ab552ea091a13add5332d85f463c2b6473295b3ce03.json"
+    },
+    {
+      "id": "67f812177b828c555df656ebe1b132acc7dc2f051b3a9063399caafee8485ae0",
+      "name": "Helmholtz/Assembly/LowWave/H1/P2/Complex/Tetrahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/67f812177b828c555df656ebe1b132acc7dc2f051b3a9063399caafee8485ae0.json"
+    },
+    {
+      "id": "9a9059d7a154b3d80ba137f769adac39f5c228047d732cf240239325678f212e",
+      "name": "Helmholtz/Assembly/LowWave/H1/P2/Complex/Tetrahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/9a9059d7a154b3d80ba137f769adac39f5c228047d732cf240239325678f212e.json"
+    },
+    {
+      "id": "3e4e55697340236e1e26d651defa94fcac16973549393158c78d195931b58b92",
+      "name": "Helmholtz/Assembly/LowWave/H1/P2/Complex/Tetrahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/3e4e55697340236e1e26d651defa94fcac16973549393158c78d195931b58b92.json"
+    },
+    {
+      "id": "bfbae3b6266e920cef7b1d9abf5ca5b411365a763f08bc66b1e7478b015e8f6d",
+      "name": "Helmholtz/Assembly/LowWave/H1/P2/Complex/Triangle/3/real_time",
+      "metric": "real_time",
+      "url": "cases/bfbae3b6266e920cef7b1d9abf5ca5b411365a763f08bc66b1e7478b015e8f6d.json"
+    },
+    {
+      "id": "a51b6a95313706eec773889704501c4678ced045488ac5645b27d91c87d708fd",
+      "name": "Helmholtz/Assembly/LowWave/H1/P2/Complex/Triangle/5/real_time",
+      "metric": "real_time",
+      "url": "cases/a51b6a95313706eec773889704501c4678ced045488ac5645b27d91c87d708fd.json"
+    },
+    {
+      "id": "bce85e8972dc638b580b640576258018d3b1238b2910b4ebd83b3237ee221e15",
+      "name": "Helmholtz/Assembly/LowWave/H1/P2/Complex/Triangle/9/real_time",
+      "metric": "real_time",
+      "url": "cases/bce85e8972dc638b580b640576258018d3b1238b2910b4ebd83b3237ee221e15.json"
+    },
+    {
+      "id": "26e11ad1833da13e85c1a2a2f696b755b9dd49c0fe92874e10210ae4c499e8b2",
+      "name": "Helmholtz/Assembly/LowWave/H1/P2/Complex/Wedge/3/real_time",
+      "metric": "real_time",
+      "url": "cases/26e11ad1833da13e85c1a2a2f696b755b9dd49c0fe92874e10210ae4c499e8b2.json"
+    },
+    {
+      "id": "394fdcebd29544beb7b891c754006eb79abf00987c27749fbcec9f0837305fdd",
+      "name": "Helmholtz/Assembly/LowWave/H1/P2/Complex/Wedge/5/real_time",
+      "metric": "real_time",
+      "url": "cases/394fdcebd29544beb7b891c754006eb79abf00987c27749fbcec9f0837305fdd.json"
+    },
+    {
+      "id": "2247261728e06bb0d9ee2d173386f994d39815e8529aeaf51085683a26544de3",
+      "name": "Helmholtz/Assembly/LowWave/H1/P2/Complex/Wedge/9/real_time",
+      "metric": "real_time",
+      "url": "cases/2247261728e06bb0d9ee2d173386f994d39815e8529aeaf51085683a26544de3.json"
+    },
+    {
+      "id": "bf67c767c511bbc00bb3f5eb15581c246c6bef4a404428944f2ca0f84639aba6",
+      "name": "Helmholtz/Assembly/LowWave/H1/P3/Complex/Hexahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/bf67c767c511bbc00bb3f5eb15581c246c6bef4a404428944f2ca0f84639aba6.json"
+    },
+    {
+      "id": "9dd4d671b2ee08101aa30bd7256b9d38fb0606b23b215502afd244562ecaebe6",
+      "name": "Helmholtz/Assembly/LowWave/H1/P3/Complex/Hexahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/9dd4d671b2ee08101aa30bd7256b9d38fb0606b23b215502afd244562ecaebe6.json"
+    },
+    {
+      "id": "ce0541673011262a98055087c3b38ebe0759b3f6a60b8182a0a891c670241406",
+      "name": "Helmholtz/Assembly/LowWave/H1/P3/Complex/Hexahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/ce0541673011262a98055087c3b38ebe0759b3f6a60b8182a0a891c670241406.json"
+    },
+    {
+      "id": "665f45bc66b1513b442cba54097f7b5ef67eed375c6eca41e4c554963885ce80",
+      "name": "Helmholtz/Assembly/LowWave/H1/P3/Complex/Pyramid/3/real_time",
+      "metric": "real_time",
+      "url": "cases/665f45bc66b1513b442cba54097f7b5ef67eed375c6eca41e4c554963885ce80.json"
+    },
+    {
+      "id": "c093168a33d02f0d4df60ff3cf29d917effa4cc36101427274d2b9be508ec6d6",
+      "name": "Helmholtz/Assembly/LowWave/H1/P3/Complex/Pyramid/5/real_time",
+      "metric": "real_time",
+      "url": "cases/c093168a33d02f0d4df60ff3cf29d917effa4cc36101427274d2b9be508ec6d6.json"
+    },
+    {
+      "id": "6c227272f7d6383e9e59c0375cab6a1fcf1d29b0240608b5db865b22f0bcfbab",
+      "name": "Helmholtz/Assembly/LowWave/H1/P3/Complex/Pyramid/9/real_time",
+      "metric": "real_time",
+      "url": "cases/6c227272f7d6383e9e59c0375cab6a1fcf1d29b0240608b5db865b22f0bcfbab.json"
+    },
+    {
+      "id": "f44d4394399515e41f4b2b95137b9f8dd9de5a76a8cb6899eb54d3542c7d28f7",
+      "name": "Helmholtz/Assembly/LowWave/H1/P3/Complex/Quadrilateral/3/real_time",
+      "metric": "real_time",
+      "url": "cases/f44d4394399515e41f4b2b95137b9f8dd9de5a76a8cb6899eb54d3542c7d28f7.json"
+    },
+    {
+      "id": "ba046942fbabfeea8aba2e1bb2c9c30e9c2124ff41dd354fff1db9e9e32cb14f",
+      "name": "Helmholtz/Assembly/LowWave/H1/P3/Complex/Quadrilateral/5/real_time",
+      "metric": "real_time",
+      "url": "cases/ba046942fbabfeea8aba2e1bb2c9c30e9c2124ff41dd354fff1db9e9e32cb14f.json"
+    },
+    {
+      "id": "49e09777273a1a2da7a5e8067eabc418049bd8aa188bef3b01d9444699b256f9",
+      "name": "Helmholtz/Assembly/LowWave/H1/P3/Complex/Quadrilateral/9/real_time",
+      "metric": "real_time",
+      "url": "cases/49e09777273a1a2da7a5e8067eabc418049bd8aa188bef3b01d9444699b256f9.json"
+    },
+    {
+      "id": "8c0341ccb1b7fb311f171b8ea840b57737aa4aa48a73597b4de9dbc25d71b4d1",
+      "name": "Helmholtz/Assembly/LowWave/H1/P3/Complex/Segment/3/real_time",
+      "metric": "real_time",
+      "url": "cases/8c0341ccb1b7fb311f171b8ea840b57737aa4aa48a73597b4de9dbc25d71b4d1.json"
+    },
+    {
+      "id": "d47a44226e8e2efa13f7ae601a0487a130e0e33b2c4ac24c32638bff512a7675",
+      "name": "Helmholtz/Assembly/LowWave/H1/P3/Complex/Segment/5/real_time",
+      "metric": "real_time",
+      "url": "cases/d47a44226e8e2efa13f7ae601a0487a130e0e33b2c4ac24c32638bff512a7675.json"
+    },
+    {
+      "id": "49132d629b716c20f82ba8c0a9018d4b2dfc7f50e72cee1ae2cdb92bb917a06c",
+      "name": "Helmholtz/Assembly/LowWave/H1/P3/Complex/Segment/9/real_time",
+      "metric": "real_time",
+      "url": "cases/49132d629b716c20f82ba8c0a9018d4b2dfc7f50e72cee1ae2cdb92bb917a06c.json"
+    },
+    {
+      "id": "ecb0c6440e996812d56a6361a5338f1c360752ae850e61b140ee0a17028ec344",
+      "name": "Helmholtz/Assembly/LowWave/H1/P3/Complex/Tetrahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/ecb0c6440e996812d56a6361a5338f1c360752ae850e61b140ee0a17028ec344.json"
+    },
+    {
+      "id": "91eb9ede10094505926c7bff00e6925ce7e62a0ddc1dd2bf62625b9eedcdaf4e",
+      "name": "Helmholtz/Assembly/LowWave/H1/P3/Complex/Tetrahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/91eb9ede10094505926c7bff00e6925ce7e62a0ddc1dd2bf62625b9eedcdaf4e.json"
+    },
+    {
+      "id": "4e26bc79214168add9eac523a29f3936794a93bb1495d73e7abc7cb5aa7f03bf",
+      "name": "Helmholtz/Assembly/LowWave/H1/P3/Complex/Tetrahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/4e26bc79214168add9eac523a29f3936794a93bb1495d73e7abc7cb5aa7f03bf.json"
+    },
+    {
+      "id": "30049876114c65b02cb97f094e42cfea1ce9d433697562c6cd818bfb9cb88b0c",
+      "name": "Helmholtz/Assembly/LowWave/H1/P3/Complex/Triangle/3/real_time",
+      "metric": "real_time",
+      "url": "cases/30049876114c65b02cb97f094e42cfea1ce9d433697562c6cd818bfb9cb88b0c.json"
+    },
+    {
+      "id": "b398869d3fa0a2e2fff3743380552e26b7d3d3f8d5b980aa9181edb6f62a9d32",
+      "name": "Helmholtz/Assembly/LowWave/H1/P3/Complex/Triangle/5/real_time",
+      "metric": "real_time",
+      "url": "cases/b398869d3fa0a2e2fff3743380552e26b7d3d3f8d5b980aa9181edb6f62a9d32.json"
+    },
+    {
+      "id": "dd89a69b6e38b73442f1dbe711a2e6971a6904de5f7731a767f8160864f7ac37",
+      "name": "Helmholtz/Assembly/LowWave/H1/P3/Complex/Triangle/9/real_time",
+      "metric": "real_time",
+      "url": "cases/dd89a69b6e38b73442f1dbe711a2e6971a6904de5f7731a767f8160864f7ac37.json"
+    },
+    {
+      "id": "febcfa0a6b8c091ba356e525dff63bceb555acba5490387e3cf86a4d6309bc96",
+      "name": "Helmholtz/Assembly/LowWave/H1/P3/Complex/Wedge/3/real_time",
+      "metric": "real_time",
+      "url": "cases/febcfa0a6b8c091ba356e525dff63bceb555acba5490387e3cf86a4d6309bc96.json"
+    },
+    {
+      "id": "8761522cf5371280f3fa4923160104b173740360115de8c362d163ffe448f33b",
+      "name": "Helmholtz/Assembly/LowWave/H1/P3/Complex/Wedge/5/real_time",
+      "metric": "real_time",
+      "url": "cases/8761522cf5371280f3fa4923160104b173740360115de8c362d163ffe448f33b.json"
+    },
+    {
+      "id": "66bbbb4f39ec110e30085a26cdddf83b5230c6b2e6eee402a9f8898b9a7438cf",
+      "name": "Helmholtz/Assembly/LowWave/H1/P3/Complex/Wedge/9/real_time",
+      "metric": "real_time",
+      "url": "cases/66bbbb4f39ec110e30085a26cdddf83b5230c6b2e6eee402a9f8898b9a7438cf.json"
+    },
+    {
+      "id": "d282d04a18fe271a84530acfe3cf6bbe8cd07f240306b290dbb5f156a832f92c",
+      "name": "Helmholtz/Assembly/Shifted/H1/P1/Complex/Hexahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/d282d04a18fe271a84530acfe3cf6bbe8cd07f240306b290dbb5f156a832f92c.json"
+    },
+    {
+      "id": "c2cac05b02c31101a037a93a7c4eec870e6c3c7e1f51943632145ca8d0af8e02",
+      "name": "Helmholtz/Assembly/Shifted/H1/P1/Complex/Hexahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/c2cac05b02c31101a037a93a7c4eec870e6c3c7e1f51943632145ca8d0af8e02.json"
+    },
+    {
+      "id": "ff964725038c6fe7dbfe9f72e6994a69f5436d9c1634ac399a7d0b3c44c547ee",
+      "name": "Helmholtz/Assembly/Shifted/H1/P1/Complex/Hexahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/ff964725038c6fe7dbfe9f72e6994a69f5436d9c1634ac399a7d0b3c44c547ee.json"
+    },
+    {
+      "id": "d0c38511bbb9ee5e0de2d8527e699712c3fd652180487a2001e9cbe8c8e37d2c",
+      "name": "Helmholtz/Assembly/Shifted/H1/P1/Complex/Pyramid/3/real_time",
+      "metric": "real_time",
+      "url": "cases/d0c38511bbb9ee5e0de2d8527e699712c3fd652180487a2001e9cbe8c8e37d2c.json"
+    },
+    {
+      "id": "48a23e78dc6999b369bb229f68218ee7e26b09241c10a2e48465cd36528e8150",
+      "name": "Helmholtz/Assembly/Shifted/H1/P1/Complex/Pyramid/5/real_time",
+      "metric": "real_time",
+      "url": "cases/48a23e78dc6999b369bb229f68218ee7e26b09241c10a2e48465cd36528e8150.json"
+    },
+    {
+      "id": "d9ef1636f124bc6fcbd4767b2617035576840328cc23c757608b5271209e2823",
+      "name": "Helmholtz/Assembly/Shifted/H1/P1/Complex/Pyramid/9/real_time",
+      "metric": "real_time",
+      "url": "cases/d9ef1636f124bc6fcbd4767b2617035576840328cc23c757608b5271209e2823.json"
+    },
+    {
+      "id": "aa259028cef4ab1c05b4d756adf9a34c41ab77bcccdafbe48b573eda0581aebe",
+      "name": "Helmholtz/Assembly/Shifted/H1/P1/Complex/Quadrilateral/3/real_time",
+      "metric": "real_time",
+      "url": "cases/aa259028cef4ab1c05b4d756adf9a34c41ab77bcccdafbe48b573eda0581aebe.json"
+    },
+    {
+      "id": "8cedc7168132be2aa20768c9270f99f36ee0e8f25efbd793fd888ef3db828680",
+      "name": "Helmholtz/Assembly/Shifted/H1/P1/Complex/Quadrilateral/5/real_time",
+      "metric": "real_time",
+      "url": "cases/8cedc7168132be2aa20768c9270f99f36ee0e8f25efbd793fd888ef3db828680.json"
+    },
+    {
+      "id": "2dc5e314b25b0197d24ab17f47e83378e24067e6cc86ddaff747ce901e6816e9",
+      "name": "Helmholtz/Assembly/Shifted/H1/P1/Complex/Quadrilateral/9/real_time",
+      "metric": "real_time",
+      "url": "cases/2dc5e314b25b0197d24ab17f47e83378e24067e6cc86ddaff747ce901e6816e9.json"
+    },
+    {
+      "id": "d0bba1eaa8a6d3b8499c26ab0f25e4ae86c6613251bd4a0fcc4e8272d346350f",
+      "name": "Helmholtz/Assembly/Shifted/H1/P1/Complex/Segment/3/real_time",
+      "metric": "real_time",
+      "url": "cases/d0bba1eaa8a6d3b8499c26ab0f25e4ae86c6613251bd4a0fcc4e8272d346350f.json"
+    },
+    {
+      "id": "12ed8bf072e5cd8c9eeb767f0620cc8e75434f1cd86dd30453cafb01600e6885",
+      "name": "Helmholtz/Assembly/Shifted/H1/P1/Complex/Segment/5/real_time",
+      "metric": "real_time",
+      "url": "cases/12ed8bf072e5cd8c9eeb767f0620cc8e75434f1cd86dd30453cafb01600e6885.json"
+    },
+    {
+      "id": "ddad0aaa2a7e38772162e76f2718ac544527837dc71c7aaeb02b3261e5568844",
+      "name": "Helmholtz/Assembly/Shifted/H1/P1/Complex/Segment/9/real_time",
+      "metric": "real_time",
+      "url": "cases/ddad0aaa2a7e38772162e76f2718ac544527837dc71c7aaeb02b3261e5568844.json"
+    },
+    {
+      "id": "40b95f6836a3eabe8eb94e20119d42fc7424d19021a42ac34a454c28f9fdb26d",
+      "name": "Helmholtz/Assembly/Shifted/H1/P1/Complex/Tetrahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/40b95f6836a3eabe8eb94e20119d42fc7424d19021a42ac34a454c28f9fdb26d.json"
+    },
+    {
+      "id": "d9dd2b8b12f466e513a429350715056453ecef071a0ae5450846cc0d53b589a3",
+      "name": "Helmholtz/Assembly/Shifted/H1/P1/Complex/Tetrahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/d9dd2b8b12f466e513a429350715056453ecef071a0ae5450846cc0d53b589a3.json"
+    },
+    {
+      "id": "242fe81e451799ed2084589ff37d3e988d1a6a6aae92161b257e2c8d28c8819f",
+      "name": "Helmholtz/Assembly/Shifted/H1/P1/Complex/Tetrahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/242fe81e451799ed2084589ff37d3e988d1a6a6aae92161b257e2c8d28c8819f.json"
+    },
+    {
+      "id": "9a76ec3ccc2fdd0c1aeb4c60231ac2f703a7f2925272134f5cd0f85fbd17cbeb",
+      "name": "Helmholtz/Assembly/Shifted/H1/P1/Complex/Triangle/3/real_time",
+      "metric": "real_time",
+      "url": "cases/9a76ec3ccc2fdd0c1aeb4c60231ac2f703a7f2925272134f5cd0f85fbd17cbeb.json"
+    },
+    {
+      "id": "ab6e257ff42b5a6914968aa266d7421829cff4a0028756d541d0d21778f01390",
+      "name": "Helmholtz/Assembly/Shifted/H1/P1/Complex/Triangle/5/real_time",
+      "metric": "real_time",
+      "url": "cases/ab6e257ff42b5a6914968aa266d7421829cff4a0028756d541d0d21778f01390.json"
+    },
+    {
+      "id": "31bd1c984d665bffb6251814e054fc2b5c01634e3adaf0cf3df20f423a5d16ec",
+      "name": "Helmholtz/Assembly/Shifted/H1/P1/Complex/Triangle/9/real_time",
+      "metric": "real_time",
+      "url": "cases/31bd1c984d665bffb6251814e054fc2b5c01634e3adaf0cf3df20f423a5d16ec.json"
+    },
+    {
+      "id": "1051271e61042c737f8ac86575b67dd113ce17889d19e94e337f5f5435cecf5a",
+      "name": "Helmholtz/Assembly/Shifted/H1/P1/Complex/Wedge/3/real_time",
+      "metric": "real_time",
+      "url": "cases/1051271e61042c737f8ac86575b67dd113ce17889d19e94e337f5f5435cecf5a.json"
+    },
+    {
+      "id": "b1d7ed4999d37a98bd48ced804b928e3b12e598738a52792bb19b897b2dc0282",
+      "name": "Helmholtz/Assembly/Shifted/H1/P1/Complex/Wedge/5/real_time",
+      "metric": "real_time",
+      "url": "cases/b1d7ed4999d37a98bd48ced804b928e3b12e598738a52792bb19b897b2dc0282.json"
+    },
+    {
+      "id": "b290bd48b93eb7d47869a6004bd9e2c103c1fd1ec665c648d326156be5041939",
+      "name": "Helmholtz/Assembly/Shifted/H1/P1/Complex/Wedge/9/real_time",
+      "metric": "real_time",
+      "url": "cases/b290bd48b93eb7d47869a6004bd9e2c103c1fd1ec665c648d326156be5041939.json"
+    },
+    {
+      "id": "aa20d98b84e6ab553ad4653c98bb38cb4f3211c4ea5ac1bcfc44d6749b5421c2",
+      "name": "Helmholtz/Assembly/Shifted/H1/P2/Complex/Hexahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/aa20d98b84e6ab553ad4653c98bb38cb4f3211c4ea5ac1bcfc44d6749b5421c2.json"
+    },
+    {
+      "id": "d48ccf45549a475ed5a80c773716349fcdc4763bfa4862b087e2402751dd6a60",
+      "name": "Helmholtz/Assembly/Shifted/H1/P2/Complex/Hexahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/d48ccf45549a475ed5a80c773716349fcdc4763bfa4862b087e2402751dd6a60.json"
+    },
+    {
+      "id": "a11c45b28f40970b27046359e98c356adb1645487140691b6c714438f05afc0d",
+      "name": "Helmholtz/Assembly/Shifted/H1/P2/Complex/Hexahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/a11c45b28f40970b27046359e98c356adb1645487140691b6c714438f05afc0d.json"
+    },
+    {
+      "id": "2d5d2a8e1eb5fe34a1d32927d4f92afc5f2ad3426c7304f61c7940d33eae736d",
+      "name": "Helmholtz/Assembly/Shifted/H1/P2/Complex/Pyramid/3/real_time",
+      "metric": "real_time",
+      "url": "cases/2d5d2a8e1eb5fe34a1d32927d4f92afc5f2ad3426c7304f61c7940d33eae736d.json"
+    },
+    {
+      "id": "2a65a7daf70196f0919c5d8d294baac75ba1d29038a35af6c2d6d02e7c264a5c",
+      "name": "Helmholtz/Assembly/Shifted/H1/P2/Complex/Pyramid/5/real_time",
+      "metric": "real_time",
+      "url": "cases/2a65a7daf70196f0919c5d8d294baac75ba1d29038a35af6c2d6d02e7c264a5c.json"
+    },
+    {
+      "id": "e0447cacf92aff4fef548838540bfea57a21c3504bc91930975faac5d50028f5",
+      "name": "Helmholtz/Assembly/Shifted/H1/P2/Complex/Pyramid/9/real_time",
+      "metric": "real_time",
+      "url": "cases/e0447cacf92aff4fef548838540bfea57a21c3504bc91930975faac5d50028f5.json"
+    },
+    {
+      "id": "ac85cb55ecd11ad78ff54da61c8e02c10c9cfe1aa9beb498d2a7229552b0a830",
+      "name": "Helmholtz/Assembly/Shifted/H1/P2/Complex/Quadrilateral/3/real_time",
+      "metric": "real_time",
+      "url": "cases/ac85cb55ecd11ad78ff54da61c8e02c10c9cfe1aa9beb498d2a7229552b0a830.json"
+    },
+    {
+      "id": "e6ffe2967b9cb3bae288e6c88a299d2aca8bf9c144761368b93129896ce2786c",
+      "name": "Helmholtz/Assembly/Shifted/H1/P2/Complex/Quadrilateral/5/real_time",
+      "metric": "real_time",
+      "url": "cases/e6ffe2967b9cb3bae288e6c88a299d2aca8bf9c144761368b93129896ce2786c.json"
+    },
+    {
+      "id": "5b1df9b8eda5ae8e088b792a06f4f2cb26403dad9f3e374707d5fbc9cf2341a6",
+      "name": "Helmholtz/Assembly/Shifted/H1/P2/Complex/Quadrilateral/9/real_time",
+      "metric": "real_time",
+      "url": "cases/5b1df9b8eda5ae8e088b792a06f4f2cb26403dad9f3e374707d5fbc9cf2341a6.json"
+    },
+    {
+      "id": "fbab1db554915dd4f0b89964764f7210ea47f940f85632a8c2d8eb008fc0de79",
+      "name": "Helmholtz/Assembly/Shifted/H1/P2/Complex/Segment/3/real_time",
+      "metric": "real_time",
+      "url": "cases/fbab1db554915dd4f0b89964764f7210ea47f940f85632a8c2d8eb008fc0de79.json"
+    },
+    {
+      "id": "268979c3ebea695fa066c6c948e8ee76b5678a67c1f104bb94492ab83d06fcda",
+      "name": "Helmholtz/Assembly/Shifted/H1/P2/Complex/Segment/5/real_time",
+      "metric": "real_time",
+      "url": "cases/268979c3ebea695fa066c6c948e8ee76b5678a67c1f104bb94492ab83d06fcda.json"
+    },
+    {
+      "id": "311ac2bec03d6cfcf2c91b60f03fdb67d1edcd4cc1d881dc15ddc98781aa1571",
+      "name": "Helmholtz/Assembly/Shifted/H1/P2/Complex/Segment/9/real_time",
+      "metric": "real_time",
+      "url": "cases/311ac2bec03d6cfcf2c91b60f03fdb67d1edcd4cc1d881dc15ddc98781aa1571.json"
+    },
+    {
+      "id": "0b94b61611315e66eee04cf320c08c4edfa061697ee9889d0b3d2aae87d170cb",
+      "name": "Helmholtz/Assembly/Shifted/H1/P2/Complex/Tetrahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/0b94b61611315e66eee04cf320c08c4edfa061697ee9889d0b3d2aae87d170cb.json"
+    },
+    {
+      "id": "7cbd05c5f77ed60d262d74a7b36bbf64e7d574aa5dfaf20718e48768fec7c76f",
+      "name": "Helmholtz/Assembly/Shifted/H1/P2/Complex/Tetrahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/7cbd05c5f77ed60d262d74a7b36bbf64e7d574aa5dfaf20718e48768fec7c76f.json"
+    },
+    {
+      "id": "e4c764ea8e4a25bf55b8be0be59422e64f275484837af6aae92a930709e5c36d",
+      "name": "Helmholtz/Assembly/Shifted/H1/P2/Complex/Tetrahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/e4c764ea8e4a25bf55b8be0be59422e64f275484837af6aae92a930709e5c36d.json"
+    },
+    {
+      "id": "08f96f21f4d663152cf46f9314204a4ee5e9735e53b1d207303bbea0c9aa0aa0",
+      "name": "Helmholtz/Assembly/Shifted/H1/P2/Complex/Triangle/3/real_time",
+      "metric": "real_time",
+      "url": "cases/08f96f21f4d663152cf46f9314204a4ee5e9735e53b1d207303bbea0c9aa0aa0.json"
+    },
+    {
+      "id": "101978a12eee4320d660ba3cff03737e9f4b3a8870d27f96128a276e8c4a1ca8",
+      "name": "Helmholtz/Assembly/Shifted/H1/P2/Complex/Triangle/5/real_time",
+      "metric": "real_time",
+      "url": "cases/101978a12eee4320d660ba3cff03737e9f4b3a8870d27f96128a276e8c4a1ca8.json"
+    },
+    {
+      "id": "062b59c7cc7db90e5b2f1cb7d3c8b8c5a39ea0c398297d769982f946ee429047",
+      "name": "Helmholtz/Assembly/Shifted/H1/P2/Complex/Triangle/9/real_time",
+      "metric": "real_time",
+      "url": "cases/062b59c7cc7db90e5b2f1cb7d3c8b8c5a39ea0c398297d769982f946ee429047.json"
+    },
+    {
+      "id": "047794f77d40013f9e51d048febf1f713a9b468246a7d739915ba7dc9118105f",
+      "name": "Helmholtz/Assembly/Shifted/H1/P2/Complex/Wedge/3/real_time",
+      "metric": "real_time",
+      "url": "cases/047794f77d40013f9e51d048febf1f713a9b468246a7d739915ba7dc9118105f.json"
+    },
+    {
+      "id": "f405edcb45060efea5b6f58afb24d08e2d873208eefd6bb0b54021beace7f94e",
+      "name": "Helmholtz/Assembly/Shifted/H1/P2/Complex/Wedge/5/real_time",
+      "metric": "real_time",
+      "url": "cases/f405edcb45060efea5b6f58afb24d08e2d873208eefd6bb0b54021beace7f94e.json"
+    },
+    {
+      "id": "33262da8f24b6def0becdfdc3659b00e34848f266063e58e4f0f52a7b9a62b5b",
+      "name": "Helmholtz/Assembly/Shifted/H1/P2/Complex/Wedge/9/real_time",
+      "metric": "real_time",
+      "url": "cases/33262da8f24b6def0becdfdc3659b00e34848f266063e58e4f0f52a7b9a62b5b.json"
+    },
+    {
+      "id": "bc87ec6a684fcc066c0edb42feab2806a4b9a0c7eec8db9010e4aac7961fe755",
+      "name": "Helmholtz/Assembly/Shifted/H1/P3/Complex/Hexahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/bc87ec6a684fcc066c0edb42feab2806a4b9a0c7eec8db9010e4aac7961fe755.json"
+    },
+    {
+      "id": "0519bff805dcfe2ced1280d9392103b3ae2d0491dfdf37c2793dfaf9557105bb",
+      "name": "Helmholtz/Assembly/Shifted/H1/P3/Complex/Hexahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/0519bff805dcfe2ced1280d9392103b3ae2d0491dfdf37c2793dfaf9557105bb.json"
+    },
+    {
+      "id": "77531341d1ed1cfc7535cf98cccb489c74db19fb08b93677efbb0ed49ce5f313",
+      "name": "Helmholtz/Assembly/Shifted/H1/P3/Complex/Hexahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/77531341d1ed1cfc7535cf98cccb489c74db19fb08b93677efbb0ed49ce5f313.json"
+    },
+    {
+      "id": "ea70557a38592a12d57ebbd5d14fe1b21bfc351a7f5b123c969d4cf591fe1909",
+      "name": "Helmholtz/Assembly/Shifted/H1/P3/Complex/Pyramid/3/real_time",
+      "metric": "real_time",
+      "url": "cases/ea70557a38592a12d57ebbd5d14fe1b21bfc351a7f5b123c969d4cf591fe1909.json"
+    },
+    {
+      "id": "ec18bc85ce0baa7ccaea514b8f5feb9e30ad3a448cc6e64cc615a746db9124cd",
+      "name": "Helmholtz/Assembly/Shifted/H1/P3/Complex/Pyramid/5/real_time",
+      "metric": "real_time",
+      "url": "cases/ec18bc85ce0baa7ccaea514b8f5feb9e30ad3a448cc6e64cc615a746db9124cd.json"
+    },
+    {
+      "id": "0cb9a03c39f8de62308daded515a408ad40a6e883e2759ca4106534721a2c0f7",
+      "name": "Helmholtz/Assembly/Shifted/H1/P3/Complex/Pyramid/9/real_time",
+      "metric": "real_time",
+      "url": "cases/0cb9a03c39f8de62308daded515a408ad40a6e883e2759ca4106534721a2c0f7.json"
+    },
+    {
+      "id": "19ac4abb653cf66bc1a224bdc2b51bf4a40cddc5dac4362031ad011177d318e1",
+      "name": "Helmholtz/Assembly/Shifted/H1/P3/Complex/Quadrilateral/3/real_time",
+      "metric": "real_time",
+      "url": "cases/19ac4abb653cf66bc1a224bdc2b51bf4a40cddc5dac4362031ad011177d318e1.json"
+    },
+    {
+      "id": "ad3d308258fa506d682bec89a19a683e17cf3c292a151ae27e8615624a3e4b49",
+      "name": "Helmholtz/Assembly/Shifted/H1/P3/Complex/Quadrilateral/5/real_time",
+      "metric": "real_time",
+      "url": "cases/ad3d308258fa506d682bec89a19a683e17cf3c292a151ae27e8615624a3e4b49.json"
+    },
+    {
+      "id": "f9f671209665fcb778db4f8ae3f214efa10e90b90f754e2897d122b0e5ba14bb",
+      "name": "Helmholtz/Assembly/Shifted/H1/P3/Complex/Quadrilateral/9/real_time",
+      "metric": "real_time",
+      "url": "cases/f9f671209665fcb778db4f8ae3f214efa10e90b90f754e2897d122b0e5ba14bb.json"
+    },
+    {
+      "id": "4e07aee912888bb581033ebaa46e4791103799a9eb227c6dc9b5b46ea42b69f5",
+      "name": "Helmholtz/Assembly/Shifted/H1/P3/Complex/Segment/3/real_time",
+      "metric": "real_time",
+      "url": "cases/4e07aee912888bb581033ebaa46e4791103799a9eb227c6dc9b5b46ea42b69f5.json"
+    },
+    {
+      "id": "869e42f5e80b27dfefa2de1afd22b8da56b2df96807a49697be71745366b8f62",
+      "name": "Helmholtz/Assembly/Shifted/H1/P3/Complex/Segment/5/real_time",
+      "metric": "real_time",
+      "url": "cases/869e42f5e80b27dfefa2de1afd22b8da56b2df96807a49697be71745366b8f62.json"
+    },
+    {
+      "id": "8caf5acb991d20ef05cb0c7c1c64f8772d046e4c0fb99c093fb1cb835092736b",
+      "name": "Helmholtz/Assembly/Shifted/H1/P3/Complex/Segment/9/real_time",
+      "metric": "real_time",
+      "url": "cases/8caf5acb991d20ef05cb0c7c1c64f8772d046e4c0fb99c093fb1cb835092736b.json"
+    },
+    {
+      "id": "2134ebdb6d8d9b1819e45da6da2003d4c35551446b97ec7aa78c2b5c594c60c2",
+      "name": "Helmholtz/Assembly/Shifted/H1/P3/Complex/Tetrahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/2134ebdb6d8d9b1819e45da6da2003d4c35551446b97ec7aa78c2b5c594c60c2.json"
+    },
+    {
+      "id": "66cc76be8132961f45c983b69f4386104504f581db1e7c946e542491dfb5be57",
+      "name": "Helmholtz/Assembly/Shifted/H1/P3/Complex/Tetrahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/66cc76be8132961f45c983b69f4386104504f581db1e7c946e542491dfb5be57.json"
+    },
+    {
+      "id": "6883848a6eb32cc85eebbd04ce90332b110320d3368a4ff3de167028bcb77093",
+      "name": "Helmholtz/Assembly/Shifted/H1/P3/Complex/Tetrahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/6883848a6eb32cc85eebbd04ce90332b110320d3368a4ff3de167028bcb77093.json"
+    },
+    {
+      "id": "71a0272f2ae3d6d01c1bdca1e4e1fe9d70e5fa2d7bb45c91c432b756972920d2",
+      "name": "Helmholtz/Assembly/Shifted/H1/P3/Complex/Triangle/3/real_time",
+      "metric": "real_time",
+      "url": "cases/71a0272f2ae3d6d01c1bdca1e4e1fe9d70e5fa2d7bb45c91c432b756972920d2.json"
+    },
+    {
+      "id": "41f038d28c0830a891be3f8643a5dbea24032690aef9839e8e4c1f756055fbf1",
+      "name": "Helmholtz/Assembly/Shifted/H1/P3/Complex/Triangle/5/real_time",
+      "metric": "real_time",
+      "url": "cases/41f038d28c0830a891be3f8643a5dbea24032690aef9839e8e4c1f756055fbf1.json"
+    },
+    {
+      "id": "bcf92f1d5cff4b59fe8d7a2563294981b972ee90985b20353ce1bd83767f60db",
+      "name": "Helmholtz/Assembly/Shifted/H1/P3/Complex/Triangle/9/real_time",
+      "metric": "real_time",
+      "url": "cases/bcf92f1d5cff4b59fe8d7a2563294981b972ee90985b20353ce1bd83767f60db.json"
+    },
+    {
+      "id": "8bd57360b8f913c72ef2cccc83cb407b233f201fe7127fb6a6f2d8a0962d0207",
+      "name": "Helmholtz/Assembly/Shifted/H1/P3/Complex/Wedge/3/real_time",
+      "metric": "real_time",
+      "url": "cases/8bd57360b8f913c72ef2cccc83cb407b233f201fe7127fb6a6f2d8a0962d0207.json"
+    },
+    {
+      "id": "3fa56af74769adf323c40b63e69e29bb3f18c4737dca1a4583c2267ed4de784d",
+      "name": "Helmholtz/Assembly/Shifted/H1/P3/Complex/Wedge/5/real_time",
+      "metric": "real_time",
+      "url": "cases/3fa56af74769adf323c40b63e69e29bb3f18c4737dca1a4583c2267ed4de784d.json"
+    },
+    {
+      "id": "9c19b6c70aa82e0f345bce529300a91a514f13d914615b9a2514ffa128c7af1c",
+      "name": "Helmholtz/Assembly/Shifted/H1/P3/Complex/Wedge/9/real_time",
+      "metric": "real_time",
+      "url": "cases/9c19b6c70aa82e0f345bce529300a91a514f13d914615b9a2514ffa128c7af1c.json"
+    }
+  ]
+}

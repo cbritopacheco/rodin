@@ -1,0 +1,229 @@
+{
+  "schema": 1,
+  "definition": {
+    "kind": "benchmark",
+    "mode": "local",
+    "compiler": "gcc-14",
+    "runner": "ubuntu-24.04",
+    "cmake": {
+      "CMAKE_BUILD_TYPE": "Release",
+      "CMAKE_CXX_COMPILER": "g++-14",
+      "CMAKE_C_COMPILER": "gcc-14",
+      "CMAKE_SUPPRESS_REGENERATION": "ON",
+      "RODIN_BUILD_SRC": "ON",
+      "RODIN_BUILD_BENCHMARKS": "ON",
+      "RODIN_BUILD_UNIT_TESTS": "OFF",
+      "RODIN_BUILD_MANUFACTURED_TESTS": "OFF",
+      "RODIN_BUILD_CONVERGENCE_TESTS": "OFF",
+      "RODIN_BUILD_EXAMPLES": "OFF",
+      "RODIN_BUILD_DOC": "OFF",
+      "RODIN_INSTALL_RESOURCES": "OFF",
+      "RODIN_CODE_COVERAGE": "OFF",
+      "RODIN_MULTITHREADED": "OFF",
+      "RODIN_USE_ASAN": "OFF",
+      "RODIN_USE_UBSAN": "OFF",
+      "RODIN_USE_MPI": "OFF",
+      "RODIN_USE_PETSC": "OFF"
+    },
+    "targets": [
+      "RodinQFBenchmarks",
+      "RodinReferenceQuadratureBenchmarks"
+    ],
+    "stage": "components"
+  },
+  "ranks": 1,
+  "cases": [
+    {
+      "id": "407a17419f22928e3b18e26aa144a3b72e46f737bd05141dd06cb66fe1c6c4d5",
+      "name": "BM_QuadratureAccess/0/2",
+      "metric": "cpu_time",
+      "url": "cases/407a17419f22928e3b18e26aa144a3b72e46f737bd05141dd06cb66fe1c6c4d5.json"
+    },
+    {
+      "id": "334d2d7770989135faedf865f37137fffa0697c96bd54216daac1fc2046c56d5",
+      "name": "BM_QuadratureAccess/0/4",
+      "metric": "cpu_time",
+      "url": "cases/334d2d7770989135faedf865f37137fffa0697c96bd54216daac1fc2046c56d5.json"
+    },
+    {
+      "id": "e066b93b3a5dd2d55da7e18cab006f01e60b6e2858248b7a8f904f646ef5c59b",
+      "name": "BM_QuadratureAccess/0/6",
+      "metric": "cpu_time",
+      "url": "cases/e066b93b3a5dd2d55da7e18cab006f01e60b6e2858248b7a8f904f646ef5c59b.json"
+    },
+    {
+      "id": "a477829f0592c11d466edc2ea1977d1365c11d22e663630aaad6ce71ac96b5df",
+      "name": "BM_QuadratureAccess/0/8",
+      "metric": "cpu_time",
+      "url": "cases/a477829f0592c11d466edc2ea1977d1365c11d22e663630aaad6ce71ac96b5df.json"
+    },
+    {
+      "id": "f4ce6eec3a187538645f3bee3434ea6c673a91d91cf259280a6a474e12141f36",
+      "name": "BM_QuadratureAccess/1/2",
+      "metric": "cpu_time",
+      "url": "cases/f4ce6eec3a187538645f3bee3434ea6c673a91d91cf259280a6a474e12141f36.json"
+    },
+    {
+      "id": "0a3874d3c39f47805fc13c38d12529a3a00976e6b8afa31a7c14bcbe53a12669",
+      "name": "BM_QuadratureAccess/1/4",
+      "metric": "cpu_time",
+      "url": "cases/0a3874d3c39f47805fc13c38d12529a3a00976e6b8afa31a7c14bcbe53a12669.json"
+    },
+    {
+      "id": "e4be7f504513df56806e698b991c95a3aa4a3ca0e345128b70d11ee3b2b9d1bd",
+      "name": "BM_QuadratureAccess/1/6",
+      "metric": "cpu_time",
+      "url": "cases/e4be7f504513df56806e698b991c95a3aa4a3ca0e345128b70d11ee3b2b9d1bd.json"
+    },
+    {
+      "id": "ebe21b993807142908bf780e557d4a3d3c3aaff4397b500a31b86bd602f29e76",
+      "name": "BM_QuadratureAccess/1/8",
+      "metric": "cpu_time",
+      "url": "cases/ebe21b993807142908bf780e557d4a3d3c3aaff4397b500a31b86bd602f29e76.json"
+    },
+    {
+      "id": "9783ea9a71b20474aca8a572d6befa423a42048b9168a30777f4e5b373cb6667",
+      "name": "BM_QuadratureAccess/2/2",
+      "metric": "cpu_time",
+      "url": "cases/9783ea9a71b20474aca8a572d6befa423a42048b9168a30777f4e5b373cb6667.json"
+    },
+    {
+      "id": "6b3e498abacfbc27ff16a31f3bf88783b21dca66b9c5beedb16892f0a9dc2c28",
+      "name": "BM_QuadratureAccess/2/4",
+      "metric": "cpu_time",
+      "url": "cases/6b3e498abacfbc27ff16a31f3bf88783b21dca66b9c5beedb16892f0a9dc2c28.json"
+    },
+    {
+      "id": "825b59c77dd339ff0023e025b21c3dabf8e50cfc08bf74cb5e6ac37ff1961f89",
+      "name": "BM_QuadratureAccess/2/6",
+      "metric": "cpu_time",
+      "url": "cases/825b59c77dd339ff0023e025b21c3dabf8e50cfc08bf74cb5e6ac37ff1961f89.json"
+    },
+    {
+      "id": "98162c7426fde6700ed7cc90bdf413eea85df709858849a5709e00dbacab1d9d",
+      "name": "BM_QuadratureAccess/2/8",
+      "metric": "cpu_time",
+      "url": "cases/98162c7426fde6700ed7cc90bdf413eea85df709858849a5709e00dbacab1d9d.json"
+    },
+    {
+      "id": "9b47914677598a04968cb71b4ced0ff1672b729090736af7040a1dbd24f42d6c",
+      "name": "BM_QuadratureAccess/3/2",
+      "metric": "cpu_time",
+      "url": "cases/9b47914677598a04968cb71b4ced0ff1672b729090736af7040a1dbd24f42d6c.json"
+    },
+    {
+      "id": "17901a1a71cb31beccaa822f596b421a4df12846dfc2fd4d1b64699badb9f715",
+      "name": "BM_QuadratureAccess/3/4",
+      "metric": "cpu_time",
+      "url": "cases/17901a1a71cb31beccaa822f596b421a4df12846dfc2fd4d1b64699badb9f715.json"
+    },
+    {
+      "id": "0f15bf63ceb369b8c4dd1a92564660a0653715a68ff1a73eeda3f8713841b81e",
+      "name": "BM_QuadratureAccess/3/6",
+      "metric": "cpu_time",
+      "url": "cases/0f15bf63ceb369b8c4dd1a92564660a0653715a68ff1a73eeda3f8713841b81e.json"
+    },
+    {
+      "id": "e60a163f6afa5e94e91ab76dc350bd81b9686847a5bf62c333c65507ba6a520b",
+      "name": "BM_QuadratureAccess/3/8",
+      "metric": "cpu_time",
+      "url": "cases/e60a163f6afa5e94e91ab76dc350bd81b9686847a5bf62c333c65507ba6a520b.json"
+    },
+    {
+      "id": "bb14fa50401002b56028c82ff909866919e7d3ff3ae36a60704dfcfead150102",
+      "name": "BM_QuadratureSweep/0/2",
+      "metric": "cpu_time",
+      "url": "cases/bb14fa50401002b56028c82ff909866919e7d3ff3ae36a60704dfcfead150102.json"
+    },
+    {
+      "id": "feee3572f54fe588f4cdbfc6ce92abc2c2ca35f1eb727baf997740403483ff91",
+      "name": "BM_QuadratureSweep/0/4",
+      "metric": "cpu_time",
+      "url": "cases/feee3572f54fe588f4cdbfc6ce92abc2c2ca35f1eb727baf997740403483ff91.json"
+    },
+    {
+      "id": "c513fb4e2a9fd23f0c0923334bfea68f121f394b08ddb017a114baf95caef2dc",
+      "name": "BM_QuadratureSweep/0/6",
+      "metric": "cpu_time",
+      "url": "cases/c513fb4e2a9fd23f0c0923334bfea68f121f394b08ddb017a114baf95caef2dc.json"
+    },
+    {
+      "id": "378ca566d83be21a0df123381206271eeac14088dbd794cb8fd121d6eb938dbc",
+      "name": "BM_QuadratureSweep/0/8",
+      "metric": "cpu_time",
+      "url": "cases/378ca566d83be21a0df123381206271eeac14088dbd794cb8fd121d6eb938dbc.json"
+    },
+    {
+      "id": "298d264212f23f3008d2cdcb12e6b007d8dab654b8a0df135f60f54e990184d7",
+      "name": "BM_QuadratureSweep/1/2",
+      "metric": "cpu_time",
+      "url": "cases/298d264212f23f3008d2cdcb12e6b007d8dab654b8a0df135f60f54e990184d7.json"
+    },
+    {
+      "id": "f842cf9081ad68200cadc9cada7adc10468657b1c2b49a210ff29ee23e3fae51",
+      "name": "BM_QuadratureSweep/1/4",
+      "metric": "cpu_time",
+      "url": "cases/f842cf9081ad68200cadc9cada7adc10468657b1c2b49a210ff29ee23e3fae51.json"
+    },
+    {
+      "id": "99a2ba67653243d0a758c6e837cf8648413cf1c0afe6f88720a8db68627c7688",
+      "name": "BM_QuadratureSweep/1/6",
+      "metric": "cpu_time",
+      "url": "cases/99a2ba67653243d0a758c6e837cf8648413cf1c0afe6f88720a8db68627c7688.json"
+    },
+    {
+      "id": "73b8ad6db9acc9ac8e7e2db7e936c631bed40eb8a90a68569cf69bd8eff0cd21",
+      "name": "BM_QuadratureSweep/1/8",
+      "metric": "cpu_time",
+      "url": "cases/73b8ad6db9acc9ac8e7e2db7e936c631bed40eb8a90a68569cf69bd8eff0cd21.json"
+    },
+    {
+      "id": "6b65bd55bfdc620c70d2985724a2ba46c6e900a5112e30ecd4e302ba82cce226",
+      "name": "BM_QuadratureSweep/2/2",
+      "metric": "cpu_time",
+      "url": "cases/6b65bd55bfdc620c70d2985724a2ba46c6e900a5112e30ecd4e302ba82cce226.json"
+    },
+    {
+      "id": "bc1f8028788e46c5657d98526a273dc5f29094eabe02593238085e8dc42fa2c7",
+      "name": "BM_QuadratureSweep/2/4",
+      "metric": "cpu_time",
+      "url": "cases/bc1f8028788e46c5657d98526a273dc5f29094eabe02593238085e8dc42fa2c7.json"
+    },
+    {
+      "id": "4704d98853a856dbd9f117f86dfd9375e2c60294399bb146f3fa6f44722314d1",
+      "name": "BM_QuadratureSweep/2/6",
+      "metric": "cpu_time",
+      "url": "cases/4704d98853a856dbd9f117f86dfd9375e2c60294399bb146f3fa6f44722314d1.json"
+    },
+    {
+      "id": "0d2c7cf7693cf0a8bcd3a856a710d704e0944cf4cdd336e5b0a096a374dbbc70",
+      "name": "BM_QuadratureSweep/2/8",
+      "metric": "cpu_time",
+      "url": "cases/0d2c7cf7693cf0a8bcd3a856a710d704e0944cf4cdd336e5b0a096a374dbbc70.json"
+    },
+    {
+      "id": "fcf323687fed1a4e66484820b399d311439ad70890cb81aa0c771043c4f2b27e",
+      "name": "BM_QuadratureSweep/3/2",
+      "metric": "cpu_time",
+      "url": "cases/fcf323687fed1a4e66484820b399d311439ad70890cb81aa0c771043c4f2b27e.json"
+    },
+    {
+      "id": "167a6703caef31363a6706f3d916e39a4b35527143010a661d335925e18cd215",
+      "name": "BM_QuadratureSweep/3/4",
+      "metric": "cpu_time",
+      "url": "cases/167a6703caef31363a6706f3d916e39a4b35527143010a661d335925e18cd215.json"
+    },
+    {
+      "id": "45da72a05fb8eca18f8ee21d7900f23ea9ce54fc5222314021064115f794e0f0",
+      "name": "BM_QuadratureSweep/3/6",
+      "metric": "cpu_time",
+      "url": "cases/45da72a05fb8eca18f8ee21d7900f23ea9ce54fc5222314021064115f794e0f0.json"
+    },
+    {
+      "id": "e60125cdf24b6536b7ccb082694a3f8bba56fbfa57790d6003388ea9d1dd82fa",
+      "name": "BM_QuadratureSweep/3/8",
+      "metric": "cpu_time",
+      "url": "cases/e60125cdf24b6536b7ccb082694a3f8bba56fbfa57790d6003388ea9d1dd82fa.json"
+    }
+  ]
+}

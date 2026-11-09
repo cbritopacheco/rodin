@@ -1,0 +1,688 @@
+{
+  "schema": 1,
+  "definition": {
+    "kind": "benchmark",
+    "mode": "local",
+    "compiler": "gcc-14",
+    "runner": "ubuntu-24.04",
+    "cmake": {
+      "CMAKE_BUILD_TYPE": "Release",
+      "CMAKE_CXX_COMPILER": "g++-14",
+      "CMAKE_C_COMPILER": "gcc-14",
+      "CMAKE_SUPPRESS_REGENERATION": "ON",
+      "RODIN_BUILD_SRC": "ON",
+      "RODIN_BUILD_BENCHMARKS": "ON",
+      "RODIN_BUILD_UNIT_TESTS": "OFF",
+      "RODIN_BUILD_MANUFACTURED_TESTS": "OFF",
+      "RODIN_BUILD_CONVERGENCE_TESTS": "OFF",
+      "RODIN_BUILD_EXAMPLES": "OFF",
+      "RODIN_BUILD_DOC": "OFF",
+      "RODIN_INSTALL_RESOURCES": "OFF",
+      "RODIN_CODE_COVERAGE": "OFF",
+      "RODIN_MULTITHREADED": "OFF",
+      "RODIN_USE_ASAN": "OFF",
+      "RODIN_USE_UBSAN": "OFF",
+      "RODIN_USE_MPI": "OFF",
+      "RODIN_USE_PETSC": "OFF"
+    },
+    "targets": [
+      "RodinConstrainedSolveBenchmarks",
+      "RodinCoupledReactionDiffusionSolveBenchmarks",
+      "RodinDiagonalPreconditionerBenchmarks",
+      "RodinHelmholtzSolveBenchmarks",
+      "RodinStokesGMRESBenchmarks"
+    ],
+    "stage": "components"
+  },
+  "ranks": 1,
+  "cases": [
+    {
+      "id": "766a932413cc1931658d7587551b7768a669adaf4b2595d984f3fa95496e6305",
+      "name": "Stokes/GMRESBlockSchur/H1/P2P1/Real/Hexahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/766a932413cc1931658d7587551b7768a669adaf4b2595d984f3fa95496e6305.json"
+    },
+    {
+      "id": "8920dd905be5b0d141a0ad36c05ca57c24c636e29c5a7d396ed6818dc2d35d6d",
+      "name": "Stokes/GMRESBlockSchur/H1/P2P1/Real/Hexahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/8920dd905be5b0d141a0ad36c05ca57c24c636e29c5a7d396ed6818dc2d35d6d.json"
+    },
+    {
+      "id": "b1e0c4fde855ef57eb54dec6f14dc46a4cf87e67ef61af402f8287b8a9566d7b",
+      "name": "Stokes/GMRESBlockSchur/H1/P2P1/Real/Hexahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/b1e0c4fde855ef57eb54dec6f14dc46a4cf87e67ef61af402f8287b8a9566d7b.json"
+    },
+    {
+      "id": "e28ea04b2a9aaa3146cfd7fbd90269892311ed4dff5f5c13632a4508bf96be57",
+      "name": "Stokes/GMRESBlockSchur/H1/P2P1/Real/Pyramid/3/real_time",
+      "metric": "real_time",
+      "url": "cases/e28ea04b2a9aaa3146cfd7fbd90269892311ed4dff5f5c13632a4508bf96be57.json"
+    },
+    {
+      "id": "d904f7a4093cd058e16f8673c0aaaeab0d2322367c9f0e863729910ecbfa2176",
+      "name": "Stokes/GMRESBlockSchur/H1/P2P1/Real/Pyramid/5/real_time",
+      "metric": "real_time",
+      "url": "cases/d904f7a4093cd058e16f8673c0aaaeab0d2322367c9f0e863729910ecbfa2176.json"
+    },
+    {
+      "id": "236576ded600cd8e0e145ceaf0d5790745c96baf801a52024230462820df83b7",
+      "name": "Stokes/GMRESBlockSchur/H1/P2P1/Real/Pyramid/9/real_time",
+      "metric": "real_time",
+      "url": "cases/236576ded600cd8e0e145ceaf0d5790745c96baf801a52024230462820df83b7.json"
+    },
+    {
+      "id": "3eab5989ab5dd727b98c15eb9734cf4f073357c4d3b75ea9d284be6c27c5b1cf",
+      "name": "Stokes/GMRESBlockSchur/H1/P2P1/Real/Quadrilateral/3/real_time",
+      "metric": "real_time",
+      "url": "cases/3eab5989ab5dd727b98c15eb9734cf4f073357c4d3b75ea9d284be6c27c5b1cf.json"
+    },
+    {
+      "id": "fb6d35e2a3da50ad550c172e03f64f77e59fd4515dd4d641aa8b0cb82e1a8b08",
+      "name": "Stokes/GMRESBlockSchur/H1/P2P1/Real/Quadrilateral/5/real_time",
+      "metric": "real_time",
+      "url": "cases/fb6d35e2a3da50ad550c172e03f64f77e59fd4515dd4d641aa8b0cb82e1a8b08.json"
+    },
+    {
+      "id": "fd140764eea69129b37a4d4f08a480dff8ed66f5e832b5ef3d2ed6b236e0719d",
+      "name": "Stokes/GMRESBlockSchur/H1/P2P1/Real/Quadrilateral/9/real_time",
+      "metric": "real_time",
+      "url": "cases/fd140764eea69129b37a4d4f08a480dff8ed66f5e832b5ef3d2ed6b236e0719d.json"
+    },
+    {
+      "id": "7e02915b730baf8c1b46092a404be59e5f35eab0711efc3cd739aa70f58048e3",
+      "name": "Stokes/GMRESBlockSchur/H1/P2P1/Real/Tetrahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/7e02915b730baf8c1b46092a404be59e5f35eab0711efc3cd739aa70f58048e3.json"
+    },
+    {
+      "id": "3457ef64ac24a486f913a36a4622fb64c04c2db55222ecb37b090a3440df9a84",
+      "name": "Stokes/GMRESBlockSchur/H1/P2P1/Real/Tetrahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/3457ef64ac24a486f913a36a4622fb64c04c2db55222ecb37b090a3440df9a84.json"
+    },
+    {
+      "id": "50d4f543a5719ccfe795c65419cf29a58203247bb6ae898a6fa0a10d6bf52e0a",
+      "name": "Stokes/GMRESBlockSchur/H1/P2P1/Real/Tetrahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/50d4f543a5719ccfe795c65419cf29a58203247bb6ae898a6fa0a10d6bf52e0a.json"
+    },
+    {
+      "id": "3c82881119af48f81de1cf8c2e5cf44b8d2550b02c436bb98e6a7515eaa51091",
+      "name": "Stokes/GMRESBlockSchur/H1/P2P1/Real/Triangle/3/real_time",
+      "metric": "real_time",
+      "url": "cases/3c82881119af48f81de1cf8c2e5cf44b8d2550b02c436bb98e6a7515eaa51091.json"
+    },
+    {
+      "id": "56f80513c1b811aa457beb265d495a41f95b9dec88ffffb73d98d4a532aebad2",
+      "name": "Stokes/GMRESBlockSchur/H1/P2P1/Real/Triangle/5/real_time",
+      "metric": "real_time",
+      "url": "cases/56f80513c1b811aa457beb265d495a41f95b9dec88ffffb73d98d4a532aebad2.json"
+    },
+    {
+      "id": "b7f65f0fa2d01efad43fc4951be48c6804a8d0a721c19e2debb06e34f0008426",
+      "name": "Stokes/GMRESBlockSchur/H1/P2P1/Real/Triangle/9/real_time",
+      "metric": "real_time",
+      "url": "cases/b7f65f0fa2d01efad43fc4951be48c6804a8d0a721c19e2debb06e34f0008426.json"
+    },
+    {
+      "id": "765951ac0b0f0c65999de6116e681123c6191f7a9d08791ccd4bebe960b3853b",
+      "name": "Stokes/GMRESBlockSchur/H1/P2P1/Real/Wedge/3/real_time",
+      "metric": "real_time",
+      "url": "cases/765951ac0b0f0c65999de6116e681123c6191f7a9d08791ccd4bebe960b3853b.json"
+    },
+    {
+      "id": "75ef24dfee4aa75cc8bf5be8d56df0627e1b5e60f34e6af8975a880e2fbda74d",
+      "name": "Stokes/GMRESBlockSchur/H1/P2P1/Real/Wedge/5/real_time",
+      "metric": "real_time",
+      "url": "cases/75ef24dfee4aa75cc8bf5be8d56df0627e1b5e60f34e6af8975a880e2fbda74d.json"
+    },
+    {
+      "id": "564516e1afeed604145709b08333bf43edff8fccc3db17f1c52d557d1226e366",
+      "name": "Stokes/GMRESBlockSchur/H1/P2P1/Real/Wedge/9/real_time",
+      "metric": "real_time",
+      "url": "cases/564516e1afeed604145709b08333bf43edff8fccc3db17f1c52d557d1226e366.json"
+    },
+    {
+      "id": "ff808aec21fa2d61fb6cdec62dde70fba40a115a47bd4ddaa10e3f0ab2b9a34f",
+      "name": "Stokes/GMRESBlockSchur/H1/P3P2/Real/Hexahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/ff808aec21fa2d61fb6cdec62dde70fba40a115a47bd4ddaa10e3f0ab2b9a34f.json"
+    },
+    {
+      "id": "a8c2b4de865ccd035bee4aa034e0e5e7798ba8130c605557347eb939bebf445d",
+      "name": "Stokes/GMRESBlockSchur/H1/P3P2/Real/Hexahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/a8c2b4de865ccd035bee4aa034e0e5e7798ba8130c605557347eb939bebf445d.json"
+    },
+    {
+      "id": "cd7c4e56c3efe44328fcdf22e71d69dac0e0b7c5e6a5221374a55f834693567f",
+      "name": "Stokes/GMRESBlockSchur/H1/P3P2/Real/Hexahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/cd7c4e56c3efe44328fcdf22e71d69dac0e0b7c5e6a5221374a55f834693567f.json"
+    },
+    {
+      "id": "81aa8d03cb416c88e40e92a5f7c57b0d34ce4420bbaf1b7277ad80f6604ce1a7",
+      "name": "Stokes/GMRESBlockSchur/H1/P3P2/Real/Pyramid/3/real_time",
+      "metric": "real_time",
+      "url": "cases/81aa8d03cb416c88e40e92a5f7c57b0d34ce4420bbaf1b7277ad80f6604ce1a7.json"
+    },
+    {
+      "id": "e3f0d2ea0af135c507d4d46ea2b72a4a11fb1f0419ef02fa812db15ef8206654",
+      "name": "Stokes/GMRESBlockSchur/H1/P3P2/Real/Pyramid/5/real_time",
+      "metric": "real_time",
+      "url": "cases/e3f0d2ea0af135c507d4d46ea2b72a4a11fb1f0419ef02fa812db15ef8206654.json"
+    },
+    {
+      "id": "be20bafa8143b5b7f319106c8669e2fc86590b40e43a2bd0388d9e2820c59154",
+      "name": "Stokes/GMRESBlockSchur/H1/P3P2/Real/Pyramid/9/real_time",
+      "metric": "real_time",
+      "url": "cases/be20bafa8143b5b7f319106c8669e2fc86590b40e43a2bd0388d9e2820c59154.json"
+    },
+    {
+      "id": "41e02ca7c8ccd6f0a9c63eb211e88c275462b23fdeaccc11c597eaa453e1a546",
+      "name": "Stokes/GMRESBlockSchur/H1/P3P2/Real/Quadrilateral/3/real_time",
+      "metric": "real_time",
+      "url": "cases/41e02ca7c8ccd6f0a9c63eb211e88c275462b23fdeaccc11c597eaa453e1a546.json"
+    },
+    {
+      "id": "c3fec56724ac0c8aa0b3435bd886d766f68db2b279e362aa04bd6584ee8a8d05",
+      "name": "Stokes/GMRESBlockSchur/H1/P3P2/Real/Quadrilateral/5/real_time",
+      "metric": "real_time",
+      "url": "cases/c3fec56724ac0c8aa0b3435bd886d766f68db2b279e362aa04bd6584ee8a8d05.json"
+    },
+    {
+      "id": "106487dd0ae14061850a5fd05d4173c84d21b84f21769a0d7698c02662fb4be2",
+      "name": "Stokes/GMRESBlockSchur/H1/P3P2/Real/Quadrilateral/9/real_time",
+      "metric": "real_time",
+      "url": "cases/106487dd0ae14061850a5fd05d4173c84d21b84f21769a0d7698c02662fb4be2.json"
+    },
+    {
+      "id": "c93554b984a043f3dc13610101e8b8f696f2942f6098ca33f8d4313a3d978f42",
+      "name": "Stokes/GMRESBlockSchur/H1/P3P2/Real/Tetrahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/c93554b984a043f3dc13610101e8b8f696f2942f6098ca33f8d4313a3d978f42.json"
+    },
+    {
+      "id": "8ff08d801d30f736bf3fe43fe1eec175eb6c546a3addb485cab15f95566a9a50",
+      "name": "Stokes/GMRESBlockSchur/H1/P3P2/Real/Tetrahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/8ff08d801d30f736bf3fe43fe1eec175eb6c546a3addb485cab15f95566a9a50.json"
+    },
+    {
+      "id": "bf931cf26bb68a5441b06778ee2e584ec275154f5f815d02f0626f70c9f7800f",
+      "name": "Stokes/GMRESBlockSchur/H1/P3P2/Real/Tetrahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/bf931cf26bb68a5441b06778ee2e584ec275154f5f815d02f0626f70c9f7800f.json"
+    },
+    {
+      "id": "07e5e3800fcef1e844a7da5a024fff260eecb652a9838f821688ec516dd4710f",
+      "name": "Stokes/GMRESBlockSchur/H1/P3P2/Real/Triangle/3/real_time",
+      "metric": "real_time",
+      "url": "cases/07e5e3800fcef1e844a7da5a024fff260eecb652a9838f821688ec516dd4710f.json"
+    },
+    {
+      "id": "401a19fa50e6b74c381bddeef1a8add64cfcbc5a4ded9b7b49c3f6d017444047",
+      "name": "Stokes/GMRESBlockSchur/H1/P3P2/Real/Triangle/5/real_time",
+      "metric": "real_time",
+      "url": "cases/401a19fa50e6b74c381bddeef1a8add64cfcbc5a4ded9b7b49c3f6d017444047.json"
+    },
+    {
+      "id": "19a00c6d0bbd7c951e4d86b1620f4c8ead1de0f6fba56a2b5ac081bbd8864513",
+      "name": "Stokes/GMRESBlockSchur/H1/P3P2/Real/Triangle/9/real_time",
+      "metric": "real_time",
+      "url": "cases/19a00c6d0bbd7c951e4d86b1620f4c8ead1de0f6fba56a2b5ac081bbd8864513.json"
+    },
+    {
+      "id": "1598dfb57754a6df66bce4c3a8657239e10985d710dd7385ec1963c64a3a2e84",
+      "name": "Stokes/GMRESBlockSchur/H1/P3P2/Real/Wedge/3/real_time",
+      "metric": "real_time",
+      "url": "cases/1598dfb57754a6df66bce4c3a8657239e10985d710dd7385ec1963c64a3a2e84.json"
+    },
+    {
+      "id": "93915537f966af83b32586a21f8de1f404a3ba16c5b2e3009dd378c272a88bfb",
+      "name": "Stokes/GMRESBlockSchur/H1/P3P2/Real/Wedge/5/real_time",
+      "metric": "real_time",
+      "url": "cases/93915537f966af83b32586a21f8de1f404a3ba16c5b2e3009dd378c272a88bfb.json"
+    },
+    {
+      "id": "f3200a5c528a7a5c868498f7127e7663cb9eee49f08738e6e86d6b4cd5e10513",
+      "name": "Stokes/GMRESBlockSchur/H1/P3P2/Real/Wedge/9/real_time",
+      "metric": "real_time",
+      "url": "cases/f3200a5c528a7a5c868498f7127e7663cb9eee49f08738e6e86d6b4cd5e10513.json"
+    },
+    {
+      "id": "10770e23a5de42ffc788e86d3a710424cf47b54f54a107dc725644c6b913d684",
+      "name": "Stokes/GMRESBlockSchur/H1/P4P3/Real/Hexahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/10770e23a5de42ffc788e86d3a710424cf47b54f54a107dc725644c6b913d684.json"
+    },
+    {
+      "id": "963399f2eb37523ee191bdbbaf4ebec74ca7b2e8b4a4c45beb8d58fccee1fc8b",
+      "name": "Stokes/GMRESBlockSchur/H1/P4P3/Real/Hexahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/963399f2eb37523ee191bdbbaf4ebec74ca7b2e8b4a4c45beb8d58fccee1fc8b.json"
+    },
+    {
+      "id": "5e19763efb7f82d540a5d60fe6d8523eb508fe94ba82e2e4e8ba5e8c7aecd3fd",
+      "name": "Stokes/GMRESBlockSchur/H1/P4P3/Real/Hexahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/5e19763efb7f82d540a5d60fe6d8523eb508fe94ba82e2e4e8ba5e8c7aecd3fd.json"
+    },
+    {
+      "id": "424b206eb98e43932a33c2e3cbe695df3becd572f6c473b7d4d0ef987ad76930",
+      "name": "Stokes/GMRESBlockSchur/H1/P4P3/Real/Pyramid/3/real_time",
+      "metric": "real_time",
+      "url": "cases/424b206eb98e43932a33c2e3cbe695df3becd572f6c473b7d4d0ef987ad76930.json"
+    },
+    {
+      "id": "f9354be290bedcfbe8f20d4fcfc02b12ce4d3a249e02ed09cf44bf4fe8d333f1",
+      "name": "Stokes/GMRESBlockSchur/H1/P4P3/Real/Pyramid/5/real_time",
+      "metric": "real_time",
+      "url": "cases/f9354be290bedcfbe8f20d4fcfc02b12ce4d3a249e02ed09cf44bf4fe8d333f1.json"
+    },
+    {
+      "id": "9bea4471e59f2b2a4c7e352e393da30dccf47d0d946b6a9bef603627f839617d",
+      "name": "Stokes/GMRESBlockSchur/H1/P4P3/Real/Pyramid/9/real_time",
+      "metric": "real_time",
+      "url": "cases/9bea4471e59f2b2a4c7e352e393da30dccf47d0d946b6a9bef603627f839617d.json"
+    },
+    {
+      "id": "31c3c28f131e6129761a9e5e880629419d4c183e79177c88317ccd0e786e4db4",
+      "name": "Stokes/GMRESBlockSchur/H1/P4P3/Real/Quadrilateral/3/real_time",
+      "metric": "real_time",
+      "url": "cases/31c3c28f131e6129761a9e5e880629419d4c183e79177c88317ccd0e786e4db4.json"
+    },
+    {
+      "id": "5c080849f01e77f6ba22c0be6c94a0426a2c3c8a2d8db5e4db32435cc9c75a64",
+      "name": "Stokes/GMRESBlockSchur/H1/P4P3/Real/Quadrilateral/5/real_time",
+      "metric": "real_time",
+      "url": "cases/5c080849f01e77f6ba22c0be6c94a0426a2c3c8a2d8db5e4db32435cc9c75a64.json"
+    },
+    {
+      "id": "e50e5ecb9c2b9d2a3e5810c4bae06a465ef58bb9b8cfc774e52c66e54e727409",
+      "name": "Stokes/GMRESBlockSchur/H1/P4P3/Real/Quadrilateral/9/real_time",
+      "metric": "real_time",
+      "url": "cases/e50e5ecb9c2b9d2a3e5810c4bae06a465ef58bb9b8cfc774e52c66e54e727409.json"
+    },
+    {
+      "id": "9501d944d168cd1beaccbf2167924e906f4fdd0a429206700af0399df373a64b",
+      "name": "Stokes/GMRESBlockSchur/H1/P4P3/Real/Tetrahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/9501d944d168cd1beaccbf2167924e906f4fdd0a429206700af0399df373a64b.json"
+    },
+    {
+      "id": "67a4b5e2644541e0313179b0dfd4ff905b7ade44ad11394221a0960012a9c9bb",
+      "name": "Stokes/GMRESBlockSchur/H1/P4P3/Real/Tetrahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/67a4b5e2644541e0313179b0dfd4ff905b7ade44ad11394221a0960012a9c9bb.json"
+    },
+    {
+      "id": "96a075277b51d24d294e348a456774631eb967bd43abf286666846defb8040e9",
+      "name": "Stokes/GMRESBlockSchur/H1/P4P3/Real/Tetrahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/96a075277b51d24d294e348a456774631eb967bd43abf286666846defb8040e9.json"
+    },
+    {
+      "id": "3b52e91e5b5979352fdd78c7b18ceef69b041da2827860f448b64dc4f4673809",
+      "name": "Stokes/GMRESBlockSchur/H1/P4P3/Real/Triangle/3/real_time",
+      "metric": "real_time",
+      "url": "cases/3b52e91e5b5979352fdd78c7b18ceef69b041da2827860f448b64dc4f4673809.json"
+    },
+    {
+      "id": "e37696c89386c48c1931ff768d26907ebd47236f5fab36434eec7322631b94ed",
+      "name": "Stokes/GMRESBlockSchur/H1/P4P3/Real/Triangle/5/real_time",
+      "metric": "real_time",
+      "url": "cases/e37696c89386c48c1931ff768d26907ebd47236f5fab36434eec7322631b94ed.json"
+    },
+    {
+      "id": "ce05acbc97bae91191e94d1651790f0a3d0801ef18f5f5404d18ed29615bcf3d",
+      "name": "Stokes/GMRESBlockSchur/H1/P4P3/Real/Triangle/9/real_time",
+      "metric": "real_time",
+      "url": "cases/ce05acbc97bae91191e94d1651790f0a3d0801ef18f5f5404d18ed29615bcf3d.json"
+    },
+    {
+      "id": "40c200cb9c5163805744b53ffeed66e57d123757a9456bc671641bd57fa7556f",
+      "name": "Stokes/GMRESBlockSchur/H1/P4P3/Real/Wedge/3/real_time",
+      "metric": "real_time",
+      "url": "cases/40c200cb9c5163805744b53ffeed66e57d123757a9456bc671641bd57fa7556f.json"
+    },
+    {
+      "id": "d5b86898b50c0541bedcae84576f84614f311d7ac735540ffbc50e636c0bbaef",
+      "name": "Stokes/GMRESBlockSchur/H1/P4P3/Real/Wedge/5/real_time",
+      "metric": "real_time",
+      "url": "cases/d5b86898b50c0541bedcae84576f84614f311d7ac735540ffbc50e636c0bbaef.json"
+    },
+    {
+      "id": "c868ceada6fdb9d3d475bb13ee7a2ab150e5ee21b60f8e5601d27bf5122804d3",
+      "name": "Stokes/GMRESBlockSchur/H1/P4P3/Real/Wedge/9/real_time",
+      "metric": "real_time",
+      "url": "cases/c868ceada6fdb9d3d475bb13ee7a2ab150e5ee21b60f8e5601d27bf5122804d3.json"
+    },
+    {
+      "id": "8da83adc1056a27843c45604b821c84c58455816c6521bd95fbc65acc4dbf7c0",
+      "name": "Stokes/GMRESBlockSchur/WeightedViscosity/H1/P2P1/Real/Hexahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/8da83adc1056a27843c45604b821c84c58455816c6521bd95fbc65acc4dbf7c0.json"
+    },
+    {
+      "id": "9693ca7038e5e941ddeebc85b06a047449c24c1f75258143552d0e20a37c579a",
+      "name": "Stokes/GMRESBlockSchur/WeightedViscosity/H1/P2P1/Real/Hexahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/9693ca7038e5e941ddeebc85b06a047449c24c1f75258143552d0e20a37c579a.json"
+    },
+    {
+      "id": "996d3b5888432fb2d47cb398f9078b8dade0a6c20520574ee8646aa0574872db",
+      "name": "Stokes/GMRESBlockSchur/WeightedViscosity/H1/P2P1/Real/Hexahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/996d3b5888432fb2d47cb398f9078b8dade0a6c20520574ee8646aa0574872db.json"
+    },
+    {
+      "id": "ca5c49e631c97cb0cc04b5c66a94a9a50f0d917e40c1027c1ec8d6ddf80b357e",
+      "name": "Stokes/GMRESBlockSchur/WeightedViscosity/H1/P2P1/Real/Pyramid/3/real_time",
+      "metric": "real_time",
+      "url": "cases/ca5c49e631c97cb0cc04b5c66a94a9a50f0d917e40c1027c1ec8d6ddf80b357e.json"
+    },
+    {
+      "id": "96d278dd3f111d9df5b43785e9619deae6ab214dd9cf162927addfc36de98147",
+      "name": "Stokes/GMRESBlockSchur/WeightedViscosity/H1/P2P1/Real/Pyramid/5/real_time",
+      "metric": "real_time",
+      "url": "cases/96d278dd3f111d9df5b43785e9619deae6ab214dd9cf162927addfc36de98147.json"
+    },
+    {
+      "id": "5144bf39e49195022d9d52abb1f64bccad72abb2a8fd113d7fd2999b8c4fd992",
+      "name": "Stokes/GMRESBlockSchur/WeightedViscosity/H1/P2P1/Real/Pyramid/9/real_time",
+      "metric": "real_time",
+      "url": "cases/5144bf39e49195022d9d52abb1f64bccad72abb2a8fd113d7fd2999b8c4fd992.json"
+    },
+    {
+      "id": "0a3defd47021f2538a660d5f4888d880a6fcd9068f52af90c174495c3e48b6d0",
+      "name": "Stokes/GMRESBlockSchur/WeightedViscosity/H1/P2P1/Real/Quadrilateral/3/real_time",
+      "metric": "real_time",
+      "url": "cases/0a3defd47021f2538a660d5f4888d880a6fcd9068f52af90c174495c3e48b6d0.json"
+    },
+    {
+      "id": "74513a5610326be9930aa99f84ab53c8dc88ac6efebc7035dea6a4acd5eb0d49",
+      "name": "Stokes/GMRESBlockSchur/WeightedViscosity/H1/P2P1/Real/Quadrilateral/5/real_time",
+      "metric": "real_time",
+      "url": "cases/74513a5610326be9930aa99f84ab53c8dc88ac6efebc7035dea6a4acd5eb0d49.json"
+    },
+    {
+      "id": "cda9a11773e03a7e326415f7d72d24343dfdd57c5843cce1dc64976fe6c0bd71",
+      "name": "Stokes/GMRESBlockSchur/WeightedViscosity/H1/P2P1/Real/Quadrilateral/9/real_time",
+      "metric": "real_time",
+      "url": "cases/cda9a11773e03a7e326415f7d72d24343dfdd57c5843cce1dc64976fe6c0bd71.json"
+    },
+    {
+      "id": "13c1b9d37b05af22d1b0ba75d77931c182d7be995465d730d56c1ba638448557",
+      "name": "Stokes/GMRESBlockSchur/WeightedViscosity/H1/P2P1/Real/Tetrahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/13c1b9d37b05af22d1b0ba75d77931c182d7be995465d730d56c1ba638448557.json"
+    },
+    {
+      "id": "6c99683115377039f167c15782735ca28ac23970d267ed20534d1a5a6bd88a98",
+      "name": "Stokes/GMRESBlockSchur/WeightedViscosity/H1/P2P1/Real/Tetrahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/6c99683115377039f167c15782735ca28ac23970d267ed20534d1a5a6bd88a98.json"
+    },
+    {
+      "id": "586ab31d51b68418f5074b196b7a410b9b920ab6377f67a8f12954099f607649",
+      "name": "Stokes/GMRESBlockSchur/WeightedViscosity/H1/P2P1/Real/Tetrahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/586ab31d51b68418f5074b196b7a410b9b920ab6377f67a8f12954099f607649.json"
+    },
+    {
+      "id": "5f924bbdff9987c39b31de9bb98a06415da527df9f7a89a7f3c8cc2a13908647",
+      "name": "Stokes/GMRESBlockSchur/WeightedViscosity/H1/P2P1/Real/Triangle/3/real_time",
+      "metric": "real_time",
+      "url": "cases/5f924bbdff9987c39b31de9bb98a06415da527df9f7a89a7f3c8cc2a13908647.json"
+    },
+    {
+      "id": "e70cdf1da083f3dff098769c694ed12cadab66ebf112d263dfb7d6a8d667770b",
+      "name": "Stokes/GMRESBlockSchur/WeightedViscosity/H1/P2P1/Real/Triangle/5/real_time",
+      "metric": "real_time",
+      "url": "cases/e70cdf1da083f3dff098769c694ed12cadab66ebf112d263dfb7d6a8d667770b.json"
+    },
+    {
+      "id": "84800d5468893f95a21c8b95fb4c4d2f34ffd01d38a68102335a9c35f7f35274",
+      "name": "Stokes/GMRESBlockSchur/WeightedViscosity/H1/P2P1/Real/Triangle/9/real_time",
+      "metric": "real_time",
+      "url": "cases/84800d5468893f95a21c8b95fb4c4d2f34ffd01d38a68102335a9c35f7f35274.json"
+    },
+    {
+      "id": "d4bae86117fc50b2b9f4a07ddec482cc57a5f29bca4a136fcc9da388ebb21e01",
+      "name": "Stokes/GMRESBlockSchur/WeightedViscosity/H1/P2P1/Real/Wedge/3/real_time",
+      "metric": "real_time",
+      "url": "cases/d4bae86117fc50b2b9f4a07ddec482cc57a5f29bca4a136fcc9da388ebb21e01.json"
+    },
+    {
+      "id": "7cb0eb26b3da07908e52ab9b80d8684e76b06f504f437863240586ac74717cfd",
+      "name": "Stokes/GMRESBlockSchur/WeightedViscosity/H1/P2P1/Real/Wedge/5/real_time",
+      "metric": "real_time",
+      "url": "cases/7cb0eb26b3da07908e52ab9b80d8684e76b06f504f437863240586ac74717cfd.json"
+    },
+    {
+      "id": "7ec0cde3a7965301430b013d436aeab85baa8ad8fa1be6654fe79acf29511534",
+      "name": "Stokes/GMRESBlockSchur/WeightedViscosity/H1/P2P1/Real/Wedge/9/real_time",
+      "metric": "real_time",
+      "url": "cases/7ec0cde3a7965301430b013d436aeab85baa8ad8fa1be6654fe79acf29511534.json"
+    },
+    {
+      "id": "e0ce9d6a0412d5e8cbb9cc652cdfcf8662901209e036853973aaee58cd290a83",
+      "name": "Stokes/GMRESBlockSchur/WeightedViscosity/H1/P3P2/Real/Hexahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/e0ce9d6a0412d5e8cbb9cc652cdfcf8662901209e036853973aaee58cd290a83.json"
+    },
+    {
+      "id": "593d9acd75cae554adb091d144ec227b4c7cfffafed6b2c2891da22d48160041",
+      "name": "Stokes/GMRESBlockSchur/WeightedViscosity/H1/P3P2/Real/Hexahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/593d9acd75cae554adb091d144ec227b4c7cfffafed6b2c2891da22d48160041.json"
+    },
+    {
+      "id": "6e29dbfa34c1ede3c0f8c0347efe86498771801548b5679988ce815fb21c74f9",
+      "name": "Stokes/GMRESBlockSchur/WeightedViscosity/H1/P3P2/Real/Hexahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/6e29dbfa34c1ede3c0f8c0347efe86498771801548b5679988ce815fb21c74f9.json"
+    },
+    {
+      "id": "0026c27a308378f7ca0225ef7cc766af620af13ac3514d982699bc5c038a6d94",
+      "name": "Stokes/GMRESBlockSchur/WeightedViscosity/H1/P3P2/Real/Pyramid/3/real_time",
+      "metric": "real_time",
+      "url": "cases/0026c27a308378f7ca0225ef7cc766af620af13ac3514d982699bc5c038a6d94.json"
+    },
+    {
+      "id": "cdd7ee4024cf647fda39b6650be78f46d262ebc4101ce491197c958eb8c9b40e",
+      "name": "Stokes/GMRESBlockSchur/WeightedViscosity/H1/P3P2/Real/Pyramid/5/real_time",
+      "metric": "real_time",
+      "url": "cases/cdd7ee4024cf647fda39b6650be78f46d262ebc4101ce491197c958eb8c9b40e.json"
+    },
+    {
+      "id": "323b2ce594e88a6915ebc699175bb5847356039a3575f28b819321383b00cb5b",
+      "name": "Stokes/GMRESBlockSchur/WeightedViscosity/H1/P3P2/Real/Pyramid/9/real_time",
+      "metric": "real_time",
+      "url": "cases/323b2ce594e88a6915ebc699175bb5847356039a3575f28b819321383b00cb5b.json"
+    },
+    {
+      "id": "b6a3fa33632545a6ad81a77162a0eabdfe1cc6be3ac9693e4aab5f795a11b249",
+      "name": "Stokes/GMRESBlockSchur/WeightedViscosity/H1/P3P2/Real/Quadrilateral/3/real_time",
+      "metric": "real_time",
+      "url": "cases/b6a3fa33632545a6ad81a77162a0eabdfe1cc6be3ac9693e4aab5f795a11b249.json"
+    },
+    {
+      "id": "a78c7cc849ef144de8dcc402ff281102992a86efd7d0ed16f870640a574b37db",
+      "name": "Stokes/GMRESBlockSchur/WeightedViscosity/H1/P3P2/Real/Quadrilateral/5/real_time",
+      "metric": "real_time",
+      "url": "cases/a78c7cc849ef144de8dcc402ff281102992a86efd7d0ed16f870640a574b37db.json"
+    },
+    {
+      "id": "e59cc04959100cd5be0fe4af275cfaf045cef8f06770f694cf25b61071a809e5",
+      "name": "Stokes/GMRESBlockSchur/WeightedViscosity/H1/P3P2/Real/Quadrilateral/9/real_time",
+      "metric": "real_time",
+      "url": "cases/e59cc04959100cd5be0fe4af275cfaf045cef8f06770f694cf25b61071a809e5.json"
+    },
+    {
+      "id": "3fee6ebcd197b696e88e6ac738996bddb2781a76272a20b608ac27f8ca768471",
+      "name": "Stokes/GMRESBlockSchur/WeightedViscosity/H1/P3P2/Real/Tetrahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/3fee6ebcd197b696e88e6ac738996bddb2781a76272a20b608ac27f8ca768471.json"
+    },
+    {
+      "id": "c2927aeb3411e72fc1de68c650069f464f1febb368652fb6fd866dae332de5ae",
+      "name": "Stokes/GMRESBlockSchur/WeightedViscosity/H1/P3P2/Real/Tetrahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/c2927aeb3411e72fc1de68c650069f464f1febb368652fb6fd866dae332de5ae.json"
+    },
+    {
+      "id": "a0f1dcff8f16e41952321eaea7600f6faba61df484fdec77339943a566ab1414",
+      "name": "Stokes/GMRESBlockSchur/WeightedViscosity/H1/P3P2/Real/Tetrahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/a0f1dcff8f16e41952321eaea7600f6faba61df484fdec77339943a566ab1414.json"
+    },
+    {
+      "id": "78641cc60fce3e267a5b4e663a09ceaaab95e29bf2c23e448a2d1a9e1e657468",
+      "name": "Stokes/GMRESBlockSchur/WeightedViscosity/H1/P3P2/Real/Triangle/3/real_time",
+      "metric": "real_time",
+      "url": "cases/78641cc60fce3e267a5b4e663a09ceaaab95e29bf2c23e448a2d1a9e1e657468.json"
+    },
+    {
+      "id": "991a674acd79b3395b4f09904fab06688d83445ea813c1665508abdde2e24875",
+      "name": "Stokes/GMRESBlockSchur/WeightedViscosity/H1/P3P2/Real/Triangle/5/real_time",
+      "metric": "real_time",
+      "url": "cases/991a674acd79b3395b4f09904fab06688d83445ea813c1665508abdde2e24875.json"
+    },
+    {
+      "id": "4d7743a66957a40ba1fabeb4aeea3d20e8e81599add83d3240cb95c4eee303ec",
+      "name": "Stokes/GMRESBlockSchur/WeightedViscosity/H1/P3P2/Real/Triangle/9/real_time",
+      "metric": "real_time",
+      "url": "cases/4d7743a66957a40ba1fabeb4aeea3d20e8e81599add83d3240cb95c4eee303ec.json"
+    },
+    {
+      "id": "bf6f3900629824c2625ff9e15e36fba0ec9b552f318dd91caa521ecd90794f0f",
+      "name": "Stokes/GMRESBlockSchur/WeightedViscosity/H1/P3P2/Real/Wedge/3/real_time",
+      "metric": "real_time",
+      "url": "cases/bf6f3900629824c2625ff9e15e36fba0ec9b552f318dd91caa521ecd90794f0f.json"
+    },
+    {
+      "id": "9d52be4ea3a8f82d2d2563f09b6b2ea8ccd3d2c18bc4e2d0fb4ddb33fa60fc45",
+      "name": "Stokes/GMRESBlockSchur/WeightedViscosity/H1/P3P2/Real/Wedge/5/real_time",
+      "metric": "real_time",
+      "url": "cases/9d52be4ea3a8f82d2d2563f09b6b2ea8ccd3d2c18bc4e2d0fb4ddb33fa60fc45.json"
+    },
+    {
+      "id": "d26c3450799bd518bf3d36c87b6a37eb558a1aa8c64fd2e2b12d12116c4c5865",
+      "name": "Stokes/GMRESBlockSchur/WeightedViscosity/H1/P3P2/Real/Wedge/9/real_time",
+      "metric": "real_time",
+      "url": "cases/d26c3450799bd518bf3d36c87b6a37eb558a1aa8c64fd2e2b12d12116c4c5865.json"
+    },
+    {
+      "id": "01388726e5ced061b04d4bd75b28ae4cb60463445e95bb2635cfc30061b68305",
+      "name": "Stokes/GMRESBlockSchur/WeightedViscosity/H1/P4P3/Real/Hexahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/01388726e5ced061b04d4bd75b28ae4cb60463445e95bb2635cfc30061b68305.json"
+    },
+    {
+      "id": "c4cfba976128d7724c7eff07dd9da8a6d38943559b5f748717c7a8450465a455",
+      "name": "Stokes/GMRESBlockSchur/WeightedViscosity/H1/P4P3/Real/Hexahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/c4cfba976128d7724c7eff07dd9da8a6d38943559b5f748717c7a8450465a455.json"
+    },
+    {
+      "id": "5850037d3a33bd801610db119e8ce3cec48f6f102d1be47a30b6bfee217163c0",
+      "name": "Stokes/GMRESBlockSchur/WeightedViscosity/H1/P4P3/Real/Hexahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/5850037d3a33bd801610db119e8ce3cec48f6f102d1be47a30b6bfee217163c0.json"
+    },
+    {
+      "id": "8551930a0259f50780b4fbd1693b0a6757e1f79fc346b11d20d5c41bfb51376f",
+      "name": "Stokes/GMRESBlockSchur/WeightedViscosity/H1/P4P3/Real/Pyramid/3/real_time",
+      "metric": "real_time",
+      "url": "cases/8551930a0259f50780b4fbd1693b0a6757e1f79fc346b11d20d5c41bfb51376f.json"
+    },
+    {
+      "id": "a1e784118a3117983e2d83fa9637d441fdece705b9e62c601694844df848ce1c",
+      "name": "Stokes/GMRESBlockSchur/WeightedViscosity/H1/P4P3/Real/Pyramid/5/real_time",
+      "metric": "real_time",
+      "url": "cases/a1e784118a3117983e2d83fa9637d441fdece705b9e62c601694844df848ce1c.json"
+    },
+    {
+      "id": "f6b87530e8f8b92124ff8445ab0904867b623067f29de58c515a3e449a95f515",
+      "name": "Stokes/GMRESBlockSchur/WeightedViscosity/H1/P4P3/Real/Pyramid/9/real_time",
+      "metric": "real_time",
+      "url": "cases/f6b87530e8f8b92124ff8445ab0904867b623067f29de58c515a3e449a95f515.json"
+    },
+    {
+      "id": "ef90f92cc3dfce23e7645f314ea68ef790044a1a23a17028f85176c3235c1306",
+      "name": "Stokes/GMRESBlockSchur/WeightedViscosity/H1/P4P3/Real/Quadrilateral/3/real_time",
+      "metric": "real_time",
+      "url": "cases/ef90f92cc3dfce23e7645f314ea68ef790044a1a23a17028f85176c3235c1306.json"
+    },
+    {
+      "id": "831390e4f100f63dc53c065ae4ec8484ef0f7dcb9794abba3b88bb760ac4d742",
+      "name": "Stokes/GMRESBlockSchur/WeightedViscosity/H1/P4P3/Real/Quadrilateral/5/real_time",
+      "metric": "real_time",
+      "url": "cases/831390e4f100f63dc53c065ae4ec8484ef0f7dcb9794abba3b88bb760ac4d742.json"
+    },
+    {
+      "id": "47654a24cd080642162dbd777ec0d94f8d1a11ac7cecacc6c2babb545365f9dd",
+      "name": "Stokes/GMRESBlockSchur/WeightedViscosity/H1/P4P3/Real/Quadrilateral/9/real_time",
+      "metric": "real_time",
+      "url": "cases/47654a24cd080642162dbd777ec0d94f8d1a11ac7cecacc6c2babb545365f9dd.json"
+    },
+    {
+      "id": "d64857bc7a91c54b8dd281190df1b9d18a313feb92a7113de15c60fd13b6dfad",
+      "name": "Stokes/GMRESBlockSchur/WeightedViscosity/H1/P4P3/Real/Tetrahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/d64857bc7a91c54b8dd281190df1b9d18a313feb92a7113de15c60fd13b6dfad.json"
+    },
+    {
+      "id": "8419a698d25909e3e6dae3ff1486aac52c3d63f7f5c6faf540ac6b61a44baaa5",
+      "name": "Stokes/GMRESBlockSchur/WeightedViscosity/H1/P4P3/Real/Tetrahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/8419a698d25909e3e6dae3ff1486aac52c3d63f7f5c6faf540ac6b61a44baaa5.json"
+    },
+    {
+      "id": "df0a00990f4b27b329c254ed8a037f584fa1f2551391bd8ad3ccc2381b9c3be4",
+      "name": "Stokes/GMRESBlockSchur/WeightedViscosity/H1/P4P3/Real/Tetrahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/df0a00990f4b27b329c254ed8a037f584fa1f2551391bd8ad3ccc2381b9c3be4.json"
+    },
+    {
+      "id": "0353239aeab0f76d0cfa64bbeb8a4b8f4a8b9f79b09e0dcba4217cfdee157438",
+      "name": "Stokes/GMRESBlockSchur/WeightedViscosity/H1/P4P3/Real/Triangle/3/real_time",
+      "metric": "real_time",
+      "url": "cases/0353239aeab0f76d0cfa64bbeb8a4b8f4a8b9f79b09e0dcba4217cfdee157438.json"
+    },
+    {
+      "id": "0ca7497865fcc4daa013df094e05e69eb3f0f3f800183122b06619a6a32caf99",
+      "name": "Stokes/GMRESBlockSchur/WeightedViscosity/H1/P4P3/Real/Triangle/5/real_time",
+      "metric": "real_time",
+      "url": "cases/0ca7497865fcc4daa013df094e05e69eb3f0f3f800183122b06619a6a32caf99.json"
+    },
+    {
+      "id": "e9adb5b72a89324c2d7dc2a5e53784c91231469f130d8414d55cf08e76f66423",
+      "name": "Stokes/GMRESBlockSchur/WeightedViscosity/H1/P4P3/Real/Triangle/9/real_time",
+      "metric": "real_time",
+      "url": "cases/e9adb5b72a89324c2d7dc2a5e53784c91231469f130d8414d55cf08e76f66423.json"
+    },
+    {
+      "id": "8e40c5fbdb8e0e8e1ff01f1b3164a9d4f339e472f60ee2ded3dbe97419a2a0cd",
+      "name": "Stokes/GMRESBlockSchur/WeightedViscosity/H1/P4P3/Real/Wedge/3/real_time",
+      "metric": "real_time",
+      "url": "cases/8e40c5fbdb8e0e8e1ff01f1b3164a9d4f339e472f60ee2ded3dbe97419a2a0cd.json"
+    },
+    {
+      "id": "ba6f4c3b9961a3449c14034f930d51a67e534215cecdbde454adeb551d97bae9",
+      "name": "Stokes/GMRESBlockSchur/WeightedViscosity/H1/P4P3/Real/Wedge/5/real_time",
+      "metric": "real_time",
+      "url": "cases/ba6f4c3b9961a3449c14034f930d51a67e534215cecdbde454adeb551d97bae9.json"
+    },
+    {
+      "id": "73a729f9296a1e24566edf0cffc2e0a3a5e9a13348f5d5e6c9a5ea638b0d0e4e",
+      "name": "Stokes/GMRESBlockSchur/WeightedViscosity/H1/P4P3/Real/Wedge/9/real_time",
+      "metric": "real_time",
+      "url": "cases/73a729f9296a1e24566edf0cffc2e0a3a5e9a13348f5d5e6c9a5ea638b0d0e4e.json"
+    }
+  ]
+}

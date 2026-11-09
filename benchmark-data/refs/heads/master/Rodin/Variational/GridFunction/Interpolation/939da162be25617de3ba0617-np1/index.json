@@ -1,0 +1,782 @@
+{
+  "schema": 1,
+  "definition": {
+    "kind": "benchmark",
+    "mode": "local",
+    "compiler": "gcc-14",
+    "runner": "ubuntu-24.04",
+    "cmake": {
+      "CMAKE_BUILD_TYPE": "Release",
+      "CMAKE_CXX_COMPILER": "g++-14",
+      "CMAKE_C_COMPILER": "gcc-14",
+      "CMAKE_SUPPRESS_REGENERATION": "ON",
+      "RODIN_BUILD_SRC": "ON",
+      "RODIN_BUILD_BENCHMARKS": "ON",
+      "RODIN_BUILD_UNIT_TESTS": "OFF",
+      "RODIN_BUILD_MANUFACTURED_TESTS": "OFF",
+      "RODIN_BUILD_CONVERGENCE_TESTS": "OFF",
+      "RODIN_BUILD_EXAMPLES": "OFF",
+      "RODIN_BUILD_DOC": "OFF",
+      "RODIN_INSTALL_RESOURCES": "OFF",
+      "RODIN_CODE_COVERAGE": "OFF",
+      "RODIN_MULTITHREADED": "OFF",
+      "RODIN_USE_ASAN": "OFF",
+      "RODIN_USE_UBSAN": "OFF",
+      "RODIN_USE_MPI": "OFF",
+      "RODIN_USE_PETSC": "OFF"
+    },
+    "targets": [
+      "RodinBasisScalingBenchmarks",
+      "RodinFieldContractionBenchmarks",
+      "RodinFieldDerivativeBenchmarks",
+      "RodinFieldOperationBenchmarks",
+      "RodinGridFunctionBenchmarks",
+      "RodinH1BasisLifecycleBenchmarks",
+      "RodinH1ConvectionBenchmarks",
+      "RodinH1MassBindingBenchmarks",
+      "RodinH1MassOperandOrderBenchmarks",
+      "RodinH1PreparedBasisBenchmarks",
+      "RodinH1PyramidBenchmarks",
+      "RodinH1PyramidNodalBenchmarks",
+      "RodinNamedFormBenchmarks",
+      "RodinNamedMassKernelBenchmarks",
+      "RodinP1QuadratureBindingBenchmarks",
+      "RodinPhysicalGradientBenchmarks",
+      "RodinProblemLifecycleBenchmarks",
+      "RodinQuadratureBindingBenchmarks",
+      "RodinQuadratureExpressionBenchmarks",
+      "RodinReferenceElementBenchmarks",
+      "RodinStokesBindingBenchmarks",
+      "RodinVariationalCoefficientEvaluationBenchmarks",
+      "RodinVariationalGridFunctionBenchmarks",
+      "RodinVariationalIntegratorsBenchmarks",
+      "RodinVariationalNamedFormsBenchmarks",
+      "RodinVariationalP1Benchmarks",
+      "RodinVariationalRankOneJacobianBenchmarks"
+    ],
+    "stage": "components"
+  },
+  "ranks": 1,
+  "cases": [
+    {
+      "id": "4b06d429d7ae82d2806717f2bde4bac8d917948c280b8819ce8b7bd54178ddcd",
+      "name": "Interpolation/P1Scalar/CrossSpaceAssignment/dimension:2/operation:4",
+      "metric": "cpu_time",
+      "url": "cases/4b06d429d7ae82d2806717f2bde4bac8d917948c280b8819ce8b7bd54178ddcd.json"
+    },
+    {
+      "id": "f2f0f8f748ff42c8b37c5e238e22578c3bdf1a335325c6fb2c3a9204989d2f08",
+      "name": "Interpolation/P1Scalar/CrossSpaceAssignment/dimension:3/operation:4",
+      "metric": "cpu_time",
+      "url": "cases/f2f0f8f748ff42c8b37c5e238e22578c3bdf1a335325c6fb2c3a9204989d2f08.json"
+    },
+    {
+      "id": "9067a2118bea67da057ffb45e0c9d417e491d69b2ffb2a2fef53fba0353d4fdc",
+      "name": "Interpolation/P1Scalar/FirstInterpolation/dimension:2/operation:5",
+      "metric": "cpu_time",
+      "url": "cases/9067a2118bea67da057ffb45e0c9d417e491d69b2ffb2a2fef53fba0353d4fdc.json"
+    },
+    {
+      "id": "f4d04202f377755dbe108b926ebdfc5ce370acb075c25124f7c714f138e8a446",
+      "name": "Interpolation/P1Scalar/FirstInterpolation/dimension:3/operation:5",
+      "metric": "cpu_time",
+      "url": "cases/f4d04202f377755dbe108b926ebdfc5ce370acb075c25124f7c714f138e8a446.json"
+    },
+    {
+      "id": "daeaf194534b7ec7915b90a89b85d0f8d98b5530a375d261cc377bf2aa4f9d5f",
+      "name": "Interpolation/P1Scalar/Pointwise/dimension:2/operation:2",
+      "metric": "cpu_time",
+      "url": "cases/daeaf194534b7ec7915b90a89b85d0f8d98b5530a375d261cc377bf2aa4f9d5f.json"
+    },
+    {
+      "id": "e87f8690d6d5ddf3024e587810cf81c0de5a2d5145adbde013a4125774e8a983",
+      "name": "Interpolation/P1Scalar/Pointwise/dimension:3/operation:2",
+      "metric": "cpu_time",
+      "url": "cases/e87f8690d6d5ddf3024e587810cf81c0de5a2d5145adbde013a4125774e8a983.json"
+    },
+    {
+      "id": "a65d1eed5a4e34a4ee7b7d714b4dae2ec18cb018386902c26b44dc26478cb091",
+      "name": "Interpolation/P1Scalar/ProvenanceFallback/dimension:2/operation:6",
+      "metric": "cpu_time",
+      "url": "cases/a65d1eed5a4e34a4ee7b7d714b4dae2ec18cb018386902c26b44dc26478cb091.json"
+    },
+    {
+      "id": "b2d5610db00c0398c94efd221418abe53f067225fe26c850b79501d275e99587",
+      "name": "Interpolation/P1Scalar/ProvenanceFallback/dimension:3/operation:6",
+      "metric": "cpu_time",
+      "url": "cases/b2d5610db00c0398c94efd221418abe53f067225fe26c850b79501d275e99587.json"
+    },
+    {
+      "id": "65e6e68bf5d540612759ca49c466465c109649ed4bf0a664bcea24d9be767b59",
+      "name": "Interpolation/P1Scalar/QuadratureAlternate/dimension:2/operation:1",
+      "metric": "cpu_time",
+      "url": "cases/65e6e68bf5d540612759ca49c466465c109649ed4bf0a664bcea24d9be767b59.json"
+    },
+    {
+      "id": "0bf99980e0fdbff185d63220aa2cb7bd6c55f0525fa0fbdf15717c13eface26d",
+      "name": "Interpolation/P1Scalar/QuadratureAlternate/dimension:3/operation:1",
+      "metric": "cpu_time",
+      "url": "cases/0bf99980e0fdbff185d63220aa2cb7bd6c55f0525fa0fbdf15717c13eface26d.json"
+    },
+    {
+      "id": "bfc46f340e3cafde234ec0667ac0d39523d12ce6e3baf4d772f7a3accb8460f9",
+      "name": "Interpolation/P1Scalar/QuadratureRepeat/dimension:2/operation:0",
+      "metric": "cpu_time",
+      "url": "cases/bfc46f340e3cafde234ec0667ac0d39523d12ce6e3baf4d772f7a3accb8460f9.json"
+    },
+    {
+      "id": "f7d04506d50e10cb2f8502840cb2d61b93c327591bd87406187ce24892ff433b",
+      "name": "Interpolation/P1Scalar/QuadratureRepeat/dimension:3/operation:0",
+      "metric": "cpu_time",
+      "url": "cases/f7d04506d50e10cb2f8502840cb2d61b93c327591bd87406187ce24892ff433b.json"
+    },
+    {
+      "id": "3cb9681fdc50ac97a8caf1e489a385caa1c602e86a39bc1f9de509c81995240b",
+      "name": "Interpolation/P1Scalar/Reproject/dimension:2/operation:3",
+      "metric": "cpu_time",
+      "url": "cases/3cb9681fdc50ac97a8caf1e489a385caa1c602e86a39bc1f9de509c81995240b.json"
+    },
+    {
+      "id": "089de5c8edfeaf9c0a77e8f206228c4909cf7abe6975b369d042cd27679578db",
+      "name": "Interpolation/P1Scalar/Reproject/dimension:3/operation:3",
+      "metric": "cpu_time",
+      "url": "cases/089de5c8edfeaf9c0a77e8f206228c4909cf7abe6975b369d042cd27679578db.json"
+    },
+    {
+      "id": "d392c830a42fa2103bba8066cdc91767fb14dbd49a7ed4d2a36c1a6a0a7a1b9a",
+      "name": "Interpolation/P1Vector/CrossSpaceAssignment/dimension:2/operation:4",
+      "metric": "cpu_time",
+      "url": "cases/d392c830a42fa2103bba8066cdc91767fb14dbd49a7ed4d2a36c1a6a0a7a1b9a.json"
+    },
+    {
+      "id": "36758e468114d7ae2097e86bab675ccaf48b23dd527c5e8e7c10db56e4f3e7fe",
+      "name": "Interpolation/P1Vector/CrossSpaceAssignment/dimension:3/operation:4",
+      "metric": "cpu_time",
+      "url": "cases/36758e468114d7ae2097e86bab675ccaf48b23dd527c5e8e7c10db56e4f3e7fe.json"
+    },
+    {
+      "id": "ce2d24a409c45043f6a33ae5cc4634ab8651ca9e773971b2c5ed01ac8d141279",
+      "name": "Interpolation/P1Vector/FirstInterpolation/dimension:2/operation:5",
+      "metric": "cpu_time",
+      "url": "cases/ce2d24a409c45043f6a33ae5cc4634ab8651ca9e773971b2c5ed01ac8d141279.json"
+    },
+    {
+      "id": "0a730888b7188e4e99c35b75794ec00507365c47b23190461273df832c113e1b",
+      "name": "Interpolation/P1Vector/FirstInterpolation/dimension:3/operation:5",
+      "metric": "cpu_time",
+      "url": "cases/0a730888b7188e4e99c35b75794ec00507365c47b23190461273df832c113e1b.json"
+    },
+    {
+      "id": "5ea61d23a1264eea6d15f1b8c635b68c15b6a7000069f056072f59382b2e2617",
+      "name": "Interpolation/P1Vector/Pointwise/dimension:2/operation:2",
+      "metric": "cpu_time",
+      "url": "cases/5ea61d23a1264eea6d15f1b8c635b68c15b6a7000069f056072f59382b2e2617.json"
+    },
+    {
+      "id": "3325cc3423bab098acd51634b2aac72e6fa51cb29f78766890a001cfac38a1c1",
+      "name": "Interpolation/P1Vector/Pointwise/dimension:3/operation:2",
+      "metric": "cpu_time",
+      "url": "cases/3325cc3423bab098acd51634b2aac72e6fa51cb29f78766890a001cfac38a1c1.json"
+    },
+    {
+      "id": "6c7000914136799aa82b6824d1f6ce4da730822427f48eb2758055feb90c1b43",
+      "name": "Interpolation/P1Vector/ProvenanceFallback/dimension:2/operation:6",
+      "metric": "cpu_time",
+      "url": "cases/6c7000914136799aa82b6824d1f6ce4da730822427f48eb2758055feb90c1b43.json"
+    },
+    {
+      "id": "74c8fdd144ba1e3a8b2d7ae64ed747503b6b2a7046d9d07e0111b91bc442add3",
+      "name": "Interpolation/P1Vector/ProvenanceFallback/dimension:3/operation:6",
+      "metric": "cpu_time",
+      "url": "cases/74c8fdd144ba1e3a8b2d7ae64ed747503b6b2a7046d9d07e0111b91bc442add3.json"
+    },
+    {
+      "id": "356d2772d82b5ca12eba570999cbd2a20f5126104b1af8feb3ff0a36882e9d89",
+      "name": "Interpolation/P1Vector/QuadratureAlternate/dimension:2/operation:1",
+      "metric": "cpu_time",
+      "url": "cases/356d2772d82b5ca12eba570999cbd2a20f5126104b1af8feb3ff0a36882e9d89.json"
+    },
+    {
+      "id": "799ef3e6fbe1563b1c710922dcdd1a2cd23d1f6a792684a653ec2e0ff7e6ed68",
+      "name": "Interpolation/P1Vector/QuadratureAlternate/dimension:3/operation:1",
+      "metric": "cpu_time",
+      "url": "cases/799ef3e6fbe1563b1c710922dcdd1a2cd23d1f6a792684a653ec2e0ff7e6ed68.json"
+    },
+    {
+      "id": "7c04c69f8e35dedd7f1e96799366a11cb0f671948d0433e15459a543795e7d9c",
+      "name": "Interpolation/P1Vector/QuadratureRepeat/dimension:2/operation:0",
+      "metric": "cpu_time",
+      "url": "cases/7c04c69f8e35dedd7f1e96799366a11cb0f671948d0433e15459a543795e7d9c.json"
+    },
+    {
+      "id": "2911e60d2546b9802ecb444fda247d1dfd434f80567c72e25b8ce938f62bbe88",
+      "name": "Interpolation/P1Vector/QuadratureRepeat/dimension:3/operation:0",
+      "metric": "cpu_time",
+      "url": "cases/2911e60d2546b9802ecb444fda247d1dfd434f80567c72e25b8ce938f62bbe88.json"
+    },
+    {
+      "id": "e12e8d4f76c429263314941c30d1039bf5205af045276aaef7983f8bfb307873",
+      "name": "Interpolation/P1Vector/Reproject/dimension:2/operation:3",
+      "metric": "cpu_time",
+      "url": "cases/e12e8d4f76c429263314941c30d1039bf5205af045276aaef7983f8bfb307873.json"
+    },
+    {
+      "id": "0c8b678f22b465be574b53980c72978b7d942f5716586f47f3c46bb3fc6bdc2e",
+      "name": "Interpolation/P1Vector/Reproject/dimension:3/operation:3",
+      "metric": "cpu_time",
+      "url": "cases/0c8b678f22b465be574b53980c72978b7d942f5716586f47f3c46bb3fc6bdc2e.json"
+    },
+    {
+      "id": "f4fb4562232f6d52cc56daedb7a9ec12ad22045901310c5285c70e9214b4f4e6",
+      "name": "Interpolation/P2Scalar/CrossSpaceAssignment/dimension:2/operation:4",
+      "metric": "cpu_time",
+      "url": "cases/f4fb4562232f6d52cc56daedb7a9ec12ad22045901310c5285c70e9214b4f4e6.json"
+    },
+    {
+      "id": "21ab75893222493b39b19d6162bc56cadce83f91432b6c643dcbc647428a964c",
+      "name": "Interpolation/P2Scalar/CrossSpaceAssignment/dimension:3/operation:4",
+      "metric": "cpu_time",
+      "url": "cases/21ab75893222493b39b19d6162bc56cadce83f91432b6c643dcbc647428a964c.json"
+    },
+    {
+      "id": "8d828c06df2bd778b5f7c2247a52f26b5135e30b421646d907d77a0ede58d857",
+      "name": "Interpolation/P2Scalar/FirstInterpolation/dimension:2/operation:5",
+      "metric": "cpu_time",
+      "url": "cases/8d828c06df2bd778b5f7c2247a52f26b5135e30b421646d907d77a0ede58d857.json"
+    },
+    {
+      "id": "112ca625f257d0382dc20f62ad19b7204038a233a2232e686bf3263c0031047d",
+      "name": "Interpolation/P2Scalar/FirstInterpolation/dimension:3/operation:5",
+      "metric": "cpu_time",
+      "url": "cases/112ca625f257d0382dc20f62ad19b7204038a233a2232e686bf3263c0031047d.json"
+    },
+    {
+      "id": "1abef6d995af79cd26e6c0dd81e13e41bbf8f19b0321e4b5ca173b1537cb35e1",
+      "name": "Interpolation/P2Scalar/Pointwise/dimension:2/operation:2",
+      "metric": "cpu_time",
+      "url": "cases/1abef6d995af79cd26e6c0dd81e13e41bbf8f19b0321e4b5ca173b1537cb35e1.json"
+    },
+    {
+      "id": "aad39e0b812a6689ae0dac982ca175d30e524e04d3d99eafff6b82afeb2a2df5",
+      "name": "Interpolation/P2Scalar/Pointwise/dimension:3/operation:2",
+      "metric": "cpu_time",
+      "url": "cases/aad39e0b812a6689ae0dac982ca175d30e524e04d3d99eafff6b82afeb2a2df5.json"
+    },
+    {
+      "id": "6b7f73d4aaa938989689b98a61a7f76a853f6c9b8d8bfeed63afe80504a648e1",
+      "name": "Interpolation/P2Scalar/ProvenanceFallback/dimension:2/operation:6",
+      "metric": "cpu_time",
+      "url": "cases/6b7f73d4aaa938989689b98a61a7f76a853f6c9b8d8bfeed63afe80504a648e1.json"
+    },
+    {
+      "id": "d86afca4b7ebafb0bc3099f7ef15ada182793bf2e121cf62126ca40bbb1abe54",
+      "name": "Interpolation/P2Scalar/ProvenanceFallback/dimension:3/operation:6",
+      "metric": "cpu_time",
+      "url": "cases/d86afca4b7ebafb0bc3099f7ef15ada182793bf2e121cf62126ca40bbb1abe54.json"
+    },
+    {
+      "id": "6932df7a1475e3da7644f9436e7cb47ffee6b970c090b88f214e81cf4212264b",
+      "name": "Interpolation/P2Scalar/QuadratureAlternate/dimension:2/operation:1",
+      "metric": "cpu_time",
+      "url": "cases/6932df7a1475e3da7644f9436e7cb47ffee6b970c090b88f214e81cf4212264b.json"
+    },
+    {
+      "id": "039590aadbab2809f8c4880011c63b7989d8ca5bd4c0b93fee0b283164163c69",
+      "name": "Interpolation/P2Scalar/QuadratureAlternate/dimension:3/operation:1",
+      "metric": "cpu_time",
+      "url": "cases/039590aadbab2809f8c4880011c63b7989d8ca5bd4c0b93fee0b283164163c69.json"
+    },
+    {
+      "id": "add9922f9c5489a34064b1f22305010425629d0258573e4449acf246b9ce0da5",
+      "name": "Interpolation/P2Scalar/QuadratureRepeat/dimension:2/operation:0",
+      "metric": "cpu_time",
+      "url": "cases/add9922f9c5489a34064b1f22305010425629d0258573e4449acf246b9ce0da5.json"
+    },
+    {
+      "id": "a98a242cdb916f06a55d64d5ef03ec8ad4cdf071547409340817633335683697",
+      "name": "Interpolation/P2Scalar/QuadratureRepeat/dimension:3/operation:0",
+      "metric": "cpu_time",
+      "url": "cases/a98a242cdb916f06a55d64d5ef03ec8ad4cdf071547409340817633335683697.json"
+    },
+    {
+      "id": "1dba785d06bdfcf95fb2c06c627aa68bb546c69c1c15c962705bc8e50efd10a0",
+      "name": "Interpolation/P2Scalar/Reproject/dimension:2/operation:3",
+      "metric": "cpu_time",
+      "url": "cases/1dba785d06bdfcf95fb2c06c627aa68bb546c69c1c15c962705bc8e50efd10a0.json"
+    },
+    {
+      "id": "632ab74cd0a0c9bdaed873650af91ba234d2e73770f89fb6e7246485685c592c",
+      "name": "Interpolation/P2Scalar/Reproject/dimension:3/operation:3",
+      "metric": "cpu_time",
+      "url": "cases/632ab74cd0a0c9bdaed873650af91ba234d2e73770f89fb6e7246485685c592c.json"
+    },
+    {
+      "id": "ec6a5b0d5e166a674f05e2c1f19a174ca77a2bbc8b12cf1b511360edd5502ec1",
+      "name": "Interpolation/P2Vector/CrossSpaceAssignment/dimension:2/operation:4",
+      "metric": "cpu_time",
+      "url": "cases/ec6a5b0d5e166a674f05e2c1f19a174ca77a2bbc8b12cf1b511360edd5502ec1.json"
+    },
+    {
+      "id": "fdda94c983a2d2b81a799127375e0746252d69beccde92b6f02e83750bee5c2b",
+      "name": "Interpolation/P2Vector/CrossSpaceAssignment/dimension:3/operation:4",
+      "metric": "cpu_time",
+      "url": "cases/fdda94c983a2d2b81a799127375e0746252d69beccde92b6f02e83750bee5c2b.json"
+    },
+    {
+      "id": "aab8aa361f8f50251d0e366b73cf15562d1851ce77945573228edecdea420362",
+      "name": "Interpolation/P2Vector/FirstInterpolation/dimension:2/operation:5",
+      "metric": "cpu_time",
+      "url": "cases/aab8aa361f8f50251d0e366b73cf15562d1851ce77945573228edecdea420362.json"
+    },
+    {
+      "id": "6d1e5884c54c4857f01287062afdb6f4aab1eb659dfcb1ebb3563ef9aa817a49",
+      "name": "Interpolation/P2Vector/FirstInterpolation/dimension:3/operation:5",
+      "metric": "cpu_time",
+      "url": "cases/6d1e5884c54c4857f01287062afdb6f4aab1eb659dfcb1ebb3563ef9aa817a49.json"
+    },
+    {
+      "id": "16a2d04f193cf5a2d6450636b00f8cfbff5a5304a7acfe9c2e5f813fe79e1f61",
+      "name": "Interpolation/P2Vector/Pointwise/dimension:2/operation:2",
+      "metric": "cpu_time",
+      "url": "cases/16a2d04f193cf5a2d6450636b00f8cfbff5a5304a7acfe9c2e5f813fe79e1f61.json"
+    },
+    {
+      "id": "681c65c30a2621d693cdbaa4e53719d4a1416ddf32146ff07122de339610a25c",
+      "name": "Interpolation/P2Vector/Pointwise/dimension:3/operation:2",
+      "metric": "cpu_time",
+      "url": "cases/681c65c30a2621d693cdbaa4e53719d4a1416ddf32146ff07122de339610a25c.json"
+    },
+    {
+      "id": "3e17cb19213b58cc487f0895fb5d7e954f4876980ae62c366bb014abb6b24a16",
+      "name": "Interpolation/P2Vector/ProvenanceFallback/dimension:2/operation:6",
+      "metric": "cpu_time",
+      "url": "cases/3e17cb19213b58cc487f0895fb5d7e954f4876980ae62c366bb014abb6b24a16.json"
+    },
+    {
+      "id": "c47c603031954eec80ade8dd6b6837e76655c907284b6d1d9aa978b61ac5d361",
+      "name": "Interpolation/P2Vector/ProvenanceFallback/dimension:3/operation:6",
+      "metric": "cpu_time",
+      "url": "cases/c47c603031954eec80ade8dd6b6837e76655c907284b6d1d9aa978b61ac5d361.json"
+    },
+    {
+      "id": "bf03dbf5207c4cc43d5fbcc426da3dcace27974f7da78b353bcdd6536155b4b5",
+      "name": "Interpolation/P2Vector/QuadratureAlternate/dimension:2/operation:1",
+      "metric": "cpu_time",
+      "url": "cases/bf03dbf5207c4cc43d5fbcc426da3dcace27974f7da78b353bcdd6536155b4b5.json"
+    },
+    {
+      "id": "d1bdd383e4e70c4c3ab1fe54c7bf619558a7815a418cca8a5777a61f29a49faf",
+      "name": "Interpolation/P2Vector/QuadratureAlternate/dimension:3/operation:1",
+      "metric": "cpu_time",
+      "url": "cases/d1bdd383e4e70c4c3ab1fe54c7bf619558a7815a418cca8a5777a61f29a49faf.json"
+    },
+    {
+      "id": "75ab49f3e240872fe60981e32efe633082a251d84d4c55b45a7b1b2b2476c7be",
+      "name": "Interpolation/P2Vector/QuadratureRepeat/dimension:2/operation:0",
+      "metric": "cpu_time",
+      "url": "cases/75ab49f3e240872fe60981e32efe633082a251d84d4c55b45a7b1b2b2476c7be.json"
+    },
+    {
+      "id": "d8d82dd6785050673231a947c37fb70e554ec4cfa3f810144c2925c6706eacc4",
+      "name": "Interpolation/P2Vector/QuadratureRepeat/dimension:3/operation:0",
+      "metric": "cpu_time",
+      "url": "cases/d8d82dd6785050673231a947c37fb70e554ec4cfa3f810144c2925c6706eacc4.json"
+    },
+    {
+      "id": "54aa5dd8a5ed0ec5763dcee771a87e1bc84ec2a261fbbef06817cf3b4e14c364",
+      "name": "Interpolation/P2Vector/Reproject/dimension:2/operation:3",
+      "metric": "cpu_time",
+      "url": "cases/54aa5dd8a5ed0ec5763dcee771a87e1bc84ec2a261fbbef06817cf3b4e14c364.json"
+    },
+    {
+      "id": "ceb575a80dcd1c0734c32d13b3d9ebf64dae13174c14c4040a03156341185b92",
+      "name": "Interpolation/P2Vector/Reproject/dimension:3/operation:3",
+      "metric": "cpu_time",
+      "url": "cases/ceb575a80dcd1c0734c32d13b3d9ebf64dae13174c14c4040a03156341185b92.json"
+    },
+    {
+      "id": "3b5b03ac66a2e55a895b161a3ec7224ca7160200f71a6ca9ef3e9cad63357163",
+      "name": "LargeInterpolation/P1Scalar/Repeat32/Pointwise/dimension:2/workload:2/pointwise:1",
+      "metric": "cpu_time",
+      "url": "cases/3b5b03ac66a2e55a895b161a3ec7224ca7160200f71a6ca9ef3e9cad63357163.json"
+    },
+    {
+      "id": "26b31eed22e19ead8df8118b3f03f6800220b4cc0f836a334b0d4b81900dc646",
+      "name": "LargeInterpolation/P1Scalar/Repeat32/Pointwise/dimension:3/workload:2/pointwise:1",
+      "metric": "cpu_time",
+      "url": "cases/26b31eed22e19ead8df8118b3f03f6800220b4cc0f836a334b0d4b81900dc646.json"
+    },
+    {
+      "id": "1bf049ba96e2bf322a79fc3721123cb454fa6a7082bace49c5b1a64af012392d",
+      "name": "LargeInterpolation/P1Scalar/Repeat32/Quadrature/dimension:2/workload:2/pointwise:0",
+      "metric": "cpu_time",
+      "url": "cases/1bf049ba96e2bf322a79fc3721123cb454fa6a7082bace49c5b1a64af012392d.json"
+    },
+    {
+      "id": "7d42cbcbc2b607bfbbc86750fa0ead9f80bbdb3203c62132863f7e837ef3b49f",
+      "name": "LargeInterpolation/P1Scalar/Repeat32/Quadrature/dimension:3/workload:2/pointwise:0",
+      "metric": "cpu_time",
+      "url": "cases/7d42cbcbc2b607bfbbc86750fa0ead9f80bbdb3203c62132863f7e837ef3b49f.json"
+    },
+    {
+      "id": "2182f4d43867e079987dac1daa14dbd1ffaca0ff8556117908534c2a2fcf8ec7",
+      "name": "LargeInterpolation/P1Scalar/Repeat4/Pointwise/dimension:2/workload:1/pointwise:1",
+      "metric": "cpu_time",
+      "url": "cases/2182f4d43867e079987dac1daa14dbd1ffaca0ff8556117908534c2a2fcf8ec7.json"
+    },
+    {
+      "id": "18452501870f65279b82c3e974c0d4daaafc9f134be1eebb5333faa88be41a6c",
+      "name": "LargeInterpolation/P1Scalar/Repeat4/Pointwise/dimension:3/workload:1/pointwise:1",
+      "metric": "cpu_time",
+      "url": "cases/18452501870f65279b82c3e974c0d4daaafc9f134be1eebb5333faa88be41a6c.json"
+    },
+    {
+      "id": "5749384f099c08a2da4c3917efbad604190885f9f976bc91ace3952cb3e156c4",
+      "name": "LargeInterpolation/P1Scalar/Repeat4/Quadrature/dimension:2/workload:1/pointwise:0",
+      "metric": "cpu_time",
+      "url": "cases/5749384f099c08a2da4c3917efbad604190885f9f976bc91ace3952cb3e156c4.json"
+    },
+    {
+      "id": "79698125a3f9c4654944f63aec19b5e87d48c2c9f35d7c4db48a0df9e75def44",
+      "name": "LargeInterpolation/P1Scalar/Repeat4/Quadrature/dimension:3/workload:1/pointwise:0",
+      "metric": "cpu_time",
+      "url": "cases/79698125a3f9c4654944f63aec19b5e87d48c2c9f35d7c4db48a0df9e75def44.json"
+    },
+    {
+      "id": "dfa872539d46ab9f2f9a45328749d6de61201cbcc5193f78461fac13a2c8bd78",
+      "name": "LargeInterpolation/P1Scalar/RepeatOne/Pointwise/dimension:2/workload:3/pointwise:1",
+      "metric": "cpu_time",
+      "url": "cases/dfa872539d46ab9f2f9a45328749d6de61201cbcc5193f78461fac13a2c8bd78.json"
+    },
+    {
+      "id": "2a56755630eaa8869c0b47dded1d6fc31b12ed0832b7675ef8c5008fbdf69adf",
+      "name": "LargeInterpolation/P1Scalar/RepeatOne/Pointwise/dimension:3/workload:3/pointwise:1",
+      "metric": "cpu_time",
+      "url": "cases/2a56755630eaa8869c0b47dded1d6fc31b12ed0832b7675ef8c5008fbdf69adf.json"
+    },
+    {
+      "id": "c9a7baa2d401c4ee6f02164a08deb232fa751e4cf3b0eb22419527d9240bb8c1",
+      "name": "LargeInterpolation/P1Scalar/RepeatOne/Quadrature/dimension:2/workload:3/pointwise:0",
+      "metric": "cpu_time",
+      "url": "cases/c9a7baa2d401c4ee6f02164a08deb232fa751e4cf3b0eb22419527d9240bb8c1.json"
+    },
+    {
+      "id": "d74e68fb69b2ca274b0c18808ef1a75a5f6888f60408f205dfc18e00af911ee7",
+      "name": "LargeInterpolation/P1Scalar/RepeatOne/Quadrature/dimension:3/workload:3/pointwise:0",
+      "metric": "cpu_time",
+      "url": "cases/d74e68fb69b2ca274b0c18808ef1a75a5f6888f60408f205dfc18e00af911ee7.json"
+    },
+    {
+      "id": "21a48a5a42c8520f366b45502ccececda523f1ac4d1a98fda20f2f72d553771a",
+      "name": "LargeInterpolation/P1Scalar/Sweep/Pointwise/dimension:2/workload:0/pointwise:1",
+      "metric": "cpu_time",
+      "url": "cases/21a48a5a42c8520f366b45502ccececda523f1ac4d1a98fda20f2f72d553771a.json"
+    },
+    {
+      "id": "de7abba68c8f6087da1ce3b4363bc8975158d0502078cbb22a7e868577ca4d3e",
+      "name": "LargeInterpolation/P1Scalar/Sweep/Pointwise/dimension:3/workload:0/pointwise:1",
+      "metric": "cpu_time",
+      "url": "cases/de7abba68c8f6087da1ce3b4363bc8975158d0502078cbb22a7e868577ca4d3e.json"
+    },
+    {
+      "id": "d734c9003ae723ee6366392c3d11f8de85c60ffe867f2b04a6f4deddc85ee9ab",
+      "name": "LargeInterpolation/P1Scalar/Sweep/Quadrature/dimension:2/workload:0/pointwise:0",
+      "metric": "cpu_time",
+      "url": "cases/d734c9003ae723ee6366392c3d11f8de85c60ffe867f2b04a6f4deddc85ee9ab.json"
+    },
+    {
+      "id": "2eda89724bdfb643cf17db7716b67c7dce014f507e5ee10eff85ea307858e73c",
+      "name": "LargeInterpolation/P1Scalar/Sweep/Quadrature/dimension:3/workload:0/pointwise:0",
+      "metric": "cpu_time",
+      "url": "cases/2eda89724bdfb643cf17db7716b67c7dce014f507e5ee10eff85ea307858e73c.json"
+    },
+    {
+      "id": "938abbabdb6cc768ed670ddd1be191b50c8a64187a23f21af7a95c3aac63b9f8",
+      "name": "LargeInterpolation/P1Vector/Repeat32/Pointwise/dimension:2/workload:2/pointwise:1",
+      "metric": "cpu_time",
+      "url": "cases/938abbabdb6cc768ed670ddd1be191b50c8a64187a23f21af7a95c3aac63b9f8.json"
+    },
+    {
+      "id": "8cb0dde2f892885ad91a2b93caaddba465ca78dd064dc31a8b71ea9bea48ae17",
+      "name": "LargeInterpolation/P1Vector/Repeat32/Pointwise/dimension:3/workload:2/pointwise:1",
+      "metric": "cpu_time",
+      "url": "cases/8cb0dde2f892885ad91a2b93caaddba465ca78dd064dc31a8b71ea9bea48ae17.json"
+    },
+    {
+      "id": "fcb15611b594aa21701b1e171ad79b0a081443b7dbfb4be384c1328e7744f46f",
+      "name": "LargeInterpolation/P1Vector/Repeat32/Quadrature/dimension:2/workload:2/pointwise:0",
+      "metric": "cpu_time",
+      "url": "cases/fcb15611b594aa21701b1e171ad79b0a081443b7dbfb4be384c1328e7744f46f.json"
+    },
+    {
+      "id": "707691ee1bf4192edf1d9dbb9ae974a04aa572d9b6df53a92bf1a162cd47f79f",
+      "name": "LargeInterpolation/P1Vector/Repeat32/Quadrature/dimension:3/workload:2/pointwise:0",
+      "metric": "cpu_time",
+      "url": "cases/707691ee1bf4192edf1d9dbb9ae974a04aa572d9b6df53a92bf1a162cd47f79f.json"
+    },
+    {
+      "id": "fece23acead79413b7bf0d8ebff7c46c3d07a5ec235b76dfce1f0e8f8111f7d8",
+      "name": "LargeInterpolation/P1Vector/Repeat4/Pointwise/dimension:2/workload:1/pointwise:1",
+      "metric": "cpu_time",
+      "url": "cases/fece23acead79413b7bf0d8ebff7c46c3d07a5ec235b76dfce1f0e8f8111f7d8.json"
+    },
+    {
+      "id": "bb4dad1c40f9e36a48c7cba104c212696b08136e5a47693501ffb20533bb5128",
+      "name": "LargeInterpolation/P1Vector/Repeat4/Pointwise/dimension:3/workload:1/pointwise:1",
+      "metric": "cpu_time",
+      "url": "cases/bb4dad1c40f9e36a48c7cba104c212696b08136e5a47693501ffb20533bb5128.json"
+    },
+    {
+      "id": "02bcea1a25aa14c5e7ce75fd51799565a6dbaaebe6419109923dffe4b1feb5c9",
+      "name": "LargeInterpolation/P1Vector/Repeat4/Quadrature/dimension:2/workload:1/pointwise:0",
+      "metric": "cpu_time",
+      "url": "cases/02bcea1a25aa14c5e7ce75fd51799565a6dbaaebe6419109923dffe4b1feb5c9.json"
+    },
+    {
+      "id": "d0d8835ba93eee99ea2b18bed8b1fedf1ac578bcbe4226e51de3680a7b300ac3",
+      "name": "LargeInterpolation/P1Vector/Repeat4/Quadrature/dimension:3/workload:1/pointwise:0",
+      "metric": "cpu_time",
+      "url": "cases/d0d8835ba93eee99ea2b18bed8b1fedf1ac578bcbe4226e51de3680a7b300ac3.json"
+    },
+    {
+      "id": "ecd08fbac4c909521f2591a759a9c6e359331b1a547172b3090a6f8258efe048",
+      "name": "LargeInterpolation/P1Vector/RepeatOne/Pointwise/dimension:2/workload:3/pointwise:1",
+      "metric": "cpu_time",
+      "url": "cases/ecd08fbac4c909521f2591a759a9c6e359331b1a547172b3090a6f8258efe048.json"
+    },
+    {
+      "id": "f9d991198acafa0688ce4100dfa69be215150c73ca001de3509eb20d4d1b49a3",
+      "name": "LargeInterpolation/P1Vector/RepeatOne/Pointwise/dimension:3/workload:3/pointwise:1",
+      "metric": "cpu_time",
+      "url": "cases/f9d991198acafa0688ce4100dfa69be215150c73ca001de3509eb20d4d1b49a3.json"
+    },
+    {
+      "id": "f508bfa6f0b952ed37caf15dba8763651baa8fdbd68f65ea6876ca04bc24b262",
+      "name": "LargeInterpolation/P1Vector/RepeatOne/Quadrature/dimension:2/workload:3/pointwise:0",
+      "metric": "cpu_time",
+      "url": "cases/f508bfa6f0b952ed37caf15dba8763651baa8fdbd68f65ea6876ca04bc24b262.json"
+    },
+    {
+      "id": "b5377ff583c38fc3ca8ed77bb9fa529c51037d00b83a559413f3a4611ae9e66f",
+      "name": "LargeInterpolation/P1Vector/RepeatOne/Quadrature/dimension:3/workload:3/pointwise:0",
+      "metric": "cpu_time",
+      "url": "cases/b5377ff583c38fc3ca8ed77bb9fa529c51037d00b83a559413f3a4611ae9e66f.json"
+    },
+    {
+      "id": "3b18af73e4746cb047da59b258dfcc43295f57e28b1153621e851430df8a74aa",
+      "name": "LargeInterpolation/P1Vector/Sweep/Pointwise/dimension:2/workload:0/pointwise:1",
+      "metric": "cpu_time",
+      "url": "cases/3b18af73e4746cb047da59b258dfcc43295f57e28b1153621e851430df8a74aa.json"
+    },
+    {
+      "id": "a7fdc6eaaddaf587300ec513ed25cf2ad3d9bcf305b2fa36628896999ebee035",
+      "name": "LargeInterpolation/P1Vector/Sweep/Pointwise/dimension:3/workload:0/pointwise:1",
+      "metric": "cpu_time",
+      "url": "cases/a7fdc6eaaddaf587300ec513ed25cf2ad3d9bcf305b2fa36628896999ebee035.json"
+    },
+    {
+      "id": "12cceed88860799e20f7eae298cab44f64f1e71842bc7bf3194f16d54bf135cf",
+      "name": "LargeInterpolation/P1Vector/Sweep/Quadrature/dimension:2/workload:0/pointwise:0",
+      "metric": "cpu_time",
+      "url": "cases/12cceed88860799e20f7eae298cab44f64f1e71842bc7bf3194f16d54bf135cf.json"
+    },
+    {
+      "id": "fb895ba36ceebacb16fc5caa8cc9b20b0bca635d8875a59027ee5fb80ab11fdc",
+      "name": "LargeInterpolation/P1Vector/Sweep/Quadrature/dimension:3/workload:0/pointwise:0",
+      "metric": "cpu_time",
+      "url": "cases/fb895ba36ceebacb16fc5caa8cc9b20b0bca635d8875a59027ee5fb80ab11fdc.json"
+    },
+    {
+      "id": "67f53b305a9415a32a358268fa056b24c49192b5334bf5cc3a41cb653800f7af",
+      "name": "LargeInterpolation/P2Scalar/Repeat32/Pointwise/dimension:2/workload:2/pointwise:1",
+      "metric": "cpu_time",
+      "url": "cases/67f53b305a9415a32a358268fa056b24c49192b5334bf5cc3a41cb653800f7af.json"
+    },
+    {
+      "id": "20e996b0fa74a4bec7b7d3aee90fb0a76a046fe340a6a9840c5b5589e759aa60",
+      "name": "LargeInterpolation/P2Scalar/Repeat32/Pointwise/dimension:3/workload:2/pointwise:1",
+      "metric": "cpu_time",
+      "url": "cases/20e996b0fa74a4bec7b7d3aee90fb0a76a046fe340a6a9840c5b5589e759aa60.json"
+    },
+    {
+      "id": "210a1d11bacd11b3713b3314954bc7a5ca0bde86a3b4473ff62797f346210048",
+      "name": "LargeInterpolation/P2Scalar/Repeat32/Quadrature/dimension:2/workload:2/pointwise:0",
+      "metric": "cpu_time",
+      "url": "cases/210a1d11bacd11b3713b3314954bc7a5ca0bde86a3b4473ff62797f346210048.json"
+    },
+    {
+      "id": "efd91c6b1cc2c42f667237e9382de34c4f0683e39923c059c04c9fff1cd05e3d",
+      "name": "LargeInterpolation/P2Scalar/Repeat32/Quadrature/dimension:3/workload:2/pointwise:0",
+      "metric": "cpu_time",
+      "url": "cases/efd91c6b1cc2c42f667237e9382de34c4f0683e39923c059c04c9fff1cd05e3d.json"
+    },
+    {
+      "id": "cc71ed98c0d1f3fdefabab64f944fdd64e126a58544404a6466fa43a31b58356",
+      "name": "LargeInterpolation/P2Scalar/Repeat4/Pointwise/dimension:2/workload:1/pointwise:1",
+      "metric": "cpu_time",
+      "url": "cases/cc71ed98c0d1f3fdefabab64f944fdd64e126a58544404a6466fa43a31b58356.json"
+    },
+    {
+      "id": "47135033f8503c70d26110b889783deedeac6cf3c6411770cabb40f5a624d5b8",
+      "name": "LargeInterpolation/P2Scalar/Repeat4/Pointwise/dimension:3/workload:1/pointwise:1",
+      "metric": "cpu_time",
+      "url": "cases/47135033f8503c70d26110b889783deedeac6cf3c6411770cabb40f5a624d5b8.json"
+    },
+    {
+      "id": "732c2ea670133265781a288764dc8a8dcdbae280181f96251731a0ef77ca4a2e",
+      "name": "LargeInterpolation/P2Scalar/Repeat4/Quadrature/dimension:2/workload:1/pointwise:0",
+      "metric": "cpu_time",
+      "url": "cases/732c2ea670133265781a288764dc8a8dcdbae280181f96251731a0ef77ca4a2e.json"
+    },
+    {
+      "id": "39fa82462c2e6f7f3b4f5ca93e0681277f826a29a1b5d0b9a8929f906797f1a3",
+      "name": "LargeInterpolation/P2Scalar/Repeat4/Quadrature/dimension:3/workload:1/pointwise:0",
+      "metric": "cpu_time",
+      "url": "cases/39fa82462c2e6f7f3b4f5ca93e0681277f826a29a1b5d0b9a8929f906797f1a3.json"
+    },
+    {
+      "id": "b9a81c450eb9cc9c79069f2b6239457945db267427b38a162e5282274a8a38db",
+      "name": "LargeInterpolation/P2Scalar/RepeatOne/Pointwise/dimension:2/workload:3/pointwise:1",
+      "metric": "cpu_time",
+      "url": "cases/b9a81c450eb9cc9c79069f2b6239457945db267427b38a162e5282274a8a38db.json"
+    },
+    {
+      "id": "00eb72c64556c512efbf51f053f74e0f54e5ab6ea28dcf404137706fd9362261",
+      "name": "LargeInterpolation/P2Scalar/RepeatOne/Pointwise/dimension:3/workload:3/pointwise:1",
+      "metric": "cpu_time",
+      "url": "cases/00eb72c64556c512efbf51f053f74e0f54e5ab6ea28dcf404137706fd9362261.json"
+    },
+    {
+      "id": "4b7866f25c5cda7263d65fbb15b2d5b6ab8e2a40acffaa6627ae60a51e6059d2",
+      "name": "LargeInterpolation/P2Scalar/RepeatOne/Quadrature/dimension:2/workload:3/pointwise:0",
+      "metric": "cpu_time",
+      "url": "cases/4b7866f25c5cda7263d65fbb15b2d5b6ab8e2a40acffaa6627ae60a51e6059d2.json"
+    },
+    {
+      "id": "902d126a2361156d19d0a042a6fb1c0dd319f07358e3779a03477edaf9d82028",
+      "name": "LargeInterpolation/P2Scalar/RepeatOne/Quadrature/dimension:3/workload:3/pointwise:0",
+      "metric": "cpu_time",
+      "url": "cases/902d126a2361156d19d0a042a6fb1c0dd319f07358e3779a03477edaf9d82028.json"
+    },
+    {
+      "id": "989f09a85f073d430b8a9250aeaadb684e65ddfe8e1a1718c69a7084faaa6d88",
+      "name": "LargeInterpolation/P2Scalar/Sweep/Pointwise/dimension:2/workload:0/pointwise:1",
+      "metric": "cpu_time",
+      "url": "cases/989f09a85f073d430b8a9250aeaadb684e65ddfe8e1a1718c69a7084faaa6d88.json"
+    },
+    {
+      "id": "bd586dabc86fccd541a9c2d01b72fbd218ae9ee1fe5333864ef8f28895e8ab13",
+      "name": "LargeInterpolation/P2Scalar/Sweep/Pointwise/dimension:3/workload:0/pointwise:1",
+      "metric": "cpu_time",
+      "url": "cases/bd586dabc86fccd541a9c2d01b72fbd218ae9ee1fe5333864ef8f28895e8ab13.json"
+    },
+    {
+      "id": "078eac00285850b9328a26f2b31bc06e6cc143aa2154d90f23f1ed1d2ce8334c",
+      "name": "LargeInterpolation/P2Scalar/Sweep/Quadrature/dimension:2/workload:0/pointwise:0",
+      "metric": "cpu_time",
+      "url": "cases/078eac00285850b9328a26f2b31bc06e6cc143aa2154d90f23f1ed1d2ce8334c.json"
+    },
+    {
+      "id": "578b27e3bb80e690a1a6981a25fcff44cd83706d2f4eb7b53bf3b854addd34cc",
+      "name": "LargeInterpolation/P2Scalar/Sweep/Quadrature/dimension:3/workload:0/pointwise:0",
+      "metric": "cpu_time",
+      "url": "cases/578b27e3bb80e690a1a6981a25fcff44cd83706d2f4eb7b53bf3b854addd34cc.json"
+    },
+    {
+      "id": "69dd6e4bb9d05c35aa7e6e67837f7db03765087110ca2dd3cb994bfd48134d00",
+      "name": "LargeInterpolation/P2Vector/Repeat32/Pointwise/dimension:2/workload:2/pointwise:1",
+      "metric": "cpu_time",
+      "url": "cases/69dd6e4bb9d05c35aa7e6e67837f7db03765087110ca2dd3cb994bfd48134d00.json"
+    },
+    {
+      "id": "2ae98e22d66a7ce231fb26e063e1aa403e1058ad40e4218673cc938d2bd3a7a3",
+      "name": "LargeInterpolation/P2Vector/Repeat32/Pointwise/dimension:3/workload:2/pointwise:1",
+      "metric": "cpu_time",
+      "url": "cases/2ae98e22d66a7ce231fb26e063e1aa403e1058ad40e4218673cc938d2bd3a7a3.json"
+    },
+    {
+      "id": "78c59a56c8c56e90da3ca15c9cf60ffe56e37ef5f0e8aa43234e038543f54f5d",
+      "name": "LargeInterpolation/P2Vector/Repeat32/Quadrature/dimension:2/workload:2/pointwise:0",
+      "metric": "cpu_time",
+      "url": "cases/78c59a56c8c56e90da3ca15c9cf60ffe56e37ef5f0e8aa43234e038543f54f5d.json"
+    },
+    {
+      "id": "c983d8f5bc8173d7af615c0700a10935c67819c16d7da2656a75e19afb2078a4",
+      "name": "LargeInterpolation/P2Vector/Repeat32/Quadrature/dimension:3/workload:2/pointwise:0",
+      "metric": "cpu_time",
+      "url": "cases/c983d8f5bc8173d7af615c0700a10935c67819c16d7da2656a75e19afb2078a4.json"
+    },
+    {
+      "id": "f56fee9434d20e01c19e007365f87fe253fa764bc5d0902d3fe6f856fbf8e7f0",
+      "name": "LargeInterpolation/P2Vector/Repeat4/Pointwise/dimension:2/workload:1/pointwise:1",
+      "metric": "cpu_time",
+      "url": "cases/f56fee9434d20e01c19e007365f87fe253fa764bc5d0902d3fe6f856fbf8e7f0.json"
+    },
+    {
+      "id": "b08fc3739fecfeff14474a21d79d570362eb2035722bdc3c3bcd959ad8e96add",
+      "name": "LargeInterpolation/P2Vector/Repeat4/Pointwise/dimension:3/workload:1/pointwise:1",
+      "metric": "cpu_time",
+      "url": "cases/b08fc3739fecfeff14474a21d79d570362eb2035722bdc3c3bcd959ad8e96add.json"
+    },
+    {
+      "id": "92f2f333281a681dcbd14b1a4e179288877175cf98aa5aca3b7d86d5c948706e",
+      "name": "LargeInterpolation/P2Vector/Repeat4/Quadrature/dimension:2/workload:1/pointwise:0",
+      "metric": "cpu_time",
+      "url": "cases/92f2f333281a681dcbd14b1a4e179288877175cf98aa5aca3b7d86d5c948706e.json"
+    },
+    {
+      "id": "51a3026f8d0e66524adf4fe8d5dbe229fadc2c0da9dd78b3afd21f5a35af060d",
+      "name": "LargeInterpolation/P2Vector/Repeat4/Quadrature/dimension:3/workload:1/pointwise:0",
+      "metric": "cpu_time",
+      "url": "cases/51a3026f8d0e66524adf4fe8d5dbe229fadc2c0da9dd78b3afd21f5a35af060d.json"
+    },
+    {
+      "id": "2a2d24a7c48e8e425acf5f1a501abb265d7dc9df71ca4fce136cd3ad5a63eea0",
+      "name": "LargeInterpolation/P2Vector/RepeatOne/Pointwise/dimension:2/workload:3/pointwise:1",
+      "metric": "cpu_time",
+      "url": "cases/2a2d24a7c48e8e425acf5f1a501abb265d7dc9df71ca4fce136cd3ad5a63eea0.json"
+    },
+    {
+      "id": "8a56e933bd4963aa31c563283ca3134c0aab0302ed37a0df5862db6d6537ab4f",
+      "name": "LargeInterpolation/P2Vector/RepeatOne/Pointwise/dimension:3/workload:3/pointwise:1",
+      "metric": "cpu_time",
+      "url": "cases/8a56e933bd4963aa31c563283ca3134c0aab0302ed37a0df5862db6d6537ab4f.json"
+    },
+    {
+      "id": "38eb859a0f670aab0d683f7318fd1a462f081f237e61265b8bbd836315983b54",
+      "name": "LargeInterpolation/P2Vector/RepeatOne/Quadrature/dimension:2/workload:3/pointwise:0",
+      "metric": "cpu_time",
+      "url": "cases/38eb859a0f670aab0d683f7318fd1a462f081f237e61265b8bbd836315983b54.json"
+    },
+    {
+      "id": "ea03194bc6ff99b5aafaca0e8dd06826529ae1f7d7169819e4333df126d805dc",
+      "name": "LargeInterpolation/P2Vector/RepeatOne/Quadrature/dimension:3/workload:3/pointwise:0",
+      "metric": "cpu_time",
+      "url": "cases/ea03194bc6ff99b5aafaca0e8dd06826529ae1f7d7169819e4333df126d805dc.json"
+    },
+    {
+      "id": "5fc3338c4eb51bd89a350b04261d5c92338fb1a511a67c8771eb84e4207c7941",
+      "name": "LargeInterpolation/P2Vector/Sweep/Pointwise/dimension:2/workload:0/pointwise:1",
+      "metric": "cpu_time",
+      "url": "cases/5fc3338c4eb51bd89a350b04261d5c92338fb1a511a67c8771eb84e4207c7941.json"
+    },
+    {
+      "id": "4ecc808784a8fb57b1d3a9228fd89d867fe2d7f4f714f553401491aa09cd44fb",
+      "name": "LargeInterpolation/P2Vector/Sweep/Pointwise/dimension:3/workload:0/pointwise:1",
+      "metric": "cpu_time",
+      "url": "cases/4ecc808784a8fb57b1d3a9228fd89d867fe2d7f4f714f553401491aa09cd44fb.json"
+    },
+    {
+      "id": "460d0237f744fed35b7874a6713cb8e58213cade2f07fa6b011df9712052eccd",
+      "name": "LargeInterpolation/P2Vector/Sweep/Quadrature/dimension:2/workload:0/pointwise:0",
+      "metric": "cpu_time",
+      "url": "cases/460d0237f744fed35b7874a6713cb8e58213cade2f07fa6b011df9712052eccd.json"
+    },
+    {
+      "id": "be6757634de674cb5ff232868b81d8b7bcbc2279347ab5ffceeda9d015c83a04",
+      "name": "LargeInterpolation/P2Vector/Sweep/Quadrature/dimension:3/workload:0/pointwise:0",
+      "metric": "cpu_time",
+      "url": "cases/be6757634de674cb5ff232868b81d8b7bcbc2279347ab5ffceeda9d015c83a04.json"
+    }
+  ]
+}

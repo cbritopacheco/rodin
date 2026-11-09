@@ -1,0 +1,278 @@
+{
+  "schema": 1,
+  "definition": {
+    "kind": "benchmark",
+    "mode": "local",
+    "compiler": "gcc-14",
+    "runner": "ubuntu-24.04",
+    "cmake": {
+      "CMAKE_BUILD_TYPE": "Release",
+      "CMAKE_CXX_COMPILER": "g++-14",
+      "CMAKE_C_COMPILER": "gcc-14",
+      "CMAKE_SUPPRESS_REGENERATION": "ON",
+      "RODIN_BUILD_SRC": "ON",
+      "RODIN_BUILD_BENCHMARKS": "ON",
+      "RODIN_BUILD_UNIT_TESTS": "OFF",
+      "RODIN_BUILD_MANUFACTURED_TESTS": "OFF",
+      "RODIN_BUILD_CONVERGENCE_TESTS": "OFF",
+      "RODIN_BUILD_EXAMPLES": "OFF",
+      "RODIN_BUILD_DOC": "OFF",
+      "RODIN_INSTALL_RESOURCES": "OFF",
+      "RODIN_CODE_COVERAGE": "OFF",
+      "RODIN_MULTITHREADED": "OFF",
+      "RODIN_USE_ASAN": "OFF",
+      "RODIN_USE_UBSAN": "OFF",
+      "RODIN_USE_MPI": "OFF",
+      "RODIN_USE_PETSC": "OFF"
+    },
+    "targets": [
+      "RodinBasisScalingBenchmarks",
+      "RodinFieldContractionBenchmarks",
+      "RodinFieldDerivativeBenchmarks",
+      "RodinFieldOperationBenchmarks",
+      "RodinGridFunctionBenchmarks",
+      "RodinH1BasisLifecycleBenchmarks",
+      "RodinH1ConvectionBenchmarks",
+      "RodinH1MassBindingBenchmarks",
+      "RodinH1MassOperandOrderBenchmarks",
+      "RodinH1PreparedBasisBenchmarks",
+      "RodinH1PyramidBenchmarks",
+      "RodinH1PyramidNodalBenchmarks",
+      "RodinNamedFormBenchmarks",
+      "RodinNamedMassKernelBenchmarks",
+      "RodinP1QuadratureBindingBenchmarks",
+      "RodinPhysicalGradientBenchmarks",
+      "RodinProblemLifecycleBenchmarks",
+      "RodinQuadratureBindingBenchmarks",
+      "RodinQuadratureExpressionBenchmarks",
+      "RodinReferenceElementBenchmarks",
+      "RodinStokesBindingBenchmarks",
+      "RodinVariationalCoefficientEvaluationBenchmarks",
+      "RodinVariationalGridFunctionBenchmarks",
+      "RodinVariationalIntegratorsBenchmarks",
+      "RodinVariationalNamedFormsBenchmarks",
+      "RodinVariationalP1Benchmarks",
+      "RodinVariationalRankOneJacobianBenchmarks"
+    ],
+    "stage": "components"
+  },
+  "ranks": 1,
+  "cases": [
+    {
+      "id": "e10da858b36de2f4fe43e9783728aaf82d2cb608e6f28348ecc35a52fbb9d09c",
+      "name": "GenericCoefficient/Matrix/P1/dimension:2/expensive:0/process_time",
+      "metric": "cpu_time",
+      "url": "cases/e10da858b36de2f4fe43e9783728aaf82d2cb608e6f28348ecc35a52fbb9d09c.json"
+    },
+    {
+      "id": "7119264782a22f773594a1afef876aab5a4f3dcf31c8aae45d6bfb90efa2a8f1",
+      "name": "GenericCoefficient/Matrix/P1/dimension:2/expensive:1/process_time",
+      "metric": "cpu_time",
+      "url": "cases/7119264782a22f773594a1afef876aab5a4f3dcf31c8aae45d6bfb90efa2a8f1.json"
+    },
+    {
+      "id": "9e2a876f7679b788e4f766607c4df052d00649dbd83fd3626593d8c5236f038a",
+      "name": "GenericCoefficient/Matrix/P1/dimension:3/expensive:0/process_time",
+      "metric": "cpu_time",
+      "url": "cases/9e2a876f7679b788e4f766607c4df052d00649dbd83fd3626593d8c5236f038a.json"
+    },
+    {
+      "id": "f2622403addf0d80373203f94a7bf381afad21647aed4a15238439a4a225638b",
+      "name": "GenericCoefficient/Matrix/P1/dimension:3/expensive:1/process_time",
+      "metric": "cpu_time",
+      "url": "cases/f2622403addf0d80373203f94a7bf381afad21647aed4a15238439a4a225638b.json"
+    },
+    {
+      "id": "677ead7d42ad8a03bb253fdb1c04c91998a64e52043cb699e2391f6478c207f8",
+      "name": "GenericCoefficient/Matrix/P2/dimension:2/expensive:0/process_time",
+      "metric": "cpu_time",
+      "url": "cases/677ead7d42ad8a03bb253fdb1c04c91998a64e52043cb699e2391f6478c207f8.json"
+    },
+    {
+      "id": "3ee1c947b3bf00397a8bf6829c02caed4748864758e12d53ceee974cb7dfb239",
+      "name": "GenericCoefficient/Matrix/P2/dimension:2/expensive:1/process_time",
+      "metric": "cpu_time",
+      "url": "cases/3ee1c947b3bf00397a8bf6829c02caed4748864758e12d53ceee974cb7dfb239.json"
+    },
+    {
+      "id": "4a33f518e42aac6221c6a73390a366ade0fbb48769587249fb20ff90d4fa6acd",
+      "name": "GenericCoefficient/Matrix/P2/dimension:3/expensive:0/process_time",
+      "metric": "cpu_time",
+      "url": "cases/4a33f518e42aac6221c6a73390a366ade0fbb48769587249fb20ff90d4fa6acd.json"
+    },
+    {
+      "id": "7ce4e0838b80955ad0b728394eb063c49fdd15b82ae52e14d7b3ef19d1237564",
+      "name": "GenericCoefficient/Matrix/P2/dimension:3/expensive:1/process_time",
+      "metric": "cpu_time",
+      "url": "cases/7ce4e0838b80955ad0b728394eb063c49fdd15b82ae52e14d7b3ef19d1237564.json"
+    },
+    {
+      "id": "7682b3979623d0196fcf5428572518310fc1643153e686d6b4b63d8bf49612c4",
+      "name": "GenericCoefficient/Matrix/P3/dimension:2/expensive:0/process_time",
+      "metric": "cpu_time",
+      "url": "cases/7682b3979623d0196fcf5428572518310fc1643153e686d6b4b63d8bf49612c4.json"
+    },
+    {
+      "id": "0e2785ab2ceb5c7a5cbd1921887c0de02df2757350e6f6fdb9c4536cd4b13d89",
+      "name": "GenericCoefficient/Matrix/P3/dimension:2/expensive:1/process_time",
+      "metric": "cpu_time",
+      "url": "cases/0e2785ab2ceb5c7a5cbd1921887c0de02df2757350e6f6fdb9c4536cd4b13d89.json"
+    },
+    {
+      "id": "58e43fa8e27d1ee0ea9a7d4ee924eb3b7d5241f2e0fd521632b0675d169147fd",
+      "name": "GenericCoefficient/Matrix/P3/dimension:3/expensive:0/process_time",
+      "metric": "cpu_time",
+      "url": "cases/58e43fa8e27d1ee0ea9a7d4ee924eb3b7d5241f2e0fd521632b0675d169147fd.json"
+    },
+    {
+      "id": "f23d428016ca9bb2107beb4c661bf5ec9b845d8609c35bbf2fb507741778ccb1",
+      "name": "GenericCoefficient/Matrix/P3/dimension:3/expensive:1/process_time",
+      "metric": "cpu_time",
+      "url": "cases/f23d428016ca9bb2107beb4c661bf5ec9b845d8609c35bbf2fb507741778ccb1.json"
+    },
+    {
+      "id": "0abe4c5485f1ede9ec9bc3b4075f7471d54c6972d2741b5fd4e32f04f5244def",
+      "name": "GenericCoefficient/Scalar/P1/dimension:2/expensive:0/process_time",
+      "metric": "cpu_time",
+      "url": "cases/0abe4c5485f1ede9ec9bc3b4075f7471d54c6972d2741b5fd4e32f04f5244def.json"
+    },
+    {
+      "id": "53243d275dcfd82edb23b13acc301e01db129a84ef3596147a41930bc2445b18",
+      "name": "GenericCoefficient/Scalar/P1/dimension:2/expensive:1/process_time",
+      "metric": "cpu_time",
+      "url": "cases/53243d275dcfd82edb23b13acc301e01db129a84ef3596147a41930bc2445b18.json"
+    },
+    {
+      "id": "9dbc923849b5db57b7a8718fad5e19e3c9377d8cb49b6ad824e7c83a5722c58c",
+      "name": "GenericCoefficient/Scalar/P1/dimension:3/expensive:0/process_time",
+      "metric": "cpu_time",
+      "url": "cases/9dbc923849b5db57b7a8718fad5e19e3c9377d8cb49b6ad824e7c83a5722c58c.json"
+    },
+    {
+      "id": "12cd24af0eba25e446aadce8f2b497c3f3560e3fb342091d68d88dd20ca175c9",
+      "name": "GenericCoefficient/Scalar/P1/dimension:3/expensive:1/process_time",
+      "metric": "cpu_time",
+      "url": "cases/12cd24af0eba25e446aadce8f2b497c3f3560e3fb342091d68d88dd20ca175c9.json"
+    },
+    {
+      "id": "bd45b7c99aadb1d3132da24f306fbd44059c7982fc5dda67d5ea65e5b5f12a30",
+      "name": "GenericCoefficient/Scalar/P2/dimension:2/expensive:0/process_time",
+      "metric": "cpu_time",
+      "url": "cases/bd45b7c99aadb1d3132da24f306fbd44059c7982fc5dda67d5ea65e5b5f12a30.json"
+    },
+    {
+      "id": "26f280af5cb76093d9b4f91f7964b405d4ec2bff901135aa835fbfd03d422268",
+      "name": "GenericCoefficient/Scalar/P2/dimension:2/expensive:1/process_time",
+      "metric": "cpu_time",
+      "url": "cases/26f280af5cb76093d9b4f91f7964b405d4ec2bff901135aa835fbfd03d422268.json"
+    },
+    {
+      "id": "735eb3ea785b99dbbb7de17ccf33af405d22bdf03dafa0e23b043d9719a2680b",
+      "name": "GenericCoefficient/Scalar/P2/dimension:3/expensive:0/process_time",
+      "metric": "cpu_time",
+      "url": "cases/735eb3ea785b99dbbb7de17ccf33af405d22bdf03dafa0e23b043d9719a2680b.json"
+    },
+    {
+      "id": "ce3175e7d43f352cc14a78332f566c0a8f5b049b2e105bbd38d71900b60fa156",
+      "name": "GenericCoefficient/Scalar/P2/dimension:3/expensive:1/process_time",
+      "metric": "cpu_time",
+      "url": "cases/ce3175e7d43f352cc14a78332f566c0a8f5b049b2e105bbd38d71900b60fa156.json"
+    },
+    {
+      "id": "f9f1e260b15190057fb2621f244a947e382238924ef90b45e697b26f32e06e6f",
+      "name": "GenericCoefficient/Scalar/P3/dimension:2/expensive:0/process_time",
+      "metric": "cpu_time",
+      "url": "cases/f9f1e260b15190057fb2621f244a947e382238924ef90b45e697b26f32e06e6f.json"
+    },
+    {
+      "id": "b7de362d344b1f9ee7e20124e59f08b3d32d517acd4a1c4c1e082ee1f1a125a0",
+      "name": "GenericCoefficient/Scalar/P3/dimension:2/expensive:1/process_time",
+      "metric": "cpu_time",
+      "url": "cases/b7de362d344b1f9ee7e20124e59f08b3d32d517acd4a1c4c1e082ee1f1a125a0.json"
+    },
+    {
+      "id": "6b1c72e1d86fcfc51efc672982094cde7ee609251158e66f5cb4fb2151c62e70",
+      "name": "GenericCoefficient/Scalar/P3/dimension:3/expensive:0/process_time",
+      "metric": "cpu_time",
+      "url": "cases/6b1c72e1d86fcfc51efc672982094cde7ee609251158e66f5cb4fb2151c62e70.json"
+    },
+    {
+      "id": "7ec7f5436d47f50c3935e62d26d56d586cc13d238290854771a0ceff03ef6d02",
+      "name": "GenericCoefficient/Scalar/P3/dimension:3/expensive:1/process_time",
+      "metric": "cpu_time",
+      "url": "cases/7ec7f5436d47f50c3935e62d26d56d586cc13d238290854771a0ceff03ef6d02.json"
+    },
+    {
+      "id": "bd63c62729dbf4cfbdb955ac0254c02859246f14349366085f8d21799e4d7082",
+      "name": "GenericCoefficient/Vector/P1/dimension:2/expensive:0/process_time",
+      "metric": "cpu_time",
+      "url": "cases/bd63c62729dbf4cfbdb955ac0254c02859246f14349366085f8d21799e4d7082.json"
+    },
+    {
+      "id": "4ffa7be0603714062c5538b0e146e1c00bc279c1cdb5cc345d30ba6aba112596",
+      "name": "GenericCoefficient/Vector/P1/dimension:2/expensive:1/process_time",
+      "metric": "cpu_time",
+      "url": "cases/4ffa7be0603714062c5538b0e146e1c00bc279c1cdb5cc345d30ba6aba112596.json"
+    },
+    {
+      "id": "48b411efc6d026ba06772523562f5144707fe3620d9b47e8c024a03e0bfd721c",
+      "name": "GenericCoefficient/Vector/P1/dimension:3/expensive:0/process_time",
+      "metric": "cpu_time",
+      "url": "cases/48b411efc6d026ba06772523562f5144707fe3620d9b47e8c024a03e0bfd721c.json"
+    },
+    {
+      "id": "3e4ff802015ad3a8bf9951ebbcf92cb2498510213f3f5c59d54822cb8a95d7f9",
+      "name": "GenericCoefficient/Vector/P1/dimension:3/expensive:1/process_time",
+      "metric": "cpu_time",
+      "url": "cases/3e4ff802015ad3a8bf9951ebbcf92cb2498510213f3f5c59d54822cb8a95d7f9.json"
+    },
+    {
+      "id": "cb9bc256673f437162261083fd904d9d569e19707337353cda5281448fe39fbf",
+      "name": "GenericCoefficient/Vector/P2/dimension:2/expensive:0/process_time",
+      "metric": "cpu_time",
+      "url": "cases/cb9bc256673f437162261083fd904d9d569e19707337353cda5281448fe39fbf.json"
+    },
+    {
+      "id": "e2e6fdd57d9eae0da5da55d3beac5ba4aff9b576fb6e009831e6e59abdca9176",
+      "name": "GenericCoefficient/Vector/P2/dimension:2/expensive:1/process_time",
+      "metric": "cpu_time",
+      "url": "cases/e2e6fdd57d9eae0da5da55d3beac5ba4aff9b576fb6e009831e6e59abdca9176.json"
+    },
+    {
+      "id": "c691e527930aa01f48f32b32d898486c0cffab1fbd447ef81238929152e38a8b",
+      "name": "GenericCoefficient/Vector/P2/dimension:3/expensive:0/process_time",
+      "metric": "cpu_time",
+      "url": "cases/c691e527930aa01f48f32b32d898486c0cffab1fbd447ef81238929152e38a8b.json"
+    },
+    {
+      "id": "f1adf6af6766e784edc67a75ef9edd37c5d9d8a4bc380a3a2497c5bbcc3782aa",
+      "name": "GenericCoefficient/Vector/P2/dimension:3/expensive:1/process_time",
+      "metric": "cpu_time",
+      "url": "cases/f1adf6af6766e784edc67a75ef9edd37c5d9d8a4bc380a3a2497c5bbcc3782aa.json"
+    },
+    {
+      "id": "09eee927fe4a799336e2362348476865ce5a17e53d9fc8ea23a1f695f0f43915",
+      "name": "GenericCoefficient/Vector/P3/dimension:2/expensive:0/process_time",
+      "metric": "cpu_time",
+      "url": "cases/09eee927fe4a799336e2362348476865ce5a17e53d9fc8ea23a1f695f0f43915.json"
+    },
+    {
+      "id": "ca565b6e91a3ad984685b0ed49ad0c09338311683b59d6c986d64450d0cfa739",
+      "name": "GenericCoefficient/Vector/P3/dimension:2/expensive:1/process_time",
+      "metric": "cpu_time",
+      "url": "cases/ca565b6e91a3ad984685b0ed49ad0c09338311683b59d6c986d64450d0cfa739.json"
+    },
+    {
+      "id": "8f9c04f6f1a3e2dd613391c02694cbf9e783f887a4033c7fea5aa14cf583ad1c",
+      "name": "GenericCoefficient/Vector/P3/dimension:3/expensive:0/process_time",
+      "metric": "cpu_time",
+      "url": "cases/8f9c04f6f1a3e2dd613391c02694cbf9e783f887a4033c7fea5aa14cf583ad1c.json"
+    },
+    {
+      "id": "99f3269c736df2b5cb7406e35395426b909c151bd4224061cbe2c008247123dc",
+      "name": "GenericCoefficient/Vector/P3/dimension:3/expensive:1/process_time",
+      "metric": "cpu_time",
+      "url": "cases/99f3269c736df2b5cb7406e35395426b909c151bd4224061cbe2c008247123dc.json"
+    }
+  ]
+}

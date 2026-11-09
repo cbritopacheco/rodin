@@ -1,0 +1,2942 @@
+{
+  "schema": 1,
+  "definition": {
+    "kind": "benchmark",
+    "mode": "local",
+    "compiler": "gcc-14",
+    "runner": "ubuntu-24.04",
+    "cmake": {
+      "CMAKE_BUILD_TYPE": "Release",
+      "CMAKE_CXX_COMPILER": "g++-14",
+      "CMAKE_C_COMPILER": "gcc-14",
+      "CMAKE_SUPPRESS_REGENERATION": "ON",
+      "RODIN_BUILD_SRC": "ON",
+      "RODIN_BUILD_BENCHMARKS": "ON",
+      "RODIN_BUILD_UNIT_TESTS": "OFF",
+      "RODIN_BUILD_MANUFACTURED_TESTS": "OFF",
+      "RODIN_BUILD_CONVERGENCE_TESTS": "OFF",
+      "RODIN_BUILD_EXAMPLES": "OFF",
+      "RODIN_BUILD_DOC": "OFF",
+      "RODIN_INSTALL_RESOURCES": "OFF",
+      "RODIN_CODE_COVERAGE": "OFF",
+      "RODIN_MULTITHREADED": "OFF",
+      "RODIN_USE_ASAN": "OFF",
+      "RODIN_USE_UBSAN": "OFF",
+      "RODIN_USE_MPI": "OFF",
+      "RODIN_USE_PETSC": "OFF"
+    },
+    "targets": [
+      "RodinBasisScalingBenchmarks",
+      "RodinFieldContractionBenchmarks",
+      "RodinFieldDerivativeBenchmarks",
+      "RodinFieldOperationBenchmarks",
+      "RodinGridFunctionBenchmarks",
+      "RodinH1BasisLifecycleBenchmarks",
+      "RodinH1ConvectionBenchmarks",
+      "RodinH1MassBindingBenchmarks",
+      "RodinH1MassOperandOrderBenchmarks",
+      "RodinH1PreparedBasisBenchmarks",
+      "RodinH1PyramidBenchmarks",
+      "RodinH1PyramidNodalBenchmarks",
+      "RodinNamedFormBenchmarks",
+      "RodinNamedMassKernelBenchmarks",
+      "RodinP1QuadratureBindingBenchmarks",
+      "RodinPhysicalGradientBenchmarks",
+      "RodinProblemLifecycleBenchmarks",
+      "RodinQuadratureBindingBenchmarks",
+      "RodinQuadratureExpressionBenchmarks",
+      "RodinReferenceElementBenchmarks",
+      "RodinStokesBindingBenchmarks",
+      "RodinVariationalCoefficientEvaluationBenchmarks",
+      "RodinVariationalGridFunctionBenchmarks",
+      "RodinVariationalIntegratorsBenchmarks",
+      "RodinVariationalNamedFormsBenchmarks",
+      "RodinVariationalP1Benchmarks",
+      "RodinVariationalRankOneJacobianBenchmarks"
+    ],
+    "stage": "components"
+  },
+  "ranks": 1,
+  "cases": [
+    {
+      "id": "6f1fb5ecaf1a65c81577b1743b6d86718a5b1d51951ddc8b6d0759130fc26bb4",
+      "name": "NamedEvaluation/P1/Diffusion/Constant/Integral/First/dimension:2/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/6f1fb5ecaf1a65c81577b1743b6d86718a5b1d51951ddc8b6d0759130fc26bb4.json"
+    },
+    {
+      "id": "f5a829a261a51dd72ac5349e2d3ce0eb3dc6d4f6f8df984d12e5ea5d1e0545b6",
+      "name": "NamedEvaluation/P1/Diffusion/Constant/Integral/First/dimension:3/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/f5a829a261a51dd72ac5349e2d3ce0eb3dc6d4f6f8df984d12e5ea5d1e0545b6.json"
+    },
+    {
+      "id": "55981af933cbf79d3d34ac35c0a4a120bace483847e32e88c00e49fa9fdb12f3",
+      "name": "NamedEvaluation/P1/Diffusion/Constant/Integral/Warm/dimension:2/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/55981af933cbf79d3d34ac35c0a4a120bace483847e32e88c00e49fa9fdb12f3.json"
+    },
+    {
+      "id": "8b6dd230c8426c4d624faf54375d222bf9f8e8bc3b983433c35a18d8ece36c2e",
+      "name": "NamedEvaluation/P1/Diffusion/Constant/Integral/Warm/dimension:3/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/8b6dd230c8426c4d624faf54375d222bf9f8e8bc3b983433c35a18d8ece36c2e.json"
+    },
+    {
+      "id": "5a04b139344fc80eee8f7abf8c514d12837e56fb538fc5942fa8fd4d57a0ed2e",
+      "name": "NamedEvaluation/P1/Diffusion/Constant/Named/First/dimension:2/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/5a04b139344fc80eee8f7abf8c514d12837e56fb538fc5942fa8fd4d57a0ed2e.json"
+    },
+    {
+      "id": "82888daeea810bac791bf38d65e31350b5c09ad364fa7f4e31c237ee7e924ca8",
+      "name": "NamedEvaluation/P1/Diffusion/Constant/Named/First/dimension:3/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/82888daeea810bac791bf38d65e31350b5c09ad364fa7f4e31c237ee7e924ca8.json"
+    },
+    {
+      "id": "f249f5ad83fd246d70d1ef342e68f4d2b2a2b213fb0433706bbc7d407319f7b0",
+      "name": "NamedEvaluation/P1/Diffusion/Constant/Named/Warm/dimension:2/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/f249f5ad83fd246d70d1ef342e68f4d2b2a2b213fb0433706bbc7d407319f7b0.json"
+    },
+    {
+      "id": "9fac6cfb53b44abaffc490368b4668532c3de199f2ae4d8ae85ced453e5128ca",
+      "name": "NamedEvaluation/P1/Diffusion/Constant/Named/Warm/dimension:3/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/9fac6cfb53b44abaffc490368b4668532c3de199f2ae4d8ae85ced453e5128ca.json"
+    },
+    {
+      "id": "c60ac8a157b5891d11bc396b7e19dd250a07622746590c913bb43faa0da2ca53",
+      "name": "NamedEvaluation/P1/Diffusion/FieldCoefficient/Integral/First/dimension:2/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/c60ac8a157b5891d11bc396b7e19dd250a07622746590c913bb43faa0da2ca53.json"
+    },
+    {
+      "id": "f0183dc64f261bbcb7f164f36a9d493da20b7b92986d766652d43701c77bedc8",
+      "name": "NamedEvaluation/P1/Diffusion/FieldCoefficient/Integral/First/dimension:3/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/f0183dc64f261bbcb7f164f36a9d493da20b7b92986d766652d43701c77bedc8.json"
+    },
+    {
+      "id": "25aa51d0e63a2787c8d4905abee3d66fbf41760015dea7b46a924ccfddd1494e",
+      "name": "NamedEvaluation/P1/Diffusion/FieldCoefficient/Integral/Warm/dimension:2/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/25aa51d0e63a2787c8d4905abee3d66fbf41760015dea7b46a924ccfddd1494e.json"
+    },
+    {
+      "id": "ac5388fddbfafb581f9794f5c2030942e9a7a16bd663c75321021fe48a7c795e",
+      "name": "NamedEvaluation/P1/Diffusion/FieldCoefficient/Integral/Warm/dimension:3/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/ac5388fddbfafb581f9794f5c2030942e9a7a16bd663c75321021fe48a7c795e.json"
+    },
+    {
+      "id": "186f59fc8b4c7b1587bdf6a9c243c9590cb8fd23e441a605378b3829ebed4c20",
+      "name": "NamedEvaluation/P1/Diffusion/FieldCoefficient/Named/First/dimension:2/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/186f59fc8b4c7b1587bdf6a9c243c9590cb8fd23e441a605378b3829ebed4c20.json"
+    },
+    {
+      "id": "8cc3fcbaf294915ea0649fc660403125589c7aa2cf6f395d5f4d36f52a611365",
+      "name": "NamedEvaluation/P1/Diffusion/FieldCoefficient/Named/First/dimension:3/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/8cc3fcbaf294915ea0649fc660403125589c7aa2cf6f395d5f4d36f52a611365.json"
+    },
+    {
+      "id": "4bdf2f02a097e507feec01e80f00cba663de16fc2602d47f9dc655b02215b79e",
+      "name": "NamedEvaluation/P1/Diffusion/FieldCoefficient/Named/Warm/dimension:2/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/4bdf2f02a097e507feec01e80f00cba663de16fc2602d47f9dc655b02215b79e.json"
+    },
+    {
+      "id": "a02f98b8861b329cc7ee4617e63e823c83561a11902f15752f7835eabe4675a0",
+      "name": "NamedEvaluation/P1/Diffusion/FieldCoefficient/Named/Warm/dimension:3/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/a02f98b8861b329cc7ee4617e63e823c83561a11902f15752f7835eabe4675a0.json"
+    },
+    {
+      "id": "dbf95c4ad26ee4a0bbe60eea6bd6bb15820edb7d9d8713d4e5e5e62a181289e9",
+      "name": "NamedEvaluation/P1/Helmholtz/Constant/Integral/First/dimension:2/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/dbf95c4ad26ee4a0bbe60eea6bd6bb15820edb7d9d8713d4e5e5e62a181289e9.json"
+    },
+    {
+      "id": "5ede718300a30a0127f651c193180df94b568c1e8235d7c786fb1480a8822728",
+      "name": "NamedEvaluation/P1/Helmholtz/Constant/Integral/First/dimension:3/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/5ede718300a30a0127f651c193180df94b568c1e8235d7c786fb1480a8822728.json"
+    },
+    {
+      "id": "3519220328fd4ea34cdbbc3a5e4e9fcafb8d591a3ba05996fb83a71f59a5228a",
+      "name": "NamedEvaluation/P1/Helmholtz/Constant/Integral/Warm/dimension:2/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/3519220328fd4ea34cdbbc3a5e4e9fcafb8d591a3ba05996fb83a71f59a5228a.json"
+    },
+    {
+      "id": "466a2508ca461bbe558a29fc20781ef2db78f30c93a3586c3e1717216e2f1150",
+      "name": "NamedEvaluation/P1/Helmholtz/Constant/Integral/Warm/dimension:3/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/466a2508ca461bbe558a29fc20781ef2db78f30c93a3586c3e1717216e2f1150.json"
+    },
+    {
+      "id": "9156f8ae7bc7b5a608c5ac8ae189ef568498f97d919922f8da6a6166d9981c02",
+      "name": "NamedEvaluation/P1/Helmholtz/Constant/Named/First/dimension:2/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/9156f8ae7bc7b5a608c5ac8ae189ef568498f97d919922f8da6a6166d9981c02.json"
+    },
+    {
+      "id": "b25bd0f68d87f5f9c8efc6d640398644648df0fcb0781ccedb02abeafcf4fb44",
+      "name": "NamedEvaluation/P1/Helmholtz/Constant/Named/First/dimension:3/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/b25bd0f68d87f5f9c8efc6d640398644648df0fcb0781ccedb02abeafcf4fb44.json"
+    },
+    {
+      "id": "40937089a35bdbfc976306837b84dd1bdb99818b86d7946dbb64e843f3e9e821",
+      "name": "NamedEvaluation/P1/Helmholtz/Constant/Named/Warm/dimension:2/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/40937089a35bdbfc976306837b84dd1bdb99818b86d7946dbb64e843f3e9e821.json"
+    },
+    {
+      "id": "571b466d0a8d71f102d81d9f6eca18d3936373377481b18ca06b03bc821fddf3",
+      "name": "NamedEvaluation/P1/Helmholtz/Constant/Named/Warm/dimension:3/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/571b466d0a8d71f102d81d9f6eca18d3936373377481b18ca06b03bc821fddf3.json"
+    },
+    {
+      "id": "61534d257a409a4a8ba86fe9747382e19762df0318ab35295a868b33adb6c0e7",
+      "name": "NamedEvaluation/P1/Helmholtz/FieldCoefficient/Integral/First/dimension:2/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/61534d257a409a4a8ba86fe9747382e19762df0318ab35295a868b33adb6c0e7.json"
+    },
+    {
+      "id": "f5438ce664362c255c2cf7174b27568b243253703b65c052b97533f28d9d2af6",
+      "name": "NamedEvaluation/P1/Helmholtz/FieldCoefficient/Integral/First/dimension:3/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/f5438ce664362c255c2cf7174b27568b243253703b65c052b97533f28d9d2af6.json"
+    },
+    {
+      "id": "adf6edd0c21dfdf0b32a9af862992637a96b0014a3c94e7dd6a8f38e05bef1dd",
+      "name": "NamedEvaluation/P1/Helmholtz/FieldCoefficient/Integral/Warm/dimension:2/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/adf6edd0c21dfdf0b32a9af862992637a96b0014a3c94e7dd6a8f38e05bef1dd.json"
+    },
+    {
+      "id": "a307e13d98ef7a3dc33686779a78e09ea0ff30203f05a6dcda9108c9a383a773",
+      "name": "NamedEvaluation/P1/Helmholtz/FieldCoefficient/Integral/Warm/dimension:3/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/a307e13d98ef7a3dc33686779a78e09ea0ff30203f05a6dcda9108c9a383a773.json"
+    },
+    {
+      "id": "6b88ed8af67bb0acdcf4cc2832b8efe2655f5a92dadf7ab03707e9b7909607d0",
+      "name": "NamedEvaluation/P1/Helmholtz/FieldCoefficient/Named/First/dimension:2/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/6b88ed8af67bb0acdcf4cc2832b8efe2655f5a92dadf7ab03707e9b7909607d0.json"
+    },
+    {
+      "id": "ab10bff62cd7c2b2268c5b6369ad1261867c4f09a7d1a270f36caaf8d71bc830",
+      "name": "NamedEvaluation/P1/Helmholtz/FieldCoefficient/Named/First/dimension:3/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/ab10bff62cd7c2b2268c5b6369ad1261867c4f09a7d1a270f36caaf8d71bc830.json"
+    },
+    {
+      "id": "1876c76448fb01b486d58b4249cc92ebec2393871a4f6d9dcac488b75b120aec",
+      "name": "NamedEvaluation/P1/Helmholtz/FieldCoefficient/Named/Warm/dimension:2/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/1876c76448fb01b486d58b4249cc92ebec2393871a4f6d9dcac488b75b120aec.json"
+    },
+    {
+      "id": "ab21bece38cdcd9eb235c9401f567964601579e7c5112101a7a2d5e8241d959f",
+      "name": "NamedEvaluation/P1/Helmholtz/FieldCoefficient/Named/Warm/dimension:3/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/ab21bece38cdcd9eb235c9401f567964601579e7c5112101a7a2d5e8241d959f.json"
+    },
+    {
+      "id": "0b5b5453a9296ece683623eb408a7c55b8b0d5e3f63f8870b578002773017e4d",
+      "name": "NamedEvaluation/P1/LinearElasticity/Constant/Integral/First/dimension:2/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/0b5b5453a9296ece683623eb408a7c55b8b0d5e3f63f8870b578002773017e4d.json"
+    },
+    {
+      "id": "33c493e51970ff78027e92a3f9b7ae80c6c3d6d96df353dff73d4f20f4cc5423",
+      "name": "NamedEvaluation/P1/LinearElasticity/Constant/Integral/First/dimension:3/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/33c493e51970ff78027e92a3f9b7ae80c6c3d6d96df353dff73d4f20f4cc5423.json"
+    },
+    {
+      "id": "21f725f60bb040b06673a58d427fdc1d9f7e1cb75a9d4f966518baccda6990b2",
+      "name": "NamedEvaluation/P1/LinearElasticity/Constant/Integral/Warm/dimension:2/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/21f725f60bb040b06673a58d427fdc1d9f7e1cb75a9d4f966518baccda6990b2.json"
+    },
+    {
+      "id": "ba0027497254252c70a089d1af9cbe1418b8b9f9ccb4a7093837d08fda2c6ede",
+      "name": "NamedEvaluation/P1/LinearElasticity/Constant/Integral/Warm/dimension:3/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/ba0027497254252c70a089d1af9cbe1418b8b9f9ccb4a7093837d08fda2c6ede.json"
+    },
+    {
+      "id": "b1133e21eed78c8025f17f528fbb8de00d86b3ed9bad9380ef3046a9d168eb30",
+      "name": "NamedEvaluation/P1/LinearElasticity/Constant/Named/First/dimension:2/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/b1133e21eed78c8025f17f528fbb8de00d86b3ed9bad9380ef3046a9d168eb30.json"
+    },
+    {
+      "id": "e1dd972fadd38250efc512a712c55acd12aff36b0652f001844ce1dc0608ab22",
+      "name": "NamedEvaluation/P1/LinearElasticity/Constant/Named/First/dimension:3/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/e1dd972fadd38250efc512a712c55acd12aff36b0652f001844ce1dc0608ab22.json"
+    },
+    {
+      "id": "31308be4f3d161d5199d3e1bd556848e5f946611902a2b92c31cf522a1271ec0",
+      "name": "NamedEvaluation/P1/LinearElasticity/Constant/Named/Warm/dimension:2/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/31308be4f3d161d5199d3e1bd556848e5f946611902a2b92c31cf522a1271ec0.json"
+    },
+    {
+      "id": "5de59afdd17132f351506287cc127460d33efd67291b2798a4573d31b23ef591",
+      "name": "NamedEvaluation/P1/LinearElasticity/Constant/Named/Warm/dimension:3/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/5de59afdd17132f351506287cc127460d33efd67291b2798a4573d31b23ef591.json"
+    },
+    {
+      "id": "17d6db1a64fdfa5a34d288ad9672a00fb969675cf09de3b2732b597f315aae7d",
+      "name": "NamedEvaluation/P1/LinearElasticity/FieldCoefficient/Integral/First/dimension:2/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/17d6db1a64fdfa5a34d288ad9672a00fb969675cf09de3b2732b597f315aae7d.json"
+    },
+    {
+      "id": "97acbf2f2ecb9730653f4a64d7469414ade421b2691171bb7be6e3c9efe9665c",
+      "name": "NamedEvaluation/P1/LinearElasticity/FieldCoefficient/Integral/First/dimension:3/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/97acbf2f2ecb9730653f4a64d7469414ade421b2691171bb7be6e3c9efe9665c.json"
+    },
+    {
+      "id": "93c9ef19013e481bcd2e3a7b6d5c2bc8f1c000957f2779b20ff41a0a62a36f14",
+      "name": "NamedEvaluation/P1/LinearElasticity/FieldCoefficient/Integral/Warm/dimension:2/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/93c9ef19013e481bcd2e3a7b6d5c2bc8f1c000957f2779b20ff41a0a62a36f14.json"
+    },
+    {
+      "id": "087d1788fba7b343470753bd73cdbc98a530adbbc54a55b1c5eb728c2bf86c6a",
+      "name": "NamedEvaluation/P1/LinearElasticity/FieldCoefficient/Integral/Warm/dimension:3/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/087d1788fba7b343470753bd73cdbc98a530adbbc54a55b1c5eb728c2bf86c6a.json"
+    },
+    {
+      "id": "57e87a7dccf8f65d27e4251d21ef67f3af411121f218fd5c756e2117fe56c13b",
+      "name": "NamedEvaluation/P1/LinearElasticity/FieldCoefficient/Named/First/dimension:2/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/57e87a7dccf8f65d27e4251d21ef67f3af411121f218fd5c756e2117fe56c13b.json"
+    },
+    {
+      "id": "1390516e92856e25aa912e2f76268b295e6171b826c4d13f2a7767bb32d1a293",
+      "name": "NamedEvaluation/P1/LinearElasticity/FieldCoefficient/Named/First/dimension:3/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/1390516e92856e25aa912e2f76268b295e6171b826c4d13f2a7767bb32d1a293.json"
+    },
+    {
+      "id": "4d30d63e18624aa526f75f0a33b23ad0b27e7852539217a2815a2beba5190285",
+      "name": "NamedEvaluation/P1/LinearElasticity/FieldCoefficient/Named/Warm/dimension:2/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/4d30d63e18624aa526f75f0a33b23ad0b27e7852539217a2815a2beba5190285.json"
+    },
+    {
+      "id": "cb8aefe28ceb7548b226abd2179244841b8da5072a6e2909bb19640c4c1cafbd",
+      "name": "NamedEvaluation/P1/LinearElasticity/FieldCoefficient/Named/Warm/dimension:3/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/cb8aefe28ceb7548b226abd2179244841b8da5072a6e2909bb19640c4c1cafbd.json"
+    },
+    {
+      "id": "96c1d075aff5f4223a98417a32b57fda9d9a05ae62a9744b096acde0529e49cd",
+      "name": "NamedEvaluation/P1/Mass/Constant/Integral/First/dimension:2/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/96c1d075aff5f4223a98417a32b57fda9d9a05ae62a9744b096acde0529e49cd.json"
+    },
+    {
+      "id": "2474579ecb84e737e705282531d69a4c0c17cc99619ca97127c0741af002f1ed",
+      "name": "NamedEvaluation/P1/Mass/Constant/Integral/First/dimension:3/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/2474579ecb84e737e705282531d69a4c0c17cc99619ca97127c0741af002f1ed.json"
+    },
+    {
+      "id": "b78a9bba809a3b307d798031fe8b0f9b94c01024070b6db78029894f7ead53bf",
+      "name": "NamedEvaluation/P1/Mass/Constant/Integral/Warm/dimension:2/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/b78a9bba809a3b307d798031fe8b0f9b94c01024070b6db78029894f7ead53bf.json"
+    },
+    {
+      "id": "47ac70f763ad28b3df1e02bb9a1edfa041f1da10ba6531f011d56ce0cbb31644",
+      "name": "NamedEvaluation/P1/Mass/Constant/Integral/Warm/dimension:3/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/47ac70f763ad28b3df1e02bb9a1edfa041f1da10ba6531f011d56ce0cbb31644.json"
+    },
+    {
+      "id": "3d76068edc791ddd7c51ec137409fa0e47647322b468114069d3e7c7cafd6608",
+      "name": "NamedEvaluation/P1/Mass/Constant/Named/First/dimension:2/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/3d76068edc791ddd7c51ec137409fa0e47647322b468114069d3e7c7cafd6608.json"
+    },
+    {
+      "id": "4bb712da25e27bc45423c858292e791fe7926d1cc056104d025ba71a6fb97cac",
+      "name": "NamedEvaluation/P1/Mass/Constant/Named/First/dimension:3/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/4bb712da25e27bc45423c858292e791fe7926d1cc056104d025ba71a6fb97cac.json"
+    },
+    {
+      "id": "c1c70276b8ca8967e6cbcc3aed2fa50fcaddf44d01544b6e45059f8816ec4eb7",
+      "name": "NamedEvaluation/P1/Mass/Constant/Named/Warm/dimension:2/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/c1c70276b8ca8967e6cbcc3aed2fa50fcaddf44d01544b6e45059f8816ec4eb7.json"
+    },
+    {
+      "id": "3e1dfc5c1cf138153fcf9c633cdbb9a482b9d10051b4cfb3901b5ea337917e30",
+      "name": "NamedEvaluation/P1/Mass/Constant/Named/Warm/dimension:3/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/3e1dfc5c1cf138153fcf9c633cdbb9a482b9d10051b4cfb3901b5ea337917e30.json"
+    },
+    {
+      "id": "f28f0fd876618491e8d665fd34780894bacc35393493c2bc4a8c86eebdd4e8a4",
+      "name": "NamedEvaluation/P1/Mass/FieldCoefficient/Integral/First/dimension:2/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/f28f0fd876618491e8d665fd34780894bacc35393493c2bc4a8c86eebdd4e8a4.json"
+    },
+    {
+      "id": "319fae3e4dc0f59fd09f32afb746f21ddd241f1906cab8b0853c64e445bb5ee9",
+      "name": "NamedEvaluation/P1/Mass/FieldCoefficient/Integral/First/dimension:3/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/319fae3e4dc0f59fd09f32afb746f21ddd241f1906cab8b0853c64e445bb5ee9.json"
+    },
+    {
+      "id": "6595378531243bf80b266e03fa5c6a871b372c9a27457adc060eeb3e7c370400",
+      "name": "NamedEvaluation/P1/Mass/FieldCoefficient/Integral/Warm/dimension:2/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/6595378531243bf80b266e03fa5c6a871b372c9a27457adc060eeb3e7c370400.json"
+    },
+    {
+      "id": "90bbb4ebc80da21432c86ecb3b0bc59ef84178cd7ae6106c0db74d9dcff6b06c",
+      "name": "NamedEvaluation/P1/Mass/FieldCoefficient/Integral/Warm/dimension:3/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/90bbb4ebc80da21432c86ecb3b0bc59ef84178cd7ae6106c0db74d9dcff6b06c.json"
+    },
+    {
+      "id": "89dea4e96278d5188a7f58ddf5d741f95823a0882a2b57a8b0285d98c0f73343",
+      "name": "NamedEvaluation/P1/Mass/FieldCoefficient/Named/First/dimension:2/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/89dea4e96278d5188a7f58ddf5d741f95823a0882a2b57a8b0285d98c0f73343.json"
+    },
+    {
+      "id": "8e58c20ac508fe652083aebe220040d43c957a4039ba2121f7f8ac75e3197800",
+      "name": "NamedEvaluation/P1/Mass/FieldCoefficient/Named/First/dimension:3/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/8e58c20ac508fe652083aebe220040d43c957a4039ba2121f7f8ac75e3197800.json"
+    },
+    {
+      "id": "36f39d30fe184738b4c13c88b2b5ff73df50961c94ca86b17f5a0a13df0987fe",
+      "name": "NamedEvaluation/P1/Mass/FieldCoefficient/Named/Warm/dimension:2/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/36f39d30fe184738b4c13c88b2b5ff73df50961c94ca86b17f5a0a13df0987fe.json"
+    },
+    {
+      "id": "be6e629dcfedd349f9a43484174b9ff6f976262b1b6060970feee7067664a798",
+      "name": "NamedEvaluation/P1/Mass/FieldCoefficient/Named/Warm/dimension:3/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/be6e629dcfedd349f9a43484174b9ff6f976262b1b6060970feee7067664a798.json"
+    },
+    {
+      "id": "9ffd7a7cd734c19e081ce3cfde21391c580a15a5aec60ba89f4c3516dc729161",
+      "name": "NamedEvaluation/P1/VectorMass/Constant/Integral/First/dimension:2/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/9ffd7a7cd734c19e081ce3cfde21391c580a15a5aec60ba89f4c3516dc729161.json"
+    },
+    {
+      "id": "77f6c34a0aa26a185fffe9288dffae33e2c19025b08f1c8a549d7e9a3528345f",
+      "name": "NamedEvaluation/P1/VectorMass/Constant/Integral/First/dimension:3/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/77f6c34a0aa26a185fffe9288dffae33e2c19025b08f1c8a549d7e9a3528345f.json"
+    },
+    {
+      "id": "5288fd46ddc6fc839e684ca45402ae686ef95d813e29d451e2be9b664037121a",
+      "name": "NamedEvaluation/P1/VectorMass/Constant/Integral/Warm/dimension:2/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/5288fd46ddc6fc839e684ca45402ae686ef95d813e29d451e2be9b664037121a.json"
+    },
+    {
+      "id": "5d32852875658efce38886f85bdaed631f124615c4fe5440b5b987a429722c87",
+      "name": "NamedEvaluation/P1/VectorMass/Constant/Integral/Warm/dimension:3/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/5d32852875658efce38886f85bdaed631f124615c4fe5440b5b987a429722c87.json"
+    },
+    {
+      "id": "36d4f16fd54a1447f8b06c2fed722930a5957b6f02d38d6ef9f76d9695f679e5",
+      "name": "NamedEvaluation/P1/VectorMass/Constant/Named/First/dimension:2/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/36d4f16fd54a1447f8b06c2fed722930a5957b6f02d38d6ef9f76d9695f679e5.json"
+    },
+    {
+      "id": "a12837d95442174f54718f0b3bfc3a712b1ab0b67a6915cbd5a559ac77594d79",
+      "name": "NamedEvaluation/P1/VectorMass/Constant/Named/First/dimension:3/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/a12837d95442174f54718f0b3bfc3a712b1ab0b67a6915cbd5a559ac77594d79.json"
+    },
+    {
+      "id": "060939fa62d172af5ad286ffb9fa72a13b1b9850d73a4e458b6fc4a11d840e99",
+      "name": "NamedEvaluation/P1/VectorMass/Constant/Named/Warm/dimension:2/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/060939fa62d172af5ad286ffb9fa72a13b1b9850d73a4e458b6fc4a11d840e99.json"
+    },
+    {
+      "id": "c0b23a19dc6c923625e3256e59acb66eaf5abc359cee27bfedd2d8b67b669f32",
+      "name": "NamedEvaluation/P1/VectorMass/Constant/Named/Warm/dimension:3/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/c0b23a19dc6c923625e3256e59acb66eaf5abc359cee27bfedd2d8b67b669f32.json"
+    },
+    {
+      "id": "9f53270442c3a3e3bb41e9381a71b1b34d039805c18cbe6189f4a3544842c96a",
+      "name": "NamedEvaluation/P1/VectorMass/FieldCoefficient/Integral/First/dimension:2/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/9f53270442c3a3e3bb41e9381a71b1b34d039805c18cbe6189f4a3544842c96a.json"
+    },
+    {
+      "id": "289a6fe4588f00067c6e1a96c12ca35d544ac4c8c186d3c706b6632340bc5210",
+      "name": "NamedEvaluation/P1/VectorMass/FieldCoefficient/Integral/First/dimension:3/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/289a6fe4588f00067c6e1a96c12ca35d544ac4c8c186d3c706b6632340bc5210.json"
+    },
+    {
+      "id": "5e2565f392aab5f75e8a5fcd0623254923fb8fa13af6184d8c5cf92087c8a6f1",
+      "name": "NamedEvaluation/P1/VectorMass/FieldCoefficient/Integral/Warm/dimension:2/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/5e2565f392aab5f75e8a5fcd0623254923fb8fa13af6184d8c5cf92087c8a6f1.json"
+    },
+    {
+      "id": "63d2b46ceb8c5e46cd3ba8a23caf58f1a77d93eba0f768c371cdfe63f216d84a",
+      "name": "NamedEvaluation/P1/VectorMass/FieldCoefficient/Integral/Warm/dimension:3/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/63d2b46ceb8c5e46cd3ba8a23caf58f1a77d93eba0f768c371cdfe63f216d84a.json"
+    },
+    {
+      "id": "24f1dfb2cefd01a41aefac14a7e81983ce0c2ebbef7c251ae98c4616626bdccb",
+      "name": "NamedEvaluation/P1/VectorMass/FieldCoefficient/Named/First/dimension:2/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/24f1dfb2cefd01a41aefac14a7e81983ce0c2ebbef7c251ae98c4616626bdccb.json"
+    },
+    {
+      "id": "2b60f6870c6275ad414949f5faadb720e5b08ae53ecd3a16618d93ae46a986c1",
+      "name": "NamedEvaluation/P1/VectorMass/FieldCoefficient/Named/First/dimension:3/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/2b60f6870c6275ad414949f5faadb720e5b08ae53ecd3a16618d93ae46a986c1.json"
+    },
+    {
+      "id": "52e154b5d4af24b03249fd34c6d0e4f61936133812c4537c7b431e1061cd4a75",
+      "name": "NamedEvaluation/P1/VectorMass/FieldCoefficient/Named/Warm/dimension:2/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/52e154b5d4af24b03249fd34c6d0e4f61936133812c4537c7b431e1061cd4a75.json"
+    },
+    {
+      "id": "819aa8bbaf28238b546bc001220e6b5ce5d205847c48ce5646f02695684e5c50",
+      "name": "NamedEvaluation/P1/VectorMass/FieldCoefficient/Named/Warm/dimension:3/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/819aa8bbaf28238b546bc001220e6b5ce5d205847c48ce5646f02695684e5c50.json"
+    },
+    {
+      "id": "ef96575e90b47502e6894487a71799c40a31078cd9d6b79414166fb997a9bdfd",
+      "name": "NamedEvaluation/P2/Diffusion/Constant/Integral/First/dimension:2/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/ef96575e90b47502e6894487a71799c40a31078cd9d6b79414166fb997a9bdfd.json"
+    },
+    {
+      "id": "91b7e7c82af022d08b7cf5c628b1811ab1347c1e444bfbfb40eafb05c36638d7",
+      "name": "NamedEvaluation/P2/Diffusion/Constant/Integral/First/dimension:3/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/91b7e7c82af022d08b7cf5c628b1811ab1347c1e444bfbfb40eafb05c36638d7.json"
+    },
+    {
+      "id": "bd94aca4b5ca188684f669679e574c85003f35b426866cc20e460bef178cdaa2",
+      "name": "NamedEvaluation/P2/Diffusion/Constant/Integral/Warm/dimension:2/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/bd94aca4b5ca188684f669679e574c85003f35b426866cc20e460bef178cdaa2.json"
+    },
+    {
+      "id": "19f9a8d17b4cb498e4fab0bfd563a6cafed89c0580fa629681e874472d9312a1",
+      "name": "NamedEvaluation/P2/Diffusion/Constant/Integral/Warm/dimension:3/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/19f9a8d17b4cb498e4fab0bfd563a6cafed89c0580fa629681e874472d9312a1.json"
+    },
+    {
+      "id": "361cc4a8afff8872acf28c9304ab4e9c9ae75e765f30dab241fd09fb149e4691",
+      "name": "NamedEvaluation/P2/Diffusion/Constant/Named/First/dimension:2/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/361cc4a8afff8872acf28c9304ab4e9c9ae75e765f30dab241fd09fb149e4691.json"
+    },
+    {
+      "id": "9d452576be18bcc676b73382e2d5e87b48e103c07e92b6edfbe0c518947318a0",
+      "name": "NamedEvaluation/P2/Diffusion/Constant/Named/First/dimension:3/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/9d452576be18bcc676b73382e2d5e87b48e103c07e92b6edfbe0c518947318a0.json"
+    },
+    {
+      "id": "c1660c95e2aafff72b208ad53f868cfe87047e905eace8969e7cb945baf3c296",
+      "name": "NamedEvaluation/P2/Diffusion/Constant/Named/Warm/dimension:2/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/c1660c95e2aafff72b208ad53f868cfe87047e905eace8969e7cb945baf3c296.json"
+    },
+    {
+      "id": "34dc716003d62193fc5d4a5f98a95193b785bf604b32761b865ff1fd8478d9fa",
+      "name": "NamedEvaluation/P2/Diffusion/Constant/Named/Warm/dimension:3/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/34dc716003d62193fc5d4a5f98a95193b785bf604b32761b865ff1fd8478d9fa.json"
+    },
+    {
+      "id": "3b0fab2731385629f6d09534afe135dcf389f876f42c87869d2f5e4e35850a39",
+      "name": "NamedEvaluation/P2/Diffusion/FieldCoefficient/Integral/First/dimension:2/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/3b0fab2731385629f6d09534afe135dcf389f876f42c87869d2f5e4e35850a39.json"
+    },
+    {
+      "id": "448227f786efe98e383fc15ab0ced9317e5682016a1684325110fd041fed0d52",
+      "name": "NamedEvaluation/P2/Diffusion/FieldCoefficient/Integral/First/dimension:3/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/448227f786efe98e383fc15ab0ced9317e5682016a1684325110fd041fed0d52.json"
+    },
+    {
+      "id": "21b1f936fce2404ccae5fc85879922245da4782225e5f51363430313b21c7add",
+      "name": "NamedEvaluation/P2/Diffusion/FieldCoefficient/Integral/Warm/dimension:2/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/21b1f936fce2404ccae5fc85879922245da4782225e5f51363430313b21c7add.json"
+    },
+    {
+      "id": "47bcf4d933adecb99e81faa1ca36a90439173b5f9e61a6d1699ea0c54da1e4b4",
+      "name": "NamedEvaluation/P2/Diffusion/FieldCoefficient/Integral/Warm/dimension:3/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/47bcf4d933adecb99e81faa1ca36a90439173b5f9e61a6d1699ea0c54da1e4b4.json"
+    },
+    {
+      "id": "ddfcffdd458ad4f4419252b0555da883b28ebaf194f4217ea7253c577bdcc52b",
+      "name": "NamedEvaluation/P2/Diffusion/FieldCoefficient/Named/First/dimension:2/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/ddfcffdd458ad4f4419252b0555da883b28ebaf194f4217ea7253c577bdcc52b.json"
+    },
+    {
+      "id": "d38495a41e5d900613ce2fe6ec0bae19b5a0182931ef9f1af2fe80f14be3bed0",
+      "name": "NamedEvaluation/P2/Diffusion/FieldCoefficient/Named/First/dimension:3/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/d38495a41e5d900613ce2fe6ec0bae19b5a0182931ef9f1af2fe80f14be3bed0.json"
+    },
+    {
+      "id": "51de1b4bf0cdf16539ffe43f7ddd0d5d798b5179d5757724d1ec213e085a8826",
+      "name": "NamedEvaluation/P2/Diffusion/FieldCoefficient/Named/Warm/dimension:2/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/51de1b4bf0cdf16539ffe43f7ddd0d5d798b5179d5757724d1ec213e085a8826.json"
+    },
+    {
+      "id": "15ac5739dcc040ae64c6dba34f9595b4259440815b18589d2e9d3edc35626da3",
+      "name": "NamedEvaluation/P2/Diffusion/FieldCoefficient/Named/Warm/dimension:3/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/15ac5739dcc040ae64c6dba34f9595b4259440815b18589d2e9d3edc35626da3.json"
+    },
+    {
+      "id": "2ec1c4eb436444aae6ee7325656c5f72eaad781011262bef4593ec8b442ab5b4",
+      "name": "NamedEvaluation/P2/Helmholtz/Constant/Integral/First/dimension:2/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/2ec1c4eb436444aae6ee7325656c5f72eaad781011262bef4593ec8b442ab5b4.json"
+    },
+    {
+      "id": "5d2de8864d0075614c5b05018bf7bbb2711bddd66e66a6cbcf20abe1a96ac843",
+      "name": "NamedEvaluation/P2/Helmholtz/Constant/Integral/First/dimension:3/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/5d2de8864d0075614c5b05018bf7bbb2711bddd66e66a6cbcf20abe1a96ac843.json"
+    },
+    {
+      "id": "f7b9a6c2b0d1ed916bd8176aa43c45d78d784f48b383a45596a8f686eb870972",
+      "name": "NamedEvaluation/P2/Helmholtz/Constant/Integral/Warm/dimension:2/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/f7b9a6c2b0d1ed916bd8176aa43c45d78d784f48b383a45596a8f686eb870972.json"
+    },
+    {
+      "id": "d14ef9b596901f507fc093c42bb26ea18e254fa9df7d65c758bfa3fdcdbb1102",
+      "name": "NamedEvaluation/P2/Helmholtz/Constant/Integral/Warm/dimension:3/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/d14ef9b596901f507fc093c42bb26ea18e254fa9df7d65c758bfa3fdcdbb1102.json"
+    },
+    {
+      "id": "129a56ddde7db48c9bf8ed925211b1f1ddbca44b367ef2b213569fe34cbf36a4",
+      "name": "NamedEvaluation/P2/Helmholtz/Constant/Named/First/dimension:2/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/129a56ddde7db48c9bf8ed925211b1f1ddbca44b367ef2b213569fe34cbf36a4.json"
+    },
+    {
+      "id": "8dff73619362010157722d03f1666fbcddceb4f1fb3d88f3b9bf4610aab0c90f",
+      "name": "NamedEvaluation/P2/Helmholtz/Constant/Named/First/dimension:3/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/8dff73619362010157722d03f1666fbcddceb4f1fb3d88f3b9bf4610aab0c90f.json"
+    },
+    {
+      "id": "dd71218b8b63b86cd2ebb8c5b2a83ddaac87891580dd9e8ec386d6d20a98d933",
+      "name": "NamedEvaluation/P2/Helmholtz/Constant/Named/Warm/dimension:2/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/dd71218b8b63b86cd2ebb8c5b2a83ddaac87891580dd9e8ec386d6d20a98d933.json"
+    },
+    {
+      "id": "c1cc36815c4ff36f8e18b5bf17bfcc2e08e8cabb6d0217e701a150aa984d9e23",
+      "name": "NamedEvaluation/P2/Helmholtz/Constant/Named/Warm/dimension:3/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/c1cc36815c4ff36f8e18b5bf17bfcc2e08e8cabb6d0217e701a150aa984d9e23.json"
+    },
+    {
+      "id": "23d2d715906a1d544f03efd0e4e6821bba58b1b961c11b8db2eeedbe4c651180",
+      "name": "NamedEvaluation/P2/Helmholtz/FieldCoefficient/Integral/First/dimension:2/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/23d2d715906a1d544f03efd0e4e6821bba58b1b961c11b8db2eeedbe4c651180.json"
+    },
+    {
+      "id": "2887ffd84a1409122cbebbc17946dcd54d18685dbe55674596963c8d0258b5a8",
+      "name": "NamedEvaluation/P2/Helmholtz/FieldCoefficient/Integral/First/dimension:3/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/2887ffd84a1409122cbebbc17946dcd54d18685dbe55674596963c8d0258b5a8.json"
+    },
+    {
+      "id": "7c74d30b846c283d142fa08c01be77c41d631fc5251d748095253677592dddab",
+      "name": "NamedEvaluation/P2/Helmholtz/FieldCoefficient/Integral/Warm/dimension:2/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/7c74d30b846c283d142fa08c01be77c41d631fc5251d748095253677592dddab.json"
+    },
+    {
+      "id": "377b54b81dfb9b95082c21074610b79cddc3cba610b7a60e6f76c7d9eed1424e",
+      "name": "NamedEvaluation/P2/Helmholtz/FieldCoefficient/Integral/Warm/dimension:3/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/377b54b81dfb9b95082c21074610b79cddc3cba610b7a60e6f76c7d9eed1424e.json"
+    },
+    {
+      "id": "5704c2d07bd71a582f6542fbbf457f1b4942814acd7c14002610dcf247ac3a6b",
+      "name": "NamedEvaluation/P2/Helmholtz/FieldCoefficient/Named/First/dimension:2/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/5704c2d07bd71a582f6542fbbf457f1b4942814acd7c14002610dcf247ac3a6b.json"
+    },
+    {
+      "id": "ab818b90d72cb697e04d017b055d3cac250dde150a4312fadda672ae4e00724c",
+      "name": "NamedEvaluation/P2/Helmholtz/FieldCoefficient/Named/First/dimension:3/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/ab818b90d72cb697e04d017b055d3cac250dde150a4312fadda672ae4e00724c.json"
+    },
+    {
+      "id": "f851e9fddd45f3375cb1b033402a25fe1de8e3d1e50f40615a2592ea0ea0acc8",
+      "name": "NamedEvaluation/P2/Helmholtz/FieldCoefficient/Named/Warm/dimension:2/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/f851e9fddd45f3375cb1b033402a25fe1de8e3d1e50f40615a2592ea0ea0acc8.json"
+    },
+    {
+      "id": "ff5114904f9772f044ad2743c69fbcc0dce4ccbf88834abccfb1ea53159f09da",
+      "name": "NamedEvaluation/P2/Helmholtz/FieldCoefficient/Named/Warm/dimension:3/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/ff5114904f9772f044ad2743c69fbcc0dce4ccbf88834abccfb1ea53159f09da.json"
+    },
+    {
+      "id": "e9d1676b0df00fdb119bcf14e02eadb8270d3a8a8dd3c6e7437f5d5f90ffda74",
+      "name": "NamedEvaluation/P2/LinearElasticity/Constant/Integral/First/dimension:2/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/e9d1676b0df00fdb119bcf14e02eadb8270d3a8a8dd3c6e7437f5d5f90ffda74.json"
+    },
+    {
+      "id": "114908410d5e82f1c70c18eb20985e6f9f84f90070e2f4e76dfa3affa8da14fd",
+      "name": "NamedEvaluation/P2/LinearElasticity/Constant/Integral/First/dimension:3/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/114908410d5e82f1c70c18eb20985e6f9f84f90070e2f4e76dfa3affa8da14fd.json"
+    },
+    {
+      "id": "d51be1b00d13de24410cd061502da73b41cad95258eed8cc06cdb865c0f59025",
+      "name": "NamedEvaluation/P2/LinearElasticity/Constant/Integral/Warm/dimension:2/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/d51be1b00d13de24410cd061502da73b41cad95258eed8cc06cdb865c0f59025.json"
+    },
+    {
+      "id": "5095ce271ceca2514810ed11a176038ef696a6f46c8535ffb6d22e5d66d2c583",
+      "name": "NamedEvaluation/P2/LinearElasticity/Constant/Integral/Warm/dimension:3/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/5095ce271ceca2514810ed11a176038ef696a6f46c8535ffb6d22e5d66d2c583.json"
+    },
+    {
+      "id": "66fa4d90550f43f5ad20b8b062609866a7ce5096d37425c961615591a6b3d88f",
+      "name": "NamedEvaluation/P2/LinearElasticity/Constant/Named/First/dimension:2/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/66fa4d90550f43f5ad20b8b062609866a7ce5096d37425c961615591a6b3d88f.json"
+    },
+    {
+      "id": "aca32dbda107dd1b99ea16abdd6e51e06f4eafc3c10dc2f90273210883ca516c",
+      "name": "NamedEvaluation/P2/LinearElasticity/Constant/Named/First/dimension:3/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/aca32dbda107dd1b99ea16abdd6e51e06f4eafc3c10dc2f90273210883ca516c.json"
+    },
+    {
+      "id": "fd0273a53ee374c11e8f3f22cfbb5c02a92dce7e5930d0b09983d91f11ff04a3",
+      "name": "NamedEvaluation/P2/LinearElasticity/Constant/Named/Warm/dimension:2/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/fd0273a53ee374c11e8f3f22cfbb5c02a92dce7e5930d0b09983d91f11ff04a3.json"
+    },
+    {
+      "id": "750aa87894ed0711155af05b2c3110bd2fb264e520df257ba2b110f11353a144",
+      "name": "NamedEvaluation/P2/LinearElasticity/Constant/Named/Warm/dimension:3/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/750aa87894ed0711155af05b2c3110bd2fb264e520df257ba2b110f11353a144.json"
+    },
+    {
+      "id": "b322a1a7a8e6e9c61f8b315db0f1aece1b6148f470d4a48afac721cebe978843",
+      "name": "NamedEvaluation/P2/LinearElasticity/FieldCoefficient/Integral/First/dimension:2/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/b322a1a7a8e6e9c61f8b315db0f1aece1b6148f470d4a48afac721cebe978843.json"
+    },
+    {
+      "id": "9d860935dc678e7a32aa879d746a6f435bda4d7a08084fb5b81095341febb31f",
+      "name": "NamedEvaluation/P2/LinearElasticity/FieldCoefficient/Integral/First/dimension:3/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/9d860935dc678e7a32aa879d746a6f435bda4d7a08084fb5b81095341febb31f.json"
+    },
+    {
+      "id": "9225a4bb743dcb6ffc8c849d02f178f95fb6509da9657754f76b80711f22366b",
+      "name": "NamedEvaluation/P2/LinearElasticity/FieldCoefficient/Integral/Warm/dimension:2/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/9225a4bb743dcb6ffc8c849d02f178f95fb6509da9657754f76b80711f22366b.json"
+    },
+    {
+      "id": "c3df8dbecd6f723e6a79abc099478db8887694bce61e5670bb0d39275a63a91f",
+      "name": "NamedEvaluation/P2/LinearElasticity/FieldCoefficient/Integral/Warm/dimension:3/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/c3df8dbecd6f723e6a79abc099478db8887694bce61e5670bb0d39275a63a91f.json"
+    },
+    {
+      "id": "b9a356e32ce023034656f5d5432593c284472923cccaf7a0eb413811bef57cd9",
+      "name": "NamedEvaluation/P2/LinearElasticity/FieldCoefficient/Named/First/dimension:2/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/b9a356e32ce023034656f5d5432593c284472923cccaf7a0eb413811bef57cd9.json"
+    },
+    {
+      "id": "1bd59c6d79650aa8d426ee664af6570ad01abe4d57e1ef0d5d324c26492fc15f",
+      "name": "NamedEvaluation/P2/LinearElasticity/FieldCoefficient/Named/First/dimension:3/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/1bd59c6d79650aa8d426ee664af6570ad01abe4d57e1ef0d5d324c26492fc15f.json"
+    },
+    {
+      "id": "d53474edbb59e4b13659ad6b3a1922e8fd41fd660a05aea10870735ab9d1064e",
+      "name": "NamedEvaluation/P2/LinearElasticity/FieldCoefficient/Named/Warm/dimension:2/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/d53474edbb59e4b13659ad6b3a1922e8fd41fd660a05aea10870735ab9d1064e.json"
+    },
+    {
+      "id": "4a0e3a39f698d5c16b1530c5cad3f7f4acaafb0fc926a75f2cab294f915596c6",
+      "name": "NamedEvaluation/P2/LinearElasticity/FieldCoefficient/Named/Warm/dimension:3/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/4a0e3a39f698d5c16b1530c5cad3f7f4acaafb0fc926a75f2cab294f915596c6.json"
+    },
+    {
+      "id": "ee29cc4b627b84bbb073243ce6d0e6b32096721ea074daf5487a4f87bed87a02",
+      "name": "NamedEvaluation/P2/Mass/Constant/Integral/First/dimension:2/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/ee29cc4b627b84bbb073243ce6d0e6b32096721ea074daf5487a4f87bed87a02.json"
+    },
+    {
+      "id": "461340bccd00e81397e62975342fefe265d982561b56d70c1952326de2951d52",
+      "name": "NamedEvaluation/P2/Mass/Constant/Integral/First/dimension:3/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/461340bccd00e81397e62975342fefe265d982561b56d70c1952326de2951d52.json"
+    },
+    {
+      "id": "5a27b071bd837997dec3ed6dd52988a06c19385976b32cac8f2952222c44a732",
+      "name": "NamedEvaluation/P2/Mass/Constant/Integral/Warm/dimension:2/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/5a27b071bd837997dec3ed6dd52988a06c19385976b32cac8f2952222c44a732.json"
+    },
+    {
+      "id": "342d8863e98d44b27de1e24874db0ad952cea6a66c6d8a3fdf4f6fdf720a9139",
+      "name": "NamedEvaluation/P2/Mass/Constant/Integral/Warm/dimension:3/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/342d8863e98d44b27de1e24874db0ad952cea6a66c6d8a3fdf4f6fdf720a9139.json"
+    },
+    {
+      "id": "5d699366c794622749055f122061d7b55852c3eaf36081507136165ebca7bbf1",
+      "name": "NamedEvaluation/P2/Mass/Constant/Named/First/dimension:2/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/5d699366c794622749055f122061d7b55852c3eaf36081507136165ebca7bbf1.json"
+    },
+    {
+      "id": "73d15c69600253424bae6b10dc74052982ffe793231f5770c53e08a7b86f2f41",
+      "name": "NamedEvaluation/P2/Mass/Constant/Named/First/dimension:3/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/73d15c69600253424bae6b10dc74052982ffe793231f5770c53e08a7b86f2f41.json"
+    },
+    {
+      "id": "11024afd31382fcbc4ccfd47bb7d24105abb993a1c69a8fe725d8fb5c947ca73",
+      "name": "NamedEvaluation/P2/Mass/Constant/Named/Warm/dimension:2/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/11024afd31382fcbc4ccfd47bb7d24105abb993a1c69a8fe725d8fb5c947ca73.json"
+    },
+    {
+      "id": "6f7ab54fdff293e605ced7de447f7feb46f624ccb7d5a9f9e7e74c217012f8eb",
+      "name": "NamedEvaluation/P2/Mass/Constant/Named/Warm/dimension:3/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/6f7ab54fdff293e605ced7de447f7feb46f624ccb7d5a9f9e7e74c217012f8eb.json"
+    },
+    {
+      "id": "8f1dc6b83a4e04eb9a04eaf9b5c5954b7c4da56674305293adec908cba6a0ea4",
+      "name": "NamedEvaluation/P2/Mass/FieldCoefficient/Integral/First/dimension:2/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/8f1dc6b83a4e04eb9a04eaf9b5c5954b7c4da56674305293adec908cba6a0ea4.json"
+    },
+    {
+      "id": "9dd2bbb299fc292728533518dd645972e26a2e5927a005d10d1d1e56db51dbe2",
+      "name": "NamedEvaluation/P2/Mass/FieldCoefficient/Integral/First/dimension:3/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/9dd2bbb299fc292728533518dd645972e26a2e5927a005d10d1d1e56db51dbe2.json"
+    },
+    {
+      "id": "137a06aba2a8b80b55e2c1afa06fe2e4a6df2fb4f30d82569e54f32c89f5b765",
+      "name": "NamedEvaluation/P2/Mass/FieldCoefficient/Integral/Warm/dimension:2/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/137a06aba2a8b80b55e2c1afa06fe2e4a6df2fb4f30d82569e54f32c89f5b765.json"
+    },
+    {
+      "id": "e9eb1aa8a07a96d299e462f7d867e43c04943ca4ca16f0d85371a59ae8cea7cb",
+      "name": "NamedEvaluation/P2/Mass/FieldCoefficient/Integral/Warm/dimension:3/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/e9eb1aa8a07a96d299e462f7d867e43c04943ca4ca16f0d85371a59ae8cea7cb.json"
+    },
+    {
+      "id": "331439aaff377e9204002a5766d41e9deb081b436ed552611c2b8acec0cb6fe6",
+      "name": "NamedEvaluation/P2/Mass/FieldCoefficient/Named/First/dimension:2/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/331439aaff377e9204002a5766d41e9deb081b436ed552611c2b8acec0cb6fe6.json"
+    },
+    {
+      "id": "44247ff7aedf76089b3bd081c11a965ddf8674f3fad974b0225677dca9dd6e7d",
+      "name": "NamedEvaluation/P2/Mass/FieldCoefficient/Named/First/dimension:3/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/44247ff7aedf76089b3bd081c11a965ddf8674f3fad974b0225677dca9dd6e7d.json"
+    },
+    {
+      "id": "f0c96f912fa8332efc8d5e4294b38ee0c0b1f79fda8a2add1cef1b50888d3fab",
+      "name": "NamedEvaluation/P2/Mass/FieldCoefficient/Named/Warm/dimension:2/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/f0c96f912fa8332efc8d5e4294b38ee0c0b1f79fda8a2add1cef1b50888d3fab.json"
+    },
+    {
+      "id": "2c90a4683775627c8b7a49da1824151afda27849ca89cae6444c2906f4028294",
+      "name": "NamedEvaluation/P2/Mass/FieldCoefficient/Named/Warm/dimension:3/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/2c90a4683775627c8b7a49da1824151afda27849ca89cae6444c2906f4028294.json"
+    },
+    {
+      "id": "92d8a89fd4b4711f53deec7e79911f06bc8294fe2a700c61709ad75f77501a52",
+      "name": "NamedEvaluation/P2/VectorMass/Constant/Integral/First/dimension:2/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/92d8a89fd4b4711f53deec7e79911f06bc8294fe2a700c61709ad75f77501a52.json"
+    },
+    {
+      "id": "5a29dc74f417414924d22de79cea2de08baeaf089b9ab927b3fdc0a387b340ba",
+      "name": "NamedEvaluation/P2/VectorMass/Constant/Integral/First/dimension:3/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/5a29dc74f417414924d22de79cea2de08baeaf089b9ab927b3fdc0a387b340ba.json"
+    },
+    {
+      "id": "a8f7ac83602763584f22c265f8c8a85c67015dccbd66ccbfbf19dafac219a7ee",
+      "name": "NamedEvaluation/P2/VectorMass/Constant/Integral/Warm/dimension:2/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/a8f7ac83602763584f22c265f8c8a85c67015dccbd66ccbfbf19dafac219a7ee.json"
+    },
+    {
+      "id": "dd011e45859990816257e0fc21944a4457daeff633d9b5384c98f0fb5dd59cf9",
+      "name": "NamedEvaluation/P2/VectorMass/Constant/Integral/Warm/dimension:3/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/dd011e45859990816257e0fc21944a4457daeff633d9b5384c98f0fb5dd59cf9.json"
+    },
+    {
+      "id": "e308833ee1a716902514334a3da5af00c340827a7d76c17a9940a6319e40071c",
+      "name": "NamedEvaluation/P2/VectorMass/Constant/Named/First/dimension:2/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/e308833ee1a716902514334a3da5af00c340827a7d76c17a9940a6319e40071c.json"
+    },
+    {
+      "id": "9c39592cadb5e56234d3a7a6e5bb6b4eaa1b8d51fcaeeb406a7fa65fe1ba2d31",
+      "name": "NamedEvaluation/P2/VectorMass/Constant/Named/First/dimension:3/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/9c39592cadb5e56234d3a7a6e5bb6b4eaa1b8d51fcaeeb406a7fa65fe1ba2d31.json"
+    },
+    {
+      "id": "d56c34a5df00603d1c89fa5704a6b0209ba7d0e151129f3825e4e2617d544cfa",
+      "name": "NamedEvaluation/P2/VectorMass/Constant/Named/Warm/dimension:2/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/d56c34a5df00603d1c89fa5704a6b0209ba7d0e151129f3825e4e2617d544cfa.json"
+    },
+    {
+      "id": "e6131f331b94a8d9b20ea39612a0c0614c5b0b0d7e7ea05a0b1fd7f1fc2a9333",
+      "name": "NamedEvaluation/P2/VectorMass/Constant/Named/Warm/dimension:3/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/e6131f331b94a8d9b20ea39612a0c0614c5b0b0d7e7ea05a0b1fd7f1fc2a9333.json"
+    },
+    {
+      "id": "64acf5d334f17ea98217078e32e3fd7c6af27ba12df85384dbc7f921b86a3755",
+      "name": "NamedEvaluation/P2/VectorMass/FieldCoefficient/Integral/First/dimension:2/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/64acf5d334f17ea98217078e32e3fd7c6af27ba12df85384dbc7f921b86a3755.json"
+    },
+    {
+      "id": "ea91f7f35959a3b943355a77748197d2682dbc825b6d8db209cb48a607a28bc3",
+      "name": "NamedEvaluation/P2/VectorMass/FieldCoefficient/Integral/First/dimension:3/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/ea91f7f35959a3b943355a77748197d2682dbc825b6d8db209cb48a607a28bc3.json"
+    },
+    {
+      "id": "f05bacea94f5148ac87bc665e6b7723a8da9316cbba1eb7d6561c4064a47fc7e",
+      "name": "NamedEvaluation/P2/VectorMass/FieldCoefficient/Integral/Warm/dimension:2/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/f05bacea94f5148ac87bc665e6b7723a8da9316cbba1eb7d6561c4064a47fc7e.json"
+    },
+    {
+      "id": "6a656ca2ca81934c16f41722f3b5499d8d9b095bb08e446611997ef3944b7d3f",
+      "name": "NamedEvaluation/P2/VectorMass/FieldCoefficient/Integral/Warm/dimension:3/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/6a656ca2ca81934c16f41722f3b5499d8d9b095bb08e446611997ef3944b7d3f.json"
+    },
+    {
+      "id": "02d5631aed0f4d9386575c6449060840d345876c433c9e8278af2a1d2b58e0db",
+      "name": "NamedEvaluation/P2/VectorMass/FieldCoefficient/Named/First/dimension:2/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/02d5631aed0f4d9386575c6449060840d345876c433c9e8278af2a1d2b58e0db.json"
+    },
+    {
+      "id": "83d8193054ee1e2e0f54509e0db8e080812cbad9f30ef5523e930f046098505f",
+      "name": "NamedEvaluation/P2/VectorMass/FieldCoefficient/Named/First/dimension:3/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/83d8193054ee1e2e0f54509e0db8e080812cbad9f30ef5523e930f046098505f.json"
+    },
+    {
+      "id": "eab1678512333b6bd32b9485470ceece4717b90e94e1679559b2e493e4cc6c01",
+      "name": "NamedEvaluation/P2/VectorMass/FieldCoefficient/Named/Warm/dimension:2/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/eab1678512333b6bd32b9485470ceece4717b90e94e1679559b2e493e4cc6c01.json"
+    },
+    {
+      "id": "4073158e8ce727759f1c0a078f039064dba0725460eb93702a60e4915ba4bf3c",
+      "name": "NamedEvaluation/P2/VectorMass/FieldCoefficient/Named/Warm/dimension:3/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/4073158e8ce727759f1c0a078f039064dba0725460eb93702a60e4915ba4bf3c.json"
+    },
+    {
+      "id": "b83ac8bdef30a4c06ffef8b185b1142a13b6407a263e49d2c91a312c47b0580d",
+      "name": "NamedEvaluationColdGeometry/P1/Diffusion/Constant/Integral/First/dimension:2/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/b83ac8bdef30a4c06ffef8b185b1142a13b6407a263e49d2c91a312c47b0580d.json"
+    },
+    {
+      "id": "2ab98ffef860999c05f5649a87a8327af76f21a868350f0e86703684756a1238",
+      "name": "NamedEvaluationColdGeometry/P1/Diffusion/Constant/Integral/First/dimension:3/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/2ab98ffef860999c05f5649a87a8327af76f21a868350f0e86703684756a1238.json"
+    },
+    {
+      "id": "af676021be6d59c45656cc63075b4ae2461789692da804f82a565fea472fcbac",
+      "name": "NamedEvaluationColdGeometry/P1/Diffusion/Constant/Integral/Warm/dimension:2/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/af676021be6d59c45656cc63075b4ae2461789692da804f82a565fea472fcbac.json"
+    },
+    {
+      "id": "b7d145b16f0f2d24375daad8e21c4a2177e04c23139d64eeb47964a1bb82bdd0",
+      "name": "NamedEvaluationColdGeometry/P1/Diffusion/Constant/Integral/Warm/dimension:3/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/b7d145b16f0f2d24375daad8e21c4a2177e04c23139d64eeb47964a1bb82bdd0.json"
+    },
+    {
+      "id": "bdb4b70d623b56816cdb46e173cdb7806a11572e530aee2742dcedcb81b46706",
+      "name": "NamedEvaluationColdGeometry/P1/Diffusion/Constant/Named/First/dimension:2/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/bdb4b70d623b56816cdb46e173cdb7806a11572e530aee2742dcedcb81b46706.json"
+    },
+    {
+      "id": "69416bd6db9bb368b2148623a53fa7e448b828e06c0c571389f2f6337ec4c08f",
+      "name": "NamedEvaluationColdGeometry/P1/Diffusion/Constant/Named/First/dimension:3/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/69416bd6db9bb368b2148623a53fa7e448b828e06c0c571389f2f6337ec4c08f.json"
+    },
+    {
+      "id": "43e796c6b5b505608449e55026d72a6e8b1e2c9c0709a022fa8293edd7f76aef",
+      "name": "NamedEvaluationColdGeometry/P1/Diffusion/Constant/Named/Warm/dimension:2/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/43e796c6b5b505608449e55026d72a6e8b1e2c9c0709a022fa8293edd7f76aef.json"
+    },
+    {
+      "id": "629f58ddad82606c67a1de65d947903b79bfef4932b0cb15e58d097703a5c02a",
+      "name": "NamedEvaluationColdGeometry/P1/Diffusion/Constant/Named/Warm/dimension:3/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/629f58ddad82606c67a1de65d947903b79bfef4932b0cb15e58d097703a5c02a.json"
+    },
+    {
+      "id": "7c7211b68e5b0c61734c52a162537fcea1e20db767d634d846318a3d2d5252ac",
+      "name": "NamedEvaluationColdGeometry/P1/Diffusion/FieldCoefficient/Integral/First/dimension:2/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/7c7211b68e5b0c61734c52a162537fcea1e20db767d634d846318a3d2d5252ac.json"
+    },
+    {
+      "id": "59908d63c1dc6511cbafa334366c0b3ee7aa652970e562de011d609029a8f17a",
+      "name": "NamedEvaluationColdGeometry/P1/Diffusion/FieldCoefficient/Integral/First/dimension:3/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/59908d63c1dc6511cbafa334366c0b3ee7aa652970e562de011d609029a8f17a.json"
+    },
+    {
+      "id": "88eda079961c95c7b5f96c4cb467e14b227cc0937fdb9e487c93351a61f3e9d8",
+      "name": "NamedEvaluationColdGeometry/P1/Diffusion/FieldCoefficient/Integral/Warm/dimension:2/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/88eda079961c95c7b5f96c4cb467e14b227cc0937fdb9e487c93351a61f3e9d8.json"
+    },
+    {
+      "id": "6efdf51b28c01ead24c1aa2f328dcd7c515bd1e4ae37c4fa2d45b7fb3c412684",
+      "name": "NamedEvaluationColdGeometry/P1/Diffusion/FieldCoefficient/Integral/Warm/dimension:3/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/6efdf51b28c01ead24c1aa2f328dcd7c515bd1e4ae37c4fa2d45b7fb3c412684.json"
+    },
+    {
+      "id": "a4e11fd03f886eafdaca8eb1c6e0ea3445cb23f072f5750382f3e3fbe944c320",
+      "name": "NamedEvaluationColdGeometry/P1/Diffusion/FieldCoefficient/Named/First/dimension:2/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/a4e11fd03f886eafdaca8eb1c6e0ea3445cb23f072f5750382f3e3fbe944c320.json"
+    },
+    {
+      "id": "2afe55fe470bfefa794c7bdb3dabde5d2ab9b029d95370ef81339f9f15b0ecc4",
+      "name": "NamedEvaluationColdGeometry/P1/Diffusion/FieldCoefficient/Named/First/dimension:3/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/2afe55fe470bfefa794c7bdb3dabde5d2ab9b029d95370ef81339f9f15b0ecc4.json"
+    },
+    {
+      "id": "7d6c73f2cfe4fc8a1a095f7fee9de3ba87892c2a726abdb1355a497fe2068203",
+      "name": "NamedEvaluationColdGeometry/P1/Diffusion/FieldCoefficient/Named/Warm/dimension:2/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/7d6c73f2cfe4fc8a1a095f7fee9de3ba87892c2a726abdb1355a497fe2068203.json"
+    },
+    {
+      "id": "1f3826c70ed7d6ac7a6629d4d1e65c84e0ec7bc3582025b8e00dfa3ddad62c86",
+      "name": "NamedEvaluationColdGeometry/P1/Diffusion/FieldCoefficient/Named/Warm/dimension:3/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/1f3826c70ed7d6ac7a6629d4d1e65c84e0ec7bc3582025b8e00dfa3ddad62c86.json"
+    },
+    {
+      "id": "3a49eb2ec476d445f5f33a2603cc7d140104a463ff6cd9132ca231135d4694ab",
+      "name": "NamedEvaluationColdGeometry/P1/Helmholtz/Constant/Integral/First/dimension:2/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/3a49eb2ec476d445f5f33a2603cc7d140104a463ff6cd9132ca231135d4694ab.json"
+    },
+    {
+      "id": "484ac216a17e8d061a6a0eee7f9c9bda8fcef2488cdd3f811cf6571925e5f975",
+      "name": "NamedEvaluationColdGeometry/P1/Helmholtz/Constant/Integral/First/dimension:3/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/484ac216a17e8d061a6a0eee7f9c9bda8fcef2488cdd3f811cf6571925e5f975.json"
+    },
+    {
+      "id": "02ae6e7c3781e00d9e0f6dae84d7439a8b35dbaa3f80e118a7d21eb7c3ec0701",
+      "name": "NamedEvaluationColdGeometry/P1/Helmholtz/Constant/Integral/Warm/dimension:2/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/02ae6e7c3781e00d9e0f6dae84d7439a8b35dbaa3f80e118a7d21eb7c3ec0701.json"
+    },
+    {
+      "id": "fffc79a03ea60849a2bf4f9c7cd2f0928d464b04f368f8d72462398afbc8f075",
+      "name": "NamedEvaluationColdGeometry/P1/Helmholtz/Constant/Integral/Warm/dimension:3/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/fffc79a03ea60849a2bf4f9c7cd2f0928d464b04f368f8d72462398afbc8f075.json"
+    },
+    {
+      "id": "1b3fa404f6f08c74f4db83993ea56f44d8e7577f0a20135e67304a44378605de",
+      "name": "NamedEvaluationColdGeometry/P1/Helmholtz/Constant/Named/First/dimension:2/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/1b3fa404f6f08c74f4db83993ea56f44d8e7577f0a20135e67304a44378605de.json"
+    },
+    {
+      "id": "2426a4fcd6e2c1175fa63ada148b1118228a691e08c90ee5dd050a4b74a81e82",
+      "name": "NamedEvaluationColdGeometry/P1/Helmholtz/Constant/Named/First/dimension:3/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/2426a4fcd6e2c1175fa63ada148b1118228a691e08c90ee5dd050a4b74a81e82.json"
+    },
+    {
+      "id": "a898b428de1bc143632157d51f9351ce2f5729e206b5ed8e2e889e3d01dde2dc",
+      "name": "NamedEvaluationColdGeometry/P1/Helmholtz/Constant/Named/Warm/dimension:2/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/a898b428de1bc143632157d51f9351ce2f5729e206b5ed8e2e889e3d01dde2dc.json"
+    },
+    {
+      "id": "e06bf4678e59f96b93a91e14e0c9c227b5bf1dc493fb198fab230242d41f5912",
+      "name": "NamedEvaluationColdGeometry/P1/Helmholtz/Constant/Named/Warm/dimension:3/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/e06bf4678e59f96b93a91e14e0c9c227b5bf1dc493fb198fab230242d41f5912.json"
+    },
+    {
+      "id": "999910087089be05ddcde321175bf2116a4f8b9959ca2d408c33dd9e4a8607c2",
+      "name": "NamedEvaluationColdGeometry/P1/Helmholtz/FieldCoefficient/Integral/First/dimension:2/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/999910087089be05ddcde321175bf2116a4f8b9959ca2d408c33dd9e4a8607c2.json"
+    },
+    {
+      "id": "af4906b8bab9cc9f61174bf361c797211e1eaae65ad481eaa999360f36e40b53",
+      "name": "NamedEvaluationColdGeometry/P1/Helmholtz/FieldCoefficient/Integral/First/dimension:3/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/af4906b8bab9cc9f61174bf361c797211e1eaae65ad481eaa999360f36e40b53.json"
+    },
+    {
+      "id": "b298b6e93d0c18202157693615c19817b7615f278905818f00a650e56da39e13",
+      "name": "NamedEvaluationColdGeometry/P1/Helmholtz/FieldCoefficient/Integral/Warm/dimension:2/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/b298b6e93d0c18202157693615c19817b7615f278905818f00a650e56da39e13.json"
+    },
+    {
+      "id": "0fcd21565674c9359f81ed78accb0fa6b34371fa85e924e60de950da7fc157e6",
+      "name": "NamedEvaluationColdGeometry/P1/Helmholtz/FieldCoefficient/Integral/Warm/dimension:3/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/0fcd21565674c9359f81ed78accb0fa6b34371fa85e924e60de950da7fc157e6.json"
+    },
+    {
+      "id": "5b80de90fb9e9bd7d91faaf2ea406c33c6ed9a1c9b4ab53ec743386c03817388",
+      "name": "NamedEvaluationColdGeometry/P1/Helmholtz/FieldCoefficient/Named/First/dimension:2/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/5b80de90fb9e9bd7d91faaf2ea406c33c6ed9a1c9b4ab53ec743386c03817388.json"
+    },
+    {
+      "id": "8fa3c098270466f25f51ba651f648f7e8f31ecb09a4ef12c58b188312e8904fc",
+      "name": "NamedEvaluationColdGeometry/P1/Helmholtz/FieldCoefficient/Named/First/dimension:3/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/8fa3c098270466f25f51ba651f648f7e8f31ecb09a4ef12c58b188312e8904fc.json"
+    },
+    {
+      "id": "316b1172484090477e7c0e08bb6f70133d9fbc593c281671017c1ec48d020fe9",
+      "name": "NamedEvaluationColdGeometry/P1/Helmholtz/FieldCoefficient/Named/Warm/dimension:2/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/316b1172484090477e7c0e08bb6f70133d9fbc593c281671017c1ec48d020fe9.json"
+    },
+    {
+      "id": "15102c6ce3eb3c687752a85dfe02f4af83e938bffa5e2dadd17640fad234fdbf",
+      "name": "NamedEvaluationColdGeometry/P1/Helmholtz/FieldCoefficient/Named/Warm/dimension:3/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/15102c6ce3eb3c687752a85dfe02f4af83e938bffa5e2dadd17640fad234fdbf.json"
+    },
+    {
+      "id": "5b280abbfd8497e055d5fe1b6d2297ef359c272283b53d0d0f483b66c50fd00e",
+      "name": "NamedEvaluationColdGeometry/P1/LinearElasticity/Constant/Integral/First/dimension:2/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/5b280abbfd8497e055d5fe1b6d2297ef359c272283b53d0d0f483b66c50fd00e.json"
+    },
+    {
+      "id": "4c98555c8496191dec17c28098766348177ff8b251acb21cf1b5d5b470de3368",
+      "name": "NamedEvaluationColdGeometry/P1/LinearElasticity/Constant/Integral/First/dimension:3/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/4c98555c8496191dec17c28098766348177ff8b251acb21cf1b5d5b470de3368.json"
+    },
+    {
+      "id": "70821b016982658e1b3f784ad91265bc6a4470c3ecc48b0ffc85d47ac56ee88b",
+      "name": "NamedEvaluationColdGeometry/P1/LinearElasticity/Constant/Integral/Warm/dimension:2/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/70821b016982658e1b3f784ad91265bc6a4470c3ecc48b0ffc85d47ac56ee88b.json"
+    },
+    {
+      "id": "8993fcc5824c41365023df00776f8e3ad7c61a10fbceb897fd8738866689153a",
+      "name": "NamedEvaluationColdGeometry/P1/LinearElasticity/Constant/Integral/Warm/dimension:3/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/8993fcc5824c41365023df00776f8e3ad7c61a10fbceb897fd8738866689153a.json"
+    },
+    {
+      "id": "49bfb01a4e5f5747e8c7654cf41cdd5ced0115d664c3814a6b33d92485198661",
+      "name": "NamedEvaluationColdGeometry/P1/LinearElasticity/Constant/Named/First/dimension:2/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/49bfb01a4e5f5747e8c7654cf41cdd5ced0115d664c3814a6b33d92485198661.json"
+    },
+    {
+      "id": "61bd5ad3ff82d4b57d38bf7e76dd111c8e3da3f1f8f63e492f854801e2f64fd1",
+      "name": "NamedEvaluationColdGeometry/P1/LinearElasticity/Constant/Named/First/dimension:3/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/61bd5ad3ff82d4b57d38bf7e76dd111c8e3da3f1f8f63e492f854801e2f64fd1.json"
+    },
+    {
+      "id": "3fa7457a513931ba8a6b0232ec5c34a0e940cce858febc8204050d24a9ac90cf",
+      "name": "NamedEvaluationColdGeometry/P1/LinearElasticity/Constant/Named/Warm/dimension:2/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/3fa7457a513931ba8a6b0232ec5c34a0e940cce858febc8204050d24a9ac90cf.json"
+    },
+    {
+      "id": "8ba986688c7a3839b1c3aaccc749a1ea99f1dcff1e43f4a9cd8dee326c6ed53c",
+      "name": "NamedEvaluationColdGeometry/P1/LinearElasticity/Constant/Named/Warm/dimension:3/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/8ba986688c7a3839b1c3aaccc749a1ea99f1dcff1e43f4a9cd8dee326c6ed53c.json"
+    },
+    {
+      "id": "3c54518380a3e5a071d93889c972b33ea3d789913ab884684d2de697ba2d0a61",
+      "name": "NamedEvaluationColdGeometry/P1/LinearElasticity/FieldCoefficient/Integral/First/dimension:2/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/3c54518380a3e5a071d93889c972b33ea3d789913ab884684d2de697ba2d0a61.json"
+    },
+    {
+      "id": "80724e1d9fe0edc8b6434f6869c2ccef23da09cf9053429c2edde2f73ca31837",
+      "name": "NamedEvaluationColdGeometry/P1/LinearElasticity/FieldCoefficient/Integral/First/dimension:3/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/80724e1d9fe0edc8b6434f6869c2ccef23da09cf9053429c2edde2f73ca31837.json"
+    },
+    {
+      "id": "39d4e3dd2cc2980e427743f15ca69f0052837a1b86f906e3c385b41beb9fa257",
+      "name": "NamedEvaluationColdGeometry/P1/LinearElasticity/FieldCoefficient/Integral/Warm/dimension:2/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/39d4e3dd2cc2980e427743f15ca69f0052837a1b86f906e3c385b41beb9fa257.json"
+    },
+    {
+      "id": "2e8a2d6e4fa03792189b9ab421266b525ea5acd29ceda88c303f578d7b101749",
+      "name": "NamedEvaluationColdGeometry/P1/LinearElasticity/FieldCoefficient/Integral/Warm/dimension:3/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/2e8a2d6e4fa03792189b9ab421266b525ea5acd29ceda88c303f578d7b101749.json"
+    },
+    {
+      "id": "314a0c6b729098dcad2086200d5897b6ec9b810fd9ed397f31b30c9a5c5a467f",
+      "name": "NamedEvaluationColdGeometry/P1/LinearElasticity/FieldCoefficient/Named/First/dimension:2/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/314a0c6b729098dcad2086200d5897b6ec9b810fd9ed397f31b30c9a5c5a467f.json"
+    },
+    {
+      "id": "c3cf06883fbab88467ea54a8cbdc797d2b4299a570384374acc82064c881f89a",
+      "name": "NamedEvaluationColdGeometry/P1/LinearElasticity/FieldCoefficient/Named/First/dimension:3/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/c3cf06883fbab88467ea54a8cbdc797d2b4299a570384374acc82064c881f89a.json"
+    },
+    {
+      "id": "ca9a7ce4a681c941f871b4f25acacdf5db882e7292e9d08ea08772afa58c3d05",
+      "name": "NamedEvaluationColdGeometry/P1/LinearElasticity/FieldCoefficient/Named/Warm/dimension:2/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/ca9a7ce4a681c941f871b4f25acacdf5db882e7292e9d08ea08772afa58c3d05.json"
+    },
+    {
+      "id": "5354646a45ae0fba561b66c9b747794f96ad6e4fb227cc1d46000db584e104ab",
+      "name": "NamedEvaluationColdGeometry/P1/LinearElasticity/FieldCoefficient/Named/Warm/dimension:3/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/5354646a45ae0fba561b66c9b747794f96ad6e4fb227cc1d46000db584e104ab.json"
+    },
+    {
+      "id": "f68003239345c0406a1ae49deb4caf8307248f668b17dc478294f86ce021ece9",
+      "name": "NamedEvaluationColdGeometry/P1/Mass/Constant/Integral/First/dimension:2/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/f68003239345c0406a1ae49deb4caf8307248f668b17dc478294f86ce021ece9.json"
+    },
+    {
+      "id": "24f5947d6bea42f3eb79b935396b28a18e25a2b0cc84e88167a1b416d705053d",
+      "name": "NamedEvaluationColdGeometry/P1/Mass/Constant/Integral/First/dimension:3/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/24f5947d6bea42f3eb79b935396b28a18e25a2b0cc84e88167a1b416d705053d.json"
+    },
+    {
+      "id": "76d7bef22ac78e72dc0612f796ea126411ec4d307edfc05cc86dac47b53457b8",
+      "name": "NamedEvaluationColdGeometry/P1/Mass/Constant/Integral/Warm/dimension:2/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/76d7bef22ac78e72dc0612f796ea126411ec4d307edfc05cc86dac47b53457b8.json"
+    },
+    {
+      "id": "b84f773c3c1114c63b6b83ca55d50d9372e2e99605698d17ede095e0b4d81843",
+      "name": "NamedEvaluationColdGeometry/P1/Mass/Constant/Integral/Warm/dimension:3/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/b84f773c3c1114c63b6b83ca55d50d9372e2e99605698d17ede095e0b4d81843.json"
+    },
+    {
+      "id": "607e4283a2c2321930763f1146915e5ec4d64f9e74d2a2c7961faa36be2df43f",
+      "name": "NamedEvaluationColdGeometry/P1/Mass/Constant/Named/First/dimension:2/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/607e4283a2c2321930763f1146915e5ec4d64f9e74d2a2c7961faa36be2df43f.json"
+    },
+    {
+      "id": "207b0992d5411d89165a3ac31a7424ac8906328550cf0e4f4720cb805c0ddaa3",
+      "name": "NamedEvaluationColdGeometry/P1/Mass/Constant/Named/First/dimension:3/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/207b0992d5411d89165a3ac31a7424ac8906328550cf0e4f4720cb805c0ddaa3.json"
+    },
+    {
+      "id": "d959148b0a1e3a6994fc145f5969d9d925b0007a0d7099be8ee16eebeab860e6",
+      "name": "NamedEvaluationColdGeometry/P1/Mass/Constant/Named/Warm/dimension:2/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/d959148b0a1e3a6994fc145f5969d9d925b0007a0d7099be8ee16eebeab860e6.json"
+    },
+    {
+      "id": "a65fdb3806dd5a9b946a61fd105062f8a51b414111c7fd6d91b91f362b685e19",
+      "name": "NamedEvaluationColdGeometry/P1/Mass/Constant/Named/Warm/dimension:3/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/a65fdb3806dd5a9b946a61fd105062f8a51b414111c7fd6d91b91f362b685e19.json"
+    },
+    {
+      "id": "cc6d740ac479546613d8b9941594e6000dbb2331fcef65ee5767c1a8926b466e",
+      "name": "NamedEvaluationColdGeometry/P1/Mass/FieldCoefficient/Integral/First/dimension:2/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/cc6d740ac479546613d8b9941594e6000dbb2331fcef65ee5767c1a8926b466e.json"
+    },
+    {
+      "id": "06314b303ee23f218c3e8516ea0b6953263fcbad1226d2cb39e1b589342d12e3",
+      "name": "NamedEvaluationColdGeometry/P1/Mass/FieldCoefficient/Integral/First/dimension:3/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/06314b303ee23f218c3e8516ea0b6953263fcbad1226d2cb39e1b589342d12e3.json"
+    },
+    {
+      "id": "e43a45ebf9686d6ddf1dcaa3755b8a9dc2b61167ab0242b8e8d03c3647db0d29",
+      "name": "NamedEvaluationColdGeometry/P1/Mass/FieldCoefficient/Integral/Warm/dimension:2/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/e43a45ebf9686d6ddf1dcaa3755b8a9dc2b61167ab0242b8e8d03c3647db0d29.json"
+    },
+    {
+      "id": "bb2d8ce16f87caf854e224ea50a6b283faf8882beaabc9b0e69901b37c0e4a43",
+      "name": "NamedEvaluationColdGeometry/P1/Mass/FieldCoefficient/Integral/Warm/dimension:3/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/bb2d8ce16f87caf854e224ea50a6b283faf8882beaabc9b0e69901b37c0e4a43.json"
+    },
+    {
+      "id": "8e18e60f501cfaebdde157fd2ef012b3e317246cd868d5fffa8b6ff05198e323",
+      "name": "NamedEvaluationColdGeometry/P1/Mass/FieldCoefficient/Named/First/dimension:2/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/8e18e60f501cfaebdde157fd2ef012b3e317246cd868d5fffa8b6ff05198e323.json"
+    },
+    {
+      "id": "2e2d70d848e7a0ebd77c0d21901a97c3f9ada2ee89bd21c197cce8390d3f9709",
+      "name": "NamedEvaluationColdGeometry/P1/Mass/FieldCoefficient/Named/First/dimension:3/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/2e2d70d848e7a0ebd77c0d21901a97c3f9ada2ee89bd21c197cce8390d3f9709.json"
+    },
+    {
+      "id": "5aa037d3f8830ab8c35433005b9c6351841e5221452ae464f9a4b56e61c96d76",
+      "name": "NamedEvaluationColdGeometry/P1/Mass/FieldCoefficient/Named/Warm/dimension:2/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/5aa037d3f8830ab8c35433005b9c6351841e5221452ae464f9a4b56e61c96d76.json"
+    },
+    {
+      "id": "2d2a6c60d1e176c02e43f82ec903c572ddc3419b6611670fa1741c7ca6d34ced",
+      "name": "NamedEvaluationColdGeometry/P1/Mass/FieldCoefficient/Named/Warm/dimension:3/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/2d2a6c60d1e176c02e43f82ec903c572ddc3419b6611670fa1741c7ca6d34ced.json"
+    },
+    {
+      "id": "fbc87934c350168af6494cad849364f54988fff02683ca0873c1dfa94ad28d27",
+      "name": "NamedEvaluationColdGeometry/P1/VectorMass/Constant/Integral/First/dimension:2/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/fbc87934c350168af6494cad849364f54988fff02683ca0873c1dfa94ad28d27.json"
+    },
+    {
+      "id": "e98b5434fd6da55619bd40d7b653133491bf090209ddb06255607d766077673c",
+      "name": "NamedEvaluationColdGeometry/P1/VectorMass/Constant/Integral/First/dimension:3/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/e98b5434fd6da55619bd40d7b653133491bf090209ddb06255607d766077673c.json"
+    },
+    {
+      "id": "c17df9b7cf11d1c445fe31164d2c7a196a732344f433c71d9b20564d070346b8",
+      "name": "NamedEvaluationColdGeometry/P1/VectorMass/Constant/Integral/Warm/dimension:2/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/c17df9b7cf11d1c445fe31164d2c7a196a732344f433c71d9b20564d070346b8.json"
+    },
+    {
+      "id": "decb4a86eef65f10316cd800c34412d5984ca3964fded3925009cc0dc7ca667e",
+      "name": "NamedEvaluationColdGeometry/P1/VectorMass/Constant/Integral/Warm/dimension:3/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/decb4a86eef65f10316cd800c34412d5984ca3964fded3925009cc0dc7ca667e.json"
+    },
+    {
+      "id": "8eb7b8d34776376472beeef35019767acbfbac94c11191392f2eaa270f9498f6",
+      "name": "NamedEvaluationColdGeometry/P1/VectorMass/Constant/Named/First/dimension:2/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/8eb7b8d34776376472beeef35019767acbfbac94c11191392f2eaa270f9498f6.json"
+    },
+    {
+      "id": "96970667dede1a642482d2ac3be990cb8f4cff0d5074f814d0bbea26115eaf3f",
+      "name": "NamedEvaluationColdGeometry/P1/VectorMass/Constant/Named/First/dimension:3/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/96970667dede1a642482d2ac3be990cb8f4cff0d5074f814d0bbea26115eaf3f.json"
+    },
+    {
+      "id": "3bfc83875ad624556528a55b93128f06cfaf06d4ec3b0a66c8d8064d8c0b0ba8",
+      "name": "NamedEvaluationColdGeometry/P1/VectorMass/Constant/Named/Warm/dimension:2/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/3bfc83875ad624556528a55b93128f06cfaf06d4ec3b0a66c8d8064d8c0b0ba8.json"
+    },
+    {
+      "id": "1ccdd244ba2e2d7e65198d0c420aebc6bed893b433d34ac7d4a527620f36df02",
+      "name": "NamedEvaluationColdGeometry/P1/VectorMass/Constant/Named/Warm/dimension:3/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/1ccdd244ba2e2d7e65198d0c420aebc6bed893b433d34ac7d4a527620f36df02.json"
+    },
+    {
+      "id": "06242b7e369ccc38245b70d52e13f3601aabe5012f2509b3cab95c9287097430",
+      "name": "NamedEvaluationColdGeometry/P1/VectorMass/FieldCoefficient/Integral/First/dimension:2/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/06242b7e369ccc38245b70d52e13f3601aabe5012f2509b3cab95c9287097430.json"
+    },
+    {
+      "id": "4bc59e92cefaea8f0e68aacaeb4d0786122b5339fb6dd2a29700c7b37063c427",
+      "name": "NamedEvaluationColdGeometry/P1/VectorMass/FieldCoefficient/Integral/First/dimension:3/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/4bc59e92cefaea8f0e68aacaeb4d0786122b5339fb6dd2a29700c7b37063c427.json"
+    },
+    {
+      "id": "2715bb078198a666602106bea02cef132ffeb3419a9824509ea44daf85289318",
+      "name": "NamedEvaluationColdGeometry/P1/VectorMass/FieldCoefficient/Integral/Warm/dimension:2/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/2715bb078198a666602106bea02cef132ffeb3419a9824509ea44daf85289318.json"
+    },
+    {
+      "id": "dda92f439f11ad774b84e71ffb97b29df59ef92b68291d8b238b7aff0d65c0a0",
+      "name": "NamedEvaluationColdGeometry/P1/VectorMass/FieldCoefficient/Integral/Warm/dimension:3/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/dda92f439f11ad774b84e71ffb97b29df59ef92b68291d8b238b7aff0d65c0a0.json"
+    },
+    {
+      "id": "9c8d655300243aef9a82be2370076afa18dda1f0233b432fb1da2fef37e6b431",
+      "name": "NamedEvaluationColdGeometry/P1/VectorMass/FieldCoefficient/Named/First/dimension:2/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/9c8d655300243aef9a82be2370076afa18dda1f0233b432fb1da2fef37e6b431.json"
+    },
+    {
+      "id": "a08ea88c586cf1f20386a84c64866310af7a89714a14f8444fdec518afbb40cd",
+      "name": "NamedEvaluationColdGeometry/P1/VectorMass/FieldCoefficient/Named/First/dimension:3/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/a08ea88c586cf1f20386a84c64866310af7a89714a14f8444fdec518afbb40cd.json"
+    },
+    {
+      "id": "2a295dc0b10467215af11268f01e055be65f71d098f1dee5a0cef869a443a79a",
+      "name": "NamedEvaluationColdGeometry/P1/VectorMass/FieldCoefficient/Named/Warm/dimension:2/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/2a295dc0b10467215af11268f01e055be65f71d098f1dee5a0cef869a443a79a.json"
+    },
+    {
+      "id": "4fdc38299ddfaed334aaa15a1a3d295b75b99fd062ea9140281f238a9e554603",
+      "name": "NamedEvaluationColdGeometry/P1/VectorMass/FieldCoefficient/Named/Warm/dimension:3/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/4fdc38299ddfaed334aaa15a1a3d295b75b99fd062ea9140281f238a9e554603.json"
+    },
+    {
+      "id": "fd27c40b0e4cc01bfd2d71cdb0ad05f477afd869129b03d30264794e7ab34b33",
+      "name": "NamedEvaluationColdGeometry/P2/Diffusion/Constant/Integral/First/dimension:2/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/fd27c40b0e4cc01bfd2d71cdb0ad05f477afd869129b03d30264794e7ab34b33.json"
+    },
+    {
+      "id": "0fc9357460c420949108d6d7d129a9d3ada13e95a166586595f90481a0737d1a",
+      "name": "NamedEvaluationColdGeometry/P2/Diffusion/Constant/Integral/First/dimension:3/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/0fc9357460c420949108d6d7d129a9d3ada13e95a166586595f90481a0737d1a.json"
+    },
+    {
+      "id": "313515c6f4a8ac213118e1145eeb2fe4e7ed364ced409327eadab36f86e932a3",
+      "name": "NamedEvaluationColdGeometry/P2/Diffusion/Constant/Integral/Warm/dimension:2/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/313515c6f4a8ac213118e1145eeb2fe4e7ed364ced409327eadab36f86e932a3.json"
+    },
+    {
+      "id": "2e007de10edfcdc9133f0682dd52b7e874932f69344a1af24033aaef9ef0a696",
+      "name": "NamedEvaluationColdGeometry/P2/Diffusion/Constant/Integral/Warm/dimension:3/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/2e007de10edfcdc9133f0682dd52b7e874932f69344a1af24033aaef9ef0a696.json"
+    },
+    {
+      "id": "22fccdaffcbc2b67a02ccf9a1490a6108f0be8d66f255190f59d4b1148da45ea",
+      "name": "NamedEvaluationColdGeometry/P2/Diffusion/Constant/Named/First/dimension:2/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/22fccdaffcbc2b67a02ccf9a1490a6108f0be8d66f255190f59d4b1148da45ea.json"
+    },
+    {
+      "id": "1e5ef1af7a689b652ae1f60430eb112f6a41412cbf3f7b4f9336a72e9d219352",
+      "name": "NamedEvaluationColdGeometry/P2/Diffusion/Constant/Named/First/dimension:3/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/1e5ef1af7a689b652ae1f60430eb112f6a41412cbf3f7b4f9336a72e9d219352.json"
+    },
+    {
+      "id": "4360675f7ab464383bacbfcf30a2f33ed9dce30bc37c51e1271a466e955fb423",
+      "name": "NamedEvaluationColdGeometry/P2/Diffusion/Constant/Named/Warm/dimension:2/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/4360675f7ab464383bacbfcf30a2f33ed9dce30bc37c51e1271a466e955fb423.json"
+    },
+    {
+      "id": "73ec1784cd247cc3ad8d4854ae261b215ea151015bacbcac77259c203092cf0a",
+      "name": "NamedEvaluationColdGeometry/P2/Diffusion/Constant/Named/Warm/dimension:3/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/73ec1784cd247cc3ad8d4854ae261b215ea151015bacbcac77259c203092cf0a.json"
+    },
+    {
+      "id": "b626ff200bb4baf56f3aa41789543784827f7576a4eeace7f7b5c9e464acb0f2",
+      "name": "NamedEvaluationColdGeometry/P2/Diffusion/FieldCoefficient/Integral/First/dimension:2/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/b626ff200bb4baf56f3aa41789543784827f7576a4eeace7f7b5c9e464acb0f2.json"
+    },
+    {
+      "id": "919bad119552f1868de0ec7035d04c81ce80d71385b5163bcaa8e96e2f797385",
+      "name": "NamedEvaluationColdGeometry/P2/Diffusion/FieldCoefficient/Integral/First/dimension:3/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/919bad119552f1868de0ec7035d04c81ce80d71385b5163bcaa8e96e2f797385.json"
+    },
+    {
+      "id": "a2f40a934917599c7ed1626603d48783f40c936e816d372dcd20529b00830d52",
+      "name": "NamedEvaluationColdGeometry/P2/Diffusion/FieldCoefficient/Integral/Warm/dimension:2/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/a2f40a934917599c7ed1626603d48783f40c936e816d372dcd20529b00830d52.json"
+    },
+    {
+      "id": "06dae95646ce56b7c734880dcd86491150e677492a9dfd6bd9635c5679fae89a",
+      "name": "NamedEvaluationColdGeometry/P2/Diffusion/FieldCoefficient/Integral/Warm/dimension:3/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/06dae95646ce56b7c734880dcd86491150e677492a9dfd6bd9635c5679fae89a.json"
+    },
+    {
+      "id": "397abf3af9831ba76f86967309d34206bf1390b82a66d7c9084cfdd1f4528605",
+      "name": "NamedEvaluationColdGeometry/P2/Diffusion/FieldCoefficient/Named/First/dimension:2/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/397abf3af9831ba76f86967309d34206bf1390b82a66d7c9084cfdd1f4528605.json"
+    },
+    {
+      "id": "a4545be13d8fccf4af45b5c58ee83ad7cf0783eb6e75199245ac7cae8de014f4",
+      "name": "NamedEvaluationColdGeometry/P2/Diffusion/FieldCoefficient/Named/First/dimension:3/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/a4545be13d8fccf4af45b5c58ee83ad7cf0783eb6e75199245ac7cae8de014f4.json"
+    },
+    {
+      "id": "e79e699d26f11ebf723c2984f5be6cd083cd9a62ac9a9cf9d4beaa16e06307ab",
+      "name": "NamedEvaluationColdGeometry/P2/Diffusion/FieldCoefficient/Named/Warm/dimension:2/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/e79e699d26f11ebf723c2984f5be6cd083cd9a62ac9a9cf9d4beaa16e06307ab.json"
+    },
+    {
+      "id": "e7bf936770716d7151f6401a52cd9d141d772337083c2f9af04aa545b16a4d92",
+      "name": "NamedEvaluationColdGeometry/P2/Diffusion/FieldCoefficient/Named/Warm/dimension:3/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/e7bf936770716d7151f6401a52cd9d141d772337083c2f9af04aa545b16a4d92.json"
+    },
+    {
+      "id": "86b4c5172b5422a79083d4ade875970463ca61af04215fa527cf8eddfeb1aac9",
+      "name": "NamedEvaluationColdGeometry/P2/Helmholtz/Constant/Integral/First/dimension:2/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/86b4c5172b5422a79083d4ade875970463ca61af04215fa527cf8eddfeb1aac9.json"
+    },
+    {
+      "id": "69343ac8cfae35d72933c5be05e00f5249373fdb038efb01466a36b8da5c46a9",
+      "name": "NamedEvaluationColdGeometry/P2/Helmholtz/Constant/Integral/First/dimension:3/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/69343ac8cfae35d72933c5be05e00f5249373fdb038efb01466a36b8da5c46a9.json"
+    },
+    {
+      "id": "108cedf616332dd5e4bed0c438c85134453849be10ec77c0f171a55402fe12c0",
+      "name": "NamedEvaluationColdGeometry/P2/Helmholtz/Constant/Integral/Warm/dimension:2/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/108cedf616332dd5e4bed0c438c85134453849be10ec77c0f171a55402fe12c0.json"
+    },
+    {
+      "id": "c0a6d80a19fa397a3d7d4ad898a2c22ebf04861e5d9c593b34cff1576d5be5a1",
+      "name": "NamedEvaluationColdGeometry/P2/Helmholtz/Constant/Integral/Warm/dimension:3/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/c0a6d80a19fa397a3d7d4ad898a2c22ebf04861e5d9c593b34cff1576d5be5a1.json"
+    },
+    {
+      "id": "21a614f5c3cc196222bf0ff75a06ca873fa019e9954bec7ec6de020b45e458f1",
+      "name": "NamedEvaluationColdGeometry/P2/Helmholtz/Constant/Named/First/dimension:2/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/21a614f5c3cc196222bf0ff75a06ca873fa019e9954bec7ec6de020b45e458f1.json"
+    },
+    {
+      "id": "ea3dc0e6a1b3a75ce900323717c3c69050b4951d2c4581ae3aed13b0cbabd088",
+      "name": "NamedEvaluationColdGeometry/P2/Helmholtz/Constant/Named/First/dimension:3/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/ea3dc0e6a1b3a75ce900323717c3c69050b4951d2c4581ae3aed13b0cbabd088.json"
+    },
+    {
+      "id": "dfc4c16f8d8aee3fe42931ade8c8b994708fa1e56c3e6d915d7ef57b21c7ba52",
+      "name": "NamedEvaluationColdGeometry/P2/Helmholtz/Constant/Named/Warm/dimension:2/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/dfc4c16f8d8aee3fe42931ade8c8b994708fa1e56c3e6d915d7ef57b21c7ba52.json"
+    },
+    {
+      "id": "bcf1f4bd335782e7a94d6f7e2aec19fcc6d8c7f68d051ed7676f3647ddb3fc6c",
+      "name": "NamedEvaluationColdGeometry/P2/Helmholtz/Constant/Named/Warm/dimension:3/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/bcf1f4bd335782e7a94d6f7e2aec19fcc6d8c7f68d051ed7676f3647ddb3fc6c.json"
+    },
+    {
+      "id": "cf3caf2a0c182a1297db02bd76c7125dfa9829fc9a348dfa692e6ed11ced7c67",
+      "name": "NamedEvaluationColdGeometry/P2/Helmholtz/FieldCoefficient/Integral/First/dimension:2/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/cf3caf2a0c182a1297db02bd76c7125dfa9829fc9a348dfa692e6ed11ced7c67.json"
+    },
+    {
+      "id": "dfdbc5403315448aa0945c67abb72cd358f5a609d3d13003d0d0fbaf168e1b85",
+      "name": "NamedEvaluationColdGeometry/P2/Helmholtz/FieldCoefficient/Integral/First/dimension:3/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/dfdbc5403315448aa0945c67abb72cd358f5a609d3d13003d0d0fbaf168e1b85.json"
+    },
+    {
+      "id": "1e7dc20ea77e858efe9ce5efc16924e2f6f57df06d20a1029a2de095dc2da005",
+      "name": "NamedEvaluationColdGeometry/P2/Helmholtz/FieldCoefficient/Integral/Warm/dimension:2/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/1e7dc20ea77e858efe9ce5efc16924e2f6f57df06d20a1029a2de095dc2da005.json"
+    },
+    {
+      "id": "c708b5970b699bd98e85eb43e8a4814120ab7f38788a2dace1c951f496b2cbc2",
+      "name": "NamedEvaluationColdGeometry/P2/Helmholtz/FieldCoefficient/Integral/Warm/dimension:3/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/c708b5970b699bd98e85eb43e8a4814120ab7f38788a2dace1c951f496b2cbc2.json"
+    },
+    {
+      "id": "133b219b09ffa1b5f8a81a9b57c1f135beb86c37e5b2f544ddb099292ae4558e",
+      "name": "NamedEvaluationColdGeometry/P2/Helmholtz/FieldCoefficient/Named/First/dimension:2/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/133b219b09ffa1b5f8a81a9b57c1f135beb86c37e5b2f544ddb099292ae4558e.json"
+    },
+    {
+      "id": "ed332cb66828b8ca8c24a45d5de5fb6b6aac965d593836658027e194c76cab5d",
+      "name": "NamedEvaluationColdGeometry/P2/Helmholtz/FieldCoefficient/Named/First/dimension:3/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/ed332cb66828b8ca8c24a45d5de5fb6b6aac965d593836658027e194c76cab5d.json"
+    },
+    {
+      "id": "3188afe98a7e6a10c51302c0691208b0d258aaeccd927d9d9fdc369746bcf3d0",
+      "name": "NamedEvaluationColdGeometry/P2/Helmholtz/FieldCoefficient/Named/Warm/dimension:2/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/3188afe98a7e6a10c51302c0691208b0d258aaeccd927d9d9fdc369746bcf3d0.json"
+    },
+    {
+      "id": "6ff35fb7e90f325e4e1da2162965499d8cb9b69006f151934fed1bf83395a4dc",
+      "name": "NamedEvaluationColdGeometry/P2/Helmholtz/FieldCoefficient/Named/Warm/dimension:3/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/6ff35fb7e90f325e4e1da2162965499d8cb9b69006f151934fed1bf83395a4dc.json"
+    },
+    {
+      "id": "c0b99ecf7913ba40da2611a7ada1d6fa0f8ea82ee1a0de78891b09807e62ca25",
+      "name": "NamedEvaluationColdGeometry/P2/LinearElasticity/Constant/Integral/First/dimension:2/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/c0b99ecf7913ba40da2611a7ada1d6fa0f8ea82ee1a0de78891b09807e62ca25.json"
+    },
+    {
+      "id": "fa9e168b8e45b6f0fe6e53bd8f137b33e56132e1e14f25ccc77c704a004e7c4d",
+      "name": "NamedEvaluationColdGeometry/P2/LinearElasticity/Constant/Integral/First/dimension:3/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/fa9e168b8e45b6f0fe6e53bd8f137b33e56132e1e14f25ccc77c704a004e7c4d.json"
+    },
+    {
+      "id": "62cf86353169eab527aa4dc3d84f5cf8a1cddfd4e51ae0d22386aab698ee6d01",
+      "name": "NamedEvaluationColdGeometry/P2/LinearElasticity/Constant/Integral/Warm/dimension:2/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/62cf86353169eab527aa4dc3d84f5cf8a1cddfd4e51ae0d22386aab698ee6d01.json"
+    },
+    {
+      "id": "0c7a86dd52198178e56d5958eddc80692082a52df814e46d90ac4a9234468955",
+      "name": "NamedEvaluationColdGeometry/P2/LinearElasticity/Constant/Integral/Warm/dimension:3/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/0c7a86dd52198178e56d5958eddc80692082a52df814e46d90ac4a9234468955.json"
+    },
+    {
+      "id": "f3c5ddf3547bc367c385cd0d611e34747a84020a8f235ac364d85aa77c3daeee",
+      "name": "NamedEvaluationColdGeometry/P2/LinearElasticity/Constant/Named/First/dimension:2/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/f3c5ddf3547bc367c385cd0d611e34747a84020a8f235ac364d85aa77c3daeee.json"
+    },
+    {
+      "id": "7149d16f72ac496e2c21a062fd5f1ff311eb34d4af4b9940a3222e3ebecc456b",
+      "name": "NamedEvaluationColdGeometry/P2/LinearElasticity/Constant/Named/First/dimension:3/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/7149d16f72ac496e2c21a062fd5f1ff311eb34d4af4b9940a3222e3ebecc456b.json"
+    },
+    {
+      "id": "7a9f8e1dd5880d7e4b5c2b424dc44e1f9d71ffdb5168f15aa2cfe82fac70cda3",
+      "name": "NamedEvaluationColdGeometry/P2/LinearElasticity/Constant/Named/Warm/dimension:2/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/7a9f8e1dd5880d7e4b5c2b424dc44e1f9d71ffdb5168f15aa2cfe82fac70cda3.json"
+    },
+    {
+      "id": "fbbefde208d0a9c606c1a25e09649e140a150ac9372024ac85da1104ab7475de",
+      "name": "NamedEvaluationColdGeometry/P2/LinearElasticity/Constant/Named/Warm/dimension:3/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/fbbefde208d0a9c606c1a25e09649e140a150ac9372024ac85da1104ab7475de.json"
+    },
+    {
+      "id": "339b02fd7cbfb1fdb45c41607e00e441596a17ef2bb3885b9763e1a242c55a4b",
+      "name": "NamedEvaluationColdGeometry/P2/LinearElasticity/FieldCoefficient/Integral/First/dimension:2/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/339b02fd7cbfb1fdb45c41607e00e441596a17ef2bb3885b9763e1a242c55a4b.json"
+    },
+    {
+      "id": "0d947f4b38c71264393db4888cbbfedc2d3e5e26fca5b18a9422962a5072791d",
+      "name": "NamedEvaluationColdGeometry/P2/LinearElasticity/FieldCoefficient/Integral/First/dimension:3/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/0d947f4b38c71264393db4888cbbfedc2d3e5e26fca5b18a9422962a5072791d.json"
+    },
+    {
+      "id": "861dd0c1b2ead14ffcb896c6888aa17bf55ff64f025ca0416c0b61393938ec1c",
+      "name": "NamedEvaluationColdGeometry/P2/LinearElasticity/FieldCoefficient/Integral/Warm/dimension:2/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/861dd0c1b2ead14ffcb896c6888aa17bf55ff64f025ca0416c0b61393938ec1c.json"
+    },
+    {
+      "id": "47bca90a230b4405c3a17b57c5a60e82a371dfb8a690d924a216360b4018edcc",
+      "name": "NamedEvaluationColdGeometry/P2/LinearElasticity/FieldCoefficient/Integral/Warm/dimension:3/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/47bca90a230b4405c3a17b57c5a60e82a371dfb8a690d924a216360b4018edcc.json"
+    },
+    {
+      "id": "ca9e007130f808655bb9b22cb9b281828433a1092feb3b4e534c72b80e155c14",
+      "name": "NamedEvaluationColdGeometry/P2/LinearElasticity/FieldCoefficient/Named/First/dimension:2/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/ca9e007130f808655bb9b22cb9b281828433a1092feb3b4e534c72b80e155c14.json"
+    },
+    {
+      "id": "20466b0347f654754dfd5c474c16ded22c4b213ad11ca47e9921734684fcb2c7",
+      "name": "NamedEvaluationColdGeometry/P2/LinearElasticity/FieldCoefficient/Named/First/dimension:3/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/20466b0347f654754dfd5c474c16ded22c4b213ad11ca47e9921734684fcb2c7.json"
+    },
+    {
+      "id": "4f3676d4eb773a8f7720952b16e5b5e9312de60d780e91f85d48b5bb5db2cecf",
+      "name": "NamedEvaluationColdGeometry/P2/LinearElasticity/FieldCoefficient/Named/Warm/dimension:2/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/4f3676d4eb773a8f7720952b16e5b5e9312de60d780e91f85d48b5bb5db2cecf.json"
+    },
+    {
+      "id": "4594b214eeefc5c965663fbd0742eba39110a1998d1421050182a07f4916bb50",
+      "name": "NamedEvaluationColdGeometry/P2/LinearElasticity/FieldCoefficient/Named/Warm/dimension:3/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/4594b214eeefc5c965663fbd0742eba39110a1998d1421050182a07f4916bb50.json"
+    },
+    {
+      "id": "7cc71b98b762e5d5ac284ddc6c24da2fb2b718f3f6cb2c31ced6b738142bcd93",
+      "name": "NamedEvaluationColdGeometry/P2/Mass/Constant/Integral/First/dimension:2/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/7cc71b98b762e5d5ac284ddc6c24da2fb2b718f3f6cb2c31ced6b738142bcd93.json"
+    },
+    {
+      "id": "26a4eaa7e55136db5562090a2535c8787e52166d9f1c7d434880fc50bc2afc60",
+      "name": "NamedEvaluationColdGeometry/P2/Mass/Constant/Integral/First/dimension:3/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/26a4eaa7e55136db5562090a2535c8787e52166d9f1c7d434880fc50bc2afc60.json"
+    },
+    {
+      "id": "9b54b8fdd8ea968c86e7b859bdf41b01114969f5aeabbce423284a105e9f6644",
+      "name": "NamedEvaluationColdGeometry/P2/Mass/Constant/Integral/Warm/dimension:2/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/9b54b8fdd8ea968c86e7b859bdf41b01114969f5aeabbce423284a105e9f6644.json"
+    },
+    {
+      "id": "85d8325ff595021589b589f4a647384dc0676a9a8b30871710acbf634eca00a9",
+      "name": "NamedEvaluationColdGeometry/P2/Mass/Constant/Integral/Warm/dimension:3/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/85d8325ff595021589b589f4a647384dc0676a9a8b30871710acbf634eca00a9.json"
+    },
+    {
+      "id": "6d86c0c1f25fa4f81b64247f9606f5d340854044d3ba9d3fa2e2741bac4547bf",
+      "name": "NamedEvaluationColdGeometry/P2/Mass/Constant/Named/First/dimension:2/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/6d86c0c1f25fa4f81b64247f9606f5d340854044d3ba9d3fa2e2741bac4547bf.json"
+    },
+    {
+      "id": "91aa4d572793561fae3cefb4e2f39d22e1c846d15e4fd074d27e8d1fec4042e7",
+      "name": "NamedEvaluationColdGeometry/P2/Mass/Constant/Named/First/dimension:3/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/91aa4d572793561fae3cefb4e2f39d22e1c846d15e4fd074d27e8d1fec4042e7.json"
+    },
+    {
+      "id": "16b1c785898811cb714dcab9d92f4abeab2436474e4b1d7742d5512add66e9b4",
+      "name": "NamedEvaluationColdGeometry/P2/Mass/Constant/Named/Warm/dimension:2/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/16b1c785898811cb714dcab9d92f4abeab2436474e4b1d7742d5512add66e9b4.json"
+    },
+    {
+      "id": "77b65bc9380ba5b49bcfa22b2484ce137395aea8957703976deb0db37bd8d3b3",
+      "name": "NamedEvaluationColdGeometry/P2/Mass/Constant/Named/Warm/dimension:3/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/77b65bc9380ba5b49bcfa22b2484ce137395aea8957703976deb0db37bd8d3b3.json"
+    },
+    {
+      "id": "f9ea91ce50e561ef7523bfa24530c3ac57fd2800cf98d75357950baad061c8ef",
+      "name": "NamedEvaluationColdGeometry/P2/Mass/FieldCoefficient/Integral/First/dimension:2/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/f9ea91ce50e561ef7523bfa24530c3ac57fd2800cf98d75357950baad061c8ef.json"
+    },
+    {
+      "id": "d34e4b0197c1d72a44cfa6581043c9b3d45c0a2617cf6966c0cf4c0e475ea22d",
+      "name": "NamedEvaluationColdGeometry/P2/Mass/FieldCoefficient/Integral/First/dimension:3/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/d34e4b0197c1d72a44cfa6581043c9b3d45c0a2617cf6966c0cf4c0e475ea22d.json"
+    },
+    {
+      "id": "f69ad9aa16af18a2562086ef10d0fc3452df021cf03c7e600afaf73f9f0debc3",
+      "name": "NamedEvaluationColdGeometry/P2/Mass/FieldCoefficient/Integral/Warm/dimension:2/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/f69ad9aa16af18a2562086ef10d0fc3452df021cf03c7e600afaf73f9f0debc3.json"
+    },
+    {
+      "id": "82c23070a969094de9397a0d0d07d96136bdfc8db5a2eb4acc79b37ab26382e2",
+      "name": "NamedEvaluationColdGeometry/P2/Mass/FieldCoefficient/Integral/Warm/dimension:3/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/82c23070a969094de9397a0d0d07d96136bdfc8db5a2eb4acc79b37ab26382e2.json"
+    },
+    {
+      "id": "6e8f4da631390fd02e2d351bb84e3c2651d2cbdc8249af042a6295adeee47d55",
+      "name": "NamedEvaluationColdGeometry/P2/Mass/FieldCoefficient/Named/First/dimension:2/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/6e8f4da631390fd02e2d351bb84e3c2651d2cbdc8249af042a6295adeee47d55.json"
+    },
+    {
+      "id": "fe31014b95ad763ba90e780345f88159bb7022ca0f775d8bab000668cacb7646",
+      "name": "NamedEvaluationColdGeometry/P2/Mass/FieldCoefficient/Named/First/dimension:3/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/fe31014b95ad763ba90e780345f88159bb7022ca0f775d8bab000668cacb7646.json"
+    },
+    {
+      "id": "7a975adac212243552f756870aa8c047cae7336ba796214e7d9b9e4b6b275642",
+      "name": "NamedEvaluationColdGeometry/P2/Mass/FieldCoefficient/Named/Warm/dimension:2/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/7a975adac212243552f756870aa8c047cae7336ba796214e7d9b9e4b6b275642.json"
+    },
+    {
+      "id": "b739ed929cb4e84a52a308ddc4cedf98a633ab5d1323117b821e40fbfdfa93e6",
+      "name": "NamedEvaluationColdGeometry/P2/Mass/FieldCoefficient/Named/Warm/dimension:3/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/b739ed929cb4e84a52a308ddc4cedf98a633ab5d1323117b821e40fbfdfa93e6.json"
+    },
+    {
+      "id": "14e26d1ef83aa34ea9d6ccc27b8d38cc0703bc16e126d9f2b64762b52e8d4d72",
+      "name": "NamedEvaluationColdGeometry/P2/VectorMass/Constant/Integral/First/dimension:2/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/14e26d1ef83aa34ea9d6ccc27b8d38cc0703bc16e126d9f2b64762b52e8d4d72.json"
+    },
+    {
+      "id": "736ca3bd8b990c87846f813f1f355740d8ce63b7e4dd802947df3151b7857c81",
+      "name": "NamedEvaluationColdGeometry/P2/VectorMass/Constant/Integral/First/dimension:3/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/736ca3bd8b990c87846f813f1f355740d8ce63b7e4dd802947df3151b7857c81.json"
+    },
+    {
+      "id": "d70ed2067cfa161c44ece8b53805a72954910f8c36b13fc71daaa3772948df48",
+      "name": "NamedEvaluationColdGeometry/P2/VectorMass/Constant/Integral/Warm/dimension:2/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/d70ed2067cfa161c44ece8b53805a72954910f8c36b13fc71daaa3772948df48.json"
+    },
+    {
+      "id": "1c17eb5f9e33279946ad7ce8f977c6a5bb37371a910a09c386b9bf7dd5521062",
+      "name": "NamedEvaluationColdGeometry/P2/VectorMass/Constant/Integral/Warm/dimension:3/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/1c17eb5f9e33279946ad7ce8f977c6a5bb37371a910a09c386b9bf7dd5521062.json"
+    },
+    {
+      "id": "ffc44df1c1dd7e1239878488c09980aeb0fa806805161d91d47908cd3e634855",
+      "name": "NamedEvaluationColdGeometry/P2/VectorMass/Constant/Named/First/dimension:2/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/ffc44df1c1dd7e1239878488c09980aeb0fa806805161d91d47908cd3e634855.json"
+    },
+    {
+      "id": "f3a93b0f470944f449c5a28cd00cb59e124d6c0548328c11cc5ed03da994438f",
+      "name": "NamedEvaluationColdGeometry/P2/VectorMass/Constant/Named/First/dimension:3/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/f3a93b0f470944f449c5a28cd00cb59e124d6c0548328c11cc5ed03da994438f.json"
+    },
+    {
+      "id": "24ea69d443ad09cd9e982657d965deaf21fd70a4c933d48adf681cc2793e078b",
+      "name": "NamedEvaluationColdGeometry/P2/VectorMass/Constant/Named/Warm/dimension:2/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/24ea69d443ad09cd9e982657d965deaf21fd70a4c933d48adf681cc2793e078b.json"
+    },
+    {
+      "id": "1fb1f3f5024878cd4b159949594401c84556263ca732811659980fea33a89f83",
+      "name": "NamedEvaluationColdGeometry/P2/VectorMass/Constant/Named/Warm/dimension:3/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/1fb1f3f5024878cd4b159949594401c84556263ca732811659980fea33a89f83.json"
+    },
+    {
+      "id": "bc6b8ba528cd051301de4a24e88f28f54feb0abc30b4a2891cc556332bcd5975",
+      "name": "NamedEvaluationColdGeometry/P2/VectorMass/FieldCoefficient/Integral/First/dimension:2/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/bc6b8ba528cd051301de4a24e88f28f54feb0abc30b4a2891cc556332bcd5975.json"
+    },
+    {
+      "id": "bd0f174f0e833e14c6ba31f9522bfc127ac8469b854c14461e635010aa3dfb3b",
+      "name": "NamedEvaluationColdGeometry/P2/VectorMass/FieldCoefficient/Integral/First/dimension:3/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/bd0f174f0e833e14c6ba31f9522bfc127ac8469b854c14461e635010aa3dfb3b.json"
+    },
+    {
+      "id": "ca4c45563f37dbf4d48558d9561769b34f74915cee2eb8edbe30609cd5b2242a",
+      "name": "NamedEvaluationColdGeometry/P2/VectorMass/FieldCoefficient/Integral/Warm/dimension:2/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/ca4c45563f37dbf4d48558d9561769b34f74915cee2eb8edbe30609cd5b2242a.json"
+    },
+    {
+      "id": "45ed455152340ba1ab4f3c2be87dd5dc61e12b1686deeb0573088ef1a5fb574d",
+      "name": "NamedEvaluationColdGeometry/P2/VectorMass/FieldCoefficient/Integral/Warm/dimension:3/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/45ed455152340ba1ab4f3c2be87dd5dc61e12b1686deeb0573088ef1a5fb574d.json"
+    },
+    {
+      "id": "140ca7047ee767ab05939484e4f1a5b1d1c9f707f9a10a5367552eb8bd15261f",
+      "name": "NamedEvaluationColdGeometry/P2/VectorMass/FieldCoefficient/Named/First/dimension:2/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/140ca7047ee767ab05939484e4f1a5b1d1c9f707f9a10a5367552eb8bd15261f.json"
+    },
+    {
+      "id": "b7e4e7e8f60347cdc226bd50cf01dac62c175248e9e0dfcad79f5206591e495f",
+      "name": "NamedEvaluationColdGeometry/P2/VectorMass/FieldCoefficient/Named/First/dimension:3/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/b7e4e7e8f60347cdc226bd50cf01dac62c175248e9e0dfcad79f5206591e495f.json"
+    },
+    {
+      "id": "f869b3476d37f9468657a3fe86d516e40df10d833f1695c6171cf21da424793b",
+      "name": "NamedEvaluationColdGeometry/P2/VectorMass/FieldCoefficient/Named/Warm/dimension:2/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/f869b3476d37f9468657a3fe86d516e40df10d833f1695c6171cf21da424793b.json"
+    },
+    {
+      "id": "e219c898d6ee515ec6ec0c69a87de7dd6f1df22c12025f67f3cc0bd57aa92ef7",
+      "name": "NamedEvaluationColdGeometry/P2/VectorMass/FieldCoefficient/Named/Warm/dimension:3/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/e219c898d6ee515ec6ec0c69a87de7dd6f1df22c12025f67f3cc0bd57aa92ef7.json"
+    },
+    {
+      "id": "c9f3412a728f3a33d7376042da21b3c246d3ea7e8aed9cf2cb31bc94691bf196",
+      "name": "NamedEvaluationTimingControl/P1/Diffusion/Constant/Integral/First/dimension:2/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/c9f3412a728f3a33d7376042da21b3c246d3ea7e8aed9cf2cb31bc94691bf196.json"
+    },
+    {
+      "id": "d8e09acd797ed6b6ea8b5e4ec48b22ed1b767202d53d0c36d818a688b81eac34",
+      "name": "NamedEvaluationTimingControl/P1/Diffusion/Constant/Integral/First/dimension:3/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/d8e09acd797ed6b6ea8b5e4ec48b22ed1b767202d53d0c36d818a688b81eac34.json"
+    },
+    {
+      "id": "a35c371ed136a7a84c48506a16bb5d4a00014a4467aeff25cf8a1e6e237d5c45",
+      "name": "NamedEvaluationTimingControl/P1/Diffusion/Constant/Integral/Warm/dimension:2/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/a35c371ed136a7a84c48506a16bb5d4a00014a4467aeff25cf8a1e6e237d5c45.json"
+    },
+    {
+      "id": "a41a65e49c7528f0ba12c089c9669babfdbee0cb67a5dbfae13defcedef03828",
+      "name": "NamedEvaluationTimingControl/P1/Diffusion/Constant/Integral/Warm/dimension:3/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/a41a65e49c7528f0ba12c089c9669babfdbee0cb67a5dbfae13defcedef03828.json"
+    },
+    {
+      "id": "aadd383b9dc62c421321a9d601c5cae7782f6d0a1b7f69a2fda6f39a01088c3a",
+      "name": "NamedEvaluationTimingControl/P1/Diffusion/Constant/Named/First/dimension:2/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/aadd383b9dc62c421321a9d601c5cae7782f6d0a1b7f69a2fda6f39a01088c3a.json"
+    },
+    {
+      "id": "2ead1ceb37773b9ddd3866747a37148deadfc4adf7d9a692fec62e2a738e627e",
+      "name": "NamedEvaluationTimingControl/P1/Diffusion/Constant/Named/First/dimension:3/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/2ead1ceb37773b9ddd3866747a37148deadfc4adf7d9a692fec62e2a738e627e.json"
+    },
+    {
+      "id": "4712c25136506ed76847ff1a756cabce598c6fffbd4166795cbe516f718edd17",
+      "name": "NamedEvaluationTimingControl/P1/Diffusion/Constant/Named/Warm/dimension:2/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/4712c25136506ed76847ff1a756cabce598c6fffbd4166795cbe516f718edd17.json"
+    },
+    {
+      "id": "d77a0b86470baf7ec9cccca5ad8ae8822fd98e707da712eaaef9b622f7aee689",
+      "name": "NamedEvaluationTimingControl/P1/Diffusion/Constant/Named/Warm/dimension:3/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/d77a0b86470baf7ec9cccca5ad8ae8822fd98e707da712eaaef9b622f7aee689.json"
+    },
+    {
+      "id": "20984141cae6538ea4fefb570f9b455ac3391a2e785e3019b27d6c442c2aba49",
+      "name": "NamedEvaluationTimingControl/P1/Diffusion/FieldCoefficient/Integral/First/dimension:2/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/20984141cae6538ea4fefb570f9b455ac3391a2e785e3019b27d6c442c2aba49.json"
+    },
+    {
+      "id": "6c1b44dff793666c786c9907beb6ab08fc7d3342f1267dd341c765b1c302ea5a",
+      "name": "NamedEvaluationTimingControl/P1/Diffusion/FieldCoefficient/Integral/First/dimension:3/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/6c1b44dff793666c786c9907beb6ab08fc7d3342f1267dd341c765b1c302ea5a.json"
+    },
+    {
+      "id": "9771d1b17e941952f0fd7b94e16b5e7b1ecc53c135baa70aa94ab3b44a28f155",
+      "name": "NamedEvaluationTimingControl/P1/Diffusion/FieldCoefficient/Integral/Warm/dimension:2/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/9771d1b17e941952f0fd7b94e16b5e7b1ecc53c135baa70aa94ab3b44a28f155.json"
+    },
+    {
+      "id": "3590c588b8b729d033df8390341420e34d36a450d560644a39610f5c3a884c93",
+      "name": "NamedEvaluationTimingControl/P1/Diffusion/FieldCoefficient/Integral/Warm/dimension:3/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/3590c588b8b729d033df8390341420e34d36a450d560644a39610f5c3a884c93.json"
+    },
+    {
+      "id": "a4b7badb4df1d51132e8de2c96933ffd5a04c5ce9a960e9012d2b7088af65cd4",
+      "name": "NamedEvaluationTimingControl/P1/Diffusion/FieldCoefficient/Named/First/dimension:2/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/a4b7badb4df1d51132e8de2c96933ffd5a04c5ce9a960e9012d2b7088af65cd4.json"
+    },
+    {
+      "id": "90c849a86cd9f5c9ca008a301d85c3b7cf7cd1424408a33c3f43146bb852c0d5",
+      "name": "NamedEvaluationTimingControl/P1/Diffusion/FieldCoefficient/Named/First/dimension:3/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/90c849a86cd9f5c9ca008a301d85c3b7cf7cd1424408a33c3f43146bb852c0d5.json"
+    },
+    {
+      "id": "d592e28ef3e3ea0e42846f96847cc3bc4eb8731ced1d816d82dee59e4766055a",
+      "name": "NamedEvaluationTimingControl/P1/Diffusion/FieldCoefficient/Named/Warm/dimension:2/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/d592e28ef3e3ea0e42846f96847cc3bc4eb8731ced1d816d82dee59e4766055a.json"
+    },
+    {
+      "id": "4e8b51a2951275bd59dcbf25b8675eed35a5d99fafd814115e4924182444c72a",
+      "name": "NamedEvaluationTimingControl/P1/Diffusion/FieldCoefficient/Named/Warm/dimension:3/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/4e8b51a2951275bd59dcbf25b8675eed35a5d99fafd814115e4924182444c72a.json"
+    },
+    {
+      "id": "29b20e837b6ec20c6557a37062d6b28932b33df36f215e4a9e11a8ad2f64b5e9",
+      "name": "NamedEvaluationTimingControl/P1/Helmholtz/Constant/Integral/First/dimension:2/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/29b20e837b6ec20c6557a37062d6b28932b33df36f215e4a9e11a8ad2f64b5e9.json"
+    },
+    {
+      "id": "dca1b7179e4e11a5f3e170dccfd6969be121c6aa90e41ee5c0d3ba6fa6bd5428",
+      "name": "NamedEvaluationTimingControl/P1/Helmholtz/Constant/Integral/First/dimension:3/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/dca1b7179e4e11a5f3e170dccfd6969be121c6aa90e41ee5c0d3ba6fa6bd5428.json"
+    },
+    {
+      "id": "f9c823661247149b2ea121ae8d1724bee873b627282aadce7c448177ee8a9fea",
+      "name": "NamedEvaluationTimingControl/P1/Helmholtz/Constant/Integral/Warm/dimension:2/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/f9c823661247149b2ea121ae8d1724bee873b627282aadce7c448177ee8a9fea.json"
+    },
+    {
+      "id": "2f1cb4a81c4234ae5f7c15a762a462357260724a48ca84ee96fa2d27ac1d1374",
+      "name": "NamedEvaluationTimingControl/P1/Helmholtz/Constant/Integral/Warm/dimension:3/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/2f1cb4a81c4234ae5f7c15a762a462357260724a48ca84ee96fa2d27ac1d1374.json"
+    },
+    {
+      "id": "a8c38de1932d1403a829479a0e7cf018f1c34a67388539e8851ac7dcba37f8fb",
+      "name": "NamedEvaluationTimingControl/P1/Helmholtz/Constant/Named/First/dimension:2/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/a8c38de1932d1403a829479a0e7cf018f1c34a67388539e8851ac7dcba37f8fb.json"
+    },
+    {
+      "id": "7491c33e737a0450f50dd4b7ec92a3a6f3efccbce9927279351185051b84b3a3",
+      "name": "NamedEvaluationTimingControl/P1/Helmholtz/Constant/Named/First/dimension:3/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/7491c33e737a0450f50dd4b7ec92a3a6f3efccbce9927279351185051b84b3a3.json"
+    },
+    {
+      "id": "a4b10cf79c2124890b2e42f86685697fb8294a36da307814526e21ac3c3e4c70",
+      "name": "NamedEvaluationTimingControl/P1/Helmholtz/Constant/Named/Warm/dimension:2/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/a4b10cf79c2124890b2e42f86685697fb8294a36da307814526e21ac3c3e4c70.json"
+    },
+    {
+      "id": "0422a4cb38741397dc28d0a61b0b77471ae02cc563baddb7c7829512011487f8",
+      "name": "NamedEvaluationTimingControl/P1/Helmholtz/Constant/Named/Warm/dimension:3/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/0422a4cb38741397dc28d0a61b0b77471ae02cc563baddb7c7829512011487f8.json"
+    },
+    {
+      "id": "881aeff3acf8d95e3d0e68286c794e481bd4f8dc463ec1df17ca64d0e7ff8831",
+      "name": "NamedEvaluationTimingControl/P1/Helmholtz/FieldCoefficient/Integral/First/dimension:2/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/881aeff3acf8d95e3d0e68286c794e481bd4f8dc463ec1df17ca64d0e7ff8831.json"
+    },
+    {
+      "id": "55f9c201e33f0503da55baf30db5eef5bd449527d5cfa6855c1142174c87c0e3",
+      "name": "NamedEvaluationTimingControl/P1/Helmholtz/FieldCoefficient/Integral/First/dimension:3/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/55f9c201e33f0503da55baf30db5eef5bd449527d5cfa6855c1142174c87c0e3.json"
+    },
+    {
+      "id": "95134b310266d841a1698ca8cb8d6d18e26b38ae37147fef2c80973484707ee4",
+      "name": "NamedEvaluationTimingControl/P1/Helmholtz/FieldCoefficient/Integral/Warm/dimension:2/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/95134b310266d841a1698ca8cb8d6d18e26b38ae37147fef2c80973484707ee4.json"
+    },
+    {
+      "id": "6d2a55dc16a2ab2fb7a15fbe6b6903838013a8bf267e8aabc72e8d0575ad7dcf",
+      "name": "NamedEvaluationTimingControl/P1/Helmholtz/FieldCoefficient/Integral/Warm/dimension:3/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/6d2a55dc16a2ab2fb7a15fbe6b6903838013a8bf267e8aabc72e8d0575ad7dcf.json"
+    },
+    {
+      "id": "5b2d6e09f8977a18ed48fd85e0627dd5c5b354b2550c78e189b1de4dbf90dedb",
+      "name": "NamedEvaluationTimingControl/P1/Helmholtz/FieldCoefficient/Named/First/dimension:2/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/5b2d6e09f8977a18ed48fd85e0627dd5c5b354b2550c78e189b1de4dbf90dedb.json"
+    },
+    {
+      "id": "30e0837affe1934548f22af23c0387877367c618195295ce2b1cf7ac98526199",
+      "name": "NamedEvaluationTimingControl/P1/Helmholtz/FieldCoefficient/Named/First/dimension:3/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/30e0837affe1934548f22af23c0387877367c618195295ce2b1cf7ac98526199.json"
+    },
+    {
+      "id": "c7203ffe3be810c27448d8f65e0528282b020bf32de567333aeedfe3071c3995",
+      "name": "NamedEvaluationTimingControl/P1/Helmholtz/FieldCoefficient/Named/Warm/dimension:2/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/c7203ffe3be810c27448d8f65e0528282b020bf32de567333aeedfe3071c3995.json"
+    },
+    {
+      "id": "de2e0b3a0c1611f437c444151d616b1f3ffa063b50fd4ed18ae1f5ef29c5c6fb",
+      "name": "NamedEvaluationTimingControl/P1/Helmholtz/FieldCoefficient/Named/Warm/dimension:3/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/de2e0b3a0c1611f437c444151d616b1f3ffa063b50fd4ed18ae1f5ef29c5c6fb.json"
+    },
+    {
+      "id": "0c6d9e9aeefe4c26d573fd8956f82c195276bc381a3a636a7800cbca44a3234b",
+      "name": "NamedEvaluationTimingControl/P1/LinearElasticity/Constant/Integral/First/dimension:2/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/0c6d9e9aeefe4c26d573fd8956f82c195276bc381a3a636a7800cbca44a3234b.json"
+    },
+    {
+      "id": "a53c98eb1a270045aa8e31af908cb8b999ee8ed762f11d0d199fdd525568703a",
+      "name": "NamedEvaluationTimingControl/P1/LinearElasticity/Constant/Integral/First/dimension:3/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/a53c98eb1a270045aa8e31af908cb8b999ee8ed762f11d0d199fdd525568703a.json"
+    },
+    {
+      "id": "f4233bb9de44012f3d16ea7599b70336f46842224f42c1b5c0338bb61e4e8602",
+      "name": "NamedEvaluationTimingControl/P1/LinearElasticity/Constant/Integral/Warm/dimension:2/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/f4233bb9de44012f3d16ea7599b70336f46842224f42c1b5c0338bb61e4e8602.json"
+    },
+    {
+      "id": "c6be7cb87c70f629b86f0b9e48c5c87c5020931deb2f5e049c46658de226064c",
+      "name": "NamedEvaluationTimingControl/P1/LinearElasticity/Constant/Integral/Warm/dimension:3/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/c6be7cb87c70f629b86f0b9e48c5c87c5020931deb2f5e049c46658de226064c.json"
+    },
+    {
+      "id": "0407f21acb08e08a37aed7362b4001fb9811044c96f1e965237bfef371ab8c6d",
+      "name": "NamedEvaluationTimingControl/P1/LinearElasticity/Constant/Named/First/dimension:2/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/0407f21acb08e08a37aed7362b4001fb9811044c96f1e965237bfef371ab8c6d.json"
+    },
+    {
+      "id": "47f8d6b038868ca9e2c2173b3d2e5c0bc953e84e5cfdbc59457bae8e0f2f1382",
+      "name": "NamedEvaluationTimingControl/P1/LinearElasticity/Constant/Named/First/dimension:3/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/47f8d6b038868ca9e2c2173b3d2e5c0bc953e84e5cfdbc59457bae8e0f2f1382.json"
+    },
+    {
+      "id": "a2e1047605f687d001a02838d5301345e962e581290b302ba3e3134dea1e3ef6",
+      "name": "NamedEvaluationTimingControl/P1/LinearElasticity/Constant/Named/Warm/dimension:2/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/a2e1047605f687d001a02838d5301345e962e581290b302ba3e3134dea1e3ef6.json"
+    },
+    {
+      "id": "8d25420abc13c046cc1f72936994de86c57701b54980df1bdae7629e9e075003",
+      "name": "NamedEvaluationTimingControl/P1/LinearElasticity/Constant/Named/Warm/dimension:3/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/8d25420abc13c046cc1f72936994de86c57701b54980df1bdae7629e9e075003.json"
+    },
+    {
+      "id": "b4d59a4a218102d6894dccd2cd3610747c2f9b10c211d361429099ae557a9cde",
+      "name": "NamedEvaluationTimingControl/P1/LinearElasticity/FieldCoefficient/Integral/First/dimension:2/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/b4d59a4a218102d6894dccd2cd3610747c2f9b10c211d361429099ae557a9cde.json"
+    },
+    {
+      "id": "789f5526c058c23b7479cd57ebec5a7be1ea6ed789c508a511257138879beb5f",
+      "name": "NamedEvaluationTimingControl/P1/LinearElasticity/FieldCoefficient/Integral/First/dimension:3/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/789f5526c058c23b7479cd57ebec5a7be1ea6ed789c508a511257138879beb5f.json"
+    },
+    {
+      "id": "996f76ee9c4dc4b70ca73407a72ba056f335533fbed95dd6d636ad11078b3751",
+      "name": "NamedEvaluationTimingControl/P1/LinearElasticity/FieldCoefficient/Integral/Warm/dimension:2/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/996f76ee9c4dc4b70ca73407a72ba056f335533fbed95dd6d636ad11078b3751.json"
+    },
+    {
+      "id": "c3206a8bcf1741ed62a39edb7f1c04a91155decf9470a7e039d41487ade35203",
+      "name": "NamedEvaluationTimingControl/P1/LinearElasticity/FieldCoefficient/Integral/Warm/dimension:3/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/c3206a8bcf1741ed62a39edb7f1c04a91155decf9470a7e039d41487ade35203.json"
+    },
+    {
+      "id": "66e2fdadb8a6e21ed970991d23d876d97c37fb4075e2969469fc125a00a108d1",
+      "name": "NamedEvaluationTimingControl/P1/LinearElasticity/FieldCoefficient/Named/First/dimension:2/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/66e2fdadb8a6e21ed970991d23d876d97c37fb4075e2969469fc125a00a108d1.json"
+    },
+    {
+      "id": "67d78058f4d10c0561f50cd66a9a0af3343dc9bd9bdac49662dcf876405ff871",
+      "name": "NamedEvaluationTimingControl/P1/LinearElasticity/FieldCoefficient/Named/First/dimension:3/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/67d78058f4d10c0561f50cd66a9a0af3343dc9bd9bdac49662dcf876405ff871.json"
+    },
+    {
+      "id": "a65b7097fd3ebea78e63171321900726f5671bc3ad6f05ffa0816f427d402b9f",
+      "name": "NamedEvaluationTimingControl/P1/LinearElasticity/FieldCoefficient/Named/Warm/dimension:2/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/a65b7097fd3ebea78e63171321900726f5671bc3ad6f05ffa0816f427d402b9f.json"
+    },
+    {
+      "id": "2b592a4f99812a24789f7f44c65de4541d60458deb743f408317d4a8b7fe39f5",
+      "name": "NamedEvaluationTimingControl/P1/LinearElasticity/FieldCoefficient/Named/Warm/dimension:3/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/2b592a4f99812a24789f7f44c65de4541d60458deb743f408317d4a8b7fe39f5.json"
+    },
+    {
+      "id": "1142d8476a21a27a5253420cad12e9017553b812f77a4ee34922cb8b16e3386c",
+      "name": "NamedEvaluationTimingControl/P1/Mass/Constant/Integral/First/dimension:2/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/1142d8476a21a27a5253420cad12e9017553b812f77a4ee34922cb8b16e3386c.json"
+    },
+    {
+      "id": "35b593a99e6c5d16190da932474af11c04d97137571e8a0d110257ac67b4c3a8",
+      "name": "NamedEvaluationTimingControl/P1/Mass/Constant/Integral/First/dimension:3/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/35b593a99e6c5d16190da932474af11c04d97137571e8a0d110257ac67b4c3a8.json"
+    },
+    {
+      "id": "493fb9f7bad1bc6869902ffa012d06c23cda542cba154806a5254ab449828fa7",
+      "name": "NamedEvaluationTimingControl/P1/Mass/Constant/Integral/Warm/dimension:2/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/493fb9f7bad1bc6869902ffa012d06c23cda542cba154806a5254ab449828fa7.json"
+    },
+    {
+      "id": "e2dbfb1e3cb7bf98d9f9c36307b02dfbf42f45c79a66e7ac05fd1c63dd483368",
+      "name": "NamedEvaluationTimingControl/P1/Mass/Constant/Integral/Warm/dimension:3/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/e2dbfb1e3cb7bf98d9f9c36307b02dfbf42f45c79a66e7ac05fd1c63dd483368.json"
+    },
+    {
+      "id": "2db608f1cc1fbafe739e975f059a1fd265079ee5df4e717b858b49af935d8362",
+      "name": "NamedEvaluationTimingControl/P1/Mass/Constant/Named/First/dimension:2/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/2db608f1cc1fbafe739e975f059a1fd265079ee5df4e717b858b49af935d8362.json"
+    },
+    {
+      "id": "40d5159d67a3b5e9855130e6de480e4edf9d30904a193572275a1416c92de313",
+      "name": "NamedEvaluationTimingControl/P1/Mass/Constant/Named/First/dimension:3/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/40d5159d67a3b5e9855130e6de480e4edf9d30904a193572275a1416c92de313.json"
+    },
+    {
+      "id": "a9122769166b87a2d60859abda5819db5070e89aa6dab80aedd9ed96d9117800",
+      "name": "NamedEvaluationTimingControl/P1/Mass/Constant/Named/Warm/dimension:2/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/a9122769166b87a2d60859abda5819db5070e89aa6dab80aedd9ed96d9117800.json"
+    },
+    {
+      "id": "b7c9017052c4cd0de5e9761d29deeb7b5651c6b4b183739e67fe178c7dd3b7de",
+      "name": "NamedEvaluationTimingControl/P1/Mass/Constant/Named/Warm/dimension:3/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/b7c9017052c4cd0de5e9761d29deeb7b5651c6b4b183739e67fe178c7dd3b7de.json"
+    },
+    {
+      "id": "69805152b38ced3f0fb4f2d38556b221eae3b47a57b8da546f0b0fac6c8cb252",
+      "name": "NamedEvaluationTimingControl/P1/Mass/FieldCoefficient/Integral/First/dimension:2/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/69805152b38ced3f0fb4f2d38556b221eae3b47a57b8da546f0b0fac6c8cb252.json"
+    },
+    {
+      "id": "815b1651986a689b659fa0a644af442496addd1e417ef225f08362664e9700bf",
+      "name": "NamedEvaluationTimingControl/P1/Mass/FieldCoefficient/Integral/First/dimension:3/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/815b1651986a689b659fa0a644af442496addd1e417ef225f08362664e9700bf.json"
+    },
+    {
+      "id": "ce313240483bdbbf6b515edb76051e3769f1f64d4008f78b7aa060e031d682d5",
+      "name": "NamedEvaluationTimingControl/P1/Mass/FieldCoefficient/Integral/Warm/dimension:2/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/ce313240483bdbbf6b515edb76051e3769f1f64d4008f78b7aa060e031d682d5.json"
+    },
+    {
+      "id": "ae539bd8886264c9f2bc57c5d81f0e3801ffb66a9d79034719129eda2ce47f7e",
+      "name": "NamedEvaluationTimingControl/P1/Mass/FieldCoefficient/Integral/Warm/dimension:3/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/ae539bd8886264c9f2bc57c5d81f0e3801ffb66a9d79034719129eda2ce47f7e.json"
+    },
+    {
+      "id": "9d4a9d7e6c6031a34b5fc96b6070a8fd812cdcceee493ec8e081c94d2c11f6c2",
+      "name": "NamedEvaluationTimingControl/P1/Mass/FieldCoefficient/Named/First/dimension:2/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/9d4a9d7e6c6031a34b5fc96b6070a8fd812cdcceee493ec8e081c94d2c11f6c2.json"
+    },
+    {
+      "id": "38e7f7acbe15bf2b6074e7766e680c9f8f17fad4065dee87c6b1e5940353c6c2",
+      "name": "NamedEvaluationTimingControl/P1/Mass/FieldCoefficient/Named/First/dimension:3/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/38e7f7acbe15bf2b6074e7766e680c9f8f17fad4065dee87c6b1e5940353c6c2.json"
+    },
+    {
+      "id": "936e67daabbf78c0942bdb50f6b9c219167f0a4c27601a72d975c0b0131311c1",
+      "name": "NamedEvaluationTimingControl/P1/Mass/FieldCoefficient/Named/Warm/dimension:2/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/936e67daabbf78c0942bdb50f6b9c219167f0a4c27601a72d975c0b0131311c1.json"
+    },
+    {
+      "id": "857d96aeabc8627ba12e3ab620145b00c5a7bec4fee93c0a8e3ca96c4c939f9b",
+      "name": "NamedEvaluationTimingControl/P1/Mass/FieldCoefficient/Named/Warm/dimension:3/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/857d96aeabc8627ba12e3ab620145b00c5a7bec4fee93c0a8e3ca96c4c939f9b.json"
+    },
+    {
+      "id": "9c4043049c0481613c2013d9c6e6a413e17894f7fd2cdf5403132c2024a20630",
+      "name": "NamedEvaluationTimingControl/P1/VectorMass/Constant/Integral/First/dimension:2/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/9c4043049c0481613c2013d9c6e6a413e17894f7fd2cdf5403132c2024a20630.json"
+    },
+    {
+      "id": "a474aae2f5fe1cda14ab26c9cc78d0d5912dfb8b9250d9713e4c90d3e13334c8",
+      "name": "NamedEvaluationTimingControl/P1/VectorMass/Constant/Integral/First/dimension:3/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/a474aae2f5fe1cda14ab26c9cc78d0d5912dfb8b9250d9713e4c90d3e13334c8.json"
+    },
+    {
+      "id": "aa0ce0f10220db4ad49773e7e4d711be23569f648e3e4f920c5b29f97da1da7b",
+      "name": "NamedEvaluationTimingControl/P1/VectorMass/Constant/Integral/Warm/dimension:2/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/aa0ce0f10220db4ad49773e7e4d711be23569f648e3e4f920c5b29f97da1da7b.json"
+    },
+    {
+      "id": "d97693429255f3b34767794916bce1d46a5c4603365ebff77e6976095441ab51",
+      "name": "NamedEvaluationTimingControl/P1/VectorMass/Constant/Integral/Warm/dimension:3/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/d97693429255f3b34767794916bce1d46a5c4603365ebff77e6976095441ab51.json"
+    },
+    {
+      "id": "85f326ac097177f99aa61d55379a56a17f1261d67c1205bf1e79d789def59c7c",
+      "name": "NamedEvaluationTimingControl/P1/VectorMass/Constant/Named/First/dimension:2/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/85f326ac097177f99aa61d55379a56a17f1261d67c1205bf1e79d789def59c7c.json"
+    },
+    {
+      "id": "463c8e82eb1790585ff37e9c7a58544a06fc200c8e1d5b2dd5344b6a260a4960",
+      "name": "NamedEvaluationTimingControl/P1/VectorMass/Constant/Named/First/dimension:3/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/463c8e82eb1790585ff37e9c7a58544a06fc200c8e1d5b2dd5344b6a260a4960.json"
+    },
+    {
+      "id": "8b5ee45694e0a12af8bbc541f523a85d65962a12de6f92f22cde90d7b12afc8f",
+      "name": "NamedEvaluationTimingControl/P1/VectorMass/Constant/Named/Warm/dimension:2/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/8b5ee45694e0a12af8bbc541f523a85d65962a12de6f92f22cde90d7b12afc8f.json"
+    },
+    {
+      "id": "3681d4089257d8d60afa237d4cbb592ca6de54973ee65da09d22815c08abf843",
+      "name": "NamedEvaluationTimingControl/P1/VectorMass/Constant/Named/Warm/dimension:3/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/3681d4089257d8d60afa237d4cbb592ca6de54973ee65da09d22815c08abf843.json"
+    },
+    {
+      "id": "6849961e64de0ad07c9959c0b668524607d75266d1757e0d9c70674a21703324",
+      "name": "NamedEvaluationTimingControl/P1/VectorMass/FieldCoefficient/Integral/First/dimension:2/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/6849961e64de0ad07c9959c0b668524607d75266d1757e0d9c70674a21703324.json"
+    },
+    {
+      "id": "6b5c33ea393a3cfa432433e314fc23ea43298d89e7570a885c5bb4f8a667153e",
+      "name": "NamedEvaluationTimingControl/P1/VectorMass/FieldCoefficient/Integral/First/dimension:3/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/6b5c33ea393a3cfa432433e314fc23ea43298d89e7570a885c5bb4f8a667153e.json"
+    },
+    {
+      "id": "645a61b7deb85c3f060b05bec63fc238379c0f74cafa278271e9f81127d97a9b",
+      "name": "NamedEvaluationTimingControl/P1/VectorMass/FieldCoefficient/Integral/Warm/dimension:2/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/645a61b7deb85c3f060b05bec63fc238379c0f74cafa278271e9f81127d97a9b.json"
+    },
+    {
+      "id": "c85c4a5b37634d97c5afebda64a410ee2ff4103ad512e1379d50cb645d4d60eb",
+      "name": "NamedEvaluationTimingControl/P1/VectorMass/FieldCoefficient/Integral/Warm/dimension:3/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/c85c4a5b37634d97c5afebda64a410ee2ff4103ad512e1379d50cb645d4d60eb.json"
+    },
+    {
+      "id": "9f08f54b9521d323f321e3d9de8b9eea606cee73257a536c67b1e47c48798db7",
+      "name": "NamedEvaluationTimingControl/P1/VectorMass/FieldCoefficient/Named/First/dimension:2/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/9f08f54b9521d323f321e3d9de8b9eea606cee73257a536c67b1e47c48798db7.json"
+    },
+    {
+      "id": "568e8ade92c4969da7d1940e8b6d19ba0e054d940841f0df1898fb17bc927ef0",
+      "name": "NamedEvaluationTimingControl/P1/VectorMass/FieldCoefficient/Named/First/dimension:3/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/568e8ade92c4969da7d1940e8b6d19ba0e054d940841f0df1898fb17bc927ef0.json"
+    },
+    {
+      "id": "ea285295e5df3b5b76e23a36f2be6e6551d572ab63211c6e19c732b883cd1d4d",
+      "name": "NamedEvaluationTimingControl/P1/VectorMass/FieldCoefficient/Named/Warm/dimension:2/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/ea285295e5df3b5b76e23a36f2be6e6551d572ab63211c6e19c732b883cd1d4d.json"
+    },
+    {
+      "id": "3cac48a501e8d9359a0b47903f1049b182f2c15109e626613008584ca201627d",
+      "name": "NamedEvaluationTimingControl/P1/VectorMass/FieldCoefficient/Named/Warm/dimension:3/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/3cac48a501e8d9359a0b47903f1049b182f2c15109e626613008584ca201627d.json"
+    },
+    {
+      "id": "ec2563f51417a9bb13b147e09b7d69c01755bc0b60a22003d692b74e2e2435b2",
+      "name": "NamedEvaluationTimingControl/P2/Diffusion/Constant/Integral/First/dimension:2/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/ec2563f51417a9bb13b147e09b7d69c01755bc0b60a22003d692b74e2e2435b2.json"
+    },
+    {
+      "id": "00fc2a5638180d0ea3828f5ade9cb71c7bdef079759b405183cf44d8abf1b8da",
+      "name": "NamedEvaluationTimingControl/P2/Diffusion/Constant/Integral/First/dimension:3/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/00fc2a5638180d0ea3828f5ade9cb71c7bdef079759b405183cf44d8abf1b8da.json"
+    },
+    {
+      "id": "9410ec58c31c3fbe32a29e4c15bf3e58004684512c3e0a7ef9cc13d65e4b9349",
+      "name": "NamedEvaluationTimingControl/P2/Diffusion/Constant/Integral/Warm/dimension:2/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/9410ec58c31c3fbe32a29e4c15bf3e58004684512c3e0a7ef9cc13d65e4b9349.json"
+    },
+    {
+      "id": "1e3d117e5b1ef36892a4c795a64adbf4851084499ef63c230e4ca3c0933dc0d9",
+      "name": "NamedEvaluationTimingControl/P2/Diffusion/Constant/Integral/Warm/dimension:3/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/1e3d117e5b1ef36892a4c795a64adbf4851084499ef63c230e4ca3c0933dc0d9.json"
+    },
+    {
+      "id": "8124d0f02b16d410c1f1fb770c1e6cda68984b0e86d71a96f364275bd8cee719",
+      "name": "NamedEvaluationTimingControl/P2/Diffusion/Constant/Named/First/dimension:2/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/8124d0f02b16d410c1f1fb770c1e6cda68984b0e86d71a96f364275bd8cee719.json"
+    },
+    {
+      "id": "29d809345ea0046c4f5fba8cc803954407e895c492f249dda0bd7e10b76d274e",
+      "name": "NamedEvaluationTimingControl/P2/Diffusion/Constant/Named/First/dimension:3/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/29d809345ea0046c4f5fba8cc803954407e895c492f249dda0bd7e10b76d274e.json"
+    },
+    {
+      "id": "7d6cc9bc573182bcac0d8795e62a397b7b86696bc041aaf2c69861e4e5083a93",
+      "name": "NamedEvaluationTimingControl/P2/Diffusion/Constant/Named/Warm/dimension:2/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/7d6cc9bc573182bcac0d8795e62a397b7b86696bc041aaf2c69861e4e5083a93.json"
+    },
+    {
+      "id": "88043bc7ae8f2a676416af613c1708f04fa5835c99d52d8ff2771e78ab3b8d37",
+      "name": "NamedEvaluationTimingControl/P2/Diffusion/Constant/Named/Warm/dimension:3/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/88043bc7ae8f2a676416af613c1708f04fa5835c99d52d8ff2771e78ab3b8d37.json"
+    },
+    {
+      "id": "8bfb89f99453171ce75b407a4a342c3ab0a331509ddbbaf383a1e12474104959",
+      "name": "NamedEvaluationTimingControl/P2/Diffusion/FieldCoefficient/Integral/First/dimension:2/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/8bfb89f99453171ce75b407a4a342c3ab0a331509ddbbaf383a1e12474104959.json"
+    },
+    {
+      "id": "eeb5b600645a8711a85eac22808615fd670248d4f964c2d1ba1ffa07b83bd571",
+      "name": "NamedEvaluationTimingControl/P2/Diffusion/FieldCoefficient/Integral/First/dimension:3/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/eeb5b600645a8711a85eac22808615fd670248d4f964c2d1ba1ffa07b83bd571.json"
+    },
+    {
+      "id": "f33c8d27a40deb45a5cabd8279924bb713ca2b61fb0cc20074a2b5317b513b2e",
+      "name": "NamedEvaluationTimingControl/P2/Diffusion/FieldCoefficient/Integral/Warm/dimension:2/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/f33c8d27a40deb45a5cabd8279924bb713ca2b61fb0cc20074a2b5317b513b2e.json"
+    },
+    {
+      "id": "9dfdb33da23b7389204d29b91c4e3a50a4b2a9e68d994cf6c6a302de57856138",
+      "name": "NamedEvaluationTimingControl/P2/Diffusion/FieldCoefficient/Integral/Warm/dimension:3/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/9dfdb33da23b7389204d29b91c4e3a50a4b2a9e68d994cf6c6a302de57856138.json"
+    },
+    {
+      "id": "bf17e9d98944706cdd30c12587373025ca8639265888c0365ec16564a21b5a50",
+      "name": "NamedEvaluationTimingControl/P2/Diffusion/FieldCoefficient/Named/First/dimension:2/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/bf17e9d98944706cdd30c12587373025ca8639265888c0365ec16564a21b5a50.json"
+    },
+    {
+      "id": "fa4a156125bd59c3327cbfe24bfa01932b185f1aefc76cc0de11e38a53f4a09d",
+      "name": "NamedEvaluationTimingControl/P2/Diffusion/FieldCoefficient/Named/First/dimension:3/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/fa4a156125bd59c3327cbfe24bfa01932b185f1aefc76cc0de11e38a53f4a09d.json"
+    },
+    {
+      "id": "edb79e5025741fa2d6fbe3e634d07b81ec45baa911f56ee14db8b2831612e42b",
+      "name": "NamedEvaluationTimingControl/P2/Diffusion/FieldCoefficient/Named/Warm/dimension:2/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/edb79e5025741fa2d6fbe3e634d07b81ec45baa911f56ee14db8b2831612e42b.json"
+    },
+    {
+      "id": "e3d0f5b08b4ed1e3d5da63727a19453e45fccf14a52665dca6f40af40fb350a8",
+      "name": "NamedEvaluationTimingControl/P2/Diffusion/FieldCoefficient/Named/Warm/dimension:3/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/e3d0f5b08b4ed1e3d5da63727a19453e45fccf14a52665dca6f40af40fb350a8.json"
+    },
+    {
+      "id": "75478f261d98d8b8c021d020e1182aaa19fc63e939cad3acc9ca33b40fc4e77a",
+      "name": "NamedEvaluationTimingControl/P2/Helmholtz/Constant/Integral/First/dimension:2/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/75478f261d98d8b8c021d020e1182aaa19fc63e939cad3acc9ca33b40fc4e77a.json"
+    },
+    {
+      "id": "4d45afb756747201f67c310aa4165c35c00fc7feff396b992f1af60a0a7b47b4",
+      "name": "NamedEvaluationTimingControl/P2/Helmholtz/Constant/Integral/First/dimension:3/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/4d45afb756747201f67c310aa4165c35c00fc7feff396b992f1af60a0a7b47b4.json"
+    },
+    {
+      "id": "77e4c3ba9db94976af13150de3219d80a6d2c3c32027dacd7c3616efdeac9448",
+      "name": "NamedEvaluationTimingControl/P2/Helmholtz/Constant/Integral/Warm/dimension:2/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/77e4c3ba9db94976af13150de3219d80a6d2c3c32027dacd7c3616efdeac9448.json"
+    },
+    {
+      "id": "1edc093ee0df5b00bd0a7d80ab516718928e8c27e9b460d6642c45d23ecf5bb7",
+      "name": "NamedEvaluationTimingControl/P2/Helmholtz/Constant/Integral/Warm/dimension:3/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/1edc093ee0df5b00bd0a7d80ab516718928e8c27e9b460d6642c45d23ecf5bb7.json"
+    },
+    {
+      "id": "89566193d93b08d1b494141389eaa13daf6e78d12c1d582d3df44a37fc2cadec",
+      "name": "NamedEvaluationTimingControl/P2/Helmholtz/Constant/Named/First/dimension:2/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/89566193d93b08d1b494141389eaa13daf6e78d12c1d582d3df44a37fc2cadec.json"
+    },
+    {
+      "id": "ebe47fbfa4065ba4433c84fa2b09d9d0f7abc0a96b8d93f3c9fdc001041d2388",
+      "name": "NamedEvaluationTimingControl/P2/Helmholtz/Constant/Named/First/dimension:3/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/ebe47fbfa4065ba4433c84fa2b09d9d0f7abc0a96b8d93f3c9fdc001041d2388.json"
+    },
+    {
+      "id": "a2765bd70f55563c13402e11a6b1444edb57d0b83c0ecf421b44ff4f15511fbc",
+      "name": "NamedEvaluationTimingControl/P2/Helmholtz/Constant/Named/Warm/dimension:2/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/a2765bd70f55563c13402e11a6b1444edb57d0b83c0ecf421b44ff4f15511fbc.json"
+    },
+    {
+      "id": "30b45abb6f03044e6d636a605b6e8d08178b58445c411de0493928ffd0da5f6d",
+      "name": "NamedEvaluationTimingControl/P2/Helmholtz/Constant/Named/Warm/dimension:3/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/30b45abb6f03044e6d636a605b6e8d08178b58445c411de0493928ffd0da5f6d.json"
+    },
+    {
+      "id": "1e9fda99268a92a3b87e7366171d009d93cc7f17c425f70572a82281eed8cc66",
+      "name": "NamedEvaluationTimingControl/P2/Helmholtz/FieldCoefficient/Integral/First/dimension:2/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/1e9fda99268a92a3b87e7366171d009d93cc7f17c425f70572a82281eed8cc66.json"
+    },
+    {
+      "id": "e83a0b54f10915797ea410dce5142dde919d36071fb9b84e05dc56d866c6ce11",
+      "name": "NamedEvaluationTimingControl/P2/Helmholtz/FieldCoefficient/Integral/First/dimension:3/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/e83a0b54f10915797ea410dce5142dde919d36071fb9b84e05dc56d866c6ce11.json"
+    },
+    {
+      "id": "22eeef724515c6dcf6f2e55bb0e0d86090e5cc8c81290b0464e2bf34ac98ea89",
+      "name": "NamedEvaluationTimingControl/P2/Helmholtz/FieldCoefficient/Integral/Warm/dimension:2/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/22eeef724515c6dcf6f2e55bb0e0d86090e5cc8c81290b0464e2bf34ac98ea89.json"
+    },
+    {
+      "id": "ea2151ffa501bd8f5edcc79107221d06acc6483972a4bb0c1bb9cc47d7e1f509",
+      "name": "NamedEvaluationTimingControl/P2/Helmholtz/FieldCoefficient/Integral/Warm/dimension:3/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/ea2151ffa501bd8f5edcc79107221d06acc6483972a4bb0c1bb9cc47d7e1f509.json"
+    },
+    {
+      "id": "32c37369bab48e5e7e634d7e3c899876c8146b6697b25eb4ff54458bed48093e",
+      "name": "NamedEvaluationTimingControl/P2/Helmholtz/FieldCoefficient/Named/First/dimension:2/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/32c37369bab48e5e7e634d7e3c899876c8146b6697b25eb4ff54458bed48093e.json"
+    },
+    {
+      "id": "f995e838a488b22ed12bc506dbe8a913f47e5cf58c2f860e69701b429b610e17",
+      "name": "NamedEvaluationTimingControl/P2/Helmholtz/FieldCoefficient/Named/First/dimension:3/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/f995e838a488b22ed12bc506dbe8a913f47e5cf58c2f860e69701b429b610e17.json"
+    },
+    {
+      "id": "edbf4048989fc329c2595511c573cbbd10eaa750fdd65a72f5d65c8a9ed90302",
+      "name": "NamedEvaluationTimingControl/P2/Helmholtz/FieldCoefficient/Named/Warm/dimension:2/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/edbf4048989fc329c2595511c573cbbd10eaa750fdd65a72f5d65c8a9ed90302.json"
+    },
+    {
+      "id": "e3e67742da6fb9758afc47b7eeffe6386eface1be53c6d6eafae3137609df696",
+      "name": "NamedEvaluationTimingControl/P2/Helmholtz/FieldCoefficient/Named/Warm/dimension:3/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/e3e67742da6fb9758afc47b7eeffe6386eface1be53c6d6eafae3137609df696.json"
+    },
+    {
+      "id": "86464db7d867794358e6d6ec43c05ae58a022b4976be39f8699ac27a2ec04382",
+      "name": "NamedEvaluationTimingControl/P2/LinearElasticity/Constant/Integral/First/dimension:2/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/86464db7d867794358e6d6ec43c05ae58a022b4976be39f8699ac27a2ec04382.json"
+    },
+    {
+      "id": "7115a51db7bf043947ba0759f16d076196a72429e180ceffc59794f4b9e23a0e",
+      "name": "NamedEvaluationTimingControl/P2/LinearElasticity/Constant/Integral/First/dimension:3/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/7115a51db7bf043947ba0759f16d076196a72429e180ceffc59794f4b9e23a0e.json"
+    },
+    {
+      "id": "7bbe60c9fb5e4f1c2c7e491f1b94d3606253ba1356169ab7ee0b1c18eb00382c",
+      "name": "NamedEvaluationTimingControl/P2/LinearElasticity/Constant/Integral/Warm/dimension:2/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/7bbe60c9fb5e4f1c2c7e491f1b94d3606253ba1356169ab7ee0b1c18eb00382c.json"
+    },
+    {
+      "id": "cc0534f8251f30650c17406989c67585045ae8618116ffcbdc674554cb20dbdd",
+      "name": "NamedEvaluationTimingControl/P2/LinearElasticity/Constant/Integral/Warm/dimension:3/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/cc0534f8251f30650c17406989c67585045ae8618116ffcbdc674554cb20dbdd.json"
+    },
+    {
+      "id": "4822960ba43e7a76b3ba1b61ffacb12c841e8a084843a0628c5c3f01d7bdefb1",
+      "name": "NamedEvaluationTimingControl/P2/LinearElasticity/Constant/Named/First/dimension:2/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/4822960ba43e7a76b3ba1b61ffacb12c841e8a084843a0628c5c3f01d7bdefb1.json"
+    },
+    {
+      "id": "c130208e57b9f027ff15bd869827955e11631abb0ad56ee36155ff8ef06fb7ea",
+      "name": "NamedEvaluationTimingControl/P2/LinearElasticity/Constant/Named/First/dimension:3/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/c130208e57b9f027ff15bd869827955e11631abb0ad56ee36155ff8ef06fb7ea.json"
+    },
+    {
+      "id": "ec5d73d81b335a8f2c12c5a6d1f63eed32c4aee5f232c9573814f4c7c79c4a3c",
+      "name": "NamedEvaluationTimingControl/P2/LinearElasticity/Constant/Named/Warm/dimension:2/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/ec5d73d81b335a8f2c12c5a6d1f63eed32c4aee5f232c9573814f4c7c79c4a3c.json"
+    },
+    {
+      "id": "90c7b148867eb73dcda0b4cc11c19cf0c08726309f62f72cf85612d68fb9b2ec",
+      "name": "NamedEvaluationTimingControl/P2/LinearElasticity/Constant/Named/Warm/dimension:3/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/90c7b148867eb73dcda0b4cc11c19cf0c08726309f62f72cf85612d68fb9b2ec.json"
+    },
+    {
+      "id": "084ec738d6ef398a5ac80369bf452d6b9bc40efb5373e17e8a16764e9c71d70c",
+      "name": "NamedEvaluationTimingControl/P2/LinearElasticity/FieldCoefficient/Integral/First/dimension:2/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/084ec738d6ef398a5ac80369bf452d6b9bc40efb5373e17e8a16764e9c71d70c.json"
+    },
+    {
+      "id": "f1ac2db9aa57ac3b7b69ec13efcdb45cf4363141e947b496f906d7b20160e680",
+      "name": "NamedEvaluationTimingControl/P2/LinearElasticity/FieldCoefficient/Integral/First/dimension:3/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/f1ac2db9aa57ac3b7b69ec13efcdb45cf4363141e947b496f906d7b20160e680.json"
+    },
+    {
+      "id": "2daaa8936e82025f65110d1b22327792787d1bf9a2a9c29815f194121f0062b3",
+      "name": "NamedEvaluationTimingControl/P2/LinearElasticity/FieldCoefficient/Integral/Warm/dimension:2/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/2daaa8936e82025f65110d1b22327792787d1bf9a2a9c29815f194121f0062b3.json"
+    },
+    {
+      "id": "05e5610bc3f4be0e5adc86996fb3b231bdb0bb4b906a480d4eb5ea580452bc6d",
+      "name": "NamedEvaluationTimingControl/P2/LinearElasticity/FieldCoefficient/Integral/Warm/dimension:3/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/05e5610bc3f4be0e5adc86996fb3b231bdb0bb4b906a480d4eb5ea580452bc6d.json"
+    },
+    {
+      "id": "6c0510e159b2b9eb559431ec2007679eb5d232e764ff24a9112cb72238724895",
+      "name": "NamedEvaluationTimingControl/P2/LinearElasticity/FieldCoefficient/Named/First/dimension:2/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/6c0510e159b2b9eb559431ec2007679eb5d232e764ff24a9112cb72238724895.json"
+    },
+    {
+      "id": "7b2fc0a5c15f101410185b2b0eeddfeddec70f9b5afa7874a7e9d40bf9d05c4b",
+      "name": "NamedEvaluationTimingControl/P2/LinearElasticity/FieldCoefficient/Named/First/dimension:3/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/7b2fc0a5c15f101410185b2b0eeddfeddec70f9b5afa7874a7e9d40bf9d05c4b.json"
+    },
+    {
+      "id": "7c1bcb4faf7c133260e0973d6df59dddd503b22e8efbaf571195e33042b16858",
+      "name": "NamedEvaluationTimingControl/P2/LinearElasticity/FieldCoefficient/Named/Warm/dimension:2/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/7c1bcb4faf7c133260e0973d6df59dddd503b22e8efbaf571195e33042b16858.json"
+    },
+    {
+      "id": "d4a235b487baf1faf97f8e5d11215f754a4c50b103e25756a5b3a41da96f49b2",
+      "name": "NamedEvaluationTimingControl/P2/LinearElasticity/FieldCoefficient/Named/Warm/dimension:3/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/d4a235b487baf1faf97f8e5d11215f754a4c50b103e25756a5b3a41da96f49b2.json"
+    },
+    {
+      "id": "da3e659a14b15c2c86cf25ee7859fccd5f9c491878894756b5216074b722e5f8",
+      "name": "NamedEvaluationTimingControl/P2/Mass/Constant/Integral/First/dimension:2/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/da3e659a14b15c2c86cf25ee7859fccd5f9c491878894756b5216074b722e5f8.json"
+    },
+    {
+      "id": "a2452af6bf110fc173094666fb8e74c1efeb90b474e6c51f91294d98e28ba2be",
+      "name": "NamedEvaluationTimingControl/P2/Mass/Constant/Integral/First/dimension:3/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/a2452af6bf110fc173094666fb8e74c1efeb90b474e6c51f91294d98e28ba2be.json"
+    },
+    {
+      "id": "709ae5cf17b37d66fa454b1162410f2d43dac140529cda7a5a5fb5ac41a8adcc",
+      "name": "NamedEvaluationTimingControl/P2/Mass/Constant/Integral/Warm/dimension:2/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/709ae5cf17b37d66fa454b1162410f2d43dac140529cda7a5a5fb5ac41a8adcc.json"
+    },
+    {
+      "id": "8aede3543c96c940ef8147ccd6c6824f9fef2c27417077907eb9a6088e89b684",
+      "name": "NamedEvaluationTimingControl/P2/Mass/Constant/Integral/Warm/dimension:3/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/8aede3543c96c940ef8147ccd6c6824f9fef2c27417077907eb9a6088e89b684.json"
+    },
+    {
+      "id": "e3f6a5cc8ffeb1e05aa082169fac1a655ca262cd660b03b96577f4c6fdad06a0",
+      "name": "NamedEvaluationTimingControl/P2/Mass/Constant/Named/First/dimension:2/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/e3f6a5cc8ffeb1e05aa082169fac1a655ca262cd660b03b96577f4c6fdad06a0.json"
+    },
+    {
+      "id": "a57476ddf2d72db5063eafe9c50cfb161fc5d2b34b3c99fe4dc7d80fd30d5f47",
+      "name": "NamedEvaluationTimingControl/P2/Mass/Constant/Named/First/dimension:3/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/a57476ddf2d72db5063eafe9c50cfb161fc5d2b34b3c99fe4dc7d80fd30d5f47.json"
+    },
+    {
+      "id": "f76c20b369165580fa459fcd7951d2d53187ad6d4ee8720b58c8e4cf5e773143",
+      "name": "NamedEvaluationTimingControl/P2/Mass/Constant/Named/Warm/dimension:2/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/f76c20b369165580fa459fcd7951d2d53187ad6d4ee8720b58c8e4cf5e773143.json"
+    },
+    {
+      "id": "8fc4f2d6782a9b0c9b92d796bae5642f6560bdc036acbd06a48cd08977b209cf",
+      "name": "NamedEvaluationTimingControl/P2/Mass/Constant/Named/Warm/dimension:3/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/8fc4f2d6782a9b0c9b92d796bae5642f6560bdc036acbd06a48cd08977b209cf.json"
+    },
+    {
+      "id": "210ba9d01d59faafa1be06b4812124ad9135027b42f27e424fa355b53ce870fd",
+      "name": "NamedEvaluationTimingControl/P2/Mass/FieldCoefficient/Integral/First/dimension:2/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/210ba9d01d59faafa1be06b4812124ad9135027b42f27e424fa355b53ce870fd.json"
+    },
+    {
+      "id": "1a9ea8b26b091334ca756769af45a4a854893848a5a3d1bee971f22263ff8050",
+      "name": "NamedEvaluationTimingControl/P2/Mass/FieldCoefficient/Integral/First/dimension:3/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/1a9ea8b26b091334ca756769af45a4a854893848a5a3d1bee971f22263ff8050.json"
+    },
+    {
+      "id": "6fbb2a67d7675b3424115ddcfc3745a92414d63819a88da868c57118837e092a",
+      "name": "NamedEvaluationTimingControl/P2/Mass/FieldCoefficient/Integral/Warm/dimension:2/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/6fbb2a67d7675b3424115ddcfc3745a92414d63819a88da868c57118837e092a.json"
+    },
+    {
+      "id": "96f3d85fbc8a60adab03403d5588bd488908e22bf6822d6a43ef1419a738b984",
+      "name": "NamedEvaluationTimingControl/P2/Mass/FieldCoefficient/Integral/Warm/dimension:3/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/96f3d85fbc8a60adab03403d5588bd488908e22bf6822d6a43ef1419a738b984.json"
+    },
+    {
+      "id": "ec0ae7415a3c6d15820e81d71e1244afe813aa42644240e2613ea5d73709186e",
+      "name": "NamedEvaluationTimingControl/P2/Mass/FieldCoefficient/Named/First/dimension:2/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/ec0ae7415a3c6d15820e81d71e1244afe813aa42644240e2613ea5d73709186e.json"
+    },
+    {
+      "id": "e3ab3c935650bf4ad96e3f2eabe83036fc73cc978a7888c951e81b309af7bdf8",
+      "name": "NamedEvaluationTimingControl/P2/Mass/FieldCoefficient/Named/First/dimension:3/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/e3ab3c935650bf4ad96e3f2eabe83036fc73cc978a7888c951e81b309af7bdf8.json"
+    },
+    {
+      "id": "4038b0f9794f45e529e8ddafe5ed48c74b428c4cb86b6f5d84abda042852c3e8",
+      "name": "NamedEvaluationTimingControl/P2/Mass/FieldCoefficient/Named/Warm/dimension:2/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/4038b0f9794f45e529e8ddafe5ed48c74b428c4cb86b6f5d84abda042852c3e8.json"
+    },
+    {
+      "id": "8503030d4edb8276015a5de16730cf05770645f8d77eec6166ae4af9a7858be5",
+      "name": "NamedEvaluationTimingControl/P2/Mass/FieldCoefficient/Named/Warm/dimension:3/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/8503030d4edb8276015a5de16730cf05770645f8d77eec6166ae4af9a7858be5.json"
+    },
+    {
+      "id": "30e5dbaf55dfa21a8caf701bcf3bac291a2c93bb101cec0794da52cf8861937c",
+      "name": "NamedEvaluationTimingControl/P2/VectorMass/Constant/Integral/First/dimension:2/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/30e5dbaf55dfa21a8caf701bcf3bac291a2c93bb101cec0794da52cf8861937c.json"
+    },
+    {
+      "id": "05972c9485bbdb387aace258c0fef6dfe3627cb60ea561a0bbf5bcb0caeb4834",
+      "name": "NamedEvaluationTimingControl/P2/VectorMass/Constant/Integral/First/dimension:3/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/05972c9485bbdb387aace258c0fef6dfe3627cb60ea561a0bbf5bcb0caeb4834.json"
+    },
+    {
+      "id": "b172497c8c61fc12078e7f0e01f2c03d0645140eba5fdfa1c6df2f8800769e49",
+      "name": "NamedEvaluationTimingControl/P2/VectorMass/Constant/Integral/Warm/dimension:2/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/b172497c8c61fc12078e7f0e01f2c03d0645140eba5fdfa1c6df2f8800769e49.json"
+    },
+    {
+      "id": "4fb67f0be22f8023c978f04992fad92f189f5f52a28667632cb2dbc17e12d82b",
+      "name": "NamedEvaluationTimingControl/P2/VectorMass/Constant/Integral/Warm/dimension:3/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/4fb67f0be22f8023c978f04992fad92f189f5f52a28667632cb2dbc17e12d82b.json"
+    },
+    {
+      "id": "b6655cbf952819e0186dde98edea0e2ff177bcfadf15dd80c1967996c352dd38",
+      "name": "NamedEvaluationTimingControl/P2/VectorMass/Constant/Named/First/dimension:2/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/b6655cbf952819e0186dde98edea0e2ff177bcfadf15dd80c1967996c352dd38.json"
+    },
+    {
+      "id": "6a1f3b61283fe73f163e1cfbb39260e17f646e9e97ca669c3ed84c38acf02e66",
+      "name": "NamedEvaluationTimingControl/P2/VectorMass/Constant/Named/First/dimension:3/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/6a1f3b61283fe73f163e1cfbb39260e17f646e9e97ca669c3ed84c38acf02e66.json"
+    },
+    {
+      "id": "4800528cea6c392d6df83a3917b71dd68d196d696a03348af052d8904b7473e5",
+      "name": "NamedEvaluationTimingControl/P2/VectorMass/Constant/Named/Warm/dimension:2/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/4800528cea6c392d6df83a3917b71dd68d196d696a03348af052d8904b7473e5.json"
+    },
+    {
+      "id": "2a84d8c365ed2e58fd9d0ae7e4efef11acf27d0852fb3bbb5deb825b63a6662b",
+      "name": "NamedEvaluationTimingControl/P2/VectorMass/Constant/Named/Warm/dimension:3/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/2a84d8c365ed2e58fd9d0ae7e4efef11acf27d0852fb3bbb5deb825b63a6662b.json"
+    },
+    {
+      "id": "dbfb74654ba41404cafb3a7a2dbaa45840662fb0a09c3c55d7bf305c7523a452",
+      "name": "NamedEvaluationTimingControl/P2/VectorMass/FieldCoefficient/Integral/First/dimension:2/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/dbfb74654ba41404cafb3a7a2dbaa45840662fb0a09c3c55d7bf305c7523a452.json"
+    },
+    {
+      "id": "532432057a193eee0824866e406d5f0c92b5c26103914d054effc27119e85fc6",
+      "name": "NamedEvaluationTimingControl/P2/VectorMass/FieldCoefficient/Integral/First/dimension:3/first:1/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/532432057a193eee0824866e406d5f0c92b5c26103914d054effc27119e85fc6.json"
+    },
+    {
+      "id": "931d93d97199a05af835c529e82bae73577b2adaa55cb1b780122b4d5edff1ea",
+      "name": "NamedEvaluationTimingControl/P2/VectorMass/FieldCoefficient/Integral/Warm/dimension:2/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/931d93d97199a05af835c529e82bae73577b2adaa55cb1b780122b4d5edff1ea.json"
+    },
+    {
+      "id": "0e32cccc6bd5110716309c91b65294a1adcb7bc348ff92b205f50d1e65c8e255",
+      "name": "NamedEvaluationTimingControl/P2/VectorMass/FieldCoefficient/Integral/Warm/dimension:3/first:0/integral:1",
+      "metric": "cpu_time",
+      "url": "cases/0e32cccc6bd5110716309c91b65294a1adcb7bc348ff92b205f50d1e65c8e255.json"
+    },
+    {
+      "id": "13c7f005e6d4b173006153383ebebc54df81285a05bfa629e28f5883e731a48f",
+      "name": "NamedEvaluationTimingControl/P2/VectorMass/FieldCoefficient/Named/First/dimension:2/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/13c7f005e6d4b173006153383ebebc54df81285a05bfa629e28f5883e731a48f.json"
+    },
+    {
+      "id": "d968e537dbaaf8ac18bb27ae37b1eb72837269c18c37c33c35ecd54764774485",
+      "name": "NamedEvaluationTimingControl/P2/VectorMass/FieldCoefficient/Named/First/dimension:3/first:1/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/d968e537dbaaf8ac18bb27ae37b1eb72837269c18c37c33c35ecd54764774485.json"
+    },
+    {
+      "id": "37c0d47356f17f8ff90f7c49d219848e90cbdf24bde744fba922f8bf1f43bd53",
+      "name": "NamedEvaluationTimingControl/P2/VectorMass/FieldCoefficient/Named/Warm/dimension:2/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/37c0d47356f17f8ff90f7c49d219848e90cbdf24bde744fba922f8bf1f43bd53.json"
+    },
+    {
+      "id": "b4adcb3fedc6fda94e815a6c8bcda3d2af1342b84496a74fc0e0a958f44cbe89",
+      "name": "NamedEvaluationTimingControl/P2/VectorMass/FieldCoefficient/Named/Warm/dimension:3/first:0/integral:0",
+      "metric": "cpu_time",
+      "url": "cases/b4adcb3fedc6fda94e815a6c8bcda3d2af1342b84496a74fc0e0a958f44cbe89.json"
+    }
+  ]
+}

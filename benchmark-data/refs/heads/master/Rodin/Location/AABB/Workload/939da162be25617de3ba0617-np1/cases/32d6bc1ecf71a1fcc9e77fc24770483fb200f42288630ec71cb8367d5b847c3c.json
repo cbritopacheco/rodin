@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "component": "Rodin/Location/AABB/Workload",
+  "configuration": "939da162be25617de3ba0617-np1",
+  "name": "Pyramid/2/8/4/2/miss/0",
+  "metric": "process_cpu_time",
+  "entries": [
+    {
+      "commit": "08f2b1df730e2f6c6ec854001b199f67c990ac38",
+      "date": "2026-11-09T20:14:21.513262+00:00",
+      "run": "42617234567.1",
+      "results": [
+        {
+          "name": "Pyramid/2/8/4/2/miss/0",
+          "value": 11003281.25,
+          "unit": "ns",
+          "metric": "process_cpu_time",
+          "samples": [
+            11003281.25
+          ],
+          "records": [
+            {
+              "geometry": "Pyramid",
+              "degree": "2",
+              "resolution": "8",
+              "cells": "2058",
+              "distortion": "4.000000",
+              "warp_degree": "2",
+              "query": "miss",
+              "pruning": "0",
+              "samples": "64",
+              "ns": "11003281.25"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "format": "csv",
+  "window": 20
+}

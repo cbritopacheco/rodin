@@ -1,0 +1,589 @@
+{
+  "schema": 1,
+  "definition": {
+    "kind": "benchmark",
+    "mode": "local",
+    "compiler": "gcc-14",
+    "runner": "ubuntu-24.04",
+    "cmake": {
+      "CMAKE_BUILD_TYPE": "Release",
+      "CMAKE_CXX_COMPILER": "g++-14",
+      "CMAKE_C_COMPILER": "gcc-14",
+      "CMAKE_SUPPRESS_REGENERATION": "ON",
+      "RODIN_BUILD_SRC": "ON",
+      "RODIN_BUILD_BENCHMARKS": "ON",
+      "RODIN_BUILD_UNIT_TESTS": "OFF",
+      "RODIN_BUILD_MANUFACTURED_TESTS": "OFF",
+      "RODIN_BUILD_CONVERGENCE_TESTS": "OFF",
+      "RODIN_BUILD_EXAMPLES": "OFF",
+      "RODIN_BUILD_DOC": "OFF",
+      "RODIN_INSTALL_RESOURCES": "OFF",
+      "RODIN_CODE_COVERAGE": "OFF",
+      "RODIN_MULTITHREADED": "OFF",
+      "RODIN_USE_ASAN": "OFF",
+      "RODIN_USE_UBSAN": "OFF",
+      "RODIN_USE_MPI": "OFF",
+      "RODIN_USE_PETSC": "OFF"
+    },
+    "targets": [
+      "RodinAABBWorkload",
+      "RodinLocationBenchmarks"
+    ],
+    "stage": "components"
+  },
+  "ranks": 1,
+  "cases": [
+    {
+      "id": "94b7a59cce20c26e60ebbc4cb66d2e2ced33b926814c19eb40d358c352d45859",
+      "name": "BM_AABBBuild/Hexahedron",
+      "metric": "cpu_time",
+      "url": "cases/94b7a59cce20c26e60ebbc4cb66d2e2ced33b926814c19eb40d358c352d45859.json"
+    },
+    {
+      "id": "d052935198cb0c47b0f9e50620906ed71ac8bb9b194f2773b8a86f1077c49bd9",
+      "name": "BM_AABBBuild/Point",
+      "metric": "cpu_time",
+      "url": "cases/d052935198cb0c47b0f9e50620906ed71ac8bb9b194f2773b8a86f1077c49bd9.json"
+    },
+    {
+      "id": "964313daa1705a9b173ba8df5eb383efda599d17a2418a4bb21b3d337845797b",
+      "name": "BM_AABBBuild/Pyramid",
+      "metric": "cpu_time",
+      "url": "cases/964313daa1705a9b173ba8df5eb383efda599d17a2418a4bb21b3d337845797b.json"
+    },
+    {
+      "id": "10573c31623b8f0f8952fafb9cfc927745adce737a318119feba956d8976623a",
+      "name": "BM_AABBBuild/Quadrilateral",
+      "metric": "cpu_time",
+      "url": "cases/10573c31623b8f0f8952fafb9cfc927745adce737a318119feba956d8976623a.json"
+    },
+    {
+      "id": "b5f0355f04367259c7c7d8c62aada9c930c9bf5631cff7fe6d998127583822b6",
+      "name": "BM_AABBBuild/Segment",
+      "metric": "cpu_time",
+      "url": "cases/b5f0355f04367259c7c7d8c62aada9c930c9bf5631cff7fe6d998127583822b6.json"
+    },
+    {
+      "id": "9bb733f1d640cf81833a017041e1eceeda74f0ece8c7627afcfb7b27d4f40fa8",
+      "name": "BM_AABBBuild/Tetrahedron",
+      "metric": "cpu_time",
+      "url": "cases/9bb733f1d640cf81833a017041e1eceeda74f0ece8c7627afcfb7b27d4f40fa8.json"
+    },
+    {
+      "id": "3542d6f0ee5c6d4ae47762c25e8c28de85614185e30830105d54916abda7fd8c",
+      "name": "BM_AABBBuild/Triangle",
+      "metric": "cpu_time",
+      "url": "cases/3542d6f0ee5c6d4ae47762c25e8c28de85614185e30830105d54916abda7fd8c.json"
+    },
+    {
+      "id": "6e54175d9aa7e285ab2b4fe4a00c339c4429dca9df0a18a0db74cf31002d5b47",
+      "name": "BM_AABBBuild/Wedge",
+      "metric": "cpu_time",
+      "url": "cases/6e54175d9aa7e285ab2b4fe4a00c339c4429dca9df0a18a0db74cf31002d5b47.json"
+    },
+    {
+      "id": "444f9b4294bc4e3c0a64c12e7e2b7e8d7bbd093a9ea258f7f8f1c8c26e08bcb3",
+      "name": "BM_AABBBuildWithProjections/Hexahedron",
+      "metric": "cpu_time",
+      "url": "cases/444f9b4294bc4e3c0a64c12e7e2b7e8d7bbd093a9ea258f7f8f1c8c26e08bcb3.json"
+    },
+    {
+      "id": "89f3e4218fd17d127ac1184070be19a9e4f6d41d4c137a86e24e223450cd5b96",
+      "name": "BM_AABBBuildWithProjections/Point",
+      "metric": "cpu_time",
+      "url": "cases/89f3e4218fd17d127ac1184070be19a9e4f6d41d4c137a86e24e223450cd5b96.json"
+    },
+    {
+      "id": "d36f9f33eb74bd3ce3a3e2955897384950209056f1be9e315d3a344d1fa5048d",
+      "name": "BM_AABBBuildWithProjections/Pyramid",
+      "metric": "cpu_time",
+      "url": "cases/d36f9f33eb74bd3ce3a3e2955897384950209056f1be9e315d3a344d1fa5048d.json"
+    },
+    {
+      "id": "da7ee44c8c0f4cb64b64119c33fb8e5582cbd4a7c35b38afa2cf279b4799ec3e",
+      "name": "BM_AABBBuildWithProjections/Quadrilateral",
+      "metric": "cpu_time",
+      "url": "cases/da7ee44c8c0f4cb64b64119c33fb8e5582cbd4a7c35b38afa2cf279b4799ec3e.json"
+    },
+    {
+      "id": "2705bd002f280ffdd0081f9891f514ba6aac2891cd73f6e041e4c54d0c5da73e",
+      "name": "BM_AABBBuildWithProjections/Segment",
+      "metric": "cpu_time",
+      "url": "cases/2705bd002f280ffdd0081f9891f514ba6aac2891cd73f6e041e4c54d0c5da73e.json"
+    },
+    {
+      "id": "879763ec9eea1a252a2c5030163f5a5afb6bb99e64d25423f989b1d067cdaaef",
+      "name": "BM_AABBBuildWithProjections/Tetrahedron",
+      "metric": "cpu_time",
+      "url": "cases/879763ec9eea1a252a2c5030163f5a5afb6bb99e64d25423f989b1d067cdaaef.json"
+    },
+    {
+      "id": "6ea98e3eccf74285a95c1d1b048e5bc20859f7fcd97232901e92277f2acda182",
+      "name": "BM_AABBBuildWithProjections/Triangle",
+      "metric": "cpu_time",
+      "url": "cases/6ea98e3eccf74285a95c1d1b048e5bc20859f7fcd97232901e92277f2acda182.json"
+    },
+    {
+      "id": "83d2a26a4d6c05fdca8cf5fe5728e638d1a8200379982054e7c4a03d9a21e6fc",
+      "name": "BM_AABBBuildWithProjections/Wedge",
+      "metric": "cpu_time",
+      "url": "cases/83d2a26a4d6c05fdca8cf5fe5728e638d1a8200379982054e7c4a03d9a21e6fc.json"
+    },
+    {
+      "id": "9e01a38a8639662e9dbb0805c5c5e7f8a104b46e19d8597b3f3dd2dacc22b934",
+      "name": "BM_AABBCurvedBuild<2>/P2Hexahedron",
+      "metric": "cpu_time",
+      "url": "cases/9e01a38a8639662e9dbb0805c5c5e7f8a104b46e19d8597b3f3dd2dacc22b934.json"
+    },
+    {
+      "id": "4f238822a374258c4b1fbc43abeaa843447169d26480376f90488bede0706df3",
+      "name": "BM_AABBCurvedBuild<2>/P2Pyramid",
+      "metric": "cpu_time",
+      "url": "cases/4f238822a374258c4b1fbc43abeaa843447169d26480376f90488bede0706df3.json"
+    },
+    {
+      "id": "d840489e8f954964d9bbc5250eb76b438ee83cdb6a3530fb57fde90f1fe53f04",
+      "name": "BM_AABBCurvedBuild<2>/P2Quadrilateral",
+      "metric": "cpu_time",
+      "url": "cases/d840489e8f954964d9bbc5250eb76b438ee83cdb6a3530fb57fde90f1fe53f04.json"
+    },
+    {
+      "id": "0238991499d67054235269e1d8e817c22f9681ee96a77e1f8de606c6303af83b",
+      "name": "BM_AABBCurvedBuild<2>/P2Segment",
+      "metric": "cpu_time",
+      "url": "cases/0238991499d67054235269e1d8e817c22f9681ee96a77e1f8de606c6303af83b.json"
+    },
+    {
+      "id": "adf231f18f29bc1bb1320ab3933ffa994482600cb863c75b5a9c1640f6ae5758",
+      "name": "BM_AABBCurvedBuild<2>/P2Tetrahedron",
+      "metric": "cpu_time",
+      "url": "cases/adf231f18f29bc1bb1320ab3933ffa994482600cb863c75b5a9c1640f6ae5758.json"
+    },
+    {
+      "id": "d3d714b3361f670c93109154876e7ee28306d05739016b574d787967974df4cf",
+      "name": "BM_AABBCurvedBuild<2>/P2Triangle",
+      "metric": "cpu_time",
+      "url": "cases/d3d714b3361f670c93109154876e7ee28306d05739016b574d787967974df4cf.json"
+    },
+    {
+      "id": "ca1fe110c9b7ef22942c2092e8d9a7d9d3193e132653662cd82faf6217dfde19",
+      "name": "BM_AABBCurvedBuild<2>/P2Wedge",
+      "metric": "cpu_time",
+      "url": "cases/ca1fe110c9b7ef22942c2092e8d9a7d9d3193e132653662cd82faf6217dfde19.json"
+    },
+    {
+      "id": "720f4fea0ee029546575a8d9a864ed70c331a07e6f4f101dc6fddc721b666e5b",
+      "name": "BM_AABBCurvedBuild<2>/PrunedP2Hexahedron",
+      "metric": "cpu_time",
+      "url": "cases/720f4fea0ee029546575a8d9a864ed70c331a07e6f4f101dc6fddc721b666e5b.json"
+    },
+    {
+      "id": "1d05c79f4752395f3424f1d8066a3ac0139da1ed2fd05424546c7a0640180138",
+      "name": "BM_AABBCurvedBuild<2>/PrunedP2Pyramid",
+      "metric": "cpu_time",
+      "url": "cases/1d05c79f4752395f3424f1d8066a3ac0139da1ed2fd05424546c7a0640180138.json"
+    },
+    {
+      "id": "ed3a8e59b4fe92f0db3ce3a314f13799ff5acb9d00f9ccfe749e85b0b9938082",
+      "name": "BM_AABBCurvedBuild<2>/PrunedP2Quadrilateral",
+      "metric": "cpu_time",
+      "url": "cases/ed3a8e59b4fe92f0db3ce3a314f13799ff5acb9d00f9ccfe749e85b0b9938082.json"
+    },
+    {
+      "id": "2aa90479a3d74818106193d00f2be872aae4372f16fb22ca5bba71dadc32452e",
+      "name": "BM_AABBCurvedBuild<2>/PrunedP2Segment",
+      "metric": "cpu_time",
+      "url": "cases/2aa90479a3d74818106193d00f2be872aae4372f16fb22ca5bba71dadc32452e.json"
+    },
+    {
+      "id": "3e5fecf346b463c44a6c9c2009d506c2560ed2caa53efc83f5ac1e6897bf5749",
+      "name": "BM_AABBCurvedBuild<2>/PrunedP2Tetrahedron",
+      "metric": "cpu_time",
+      "url": "cases/3e5fecf346b463c44a6c9c2009d506c2560ed2caa53efc83f5ac1e6897bf5749.json"
+    },
+    {
+      "id": "b4b2815ee5cbacd25229ff86579d256b4fb9c2b4327c830a236f4b945eeef5a4",
+      "name": "BM_AABBCurvedBuild<2>/PrunedP2Triangle",
+      "metric": "cpu_time",
+      "url": "cases/b4b2815ee5cbacd25229ff86579d256b4fb9c2b4327c830a236f4b945eeef5a4.json"
+    },
+    {
+      "id": "a676372ebdaf652079cb354fac71276965c6962d0245369490c5ad136e958c9d",
+      "name": "BM_AABBCurvedBuild<2>/PrunedP2Wedge",
+      "metric": "cpu_time",
+      "url": "cases/a676372ebdaf652079cb354fac71276965c6962d0245369490c5ad136e958c9d.json"
+    },
+    {
+      "id": "6899f5b3b1a06592995a79191f498390104308b096e42ce999a6cdd8c823a02a",
+      "name": "BM_AABBCurvedBuild<4>/FirstP4Hexahedron/iterations:1/repeats:1",
+      "metric": "cpu_time",
+      "url": "cases/6899f5b3b1a06592995a79191f498390104308b096e42ce999a6cdd8c823a02a.json"
+    },
+    {
+      "id": "d3ac6b46814f92451ddc659fc30b15d115c99d18d5983c9ffdab12d2c5824c5b",
+      "name": "BM_AABBCurvedBuild<4>/FirstP4Pyramid/iterations:1/repeats:1",
+      "metric": "cpu_time",
+      "url": "cases/d3ac6b46814f92451ddc659fc30b15d115c99d18d5983c9ffdab12d2c5824c5b.json"
+    },
+    {
+      "id": "666e3315e8738fee4a569192302c2b026084eec3c0ae2beb4ee2e3dfc704bd67",
+      "name": "BM_AABBCurvedBuild<4>/FirstP4Quadrilateral/iterations:1/repeats:1",
+      "metric": "cpu_time",
+      "url": "cases/666e3315e8738fee4a569192302c2b026084eec3c0ae2beb4ee2e3dfc704bd67.json"
+    },
+    {
+      "id": "7bb8790ffe4a0f9c07e945aaa3ed483135ca6ec5b680faf3d3c5044c583c5f54",
+      "name": "BM_AABBCurvedBuild<4>/FirstP4Segment/iterations:1/repeats:1",
+      "metric": "cpu_time",
+      "url": "cases/7bb8790ffe4a0f9c07e945aaa3ed483135ca6ec5b680faf3d3c5044c583c5f54.json"
+    },
+    {
+      "id": "c6958d853f03b8cb4b09c07d5f5f9b3db6b984152a865d8c1b0cc0d688a67d06",
+      "name": "BM_AABBCurvedBuild<4>/FirstP4Tetrahedron/iterations:1/repeats:1",
+      "metric": "cpu_time",
+      "url": "cases/c6958d853f03b8cb4b09c07d5f5f9b3db6b984152a865d8c1b0cc0d688a67d06.json"
+    },
+    {
+      "id": "848fca428ebb095b3af6dc6f11247a290e3196b2c5b90777bf3ee9a417565229",
+      "name": "BM_AABBCurvedBuild<4>/FirstP4Triangle/iterations:1/repeats:1",
+      "metric": "cpu_time",
+      "url": "cases/848fca428ebb095b3af6dc6f11247a290e3196b2c5b90777bf3ee9a417565229.json"
+    },
+    {
+      "id": "e4b5cfd6a34d515f70c8e9f4f5ddc3d0e7b5cab685476a061b9d67284d1185ee",
+      "name": "BM_AABBCurvedBuild<4>/FirstP4Wedge/iterations:1/repeats:1",
+      "metric": "cpu_time",
+      "url": "cases/e4b5cfd6a34d515f70c8e9f4f5ddc3d0e7b5cab685476a061b9d67284d1185ee.json"
+    },
+    {
+      "id": "68ee9d9994a8acc57b77cb32fc827ece7375163ec83adcae622a4f0887167136",
+      "name": "BM_AABBCurvedBuild<4>/P4Hexahedron",
+      "metric": "cpu_time",
+      "url": "cases/68ee9d9994a8acc57b77cb32fc827ece7375163ec83adcae622a4f0887167136.json"
+    },
+    {
+      "id": "248bbaa25683daa615320dfb80178e27b4346520914af9ccb2ac93a6a6b5f6e4",
+      "name": "BM_AABBCurvedBuild<4>/P4Pyramid",
+      "metric": "cpu_time",
+      "url": "cases/248bbaa25683daa615320dfb80178e27b4346520914af9ccb2ac93a6a6b5f6e4.json"
+    },
+    {
+      "id": "37de406765a30c0a37afd379f5ac99bd6422aab60c5184a508617e3c8990ae92",
+      "name": "BM_AABBCurvedBuild<4>/P4Quadrilateral",
+      "metric": "cpu_time",
+      "url": "cases/37de406765a30c0a37afd379f5ac99bd6422aab60c5184a508617e3c8990ae92.json"
+    },
+    {
+      "id": "4525ff05e3d6668809de19a574f2333c9d2100746720177a59e698c73b749eab",
+      "name": "BM_AABBCurvedBuild<4>/P4Segment",
+      "metric": "cpu_time",
+      "url": "cases/4525ff05e3d6668809de19a574f2333c9d2100746720177a59e698c73b749eab.json"
+    },
+    {
+      "id": "3ba1f6dd9c8eccef6568f8fd6361d5d9bf6a39cc85d5b4470681919ae33e393f",
+      "name": "BM_AABBCurvedBuild<4>/P4Tetrahedron",
+      "metric": "cpu_time",
+      "url": "cases/3ba1f6dd9c8eccef6568f8fd6361d5d9bf6a39cc85d5b4470681919ae33e393f.json"
+    },
+    {
+      "id": "0971603716baaa7ae2a947d9b6a628a32eabf1dd78e4bf85a5ad6742b9fd6d35",
+      "name": "BM_AABBCurvedBuild<4>/P4Triangle",
+      "metric": "cpu_time",
+      "url": "cases/0971603716baaa7ae2a947d9b6a628a32eabf1dd78e4bf85a5ad6742b9fd6d35.json"
+    },
+    {
+      "id": "8f661a30146f6055ce7254f3c0cfdc745a55c0039de3cad3166877f62988a8c6",
+      "name": "BM_AABBCurvedBuild<4>/P4Wedge",
+      "metric": "cpu_time",
+      "url": "cases/8f661a30146f6055ce7254f3c0cfdc745a55c0039de3cad3166877f62988a8c6.json"
+    },
+    {
+      "id": "61477b3315bb5f915c866ec376242022058c4ed93caa43518738b00f41998fd8",
+      "name": "BM_AABBCurvedBuild<4>/PrunedP4Hexahedron",
+      "metric": "cpu_time",
+      "url": "cases/61477b3315bb5f915c866ec376242022058c4ed93caa43518738b00f41998fd8.json"
+    },
+    {
+      "id": "e5716368f59711ee7f4d0978e4916c9b6863fb2a7ff0faa732ab611a9439647d",
+      "name": "BM_AABBCurvedBuild<4>/PrunedP4Pyramid",
+      "metric": "cpu_time",
+      "url": "cases/e5716368f59711ee7f4d0978e4916c9b6863fb2a7ff0faa732ab611a9439647d.json"
+    },
+    {
+      "id": "e1c06b14617ddf34fb0ecc43e6d96356d8a6dfffd679ef79c1b84a7a30bd56aa",
+      "name": "BM_AABBCurvedBuild<4>/PrunedP4Quadrilateral",
+      "metric": "cpu_time",
+      "url": "cases/e1c06b14617ddf34fb0ecc43e6d96356d8a6dfffd679ef79c1b84a7a30bd56aa.json"
+    },
+    {
+      "id": "6de780525b2d9e3c5b904edeb1967b6337f1411e7d2fac27e3c7588c0c01b28d",
+      "name": "BM_AABBCurvedBuild<4>/PrunedP4Segment",
+      "metric": "cpu_time",
+      "url": "cases/6de780525b2d9e3c5b904edeb1967b6337f1411e7d2fac27e3c7588c0c01b28d.json"
+    },
+    {
+      "id": "d6c05ab3c3bd5b1d0349187603e2cfb0c0599269d40ab24b7d04943d66bad3f4",
+      "name": "BM_AABBCurvedBuild<4>/PrunedP4Tetrahedron",
+      "metric": "cpu_time",
+      "url": "cases/d6c05ab3c3bd5b1d0349187603e2cfb0c0599269d40ab24b7d04943d66bad3f4.json"
+    },
+    {
+      "id": "9e4f71ffa0389b241ce9bd57178da5a2a58ae9ce58c1910bf9fb29171bdb0592",
+      "name": "BM_AABBCurvedBuild<4>/PrunedP4Triangle",
+      "metric": "cpu_time",
+      "url": "cases/9e4f71ffa0389b241ce9bd57178da5a2a58ae9ce58c1910bf9fb29171bdb0592.json"
+    },
+    {
+      "id": "639c4bd622cf8241ca5723c31f3cd22b77affeddb7207461f0974de6781a068a",
+      "name": "BM_AABBCurvedBuild<4>/PrunedP4Wedge",
+      "metric": "cpu_time",
+      "url": "cases/639c4bd622cf8241ca5723c31f3cd22b77affeddb7207461f0974de6781a068a.json"
+    },
+    {
+      "id": "c1d297cf59105204880421a8be853cde110dc05afa196bca4a8546f9c17b7079",
+      "name": "BM_AABBCurvedHit/Hexahedron",
+      "metric": "cpu_time",
+      "url": "cases/c1d297cf59105204880421a8be853cde110dc05afa196bca4a8546f9c17b7079.json"
+    },
+    {
+      "id": "2394be8f4bf11eed11a269b07cd9f94332fdcb9ec71689096da75444c62de342",
+      "name": "BM_AABBCurvedHit/PrunedHexahedron",
+      "metric": "cpu_time",
+      "url": "cases/2394be8f4bf11eed11a269b07cd9f94332fdcb9ec71689096da75444c62de342.json"
+    },
+    {
+      "id": "1def28de6eb165fa9758537ed84d0ababdc1cb0ead17e26531bd0c27fd9420b0",
+      "name": "BM_AABBCurvedHit/PrunedPyramid",
+      "metric": "cpu_time",
+      "url": "cases/1def28de6eb165fa9758537ed84d0ababdc1cb0ead17e26531bd0c27fd9420b0.json"
+    },
+    {
+      "id": "c45652d4e35095d005653bf6b9e2b05d566bb2c96ed3bed4db3f3c3ab75962e2",
+      "name": "BM_AABBCurvedHit/PrunedQuadrilateral",
+      "metric": "cpu_time",
+      "url": "cases/c45652d4e35095d005653bf6b9e2b05d566bb2c96ed3bed4db3f3c3ab75962e2.json"
+    },
+    {
+      "id": "ad1d09f600fe88b6f9afb1918b8cbd36905aeaf7eb441e22dbcab4faebe2dca3",
+      "name": "BM_AABBCurvedHit/PrunedSegment",
+      "metric": "cpu_time",
+      "url": "cases/ad1d09f600fe88b6f9afb1918b8cbd36905aeaf7eb441e22dbcab4faebe2dca3.json"
+    },
+    {
+      "id": "98f89d1dc2430bcef9fb8eef0b4f538efacac2d5f946fd6e17527bd757ecb89b",
+      "name": "BM_AABBCurvedHit/PrunedTetrahedron",
+      "metric": "cpu_time",
+      "url": "cases/98f89d1dc2430bcef9fb8eef0b4f538efacac2d5f946fd6e17527bd757ecb89b.json"
+    },
+    {
+      "id": "c5d99d5840a17a1eb429e3b63ab0bc2aa53a176967edde151fd035f0b3ef9d8f",
+      "name": "BM_AABBCurvedHit/PrunedTriangle",
+      "metric": "cpu_time",
+      "url": "cases/c5d99d5840a17a1eb429e3b63ab0bc2aa53a176967edde151fd035f0b3ef9d8f.json"
+    },
+    {
+      "id": "dfcb3c1308d1a0ec577764c9a9fe0e1983ebfda303ffec3a258d6e559fa5df51",
+      "name": "BM_AABBCurvedHit/PrunedWedge",
+      "metric": "cpu_time",
+      "url": "cases/dfcb3c1308d1a0ec577764c9a9fe0e1983ebfda303ffec3a258d6e559fa5df51.json"
+    },
+    {
+      "id": "0d99910e985de6f59a8d820dfec8f34a5ad376a9266936497655c4ae904da7ae",
+      "name": "BM_AABBCurvedHit/Pyramid",
+      "metric": "cpu_time",
+      "url": "cases/0d99910e985de6f59a8d820dfec8f34a5ad376a9266936497655c4ae904da7ae.json"
+    },
+    {
+      "id": "43893a5e7ccb4dc5ff9c66c54c995a03ff3305bf1fc94633e72c163652b9e7f8",
+      "name": "BM_AABBCurvedHit/Quadrilateral",
+      "metric": "cpu_time",
+      "url": "cases/43893a5e7ccb4dc5ff9c66c54c995a03ff3305bf1fc94633e72c163652b9e7f8.json"
+    },
+    {
+      "id": "6d526b124dcb630620a8b966db26d29c1041ee1746083c2239b0178cc5198729",
+      "name": "BM_AABBCurvedHit/Segment",
+      "metric": "cpu_time",
+      "url": "cases/6d526b124dcb630620a8b966db26d29c1041ee1746083c2239b0178cc5198729.json"
+    },
+    {
+      "id": "69d62c863ef875d6c9afbd53cb073fb6013a06b8761f6d98996a9f1025f94a0a",
+      "name": "BM_AABBCurvedHit/Tetrahedron",
+      "metric": "cpu_time",
+      "url": "cases/69d62c863ef875d6c9afbd53cb073fb6013a06b8761f6d98996a9f1025f94a0a.json"
+    },
+    {
+      "id": "b8de055f9a801b3ffbf44065adcb1b62ad2adbe9391e6de92156528bcb597e35",
+      "name": "BM_AABBCurvedHit/Triangle",
+      "metric": "cpu_time",
+      "url": "cases/b8de055f9a801b3ffbf44065adcb1b62ad2adbe9391e6de92156528bcb597e35.json"
+    },
+    {
+      "id": "7f07d9532fef717db7cf557aaa819fa4e2c7a5437ee554025879dac54d0747bb",
+      "name": "BM_AABBCurvedHit/Wedge",
+      "metric": "cpu_time",
+      "url": "cases/7f07d9532fef717db7cf557aaa819fa4e2c7a5437ee554025879dac54d0747bb.json"
+    },
+    {
+      "id": "41cd27d9d7463bef6646d44d1d96011fee14e1d6594e91f390c3bde1676916a6",
+      "name": "BM_AABBEmbeddedCurvedHit",
+      "metric": "cpu_time",
+      "url": "cases/41cd27d9d7463bef6646d44d1d96011fee14e1d6594e91f390c3bde1676916a6.json"
+    },
+    {
+      "id": "a5b578c885b2f616c814348c2d7169e76b4e25fa380a55f082aee40b0e26cc60",
+      "name": "BM_AABBGradedHit",
+      "metric": "cpu_time",
+      "url": "cases/a5b578c885b2f616c814348c2d7169e76b4e25fa380a55f082aee40b0e26cc60.json"
+    },
+    {
+      "id": "e185c661633a71e9c52f41f4fd4d460480d2071fe3c1fd6388c493fba8a0e150",
+      "name": "BM_AABBHit/Hexahedron",
+      "metric": "cpu_time",
+      "url": "cases/e185c661633a71e9c52f41f4fd4d460480d2071fe3c1fd6388c493fba8a0e150.json"
+    },
+    {
+      "id": "0ec792e7d881110e8949b6a3520dc666030432a4deebfe33ea5e024023cbbac4",
+      "name": "BM_AABBHit/Point",
+      "metric": "cpu_time",
+      "url": "cases/0ec792e7d881110e8949b6a3520dc666030432a4deebfe33ea5e024023cbbac4.json"
+    },
+    {
+      "id": "aacaf81e081521793d58e1655fe34d54e8aa58072d9ffd23b1d48c07b0f6670c",
+      "name": "BM_AABBHit/PrunedHexahedron",
+      "metric": "cpu_time",
+      "url": "cases/aacaf81e081521793d58e1655fe34d54e8aa58072d9ffd23b1d48c07b0f6670c.json"
+    },
+    {
+      "id": "c3f9688598532d4881762bbaaa4d494ba6a7182139aa6e626768d244fbb301d3",
+      "name": "BM_AABBHit/PrunedPoint",
+      "metric": "cpu_time",
+      "url": "cases/c3f9688598532d4881762bbaaa4d494ba6a7182139aa6e626768d244fbb301d3.json"
+    },
+    {
+      "id": "c9c7436d7154f3153efc14460c717d8f6eb8d15dba473a480c9774d777de5897",
+      "name": "BM_AABBHit/PrunedPyramid",
+      "metric": "cpu_time",
+      "url": "cases/c9c7436d7154f3153efc14460c717d8f6eb8d15dba473a480c9774d777de5897.json"
+    },
+    {
+      "id": "7fd8fe024b30960d8b3d2922ef7f971ae8ec79077c84b7fa54f38ec0e9c4c1e4",
+      "name": "BM_AABBHit/PrunedQuadrilateral",
+      "metric": "cpu_time",
+      "url": "cases/7fd8fe024b30960d8b3d2922ef7f971ae8ec79077c84b7fa54f38ec0e9c4c1e4.json"
+    },
+    {
+      "id": "34531334a8184f130f0a64ab7a07ca9ca46634ece75995f275736bb0571690b9",
+      "name": "BM_AABBHit/PrunedSegment",
+      "metric": "cpu_time",
+      "url": "cases/34531334a8184f130f0a64ab7a07ca9ca46634ece75995f275736bb0571690b9.json"
+    },
+    {
+      "id": "64890c9ebcaf29d017a06d3c318d3b25908058506f0d2f8c5e0dea92cfe3b2c3",
+      "name": "BM_AABBHit/PrunedTetrahedron",
+      "metric": "cpu_time",
+      "url": "cases/64890c9ebcaf29d017a06d3c318d3b25908058506f0d2f8c5e0dea92cfe3b2c3.json"
+    },
+    {
+      "id": "38f4059cc02ef950b95043afe86352ee87237f7d8c6d114402416b999b94b86b",
+      "name": "BM_AABBHit/PrunedTriangle",
+      "metric": "cpu_time",
+      "url": "cases/38f4059cc02ef950b95043afe86352ee87237f7d8c6d114402416b999b94b86b.json"
+    },
+    {
+      "id": "829e3cd1cfc4c8f69ff49c059df2f71a6c07159ffea2f7ca6f1756482f5b9622",
+      "name": "BM_AABBHit/PrunedWedge",
+      "metric": "cpu_time",
+      "url": "cases/829e3cd1cfc4c8f69ff49c059df2f71a6c07159ffea2f7ca6f1756482f5b9622.json"
+    },
+    {
+      "id": "95129795fd9962d0683d8b484a1d70225d81e1ab6fcb71b79ae0bffda2a160dd",
+      "name": "BM_AABBHit/Pyramid",
+      "metric": "cpu_time",
+      "url": "cases/95129795fd9962d0683d8b484a1d70225d81e1ab6fcb71b79ae0bffda2a160dd.json"
+    },
+    {
+      "id": "51bae9f96089567c42367dd0cdacaa97d58bbcd486e94f1062b6e23f71b6ba0e",
+      "name": "BM_AABBHit/Quadrilateral",
+      "metric": "cpu_time",
+      "url": "cases/51bae9f96089567c42367dd0cdacaa97d58bbcd486e94f1062b6e23f71b6ba0e.json"
+    },
+    {
+      "id": "c8ecbed86481360126cc26d0ca640a0a580218caf9bdede70ac7b8bca2bc3b35",
+      "name": "BM_AABBHit/Segment",
+      "metric": "cpu_time",
+      "url": "cases/c8ecbed86481360126cc26d0ca640a0a580218caf9bdede70ac7b8bca2bc3b35.json"
+    },
+    {
+      "id": "26be00881c75053c0f52c5fafc67dedd57c7e29bb9cfff677d51863ca0344ad1",
+      "name": "BM_AABBHit/Tetrahedron",
+      "metric": "cpu_time",
+      "url": "cases/26be00881c75053c0f52c5fafc67dedd57c7e29bb9cfff677d51863ca0344ad1.json"
+    },
+    {
+      "id": "e5c6211d6673d813b5c94cadaeee5d877e96d2f0075cf6eb5210ec2aaf6b0075",
+      "name": "BM_AABBHit/Triangle",
+      "metric": "cpu_time",
+      "url": "cases/e5c6211d6673d813b5c94cadaeee5d877e96d2f0075cf6eb5210ec2aaf6b0075.json"
+    },
+    {
+      "id": "0faa10f355b1ebf1fec04413c6586227eeaab65d23f638c984e2694e72fe5979",
+      "name": "BM_AABBHit/Wedge",
+      "metric": "cpu_time",
+      "url": "cases/0faa10f355b1ebf1fec04413c6586227eeaab65d23f638c984e2694e72fe5979.json"
+    },
+    {
+      "id": "99d9a95373086c289346aea26e94ffd6bf2bb759901d1c3ed0146056306b74ae",
+      "name": "BM_AABBOuterMiss/Hexahedron",
+      "metric": "cpu_time",
+      "url": "cases/99d9a95373086c289346aea26e94ffd6bf2bb759901d1c3ed0146056306b74ae.json"
+    },
+    {
+      "id": "f53c924df173ade945334bff2381e984264a24aef10e38f461a3364d8e606dfc",
+      "name": "BM_AABBOuterMiss/Point",
+      "metric": "cpu_time",
+      "url": "cases/f53c924df173ade945334bff2381e984264a24aef10e38f461a3364d8e606dfc.json"
+    },
+    {
+      "id": "4159fa50837eb969d5d01e5a12f4ae42ae43c7ef5c75e6c06205ced92d044978",
+      "name": "BM_AABBOuterMiss/Pyramid",
+      "metric": "cpu_time",
+      "url": "cases/4159fa50837eb969d5d01e5a12f4ae42ae43c7ef5c75e6c06205ced92d044978.json"
+    },
+    {
+      "id": "987953ba11911b61e9211e08690e1302dfbda638f8ad1370000de865aa8742d9",
+      "name": "BM_AABBOuterMiss/Quadrilateral",
+      "metric": "cpu_time",
+      "url": "cases/987953ba11911b61e9211e08690e1302dfbda638f8ad1370000de865aa8742d9.json"
+    },
+    {
+      "id": "99d6467c73d0f11de97f50b7da74b38118055e01552d239f74f84e0abff6f06b",
+      "name": "BM_AABBOuterMiss/Segment",
+      "metric": "cpu_time",
+      "url": "cases/99d6467c73d0f11de97f50b7da74b38118055e01552d239f74f84e0abff6f06b.json"
+    },
+    {
+      "id": "91e8ef432b824df3e49d977a8728e378c99c8b5974bcc01177e2d1950f71458b",
+      "name": "BM_AABBOuterMiss/Tetrahedron",
+      "metric": "cpu_time",
+      "url": "cases/91e8ef432b824df3e49d977a8728e378c99c8b5974bcc01177e2d1950f71458b.json"
+    },
+    {
+      "id": "ab28f132f2d0b37a2ffcd7e740dca543ce32a1bdb7539196997783cb6cb674dd",
+      "name": "BM_AABBOuterMiss/Triangle",
+      "metric": "cpu_time",
+      "url": "cases/ab28f132f2d0b37a2ffcd7e740dca543ce32a1bdb7539196997783cb6cb674dd.json"
+    },
+    {
+      "id": "1f737b6c432d0f4be4d34f82c6ed78705a1d41585a2dd0ed7faf09403c917a2c",
+      "name": "BM_AABBOuterMiss/Wedge",
+      "metric": "cpu_time",
+      "url": "cases/1f737b6c432d0f4be4d34f82c6ed78705a1d41585a2dd0ed7faf09403c917a2c.json"
+    },
+    {
+      "id": "a0dfe3a53f197671d2ba3f78df86896bdce47c0496bd25f58800cac98c1e62b6",
+      "name": "BM_AABBTriangleNarrowMiss",
+      "metric": "cpu_time",
+      "url": "cases/a0dfe3a53f197671d2ba3f78df86896bdce47c0496bd25f58800cac98c1e62b6.json"
+    }
+  ]
+}

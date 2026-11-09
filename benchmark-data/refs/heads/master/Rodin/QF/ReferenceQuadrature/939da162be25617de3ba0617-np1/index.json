@@ -1,0 +1,1837 @@
+{
+  "schema": 1,
+  "definition": {
+    "kind": "benchmark",
+    "mode": "local",
+    "compiler": "gcc-14",
+    "runner": "ubuntu-24.04",
+    "cmake": {
+      "CMAKE_BUILD_TYPE": "Release",
+      "CMAKE_CXX_COMPILER": "g++-14",
+      "CMAKE_C_COMPILER": "gcc-14",
+      "CMAKE_SUPPRESS_REGENERATION": "ON",
+      "RODIN_BUILD_SRC": "ON",
+      "RODIN_BUILD_BENCHMARKS": "ON",
+      "RODIN_BUILD_UNIT_TESTS": "OFF",
+      "RODIN_BUILD_MANUFACTURED_TESTS": "OFF",
+      "RODIN_BUILD_CONVERGENCE_TESTS": "OFF",
+      "RODIN_BUILD_EXAMPLES": "OFF",
+      "RODIN_BUILD_DOC": "OFF",
+      "RODIN_INSTALL_RESOURCES": "OFF",
+      "RODIN_CODE_COVERAGE": "OFF",
+      "RODIN_MULTITHREADED": "OFF",
+      "RODIN_USE_ASAN": "OFF",
+      "RODIN_USE_UBSAN": "OFF",
+      "RODIN_USE_MPI": "OFF",
+      "RODIN_USE_PETSC": "OFF"
+    },
+    "targets": [
+      "RodinQFBenchmarks",
+      "RodinReferenceQuadratureBenchmarks"
+    ],
+    "stage": "components"
+  },
+  "ranks": 1,
+  "cases": [
+    {
+      "id": "76a466bcb626bf785bf012071458e564b0d463a9719b07f6b896e58f62e42e2b",
+      "name": "ReferenceQuadrature/DefaultDispatchSweep9/Hexahedron/15/real_time",
+      "metric": "real_time",
+      "url": "cases/76a466bcb626bf785bf012071458e564b0d463a9719b07f6b896e58f62e42e2b.json"
+    },
+    {
+      "id": "2ab5dcf45237e938a401ec34d0688161802e0d144fe5cc56de444838c2cb38d6",
+      "name": "ReferenceQuadrature/DefaultDispatchSweep9/Hexahedron/16/real_time",
+      "metric": "real_time",
+      "url": "cases/2ab5dcf45237e938a401ec34d0688161802e0d144fe5cc56de444838c2cb38d6.json"
+    },
+    {
+      "id": "80c7b33b1b4ed56a06cf6726d801be13c921af4f9f1f39627db48b22fe1f584f",
+      "name": "ReferenceQuadrature/DefaultDispatchSweep9/Hexahedron/17/real_time",
+      "metric": "real_time",
+      "url": "cases/80c7b33b1b4ed56a06cf6726d801be13c921af4f9f1f39627db48b22fe1f584f.json"
+    },
+    {
+      "id": "d5be9c61226be7cd35d3937e8fe1bd5ec5a4b199a63bd3cfb94b7b4fd48de2e7",
+      "name": "ReferenceQuadrature/DefaultDispatchSweep9/Hexahedron/2/real_time",
+      "metric": "real_time",
+      "url": "cases/d5be9c61226be7cd35d3937e8fe1bd5ec5a4b199a63bd3cfb94b7b4fd48de2e7.json"
+    },
+    {
+      "id": "b325ce3c2c6a2e03197c0291942f3c1c7fb9fcaf5ba34a9061ef9b647e2fbe7d",
+      "name": "ReferenceQuadrature/DefaultDispatchSweep9/Hexahedron/8/real_time",
+      "metric": "real_time",
+      "url": "cases/b325ce3c2c6a2e03197c0291942f3c1c7fb9fcaf5ba34a9061ef9b647e2fbe7d.json"
+    },
+    {
+      "id": "d2979a00728c7ef26dc01dd12ff68192f16a806bc5195abd20fe941599167cb7",
+      "name": "ReferenceQuadrature/DefaultDispatchSweep9/Point/15/real_time",
+      "metric": "real_time",
+      "url": "cases/d2979a00728c7ef26dc01dd12ff68192f16a806bc5195abd20fe941599167cb7.json"
+    },
+    {
+      "id": "b7cedd1a82e58f7b864243e4503466394fa9f4e23e96c7e0241c785eae951c24",
+      "name": "ReferenceQuadrature/DefaultDispatchSweep9/Point/16/real_time",
+      "metric": "real_time",
+      "url": "cases/b7cedd1a82e58f7b864243e4503466394fa9f4e23e96c7e0241c785eae951c24.json"
+    },
+    {
+      "id": "2ab5d4955743f4044e5633ceb208a2bfd5a079d59c8589682582b841b97954fb",
+      "name": "ReferenceQuadrature/DefaultDispatchSweep9/Point/17/real_time",
+      "metric": "real_time",
+      "url": "cases/2ab5d4955743f4044e5633ceb208a2bfd5a079d59c8589682582b841b97954fb.json"
+    },
+    {
+      "id": "869297325c47a348f7b8b0c2134815cb6a24f677ee4d997911aa61b4c676c810",
+      "name": "ReferenceQuadrature/DefaultDispatchSweep9/Point/2/real_time",
+      "metric": "real_time",
+      "url": "cases/869297325c47a348f7b8b0c2134815cb6a24f677ee4d997911aa61b4c676c810.json"
+    },
+    {
+      "id": "bdc077e14c76b7967ffc548ad0176005efbf9307671d18c349385c570280909f",
+      "name": "ReferenceQuadrature/DefaultDispatchSweep9/Point/8/real_time",
+      "metric": "real_time",
+      "url": "cases/bdc077e14c76b7967ffc548ad0176005efbf9307671d18c349385c570280909f.json"
+    },
+    {
+      "id": "20d10fa2cc7da24351074a5bbcba35396e584428436c629bd15d2344ac5013f0",
+      "name": "ReferenceQuadrature/DefaultDispatchSweep9/Pyramid/10/real_time",
+      "metric": "real_time",
+      "url": "cases/20d10fa2cc7da24351074a5bbcba35396e584428436c629bd15d2344ac5013f0.json"
+    },
+    {
+      "id": "c1705a4752d3e327bdd05833987d6611324682b9ce85e7c510e312b177305145",
+      "name": "ReferenceQuadrature/DefaultDispatchSweep9/Pyramid/11/real_time",
+      "metric": "real_time",
+      "url": "cases/c1705a4752d3e327bdd05833987d6611324682b9ce85e7c510e312b177305145.json"
+    },
+    {
+      "id": "907b6e71de9f87285b35a0ff8cf2df60c7a0955180d8eee6ffd5ea630a366d56",
+      "name": "ReferenceQuadrature/DefaultDispatchSweep9/Pyramid/15/real_time",
+      "metric": "real_time",
+      "url": "cases/907b6e71de9f87285b35a0ff8cf2df60c7a0955180d8eee6ffd5ea630a366d56.json"
+    },
+    {
+      "id": "d2176a344a7aebbeb44186a5492c1a2e84e912721310c34f5dd232e9ebc44b27",
+      "name": "ReferenceQuadrature/DefaultDispatchSweep9/Pyramid/16/real_time",
+      "metric": "real_time",
+      "url": "cases/d2176a344a7aebbeb44186a5492c1a2e84e912721310c34f5dd232e9ebc44b27.json"
+    },
+    {
+      "id": "734bbbc3132adc579da8be87b8c2229ed20118461b54b3213c3a82f8eb62bd45",
+      "name": "ReferenceQuadrature/DefaultDispatchSweep9/Pyramid/17/real_time",
+      "metric": "real_time",
+      "url": "cases/734bbbc3132adc579da8be87b8c2229ed20118461b54b3213c3a82f8eb62bd45.json"
+    },
+    {
+      "id": "8aee11ad20cb3e4be15ac6070d9f5df7e501c0d4a8aaaf27ec8f9cd548e6d8d8",
+      "name": "ReferenceQuadrature/DefaultDispatchSweep9/Pyramid/2/real_time",
+      "metric": "real_time",
+      "url": "cases/8aee11ad20cb3e4be15ac6070d9f5df7e501c0d4a8aaaf27ec8f9cd548e6d8d8.json"
+    },
+    {
+      "id": "69066ad1f580af4759eacffb1614893b4036f5624afe88c4dc1d13a3b42de271",
+      "name": "ReferenceQuadrature/DefaultDispatchSweep9/Pyramid/8/real_time",
+      "metric": "real_time",
+      "url": "cases/69066ad1f580af4759eacffb1614893b4036f5624afe88c4dc1d13a3b42de271.json"
+    },
+    {
+      "id": "ed40d41b0748d46834f57f9dc7b70fc1c98ed82b77e67567198c90b3147fd991",
+      "name": "ReferenceQuadrature/DefaultDispatchSweep9/Pyramid/9/real_time",
+      "metric": "real_time",
+      "url": "cases/ed40d41b0748d46834f57f9dc7b70fc1c98ed82b77e67567198c90b3147fd991.json"
+    },
+    {
+      "id": "3371e29425ff5d7ab91c0a051244b76f78e6872adf93272f886d52ba362773be",
+      "name": "ReferenceQuadrature/DefaultDispatchSweep9/Quadrilateral/15/real_time",
+      "metric": "real_time",
+      "url": "cases/3371e29425ff5d7ab91c0a051244b76f78e6872adf93272f886d52ba362773be.json"
+    },
+    {
+      "id": "a3c2a444edba913635c25435f897b742a74f7d892f9bfba4ec5cda8609e6da7b",
+      "name": "ReferenceQuadrature/DefaultDispatchSweep9/Quadrilateral/16/real_time",
+      "metric": "real_time",
+      "url": "cases/a3c2a444edba913635c25435f897b742a74f7d892f9bfba4ec5cda8609e6da7b.json"
+    },
+    {
+      "id": "2465b3b75efb62769342ff977a0fe126783f5b979f01910f2b31cbf74cf802db",
+      "name": "ReferenceQuadrature/DefaultDispatchSweep9/Quadrilateral/17/real_time",
+      "metric": "real_time",
+      "url": "cases/2465b3b75efb62769342ff977a0fe126783f5b979f01910f2b31cbf74cf802db.json"
+    },
+    {
+      "id": "d6b0ba7d468f20621af0b09830a683b878332c4dc2f5ef35bbe3150245081c79",
+      "name": "ReferenceQuadrature/DefaultDispatchSweep9/Quadrilateral/2/real_time",
+      "metric": "real_time",
+      "url": "cases/d6b0ba7d468f20621af0b09830a683b878332c4dc2f5ef35bbe3150245081c79.json"
+    },
+    {
+      "id": "a52c00c47acc4c1dd96a20794345132cbc4d171ab5084cddd95390909b2804f7",
+      "name": "ReferenceQuadrature/DefaultDispatchSweep9/Quadrilateral/8/real_time",
+      "metric": "real_time",
+      "url": "cases/a52c00c47acc4c1dd96a20794345132cbc4d171ab5084cddd95390909b2804f7.json"
+    },
+    {
+      "id": "69adf6aa0063f0d1ff5e7f6ea4a2b878eed3a5389ce52d91c3eb54a8b4ddeca8",
+      "name": "ReferenceQuadrature/DefaultDispatchSweep9/Segment/15/real_time",
+      "metric": "real_time",
+      "url": "cases/69adf6aa0063f0d1ff5e7f6ea4a2b878eed3a5389ce52d91c3eb54a8b4ddeca8.json"
+    },
+    {
+      "id": "2f906df46143fdb01715ad98ce322446815e4561e508c676f9a99679b4d96050",
+      "name": "ReferenceQuadrature/DefaultDispatchSweep9/Segment/16/real_time",
+      "metric": "real_time",
+      "url": "cases/2f906df46143fdb01715ad98ce322446815e4561e508c676f9a99679b4d96050.json"
+    },
+    {
+      "id": "719c2920ef0e1bf2d3c32d5b30d2392006abdff16857daf460baddb4f7d8120d",
+      "name": "ReferenceQuadrature/DefaultDispatchSweep9/Segment/17/real_time",
+      "metric": "real_time",
+      "url": "cases/719c2920ef0e1bf2d3c32d5b30d2392006abdff16857daf460baddb4f7d8120d.json"
+    },
+    {
+      "id": "c49f9b4447151dda2e1a7245ce1ccbb9b983436459ca220b11d962aa379d660b",
+      "name": "ReferenceQuadrature/DefaultDispatchSweep9/Segment/2/real_time",
+      "metric": "real_time",
+      "url": "cases/c49f9b4447151dda2e1a7245ce1ccbb9b983436459ca220b11d962aa379d660b.json"
+    },
+    {
+      "id": "595968eabbd0635a91f313a06e4e50dcdbfa7cdc68ef24c63b9e01e62a374115",
+      "name": "ReferenceQuadrature/DefaultDispatchSweep9/Segment/8/real_time",
+      "metric": "real_time",
+      "url": "cases/595968eabbd0635a91f313a06e4e50dcdbfa7cdc68ef24c63b9e01e62a374115.json"
+    },
+    {
+      "id": "51adb9692d724284167e4fe282d8e8c721193656619f4c8c57b20327e5432f18",
+      "name": "ReferenceQuadrature/DefaultDispatchSweep9/Tetrahedron/14/real_time",
+      "metric": "real_time",
+      "url": "cases/51adb9692d724284167e4fe282d8e8c721193656619f4c8c57b20327e5432f18.json"
+    },
+    {
+      "id": "efce4eb6e18f2fe45c9b35e79f82a194f3bd888e9274628af2bb35c119ba3380",
+      "name": "ReferenceQuadrature/DefaultDispatchSweep9/Tetrahedron/15/real_time",
+      "metric": "real_time",
+      "url": "cases/efce4eb6e18f2fe45c9b35e79f82a194f3bd888e9274628af2bb35c119ba3380.json"
+    },
+    {
+      "id": "1874770307be4d558ee6c8cbec3fad2cd9ea0c27d4a9b37ab3f523601c0d593a",
+      "name": "ReferenceQuadrature/DefaultDispatchSweep9/Tetrahedron/16/real_time",
+      "metric": "real_time",
+      "url": "cases/1874770307be4d558ee6c8cbec3fad2cd9ea0c27d4a9b37ab3f523601c0d593a.json"
+    },
+    {
+      "id": "5f99feb19bd53a31522bb05abc33ee0487d6f63d3181642ac9f3ef6d4d7909f2",
+      "name": "ReferenceQuadrature/DefaultDispatchSweep9/Tetrahedron/17/real_time",
+      "metric": "real_time",
+      "url": "cases/5f99feb19bd53a31522bb05abc33ee0487d6f63d3181642ac9f3ef6d4d7909f2.json"
+    },
+    {
+      "id": "5c8a6188eaff1e7f9c07202e1d0c2c6df7e3c8da9836fd79bf6970815b4bfc03",
+      "name": "ReferenceQuadrature/DefaultDispatchSweep9/Tetrahedron/2/real_time",
+      "metric": "real_time",
+      "url": "cases/5c8a6188eaff1e7f9c07202e1d0c2c6df7e3c8da9836fd79bf6970815b4bfc03.json"
+    },
+    {
+      "id": "d57ae2bbcb59a8836facbc132ef51e4bc3fa33d4cff0391f846773e4d235c2ed",
+      "name": "ReferenceQuadrature/DefaultDispatchSweep9/Tetrahedron/8/real_time",
+      "metric": "real_time",
+      "url": "cases/d57ae2bbcb59a8836facbc132ef51e4bc3fa33d4cff0391f846773e4d235c2ed.json"
+    },
+    {
+      "id": "5979b8a1e8110e496914db153baf915c65af62683cb0e97950ec7c1e1c93c973",
+      "name": "ReferenceQuadrature/DefaultDispatchSweep9/Triangle/15/real_time",
+      "metric": "real_time",
+      "url": "cases/5979b8a1e8110e496914db153baf915c65af62683cb0e97950ec7c1e1c93c973.json"
+    },
+    {
+      "id": "bee80aa52988b5f52aec688a734fc108cd12fe06e60faf84bd0461bd5052f78f",
+      "name": "ReferenceQuadrature/DefaultDispatchSweep9/Triangle/16/real_time",
+      "metric": "real_time",
+      "url": "cases/bee80aa52988b5f52aec688a734fc108cd12fe06e60faf84bd0461bd5052f78f.json"
+    },
+    {
+      "id": "ef5ba51b5af2c294f3e7a58eb00483af10e1fed326d4ef1e3e4874abc7334b5d",
+      "name": "ReferenceQuadrature/DefaultDispatchSweep9/Triangle/17/real_time",
+      "metric": "real_time",
+      "url": "cases/ef5ba51b5af2c294f3e7a58eb00483af10e1fed326d4ef1e3e4874abc7334b5d.json"
+    },
+    {
+      "id": "36394e02917b2bceffc7d2c0a9791d54b00da3a09e34c4168c97a6c9ef947501",
+      "name": "ReferenceQuadrature/DefaultDispatchSweep9/Triangle/2/real_time",
+      "metric": "real_time",
+      "url": "cases/36394e02917b2bceffc7d2c0a9791d54b00da3a09e34c4168c97a6c9ef947501.json"
+    },
+    {
+      "id": "4b1ee5205dce85993122b45397c8afbaa51a28da479304c452a495b2eed37982",
+      "name": "ReferenceQuadrature/DefaultDispatchSweep9/Triangle/49/real_time",
+      "metric": "real_time",
+      "url": "cases/4b1ee5205dce85993122b45397c8afbaa51a28da479304c452a495b2eed37982.json"
+    },
+    {
+      "id": "b73361d2272eec4dca9ab9f0a49c6602e9e67936ad850756b5e609a94fed28ea",
+      "name": "ReferenceQuadrature/DefaultDispatchSweep9/Triangle/50/real_time",
+      "metric": "real_time",
+      "url": "cases/b73361d2272eec4dca9ab9f0a49c6602e9e67936ad850756b5e609a94fed28ea.json"
+    },
+    {
+      "id": "0a4517ad28f3646455bff42e59c68046a86329c69a5091b2e5be66f6f1f62aaf",
+      "name": "ReferenceQuadrature/DefaultDispatchSweep9/Triangle/51/real_time",
+      "metric": "real_time",
+      "url": "cases/0a4517ad28f3646455bff42e59c68046a86329c69a5091b2e5be66f6f1f62aaf.json"
+    },
+    {
+      "id": "da39d530e260262bb25cab5c1c899f8103953dcd6ad3525906e7decf8e6bac97",
+      "name": "ReferenceQuadrature/DefaultDispatchSweep9/Triangle/8/real_time",
+      "metric": "real_time",
+      "url": "cases/da39d530e260262bb25cab5c1c899f8103953dcd6ad3525906e7decf8e6bac97.json"
+    },
+    {
+      "id": "d8a6a7cbbb02fd35a4fa7641ecf2757263fe26ad353d904fcb56d92a0eabe61f",
+      "name": "ReferenceQuadrature/DefaultDispatchSweep9/Wedge/15/real_time",
+      "metric": "real_time",
+      "url": "cases/d8a6a7cbbb02fd35a4fa7641ecf2757263fe26ad353d904fcb56d92a0eabe61f.json"
+    },
+    {
+      "id": "93aa3458369cbfc28032049c0ed85086b0a1039d98fdc0fc61700ab15887d100",
+      "name": "ReferenceQuadrature/DefaultDispatchSweep9/Wedge/16/real_time",
+      "metric": "real_time",
+      "url": "cases/93aa3458369cbfc28032049c0ed85086b0a1039d98fdc0fc61700ab15887d100.json"
+    },
+    {
+      "id": "1aab83154d5c0f7c3ec96986f18d3a9ef608ffc2ff6dd1c3b0b997056f08e921",
+      "name": "ReferenceQuadrature/DefaultDispatchSweep9/Wedge/17/real_time",
+      "metric": "real_time",
+      "url": "cases/1aab83154d5c0f7c3ec96986f18d3a9ef608ffc2ff6dd1c3b0b997056f08e921.json"
+    },
+    {
+      "id": "007bdc9adf268e61de10b8d8248e4f4f0310da7eae019ff5d3d260063c478778",
+      "name": "ReferenceQuadrature/DefaultDispatchSweep9/Wedge/2/real_time",
+      "metric": "real_time",
+      "url": "cases/007bdc9adf268e61de10b8d8248e4f4f0310da7eae019ff5d3d260063c478778.json"
+    },
+    {
+      "id": "09a114f8c662e49f71d6b8c274dd96852519012f9adf6c611a8b4db3f2cd9e9c",
+      "name": "ReferenceQuadrature/DefaultDispatchSweep9/Wedge/49/real_time",
+      "metric": "real_time",
+      "url": "cases/09a114f8c662e49f71d6b8c274dd96852519012f9adf6c611a8b4db3f2cd9e9c.json"
+    },
+    {
+      "id": "4c1a2b85e61e2b42800446ffcd2efb9712f0bdff85359120d63e74b04297070d",
+      "name": "ReferenceQuadrature/DefaultDispatchSweep9/Wedge/50/real_time",
+      "metric": "real_time",
+      "url": "cases/4c1a2b85e61e2b42800446ffcd2efb9712f0bdff85359120d63e74b04297070d.json"
+    },
+    {
+      "id": "a025a01de0ba949fa15dd7366a0262e8888308d3bd7ae81e77e771d181557426",
+      "name": "ReferenceQuadrature/DefaultDispatchSweep9/Wedge/51/real_time",
+      "metric": "real_time",
+      "url": "cases/a025a01de0ba949fa15dd7366a0262e8888308d3bd7ae81e77e771d181557426.json"
+    },
+    {
+      "id": "12e75552108044b00102a8722cd572490e7d2605f733474ae4169b222952abf5",
+      "name": "ReferenceQuadrature/DefaultDispatchSweep9/Wedge/8/real_time",
+      "metric": "real_time",
+      "url": "cases/12e75552108044b00102a8722cd572490e7d2605f733474ae4169b222952abf5.json"
+    },
+    {
+      "id": "51945ce63f8f9a94b791de22f8106ac5e416032dea18f7988035986531ef8e5c",
+      "name": "ReferenceQuadrature/DefaultHotSweep8/Hexahedron/15/real_time",
+      "metric": "real_time",
+      "url": "cases/51945ce63f8f9a94b791de22f8106ac5e416032dea18f7988035986531ef8e5c.json"
+    },
+    {
+      "id": "71156586c2fb76df2940734dafcc34f4ef68ccddb4c057daa4b9e098b33b43bc",
+      "name": "ReferenceQuadrature/DefaultHotSweep8/Hexahedron/16/real_time",
+      "metric": "real_time",
+      "url": "cases/71156586c2fb76df2940734dafcc34f4ef68ccddb4c057daa4b9e098b33b43bc.json"
+    },
+    {
+      "id": "d7301ac68c14be59b8dae6adac97fac2b26b436f199f8000f77243951acb8402",
+      "name": "ReferenceQuadrature/DefaultHotSweep8/Hexahedron/17/real_time",
+      "metric": "real_time",
+      "url": "cases/d7301ac68c14be59b8dae6adac97fac2b26b436f199f8000f77243951acb8402.json"
+    },
+    {
+      "id": "3ab65734ce96d736e7aae666e3344aef0a6415728e71685f1798a16e214ab946",
+      "name": "ReferenceQuadrature/DefaultHotSweep8/Hexahedron/2/real_time",
+      "metric": "real_time",
+      "url": "cases/3ab65734ce96d736e7aae666e3344aef0a6415728e71685f1798a16e214ab946.json"
+    },
+    {
+      "id": "d80c0ecf45a9e2c8062da0f7457ce3add8e41bed2dfe4c9062e09c0969d01394",
+      "name": "ReferenceQuadrature/DefaultHotSweep8/Hexahedron/8/real_time",
+      "metric": "real_time",
+      "url": "cases/d80c0ecf45a9e2c8062da0f7457ce3add8e41bed2dfe4c9062e09c0969d01394.json"
+    },
+    {
+      "id": "d38baf9acce2f4d381e79acc08b6a00bda6b76dd5754cf252c899612780db609",
+      "name": "ReferenceQuadrature/DefaultHotSweep8/Point/15/real_time",
+      "metric": "real_time",
+      "url": "cases/d38baf9acce2f4d381e79acc08b6a00bda6b76dd5754cf252c899612780db609.json"
+    },
+    {
+      "id": "e9d734de496eb051fdcbcd2e560493b9e8a5da8e904edf2ee9eb0df7554fd601",
+      "name": "ReferenceQuadrature/DefaultHotSweep8/Point/16/real_time",
+      "metric": "real_time",
+      "url": "cases/e9d734de496eb051fdcbcd2e560493b9e8a5da8e904edf2ee9eb0df7554fd601.json"
+    },
+    {
+      "id": "f8517af47818acf67ea5a3e927b3950b958915b80fa470cd09df32df158363ee",
+      "name": "ReferenceQuadrature/DefaultHotSweep8/Point/17/real_time",
+      "metric": "real_time",
+      "url": "cases/f8517af47818acf67ea5a3e927b3950b958915b80fa470cd09df32df158363ee.json"
+    },
+    {
+      "id": "fbad92d0177cc950e36a6d7b9c3123e4a4f890d1a083d057899f0306a6dee9a3",
+      "name": "ReferenceQuadrature/DefaultHotSweep8/Point/2/real_time",
+      "metric": "real_time",
+      "url": "cases/fbad92d0177cc950e36a6d7b9c3123e4a4f890d1a083d057899f0306a6dee9a3.json"
+    },
+    {
+      "id": "77454ec7c402691ac083bc29098d187b139785b49170c34b81490ac7e1606355",
+      "name": "ReferenceQuadrature/DefaultHotSweep8/Point/8/real_time",
+      "metric": "real_time",
+      "url": "cases/77454ec7c402691ac083bc29098d187b139785b49170c34b81490ac7e1606355.json"
+    },
+    {
+      "id": "f95795cb35dc0968f06a08126a2110526e4b3fe8b7c5f8ab7e4f6e2b14af7bfc",
+      "name": "ReferenceQuadrature/DefaultHotSweep8/Pyramid/10/real_time",
+      "metric": "real_time",
+      "url": "cases/f95795cb35dc0968f06a08126a2110526e4b3fe8b7c5f8ab7e4f6e2b14af7bfc.json"
+    },
+    {
+      "id": "3503d02803ec77571d039481ab3464fdc32e4fb3fd3e6ed564bb2cf34dd213d7",
+      "name": "ReferenceQuadrature/DefaultHotSweep8/Pyramid/11/real_time",
+      "metric": "real_time",
+      "url": "cases/3503d02803ec77571d039481ab3464fdc32e4fb3fd3e6ed564bb2cf34dd213d7.json"
+    },
+    {
+      "id": "cfcbc63764c8b889fcd92fc9d8ec4a8cdf8a9de5e872b0cff98b9d08a949b627",
+      "name": "ReferenceQuadrature/DefaultHotSweep8/Pyramid/15/real_time",
+      "metric": "real_time",
+      "url": "cases/cfcbc63764c8b889fcd92fc9d8ec4a8cdf8a9de5e872b0cff98b9d08a949b627.json"
+    },
+    {
+      "id": "2655ce7c96d4f2ae9b551192c1d65fca629cbe1d124c497541fc19f3ee7628d0",
+      "name": "ReferenceQuadrature/DefaultHotSweep8/Pyramid/16/real_time",
+      "metric": "real_time",
+      "url": "cases/2655ce7c96d4f2ae9b551192c1d65fca629cbe1d124c497541fc19f3ee7628d0.json"
+    },
+    {
+      "id": "46c445bcdd8260c92efcf909c1aa25c078255373f492c4155eb4f7d9e0d5a432",
+      "name": "ReferenceQuadrature/DefaultHotSweep8/Pyramid/17/real_time",
+      "metric": "real_time",
+      "url": "cases/46c445bcdd8260c92efcf909c1aa25c078255373f492c4155eb4f7d9e0d5a432.json"
+    },
+    {
+      "id": "ff393a1c9d635d26f885ebc90129b06e2449b233823b073471a2cd9c32621c9f",
+      "name": "ReferenceQuadrature/DefaultHotSweep8/Pyramid/2/real_time",
+      "metric": "real_time",
+      "url": "cases/ff393a1c9d635d26f885ebc90129b06e2449b233823b073471a2cd9c32621c9f.json"
+    },
+    {
+      "id": "ff908a5540f040412509faec99e82da957a9e98dd9937b2bbf82b2b5c4e957f1",
+      "name": "ReferenceQuadrature/DefaultHotSweep8/Pyramid/8/real_time",
+      "metric": "real_time",
+      "url": "cases/ff908a5540f040412509faec99e82da957a9e98dd9937b2bbf82b2b5c4e957f1.json"
+    },
+    {
+      "id": "eb811172fca57e8b67c7d334e5c0edeb3d952b20456fdc30cf3668fd0bad471b",
+      "name": "ReferenceQuadrature/DefaultHotSweep8/Pyramid/9/real_time",
+      "metric": "real_time",
+      "url": "cases/eb811172fca57e8b67c7d334e5c0edeb3d952b20456fdc30cf3668fd0bad471b.json"
+    },
+    {
+      "id": "25f20dd63bbdb9a5c4d123377b1998dc1cfb72c5155ff08a2d1f7531462ecbaa",
+      "name": "ReferenceQuadrature/DefaultHotSweep8/Quadrilateral/15/real_time",
+      "metric": "real_time",
+      "url": "cases/25f20dd63bbdb9a5c4d123377b1998dc1cfb72c5155ff08a2d1f7531462ecbaa.json"
+    },
+    {
+      "id": "2c60c6c7c1864b34035cb24c6148118edc8db7e81527ed0dc08a347dd41d0804",
+      "name": "ReferenceQuadrature/DefaultHotSweep8/Quadrilateral/16/real_time",
+      "metric": "real_time",
+      "url": "cases/2c60c6c7c1864b34035cb24c6148118edc8db7e81527ed0dc08a347dd41d0804.json"
+    },
+    {
+      "id": "5543a4c8298cfb9bb714b71fb0d340e44e9ebf6d0efea1cc1c1fba9bbe1d0ac5",
+      "name": "ReferenceQuadrature/DefaultHotSweep8/Quadrilateral/17/real_time",
+      "metric": "real_time",
+      "url": "cases/5543a4c8298cfb9bb714b71fb0d340e44e9ebf6d0efea1cc1c1fba9bbe1d0ac5.json"
+    },
+    {
+      "id": "e20a98efc3cce092ac3dcaad0090fa92791be43bd41c58fac6834260dae2620a",
+      "name": "ReferenceQuadrature/DefaultHotSweep8/Quadrilateral/2/real_time",
+      "metric": "real_time",
+      "url": "cases/e20a98efc3cce092ac3dcaad0090fa92791be43bd41c58fac6834260dae2620a.json"
+    },
+    {
+      "id": "285041f876f7e8f56d53b35f37895b957837d6a057e7c6cf90345d4ee0e5a760",
+      "name": "ReferenceQuadrature/DefaultHotSweep8/Quadrilateral/8/real_time",
+      "metric": "real_time",
+      "url": "cases/285041f876f7e8f56d53b35f37895b957837d6a057e7c6cf90345d4ee0e5a760.json"
+    },
+    {
+      "id": "f987b9b0cb0da78803d2fd1959f03c58745feb7676264b07d42c39431ad32864",
+      "name": "ReferenceQuadrature/DefaultHotSweep8/Segment/15/real_time",
+      "metric": "real_time",
+      "url": "cases/f987b9b0cb0da78803d2fd1959f03c58745feb7676264b07d42c39431ad32864.json"
+    },
+    {
+      "id": "97fde0a2136d838156751ba2ed42829caf2c2dd223d76cf02c5ab1654562f6f9",
+      "name": "ReferenceQuadrature/DefaultHotSweep8/Segment/16/real_time",
+      "metric": "real_time",
+      "url": "cases/97fde0a2136d838156751ba2ed42829caf2c2dd223d76cf02c5ab1654562f6f9.json"
+    },
+    {
+      "id": "18330554014ad69f9e1df9ecba90b44d0bf6456652f5d01cbbe68b58187b922c",
+      "name": "ReferenceQuadrature/DefaultHotSweep8/Segment/17/real_time",
+      "metric": "real_time",
+      "url": "cases/18330554014ad69f9e1df9ecba90b44d0bf6456652f5d01cbbe68b58187b922c.json"
+    },
+    {
+      "id": "44b0edba74605bd8a57be6aada372c818c8e5ee3024475860e95aa9bd030f83a",
+      "name": "ReferenceQuadrature/DefaultHotSweep8/Segment/2/real_time",
+      "metric": "real_time",
+      "url": "cases/44b0edba74605bd8a57be6aada372c818c8e5ee3024475860e95aa9bd030f83a.json"
+    },
+    {
+      "id": "e04b421336a888aa343d250d6bfa267b6a4a9e69b0a02476bc9035f6efde6dea",
+      "name": "ReferenceQuadrature/DefaultHotSweep8/Segment/8/real_time",
+      "metric": "real_time",
+      "url": "cases/e04b421336a888aa343d250d6bfa267b6a4a9e69b0a02476bc9035f6efde6dea.json"
+    },
+    {
+      "id": "50290a89f084557a55f28564a9f3ea55ac83f8b8001edbbafca8c5e66a8bba3b",
+      "name": "ReferenceQuadrature/DefaultHotSweep8/Tetrahedron/14/real_time",
+      "metric": "real_time",
+      "url": "cases/50290a89f084557a55f28564a9f3ea55ac83f8b8001edbbafca8c5e66a8bba3b.json"
+    },
+    {
+      "id": "3fd58ee34006a88f8f2c29ec68826976778e1d56d4e7922ee1cd3a30c373a55d",
+      "name": "ReferenceQuadrature/DefaultHotSweep8/Tetrahedron/15/real_time",
+      "metric": "real_time",
+      "url": "cases/3fd58ee34006a88f8f2c29ec68826976778e1d56d4e7922ee1cd3a30c373a55d.json"
+    },
+    {
+      "id": "77f80041a054b7eca8ace4faa2992398b226a04710ff08bd3a2559ed32c0bc42",
+      "name": "ReferenceQuadrature/DefaultHotSweep8/Tetrahedron/16/real_time",
+      "metric": "real_time",
+      "url": "cases/77f80041a054b7eca8ace4faa2992398b226a04710ff08bd3a2559ed32c0bc42.json"
+    },
+    {
+      "id": "27263a0acf18f938c921d7765889495e7a0cfc271de32ae14e4ab23f68e26c31",
+      "name": "ReferenceQuadrature/DefaultHotSweep8/Tetrahedron/17/real_time",
+      "metric": "real_time",
+      "url": "cases/27263a0acf18f938c921d7765889495e7a0cfc271de32ae14e4ab23f68e26c31.json"
+    },
+    {
+      "id": "0382ed19c5cb5b03a70d13cacdd762c3d2c0b850a7685b1111de71ec5e41d307",
+      "name": "ReferenceQuadrature/DefaultHotSweep8/Tetrahedron/2/real_time",
+      "metric": "real_time",
+      "url": "cases/0382ed19c5cb5b03a70d13cacdd762c3d2c0b850a7685b1111de71ec5e41d307.json"
+    },
+    {
+      "id": "e409216847ada126ca251ea2b84cbcfbefc4392492bace092387eb86cd00744c",
+      "name": "ReferenceQuadrature/DefaultHotSweep8/Tetrahedron/8/real_time",
+      "metric": "real_time",
+      "url": "cases/e409216847ada126ca251ea2b84cbcfbefc4392492bace092387eb86cd00744c.json"
+    },
+    {
+      "id": "9553f7d7b140e250cdbb0115bc8c21ec01b83673cdf52bec9e50d8dbfa16fb57",
+      "name": "ReferenceQuadrature/DefaultHotSweep8/Triangle/15/real_time",
+      "metric": "real_time",
+      "url": "cases/9553f7d7b140e250cdbb0115bc8c21ec01b83673cdf52bec9e50d8dbfa16fb57.json"
+    },
+    {
+      "id": "082c6d205870af80f7cbdb13fbd482c6a1c646519a4183086d8042e617242053",
+      "name": "ReferenceQuadrature/DefaultHotSweep8/Triangle/16/real_time",
+      "metric": "real_time",
+      "url": "cases/082c6d205870af80f7cbdb13fbd482c6a1c646519a4183086d8042e617242053.json"
+    },
+    {
+      "id": "61dc3278ee899ebeeadbf2712cc54b4245dcfca369f4a1de075d438497f41227",
+      "name": "ReferenceQuadrature/DefaultHotSweep8/Triangle/17/real_time",
+      "metric": "real_time",
+      "url": "cases/61dc3278ee899ebeeadbf2712cc54b4245dcfca369f4a1de075d438497f41227.json"
+    },
+    {
+      "id": "807319caf698b76e533a384837b71c356a200f0303b0a1cc8eda3499fa3a7d5b",
+      "name": "ReferenceQuadrature/DefaultHotSweep8/Triangle/2/real_time",
+      "metric": "real_time",
+      "url": "cases/807319caf698b76e533a384837b71c356a200f0303b0a1cc8eda3499fa3a7d5b.json"
+    },
+    {
+      "id": "ce41eb453d932a102a020e8b2b07a20dd758a38e49f2dd44fd76b02b01373521",
+      "name": "ReferenceQuadrature/DefaultHotSweep8/Triangle/49/real_time",
+      "metric": "real_time",
+      "url": "cases/ce41eb453d932a102a020e8b2b07a20dd758a38e49f2dd44fd76b02b01373521.json"
+    },
+    {
+      "id": "40d6f894a5a559b729b81e7958c822002247b59b727b00ed1a1a83f6c1ae5658",
+      "name": "ReferenceQuadrature/DefaultHotSweep8/Triangle/50/real_time",
+      "metric": "real_time",
+      "url": "cases/40d6f894a5a559b729b81e7958c822002247b59b727b00ed1a1a83f6c1ae5658.json"
+    },
+    {
+      "id": "cafad03ede3eba080ca25bbbac54ac6e72643c6aa7c6c72ffed3fa27ff20a8dc",
+      "name": "ReferenceQuadrature/DefaultHotSweep8/Triangle/51/real_time",
+      "metric": "real_time",
+      "url": "cases/cafad03ede3eba080ca25bbbac54ac6e72643c6aa7c6c72ffed3fa27ff20a8dc.json"
+    },
+    {
+      "id": "3e8c3b4e271655075cf2a24bdb062ccb6830517a0fb882439ce9552bc034410f",
+      "name": "ReferenceQuadrature/DefaultHotSweep8/Triangle/8/real_time",
+      "metric": "real_time",
+      "url": "cases/3e8c3b4e271655075cf2a24bdb062ccb6830517a0fb882439ce9552bc034410f.json"
+    },
+    {
+      "id": "a8936d14091fa324aa0f4935bc1318bdbd98c9c92a118c5131e5df10a6f7ada4",
+      "name": "ReferenceQuadrature/DefaultHotSweep8/Wedge/15/real_time",
+      "metric": "real_time",
+      "url": "cases/a8936d14091fa324aa0f4935bc1318bdbd98c9c92a118c5131e5df10a6f7ada4.json"
+    },
+    {
+      "id": "59589d4da13b40834c7d2a99c4f1f0203aca4cb00bbc6ea186e79104b2df8320",
+      "name": "ReferenceQuadrature/DefaultHotSweep8/Wedge/16/real_time",
+      "metric": "real_time",
+      "url": "cases/59589d4da13b40834c7d2a99c4f1f0203aca4cb00bbc6ea186e79104b2df8320.json"
+    },
+    {
+      "id": "a8016da920cc7c92f4dc68b5d7ee65ea62099852a7c863d61adbfe740fa711fe",
+      "name": "ReferenceQuadrature/DefaultHotSweep8/Wedge/17/real_time",
+      "metric": "real_time",
+      "url": "cases/a8016da920cc7c92f4dc68b5d7ee65ea62099852a7c863d61adbfe740fa711fe.json"
+    },
+    {
+      "id": "029cb046cf092461a85297df4254bb5a46a009e30af1e78f7b487fdaf86e9fc1",
+      "name": "ReferenceQuadrature/DefaultHotSweep8/Wedge/2/real_time",
+      "metric": "real_time",
+      "url": "cases/029cb046cf092461a85297df4254bb5a46a009e30af1e78f7b487fdaf86e9fc1.json"
+    },
+    {
+      "id": "963720018471f6eb3549f2a4d66824dea2ace408f9495d4409a0ea4ad817884f",
+      "name": "ReferenceQuadrature/DefaultHotSweep8/Wedge/49/real_time",
+      "metric": "real_time",
+      "url": "cases/963720018471f6eb3549f2a4d66824dea2ace408f9495d4409a0ea4ad817884f.json"
+    },
+    {
+      "id": "74c7fa26e1824ca8aa18354500e781e9ea39d3b0d51da2f8921123c752694651",
+      "name": "ReferenceQuadrature/DefaultHotSweep8/Wedge/50/real_time",
+      "metric": "real_time",
+      "url": "cases/74c7fa26e1824ca8aa18354500e781e9ea39d3b0d51da2f8921123c752694651.json"
+    },
+    {
+      "id": "30d4338139a42c47343a64fc7d33c20dca0d042054dbbf626db72766dd2ce94e",
+      "name": "ReferenceQuadrature/DefaultHotSweep8/Wedge/51/real_time",
+      "metric": "real_time",
+      "url": "cases/30d4338139a42c47343a64fc7d33c20dca0d042054dbbf626db72766dd2ce94e.json"
+    },
+    {
+      "id": "f03b589fc225b94ac3f6ed62813588c5e599954b3519a91659beff00e56455dc",
+      "name": "ReferenceQuadrature/DefaultHotSweep8/Wedge/8/real_time",
+      "metric": "real_time",
+      "url": "cases/f03b589fc225b94ac3f6ed62813588c5e599954b3519a91659beff00e56455dc.json"
+    },
+    {
+      "id": "fbc361ea546348277f607187d0ad12c34bac73240faee4b0e3cf0dc78aaf5c51",
+      "name": "ReferenceQuadrature/OwnedBuild/Hexahedron/15/real_time",
+      "metric": "real_time",
+      "url": "cases/fbc361ea546348277f607187d0ad12c34bac73240faee4b0e3cf0dc78aaf5c51.json"
+    },
+    {
+      "id": "855e6aae129bd1d9e98b0f1ae2fe67f52a44ab633a9d0bb0cb951fa29dce24d7",
+      "name": "ReferenceQuadrature/OwnedBuild/Hexahedron/16/real_time",
+      "metric": "real_time",
+      "url": "cases/855e6aae129bd1d9e98b0f1ae2fe67f52a44ab633a9d0bb0cb951fa29dce24d7.json"
+    },
+    {
+      "id": "0b7f95258eafcd71ae518489130edd3888198dd8b421ae65d1b1ce718780cd5a",
+      "name": "ReferenceQuadrature/OwnedBuild/Hexahedron/17/real_time",
+      "metric": "real_time",
+      "url": "cases/0b7f95258eafcd71ae518489130edd3888198dd8b421ae65d1b1ce718780cd5a.json"
+    },
+    {
+      "id": "68baeefc2a1a5f8ff4f5f650096b1945ea5eaf3fa6b9fba03436594553765b35",
+      "name": "ReferenceQuadrature/OwnedBuild/Hexahedron/2/real_time",
+      "metric": "real_time",
+      "url": "cases/68baeefc2a1a5f8ff4f5f650096b1945ea5eaf3fa6b9fba03436594553765b35.json"
+    },
+    {
+      "id": "0cd5aad3ce9ceae1f31370f1079a69f8ddcbaf7f652ef308aebc0eb5419bd033",
+      "name": "ReferenceQuadrature/OwnedBuild/Hexahedron/8/real_time",
+      "metric": "real_time",
+      "url": "cases/0cd5aad3ce9ceae1f31370f1079a69f8ddcbaf7f652ef308aebc0eb5419bd033.json"
+    },
+    {
+      "id": "5aa0bcdf497437742dbaa2275d4fe8e3f8071c4e2fec0c51d4826d8d548ba871",
+      "name": "ReferenceQuadrature/OwnedBuild/Point/15/real_time",
+      "metric": "real_time",
+      "url": "cases/5aa0bcdf497437742dbaa2275d4fe8e3f8071c4e2fec0c51d4826d8d548ba871.json"
+    },
+    {
+      "id": "4876208a16f22b7b516176fecea216ce6831573c90c13840d18d415f9184848a",
+      "name": "ReferenceQuadrature/OwnedBuild/Point/16/real_time",
+      "metric": "real_time",
+      "url": "cases/4876208a16f22b7b516176fecea216ce6831573c90c13840d18d415f9184848a.json"
+    },
+    {
+      "id": "2ad81f26f960579717871904ed0cd8be6c87f6a7aeb2725552b01d41345872d4",
+      "name": "ReferenceQuadrature/OwnedBuild/Point/17/real_time",
+      "metric": "real_time",
+      "url": "cases/2ad81f26f960579717871904ed0cd8be6c87f6a7aeb2725552b01d41345872d4.json"
+    },
+    {
+      "id": "efa3d95cfad1f96d5add54f993fdd9b63504683d7b2c54eb5cfe9d8b27ae51bc",
+      "name": "ReferenceQuadrature/OwnedBuild/Point/2/real_time",
+      "metric": "real_time",
+      "url": "cases/efa3d95cfad1f96d5add54f993fdd9b63504683d7b2c54eb5cfe9d8b27ae51bc.json"
+    },
+    {
+      "id": "074fba56dccb1d66bf782d20d84e00f74dd019e53562869f2ed517fcf86fafe3",
+      "name": "ReferenceQuadrature/OwnedBuild/Point/8/real_time",
+      "metric": "real_time",
+      "url": "cases/074fba56dccb1d66bf782d20d84e00f74dd019e53562869f2ed517fcf86fafe3.json"
+    },
+    {
+      "id": "107fad7b7e9c2095452988cff1d69f24841e2f1c58efd91cb517a25d2d6ec067",
+      "name": "ReferenceQuadrature/OwnedBuild/Pyramid/10/real_time",
+      "metric": "real_time",
+      "url": "cases/107fad7b7e9c2095452988cff1d69f24841e2f1c58efd91cb517a25d2d6ec067.json"
+    },
+    {
+      "id": "b838e9cc020b8e0e047d9278dd6cb5aa4391b87ed0a24266e990c393df988c54",
+      "name": "ReferenceQuadrature/OwnedBuild/Pyramid/11/real_time",
+      "metric": "real_time",
+      "url": "cases/b838e9cc020b8e0e047d9278dd6cb5aa4391b87ed0a24266e990c393df988c54.json"
+    },
+    {
+      "id": "ef0ae69945ee1a4b4ec1bef447b7dbe204292500af463ac0ea462ef5fba07d54",
+      "name": "ReferenceQuadrature/OwnedBuild/Pyramid/15/real_time",
+      "metric": "real_time",
+      "url": "cases/ef0ae69945ee1a4b4ec1bef447b7dbe204292500af463ac0ea462ef5fba07d54.json"
+    },
+    {
+      "id": "eb3bed155b51648e45f90ee8fe6400733e4c67b77801cf5751050bff4268c176",
+      "name": "ReferenceQuadrature/OwnedBuild/Pyramid/16/real_time",
+      "metric": "real_time",
+      "url": "cases/eb3bed155b51648e45f90ee8fe6400733e4c67b77801cf5751050bff4268c176.json"
+    },
+    {
+      "id": "189d5d95b4e4a0845fb6e46371b8ad96cead4c7e2a98c383b50e92fc7770796c",
+      "name": "ReferenceQuadrature/OwnedBuild/Pyramid/17/real_time",
+      "metric": "real_time",
+      "url": "cases/189d5d95b4e4a0845fb6e46371b8ad96cead4c7e2a98c383b50e92fc7770796c.json"
+    },
+    {
+      "id": "2c3f2b58d20f3a69399d08cc50217f3721875b192059aea08b8d472c50d68ab2",
+      "name": "ReferenceQuadrature/OwnedBuild/Pyramid/2/real_time",
+      "metric": "real_time",
+      "url": "cases/2c3f2b58d20f3a69399d08cc50217f3721875b192059aea08b8d472c50d68ab2.json"
+    },
+    {
+      "id": "32c6dd0ce1447176911c75c2c9fb9e64cab2ecfb33267556b1773c0679ec24d5",
+      "name": "ReferenceQuadrature/OwnedBuild/Pyramid/8/real_time",
+      "metric": "real_time",
+      "url": "cases/32c6dd0ce1447176911c75c2c9fb9e64cab2ecfb33267556b1773c0679ec24d5.json"
+    },
+    {
+      "id": "1f0cb98af6ffb20fdc06e8e4afe68e7245e9335e17ed920d8d32d4690b3a9172",
+      "name": "ReferenceQuadrature/OwnedBuild/Pyramid/9/real_time",
+      "metric": "real_time",
+      "url": "cases/1f0cb98af6ffb20fdc06e8e4afe68e7245e9335e17ed920d8d32d4690b3a9172.json"
+    },
+    {
+      "id": "303be1048a48ba3801ec5f54be773f874e77f25677541aebd9179c09b7bec6b0",
+      "name": "ReferenceQuadrature/OwnedBuild/Quadrilateral/15/real_time",
+      "metric": "real_time",
+      "url": "cases/303be1048a48ba3801ec5f54be773f874e77f25677541aebd9179c09b7bec6b0.json"
+    },
+    {
+      "id": "dc2343ceaf79ef4b193281e3b1f29db359c2be929e91bff68c500cf9763eb321",
+      "name": "ReferenceQuadrature/OwnedBuild/Quadrilateral/16/real_time",
+      "metric": "real_time",
+      "url": "cases/dc2343ceaf79ef4b193281e3b1f29db359c2be929e91bff68c500cf9763eb321.json"
+    },
+    {
+      "id": "29a7677c9884c7ac6900d333df567fd62368a2ff4863728051d28a18a9e208ae",
+      "name": "ReferenceQuadrature/OwnedBuild/Quadrilateral/17/real_time",
+      "metric": "real_time",
+      "url": "cases/29a7677c9884c7ac6900d333df567fd62368a2ff4863728051d28a18a9e208ae.json"
+    },
+    {
+      "id": "ac249485cf308e359872487b1ee2f0f0a4baa15e6a43ed3230838d766e175785",
+      "name": "ReferenceQuadrature/OwnedBuild/Quadrilateral/2/real_time",
+      "metric": "real_time",
+      "url": "cases/ac249485cf308e359872487b1ee2f0f0a4baa15e6a43ed3230838d766e175785.json"
+    },
+    {
+      "id": "3bc2f4b37f800d224a6c4f46a33eb41dd1740d00938e6cf80f29b6b25ceca680",
+      "name": "ReferenceQuadrature/OwnedBuild/Quadrilateral/8/real_time",
+      "metric": "real_time",
+      "url": "cases/3bc2f4b37f800d224a6c4f46a33eb41dd1740d00938e6cf80f29b6b25ceca680.json"
+    },
+    {
+      "id": "b5b1fd2cc06da09be6b57ddac3753fee4d0b356df5ae0b451872c750a3143d2c",
+      "name": "ReferenceQuadrature/OwnedBuild/Segment/15/real_time",
+      "metric": "real_time",
+      "url": "cases/b5b1fd2cc06da09be6b57ddac3753fee4d0b356df5ae0b451872c750a3143d2c.json"
+    },
+    {
+      "id": "e02cc0439faed63909747f64c2404b93f5b7dbf303ff8e7d9b641fc4a0451910",
+      "name": "ReferenceQuadrature/OwnedBuild/Segment/16/real_time",
+      "metric": "real_time",
+      "url": "cases/e02cc0439faed63909747f64c2404b93f5b7dbf303ff8e7d9b641fc4a0451910.json"
+    },
+    {
+      "id": "c4ceeda8dba5a1276b1910dae3055ba83b55692b97bd8d8dd68d7e4fd09a9085",
+      "name": "ReferenceQuadrature/OwnedBuild/Segment/17/real_time",
+      "metric": "real_time",
+      "url": "cases/c4ceeda8dba5a1276b1910dae3055ba83b55692b97bd8d8dd68d7e4fd09a9085.json"
+    },
+    {
+      "id": "51e751c9411add7588c4154c29c7b3be963018fff9147eec8b8bd47018168e16",
+      "name": "ReferenceQuadrature/OwnedBuild/Segment/2/real_time",
+      "metric": "real_time",
+      "url": "cases/51e751c9411add7588c4154c29c7b3be963018fff9147eec8b8bd47018168e16.json"
+    },
+    {
+      "id": "15f9a4c5b81bb3e22c9a1778d6abb2b2be893ae606337143e9baf479f51c437b",
+      "name": "ReferenceQuadrature/OwnedBuild/Segment/8/real_time",
+      "metric": "real_time",
+      "url": "cases/15f9a4c5b81bb3e22c9a1778d6abb2b2be893ae606337143e9baf479f51c437b.json"
+    },
+    {
+      "id": "a7a131b10161a81cab9c0578e11ab1f84a00920ba7620ace48a6c6722c50b36d",
+      "name": "ReferenceQuadrature/OwnedBuild/Tetrahedron/14/real_time",
+      "metric": "real_time",
+      "url": "cases/a7a131b10161a81cab9c0578e11ab1f84a00920ba7620ace48a6c6722c50b36d.json"
+    },
+    {
+      "id": "7821c08bf8d60f0f66903169c5e92cb4ef5bfb4dba92923c8d8dfd140b9515f0",
+      "name": "ReferenceQuadrature/OwnedBuild/Tetrahedron/15/real_time",
+      "metric": "real_time",
+      "url": "cases/7821c08bf8d60f0f66903169c5e92cb4ef5bfb4dba92923c8d8dfd140b9515f0.json"
+    },
+    {
+      "id": "7f45b151168ae689a0a16401f30ec07890e175e1c31d0955d0f63761185cc1d0",
+      "name": "ReferenceQuadrature/OwnedBuild/Tetrahedron/16/real_time",
+      "metric": "real_time",
+      "url": "cases/7f45b151168ae689a0a16401f30ec07890e175e1c31d0955d0f63761185cc1d0.json"
+    },
+    {
+      "id": "b535e95672e3946e669567d03e442690dff8ebe63817eec25e17b8983c9a7d8f",
+      "name": "ReferenceQuadrature/OwnedBuild/Tetrahedron/17/real_time",
+      "metric": "real_time",
+      "url": "cases/b535e95672e3946e669567d03e442690dff8ebe63817eec25e17b8983c9a7d8f.json"
+    },
+    {
+      "id": "a0608805452503db9d42722b656862954906393a29f5a9536329c6dc593d35ea",
+      "name": "ReferenceQuadrature/OwnedBuild/Tetrahedron/2/real_time",
+      "metric": "real_time",
+      "url": "cases/a0608805452503db9d42722b656862954906393a29f5a9536329c6dc593d35ea.json"
+    },
+    {
+      "id": "bd27f12bd7fc584837793f81c2424798771fbda6274bdf9ff6710eb5997d03e4",
+      "name": "ReferenceQuadrature/OwnedBuild/Tetrahedron/8/real_time",
+      "metric": "real_time",
+      "url": "cases/bd27f12bd7fc584837793f81c2424798771fbda6274bdf9ff6710eb5997d03e4.json"
+    },
+    {
+      "id": "5f5d3c5ff08ad2ddb44b78246d78094a2bbcc4a48c8a71d00ee2addbdd089412",
+      "name": "ReferenceQuadrature/OwnedBuild/Triangle/15/real_time",
+      "metric": "real_time",
+      "url": "cases/5f5d3c5ff08ad2ddb44b78246d78094a2bbcc4a48c8a71d00ee2addbdd089412.json"
+    },
+    {
+      "id": "050a9ed5abb88ea750670fd5e142d7151e40692593459e126e91f341c3bf9307",
+      "name": "ReferenceQuadrature/OwnedBuild/Triangle/16/real_time",
+      "metric": "real_time",
+      "url": "cases/050a9ed5abb88ea750670fd5e142d7151e40692593459e126e91f341c3bf9307.json"
+    },
+    {
+      "id": "9b1b4c9a9f682883c768741c31e1348246ecf3d5d78f3c7d9e9f6ec99548c60e",
+      "name": "ReferenceQuadrature/OwnedBuild/Triangle/17/real_time",
+      "metric": "real_time",
+      "url": "cases/9b1b4c9a9f682883c768741c31e1348246ecf3d5d78f3c7d9e9f6ec99548c60e.json"
+    },
+    {
+      "id": "c1b8da6937914932f786d4c9d60efb593437b67c36ad16b79514332ed85fb791",
+      "name": "ReferenceQuadrature/OwnedBuild/Triangle/2/real_time",
+      "metric": "real_time",
+      "url": "cases/c1b8da6937914932f786d4c9d60efb593437b67c36ad16b79514332ed85fb791.json"
+    },
+    {
+      "id": "fdd358cb266f615ba0cc8de938c96c2716e204b45e93ca8c3bdaa8a5c3a744de",
+      "name": "ReferenceQuadrature/OwnedBuild/Triangle/49/real_time",
+      "metric": "real_time",
+      "url": "cases/fdd358cb266f615ba0cc8de938c96c2716e204b45e93ca8c3bdaa8a5c3a744de.json"
+    },
+    {
+      "id": "25a3f768d69f53d2b1c3176e6479bf235dad5f33849744940d1c2272553ba607",
+      "name": "ReferenceQuadrature/OwnedBuild/Triangle/50/real_time",
+      "metric": "real_time",
+      "url": "cases/25a3f768d69f53d2b1c3176e6479bf235dad5f33849744940d1c2272553ba607.json"
+    },
+    {
+      "id": "3b3799bc50b2e08c9b66ba0b31a8121d1c121d908244bb5274655eb127245e5a",
+      "name": "ReferenceQuadrature/OwnedBuild/Triangle/51/real_time",
+      "metric": "real_time",
+      "url": "cases/3b3799bc50b2e08c9b66ba0b31a8121d1c121d908244bb5274655eb127245e5a.json"
+    },
+    {
+      "id": "e1145308dab6c36d9b1bae006ff390a468a0803b38011b12dd933553da4a34f4",
+      "name": "ReferenceQuadrature/OwnedBuild/Triangle/8/real_time",
+      "metric": "real_time",
+      "url": "cases/e1145308dab6c36d9b1bae006ff390a468a0803b38011b12dd933553da4a34f4.json"
+    },
+    {
+      "id": "5180b7f9a1bfab0428713d081dcab6b26c4cba7ef77fd44e924b689e2b8207ee",
+      "name": "ReferenceQuadrature/OwnedBuild/Wedge/15/real_time",
+      "metric": "real_time",
+      "url": "cases/5180b7f9a1bfab0428713d081dcab6b26c4cba7ef77fd44e924b689e2b8207ee.json"
+    },
+    {
+      "id": "6252aa81e49ef2af8f25512909d04cccf0810a6b02eec3f5adc3e88da95d3aea",
+      "name": "ReferenceQuadrature/OwnedBuild/Wedge/16/real_time",
+      "metric": "real_time",
+      "url": "cases/6252aa81e49ef2af8f25512909d04cccf0810a6b02eec3f5adc3e88da95d3aea.json"
+    },
+    {
+      "id": "2fd048e2b2754f1b8d4ed2cbb8c558dd1988692e337d36dd0dc3e727d87d90a5",
+      "name": "ReferenceQuadrature/OwnedBuild/Wedge/17/real_time",
+      "metric": "real_time",
+      "url": "cases/2fd048e2b2754f1b8d4ed2cbb8c558dd1988692e337d36dd0dc3e727d87d90a5.json"
+    },
+    {
+      "id": "4764d6b01b0003c568b79fcf52339a24f2238af6eb57c61625b9362bfb1c88ac",
+      "name": "ReferenceQuadrature/OwnedBuild/Wedge/2/real_time",
+      "metric": "real_time",
+      "url": "cases/4764d6b01b0003c568b79fcf52339a24f2238af6eb57c61625b9362bfb1c88ac.json"
+    },
+    {
+      "id": "40e1f866554c49198cd3e8b1850d4c5727b952169a9ebc01f6c845a90b3f3feb",
+      "name": "ReferenceQuadrature/OwnedBuild/Wedge/49/real_time",
+      "metric": "real_time",
+      "url": "cases/40e1f866554c49198cd3e8b1850d4c5727b952169a9ebc01f6c845a90b3f3feb.json"
+    },
+    {
+      "id": "082937492f6725c9f8ead18a0f12c89f1bc5209fa37be4559ad14f47cfd4786b",
+      "name": "ReferenceQuadrature/OwnedBuild/Wedge/50/real_time",
+      "metric": "real_time",
+      "url": "cases/082937492f6725c9f8ead18a0f12c89f1bc5209fa37be4559ad14f47cfd4786b.json"
+    },
+    {
+      "id": "edc767adbc146af75d7f8ca3a9d5b2dfa24eb4f3b074ad175ce84632de22f3fd",
+      "name": "ReferenceQuadrature/OwnedBuild/Wedge/51/real_time",
+      "metric": "real_time",
+      "url": "cases/edc767adbc146af75d7f8ca3a9d5b2dfa24eb4f3b074ad175ce84632de22f3fd.json"
+    },
+    {
+      "id": "f796434e6510ce573e83cbf091fe3c7876fc1f1dce35365926506637834e5494",
+      "name": "ReferenceQuadrature/OwnedBuild/Wedge/8/real_time",
+      "metric": "real_time",
+      "url": "cases/f796434e6510ce573e83cbf091fe3c7876fc1f1dce35365926506637834e5494.json"
+    },
+    {
+      "id": "6a8325c919b7f3d5f36c0309a5f649a9f851feaab0fbedfd1e0328cb53b988e6",
+      "name": "ReferenceQuadrature/OwnedCopy/Hexahedron/15/real_time",
+      "metric": "real_time",
+      "url": "cases/6a8325c919b7f3d5f36c0309a5f649a9f851feaab0fbedfd1e0328cb53b988e6.json"
+    },
+    {
+      "id": "1a36a6a152fe55c5c0cbb2ec93c2609ce83ada8a53405a3965be72498f976952",
+      "name": "ReferenceQuadrature/OwnedCopy/Hexahedron/16/real_time",
+      "metric": "real_time",
+      "url": "cases/1a36a6a152fe55c5c0cbb2ec93c2609ce83ada8a53405a3965be72498f976952.json"
+    },
+    {
+      "id": "5d19b3dd3e63d74ad4620ef8274a64f1b506c62b437b3ff51d1da6fb14e387bc",
+      "name": "ReferenceQuadrature/OwnedCopy/Hexahedron/17/real_time",
+      "metric": "real_time",
+      "url": "cases/5d19b3dd3e63d74ad4620ef8274a64f1b506c62b437b3ff51d1da6fb14e387bc.json"
+    },
+    {
+      "id": "fcc6a67b239e361ba4566d4addb6c4e16d6e4208f9369c941c451ff2748d5691",
+      "name": "ReferenceQuadrature/OwnedCopy/Hexahedron/2/real_time",
+      "metric": "real_time",
+      "url": "cases/fcc6a67b239e361ba4566d4addb6c4e16d6e4208f9369c941c451ff2748d5691.json"
+    },
+    {
+      "id": "207b3020b8d38982b595b84bbb1c1e9a8af8fdfe18f1310610e90bdcd48a269b",
+      "name": "ReferenceQuadrature/OwnedCopy/Hexahedron/8/real_time",
+      "metric": "real_time",
+      "url": "cases/207b3020b8d38982b595b84bbb1c1e9a8af8fdfe18f1310610e90bdcd48a269b.json"
+    },
+    {
+      "id": "c02c747be6883c28502945253d118aedd80583ebbd0508ae3936f87d84998f13",
+      "name": "ReferenceQuadrature/OwnedCopy/Point/15/real_time",
+      "metric": "real_time",
+      "url": "cases/c02c747be6883c28502945253d118aedd80583ebbd0508ae3936f87d84998f13.json"
+    },
+    {
+      "id": "e80400e27832b9b72590ee93372c789745a3d6dd13eccef32e6986bd0082856b",
+      "name": "ReferenceQuadrature/OwnedCopy/Point/16/real_time",
+      "metric": "real_time",
+      "url": "cases/e80400e27832b9b72590ee93372c789745a3d6dd13eccef32e6986bd0082856b.json"
+    },
+    {
+      "id": "3eb672f8f5e12adc80e88c7887de6d18000c89eb81db2fae2c32d3049070fd38",
+      "name": "ReferenceQuadrature/OwnedCopy/Point/17/real_time",
+      "metric": "real_time",
+      "url": "cases/3eb672f8f5e12adc80e88c7887de6d18000c89eb81db2fae2c32d3049070fd38.json"
+    },
+    {
+      "id": "17ba3a5b5f4709dbddde00e7cdc4a00a75f277f50276e08429bfa83674c73ec4",
+      "name": "ReferenceQuadrature/OwnedCopy/Point/2/real_time",
+      "metric": "real_time",
+      "url": "cases/17ba3a5b5f4709dbddde00e7cdc4a00a75f277f50276e08429bfa83674c73ec4.json"
+    },
+    {
+      "id": "b7bbc2749b416a000921ab605b725d4442a85bb8c10a79485d8c06ae8f3abc0f",
+      "name": "ReferenceQuadrature/OwnedCopy/Point/8/real_time",
+      "metric": "real_time",
+      "url": "cases/b7bbc2749b416a000921ab605b725d4442a85bb8c10a79485d8c06ae8f3abc0f.json"
+    },
+    {
+      "id": "18838092286d215c95ea483a77de0256d7256ad69d8df1d0111b71fc89279f9f",
+      "name": "ReferenceQuadrature/OwnedCopy/Pyramid/10/real_time",
+      "metric": "real_time",
+      "url": "cases/18838092286d215c95ea483a77de0256d7256ad69d8df1d0111b71fc89279f9f.json"
+    },
+    {
+      "id": "484408270a3103e95c0797601bdba1c7d8b8a5e1f333aaf6a8b9b5e54664a627",
+      "name": "ReferenceQuadrature/OwnedCopy/Pyramid/11/real_time",
+      "metric": "real_time",
+      "url": "cases/484408270a3103e95c0797601bdba1c7d8b8a5e1f333aaf6a8b9b5e54664a627.json"
+    },
+    {
+      "id": "d12a3e597f57fd16ca9aba548917688b098dbc63ebf576f9a03a3ae9f06b2eea",
+      "name": "ReferenceQuadrature/OwnedCopy/Pyramid/15/real_time",
+      "metric": "real_time",
+      "url": "cases/d12a3e597f57fd16ca9aba548917688b098dbc63ebf576f9a03a3ae9f06b2eea.json"
+    },
+    {
+      "id": "105c4727cdeb2019312d689d8d2a719eba07491b325e073bd03e408456718775",
+      "name": "ReferenceQuadrature/OwnedCopy/Pyramid/16/real_time",
+      "metric": "real_time",
+      "url": "cases/105c4727cdeb2019312d689d8d2a719eba07491b325e073bd03e408456718775.json"
+    },
+    {
+      "id": "6ffeda6c9c1f464053caa6174c4c3cb8a19f8b287546e8a065f4fe38d0022350",
+      "name": "ReferenceQuadrature/OwnedCopy/Pyramid/17/real_time",
+      "metric": "real_time",
+      "url": "cases/6ffeda6c9c1f464053caa6174c4c3cb8a19f8b287546e8a065f4fe38d0022350.json"
+    },
+    {
+      "id": "7ff4f0ba1c77f109345b0d67a98a6e57ed07eb2e8045547e1d1cffba016f659c",
+      "name": "ReferenceQuadrature/OwnedCopy/Pyramid/2/real_time",
+      "metric": "real_time",
+      "url": "cases/7ff4f0ba1c77f109345b0d67a98a6e57ed07eb2e8045547e1d1cffba016f659c.json"
+    },
+    {
+      "id": "9d0dc623414344d2c12e565e5277f33b0396e3b957920fc82a60304fb39e319e",
+      "name": "ReferenceQuadrature/OwnedCopy/Pyramid/8/real_time",
+      "metric": "real_time",
+      "url": "cases/9d0dc623414344d2c12e565e5277f33b0396e3b957920fc82a60304fb39e319e.json"
+    },
+    {
+      "id": "fb56af6102c123184fd0e597cca00480585102fb3495646ff5ba9c27ffa06202",
+      "name": "ReferenceQuadrature/OwnedCopy/Pyramid/9/real_time",
+      "metric": "real_time",
+      "url": "cases/fb56af6102c123184fd0e597cca00480585102fb3495646ff5ba9c27ffa06202.json"
+    },
+    {
+      "id": "3444dffad8bd81057618ed820e6257dc73673271c1c669174cb617d1efd53b25",
+      "name": "ReferenceQuadrature/OwnedCopy/Quadrilateral/15/real_time",
+      "metric": "real_time",
+      "url": "cases/3444dffad8bd81057618ed820e6257dc73673271c1c669174cb617d1efd53b25.json"
+    },
+    {
+      "id": "2f5e2decd93d847f41c805aabaf52d4a382efed5f0a2c2b85c8db2d536994b40",
+      "name": "ReferenceQuadrature/OwnedCopy/Quadrilateral/16/real_time",
+      "metric": "real_time",
+      "url": "cases/2f5e2decd93d847f41c805aabaf52d4a382efed5f0a2c2b85c8db2d536994b40.json"
+    },
+    {
+      "id": "a359fdb61cd97d35228238a51e6be46ed4fe204074c2110dff6b1d0474a899dc",
+      "name": "ReferenceQuadrature/OwnedCopy/Quadrilateral/17/real_time",
+      "metric": "real_time",
+      "url": "cases/a359fdb61cd97d35228238a51e6be46ed4fe204074c2110dff6b1d0474a899dc.json"
+    },
+    {
+      "id": "eed4016cb17ff6f94a851f0b0c13a9af78a14e599462117f9ed358018ff5e130",
+      "name": "ReferenceQuadrature/OwnedCopy/Quadrilateral/2/real_time",
+      "metric": "real_time",
+      "url": "cases/eed4016cb17ff6f94a851f0b0c13a9af78a14e599462117f9ed358018ff5e130.json"
+    },
+    {
+      "id": "bfd959852495e6b5519519aaae9d3e088795b1d03cbae7f3d5af6ba637f9c4c3",
+      "name": "ReferenceQuadrature/OwnedCopy/Quadrilateral/8/real_time",
+      "metric": "real_time",
+      "url": "cases/bfd959852495e6b5519519aaae9d3e088795b1d03cbae7f3d5af6ba637f9c4c3.json"
+    },
+    {
+      "id": "da8cad40139312051f5d7a833c7fac6abb6687c44a3d3631fd15820500e1e370",
+      "name": "ReferenceQuadrature/OwnedCopy/Segment/15/real_time",
+      "metric": "real_time",
+      "url": "cases/da8cad40139312051f5d7a833c7fac6abb6687c44a3d3631fd15820500e1e370.json"
+    },
+    {
+      "id": "78c8a9c130cead563014b615a49dd94c6f1d2cdd06d50e2632e3e67f75680fed",
+      "name": "ReferenceQuadrature/OwnedCopy/Segment/16/real_time",
+      "metric": "real_time",
+      "url": "cases/78c8a9c130cead563014b615a49dd94c6f1d2cdd06d50e2632e3e67f75680fed.json"
+    },
+    {
+      "id": "60bfc3f06ed5b96cd3409412a74bb24c2a0eb900235316525d12cfd06b67863e",
+      "name": "ReferenceQuadrature/OwnedCopy/Segment/17/real_time",
+      "metric": "real_time",
+      "url": "cases/60bfc3f06ed5b96cd3409412a74bb24c2a0eb900235316525d12cfd06b67863e.json"
+    },
+    {
+      "id": "eead24a897a6acda6d7b9bb3fd8dba71a1d4916386df294d5347169852be9ba3",
+      "name": "ReferenceQuadrature/OwnedCopy/Segment/2/real_time",
+      "metric": "real_time",
+      "url": "cases/eead24a897a6acda6d7b9bb3fd8dba71a1d4916386df294d5347169852be9ba3.json"
+    },
+    {
+      "id": "51a80a0976a2850bb1fe02afff73f3b29b70d39a493a5f479272abd3766639cf",
+      "name": "ReferenceQuadrature/OwnedCopy/Segment/8/real_time",
+      "metric": "real_time",
+      "url": "cases/51a80a0976a2850bb1fe02afff73f3b29b70d39a493a5f479272abd3766639cf.json"
+    },
+    {
+      "id": "48056c07710a7a429e534e114d8edf2e0e02d748cda227bd8a2a33803cdf6b7a",
+      "name": "ReferenceQuadrature/OwnedCopy/Tetrahedron/14/real_time",
+      "metric": "real_time",
+      "url": "cases/48056c07710a7a429e534e114d8edf2e0e02d748cda227bd8a2a33803cdf6b7a.json"
+    },
+    {
+      "id": "ad19db662335ec999711de7227de7d243a6fa6f186595f83b869ba6612d3063f",
+      "name": "ReferenceQuadrature/OwnedCopy/Tetrahedron/15/real_time",
+      "metric": "real_time",
+      "url": "cases/ad19db662335ec999711de7227de7d243a6fa6f186595f83b869ba6612d3063f.json"
+    },
+    {
+      "id": "e255373f6d4d46f4681dd63d936279077454cb56b72a637340817d6b4e29afdd",
+      "name": "ReferenceQuadrature/OwnedCopy/Tetrahedron/16/real_time",
+      "metric": "real_time",
+      "url": "cases/e255373f6d4d46f4681dd63d936279077454cb56b72a637340817d6b4e29afdd.json"
+    },
+    {
+      "id": "5006731a0eaff2cf17672d16912dfb584242592ba86e248086f932e86c5b1ff6",
+      "name": "ReferenceQuadrature/OwnedCopy/Tetrahedron/17/real_time",
+      "metric": "real_time",
+      "url": "cases/5006731a0eaff2cf17672d16912dfb584242592ba86e248086f932e86c5b1ff6.json"
+    },
+    {
+      "id": "9f968bde3caa536ef7b8c61cd0687afc0e6eeb555d6d2b04f292079e757f7a6b",
+      "name": "ReferenceQuadrature/OwnedCopy/Tetrahedron/2/real_time",
+      "metric": "real_time",
+      "url": "cases/9f968bde3caa536ef7b8c61cd0687afc0e6eeb555d6d2b04f292079e757f7a6b.json"
+    },
+    {
+      "id": "8fd967c4d02618365a00d800ac77c087797daba4ba159fb2897be87bb0984ea7",
+      "name": "ReferenceQuadrature/OwnedCopy/Tetrahedron/8/real_time",
+      "metric": "real_time",
+      "url": "cases/8fd967c4d02618365a00d800ac77c087797daba4ba159fb2897be87bb0984ea7.json"
+    },
+    {
+      "id": "d8e3514859a53f586122cd6ecbb0ac9b1ea6f4d3aa7827e708a82603f8a52111",
+      "name": "ReferenceQuadrature/OwnedCopy/Triangle/15/real_time",
+      "metric": "real_time",
+      "url": "cases/d8e3514859a53f586122cd6ecbb0ac9b1ea6f4d3aa7827e708a82603f8a52111.json"
+    },
+    {
+      "id": "181bf981e64e07a91818b3d7115582f05e5833f6fa56d593b8bf8a637a825bc6",
+      "name": "ReferenceQuadrature/OwnedCopy/Triangle/16/real_time",
+      "metric": "real_time",
+      "url": "cases/181bf981e64e07a91818b3d7115582f05e5833f6fa56d593b8bf8a637a825bc6.json"
+    },
+    {
+      "id": "c5fba86f020714b7563deb517333e7baf51eb6b4a6812672da0b43b0375b2c63",
+      "name": "ReferenceQuadrature/OwnedCopy/Triangle/17/real_time",
+      "metric": "real_time",
+      "url": "cases/c5fba86f020714b7563deb517333e7baf51eb6b4a6812672da0b43b0375b2c63.json"
+    },
+    {
+      "id": "fdcd57c45dd915dcd06e2e0838c43aa123014814e95fc135c1d6a7ccf6a4a446",
+      "name": "ReferenceQuadrature/OwnedCopy/Triangle/2/real_time",
+      "metric": "real_time",
+      "url": "cases/fdcd57c45dd915dcd06e2e0838c43aa123014814e95fc135c1d6a7ccf6a4a446.json"
+    },
+    {
+      "id": "9d78007714c5ad9009b11ecf6db9909c44ff3d9e8fcf5328fcebeda600e65562",
+      "name": "ReferenceQuadrature/OwnedCopy/Triangle/49/real_time",
+      "metric": "real_time",
+      "url": "cases/9d78007714c5ad9009b11ecf6db9909c44ff3d9e8fcf5328fcebeda600e65562.json"
+    },
+    {
+      "id": "328ab832ff02e94845838491b968fce2d187ae15114f2dbe7c85bedbdf2d42a4",
+      "name": "ReferenceQuadrature/OwnedCopy/Triangle/50/real_time",
+      "metric": "real_time",
+      "url": "cases/328ab832ff02e94845838491b968fce2d187ae15114f2dbe7c85bedbdf2d42a4.json"
+    },
+    {
+      "id": "0d074d22a13ae332f13d0c587d504b8dbdb5d66840bfb23ee42c0c2758bdabf2",
+      "name": "ReferenceQuadrature/OwnedCopy/Triangle/51/real_time",
+      "metric": "real_time",
+      "url": "cases/0d074d22a13ae332f13d0c587d504b8dbdb5d66840bfb23ee42c0c2758bdabf2.json"
+    },
+    {
+      "id": "b50d3186a6e3e911cdfca516c27929a83c9768c42948f391f6bd3d839cc1c496",
+      "name": "ReferenceQuadrature/OwnedCopy/Triangle/8/real_time",
+      "metric": "real_time",
+      "url": "cases/b50d3186a6e3e911cdfca516c27929a83c9768c42948f391f6bd3d839cc1c496.json"
+    },
+    {
+      "id": "51d46b2e40167ccf5c45a59f59d131295d5cbd87fb9d201b69829bd565e7529a",
+      "name": "ReferenceQuadrature/OwnedCopy/Wedge/15/real_time",
+      "metric": "real_time",
+      "url": "cases/51d46b2e40167ccf5c45a59f59d131295d5cbd87fb9d201b69829bd565e7529a.json"
+    },
+    {
+      "id": "f020b9c366e00394cf9cb5cfcf718c6f1f5ea1f01c91fa51ac4ac9e3dc5da3b0",
+      "name": "ReferenceQuadrature/OwnedCopy/Wedge/16/real_time",
+      "metric": "real_time",
+      "url": "cases/f020b9c366e00394cf9cb5cfcf718c6f1f5ea1f01c91fa51ac4ac9e3dc5da3b0.json"
+    },
+    {
+      "id": "600edf07b1d9ed7f4ac4e8a12292676fd0a86f2cdd269927ce75adc701c8bd33",
+      "name": "ReferenceQuadrature/OwnedCopy/Wedge/17/real_time",
+      "metric": "real_time",
+      "url": "cases/600edf07b1d9ed7f4ac4e8a12292676fd0a86f2cdd269927ce75adc701c8bd33.json"
+    },
+    {
+      "id": "23d7bb66b8fd17a70d0c482811cc253ace068d94997fd8c91151150f077ad2db",
+      "name": "ReferenceQuadrature/OwnedCopy/Wedge/2/real_time",
+      "metric": "real_time",
+      "url": "cases/23d7bb66b8fd17a70d0c482811cc253ace068d94997fd8c91151150f077ad2db.json"
+    },
+    {
+      "id": "7e4aef0218a37bc84954c677a2de69d1a5ece738506301e0a3d492d3d0048960",
+      "name": "ReferenceQuadrature/OwnedCopy/Wedge/49/real_time",
+      "metric": "real_time",
+      "url": "cases/7e4aef0218a37bc84954c677a2de69d1a5ece738506301e0a3d492d3d0048960.json"
+    },
+    {
+      "id": "70569fafd14e01603b8caba907dc2e48edd2ae1ddd5526a18d749ac9afaf54f8",
+      "name": "ReferenceQuadrature/OwnedCopy/Wedge/50/real_time",
+      "metric": "real_time",
+      "url": "cases/70569fafd14e01603b8caba907dc2e48edd2ae1ddd5526a18d749ac9afaf54f8.json"
+    },
+    {
+      "id": "e74f426d4481881c323bafb49d306c63ed539a44335d2d792f5a80caf77b9a4e",
+      "name": "ReferenceQuadrature/OwnedCopy/Wedge/51/real_time",
+      "metric": "real_time",
+      "url": "cases/e74f426d4481881c323bafb49d306c63ed539a44335d2d792f5a80caf77b9a4e.json"
+    },
+    {
+      "id": "4921308da6a1d0e13c63c0af2eb0e21d8b3ff2bf63a6dfe9f35febc1be44d8e1",
+      "name": "ReferenceQuadrature/OwnedCopy/Wedge/8/real_time",
+      "metric": "real_time",
+      "url": "cases/4921308da6a1d0e13c63c0af2eb0e21d8b3ff2bf63a6dfe9f35febc1be44d8e1.json"
+    },
+    {
+      "id": "23abad21f1a2b1089a15feb9a05ec5f8d221478749173509ac9240e8a1ff3799",
+      "name": "ReferenceQuadrature/OwnedMoveDiscardedSource/Hexahedron/15/real_time",
+      "metric": "real_time",
+      "url": "cases/23abad21f1a2b1089a15feb9a05ec5f8d221478749173509ac9240e8a1ff3799.json"
+    },
+    {
+      "id": "45ac86595d4a682cc733d42382945ea8fe6637f32e300b3835e2a53ebaf1b27a",
+      "name": "ReferenceQuadrature/OwnedMoveDiscardedSource/Hexahedron/16/real_time",
+      "metric": "real_time",
+      "url": "cases/45ac86595d4a682cc733d42382945ea8fe6637f32e300b3835e2a53ebaf1b27a.json"
+    },
+    {
+      "id": "1ba0c7d00a88f0a5fedb3110efc48ea3f8bdaa7f55768c4fad2a6b8ce4605228",
+      "name": "ReferenceQuadrature/OwnedMoveDiscardedSource/Hexahedron/17/real_time",
+      "metric": "real_time",
+      "url": "cases/1ba0c7d00a88f0a5fedb3110efc48ea3f8bdaa7f55768c4fad2a6b8ce4605228.json"
+    },
+    {
+      "id": "febad4d54acc826f049ff352b2afe7ebc79648f76ba62868d1e204aad753e4f5",
+      "name": "ReferenceQuadrature/OwnedMoveDiscardedSource/Hexahedron/2/real_time",
+      "metric": "real_time",
+      "url": "cases/febad4d54acc826f049ff352b2afe7ebc79648f76ba62868d1e204aad753e4f5.json"
+    },
+    {
+      "id": "4e0a94235270b1e1cf581c6db577fbe28d5499eff2c66ba244b0dd4a52a31aa8",
+      "name": "ReferenceQuadrature/OwnedMoveDiscardedSource/Hexahedron/8/real_time",
+      "metric": "real_time",
+      "url": "cases/4e0a94235270b1e1cf581c6db577fbe28d5499eff2c66ba244b0dd4a52a31aa8.json"
+    },
+    {
+      "id": "61a9f99878e6e58762b069033b23aaf30274e0c7e9f7e14c136cb55c9360f650",
+      "name": "ReferenceQuadrature/OwnedMoveDiscardedSource/Point/15/real_time",
+      "metric": "real_time",
+      "url": "cases/61a9f99878e6e58762b069033b23aaf30274e0c7e9f7e14c136cb55c9360f650.json"
+    },
+    {
+      "id": "580c19bc54e2a7e78e10e3c8cce6dd2261bba265646703b93dd873a1f733f76d",
+      "name": "ReferenceQuadrature/OwnedMoveDiscardedSource/Point/16/real_time",
+      "metric": "real_time",
+      "url": "cases/580c19bc54e2a7e78e10e3c8cce6dd2261bba265646703b93dd873a1f733f76d.json"
+    },
+    {
+      "id": "b1281281590db75e9e7f510454c41d0a5e27b3f7122a4613d0ff150a6a9f8fda",
+      "name": "ReferenceQuadrature/OwnedMoveDiscardedSource/Point/17/real_time",
+      "metric": "real_time",
+      "url": "cases/b1281281590db75e9e7f510454c41d0a5e27b3f7122a4613d0ff150a6a9f8fda.json"
+    },
+    {
+      "id": "60f001e50af5cb857994133685a98f291dce2596177d6ac07c509963b794ab0c",
+      "name": "ReferenceQuadrature/OwnedMoveDiscardedSource/Point/2/real_time",
+      "metric": "real_time",
+      "url": "cases/60f001e50af5cb857994133685a98f291dce2596177d6ac07c509963b794ab0c.json"
+    },
+    {
+      "id": "21f46117fbf9d4b55d64311fd6f1dd15be1394c39877afb679e51f0f1f98ccff",
+      "name": "ReferenceQuadrature/OwnedMoveDiscardedSource/Point/8/real_time",
+      "metric": "real_time",
+      "url": "cases/21f46117fbf9d4b55d64311fd6f1dd15be1394c39877afb679e51f0f1f98ccff.json"
+    },
+    {
+      "id": "134a3efb19777952515d0dd797be66d621cdf4f3a5701b0ea318074bccc5ba3b",
+      "name": "ReferenceQuadrature/OwnedMoveDiscardedSource/Pyramid/10/real_time",
+      "metric": "real_time",
+      "url": "cases/134a3efb19777952515d0dd797be66d621cdf4f3a5701b0ea318074bccc5ba3b.json"
+    },
+    {
+      "id": "dacdcf50d6f80822b7c5bbe183bd79f4cdc0e0777c3c1aad20a0d94befc25d73",
+      "name": "ReferenceQuadrature/OwnedMoveDiscardedSource/Pyramid/11/real_time",
+      "metric": "real_time",
+      "url": "cases/dacdcf50d6f80822b7c5bbe183bd79f4cdc0e0777c3c1aad20a0d94befc25d73.json"
+    },
+    {
+      "id": "74dcd9d406646c059b1b08d2bc8c33832fa520c4b60b2911bbbafd5c118a8a01",
+      "name": "ReferenceQuadrature/OwnedMoveDiscardedSource/Pyramid/15/real_time",
+      "metric": "real_time",
+      "url": "cases/74dcd9d406646c059b1b08d2bc8c33832fa520c4b60b2911bbbafd5c118a8a01.json"
+    },
+    {
+      "id": "22255fc44888d1ef2b38092e9bae5b1b124c82f137e540ffc127640ccb9e67f8",
+      "name": "ReferenceQuadrature/OwnedMoveDiscardedSource/Pyramid/16/real_time",
+      "metric": "real_time",
+      "url": "cases/22255fc44888d1ef2b38092e9bae5b1b124c82f137e540ffc127640ccb9e67f8.json"
+    },
+    {
+      "id": "5be97c72ba685450e1816e0436ced5b002e090fb7bf5494d2fa11885aa588f3e",
+      "name": "ReferenceQuadrature/OwnedMoveDiscardedSource/Pyramid/17/real_time",
+      "metric": "real_time",
+      "url": "cases/5be97c72ba685450e1816e0436ced5b002e090fb7bf5494d2fa11885aa588f3e.json"
+    },
+    {
+      "id": "2db575e7b450eac8af0e9a73f60180a74e8e00c317656794edca6212b491dbdd",
+      "name": "ReferenceQuadrature/OwnedMoveDiscardedSource/Pyramid/2/real_time",
+      "metric": "real_time",
+      "url": "cases/2db575e7b450eac8af0e9a73f60180a74e8e00c317656794edca6212b491dbdd.json"
+    },
+    {
+      "id": "0f91c29618b4289c56071ceef9c03617687c9e9c382ecb48e6bd558d14132e5f",
+      "name": "ReferenceQuadrature/OwnedMoveDiscardedSource/Pyramid/8/real_time",
+      "metric": "real_time",
+      "url": "cases/0f91c29618b4289c56071ceef9c03617687c9e9c382ecb48e6bd558d14132e5f.json"
+    },
+    {
+      "id": "4246f67955d33e7e2ce58ba7cd1968ab16b38e6d03fd94f8d66939d5af395da1",
+      "name": "ReferenceQuadrature/OwnedMoveDiscardedSource/Pyramid/9/real_time",
+      "metric": "real_time",
+      "url": "cases/4246f67955d33e7e2ce58ba7cd1968ab16b38e6d03fd94f8d66939d5af395da1.json"
+    },
+    {
+      "id": "0f937b92a3ea79802cd3ef9c612d64d128374fd872918c1d9dff315bc9f6690a",
+      "name": "ReferenceQuadrature/OwnedMoveDiscardedSource/Quadrilateral/15/real_time",
+      "metric": "real_time",
+      "url": "cases/0f937b92a3ea79802cd3ef9c612d64d128374fd872918c1d9dff315bc9f6690a.json"
+    },
+    {
+      "id": "a5593a4a8c8cc87d627ea5f1f826cf49c82633e60575c87808eb9c4b4117147b",
+      "name": "ReferenceQuadrature/OwnedMoveDiscardedSource/Quadrilateral/16/real_time",
+      "metric": "real_time",
+      "url": "cases/a5593a4a8c8cc87d627ea5f1f826cf49c82633e60575c87808eb9c4b4117147b.json"
+    },
+    {
+      "id": "f2d088ef52aff7ce4e6197311749ef5c815efd90b6e02fc316008d60816ddbb6",
+      "name": "ReferenceQuadrature/OwnedMoveDiscardedSource/Quadrilateral/17/real_time",
+      "metric": "real_time",
+      "url": "cases/f2d088ef52aff7ce4e6197311749ef5c815efd90b6e02fc316008d60816ddbb6.json"
+    },
+    {
+      "id": "4343f59bac5db3fae68dc5a50e3216e23c3876336b8a7cdd5652d587f25935b7",
+      "name": "ReferenceQuadrature/OwnedMoveDiscardedSource/Quadrilateral/2/real_time",
+      "metric": "real_time",
+      "url": "cases/4343f59bac5db3fae68dc5a50e3216e23c3876336b8a7cdd5652d587f25935b7.json"
+    },
+    {
+      "id": "7bb7a8cbfefa4104280d82f31f5af97c30320b8a1c8de510671d031f82ef0c34",
+      "name": "ReferenceQuadrature/OwnedMoveDiscardedSource/Quadrilateral/8/real_time",
+      "metric": "real_time",
+      "url": "cases/7bb7a8cbfefa4104280d82f31f5af97c30320b8a1c8de510671d031f82ef0c34.json"
+    },
+    {
+      "id": "7d0443cc116d5951550a0ea7a354c5bb9f0e210c2c47e9d244d816fb382e37ab",
+      "name": "ReferenceQuadrature/OwnedMoveDiscardedSource/Segment/15/real_time",
+      "metric": "real_time",
+      "url": "cases/7d0443cc116d5951550a0ea7a354c5bb9f0e210c2c47e9d244d816fb382e37ab.json"
+    },
+    {
+      "id": "49294f37cdc78d95c90c7060477f9054d7d51ebe4256d0992dd6bed27ac59814",
+      "name": "ReferenceQuadrature/OwnedMoveDiscardedSource/Segment/16/real_time",
+      "metric": "real_time",
+      "url": "cases/49294f37cdc78d95c90c7060477f9054d7d51ebe4256d0992dd6bed27ac59814.json"
+    },
+    {
+      "id": "458acce9562cd9a5d20af0f64e5f729986c4bdc57591798c7cb56c9d9789b18f",
+      "name": "ReferenceQuadrature/OwnedMoveDiscardedSource/Segment/17/real_time",
+      "metric": "real_time",
+      "url": "cases/458acce9562cd9a5d20af0f64e5f729986c4bdc57591798c7cb56c9d9789b18f.json"
+    },
+    {
+      "id": "9c504d9f9736b908ac8066fecfb65973565e587b84a045bb40f1e7e0491fb65f",
+      "name": "ReferenceQuadrature/OwnedMoveDiscardedSource/Segment/2/real_time",
+      "metric": "real_time",
+      "url": "cases/9c504d9f9736b908ac8066fecfb65973565e587b84a045bb40f1e7e0491fb65f.json"
+    },
+    {
+      "id": "a9f07e02dacb02bba82fee34acab10ff35dc05fcb73610c739e2fe2d73a027f5",
+      "name": "ReferenceQuadrature/OwnedMoveDiscardedSource/Segment/8/real_time",
+      "metric": "real_time",
+      "url": "cases/a9f07e02dacb02bba82fee34acab10ff35dc05fcb73610c739e2fe2d73a027f5.json"
+    },
+    {
+      "id": "465b28c6f3134eb555b6ebf14cfc2afb2df853c629d936013be09ffb15fce8c5",
+      "name": "ReferenceQuadrature/OwnedMoveDiscardedSource/Tetrahedron/14/real_time",
+      "metric": "real_time",
+      "url": "cases/465b28c6f3134eb555b6ebf14cfc2afb2df853c629d936013be09ffb15fce8c5.json"
+    },
+    {
+      "id": "4b5a405a8567cef82b170345903d96148cce1a0059ab712d3e4e339cf221e270",
+      "name": "ReferenceQuadrature/OwnedMoveDiscardedSource/Tetrahedron/15/real_time",
+      "metric": "real_time",
+      "url": "cases/4b5a405a8567cef82b170345903d96148cce1a0059ab712d3e4e339cf221e270.json"
+    },
+    {
+      "id": "f316c7882ddfdd27e3228660031421c6a14a72566a9bf5fd5027a16f52031c08",
+      "name": "ReferenceQuadrature/OwnedMoveDiscardedSource/Tetrahedron/16/real_time",
+      "metric": "real_time",
+      "url": "cases/f316c7882ddfdd27e3228660031421c6a14a72566a9bf5fd5027a16f52031c08.json"
+    },
+    {
+      "id": "0b9baff31b5f20470a298838723dcbc0e990eae8081f895efbc07ee97d24123f",
+      "name": "ReferenceQuadrature/OwnedMoveDiscardedSource/Tetrahedron/17/real_time",
+      "metric": "real_time",
+      "url": "cases/0b9baff31b5f20470a298838723dcbc0e990eae8081f895efbc07ee97d24123f.json"
+    },
+    {
+      "id": "fed5edddfa2d578eb22c4788ffdc5cabf0a939c6abf168d1e4dc7f91c2ff6f71",
+      "name": "ReferenceQuadrature/OwnedMoveDiscardedSource/Tetrahedron/2/real_time",
+      "metric": "real_time",
+      "url": "cases/fed5edddfa2d578eb22c4788ffdc5cabf0a939c6abf168d1e4dc7f91c2ff6f71.json"
+    },
+    {
+      "id": "3309cf50425202ed135b23ce52a89134a98f632516ed304d441adb8f470083cb",
+      "name": "ReferenceQuadrature/OwnedMoveDiscardedSource/Tetrahedron/8/real_time",
+      "metric": "real_time",
+      "url": "cases/3309cf50425202ed135b23ce52a89134a98f632516ed304d441adb8f470083cb.json"
+    },
+    {
+      "id": "ec5eea71bd96e03f495aea8f8f48cedff92bd78d878b730cc2917aeca390c803",
+      "name": "ReferenceQuadrature/OwnedMoveDiscardedSource/Triangle/15/real_time",
+      "metric": "real_time",
+      "url": "cases/ec5eea71bd96e03f495aea8f8f48cedff92bd78d878b730cc2917aeca390c803.json"
+    },
+    {
+      "id": "7b038645304a7787262415b1d659d1aef0688d60bbfc1c1dd1623508d7ea19cb",
+      "name": "ReferenceQuadrature/OwnedMoveDiscardedSource/Triangle/16/real_time",
+      "metric": "real_time",
+      "url": "cases/7b038645304a7787262415b1d659d1aef0688d60bbfc1c1dd1623508d7ea19cb.json"
+    },
+    {
+      "id": "c4a05149ea63004040dc478ff7bb5d41578342229f2205595feb1cba51f4c44d",
+      "name": "ReferenceQuadrature/OwnedMoveDiscardedSource/Triangle/17/real_time",
+      "metric": "real_time",
+      "url": "cases/c4a05149ea63004040dc478ff7bb5d41578342229f2205595feb1cba51f4c44d.json"
+    },
+    {
+      "id": "d50c800d3779450bf170c5801723d86c73eede308766b19c27e82ab00346aa6b",
+      "name": "ReferenceQuadrature/OwnedMoveDiscardedSource/Triangle/2/real_time",
+      "metric": "real_time",
+      "url": "cases/d50c800d3779450bf170c5801723d86c73eede308766b19c27e82ab00346aa6b.json"
+    },
+    {
+      "id": "4d7aa4039aed212d896fd6003111c57a9663624073a5495dce2ff69e802c708b",
+      "name": "ReferenceQuadrature/OwnedMoveDiscardedSource/Triangle/49/real_time",
+      "metric": "real_time",
+      "url": "cases/4d7aa4039aed212d896fd6003111c57a9663624073a5495dce2ff69e802c708b.json"
+    },
+    {
+      "id": "6c088165f3cd516ca4655e78e04b3e964b881cfbdc4484511eaabacee706cf53",
+      "name": "ReferenceQuadrature/OwnedMoveDiscardedSource/Triangle/50/real_time",
+      "metric": "real_time",
+      "url": "cases/6c088165f3cd516ca4655e78e04b3e964b881cfbdc4484511eaabacee706cf53.json"
+    },
+    {
+      "id": "0ac77385f3b51834de3c770db865350f9e641e883c87aa5cdb68317c4e6f98dd",
+      "name": "ReferenceQuadrature/OwnedMoveDiscardedSource/Triangle/51/real_time",
+      "metric": "real_time",
+      "url": "cases/0ac77385f3b51834de3c770db865350f9e641e883c87aa5cdb68317c4e6f98dd.json"
+    },
+    {
+      "id": "c2422598f92fabe8f588d89132575279e6340a70ffc149514acc95d7bde4d81b",
+      "name": "ReferenceQuadrature/OwnedMoveDiscardedSource/Triangle/8/real_time",
+      "metric": "real_time",
+      "url": "cases/c2422598f92fabe8f588d89132575279e6340a70ffc149514acc95d7bde4d81b.json"
+    },
+    {
+      "id": "17ad7839b0677d66cf4b93c39fc1077ad17810a25b2c60c7e149221e254f6ff5",
+      "name": "ReferenceQuadrature/OwnedMoveDiscardedSource/Wedge/15/real_time",
+      "metric": "real_time",
+      "url": "cases/17ad7839b0677d66cf4b93c39fc1077ad17810a25b2c60c7e149221e254f6ff5.json"
+    },
+    {
+      "id": "955a991084c0669d5c664e962b15131101baac3b4b16b9b3bedc5f56ae513238",
+      "name": "ReferenceQuadrature/OwnedMoveDiscardedSource/Wedge/16/real_time",
+      "metric": "real_time",
+      "url": "cases/955a991084c0669d5c664e962b15131101baac3b4b16b9b3bedc5f56ae513238.json"
+    },
+    {
+      "id": "fad93e98b9e621354378c3467611158a4631d5db3e4187ef9431d2f03551ba04",
+      "name": "ReferenceQuadrature/OwnedMoveDiscardedSource/Wedge/17/real_time",
+      "metric": "real_time",
+      "url": "cases/fad93e98b9e621354378c3467611158a4631d5db3e4187ef9431d2f03551ba04.json"
+    },
+    {
+      "id": "3c778b8c98624e925585aec1d1b9e499eef03f0d879083d679cf7ddfe865f283",
+      "name": "ReferenceQuadrature/OwnedMoveDiscardedSource/Wedge/2/real_time",
+      "metric": "real_time",
+      "url": "cases/3c778b8c98624e925585aec1d1b9e499eef03f0d879083d679cf7ddfe865f283.json"
+    },
+    {
+      "id": "527d8812fe99315cd1851aa3b516ced69c73c7599765a9516b2e77cac4f946b8",
+      "name": "ReferenceQuadrature/OwnedMoveDiscardedSource/Wedge/49/real_time",
+      "metric": "real_time",
+      "url": "cases/527d8812fe99315cd1851aa3b516ced69c73c7599765a9516b2e77cac4f946b8.json"
+    },
+    {
+      "id": "dc30d661ccad02acd4385b10d368b96c6481f9d5baf10cb08be2eff489e1e528",
+      "name": "ReferenceQuadrature/OwnedMoveDiscardedSource/Wedge/50/real_time",
+      "metric": "real_time",
+      "url": "cases/dc30d661ccad02acd4385b10d368b96c6481f9d5baf10cb08be2eff489e1e528.json"
+    },
+    {
+      "id": "e316a660a5aa02b489a85de93043c8b66d204855aa88d09506709582d88496d1",
+      "name": "ReferenceQuadrature/OwnedMoveDiscardedSource/Wedge/51/real_time",
+      "metric": "real_time",
+      "url": "cases/e316a660a5aa02b489a85de93043c8b66d204855aa88d09506709582d88496d1.json"
+    },
+    {
+      "id": "17b1a1572b37db2037ec5a771e2d82fcb7292ab05749bfa199ab0eba10fff670",
+      "name": "ReferenceQuadrature/OwnedMoveDiscardedSource/Wedge/8/real_time",
+      "metric": "real_time",
+      "url": "cases/17b1a1572b37db2037ec5a771e2d82fcb7292ab05749bfa199ab0eba10fff670.json"
+    },
+    {
+      "id": "507e1382b82060c25ac4749e6c2a5f7a07840d025f47a0456848aa856d57f5aa",
+      "name": "ReferenceQuadrature/Traversal/Hexahedron/15/real_time",
+      "metric": "real_time",
+      "url": "cases/507e1382b82060c25ac4749e6c2a5f7a07840d025f47a0456848aa856d57f5aa.json"
+    },
+    {
+      "id": "f39efd772764ecb5af70b1a4684397b315e4a0c2533f0700262534190e8e9cc5",
+      "name": "ReferenceQuadrature/Traversal/Hexahedron/16/real_time",
+      "metric": "real_time",
+      "url": "cases/f39efd772764ecb5af70b1a4684397b315e4a0c2533f0700262534190e8e9cc5.json"
+    },
+    {
+      "id": "1655b0ed436ae797dedde0c72e21a898292fbde7d8bd6deacd45f7a6cb83485e",
+      "name": "ReferenceQuadrature/Traversal/Hexahedron/17/real_time",
+      "metric": "real_time",
+      "url": "cases/1655b0ed436ae797dedde0c72e21a898292fbde7d8bd6deacd45f7a6cb83485e.json"
+    },
+    {
+      "id": "2be517528eaa4f1227d1d94516598b3b7f6bbf434eb086e7d1599ed2e4ba5c0c",
+      "name": "ReferenceQuadrature/Traversal/Hexahedron/2/real_time",
+      "metric": "real_time",
+      "url": "cases/2be517528eaa4f1227d1d94516598b3b7f6bbf434eb086e7d1599ed2e4ba5c0c.json"
+    },
+    {
+      "id": "89a7ca5f5ff7e96cc51d0fbcde959a1475ee26b13b5e96d3713b5dedf929a14e",
+      "name": "ReferenceQuadrature/Traversal/Hexahedron/8/real_time",
+      "metric": "real_time",
+      "url": "cases/89a7ca5f5ff7e96cc51d0fbcde959a1475ee26b13b5e96d3713b5dedf929a14e.json"
+    },
+    {
+      "id": "dbcd84ab6d7a5fbe02ced72d28b95a163f4f5de2885496b50a93d589f1103570",
+      "name": "ReferenceQuadrature/Traversal/Point/15/real_time",
+      "metric": "real_time",
+      "url": "cases/dbcd84ab6d7a5fbe02ced72d28b95a163f4f5de2885496b50a93d589f1103570.json"
+    },
+    {
+      "id": "4bf0a372af6b8fc35055ef0ff280b58efab2b30d8e1fde2ff897d3c5f8aaef6e",
+      "name": "ReferenceQuadrature/Traversal/Point/16/real_time",
+      "metric": "real_time",
+      "url": "cases/4bf0a372af6b8fc35055ef0ff280b58efab2b30d8e1fde2ff897d3c5f8aaef6e.json"
+    },
+    {
+      "id": "4fd875e118ca12ff69eef6e1322ef7c450fa5c6693a37a3e8d8ec09573eeed70",
+      "name": "ReferenceQuadrature/Traversal/Point/17/real_time",
+      "metric": "real_time",
+      "url": "cases/4fd875e118ca12ff69eef6e1322ef7c450fa5c6693a37a3e8d8ec09573eeed70.json"
+    },
+    {
+      "id": "24b5b62ea3afc71fa95abfd6a4d9334cc4b48e8bbcff7776bb0819d2f66e011b",
+      "name": "ReferenceQuadrature/Traversal/Point/2/real_time",
+      "metric": "real_time",
+      "url": "cases/24b5b62ea3afc71fa95abfd6a4d9334cc4b48e8bbcff7776bb0819d2f66e011b.json"
+    },
+    {
+      "id": "1b37d4f8927ace518271ba2845b8737e0f9164291cd4ac2401bbf175caffb6d0",
+      "name": "ReferenceQuadrature/Traversal/Point/8/real_time",
+      "metric": "real_time",
+      "url": "cases/1b37d4f8927ace518271ba2845b8737e0f9164291cd4ac2401bbf175caffb6d0.json"
+    },
+    {
+      "id": "1e975e3fcbfc3f2a94bb276e200a7586750916b6b6be2dfd4ac9a21c0c0446cd",
+      "name": "ReferenceQuadrature/Traversal/Pyramid/10/real_time",
+      "metric": "real_time",
+      "url": "cases/1e975e3fcbfc3f2a94bb276e200a7586750916b6b6be2dfd4ac9a21c0c0446cd.json"
+    },
+    {
+      "id": "75f32533f8a8f85171b5c109031ff03294ab89e9a0c2bfaaf88ac99ac44328fe",
+      "name": "ReferenceQuadrature/Traversal/Pyramid/11/real_time",
+      "metric": "real_time",
+      "url": "cases/75f32533f8a8f85171b5c109031ff03294ab89e9a0c2bfaaf88ac99ac44328fe.json"
+    },
+    {
+      "id": "a5bc0eff0c6918f1c5c4f145014a5d76434079b3bbd30c51a572a7ddd895a90e",
+      "name": "ReferenceQuadrature/Traversal/Pyramid/15/real_time",
+      "metric": "real_time",
+      "url": "cases/a5bc0eff0c6918f1c5c4f145014a5d76434079b3bbd30c51a572a7ddd895a90e.json"
+    },
+    {
+      "id": "628330c5da9b42cc8f1efe54162225921bc94ee9aeaabfec136276a9bed94b88",
+      "name": "ReferenceQuadrature/Traversal/Pyramid/16/real_time",
+      "metric": "real_time",
+      "url": "cases/628330c5da9b42cc8f1efe54162225921bc94ee9aeaabfec136276a9bed94b88.json"
+    },
+    {
+      "id": "b68f63c76fdb00fa5205762cecaa29ea37cfa64cd6db0b87093a38e47829b70e",
+      "name": "ReferenceQuadrature/Traversal/Pyramid/17/real_time",
+      "metric": "real_time",
+      "url": "cases/b68f63c76fdb00fa5205762cecaa29ea37cfa64cd6db0b87093a38e47829b70e.json"
+    },
+    {
+      "id": "cbe6a2303d5df9698da1a11825d06951e0b6306a81bfb21c084a50ea592cfc2a",
+      "name": "ReferenceQuadrature/Traversal/Pyramid/2/real_time",
+      "metric": "real_time",
+      "url": "cases/cbe6a2303d5df9698da1a11825d06951e0b6306a81bfb21c084a50ea592cfc2a.json"
+    },
+    {
+      "id": "b053bd2a397375adb6a0bdf6b3160df41051db634d212b1e0554069b2d6662f2",
+      "name": "ReferenceQuadrature/Traversal/Pyramid/8/real_time",
+      "metric": "real_time",
+      "url": "cases/b053bd2a397375adb6a0bdf6b3160df41051db634d212b1e0554069b2d6662f2.json"
+    },
+    {
+      "id": "434bb3e7581e784997bbdbdc35ff3cc84792f5f8e69c960e67bf72dbf113b659",
+      "name": "ReferenceQuadrature/Traversal/Pyramid/9/real_time",
+      "metric": "real_time",
+      "url": "cases/434bb3e7581e784997bbdbdc35ff3cc84792f5f8e69c960e67bf72dbf113b659.json"
+    },
+    {
+      "id": "4f1d6d219a497176503b62e8d2972b2a459a9cf4b33a61069fdc89a15ef58ce4",
+      "name": "ReferenceQuadrature/Traversal/Quadrilateral/15/real_time",
+      "metric": "real_time",
+      "url": "cases/4f1d6d219a497176503b62e8d2972b2a459a9cf4b33a61069fdc89a15ef58ce4.json"
+    },
+    {
+      "id": "eec0d22f850e98de668438e52ee83b48824747217201d3fb903c072242a149f4",
+      "name": "ReferenceQuadrature/Traversal/Quadrilateral/16/real_time",
+      "metric": "real_time",
+      "url": "cases/eec0d22f850e98de668438e52ee83b48824747217201d3fb903c072242a149f4.json"
+    },
+    {
+      "id": "c02f71817242827268f5717bfec41bcacb12774c329a34d6208a580f1bca4797",
+      "name": "ReferenceQuadrature/Traversal/Quadrilateral/17/real_time",
+      "metric": "real_time",
+      "url": "cases/c02f71817242827268f5717bfec41bcacb12774c329a34d6208a580f1bca4797.json"
+    },
+    {
+      "id": "c959494e782e0a09a7be9f49fc60e5d440d96d1a83ad071b2b71fb7bcb29977a",
+      "name": "ReferenceQuadrature/Traversal/Quadrilateral/2/real_time",
+      "metric": "real_time",
+      "url": "cases/c959494e782e0a09a7be9f49fc60e5d440d96d1a83ad071b2b71fb7bcb29977a.json"
+    },
+    {
+      "id": "4a15e2d61507e34cc0421d9d91a98a9ba0582cf65cb156508b8781a0d7868f45",
+      "name": "ReferenceQuadrature/Traversal/Quadrilateral/8/real_time",
+      "metric": "real_time",
+      "url": "cases/4a15e2d61507e34cc0421d9d91a98a9ba0582cf65cb156508b8781a0d7868f45.json"
+    },
+    {
+      "id": "dc3e9a7216142debd00655acc0527bd03ef436e36e8d0f042f725c8302f3ec0b",
+      "name": "ReferenceQuadrature/Traversal/Segment/15/real_time",
+      "metric": "real_time",
+      "url": "cases/dc3e9a7216142debd00655acc0527bd03ef436e36e8d0f042f725c8302f3ec0b.json"
+    },
+    {
+      "id": "0152080e4a9754b29c4d990839647151e442c7ea74883ada32049d07c1b6ac9f",
+      "name": "ReferenceQuadrature/Traversal/Segment/16/real_time",
+      "metric": "real_time",
+      "url": "cases/0152080e4a9754b29c4d990839647151e442c7ea74883ada32049d07c1b6ac9f.json"
+    },
+    {
+      "id": "2c406a8a86bfca4d6810cbc318a8024114f3239086b03ef94a9e016084af1f0d",
+      "name": "ReferenceQuadrature/Traversal/Segment/17/real_time",
+      "metric": "real_time",
+      "url": "cases/2c406a8a86bfca4d6810cbc318a8024114f3239086b03ef94a9e016084af1f0d.json"
+    },
+    {
+      "id": "012ab5b3addf6605e54942d23f8abdd9e9cdf3bf0d916ff9435f11028a0dfbbd",
+      "name": "ReferenceQuadrature/Traversal/Segment/2/real_time",
+      "metric": "real_time",
+      "url": "cases/012ab5b3addf6605e54942d23f8abdd9e9cdf3bf0d916ff9435f11028a0dfbbd.json"
+    },
+    {
+      "id": "167d039597404251789da416d01ca43768e80458c908642d9832a46c6c8502ff",
+      "name": "ReferenceQuadrature/Traversal/Segment/8/real_time",
+      "metric": "real_time",
+      "url": "cases/167d039597404251789da416d01ca43768e80458c908642d9832a46c6c8502ff.json"
+    },
+    {
+      "id": "623c7f536ffb29f4193561b6a777dc98cf37e8a7ba5b6bdbaded9394cef51933",
+      "name": "ReferenceQuadrature/Traversal/Tetrahedron/14/real_time",
+      "metric": "real_time",
+      "url": "cases/623c7f536ffb29f4193561b6a777dc98cf37e8a7ba5b6bdbaded9394cef51933.json"
+    },
+    {
+      "id": "51addd0710c269ef1422df0a87753efe35ebdb107d49db969ede524515162055",
+      "name": "ReferenceQuadrature/Traversal/Tetrahedron/15/real_time",
+      "metric": "real_time",
+      "url": "cases/51addd0710c269ef1422df0a87753efe35ebdb107d49db969ede524515162055.json"
+    },
+    {
+      "id": "606259acc4a2e839a8a58d80a2f8556f8a4e3659026d36d0bb6fa2251b7e9868",
+      "name": "ReferenceQuadrature/Traversal/Tetrahedron/16/real_time",
+      "metric": "real_time",
+      "url": "cases/606259acc4a2e839a8a58d80a2f8556f8a4e3659026d36d0bb6fa2251b7e9868.json"
+    },
+    {
+      "id": "33825740560a2cdc98009b71d17dfa9b6e818a40234b4a8ad6dcd888830b3411",
+      "name": "ReferenceQuadrature/Traversal/Tetrahedron/17/real_time",
+      "metric": "real_time",
+      "url": "cases/33825740560a2cdc98009b71d17dfa9b6e818a40234b4a8ad6dcd888830b3411.json"
+    },
+    {
+      "id": "f13fc93d28df9777b621381225f947f92a6e6851beeb44b76736d63b6d405af4",
+      "name": "ReferenceQuadrature/Traversal/Tetrahedron/2/real_time",
+      "metric": "real_time",
+      "url": "cases/f13fc93d28df9777b621381225f947f92a6e6851beeb44b76736d63b6d405af4.json"
+    },
+    {
+      "id": "ed1cb76b59e56a648247e247e6c9e37a1d0352d7455d1f4dd478735f631f6e10",
+      "name": "ReferenceQuadrature/Traversal/Tetrahedron/8/real_time",
+      "metric": "real_time",
+      "url": "cases/ed1cb76b59e56a648247e247e6c9e37a1d0352d7455d1f4dd478735f631f6e10.json"
+    },
+    {
+      "id": "2417a21c7f65666eef12caa25bcd8e363d5b253b25a33dd1af29e7ec8bfc8a93",
+      "name": "ReferenceQuadrature/Traversal/Triangle/15/real_time",
+      "metric": "real_time",
+      "url": "cases/2417a21c7f65666eef12caa25bcd8e363d5b253b25a33dd1af29e7ec8bfc8a93.json"
+    },
+    {
+      "id": "52c2c61e9ddb14cd37c3bdf5a24bcbc346ad0aff6a1679c3757139537f1f23a0",
+      "name": "ReferenceQuadrature/Traversal/Triangle/16/real_time",
+      "metric": "real_time",
+      "url": "cases/52c2c61e9ddb14cd37c3bdf5a24bcbc346ad0aff6a1679c3757139537f1f23a0.json"
+    },
+    {
+      "id": "cd93261b48d4baf08a2d8bb2387cf8c6957d4f04fb80153478d38bc4f1da129d",
+      "name": "ReferenceQuadrature/Traversal/Triangle/17/real_time",
+      "metric": "real_time",
+      "url": "cases/cd93261b48d4baf08a2d8bb2387cf8c6957d4f04fb80153478d38bc4f1da129d.json"
+    },
+    {
+      "id": "c763991541cc7cdb03cf5000c1d2e8fdf522cfefbf9af6c4675b522d05485610",
+      "name": "ReferenceQuadrature/Traversal/Triangle/2/real_time",
+      "metric": "real_time",
+      "url": "cases/c763991541cc7cdb03cf5000c1d2e8fdf522cfefbf9af6c4675b522d05485610.json"
+    },
+    {
+      "id": "137b24998f581cb1ef717bdc1d699aeb72bc26f4d20f97b5935079639fd86d42",
+      "name": "ReferenceQuadrature/Traversal/Triangle/49/real_time",
+      "metric": "real_time",
+      "url": "cases/137b24998f581cb1ef717bdc1d699aeb72bc26f4d20f97b5935079639fd86d42.json"
+    },
+    {
+      "id": "c7099c3daee6cb6ffd0eaac2b20fe323d857dd49be8d9e1b0895bf8287ddf696",
+      "name": "ReferenceQuadrature/Traversal/Triangle/50/real_time",
+      "metric": "real_time",
+      "url": "cases/c7099c3daee6cb6ffd0eaac2b20fe323d857dd49be8d9e1b0895bf8287ddf696.json"
+    },
+    {
+      "id": "742892c55ef12a303e915c15a7ebb729c205a0ece710b7570d0edb5faa1a4973",
+      "name": "ReferenceQuadrature/Traversal/Triangle/51/real_time",
+      "metric": "real_time",
+      "url": "cases/742892c55ef12a303e915c15a7ebb729c205a0ece710b7570d0edb5faa1a4973.json"
+    },
+    {
+      "id": "671b67542dbe73a81331a9a60eae379ad0b87c393520284f5d2a6ad1307f8642",
+      "name": "ReferenceQuadrature/Traversal/Triangle/8/real_time",
+      "metric": "real_time",
+      "url": "cases/671b67542dbe73a81331a9a60eae379ad0b87c393520284f5d2a6ad1307f8642.json"
+    },
+    {
+      "id": "acd0a718827b1204c2be9f636b4f7ffc31a8bd458fa6a77cc8d755cc9de29bfe",
+      "name": "ReferenceQuadrature/Traversal/Wedge/15/real_time",
+      "metric": "real_time",
+      "url": "cases/acd0a718827b1204c2be9f636b4f7ffc31a8bd458fa6a77cc8d755cc9de29bfe.json"
+    },
+    {
+      "id": "3abf7b3abacc78fab03a8b89989f455e5710b6b704b75aba4ba8ca8801064ec9",
+      "name": "ReferenceQuadrature/Traversal/Wedge/16/real_time",
+      "metric": "real_time",
+      "url": "cases/3abf7b3abacc78fab03a8b89989f455e5710b6b704b75aba4ba8ca8801064ec9.json"
+    },
+    {
+      "id": "5db73bd8271bbd55e42a61c3688b67b0653e9c15acbee88cdf3dd34254042383",
+      "name": "ReferenceQuadrature/Traversal/Wedge/17/real_time",
+      "metric": "real_time",
+      "url": "cases/5db73bd8271bbd55e42a61c3688b67b0653e9c15acbee88cdf3dd34254042383.json"
+    },
+    {
+      "id": "1071205caccc3f2ca4ba8117a6e0f7e800ea47a8e8c6db6bffa3b73b07a1eab6",
+      "name": "ReferenceQuadrature/Traversal/Wedge/2/real_time",
+      "metric": "real_time",
+      "url": "cases/1071205caccc3f2ca4ba8117a6e0f7e800ea47a8e8c6db6bffa3b73b07a1eab6.json"
+    },
+    {
+      "id": "5e08395c4d0bdec57cc9e6a8afbcc520cf19586feb233c1df3f178c892467293",
+      "name": "ReferenceQuadrature/Traversal/Wedge/49/real_time",
+      "metric": "real_time",
+      "url": "cases/5e08395c4d0bdec57cc9e6a8afbcc520cf19586feb233c1df3f178c892467293.json"
+    },
+    {
+      "id": "79a1e795a04c482ee6e7f2fb1247f2b16cf09394482d17c76a047b7eb45d3ec0",
+      "name": "ReferenceQuadrature/Traversal/Wedge/50/real_time",
+      "metric": "real_time",
+      "url": "cases/79a1e795a04c482ee6e7f2fb1247f2b16cf09394482d17c76a047b7eb45d3ec0.json"
+    },
+    {
+      "id": "6807e052d69903c6b88ade6e84b03ae0b858a3d8011ceb2f69f73a036a5cd5ab",
+      "name": "ReferenceQuadrature/Traversal/Wedge/51/real_time",
+      "metric": "real_time",
+      "url": "cases/6807e052d69903c6b88ade6e84b03ae0b858a3d8011ceb2f69f73a036a5cd5ab.json"
+    },
+    {
+      "id": "10139576002f53cb7f7596a3bbf70105365b4a266db131039c5c0029c2005b1d",
+      "name": "ReferenceQuadrature/Traversal/Wedge/8/real_time",
+      "metric": "real_time",
+      "url": "cases/10139576002f53cb7f7596a3bbf70105365b4a266db131039c5c0029c2005b1d.json"
+    }
+  ]
+}

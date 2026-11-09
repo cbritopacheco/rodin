@@ -1,0 +1,926 @@
+{
+  "schema": 1,
+  "definition": {
+    "kind": "benchmark",
+    "mode": "local",
+    "compiler": "gcc-14",
+    "runner": "ubuntu-24.04",
+    "cmake": {
+      "CMAKE_BUILD_TYPE": "Release",
+      "CMAKE_CXX_COMPILER": "g++-14",
+      "CMAKE_C_COMPILER": "gcc-14",
+      "CMAKE_SUPPRESS_REGENERATION": "ON",
+      "RODIN_BUILD_SRC": "ON",
+      "RODIN_BUILD_BENCHMARKS": "ON",
+      "RODIN_BUILD_UNIT_TESTS": "OFF",
+      "RODIN_BUILD_MANUFACTURED_TESTS": "OFF",
+      "RODIN_BUILD_CONVERGENCE_TESTS": "OFF",
+      "RODIN_BUILD_EXAMPLES": "OFF",
+      "RODIN_BUILD_DOC": "OFF",
+      "RODIN_INSTALL_RESOURCES": "OFF",
+      "RODIN_CODE_COVERAGE": "OFF",
+      "RODIN_MULTITHREADED": "OFF",
+      "RODIN_USE_ASAN": "OFF",
+      "RODIN_USE_UBSAN": "OFF",
+      "RODIN_USE_MPI": "OFF",
+      "RODIN_USE_PETSC": "OFF"
+    },
+    "targets": [
+      "RodinBasisScalingBenchmarks",
+      "RodinFieldContractionBenchmarks",
+      "RodinFieldDerivativeBenchmarks",
+      "RodinFieldOperationBenchmarks",
+      "RodinGridFunctionBenchmarks",
+      "RodinH1BasisLifecycleBenchmarks",
+      "RodinH1ConvectionBenchmarks",
+      "RodinH1MassBindingBenchmarks",
+      "RodinH1MassOperandOrderBenchmarks",
+      "RodinH1PreparedBasisBenchmarks",
+      "RodinH1PyramidBenchmarks",
+      "RodinH1PyramidNodalBenchmarks",
+      "RodinNamedFormBenchmarks",
+      "RodinNamedMassKernelBenchmarks",
+      "RodinP1QuadratureBindingBenchmarks",
+      "RodinPhysicalGradientBenchmarks",
+      "RodinProblemLifecycleBenchmarks",
+      "RodinQuadratureBindingBenchmarks",
+      "RodinQuadratureExpressionBenchmarks",
+      "RodinReferenceElementBenchmarks",
+      "RodinStokesBindingBenchmarks",
+      "RodinVariationalCoefficientEvaluationBenchmarks",
+      "RodinVariationalGridFunctionBenchmarks",
+      "RodinVariationalIntegratorsBenchmarks",
+      "RodinVariationalNamedFormsBenchmarks",
+      "RodinVariationalP1Benchmarks",
+      "RodinVariationalRankOneJacobianBenchmarks"
+    ],
+    "stage": "components"
+  },
+  "ranks": 1,
+  "cases": [
+    {
+      "id": "5dc75c7630c5e4dec844726fa503313188d56c86fffb9f6bb2a6b738e429ca8d",
+      "name": "H1/Pyramid/NodalDerivatives/Public/P1/Complex/12",
+      "metric": "cpu_time",
+      "url": "cases/5dc75c7630c5e4dec844726fa503313188d56c86fffb9f6bb2a6b738e429ca8d.json"
+    },
+    {
+      "id": "bca552035b93a238ee7d5d2f957af534322537d3f426c75c3f06cdca67c2e64a",
+      "name": "H1/Pyramid/NodalDerivatives/Public/P1/Complex/2",
+      "metric": "cpu_time",
+      "url": "cases/bca552035b93a238ee7d5d2f957af534322537d3f426c75c3f06cdca67c2e64a.json"
+    },
+    {
+      "id": "317e2e7dd65d5cd62889ae7f5a496987cbf59a4d0e87094110d322fbb0fb8815",
+      "name": "H1/Pyramid/NodalDerivatives/Public/P1/Complex/4",
+      "metric": "cpu_time",
+      "url": "cases/317e2e7dd65d5cd62889ae7f5a496987cbf59a4d0e87094110d322fbb0fb8815.json"
+    },
+    {
+      "id": "a66ed86e1f8e5b6a5557081a755894a0b331588e092c83ceeb2b24ae9cce73e2",
+      "name": "H1/Pyramid/NodalDerivatives/Public/P1/Complex/8",
+      "metric": "cpu_time",
+      "url": "cases/a66ed86e1f8e5b6a5557081a755894a0b331588e092c83ceeb2b24ae9cce73e2.json"
+    },
+    {
+      "id": "28808e3c474b9668d8650242bd8d5664a0b048e3cd6fb23a3e22c959599d1129",
+      "name": "H1/Pyramid/NodalDerivatives/Public/P1/Real/12",
+      "metric": "cpu_time",
+      "url": "cases/28808e3c474b9668d8650242bd8d5664a0b048e3cd6fb23a3e22c959599d1129.json"
+    },
+    {
+      "id": "c982a2c8ea678f02a2c14849818384d848dfe9db4e2c7abd07fe2ef17a62160f",
+      "name": "H1/Pyramid/NodalDerivatives/Public/P1/Real/2",
+      "metric": "cpu_time",
+      "url": "cases/c982a2c8ea678f02a2c14849818384d848dfe9db4e2c7abd07fe2ef17a62160f.json"
+    },
+    {
+      "id": "fb4d911e95de09dc37bb59a130d0d06f2c0053ea9f467084262210e00426255d",
+      "name": "H1/Pyramid/NodalDerivatives/Public/P1/Real/4",
+      "metric": "cpu_time",
+      "url": "cases/fb4d911e95de09dc37bb59a130d0d06f2c0053ea9f467084262210e00426255d.json"
+    },
+    {
+      "id": "b7996cf20337583e7a33c1e44fbee3173cd649a10c844df0bb966d5e628a72be",
+      "name": "H1/Pyramid/NodalDerivatives/Public/P1/Real/8",
+      "metric": "cpu_time",
+      "url": "cases/b7996cf20337583e7a33c1e44fbee3173cd649a10c844df0bb966d5e628a72be.json"
+    },
+    {
+      "id": "a63339bb8bb489ac118fbd467642ce34093718919e556475cc6a9ec5fd4300c3",
+      "name": "H1/Pyramid/NodalDerivatives/Public/P2/Complex/12",
+      "metric": "cpu_time",
+      "url": "cases/a63339bb8bb489ac118fbd467642ce34093718919e556475cc6a9ec5fd4300c3.json"
+    },
+    {
+      "id": "82ebdcf393de0ebcf6f8ab3a90e76e512d73ed84955cffed049e7130d8f2c5e3",
+      "name": "H1/Pyramid/NodalDerivatives/Public/P2/Complex/2",
+      "metric": "cpu_time",
+      "url": "cases/82ebdcf393de0ebcf6f8ab3a90e76e512d73ed84955cffed049e7130d8f2c5e3.json"
+    },
+    {
+      "id": "2e8d19ce890035975769d26bb0b7c02c301d3cd5e2062441f9ef8b03fb2cd0a0",
+      "name": "H1/Pyramid/NodalDerivatives/Public/P2/Complex/4",
+      "metric": "cpu_time",
+      "url": "cases/2e8d19ce890035975769d26bb0b7c02c301d3cd5e2062441f9ef8b03fb2cd0a0.json"
+    },
+    {
+      "id": "9b1422294de9027c0c8b798c89d13d55feec08b8b3d73781b31dd85917c5ef15",
+      "name": "H1/Pyramid/NodalDerivatives/Public/P2/Complex/8",
+      "metric": "cpu_time",
+      "url": "cases/9b1422294de9027c0c8b798c89d13d55feec08b8b3d73781b31dd85917c5ef15.json"
+    },
+    {
+      "id": "a7eb5fe9296994f56e3c546e26ae34dff891cecd8a8063b94bcda3838c9c00b3",
+      "name": "H1/Pyramid/NodalDerivatives/Public/P2/Real/12",
+      "metric": "cpu_time",
+      "url": "cases/a7eb5fe9296994f56e3c546e26ae34dff891cecd8a8063b94bcda3838c9c00b3.json"
+    },
+    {
+      "id": "cab73159c633350f159c7e2f355f42d57eb937f127634c00a174cc3b8bacb0b0",
+      "name": "H1/Pyramid/NodalDerivatives/Public/P2/Real/2",
+      "metric": "cpu_time",
+      "url": "cases/cab73159c633350f159c7e2f355f42d57eb937f127634c00a174cc3b8bacb0b0.json"
+    },
+    {
+      "id": "acd52ad8e556dc8377bb9f1925c73a839f2119b7337ab7a2c20230f8e5a4c6c1",
+      "name": "H1/Pyramid/NodalDerivatives/Public/P2/Real/4",
+      "metric": "cpu_time",
+      "url": "cases/acd52ad8e556dc8377bb9f1925c73a839f2119b7337ab7a2c20230f8e5a4c6c1.json"
+    },
+    {
+      "id": "8953b9a45ff0e4164aaf3dd447224e1481701cf9926dcf927a14c4e9332f1927",
+      "name": "H1/Pyramid/NodalDerivatives/Public/P2/Real/8",
+      "metric": "cpu_time",
+      "url": "cases/8953b9a45ff0e4164aaf3dd447224e1481701cf9926dcf927a14c4e9332f1927.json"
+    },
+    {
+      "id": "3300d728e74472f420ddd5dc7caf33f51cab3198eeaed9dc9728440eff68b855",
+      "name": "H1/Pyramid/NodalDerivatives/Public/P3/Complex/12",
+      "metric": "cpu_time",
+      "url": "cases/3300d728e74472f420ddd5dc7caf33f51cab3198eeaed9dc9728440eff68b855.json"
+    },
+    {
+      "id": "305ff3effc5353e7c731e71555b318600a617cbbbb361935e1d42f537ba68139",
+      "name": "H1/Pyramid/NodalDerivatives/Public/P3/Complex/2",
+      "metric": "cpu_time",
+      "url": "cases/305ff3effc5353e7c731e71555b318600a617cbbbb361935e1d42f537ba68139.json"
+    },
+    {
+      "id": "c2fe940c5654dcd955de9c6cb86f219ee7dde95c054c65ce6d1131a70a0a7491",
+      "name": "H1/Pyramid/NodalDerivatives/Public/P3/Complex/4",
+      "metric": "cpu_time",
+      "url": "cases/c2fe940c5654dcd955de9c6cb86f219ee7dde95c054c65ce6d1131a70a0a7491.json"
+    },
+    {
+      "id": "fe8efc59669bf24fa9d6418601cd39baf2ead6c658e59ace96386b6185e53742",
+      "name": "H1/Pyramid/NodalDerivatives/Public/P3/Complex/8",
+      "metric": "cpu_time",
+      "url": "cases/fe8efc59669bf24fa9d6418601cd39baf2ead6c658e59ace96386b6185e53742.json"
+    },
+    {
+      "id": "15d3130e7cef818d8014f892b989abaa6573d027a79ce6b9cd2ae8d861a2ad01",
+      "name": "H1/Pyramid/NodalDerivatives/Public/P3/Real/12",
+      "metric": "cpu_time",
+      "url": "cases/15d3130e7cef818d8014f892b989abaa6573d027a79ce6b9cd2ae8d861a2ad01.json"
+    },
+    {
+      "id": "2dfa610d9f9a4e7213096f2044d6159647277fe50b8f07fbcbe1caf777153ccd",
+      "name": "H1/Pyramid/NodalDerivatives/Public/P3/Real/2",
+      "metric": "cpu_time",
+      "url": "cases/2dfa610d9f9a4e7213096f2044d6159647277fe50b8f07fbcbe1caf777153ccd.json"
+    },
+    {
+      "id": "c298f4efa27b8d7aff388e918840db6ab36f1d89d52cb90d823d20ccb86ea8bd",
+      "name": "H1/Pyramid/NodalDerivatives/Public/P3/Real/4",
+      "metric": "cpu_time",
+      "url": "cases/c298f4efa27b8d7aff388e918840db6ab36f1d89d52cb90d823d20ccb86ea8bd.json"
+    },
+    {
+      "id": "aed754e2bc7bd0a9d22ce9ebd46555ff2ba89eb03ef39527cd970142fc5c9a6b",
+      "name": "H1/Pyramid/NodalDerivatives/Public/P3/Real/8",
+      "metric": "cpu_time",
+      "url": "cases/aed754e2bc7bd0a9d22ce9ebd46555ff2ba89eb03ef39527cd970142fc5c9a6b.json"
+    },
+    {
+      "id": "062e82fe0b97ea7a877492a7c961b66b440ec28ebcc0cc7c8a001420da729cd1",
+      "name": "H1/Pyramid/NodalDerivatives/Public/P4/Complex/12",
+      "metric": "cpu_time",
+      "url": "cases/062e82fe0b97ea7a877492a7c961b66b440ec28ebcc0cc7c8a001420da729cd1.json"
+    },
+    {
+      "id": "1920986cd25658183c7ff8cc400b5422e5c71b87bbabaeffc98a4c6b0dd9daae",
+      "name": "H1/Pyramid/NodalDerivatives/Public/P4/Complex/2",
+      "metric": "cpu_time",
+      "url": "cases/1920986cd25658183c7ff8cc400b5422e5c71b87bbabaeffc98a4c6b0dd9daae.json"
+    },
+    {
+      "id": "81455dae2c1d31255de1f8f3b8ce8bdac8dde940d2c5023903c87512091424de",
+      "name": "H1/Pyramid/NodalDerivatives/Public/P4/Complex/4",
+      "metric": "cpu_time",
+      "url": "cases/81455dae2c1d31255de1f8f3b8ce8bdac8dde940d2c5023903c87512091424de.json"
+    },
+    {
+      "id": "47ac126d05d1cf644831cd574f5cb8bfd210a47882cf97202baf40e8e2cfad7b",
+      "name": "H1/Pyramid/NodalDerivatives/Public/P4/Complex/8",
+      "metric": "cpu_time",
+      "url": "cases/47ac126d05d1cf644831cd574f5cb8bfd210a47882cf97202baf40e8e2cfad7b.json"
+    },
+    {
+      "id": "058e90752000be35b25870a0628e2ec13600f6ba94c2cf20be3c99bd9e64a9be",
+      "name": "H1/Pyramid/NodalDerivatives/Public/P4/Real/12",
+      "metric": "cpu_time",
+      "url": "cases/058e90752000be35b25870a0628e2ec13600f6ba94c2cf20be3c99bd9e64a9be.json"
+    },
+    {
+      "id": "01dd7115b62416172e1ebfc0afb6902509ebac77f085862db95c479545d3cff3",
+      "name": "H1/Pyramid/NodalDerivatives/Public/P4/Real/2",
+      "metric": "cpu_time",
+      "url": "cases/01dd7115b62416172e1ebfc0afb6902509ebac77f085862db95c479545d3cff3.json"
+    },
+    {
+      "id": "337ddf0afb8788135b2aca53a1dfc17e1b94e2518f3e5fe8a15c813375542514",
+      "name": "H1/Pyramid/NodalDerivatives/Public/P4/Real/4",
+      "metric": "cpu_time",
+      "url": "cases/337ddf0afb8788135b2aca53a1dfc17e1b94e2518f3e5fe8a15c813375542514.json"
+    },
+    {
+      "id": "df8a0ff59d96f4775d1c4a177d2e2ebbf7082821bdced3eb7589d6d90e476b7c",
+      "name": "H1/Pyramid/NodalDerivatives/Public/P4/Real/8",
+      "metric": "cpu_time",
+      "url": "cases/df8a0ff59d96f4775d1c4a177d2e2ebbf7082821bdced3eb7589d6d90e476b7c.json"
+    },
+    {
+      "id": "a5c4de6a664c057b58926c4e47d143293dabbe24af83182d572bcada332747a0",
+      "name": "H1/Pyramid/NodalDerivatives/Public/P5/Complex/12",
+      "metric": "cpu_time",
+      "url": "cases/a5c4de6a664c057b58926c4e47d143293dabbe24af83182d572bcada332747a0.json"
+    },
+    {
+      "id": "5a6b62c67251f845f52d51f192166ea80372c564c12ab3923ef8a654e81359e5",
+      "name": "H1/Pyramid/NodalDerivatives/Public/P5/Complex/2",
+      "metric": "cpu_time",
+      "url": "cases/5a6b62c67251f845f52d51f192166ea80372c564c12ab3923ef8a654e81359e5.json"
+    },
+    {
+      "id": "99558f555af479dc3e613616e7971e19e8d4b5ffb77a8f2869b49a0c97a0f7d5",
+      "name": "H1/Pyramid/NodalDerivatives/Public/P5/Complex/4",
+      "metric": "cpu_time",
+      "url": "cases/99558f555af479dc3e613616e7971e19e8d4b5ffb77a8f2869b49a0c97a0f7d5.json"
+    },
+    {
+      "id": "9d766012937afc52d6b27f365e0858e7ca06c37b75cf18eee93504beecd75d24",
+      "name": "H1/Pyramid/NodalDerivatives/Public/P5/Complex/8",
+      "metric": "cpu_time",
+      "url": "cases/9d766012937afc52d6b27f365e0858e7ca06c37b75cf18eee93504beecd75d24.json"
+    },
+    {
+      "id": "b971454aa603a444b0d315663c771107e598ce27af0959554cd4824fb45d7a51",
+      "name": "H1/Pyramid/NodalDerivatives/Public/P5/Real/12",
+      "metric": "cpu_time",
+      "url": "cases/b971454aa603a444b0d315663c771107e598ce27af0959554cd4824fb45d7a51.json"
+    },
+    {
+      "id": "e12c65076e2c93a8869fd1a43e0bd999a6f55348b2b7d0d38da51a5f8c6f48ab",
+      "name": "H1/Pyramid/NodalDerivatives/Public/P5/Real/2",
+      "metric": "cpu_time",
+      "url": "cases/e12c65076e2c93a8869fd1a43e0bd999a6f55348b2b7d0d38da51a5f8c6f48ab.json"
+    },
+    {
+      "id": "bdbeaadcafc0ce4514afbfa4b235f30eddd6bd3621473e86d8b7a93ec221a727",
+      "name": "H1/Pyramid/NodalDerivatives/Public/P5/Real/4",
+      "metric": "cpu_time",
+      "url": "cases/bdbeaadcafc0ce4514afbfa4b235f30eddd6bd3621473e86d8b7a93ec221a727.json"
+    },
+    {
+      "id": "f0c43ebb1d69e7e2ddc95007a09f9ff192ca9712e22bcc546eb99c834d4baacc",
+      "name": "H1/Pyramid/NodalDerivatives/Public/P5/Real/8",
+      "metric": "cpu_time",
+      "url": "cases/f0c43ebb1d69e7e2ddc95007a09f9ff192ca9712e22bcc546eb99c834d4baacc.json"
+    },
+    {
+      "id": "65074baa0077175d536050dd232647a386e63dcf1864d82d56a76a23afc5637b",
+      "name": "H1/Pyramid/NodalDerivatives/Public/P6/Complex/12",
+      "metric": "cpu_time",
+      "url": "cases/65074baa0077175d536050dd232647a386e63dcf1864d82d56a76a23afc5637b.json"
+    },
+    {
+      "id": "05c89a1f137e98eb34138e0cdab3558c55c6264ef4531a9c6d00dbedcc70c587",
+      "name": "H1/Pyramid/NodalDerivatives/Public/P6/Complex/2",
+      "metric": "cpu_time",
+      "url": "cases/05c89a1f137e98eb34138e0cdab3558c55c6264ef4531a9c6d00dbedcc70c587.json"
+    },
+    {
+      "id": "e5fd90ef50734f301dffa39750f28f25428980a2ac338eccc1c162211c9b1023",
+      "name": "H1/Pyramid/NodalDerivatives/Public/P6/Complex/4",
+      "metric": "cpu_time",
+      "url": "cases/e5fd90ef50734f301dffa39750f28f25428980a2ac338eccc1c162211c9b1023.json"
+    },
+    {
+      "id": "10f70b68d59632276832a0b5ee9fceb49b7918e8f6f1a6a3afa9644c866497bf",
+      "name": "H1/Pyramid/NodalDerivatives/Public/P6/Complex/8",
+      "metric": "cpu_time",
+      "url": "cases/10f70b68d59632276832a0b5ee9fceb49b7918e8f6f1a6a3afa9644c866497bf.json"
+    },
+    {
+      "id": "053211631826542ded16566f62e836a40b0fe52eaae4dc8414fbbc23ef70267f",
+      "name": "H1/Pyramid/NodalDerivatives/Public/P6/Real/12",
+      "metric": "cpu_time",
+      "url": "cases/053211631826542ded16566f62e836a40b0fe52eaae4dc8414fbbc23ef70267f.json"
+    },
+    {
+      "id": "2739c26098e2bf6f4b64bc18aee02e1f7d438a837f81143c6e5aa9b7116021fe",
+      "name": "H1/Pyramid/NodalDerivatives/Public/P6/Real/2",
+      "metric": "cpu_time",
+      "url": "cases/2739c26098e2bf6f4b64bc18aee02e1f7d438a837f81143c6e5aa9b7116021fe.json"
+    },
+    {
+      "id": "e1dae5f018ed635fd0eb5b1a92fdf54c56a419dae413ad00babf9abe268cd3ea",
+      "name": "H1/Pyramid/NodalDerivatives/Public/P6/Real/4",
+      "metric": "cpu_time",
+      "url": "cases/e1dae5f018ed635fd0eb5b1a92fdf54c56a419dae413ad00babf9abe268cd3ea.json"
+    },
+    {
+      "id": "279b7fc31ee76170b24c0bd5cac1ebf17cdb0995233dba2769af95a46e95b34a",
+      "name": "H1/Pyramid/NodalDerivatives/Public/P6/Real/8",
+      "metric": "cpu_time",
+      "url": "cases/279b7fc31ee76170b24c0bd5cac1ebf17cdb0995233dba2769af95a46e95b34a.json"
+    },
+    {
+      "id": "763ea6c267c38e9d892c21c36111b33d2e9e7e655b94b5f299813680f09bb2a5",
+      "name": "H1/Pyramid/NodalDerivatives/RepeatedModes/P1/Complex/12",
+      "metric": "cpu_time",
+      "url": "cases/763ea6c267c38e9d892c21c36111b33d2e9e7e655b94b5f299813680f09bb2a5.json"
+    },
+    {
+      "id": "d88e1d000878f375616548bd2f134b55ff06f27a11bf026556700db18cc4c69f",
+      "name": "H1/Pyramid/NodalDerivatives/RepeatedModes/P1/Complex/2",
+      "metric": "cpu_time",
+      "url": "cases/d88e1d000878f375616548bd2f134b55ff06f27a11bf026556700db18cc4c69f.json"
+    },
+    {
+      "id": "75fe334bea6e9f552f00428836be68bc8da60b5d3eaa8df41bcdcac5fbe6f42e",
+      "name": "H1/Pyramid/NodalDerivatives/RepeatedModes/P1/Complex/4",
+      "metric": "cpu_time",
+      "url": "cases/75fe334bea6e9f552f00428836be68bc8da60b5d3eaa8df41bcdcac5fbe6f42e.json"
+    },
+    {
+      "id": "77af4c928a0b8680f6ebc350eb8165eb6f31ab040d4e01766e661f5e125042a0",
+      "name": "H1/Pyramid/NodalDerivatives/RepeatedModes/P1/Complex/8",
+      "metric": "cpu_time",
+      "url": "cases/77af4c928a0b8680f6ebc350eb8165eb6f31ab040d4e01766e661f5e125042a0.json"
+    },
+    {
+      "id": "9cd54f67ebdadb9f313590a664dc1c804c66da03ddf076700e6a665bd0d1b38c",
+      "name": "H1/Pyramid/NodalDerivatives/RepeatedModes/P1/Real/12",
+      "metric": "cpu_time",
+      "url": "cases/9cd54f67ebdadb9f313590a664dc1c804c66da03ddf076700e6a665bd0d1b38c.json"
+    },
+    {
+      "id": "0f966a3149cf035677ad05c80d54b5d0bb624485955380a6576dd35dcaf717d7",
+      "name": "H1/Pyramid/NodalDerivatives/RepeatedModes/P1/Real/2",
+      "metric": "cpu_time",
+      "url": "cases/0f966a3149cf035677ad05c80d54b5d0bb624485955380a6576dd35dcaf717d7.json"
+    },
+    {
+      "id": "8f25715c66303d3339338213a7388b09b9ec2e49bff83f45d4f5826613065dc3",
+      "name": "H1/Pyramid/NodalDerivatives/RepeatedModes/P1/Real/4",
+      "metric": "cpu_time",
+      "url": "cases/8f25715c66303d3339338213a7388b09b9ec2e49bff83f45d4f5826613065dc3.json"
+    },
+    {
+      "id": "6744d401e387af2da6e25aa9eaefe965ad5118b31bf6817f01436f5d4ea4412c",
+      "name": "H1/Pyramid/NodalDerivatives/RepeatedModes/P1/Real/8",
+      "metric": "cpu_time",
+      "url": "cases/6744d401e387af2da6e25aa9eaefe965ad5118b31bf6817f01436f5d4ea4412c.json"
+    },
+    {
+      "id": "38e495641b028ff396e2eeee85071ffad15cf028fa2dd42dfa4087139ab479a9",
+      "name": "H1/Pyramid/NodalDerivatives/RepeatedModes/P2/Complex/12",
+      "metric": "cpu_time",
+      "url": "cases/38e495641b028ff396e2eeee85071ffad15cf028fa2dd42dfa4087139ab479a9.json"
+    },
+    {
+      "id": "83d54b7a14004401c107bfa822630aae0717ae66e33c919cbd661cced8e08cbb",
+      "name": "H1/Pyramid/NodalDerivatives/RepeatedModes/P2/Complex/2",
+      "metric": "cpu_time",
+      "url": "cases/83d54b7a14004401c107bfa822630aae0717ae66e33c919cbd661cced8e08cbb.json"
+    },
+    {
+      "id": "4348100df25ee727804715ec740070b57a09c285a1f66da96c888b413198ef8e",
+      "name": "H1/Pyramid/NodalDerivatives/RepeatedModes/P2/Complex/4",
+      "metric": "cpu_time",
+      "url": "cases/4348100df25ee727804715ec740070b57a09c285a1f66da96c888b413198ef8e.json"
+    },
+    {
+      "id": "19e2e8b94554ca7edca80dd25b2878995715b1d9f40164477722a85354f7c1e4",
+      "name": "H1/Pyramid/NodalDerivatives/RepeatedModes/P2/Complex/8",
+      "metric": "cpu_time",
+      "url": "cases/19e2e8b94554ca7edca80dd25b2878995715b1d9f40164477722a85354f7c1e4.json"
+    },
+    {
+      "id": "8929bbb279eefffa93ff93e9c2f8a9474b4853f256618b10816d708d9cfde446",
+      "name": "H1/Pyramid/NodalDerivatives/RepeatedModes/P2/Real/12",
+      "metric": "cpu_time",
+      "url": "cases/8929bbb279eefffa93ff93e9c2f8a9474b4853f256618b10816d708d9cfde446.json"
+    },
+    {
+      "id": "3f0c0a48fd435936a0fd58e236563e4e68969848433f584c25d24fe816391614",
+      "name": "H1/Pyramid/NodalDerivatives/RepeatedModes/P2/Real/2",
+      "metric": "cpu_time",
+      "url": "cases/3f0c0a48fd435936a0fd58e236563e4e68969848433f584c25d24fe816391614.json"
+    },
+    {
+      "id": "be64df94685505cb22c6b6e1e55de898e9ac8c03e39074945f0059d1a1e788ed",
+      "name": "H1/Pyramid/NodalDerivatives/RepeatedModes/P2/Real/4",
+      "metric": "cpu_time",
+      "url": "cases/be64df94685505cb22c6b6e1e55de898e9ac8c03e39074945f0059d1a1e788ed.json"
+    },
+    {
+      "id": "7671289e699d5487a7cef28c3b6825c128aa4144b60c9bfdcd1020e6eab930eb",
+      "name": "H1/Pyramid/NodalDerivatives/RepeatedModes/P2/Real/8",
+      "metric": "cpu_time",
+      "url": "cases/7671289e699d5487a7cef28c3b6825c128aa4144b60c9bfdcd1020e6eab930eb.json"
+    },
+    {
+      "id": "ec788f9dfa7ed2b2bd89a0acbef97c245a27caa519e3ba1054ec8f5d895a7e23",
+      "name": "H1/Pyramid/NodalDerivatives/RepeatedModes/P3/Complex/12",
+      "metric": "cpu_time",
+      "url": "cases/ec788f9dfa7ed2b2bd89a0acbef97c245a27caa519e3ba1054ec8f5d895a7e23.json"
+    },
+    {
+      "id": "8d428f88bc62aa0a225ef58da06c4377b61d540d5a39ec8673bcfa0486593a13",
+      "name": "H1/Pyramid/NodalDerivatives/RepeatedModes/P3/Complex/2",
+      "metric": "cpu_time",
+      "url": "cases/8d428f88bc62aa0a225ef58da06c4377b61d540d5a39ec8673bcfa0486593a13.json"
+    },
+    {
+      "id": "7a1cb4e4be7ba0d797e118bdec4a9d3ce44085b48fe40acaad5df46e40e08321",
+      "name": "H1/Pyramid/NodalDerivatives/RepeatedModes/P3/Complex/4",
+      "metric": "cpu_time",
+      "url": "cases/7a1cb4e4be7ba0d797e118bdec4a9d3ce44085b48fe40acaad5df46e40e08321.json"
+    },
+    {
+      "id": "e7eff8b28614b2724d553dc11a4b160aadc5509079b11c234992f1f8b28e746b",
+      "name": "H1/Pyramid/NodalDerivatives/RepeatedModes/P3/Complex/8",
+      "metric": "cpu_time",
+      "url": "cases/e7eff8b28614b2724d553dc11a4b160aadc5509079b11c234992f1f8b28e746b.json"
+    },
+    {
+      "id": "77b8fba979d9d50c1bb428544c08e5655180ab19c986054e805a9644eb953746",
+      "name": "H1/Pyramid/NodalDerivatives/RepeatedModes/P3/Real/12",
+      "metric": "cpu_time",
+      "url": "cases/77b8fba979d9d50c1bb428544c08e5655180ab19c986054e805a9644eb953746.json"
+    },
+    {
+      "id": "ba7257e9db920a53ad9fdd15e32268c29b36fe6bac59a7b16d1dc12e347ebaa6",
+      "name": "H1/Pyramid/NodalDerivatives/RepeatedModes/P3/Real/2",
+      "metric": "cpu_time",
+      "url": "cases/ba7257e9db920a53ad9fdd15e32268c29b36fe6bac59a7b16d1dc12e347ebaa6.json"
+    },
+    {
+      "id": "2150a0afb3e4161933cac55904dd3d0b259896dc2f115e85b74f94a05b549ee7",
+      "name": "H1/Pyramid/NodalDerivatives/RepeatedModes/P3/Real/4",
+      "metric": "cpu_time",
+      "url": "cases/2150a0afb3e4161933cac55904dd3d0b259896dc2f115e85b74f94a05b549ee7.json"
+    },
+    {
+      "id": "28a551a4b69dc75b6a852826f98409ee430ee1884f488e5e6487ca6d664cf24c",
+      "name": "H1/Pyramid/NodalDerivatives/RepeatedModes/P3/Real/8",
+      "metric": "cpu_time",
+      "url": "cases/28a551a4b69dc75b6a852826f98409ee430ee1884f488e5e6487ca6d664cf24c.json"
+    },
+    {
+      "id": "d3ebcf600011ac54de5e5a5431fe469047afb73de49c53632db7a9ca39cee3f2",
+      "name": "H1/Pyramid/NodalDerivatives/RepeatedModes/P4/Complex/12",
+      "metric": "cpu_time",
+      "url": "cases/d3ebcf600011ac54de5e5a5431fe469047afb73de49c53632db7a9ca39cee3f2.json"
+    },
+    {
+      "id": "0a2d67e98c81e0a5972e6f151b4e2778daa422828afdea0b92b155f325bf9085",
+      "name": "H1/Pyramid/NodalDerivatives/RepeatedModes/P4/Complex/2",
+      "metric": "cpu_time",
+      "url": "cases/0a2d67e98c81e0a5972e6f151b4e2778daa422828afdea0b92b155f325bf9085.json"
+    },
+    {
+      "id": "2e22c657af44251f525e0a165f328582871adf17966d036a1e375b9af8ab547a",
+      "name": "H1/Pyramid/NodalDerivatives/RepeatedModes/P4/Complex/4",
+      "metric": "cpu_time",
+      "url": "cases/2e22c657af44251f525e0a165f328582871adf17966d036a1e375b9af8ab547a.json"
+    },
+    {
+      "id": "03a64367563e9ba4856dff376cd1dafed161c84b3d724127496194b7cce341dc",
+      "name": "H1/Pyramid/NodalDerivatives/RepeatedModes/P4/Complex/8",
+      "metric": "cpu_time",
+      "url": "cases/03a64367563e9ba4856dff376cd1dafed161c84b3d724127496194b7cce341dc.json"
+    },
+    {
+      "id": "8657145d89ea4ff9f42e956d2eddd4e740aadcd4a38c2fd05567ab83cf3f828e",
+      "name": "H1/Pyramid/NodalDerivatives/RepeatedModes/P4/Real/12",
+      "metric": "cpu_time",
+      "url": "cases/8657145d89ea4ff9f42e956d2eddd4e740aadcd4a38c2fd05567ab83cf3f828e.json"
+    },
+    {
+      "id": "e57c1a6da6e355da8e60bae4c72d2cc6e1021f646ad7fb80ad6bb621f28a4757",
+      "name": "H1/Pyramid/NodalDerivatives/RepeatedModes/P4/Real/2",
+      "metric": "cpu_time",
+      "url": "cases/e57c1a6da6e355da8e60bae4c72d2cc6e1021f646ad7fb80ad6bb621f28a4757.json"
+    },
+    {
+      "id": "e29cbd2394da7c6656ebe773e1fbcd22d10c75c1add779e713243cd90a8a58b7",
+      "name": "H1/Pyramid/NodalDerivatives/RepeatedModes/P4/Real/4",
+      "metric": "cpu_time",
+      "url": "cases/e29cbd2394da7c6656ebe773e1fbcd22d10c75c1add779e713243cd90a8a58b7.json"
+    },
+    {
+      "id": "ece74f17deae6774ead3116cb168f6d55409c56f73e3b1edf7adaf6ac6fae11b",
+      "name": "H1/Pyramid/NodalDerivatives/RepeatedModes/P4/Real/8",
+      "metric": "cpu_time",
+      "url": "cases/ece74f17deae6774ead3116cb168f6d55409c56f73e3b1edf7adaf6ac6fae11b.json"
+    },
+    {
+      "id": "071553d3ccdeeabc417b3cd88547163f24ef4974944e037f7856a0f8469734ca",
+      "name": "H1/Pyramid/NodalDerivatives/RepeatedModes/P5/Complex/12",
+      "metric": "cpu_time",
+      "url": "cases/071553d3ccdeeabc417b3cd88547163f24ef4974944e037f7856a0f8469734ca.json"
+    },
+    {
+      "id": "734725f87c7911cfc8f131e292a2fae42803e290c6c562732c9002504378a9b6",
+      "name": "H1/Pyramid/NodalDerivatives/RepeatedModes/P5/Complex/2",
+      "metric": "cpu_time",
+      "url": "cases/734725f87c7911cfc8f131e292a2fae42803e290c6c562732c9002504378a9b6.json"
+    },
+    {
+      "id": "70600be0407183f980eace6a98374855830fb0a1e31f1c33c4418cfa5580e24f",
+      "name": "H1/Pyramid/NodalDerivatives/RepeatedModes/P5/Complex/4",
+      "metric": "cpu_time",
+      "url": "cases/70600be0407183f980eace6a98374855830fb0a1e31f1c33c4418cfa5580e24f.json"
+    },
+    {
+      "id": "47951bc3c2972795c9db46e36296ac2862dc1828356a385837f9279bff906cee",
+      "name": "H1/Pyramid/NodalDerivatives/RepeatedModes/P5/Complex/8",
+      "metric": "cpu_time",
+      "url": "cases/47951bc3c2972795c9db46e36296ac2862dc1828356a385837f9279bff906cee.json"
+    },
+    {
+      "id": "cc7426c5a3ccfc3f14a788ccff0f19fa82a89788f16844d77957dc66b0cddbfe",
+      "name": "H1/Pyramid/NodalDerivatives/RepeatedModes/P5/Real/12",
+      "metric": "cpu_time",
+      "url": "cases/cc7426c5a3ccfc3f14a788ccff0f19fa82a89788f16844d77957dc66b0cddbfe.json"
+    },
+    {
+      "id": "acdbf29632b3042c59a318fb0f7869cfdb2a57c1f2cafd7b314d11dcea0a3ef9",
+      "name": "H1/Pyramid/NodalDerivatives/RepeatedModes/P5/Real/2",
+      "metric": "cpu_time",
+      "url": "cases/acdbf29632b3042c59a318fb0f7869cfdb2a57c1f2cafd7b314d11dcea0a3ef9.json"
+    },
+    {
+      "id": "2f0c903ab529c072559123bd9c0d672029917f08ea4c287d0ea096873543eaa7",
+      "name": "H1/Pyramid/NodalDerivatives/RepeatedModes/P5/Real/4",
+      "metric": "cpu_time",
+      "url": "cases/2f0c903ab529c072559123bd9c0d672029917f08ea4c287d0ea096873543eaa7.json"
+    },
+    {
+      "id": "54386442c9af81ce2a85934f7db1c98dcd053b7dfa7666e35412a15c0be37dfb",
+      "name": "H1/Pyramid/NodalDerivatives/RepeatedModes/P5/Real/8",
+      "metric": "cpu_time",
+      "url": "cases/54386442c9af81ce2a85934f7db1c98dcd053b7dfa7666e35412a15c0be37dfb.json"
+    },
+    {
+      "id": "48718d9022a71b73315c53203774440b4487895e6b42f970fe57e8b9270c0eeb",
+      "name": "H1/Pyramid/NodalDerivatives/RepeatedModes/P6/Complex/12",
+      "metric": "cpu_time",
+      "url": "cases/48718d9022a71b73315c53203774440b4487895e6b42f970fe57e8b9270c0eeb.json"
+    },
+    {
+      "id": "cb517c70ad3fd27d10e67dfcd589ecd80c137be6524073ac59e26d9ab3558921",
+      "name": "H1/Pyramid/NodalDerivatives/RepeatedModes/P6/Complex/2",
+      "metric": "cpu_time",
+      "url": "cases/cb517c70ad3fd27d10e67dfcd589ecd80c137be6524073ac59e26d9ab3558921.json"
+    },
+    {
+      "id": "d1a62708264508487e22c1cea3b88ebf33c0531daa294111761c683d9c721b36",
+      "name": "H1/Pyramid/NodalDerivatives/RepeatedModes/P6/Complex/4",
+      "metric": "cpu_time",
+      "url": "cases/d1a62708264508487e22c1cea3b88ebf33c0531daa294111761c683d9c721b36.json"
+    },
+    {
+      "id": "c7cc472eaa2b4297c0abc28c918dbcf677446134033620caac46649095d261bb",
+      "name": "H1/Pyramid/NodalDerivatives/RepeatedModes/P6/Complex/8",
+      "metric": "cpu_time",
+      "url": "cases/c7cc472eaa2b4297c0abc28c918dbcf677446134033620caac46649095d261bb.json"
+    },
+    {
+      "id": "da8009c6887ce2ce3cad678174f052de1e0a19a228d8be896f086eb2c8544617",
+      "name": "H1/Pyramid/NodalDerivatives/RepeatedModes/P6/Real/12",
+      "metric": "cpu_time",
+      "url": "cases/da8009c6887ce2ce3cad678174f052de1e0a19a228d8be896f086eb2c8544617.json"
+    },
+    {
+      "id": "f11e197fbc8019b7a830604e326d1ed5886cfb81b7d60eb7c215a3242547ff91",
+      "name": "H1/Pyramid/NodalDerivatives/RepeatedModes/P6/Real/2",
+      "metric": "cpu_time",
+      "url": "cases/f11e197fbc8019b7a830604e326d1ed5886cfb81b7d60eb7c215a3242547ff91.json"
+    },
+    {
+      "id": "be69728aba5beb2c7aaef13f85198e622adf53c89b0f3b11d0c7a29ddbec3c5b",
+      "name": "H1/Pyramid/NodalDerivatives/RepeatedModes/P6/Real/4",
+      "metric": "cpu_time",
+      "url": "cases/be69728aba5beb2c7aaef13f85198e622adf53c89b0f3b11d0c7a29ddbec3c5b.json"
+    },
+    {
+      "id": "4194eb3d4618d32678d8f28edfbb1bca60b9c8095e5b8ff261324c4a84b0e34a",
+      "name": "H1/Pyramid/NodalDerivatives/RepeatedModes/P6/Real/8",
+      "metric": "cpu_time",
+      "url": "cases/4194eb3d4618d32678d8f28edfbb1bca60b9c8095e5b8ff261324c4a84b0e34a.json"
+    },
+    {
+      "id": "24fc94b487efbe91a22a093eb5769d753bbbb23a071bb7ca9ab9c0f5e338b802",
+      "name": "H1/Pyramid/NodalDerivatives/SharedModes/P1/Complex/12",
+      "metric": "cpu_time",
+      "url": "cases/24fc94b487efbe91a22a093eb5769d753bbbb23a071bb7ca9ab9c0f5e338b802.json"
+    },
+    {
+      "id": "dd8d941609f454c09297a249658c97a2cc2502e8444dbc5a041e144dc86ccb6d",
+      "name": "H1/Pyramid/NodalDerivatives/SharedModes/P1/Complex/2",
+      "metric": "cpu_time",
+      "url": "cases/dd8d941609f454c09297a249658c97a2cc2502e8444dbc5a041e144dc86ccb6d.json"
+    },
+    {
+      "id": "75c29d307971d31641f77c21eaefe247b6e269aa02578b3066eeddad49bf078d",
+      "name": "H1/Pyramid/NodalDerivatives/SharedModes/P1/Complex/4",
+      "metric": "cpu_time",
+      "url": "cases/75c29d307971d31641f77c21eaefe247b6e269aa02578b3066eeddad49bf078d.json"
+    },
+    {
+      "id": "482ebad11f8aca738a0a5125ebd2a91f0f996f762b245b62937126f39a1970a1",
+      "name": "H1/Pyramid/NodalDerivatives/SharedModes/P1/Complex/8",
+      "metric": "cpu_time",
+      "url": "cases/482ebad11f8aca738a0a5125ebd2a91f0f996f762b245b62937126f39a1970a1.json"
+    },
+    {
+      "id": "2abffecbfdc404fcab39018a8cb799aebc9ddfed12362f3cb68824499f457c51",
+      "name": "H1/Pyramid/NodalDerivatives/SharedModes/P1/Real/12",
+      "metric": "cpu_time",
+      "url": "cases/2abffecbfdc404fcab39018a8cb799aebc9ddfed12362f3cb68824499f457c51.json"
+    },
+    {
+      "id": "c835d5c6cb2161594cbda1c88d60de8636bbca2c4f495b873e41e2f65940dd16",
+      "name": "H1/Pyramid/NodalDerivatives/SharedModes/P1/Real/2",
+      "metric": "cpu_time",
+      "url": "cases/c835d5c6cb2161594cbda1c88d60de8636bbca2c4f495b873e41e2f65940dd16.json"
+    },
+    {
+      "id": "58997ae44051ed13bb765967f0d475c8a6d20ec8eb6e442f38d870004eeaf9fa",
+      "name": "H1/Pyramid/NodalDerivatives/SharedModes/P1/Real/4",
+      "metric": "cpu_time",
+      "url": "cases/58997ae44051ed13bb765967f0d475c8a6d20ec8eb6e442f38d870004eeaf9fa.json"
+    },
+    {
+      "id": "23275000cf06bf07e9fa88fa2f7db2c3e7d1550b7f7595285f973dc2ea464fec",
+      "name": "H1/Pyramid/NodalDerivatives/SharedModes/P1/Real/8",
+      "metric": "cpu_time",
+      "url": "cases/23275000cf06bf07e9fa88fa2f7db2c3e7d1550b7f7595285f973dc2ea464fec.json"
+    },
+    {
+      "id": "cc71ed570a7881cc9adec17dde2ede1315020100c8f88563ad016e5738d2d6a7",
+      "name": "H1/Pyramid/NodalDerivatives/SharedModes/P2/Complex/12",
+      "metric": "cpu_time",
+      "url": "cases/cc71ed570a7881cc9adec17dde2ede1315020100c8f88563ad016e5738d2d6a7.json"
+    },
+    {
+      "id": "710b9ece72cf7840743a102dcd73ff07d05eb5d30be7c8b221aa2710d859e6cb",
+      "name": "H1/Pyramid/NodalDerivatives/SharedModes/P2/Complex/2",
+      "metric": "cpu_time",
+      "url": "cases/710b9ece72cf7840743a102dcd73ff07d05eb5d30be7c8b221aa2710d859e6cb.json"
+    },
+    {
+      "id": "46a8a850de099526f60366c9289f0e1b39c528a9d61c3afe29cab01780c8cedb",
+      "name": "H1/Pyramid/NodalDerivatives/SharedModes/P2/Complex/4",
+      "metric": "cpu_time",
+      "url": "cases/46a8a850de099526f60366c9289f0e1b39c528a9d61c3afe29cab01780c8cedb.json"
+    },
+    {
+      "id": "482e8dfcef588c5ee3662e7ce7c63669352430aa9ca05f89130b903cf1967358",
+      "name": "H1/Pyramid/NodalDerivatives/SharedModes/P2/Complex/8",
+      "metric": "cpu_time",
+      "url": "cases/482e8dfcef588c5ee3662e7ce7c63669352430aa9ca05f89130b903cf1967358.json"
+    },
+    {
+      "id": "4663336250a45c2193ac3e31c3a25e8820867841811ae1ee2d65fed8d1e51411",
+      "name": "H1/Pyramid/NodalDerivatives/SharedModes/P2/Real/12",
+      "metric": "cpu_time",
+      "url": "cases/4663336250a45c2193ac3e31c3a25e8820867841811ae1ee2d65fed8d1e51411.json"
+    },
+    {
+      "id": "956208f7877433003e99d70c124aa5f3f117fd7424bca7fd7126b5091fe7d0f5",
+      "name": "H1/Pyramid/NodalDerivatives/SharedModes/P2/Real/2",
+      "metric": "cpu_time",
+      "url": "cases/956208f7877433003e99d70c124aa5f3f117fd7424bca7fd7126b5091fe7d0f5.json"
+    },
+    {
+      "id": "bd44234acb4cb71ba54a9b80dafb8daaa093b250e3626cfcdc9164c9c2b3e31b",
+      "name": "H1/Pyramid/NodalDerivatives/SharedModes/P2/Real/4",
+      "metric": "cpu_time",
+      "url": "cases/bd44234acb4cb71ba54a9b80dafb8daaa093b250e3626cfcdc9164c9c2b3e31b.json"
+    },
+    {
+      "id": "09722f954a6e90f183abdabea78e47aee17d7c044a5011daeea629ef2b89cc9f",
+      "name": "H1/Pyramid/NodalDerivatives/SharedModes/P2/Real/8",
+      "metric": "cpu_time",
+      "url": "cases/09722f954a6e90f183abdabea78e47aee17d7c044a5011daeea629ef2b89cc9f.json"
+    },
+    {
+      "id": "a5e635f58f59aef4293ff8ae69303c7f97274da2b79199ba5c6a1a73cdc75058",
+      "name": "H1/Pyramid/NodalDerivatives/SharedModes/P3/Complex/12",
+      "metric": "cpu_time",
+      "url": "cases/a5e635f58f59aef4293ff8ae69303c7f97274da2b79199ba5c6a1a73cdc75058.json"
+    },
+    {
+      "id": "c18603293810012662caaef7c2262b05104f444f121429dcb8b267be957d2c3b",
+      "name": "H1/Pyramid/NodalDerivatives/SharedModes/P3/Complex/2",
+      "metric": "cpu_time",
+      "url": "cases/c18603293810012662caaef7c2262b05104f444f121429dcb8b267be957d2c3b.json"
+    },
+    {
+      "id": "e3e3da28c1d80bc785e0774399acf9e3e6093b64b4851661ec29bbcd3ddfcde9",
+      "name": "H1/Pyramid/NodalDerivatives/SharedModes/P3/Complex/4",
+      "metric": "cpu_time",
+      "url": "cases/e3e3da28c1d80bc785e0774399acf9e3e6093b64b4851661ec29bbcd3ddfcde9.json"
+    },
+    {
+      "id": "35d9ba807c54803132c1c000a80e06357874e9852b02ac5e0090c8d552217a64",
+      "name": "H1/Pyramid/NodalDerivatives/SharedModes/P3/Complex/8",
+      "metric": "cpu_time",
+      "url": "cases/35d9ba807c54803132c1c000a80e06357874e9852b02ac5e0090c8d552217a64.json"
+    },
+    {
+      "id": "443433cb2bbb70248ea92f94bd6ac32471cbf4c336a546ade211f9e50a89db2b",
+      "name": "H1/Pyramid/NodalDerivatives/SharedModes/P3/Real/12",
+      "metric": "cpu_time",
+      "url": "cases/443433cb2bbb70248ea92f94bd6ac32471cbf4c336a546ade211f9e50a89db2b.json"
+    },
+    {
+      "id": "37a29901396dc4c4340d8400eb11cd04284166cda3e71ec85f895e9905d8ba07",
+      "name": "H1/Pyramid/NodalDerivatives/SharedModes/P3/Real/2",
+      "metric": "cpu_time",
+      "url": "cases/37a29901396dc4c4340d8400eb11cd04284166cda3e71ec85f895e9905d8ba07.json"
+    },
+    {
+      "id": "6a951466b8dfe6c23c1cd7027a0af42d1efc7920d12f0014018ec287e9058c6d",
+      "name": "H1/Pyramid/NodalDerivatives/SharedModes/P3/Real/4",
+      "metric": "cpu_time",
+      "url": "cases/6a951466b8dfe6c23c1cd7027a0af42d1efc7920d12f0014018ec287e9058c6d.json"
+    },
+    {
+      "id": "556e60485337d57df15daacced3546092f7726b04c04563d1aa91c8a349ec430",
+      "name": "H1/Pyramid/NodalDerivatives/SharedModes/P3/Real/8",
+      "metric": "cpu_time",
+      "url": "cases/556e60485337d57df15daacced3546092f7726b04c04563d1aa91c8a349ec430.json"
+    },
+    {
+      "id": "c7dcf34bb80f886f36f3eadb65b3600da9704b454cebe0d410dbe7dbca0ead36",
+      "name": "H1/Pyramid/NodalDerivatives/SharedModes/P4/Complex/12",
+      "metric": "cpu_time",
+      "url": "cases/c7dcf34bb80f886f36f3eadb65b3600da9704b454cebe0d410dbe7dbca0ead36.json"
+    },
+    {
+      "id": "18d1a54aef2ad5ccc29b6f67ddfae1a8ef259de8bb1de630e5e846045d5e34f8",
+      "name": "H1/Pyramid/NodalDerivatives/SharedModes/P4/Complex/2",
+      "metric": "cpu_time",
+      "url": "cases/18d1a54aef2ad5ccc29b6f67ddfae1a8ef259de8bb1de630e5e846045d5e34f8.json"
+    },
+    {
+      "id": "bf957ebdaabe2d6fed8dbf4fa3c1b51fd4e435a636c05bec748226c7eb58befc",
+      "name": "H1/Pyramid/NodalDerivatives/SharedModes/P4/Complex/4",
+      "metric": "cpu_time",
+      "url": "cases/bf957ebdaabe2d6fed8dbf4fa3c1b51fd4e435a636c05bec748226c7eb58befc.json"
+    },
+    {
+      "id": "549cef228b5603456878d4454d1e6f2e195a4f7118128e64d07ff8c1a24d312b",
+      "name": "H1/Pyramid/NodalDerivatives/SharedModes/P4/Complex/8",
+      "metric": "cpu_time",
+      "url": "cases/549cef228b5603456878d4454d1e6f2e195a4f7118128e64d07ff8c1a24d312b.json"
+    },
+    {
+      "id": "cb4ac485c3baa966239074e9aed5c8aed4c975bce557a3141be6ded444682bd2",
+      "name": "H1/Pyramid/NodalDerivatives/SharedModes/P4/Real/12",
+      "metric": "cpu_time",
+      "url": "cases/cb4ac485c3baa966239074e9aed5c8aed4c975bce557a3141be6ded444682bd2.json"
+    },
+    {
+      "id": "2f41fc9c7c8fcf2402e6a4050f8e132f7a52db1e48b221899a4da01ced0470de",
+      "name": "H1/Pyramid/NodalDerivatives/SharedModes/P4/Real/2",
+      "metric": "cpu_time",
+      "url": "cases/2f41fc9c7c8fcf2402e6a4050f8e132f7a52db1e48b221899a4da01ced0470de.json"
+    },
+    {
+      "id": "7c6e30686ab73b1b4727d16e98be8ff6379e002093d93ded777581b941eeed62",
+      "name": "H1/Pyramid/NodalDerivatives/SharedModes/P4/Real/4",
+      "metric": "cpu_time",
+      "url": "cases/7c6e30686ab73b1b4727d16e98be8ff6379e002093d93ded777581b941eeed62.json"
+    },
+    {
+      "id": "0710249660165ad4b02fc1c75af0b98f47763970305d4490b30f97feefed5253",
+      "name": "H1/Pyramid/NodalDerivatives/SharedModes/P4/Real/8",
+      "metric": "cpu_time",
+      "url": "cases/0710249660165ad4b02fc1c75af0b98f47763970305d4490b30f97feefed5253.json"
+    },
+    {
+      "id": "70bd76c83023f06d30a078befa5b57d8112835c1f19c926d6ce7f58cba1dea7f",
+      "name": "H1/Pyramid/NodalDerivatives/SharedModes/P5/Complex/12",
+      "metric": "cpu_time",
+      "url": "cases/70bd76c83023f06d30a078befa5b57d8112835c1f19c926d6ce7f58cba1dea7f.json"
+    },
+    {
+      "id": "7b787277a4470fdb90595387d921d31ca0456d51e4f6fcd15c646d12b3c67fc4",
+      "name": "H1/Pyramid/NodalDerivatives/SharedModes/P5/Complex/2",
+      "metric": "cpu_time",
+      "url": "cases/7b787277a4470fdb90595387d921d31ca0456d51e4f6fcd15c646d12b3c67fc4.json"
+    },
+    {
+      "id": "58d88fd592c78ef31817033d57948e7bc3d0f824e3a3f9017ab5978476d27589",
+      "name": "H1/Pyramid/NodalDerivatives/SharedModes/P5/Complex/4",
+      "metric": "cpu_time",
+      "url": "cases/58d88fd592c78ef31817033d57948e7bc3d0f824e3a3f9017ab5978476d27589.json"
+    },
+    {
+      "id": "d186e81165b1aa0b7645909c026814e377b7c6f9f2867f235047ad3ea82e417c",
+      "name": "H1/Pyramid/NodalDerivatives/SharedModes/P5/Complex/8",
+      "metric": "cpu_time",
+      "url": "cases/d186e81165b1aa0b7645909c026814e377b7c6f9f2867f235047ad3ea82e417c.json"
+    },
+    {
+      "id": "10ce3090b23e75e3567d77ea1401390bd7ae8f4f00c783a0436bf987b10305f4",
+      "name": "H1/Pyramid/NodalDerivatives/SharedModes/P5/Real/12",
+      "metric": "cpu_time",
+      "url": "cases/10ce3090b23e75e3567d77ea1401390bd7ae8f4f00c783a0436bf987b10305f4.json"
+    },
+    {
+      "id": "40d83ca5a0203270475713f7031c48a7ee63a00421b0ed98297c21899c75b93d",
+      "name": "H1/Pyramid/NodalDerivatives/SharedModes/P5/Real/2",
+      "metric": "cpu_time",
+      "url": "cases/40d83ca5a0203270475713f7031c48a7ee63a00421b0ed98297c21899c75b93d.json"
+    },
+    {
+      "id": "5f2372b5d9c6ca2813c8dbbafad8167369bc09f0f695d321ba98527451e2e55c",
+      "name": "H1/Pyramid/NodalDerivatives/SharedModes/P5/Real/4",
+      "metric": "cpu_time",
+      "url": "cases/5f2372b5d9c6ca2813c8dbbafad8167369bc09f0f695d321ba98527451e2e55c.json"
+    },
+    {
+      "id": "30315dd202ca89da6b8f19a93f637b66e42f578658aa14823286d5a216487f1d",
+      "name": "H1/Pyramid/NodalDerivatives/SharedModes/P5/Real/8",
+      "metric": "cpu_time",
+      "url": "cases/30315dd202ca89da6b8f19a93f637b66e42f578658aa14823286d5a216487f1d.json"
+    },
+    {
+      "id": "7d9aade5b0ac4414bab0be16e2725c43db294af9bd2ebd7f68fd2bd342bfd792",
+      "name": "H1/Pyramid/NodalDerivatives/SharedModes/P6/Complex/12",
+      "metric": "cpu_time",
+      "url": "cases/7d9aade5b0ac4414bab0be16e2725c43db294af9bd2ebd7f68fd2bd342bfd792.json"
+    },
+    {
+      "id": "03e6b157aa7f1406d4790b1c5382b8b786147e40e274ceb672dbc6c8acc26a89",
+      "name": "H1/Pyramid/NodalDerivatives/SharedModes/P6/Complex/2",
+      "metric": "cpu_time",
+      "url": "cases/03e6b157aa7f1406d4790b1c5382b8b786147e40e274ceb672dbc6c8acc26a89.json"
+    },
+    {
+      "id": "e9842f7408af27d7012c0cb74cc2dcfc0bb9f0c55c01bf6ee31aee3aa4c025be",
+      "name": "H1/Pyramid/NodalDerivatives/SharedModes/P6/Complex/4",
+      "metric": "cpu_time",
+      "url": "cases/e9842f7408af27d7012c0cb74cc2dcfc0bb9f0c55c01bf6ee31aee3aa4c025be.json"
+    },
+    {
+      "id": "1083044d9a28fb6ae4a966c2eaeff18dd414f6f158a6b91aeb8649be60478c7c",
+      "name": "H1/Pyramid/NodalDerivatives/SharedModes/P6/Complex/8",
+      "metric": "cpu_time",
+      "url": "cases/1083044d9a28fb6ae4a966c2eaeff18dd414f6f158a6b91aeb8649be60478c7c.json"
+    },
+    {
+      "id": "ad3b81ea2a151cb1567c0aa3f3b51092664a12d5bd18ac21d5c97e84b4d30637",
+      "name": "H1/Pyramid/NodalDerivatives/SharedModes/P6/Real/12",
+      "metric": "cpu_time",
+      "url": "cases/ad3b81ea2a151cb1567c0aa3f3b51092664a12d5bd18ac21d5c97e84b4d30637.json"
+    },
+    {
+      "id": "6b3a95c0775b50d25ca6564ec6650922331b8c28bce774701bea2dcdbdb02617",
+      "name": "H1/Pyramid/NodalDerivatives/SharedModes/P6/Real/2",
+      "metric": "cpu_time",
+      "url": "cases/6b3a95c0775b50d25ca6564ec6650922331b8c28bce774701bea2dcdbdb02617.json"
+    },
+    {
+      "id": "95cb0cb44fbac78fbc5fc67981a033d54f3a487369f2876eaf487c5aa581f6d8",
+      "name": "H1/Pyramid/NodalDerivatives/SharedModes/P6/Real/4",
+      "metric": "cpu_time",
+      "url": "cases/95cb0cb44fbac78fbc5fc67981a033d54f3a487369f2876eaf487c5aa581f6d8.json"
+    },
+    {
+      "id": "2df3c16b8c3a1a54d192163cf744ab6bc01c343847e87cd47165b2e23d6cd60b",
+      "name": "H1/Pyramid/NodalDerivatives/SharedModes/P6/Real/8",
+      "metric": "cpu_time",
+      "url": "cases/2df3c16b8c3a1a54d192163cf744ab6bc01c343847e87cd47165b2e23d6cd60b.json"
+    }
+  ]
+}

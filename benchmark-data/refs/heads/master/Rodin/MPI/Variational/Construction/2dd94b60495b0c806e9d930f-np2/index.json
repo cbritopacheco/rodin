@@ -1,0 +1,90 @@
+{
+  "schema": 1,
+  "definition": {
+    "kind": "benchmark",
+    "mode": "distributed",
+    "compiler": "gcc-14",
+    "runner": "ubuntu-24.04",
+    "cmake": {
+      "CMAKE_BUILD_TYPE": "Release",
+      "CMAKE_CXX_COMPILER": "g++-14",
+      "CMAKE_C_COMPILER": "gcc-14",
+      "CMAKE_SUPPRESS_REGENERATION": "ON",
+      "RODIN_BUILD_SRC": "ON",
+      "RODIN_BUILD_BENCHMARKS": "ON",
+      "RODIN_BUILD_UNIT_TESTS": "OFF",
+      "RODIN_BUILD_MANUFACTURED_TESTS": "OFF",
+      "RODIN_BUILD_CONVERGENCE_TESTS": "OFF",
+      "RODIN_BUILD_EXAMPLES": "OFF",
+      "RODIN_BUILD_DOC": "OFF",
+      "RODIN_INSTALL_RESOURCES": "OFF",
+      "RODIN_CODE_COVERAGE": "OFF",
+      "RODIN_MULTITHREADED": "OFF",
+      "RODIN_USE_ASAN": "OFF",
+      "RODIN_USE_UBSAN": "OFF",
+      "RODIN_USE_MPI": "ON",
+      "RODIN_USE_PETSC": "ON"
+    },
+    "targets": [
+      "RodinMPIConstructionBenchmarks"
+    ],
+    "stage": "components"
+  },
+  "ranks": 2,
+  "cases": [
+    {
+      "id": "13647ddb5bedb0fbf94e5c4b5fb7fbbdea584ae44302581cb9fdbfef17295a0f",
+      "name": "MPIConstruction/P0Scalar/128/iterations:20/manual_time",
+      "metric": "manual_time",
+      "url": "cases/13647ddb5bedb0fbf94e5c4b5fb7fbbdea584ae44302581cb9fdbfef17295a0f.json"
+    },
+    {
+      "id": "bb3d661db06a3f0af09fa531bec3ca4111cfd9b08d870499d8298136db106319",
+      "name": "MPIConstruction/P0Scalar/32/iterations:20/manual_time",
+      "metric": "manual_time",
+      "url": "cases/bb3d661db06a3f0af09fa531bec3ca4111cfd9b08d870499d8298136db106319.json"
+    },
+    {
+      "id": "cb2e80fc987f8986239584f4ae0118bf01e2f87c214cec3e8c166ac0429d363c",
+      "name": "MPIConstruction/P0Scalar/64/iterations:20/manual_time",
+      "metric": "manual_time",
+      "url": "cases/cb2e80fc987f8986239584f4ae0118bf01e2f87c214cec3e8c166ac0429d363c.json"
+    },
+    {
+      "id": "67d4e1aa642a27d9e99c35160b3de9ca422492309619a76fe72926fb1a1ae35e",
+      "name": "MPIConstruction/P0Vector2/128/iterations:20/manual_time",
+      "metric": "manual_time",
+      "url": "cases/67d4e1aa642a27d9e99c35160b3de9ca422492309619a76fe72926fb1a1ae35e.json"
+    },
+    {
+      "id": "6caef48ae30c05555d78d6447a16c4ae5a3d5e20ed9028e859bc240fd2d46a6d",
+      "name": "MPIConstruction/P0Vector2/32/iterations:20/manual_time",
+      "metric": "manual_time",
+      "url": "cases/6caef48ae30c05555d78d6447a16c4ae5a3d5e20ed9028e859bc240fd2d46a6d.json"
+    },
+    {
+      "id": "b21d5d0825f5f75ed74babb3cfa06becb0ae2ae37f90ab3f9f1f3251917ec67f",
+      "name": "MPIConstruction/P0Vector2/64/iterations:20/manual_time",
+      "metric": "manual_time",
+      "url": "cases/b21d5d0825f5f75ed74babb3cfa06becb0ae2ae37f90ab3f9f1f3251917ec67f.json"
+    },
+    {
+      "id": "b8570b400f802e73a1b7a1dd1c0aa96f881dff8fd7a71ad224a805b3fad74353",
+      "name": "MPIConstruction/P1Vector3/128/iterations:20/manual_time",
+      "metric": "manual_time",
+      "url": "cases/b8570b400f802e73a1b7a1dd1c0aa96f881dff8fd7a71ad224a805b3fad74353.json"
+    },
+    {
+      "id": "81bf60a55f76317f862378eacd052b555844e50769a66b94503ef318e16ca1a0",
+      "name": "MPIConstruction/P1Vector3/32/iterations:20/manual_time",
+      "metric": "manual_time",
+      "url": "cases/81bf60a55f76317f862378eacd052b555844e50769a66b94503ef318e16ca1a0.json"
+    },
+    {
+      "id": "d494334c7a9e48b7085197702494e54e320a7aff10ef03158ad26805b9c4bca1",
+      "name": "MPIConstruction/P1Vector3/64/iterations:20/manual_time",
+      "metric": "manual_time",
+      "url": "cases/d494334c7a9e48b7085197702494e54e320a7aff10ef03158ad26805b9c4bca1.json"
+    }
+  ]
+}

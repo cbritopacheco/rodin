@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "component": "Rodin/Location/AABB/Workload",
+  "configuration": "939da162be25617de3ba0617-np1",
+  "name": "Triangle/3/16/0/3/shared/0",
+  "metric": "process_cpu_time",
+  "entries": [
+    {
+      "commit": "08f2b1df730e2f6c6ec854001b199f67c990ac38",
+      "date": "2026-11-09T20:14:21.513262+00:00",
+      "run": "42617234567.1",
+      "results": [
+        {
+          "name": "Triangle/3/16/0/3/shared/0",
+          "value": 5408.53046199,
+          "unit": "ns",
+          "metric": "process_cpu_time",
+          "samples": [
+            5408.53046199
+          ],
+          "records": [
+            {
+              "geometry": "Triangle",
+              "degree": "3",
+              "resolution": "16",
+              "cells": "450",
+              "distortion": "0.000000",
+              "warp_degree": "3",
+              "query": "shared",
+              "pruning": "0",
+              "samples": "64",
+              "ns": "5408.53046199"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "format": "csv",
+  "window": 20
+}

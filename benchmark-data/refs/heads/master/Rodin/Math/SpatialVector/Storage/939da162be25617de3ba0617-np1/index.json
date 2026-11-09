@@ -1,0 +1,910 @@
+{
+  "schema": 1,
+  "definition": {
+    "kind": "benchmark",
+    "mode": "local",
+    "compiler": "gcc-14",
+    "runner": "ubuntu-24.04",
+    "cmake": {
+      "CMAKE_BUILD_TYPE": "Release",
+      "CMAKE_CXX_COMPILER": "g++-14",
+      "CMAKE_C_COMPILER": "gcc-14",
+      "CMAKE_SUPPRESS_REGENERATION": "ON",
+      "RODIN_BUILD_SRC": "ON",
+      "RODIN_BUILD_BENCHMARKS": "ON",
+      "RODIN_BUILD_UNIT_TESTS": "OFF",
+      "RODIN_BUILD_MANUFACTURED_TESTS": "OFF",
+      "RODIN_BUILD_CONVERGENCE_TESTS": "OFF",
+      "RODIN_BUILD_EXAMPLES": "OFF",
+      "RODIN_BUILD_DOC": "OFF",
+      "RODIN_INSTALL_RESOURCES": "OFF",
+      "RODIN_CODE_COVERAGE": "OFF",
+      "RODIN_MULTITHREADED": "OFF",
+      "RODIN_USE_ASAN": "OFF",
+      "RODIN_USE_UBSAN": "OFF",
+      "RODIN_USE_MPI": "OFF",
+      "RODIN_USE_PETSC": "OFF"
+    },
+    "targets": [
+      "RodinMathBenchmarks",
+      "RodinMathSpatialMatrixBenchmarks",
+      "RodinMathSpatialVectorBenchmarks",
+      "RodinScalarDotBenchmarks",
+      "RodinSparseAlgebraBenchmarks",
+      "RodinSparseEliminationBenchmarks",
+      "RodinSpatialDotBenchmarks",
+      "RodinSpatialMatrixContractionBenchmarks",
+      "RodinSpatialMatrixProductBenchmarks",
+      "RodinSpatialMatrixVectorBenchmarks",
+      "RodinSpatialVectorStorageBenchmarks"
+    ],
+    "stage": "components"
+  },
+  "ranks": 1,
+  "cases": [
+    {
+      "id": "e4177d39bf7623caccd209360293f3665935d6f571334743eb19dfd63bac32e2",
+      "name": "SpatialVectorStorage/CopyAppend/Complex/0/2048/real_time",
+      "metric": "real_time",
+      "url": "cases/e4177d39bf7623caccd209360293f3665935d6f571334743eb19dfd63bac32e2.json"
+    },
+    {
+      "id": "eeeef9c773c997bff6f975b64c6918d2b44ad704ec414faba0b7718cb246adbc",
+      "name": "SpatialVectorStorage/CopyAppend/Complex/0/256/real_time",
+      "metric": "real_time",
+      "url": "cases/eeeef9c773c997bff6f975b64c6918d2b44ad704ec414faba0b7718cb246adbc.json"
+    },
+    {
+      "id": "a123b553b8110727e8ce6da164d25ac0482173364f4e95a2617c8b2a55eb326b",
+      "name": "SpatialVectorStorage/CopyAppend/Complex/0/32/real_time",
+      "metric": "real_time",
+      "url": "cases/a123b553b8110727e8ce6da164d25ac0482173364f4e95a2617c8b2a55eb326b.json"
+    },
+    {
+      "id": "5629cd8267b7e3252f9e8be424c30d740729ccdf3734e81d72f3eb8715af6bfb",
+      "name": "SpatialVectorStorage/CopyAppend/Complex/1/2048/real_time",
+      "metric": "real_time",
+      "url": "cases/5629cd8267b7e3252f9e8be424c30d740729ccdf3734e81d72f3eb8715af6bfb.json"
+    },
+    {
+      "id": "dd651a3a48cea9d25bc5ec39c2617154f3b300443aef69d1ba7b8e1f1a055897",
+      "name": "SpatialVectorStorage/CopyAppend/Complex/1/256/real_time",
+      "metric": "real_time",
+      "url": "cases/dd651a3a48cea9d25bc5ec39c2617154f3b300443aef69d1ba7b8e1f1a055897.json"
+    },
+    {
+      "id": "cadfe75133639c7d8a0bd0a6d1504131929a7e68bce87a751c0890b0c29f6bfb",
+      "name": "SpatialVectorStorage/CopyAppend/Complex/1/32/real_time",
+      "metric": "real_time",
+      "url": "cases/cadfe75133639c7d8a0bd0a6d1504131929a7e68bce87a751c0890b0c29f6bfb.json"
+    },
+    {
+      "id": "88f0823a29905c2c419b8233a0781b57d67d89c293b3b95be2e9242a05028425",
+      "name": "SpatialVectorStorage/CopyAppend/Complex/2/2048/real_time",
+      "metric": "real_time",
+      "url": "cases/88f0823a29905c2c419b8233a0781b57d67d89c293b3b95be2e9242a05028425.json"
+    },
+    {
+      "id": "e8dff26736127c58526841d51d17a80fc8f0c49d30deb70bf465f192169f581c",
+      "name": "SpatialVectorStorage/CopyAppend/Complex/2/256/real_time",
+      "metric": "real_time",
+      "url": "cases/e8dff26736127c58526841d51d17a80fc8f0c49d30deb70bf465f192169f581c.json"
+    },
+    {
+      "id": "6c95bfe3db26084595b8c55d06796a34509477be8f194f3316b2eadef3ebb13f",
+      "name": "SpatialVectorStorage/CopyAppend/Complex/2/32/real_time",
+      "metric": "real_time",
+      "url": "cases/6c95bfe3db26084595b8c55d06796a34509477be8f194f3316b2eadef3ebb13f.json"
+    },
+    {
+      "id": "1ea2003ca6be78c93503378eb189cec7ce361cafb307289593a359633463e573",
+      "name": "SpatialVectorStorage/CopyAppend/Complex/3/2048/real_time",
+      "metric": "real_time",
+      "url": "cases/1ea2003ca6be78c93503378eb189cec7ce361cafb307289593a359633463e573.json"
+    },
+    {
+      "id": "e9cac44fd5f44d80a2979b4c8547f2b750290d19a55b8569e31f1c94ddc27b2d",
+      "name": "SpatialVectorStorage/CopyAppend/Complex/3/256/real_time",
+      "metric": "real_time",
+      "url": "cases/e9cac44fd5f44d80a2979b4c8547f2b750290d19a55b8569e31f1c94ddc27b2d.json"
+    },
+    {
+      "id": "983bcbb0585fd12eba425b6e4935ebc07efa44b5e4d7e0d86209a9c5b6688dd8",
+      "name": "SpatialVectorStorage/CopyAppend/Complex/3/32/real_time",
+      "metric": "real_time",
+      "url": "cases/983bcbb0585fd12eba425b6e4935ebc07efa44b5e4d7e0d86209a9c5b6688dd8.json"
+    },
+    {
+      "id": "56dba7bedfb7590a07e0c7e4b978affb51657bddab8997812242488523568956",
+      "name": "SpatialVectorStorage/CopyAppend/Real/0/2048/real_time",
+      "metric": "real_time",
+      "url": "cases/56dba7bedfb7590a07e0c7e4b978affb51657bddab8997812242488523568956.json"
+    },
+    {
+      "id": "3ea18a83ea4d7cfce7ffffd1bd98e9d21983e4c4929fc2f3ec6753bcabf956b4",
+      "name": "SpatialVectorStorage/CopyAppend/Real/0/256/real_time",
+      "metric": "real_time",
+      "url": "cases/3ea18a83ea4d7cfce7ffffd1bd98e9d21983e4c4929fc2f3ec6753bcabf956b4.json"
+    },
+    {
+      "id": "080b574b7a4d89b1e947f594d12b96c33dbdf55970bea052bc19bfeffb6ca8f2",
+      "name": "SpatialVectorStorage/CopyAppend/Real/0/32/real_time",
+      "metric": "real_time",
+      "url": "cases/080b574b7a4d89b1e947f594d12b96c33dbdf55970bea052bc19bfeffb6ca8f2.json"
+    },
+    {
+      "id": "8cef7d125d70530ae4a3a389fc83c467711e17642c18895fb527b3f0e1bc93fa",
+      "name": "SpatialVectorStorage/CopyAppend/Real/1/2048/real_time",
+      "metric": "real_time",
+      "url": "cases/8cef7d125d70530ae4a3a389fc83c467711e17642c18895fb527b3f0e1bc93fa.json"
+    },
+    {
+      "id": "dc31bdd852fce4fa25e8f3fe5ffd44295914b8b2629914161bdb15799eea4bcf",
+      "name": "SpatialVectorStorage/CopyAppend/Real/1/256/real_time",
+      "metric": "real_time",
+      "url": "cases/dc31bdd852fce4fa25e8f3fe5ffd44295914b8b2629914161bdb15799eea4bcf.json"
+    },
+    {
+      "id": "49c8de42e0d466ae55f7fdf2395b4a30e3d51038a340cdf39f3c5c53203f5faa",
+      "name": "SpatialVectorStorage/CopyAppend/Real/1/32/real_time",
+      "metric": "real_time",
+      "url": "cases/49c8de42e0d466ae55f7fdf2395b4a30e3d51038a340cdf39f3c5c53203f5faa.json"
+    },
+    {
+      "id": "d7aebecf9c64eb20e356c6baf00e8c4a72e501bba036d779173e57b1df97f012",
+      "name": "SpatialVectorStorage/CopyAppend/Real/2/2048/real_time",
+      "metric": "real_time",
+      "url": "cases/d7aebecf9c64eb20e356c6baf00e8c4a72e501bba036d779173e57b1df97f012.json"
+    },
+    {
+      "id": "3f19557003aae59e536def14faa4cc6c25ff692aad5a8f4e09f979588276af18",
+      "name": "SpatialVectorStorage/CopyAppend/Real/2/256/real_time",
+      "metric": "real_time",
+      "url": "cases/3f19557003aae59e536def14faa4cc6c25ff692aad5a8f4e09f979588276af18.json"
+    },
+    {
+      "id": "affc2e969867b6378bdb092c3fb7aa1cd1623fbf031599089d4ba7890a851623",
+      "name": "SpatialVectorStorage/CopyAppend/Real/2/32/real_time",
+      "metric": "real_time",
+      "url": "cases/affc2e969867b6378bdb092c3fb7aa1cd1623fbf031599089d4ba7890a851623.json"
+    },
+    {
+      "id": "a9b0742d92c204ce527cb0303db31946ca19471fda4aad94b5206f5521695664",
+      "name": "SpatialVectorStorage/CopyAppend/Real/3/2048/real_time",
+      "metric": "real_time",
+      "url": "cases/a9b0742d92c204ce527cb0303db31946ca19471fda4aad94b5206f5521695664.json"
+    },
+    {
+      "id": "c2e3e30d31c0f1055e1cbca883f0a2eb457b110cfe1ea9b230ebfc5a209cc730",
+      "name": "SpatialVectorStorage/CopyAppend/Real/3/256/real_time",
+      "metric": "real_time",
+      "url": "cases/c2e3e30d31c0f1055e1cbca883f0a2eb457b110cfe1ea9b230ebfc5a209cc730.json"
+    },
+    {
+      "id": "ef13252d925dd6a60e4183a64def8c2ba6318e7e8f3edf6997029b5db3ce01e2",
+      "name": "SpatialVectorStorage/CopyAppend/Real/3/32/real_time",
+      "metric": "real_time",
+      "url": "cases/ef13252d925dd6a60e4183a64def8c2ba6318e7e8f3edf6997029b5db3ce01e2.json"
+    },
+    {
+      "id": "22137a457af3de76569a17a300b1ecd85d1d991d81f4161ab947c1ebd81afbf5",
+      "name": "SpatialVectorStorage/CopyAssign/Complex/0/2048/real_time",
+      "metric": "real_time",
+      "url": "cases/22137a457af3de76569a17a300b1ecd85d1d991d81f4161ab947c1ebd81afbf5.json"
+    },
+    {
+      "id": "c2235d9eb711fac957db154c18345020d02dd3f28704ac1ec0be9d15a4fbfbea",
+      "name": "SpatialVectorStorage/CopyAssign/Complex/0/256/real_time",
+      "metric": "real_time",
+      "url": "cases/c2235d9eb711fac957db154c18345020d02dd3f28704ac1ec0be9d15a4fbfbea.json"
+    },
+    {
+      "id": "74d0a81d773687b746e2bb119d93f75af44ae310dd8da7a22424849542997803",
+      "name": "SpatialVectorStorage/CopyAssign/Complex/0/32/real_time",
+      "metric": "real_time",
+      "url": "cases/74d0a81d773687b746e2bb119d93f75af44ae310dd8da7a22424849542997803.json"
+    },
+    {
+      "id": "e0d5a29f426ba6195a3095febe85c69872a9623b02610265fe5cb49a38ddba6b",
+      "name": "SpatialVectorStorage/CopyAssign/Complex/1/2048/real_time",
+      "metric": "real_time",
+      "url": "cases/e0d5a29f426ba6195a3095febe85c69872a9623b02610265fe5cb49a38ddba6b.json"
+    },
+    {
+      "id": "e88c2cbf0f4c291d0fd2796d64c2696171cf951d495be7748213c680d6d8a73b",
+      "name": "SpatialVectorStorage/CopyAssign/Complex/1/256/real_time",
+      "metric": "real_time",
+      "url": "cases/e88c2cbf0f4c291d0fd2796d64c2696171cf951d495be7748213c680d6d8a73b.json"
+    },
+    {
+      "id": "43f52ceba10089eec19679e915aebd61b8a7490b78b8bd3db3250b2e73f08e36",
+      "name": "SpatialVectorStorage/CopyAssign/Complex/1/32/real_time",
+      "metric": "real_time",
+      "url": "cases/43f52ceba10089eec19679e915aebd61b8a7490b78b8bd3db3250b2e73f08e36.json"
+    },
+    {
+      "id": "8343e4ecf4c03218139884d67037b49840b3cae3ea1c71a46a40ad0a7db4f9a2",
+      "name": "SpatialVectorStorage/CopyAssign/Complex/2/2048/real_time",
+      "metric": "real_time",
+      "url": "cases/8343e4ecf4c03218139884d67037b49840b3cae3ea1c71a46a40ad0a7db4f9a2.json"
+    },
+    {
+      "id": "d4c451c6a0caee27c9b0e7fd2cf3a9e80f3cb3211ca7d0e6ca239b86746b0c77",
+      "name": "SpatialVectorStorage/CopyAssign/Complex/2/256/real_time",
+      "metric": "real_time",
+      "url": "cases/d4c451c6a0caee27c9b0e7fd2cf3a9e80f3cb3211ca7d0e6ca239b86746b0c77.json"
+    },
+    {
+      "id": "711e0ad0dacf50ea111b9ea4d8ac9523cd38db68d95fae8e6cc24d21209cc07b",
+      "name": "SpatialVectorStorage/CopyAssign/Complex/2/32/real_time",
+      "metric": "real_time",
+      "url": "cases/711e0ad0dacf50ea111b9ea4d8ac9523cd38db68d95fae8e6cc24d21209cc07b.json"
+    },
+    {
+      "id": "9c227b55bbcb5b3105e224faa090435b64e14a844b17698b8902c57e0ac9755a",
+      "name": "SpatialVectorStorage/CopyAssign/Complex/3/2048/real_time",
+      "metric": "real_time",
+      "url": "cases/9c227b55bbcb5b3105e224faa090435b64e14a844b17698b8902c57e0ac9755a.json"
+    },
+    {
+      "id": "06a7273861f41ff016a821a25daa5ffe9e529f2e40925b94ceb6ee2a116c7227",
+      "name": "SpatialVectorStorage/CopyAssign/Complex/3/256/real_time",
+      "metric": "real_time",
+      "url": "cases/06a7273861f41ff016a821a25daa5ffe9e529f2e40925b94ceb6ee2a116c7227.json"
+    },
+    {
+      "id": "9e8fce4c672f7df02404b1db1f6f5e878d78792d2fb3682d373b8b67cf155fcb",
+      "name": "SpatialVectorStorage/CopyAssign/Complex/3/32/real_time",
+      "metric": "real_time",
+      "url": "cases/9e8fce4c672f7df02404b1db1f6f5e878d78792d2fb3682d373b8b67cf155fcb.json"
+    },
+    {
+      "id": "21980c470794cd65bef6e45ac70c299b4a72b4d6a330d49d530dad171620bafe",
+      "name": "SpatialVectorStorage/CopyAssign/Real/0/2048/real_time",
+      "metric": "real_time",
+      "url": "cases/21980c470794cd65bef6e45ac70c299b4a72b4d6a330d49d530dad171620bafe.json"
+    },
+    {
+      "id": "992e459d86e8417bc4f2ddcaa801947f33344e19feb3eda1a45afb9ab401cd18",
+      "name": "SpatialVectorStorage/CopyAssign/Real/0/256/real_time",
+      "metric": "real_time",
+      "url": "cases/992e459d86e8417bc4f2ddcaa801947f33344e19feb3eda1a45afb9ab401cd18.json"
+    },
+    {
+      "id": "f7bd7db8c5a82e840888afef841e9aad9910a43e9fb25aeeb4cbb81a08ed3381",
+      "name": "SpatialVectorStorage/CopyAssign/Real/0/32/real_time",
+      "metric": "real_time",
+      "url": "cases/f7bd7db8c5a82e840888afef841e9aad9910a43e9fb25aeeb4cbb81a08ed3381.json"
+    },
+    {
+      "id": "cadca470cd0e141f80db93363d7e05faaabfb4d147c15785ea8fb3d07aadf283",
+      "name": "SpatialVectorStorage/CopyAssign/Real/1/2048/real_time",
+      "metric": "real_time",
+      "url": "cases/cadca470cd0e141f80db93363d7e05faaabfb4d147c15785ea8fb3d07aadf283.json"
+    },
+    {
+      "id": "fb2cd675e0bf0e6f649bfb34a4039056adebf9d9c69fb09233a9c0e12ec44aad",
+      "name": "SpatialVectorStorage/CopyAssign/Real/1/256/real_time",
+      "metric": "real_time",
+      "url": "cases/fb2cd675e0bf0e6f649bfb34a4039056adebf9d9c69fb09233a9c0e12ec44aad.json"
+    },
+    {
+      "id": "3d223610a988ed739a2a1e033f717aad6aca4bf7f559fbffb9b08d6889b7693e",
+      "name": "SpatialVectorStorage/CopyAssign/Real/1/32/real_time",
+      "metric": "real_time",
+      "url": "cases/3d223610a988ed739a2a1e033f717aad6aca4bf7f559fbffb9b08d6889b7693e.json"
+    },
+    {
+      "id": "76367b266aceaccb50c2fd976c969bd08019cedb1d443010a93f2a836881e619",
+      "name": "SpatialVectorStorage/CopyAssign/Real/2/2048/real_time",
+      "metric": "real_time",
+      "url": "cases/76367b266aceaccb50c2fd976c969bd08019cedb1d443010a93f2a836881e619.json"
+    },
+    {
+      "id": "e10c9a02b7bb47b134287bf0d8d870fa363feb5631eb6caf11c77e9ed769e11a",
+      "name": "SpatialVectorStorage/CopyAssign/Real/2/256/real_time",
+      "metric": "real_time",
+      "url": "cases/e10c9a02b7bb47b134287bf0d8d870fa363feb5631eb6caf11c77e9ed769e11a.json"
+    },
+    {
+      "id": "7dd80abeb8a122cb082e8c6768af4e92b3f4b750916c5406a3811dd7f7e292b7",
+      "name": "SpatialVectorStorage/CopyAssign/Real/2/32/real_time",
+      "metric": "real_time",
+      "url": "cases/7dd80abeb8a122cb082e8c6768af4e92b3f4b750916c5406a3811dd7f7e292b7.json"
+    },
+    {
+      "id": "7f18da5d2956995ebadd87ef4d624fd1ed6cd5436a60997d56ca151e32019574",
+      "name": "SpatialVectorStorage/CopyAssign/Real/3/2048/real_time",
+      "metric": "real_time",
+      "url": "cases/7f18da5d2956995ebadd87ef4d624fd1ed6cd5436a60997d56ca151e32019574.json"
+    },
+    {
+      "id": "56bb6ba068a09d15f42ad659909da7d00b108d2334d2e94c0779118c1a459539",
+      "name": "SpatialVectorStorage/CopyAssign/Real/3/256/real_time",
+      "metric": "real_time",
+      "url": "cases/56bb6ba068a09d15f42ad659909da7d00b108d2334d2e94c0779118c1a459539.json"
+    },
+    {
+      "id": "e1a908b41a470d29a642e4f7517ad2e2901cb709a020d232332fa5c949348240",
+      "name": "SpatialVectorStorage/CopyAssign/Real/3/32/real_time",
+      "metric": "real_time",
+      "url": "cases/e1a908b41a470d29a642e4f7517ad2e2901cb709a020d232332fa5c949348240.json"
+    },
+    {
+      "id": "c2ced52166f642a66b504b1ebc6e2e21463dfbfdb04e85835424f1ae10643a8f",
+      "name": "SpatialVectorStorage/DirectFillAppend/Complex/0/2048/real_time",
+      "metric": "real_time",
+      "url": "cases/c2ced52166f642a66b504b1ebc6e2e21463dfbfdb04e85835424f1ae10643a8f.json"
+    },
+    {
+      "id": "da17fda8595674ee4119a45b1c77fba442710423c7997edfb467b59b4730842c",
+      "name": "SpatialVectorStorage/DirectFillAppend/Complex/0/256/real_time",
+      "metric": "real_time",
+      "url": "cases/da17fda8595674ee4119a45b1c77fba442710423c7997edfb467b59b4730842c.json"
+    },
+    {
+      "id": "ee4bf3e8fc21369557a72976dd4e75e685904a5126f321889dc4980e9ea86b6b",
+      "name": "SpatialVectorStorage/DirectFillAppend/Complex/0/32/real_time",
+      "metric": "real_time",
+      "url": "cases/ee4bf3e8fc21369557a72976dd4e75e685904a5126f321889dc4980e9ea86b6b.json"
+    },
+    {
+      "id": "c7fc6c72b7c47b7ce925acc5793501b039612f61b53beed0b9a7d7b6ef151ed2",
+      "name": "SpatialVectorStorage/DirectFillAppend/Complex/1/2048/real_time",
+      "metric": "real_time",
+      "url": "cases/c7fc6c72b7c47b7ce925acc5793501b039612f61b53beed0b9a7d7b6ef151ed2.json"
+    },
+    {
+      "id": "38e3a5a33b56d3d4584231954b1240c3a1a9ed6bc7a7e7e8c9194bea3f1a7ccf",
+      "name": "SpatialVectorStorage/DirectFillAppend/Complex/1/256/real_time",
+      "metric": "real_time",
+      "url": "cases/38e3a5a33b56d3d4584231954b1240c3a1a9ed6bc7a7e7e8c9194bea3f1a7ccf.json"
+    },
+    {
+      "id": "5cd89e2153f4d9667a8b691ad514695c69a69001494c5a3d70efb18197a78975",
+      "name": "SpatialVectorStorage/DirectFillAppend/Complex/1/32/real_time",
+      "metric": "real_time",
+      "url": "cases/5cd89e2153f4d9667a8b691ad514695c69a69001494c5a3d70efb18197a78975.json"
+    },
+    {
+      "id": "49fd8ecbce49c80ff90eed9b06caaa69b157de334bca0d5e2eba5226bc40d07f",
+      "name": "SpatialVectorStorage/DirectFillAppend/Complex/2/2048/real_time",
+      "metric": "real_time",
+      "url": "cases/49fd8ecbce49c80ff90eed9b06caaa69b157de334bca0d5e2eba5226bc40d07f.json"
+    },
+    {
+      "id": "3c2eaebcab09efbd38df1e2c284c81ebc6a6b0da5966d4103b0b8c82ca45adf8",
+      "name": "SpatialVectorStorage/DirectFillAppend/Complex/2/256/real_time",
+      "metric": "real_time",
+      "url": "cases/3c2eaebcab09efbd38df1e2c284c81ebc6a6b0da5966d4103b0b8c82ca45adf8.json"
+    },
+    {
+      "id": "5111634d266cdc4caabe067b4093806aa46df05e9de8fabe72d4a861dcc1a483",
+      "name": "SpatialVectorStorage/DirectFillAppend/Complex/2/32/real_time",
+      "metric": "real_time",
+      "url": "cases/5111634d266cdc4caabe067b4093806aa46df05e9de8fabe72d4a861dcc1a483.json"
+    },
+    {
+      "id": "40ef3e6808ce55d4502601270553ea02b5baa80b142b6ddb2dfa24369da54629",
+      "name": "SpatialVectorStorage/DirectFillAppend/Complex/3/2048/real_time",
+      "metric": "real_time",
+      "url": "cases/40ef3e6808ce55d4502601270553ea02b5baa80b142b6ddb2dfa24369da54629.json"
+    },
+    {
+      "id": "b5ebd9e8173e5f5719bb48068fa0893ef1bd08d817e9e2f74b7468e15204f8b8",
+      "name": "SpatialVectorStorage/DirectFillAppend/Complex/3/256/real_time",
+      "metric": "real_time",
+      "url": "cases/b5ebd9e8173e5f5719bb48068fa0893ef1bd08d817e9e2f74b7468e15204f8b8.json"
+    },
+    {
+      "id": "02312d62755776091138361e100bbbc2bce93735628d7b26e997f1f1b18fab3a",
+      "name": "SpatialVectorStorage/DirectFillAppend/Complex/3/32/real_time",
+      "metric": "real_time",
+      "url": "cases/02312d62755776091138361e100bbbc2bce93735628d7b26e997f1f1b18fab3a.json"
+    },
+    {
+      "id": "207ee5da377135a31592ad0dd6b61b4fc21361020e119fce44827824d5c7a56a",
+      "name": "SpatialVectorStorage/DirectFillAppend/Real/0/2048/real_time",
+      "metric": "real_time",
+      "url": "cases/207ee5da377135a31592ad0dd6b61b4fc21361020e119fce44827824d5c7a56a.json"
+    },
+    {
+      "id": "0a5b99ef7bea6a85fa60998cf49416431a2b3c9779288ffa358e16586ef18289",
+      "name": "SpatialVectorStorage/DirectFillAppend/Real/0/256/real_time",
+      "metric": "real_time",
+      "url": "cases/0a5b99ef7bea6a85fa60998cf49416431a2b3c9779288ffa358e16586ef18289.json"
+    },
+    {
+      "id": "ebc87cc93a1d624365edea9c55e1c4876f58767662992977856d199076be362e",
+      "name": "SpatialVectorStorage/DirectFillAppend/Real/0/32/real_time",
+      "metric": "real_time",
+      "url": "cases/ebc87cc93a1d624365edea9c55e1c4876f58767662992977856d199076be362e.json"
+    },
+    {
+      "id": "5197ab4cf5ae00cfef244788c8a1f6024db8d1fc1c7169658b2f685f6d738a73",
+      "name": "SpatialVectorStorage/DirectFillAppend/Real/1/2048/real_time",
+      "metric": "real_time",
+      "url": "cases/5197ab4cf5ae00cfef244788c8a1f6024db8d1fc1c7169658b2f685f6d738a73.json"
+    },
+    {
+      "id": "794c94437e41a87c8eabf1cdda94009297b2cd7d28ce336c43395203e801b245",
+      "name": "SpatialVectorStorage/DirectFillAppend/Real/1/256/real_time",
+      "metric": "real_time",
+      "url": "cases/794c94437e41a87c8eabf1cdda94009297b2cd7d28ce336c43395203e801b245.json"
+    },
+    {
+      "id": "b667cee79f5abbdcf55bfb90591b7db3c430986f37f681caf8a3ff9653b714c6",
+      "name": "SpatialVectorStorage/DirectFillAppend/Real/1/32/real_time",
+      "metric": "real_time",
+      "url": "cases/b667cee79f5abbdcf55bfb90591b7db3c430986f37f681caf8a3ff9653b714c6.json"
+    },
+    {
+      "id": "66d35ea3aece86d625fa31a6e65ffbd75075338fb7a30538cf3d95321a371b6f",
+      "name": "SpatialVectorStorage/DirectFillAppend/Real/2/2048/real_time",
+      "metric": "real_time",
+      "url": "cases/66d35ea3aece86d625fa31a6e65ffbd75075338fb7a30538cf3d95321a371b6f.json"
+    },
+    {
+      "id": "0872764f09e0f2e7025f031f9cdda43aa88b3fc6f5e03b17e7757053997bd24a",
+      "name": "SpatialVectorStorage/DirectFillAppend/Real/2/256/real_time",
+      "metric": "real_time",
+      "url": "cases/0872764f09e0f2e7025f031f9cdda43aa88b3fc6f5e03b17e7757053997bd24a.json"
+    },
+    {
+      "id": "0961dc00dd37ed5df570ee3526c2293607787de04837ce83a233d586c9968ce9",
+      "name": "SpatialVectorStorage/DirectFillAppend/Real/2/32/real_time",
+      "metric": "real_time",
+      "url": "cases/0961dc00dd37ed5df570ee3526c2293607787de04837ce83a233d586c9968ce9.json"
+    },
+    {
+      "id": "4eaeeb5c07fafd7780f9cbf28ecf4a4bd994da4e56602381470ec587c814ac05",
+      "name": "SpatialVectorStorage/DirectFillAppend/Real/3/2048/real_time",
+      "metric": "real_time",
+      "url": "cases/4eaeeb5c07fafd7780f9cbf28ecf4a4bd994da4e56602381470ec587c814ac05.json"
+    },
+    {
+      "id": "8652588fe0ae48559a159d1c2f0ca8d381f633ad81516b6e11df4a5ced3dfeb0",
+      "name": "SpatialVectorStorage/DirectFillAppend/Real/3/256/real_time",
+      "metric": "real_time",
+      "url": "cases/8652588fe0ae48559a159d1c2f0ca8d381f633ad81516b6e11df4a5ced3dfeb0.json"
+    },
+    {
+      "id": "868d997bebe0f2b71e87288f9c7693ac843a5ec56e7996acbf2878992a21e503",
+      "name": "SpatialVectorStorage/DirectFillAppend/Real/3/32/real_time",
+      "metric": "real_time",
+      "url": "cases/868d997bebe0f2b71e87288f9c7693ac843a5ec56e7996acbf2878992a21e503.json"
+    },
+    {
+      "id": "1e2272c87eae1e5d3aee59673f5a064394bdf87c53aecc1a5e32b592a34a65a2",
+      "name": "SpatialVectorStorage/TemporaryFillAppend/Complex/0/2048/real_time",
+      "metric": "real_time",
+      "url": "cases/1e2272c87eae1e5d3aee59673f5a064394bdf87c53aecc1a5e32b592a34a65a2.json"
+    },
+    {
+      "id": "0bb6070a83c32967380f1720c7eed1f01637c441ca5e3309b7b63cce3723dc81",
+      "name": "SpatialVectorStorage/TemporaryFillAppend/Complex/0/256/real_time",
+      "metric": "real_time",
+      "url": "cases/0bb6070a83c32967380f1720c7eed1f01637c441ca5e3309b7b63cce3723dc81.json"
+    },
+    {
+      "id": "5d34d274869f537dc4f05b161db241fd080ce427fc02d720c8512ae7ac280f29",
+      "name": "SpatialVectorStorage/TemporaryFillAppend/Complex/0/32/real_time",
+      "metric": "real_time",
+      "url": "cases/5d34d274869f537dc4f05b161db241fd080ce427fc02d720c8512ae7ac280f29.json"
+    },
+    {
+      "id": "f1740fe875b45bdfa2adf4309a610351a35fcd8632213de647de3e2463afebad",
+      "name": "SpatialVectorStorage/TemporaryFillAppend/Complex/1/2048/real_time",
+      "metric": "real_time",
+      "url": "cases/f1740fe875b45bdfa2adf4309a610351a35fcd8632213de647de3e2463afebad.json"
+    },
+    {
+      "id": "38ebe6e8c416c0f3d47a63803c23875afe187cd75381efee0cb9db2740b15959",
+      "name": "SpatialVectorStorage/TemporaryFillAppend/Complex/1/256/real_time",
+      "metric": "real_time",
+      "url": "cases/38ebe6e8c416c0f3d47a63803c23875afe187cd75381efee0cb9db2740b15959.json"
+    },
+    {
+      "id": "7eadc583318667f22039064b06fe51a1ec51d7532e09841a1931d3fcb953d07f",
+      "name": "SpatialVectorStorage/TemporaryFillAppend/Complex/1/32/real_time",
+      "metric": "real_time",
+      "url": "cases/7eadc583318667f22039064b06fe51a1ec51d7532e09841a1931d3fcb953d07f.json"
+    },
+    {
+      "id": "bb9bef06bd576f7c5de277d13817441527a915e4549a72f1afb094c38cf1afef",
+      "name": "SpatialVectorStorage/TemporaryFillAppend/Complex/2/2048/real_time",
+      "metric": "real_time",
+      "url": "cases/bb9bef06bd576f7c5de277d13817441527a915e4549a72f1afb094c38cf1afef.json"
+    },
+    {
+      "id": "8107c7c803462d13c62022ba5db9f625c1e38f5c73dbf4679c0032b45311335d",
+      "name": "SpatialVectorStorage/TemporaryFillAppend/Complex/2/256/real_time",
+      "metric": "real_time",
+      "url": "cases/8107c7c803462d13c62022ba5db9f625c1e38f5c73dbf4679c0032b45311335d.json"
+    },
+    {
+      "id": "77c73201f49268492b6f51fbf5238a34c78625890c59296028a0506359364a6d",
+      "name": "SpatialVectorStorage/TemporaryFillAppend/Complex/2/32/real_time",
+      "metric": "real_time",
+      "url": "cases/77c73201f49268492b6f51fbf5238a34c78625890c59296028a0506359364a6d.json"
+    },
+    {
+      "id": "5e16b391c4314dc82603c1170b578f587c539cf4243b5bdc87ac742a4ccaf424",
+      "name": "SpatialVectorStorage/TemporaryFillAppend/Complex/3/2048/real_time",
+      "metric": "real_time",
+      "url": "cases/5e16b391c4314dc82603c1170b578f587c539cf4243b5bdc87ac742a4ccaf424.json"
+    },
+    {
+      "id": "70c1daa4b66af946b9e2a1a7271f1887d17029ec8f73002eaa98fc636a2b7cbb",
+      "name": "SpatialVectorStorage/TemporaryFillAppend/Complex/3/256/real_time",
+      "metric": "real_time",
+      "url": "cases/70c1daa4b66af946b9e2a1a7271f1887d17029ec8f73002eaa98fc636a2b7cbb.json"
+    },
+    {
+      "id": "46d00f10a01f0eb193b35f798bfb99253f4d403e6ce86c4a451c8d4e89356a50",
+      "name": "SpatialVectorStorage/TemporaryFillAppend/Complex/3/32/real_time",
+      "metric": "real_time",
+      "url": "cases/46d00f10a01f0eb193b35f798bfb99253f4d403e6ce86c4a451c8d4e89356a50.json"
+    },
+    {
+      "id": "01d184240feffca5308c690b6ec5c821b36226216e6474b7be19a56edbe5f638",
+      "name": "SpatialVectorStorage/TemporaryFillAppend/Real/0/2048/real_time",
+      "metric": "real_time",
+      "url": "cases/01d184240feffca5308c690b6ec5c821b36226216e6474b7be19a56edbe5f638.json"
+    },
+    {
+      "id": "d0f427f406e2315ca401b85bd30f6ac07c64b9b033f075b60254b81b0b43b444",
+      "name": "SpatialVectorStorage/TemporaryFillAppend/Real/0/256/real_time",
+      "metric": "real_time",
+      "url": "cases/d0f427f406e2315ca401b85bd30f6ac07c64b9b033f075b60254b81b0b43b444.json"
+    },
+    {
+      "id": "61693cb3847e2cae0502d54edc4f9c7d826196e8f3257e3f735757f1b3040045",
+      "name": "SpatialVectorStorage/TemporaryFillAppend/Real/0/32/real_time",
+      "metric": "real_time",
+      "url": "cases/61693cb3847e2cae0502d54edc4f9c7d826196e8f3257e3f735757f1b3040045.json"
+    },
+    {
+      "id": "b00444e4c1db299c5d677292c2b3bdd3bb5436fb2502e01c9026ab578e2d6a6b",
+      "name": "SpatialVectorStorage/TemporaryFillAppend/Real/1/2048/real_time",
+      "metric": "real_time",
+      "url": "cases/b00444e4c1db299c5d677292c2b3bdd3bb5436fb2502e01c9026ab578e2d6a6b.json"
+    },
+    {
+      "id": "4f9f596198b2656514d3a2bcb29ca73d805ec39c726b7129ed239502cca9c83f",
+      "name": "SpatialVectorStorage/TemporaryFillAppend/Real/1/256/real_time",
+      "metric": "real_time",
+      "url": "cases/4f9f596198b2656514d3a2bcb29ca73d805ec39c726b7129ed239502cca9c83f.json"
+    },
+    {
+      "id": "0678e4dc24f2529600b61fdcd2ed0c89af4035cc7adae250c1353e26e0ead5e0",
+      "name": "SpatialVectorStorage/TemporaryFillAppend/Real/1/32/real_time",
+      "metric": "real_time",
+      "url": "cases/0678e4dc24f2529600b61fdcd2ed0c89af4035cc7adae250c1353e26e0ead5e0.json"
+    },
+    {
+      "id": "69a5af42db777fde33401e707ca9b1a00cb7eb32832eafedd3a3e97086d6b918",
+      "name": "SpatialVectorStorage/TemporaryFillAppend/Real/2/2048/real_time",
+      "metric": "real_time",
+      "url": "cases/69a5af42db777fde33401e707ca9b1a00cb7eb32832eafedd3a3e97086d6b918.json"
+    },
+    {
+      "id": "703c0a55bb68432267930ec045dcf5480c2ba554c15171ed393e3ab22fd8507b",
+      "name": "SpatialVectorStorage/TemporaryFillAppend/Real/2/256/real_time",
+      "metric": "real_time",
+      "url": "cases/703c0a55bb68432267930ec045dcf5480c2ba554c15171ed393e3ab22fd8507b.json"
+    },
+    {
+      "id": "4c1385ad2d6680f4b26ea0fe21e50efd0bbb5344cffcc3cbd4f63b2950634127",
+      "name": "SpatialVectorStorage/TemporaryFillAppend/Real/2/32/real_time",
+      "metric": "real_time",
+      "url": "cases/4c1385ad2d6680f4b26ea0fe21e50efd0bbb5344cffcc3cbd4f63b2950634127.json"
+    },
+    {
+      "id": "288a97cc961209d8e3d29e62cc3aef7bebc921b51a500aa7a8cc47f27108799f",
+      "name": "SpatialVectorStorage/TemporaryFillAppend/Real/3/2048/real_time",
+      "metric": "real_time",
+      "url": "cases/288a97cc961209d8e3d29e62cc3aef7bebc921b51a500aa7a8cc47f27108799f.json"
+    },
+    {
+      "id": "f3ba0e9030ed5bf13ad23958c418859b19c9c763b86856356c0d9298f4bef264",
+      "name": "SpatialVectorStorage/TemporaryFillAppend/Real/3/256/real_time",
+      "metric": "real_time",
+      "url": "cases/f3ba0e9030ed5bf13ad23958c418859b19c9c763b86856356c0d9298f4bef264.json"
+    },
+    {
+      "id": "975b63ab309fbf6f75dd78bfd19436b4642ad400dfcd40e2387da1526130d2d2",
+      "name": "SpatialVectorStorage/TemporaryFillAppend/Real/3/32/real_time",
+      "metric": "real_time",
+      "url": "cases/975b63ab309fbf6f75dd78bfd19436b4642ad400dfcd40e2387da1526130d2d2.json"
+    },
+    {
+      "id": "923ec46f4b8f7d377f4f7e4e80f5306e9975cc4ae47db95b16a933e992164298",
+      "name": "SpatialVectorStorage/ZeroConstruct/Complex/0/2048/real_time",
+      "metric": "real_time",
+      "url": "cases/923ec46f4b8f7d377f4f7e4e80f5306e9975cc4ae47db95b16a933e992164298.json"
+    },
+    {
+      "id": "8b64f5fcb5c9ac487587997d9b69da32a2e306d741fa9eedcc47f25082c5d0e6",
+      "name": "SpatialVectorStorage/ZeroConstruct/Complex/0/256/real_time",
+      "metric": "real_time",
+      "url": "cases/8b64f5fcb5c9ac487587997d9b69da32a2e306d741fa9eedcc47f25082c5d0e6.json"
+    },
+    {
+      "id": "dd51febe8f6b1cbfc2ecbc91cf3b9cff77fdf1ffc7220310d84281cbf3925552",
+      "name": "SpatialVectorStorage/ZeroConstruct/Complex/0/32/real_time",
+      "metric": "real_time",
+      "url": "cases/dd51febe8f6b1cbfc2ecbc91cf3b9cff77fdf1ffc7220310d84281cbf3925552.json"
+    },
+    {
+      "id": "874392f4ff1d04cf2198d88ed7995be79d27ab2afdf89889672f2ffccad58298",
+      "name": "SpatialVectorStorage/ZeroConstruct/Complex/1/2048/real_time",
+      "metric": "real_time",
+      "url": "cases/874392f4ff1d04cf2198d88ed7995be79d27ab2afdf89889672f2ffccad58298.json"
+    },
+    {
+      "id": "937e2b4e1ac1f4356451bd3065eafabe37326736d4706c3116e9ddcc9fd66614",
+      "name": "SpatialVectorStorage/ZeroConstruct/Complex/1/256/real_time",
+      "metric": "real_time",
+      "url": "cases/937e2b4e1ac1f4356451bd3065eafabe37326736d4706c3116e9ddcc9fd66614.json"
+    },
+    {
+      "id": "63ec1f70fb4d3fd6d4c48b24b0b1a54a807b01ab95107c037ce785aa926e67bd",
+      "name": "SpatialVectorStorage/ZeroConstruct/Complex/1/32/real_time",
+      "metric": "real_time",
+      "url": "cases/63ec1f70fb4d3fd6d4c48b24b0b1a54a807b01ab95107c037ce785aa926e67bd.json"
+    },
+    {
+      "id": "9816e0660d864a503ef589f9b0a9f7e607eeee9763237ac39b40a633431df12d",
+      "name": "SpatialVectorStorage/ZeroConstruct/Complex/2/2048/real_time",
+      "metric": "real_time",
+      "url": "cases/9816e0660d864a503ef589f9b0a9f7e607eeee9763237ac39b40a633431df12d.json"
+    },
+    {
+      "id": "dcf6efe8ad84446367eda92336e27218d24e25b4c1438b65e8e2593849023120",
+      "name": "SpatialVectorStorage/ZeroConstruct/Complex/2/256/real_time",
+      "metric": "real_time",
+      "url": "cases/dcf6efe8ad84446367eda92336e27218d24e25b4c1438b65e8e2593849023120.json"
+    },
+    {
+      "id": "931b11fac7e2f6b6575833fa74c60f23927fed34401ffc2622f26279116df842",
+      "name": "SpatialVectorStorage/ZeroConstruct/Complex/2/32/real_time",
+      "metric": "real_time",
+      "url": "cases/931b11fac7e2f6b6575833fa74c60f23927fed34401ffc2622f26279116df842.json"
+    },
+    {
+      "id": "836b15f70dcf8f603e420147b537d797b07ddd3e25e7d8f9013e09b2b92ff774",
+      "name": "SpatialVectorStorage/ZeroConstruct/Complex/3/2048/real_time",
+      "metric": "real_time",
+      "url": "cases/836b15f70dcf8f603e420147b537d797b07ddd3e25e7d8f9013e09b2b92ff774.json"
+    },
+    {
+      "id": "468885972b43d2eebc34d394ead2c080023b319aeebb8d46c4867a90656fd652",
+      "name": "SpatialVectorStorage/ZeroConstruct/Complex/3/256/real_time",
+      "metric": "real_time",
+      "url": "cases/468885972b43d2eebc34d394ead2c080023b319aeebb8d46c4867a90656fd652.json"
+    },
+    {
+      "id": "2aac86c0a7411ad25237f35a9819dbdd38a974ae37b3d0ca18037b2d4e81a3a5",
+      "name": "SpatialVectorStorage/ZeroConstruct/Complex/3/32/real_time",
+      "metric": "real_time",
+      "url": "cases/2aac86c0a7411ad25237f35a9819dbdd38a974ae37b3d0ca18037b2d4e81a3a5.json"
+    },
+    {
+      "id": "3a5a578769c6e5a5c12ff45fd2c94b368afad2b037f70477e947bc568f789e96",
+      "name": "SpatialVectorStorage/ZeroConstruct/Real/0/2048/real_time",
+      "metric": "real_time",
+      "url": "cases/3a5a578769c6e5a5c12ff45fd2c94b368afad2b037f70477e947bc568f789e96.json"
+    },
+    {
+      "id": "467637dce8372063dfad9491106e34fefbfa8373772a033c09676a4b8716aa2d",
+      "name": "SpatialVectorStorage/ZeroConstruct/Real/0/256/real_time",
+      "metric": "real_time",
+      "url": "cases/467637dce8372063dfad9491106e34fefbfa8373772a033c09676a4b8716aa2d.json"
+    },
+    {
+      "id": "2b0efdfe464799849bc89cf512119aee8bd4e453a041955a808f595341752ed3",
+      "name": "SpatialVectorStorage/ZeroConstruct/Real/0/32/real_time",
+      "metric": "real_time",
+      "url": "cases/2b0efdfe464799849bc89cf512119aee8bd4e453a041955a808f595341752ed3.json"
+    },
+    {
+      "id": "3334c0c0f053c8ee3d644572452bcdcf7517c593dab78128bae7b4c33a61aa6f",
+      "name": "SpatialVectorStorage/ZeroConstruct/Real/1/2048/real_time",
+      "metric": "real_time",
+      "url": "cases/3334c0c0f053c8ee3d644572452bcdcf7517c593dab78128bae7b4c33a61aa6f.json"
+    },
+    {
+      "id": "6dd81d25f8dda02b1d3f10caebc646db9b2d57ca21c62a776c42ec43d3bb4981",
+      "name": "SpatialVectorStorage/ZeroConstruct/Real/1/256/real_time",
+      "metric": "real_time",
+      "url": "cases/6dd81d25f8dda02b1d3f10caebc646db9b2d57ca21c62a776c42ec43d3bb4981.json"
+    },
+    {
+      "id": "82dad3651e296b471602379a7721b05e702e7e4f95a666112b84f16d006538ad",
+      "name": "SpatialVectorStorage/ZeroConstruct/Real/1/32/real_time",
+      "metric": "real_time",
+      "url": "cases/82dad3651e296b471602379a7721b05e702e7e4f95a666112b84f16d006538ad.json"
+    },
+    {
+      "id": "445d29535bd1645a773e364ca5d2b642f951d389fe061938993c87ec491e1a0e",
+      "name": "SpatialVectorStorage/ZeroConstruct/Real/2/2048/real_time",
+      "metric": "real_time",
+      "url": "cases/445d29535bd1645a773e364ca5d2b642f951d389fe061938993c87ec491e1a0e.json"
+    },
+    {
+      "id": "8f91a81b3b074223a48914b1827f800280d9a00ee00b7ba7ed7bba228c2c0f67",
+      "name": "SpatialVectorStorage/ZeroConstruct/Real/2/256/real_time",
+      "metric": "real_time",
+      "url": "cases/8f91a81b3b074223a48914b1827f800280d9a00ee00b7ba7ed7bba228c2c0f67.json"
+    },
+    {
+      "id": "d47290f9c040bef39cb1427285a8eb83eaab1e00e1ec46273ed52a86fcf9eebe",
+      "name": "SpatialVectorStorage/ZeroConstruct/Real/2/32/real_time",
+      "metric": "real_time",
+      "url": "cases/d47290f9c040bef39cb1427285a8eb83eaab1e00e1ec46273ed52a86fcf9eebe.json"
+    },
+    {
+      "id": "c45df23a66f4003b0638d166c12ae49f89fa6c2742dc1a1737569b8907dc1c8f",
+      "name": "SpatialVectorStorage/ZeroConstruct/Real/3/2048/real_time",
+      "metric": "real_time",
+      "url": "cases/c45df23a66f4003b0638d166c12ae49f89fa6c2742dc1a1737569b8907dc1c8f.json"
+    },
+    {
+      "id": "f2d710e44a6ad05041624354fb551458052bf8c4d3ac3851084eb25823a11cfe",
+      "name": "SpatialVectorStorage/ZeroConstruct/Real/3/256/real_time",
+      "metric": "real_time",
+      "url": "cases/f2d710e44a6ad05041624354fb551458052bf8c4d3ac3851084eb25823a11cfe.json"
+    },
+    {
+      "id": "c35211cedd42a4324cc126b617486d4341b72876774f20b85c04b0e24775530a",
+      "name": "SpatialVectorStorage/ZeroConstruct/Real/3/32/real_time",
+      "metric": "real_time",
+      "url": "cases/c35211cedd42a4324cc126b617486d4341b72876774f20b85c04b0e24775530a.json"
+    },
+    {
+      "id": "613498cafad0b54417234259f0d693e8eb4183321b71a97802786275c512592a",
+      "name": "SpatialVectorStorage/ZeroResize/Complex/0/2048/real_time",
+      "metric": "real_time",
+      "url": "cases/613498cafad0b54417234259f0d693e8eb4183321b71a97802786275c512592a.json"
+    },
+    {
+      "id": "91ef499d04a63c35a75accd96670a9027d07a8a3edf2ea2a61f2ffd7b19532d5",
+      "name": "SpatialVectorStorage/ZeroResize/Complex/0/256/real_time",
+      "metric": "real_time",
+      "url": "cases/91ef499d04a63c35a75accd96670a9027d07a8a3edf2ea2a61f2ffd7b19532d5.json"
+    },
+    {
+      "id": "a4816109357c61aee81299d612662700a931d0c605faf547a81f8b3bd7d6f905",
+      "name": "SpatialVectorStorage/ZeroResize/Complex/0/32/real_time",
+      "metric": "real_time",
+      "url": "cases/a4816109357c61aee81299d612662700a931d0c605faf547a81f8b3bd7d6f905.json"
+    },
+    {
+      "id": "62632fb21eec47c70651dd7030aa3adb2c1de7d73acb4a3b3f6d084f68546152",
+      "name": "SpatialVectorStorage/ZeroResize/Complex/1/2048/real_time",
+      "metric": "real_time",
+      "url": "cases/62632fb21eec47c70651dd7030aa3adb2c1de7d73acb4a3b3f6d084f68546152.json"
+    },
+    {
+      "id": "3b316fc4dcdcac3768408a6e3d043358f078d2e048e85e1f5f9e0745a3ce0e97",
+      "name": "SpatialVectorStorage/ZeroResize/Complex/1/256/real_time",
+      "metric": "real_time",
+      "url": "cases/3b316fc4dcdcac3768408a6e3d043358f078d2e048e85e1f5f9e0745a3ce0e97.json"
+    },
+    {
+      "id": "95b59702c80f57dbeb945f515439d84279416763bb77fe9c009b809b5370c90a",
+      "name": "SpatialVectorStorage/ZeroResize/Complex/1/32/real_time",
+      "metric": "real_time",
+      "url": "cases/95b59702c80f57dbeb945f515439d84279416763bb77fe9c009b809b5370c90a.json"
+    },
+    {
+      "id": "b6f2a649122af7159ed01ae8eac354faa72bbd18bfc36f332cfb25893ffe10b1",
+      "name": "SpatialVectorStorage/ZeroResize/Complex/2/2048/real_time",
+      "metric": "real_time",
+      "url": "cases/b6f2a649122af7159ed01ae8eac354faa72bbd18bfc36f332cfb25893ffe10b1.json"
+    },
+    {
+      "id": "be4b9b90a89f99d626f8435e16bae1d0128a0ad4aa163dcfb10669e5d5f984f6",
+      "name": "SpatialVectorStorage/ZeroResize/Complex/2/256/real_time",
+      "metric": "real_time",
+      "url": "cases/be4b9b90a89f99d626f8435e16bae1d0128a0ad4aa163dcfb10669e5d5f984f6.json"
+    },
+    {
+      "id": "d64b6c3c30654e9d5271add5813f5daad6daef39861dc9712a7bf64225afc56f",
+      "name": "SpatialVectorStorage/ZeroResize/Complex/2/32/real_time",
+      "metric": "real_time",
+      "url": "cases/d64b6c3c30654e9d5271add5813f5daad6daef39861dc9712a7bf64225afc56f.json"
+    },
+    {
+      "id": "ddbb29419be3e4f7e0f4e3aece51477b40703611f004b45b66cccae7d2201333",
+      "name": "SpatialVectorStorage/ZeroResize/Complex/3/2048/real_time",
+      "metric": "real_time",
+      "url": "cases/ddbb29419be3e4f7e0f4e3aece51477b40703611f004b45b66cccae7d2201333.json"
+    },
+    {
+      "id": "c5598656face09a8a20378909a6ff801a6fabf4e9242f5405a301732e86cd2c3",
+      "name": "SpatialVectorStorage/ZeroResize/Complex/3/256/real_time",
+      "metric": "real_time",
+      "url": "cases/c5598656face09a8a20378909a6ff801a6fabf4e9242f5405a301732e86cd2c3.json"
+    },
+    {
+      "id": "1abfdf20d0edd0692b4071e3599c17f459a0dc8421648759c2f2b3e82a7984e1",
+      "name": "SpatialVectorStorage/ZeroResize/Complex/3/32/real_time",
+      "metric": "real_time",
+      "url": "cases/1abfdf20d0edd0692b4071e3599c17f459a0dc8421648759c2f2b3e82a7984e1.json"
+    },
+    {
+      "id": "6fa8e76780d6c6541af2c9d281f9a7e4ce2ac1aa5c5b0dcc7eec7bc9f523d3cf",
+      "name": "SpatialVectorStorage/ZeroResize/Real/0/2048/real_time",
+      "metric": "real_time",
+      "url": "cases/6fa8e76780d6c6541af2c9d281f9a7e4ce2ac1aa5c5b0dcc7eec7bc9f523d3cf.json"
+    },
+    {
+      "id": "d46b30f6f88f78e4dca6bbbef80b7078979a663809739d8bd862dcb2f57c1d51",
+      "name": "SpatialVectorStorage/ZeroResize/Real/0/256/real_time",
+      "metric": "real_time",
+      "url": "cases/d46b30f6f88f78e4dca6bbbef80b7078979a663809739d8bd862dcb2f57c1d51.json"
+    },
+    {
+      "id": "cd66bbaf3a9fae140c8d3ad975ccf35455ee55b11b90d74e6d0836d8a311dc2a",
+      "name": "SpatialVectorStorage/ZeroResize/Real/0/32/real_time",
+      "metric": "real_time",
+      "url": "cases/cd66bbaf3a9fae140c8d3ad975ccf35455ee55b11b90d74e6d0836d8a311dc2a.json"
+    },
+    {
+      "id": "4ffc82f5b7c3d192ea820b5a7515e7875abbe18a6269626948cbba02ed2c51e0",
+      "name": "SpatialVectorStorage/ZeroResize/Real/1/2048/real_time",
+      "metric": "real_time",
+      "url": "cases/4ffc82f5b7c3d192ea820b5a7515e7875abbe18a6269626948cbba02ed2c51e0.json"
+    },
+    {
+      "id": "ddf525a4680d1aaa0f016aacbc5168b6e8eeffde44be75bf9f771b98b45c8ef5",
+      "name": "SpatialVectorStorage/ZeroResize/Real/1/256/real_time",
+      "metric": "real_time",
+      "url": "cases/ddf525a4680d1aaa0f016aacbc5168b6e8eeffde44be75bf9f771b98b45c8ef5.json"
+    },
+    {
+      "id": "2654477526f2c0398125105e7939ea3fe051d794005277a4d5eaa145ca2d57a0",
+      "name": "SpatialVectorStorage/ZeroResize/Real/1/32/real_time",
+      "metric": "real_time",
+      "url": "cases/2654477526f2c0398125105e7939ea3fe051d794005277a4d5eaa145ca2d57a0.json"
+    },
+    {
+      "id": "a4db032ac61e72710bdbab53ab836a38646ea5b2e480e4f7744f86647f4837f2",
+      "name": "SpatialVectorStorage/ZeroResize/Real/2/2048/real_time",
+      "metric": "real_time",
+      "url": "cases/a4db032ac61e72710bdbab53ab836a38646ea5b2e480e4f7744f86647f4837f2.json"
+    },
+    {
+      "id": "eb9e2de1f150bb8a4e6537b2296f932c99c89241f0647dff9a28c04032bc62ee",
+      "name": "SpatialVectorStorage/ZeroResize/Real/2/256/real_time",
+      "metric": "real_time",
+      "url": "cases/eb9e2de1f150bb8a4e6537b2296f932c99c89241f0647dff9a28c04032bc62ee.json"
+    },
+    {
+      "id": "0b2a4a69475403d6758b5b5360677b9bb83af7cecc2270ecf8faac8a9beff14a",
+      "name": "SpatialVectorStorage/ZeroResize/Real/2/32/real_time",
+      "metric": "real_time",
+      "url": "cases/0b2a4a69475403d6758b5b5360677b9bb83af7cecc2270ecf8faac8a9beff14a.json"
+    },
+    {
+      "id": "c6529b0eae4e5afe2dca278d6cdbf92da243701981f826a2e892b32d57e2e5de",
+      "name": "SpatialVectorStorage/ZeroResize/Real/3/2048/real_time",
+      "metric": "real_time",
+      "url": "cases/c6529b0eae4e5afe2dca278d6cdbf92da243701981f826a2e892b32d57e2e5de.json"
+    },
+    {
+      "id": "4e2c009093817a5efa0ddad8bdbd7d91aad9aa1d55cd9f653aabf375d934a0d2",
+      "name": "SpatialVectorStorage/ZeroResize/Real/3/256/real_time",
+      "metric": "real_time",
+      "url": "cases/4e2c009093817a5efa0ddad8bdbd7d91aad9aa1d55cd9f653aabf375d934a0d2.json"
+    },
+    {
+      "id": "851bd3a827843fa2913a170b45a34d8e1e4a4c3160d90a3dee43a1b0b3e6081a",
+      "name": "SpatialVectorStorage/ZeroResize/Real/3/32/real_time",
+      "metric": "real_time",
+      "url": "cases/851bd3a827843fa2913a170b45a34d8e1e4a4c3160d90a3dee43a1b0b3e6081a.json"
+    }
+  ]
+}

@@ -1,0 +1,796 @@
+{
+  "schema": 1,
+  "definition": {
+    "kind": "benchmark",
+    "mode": "local",
+    "compiler": "gcc-14",
+    "runner": "ubuntu-24.04",
+    "cmake": {
+      "CMAKE_BUILD_TYPE": "Release",
+      "CMAKE_CXX_COMPILER": "g++-14",
+      "CMAKE_C_COMPILER": "gcc-14",
+      "CMAKE_SUPPRESS_REGENERATION": "ON",
+      "RODIN_BUILD_SRC": "ON",
+      "RODIN_BUILD_BENCHMARKS": "ON",
+      "RODIN_BUILD_UNIT_TESTS": "OFF",
+      "RODIN_BUILD_MANUFACTURED_TESTS": "OFF",
+      "RODIN_BUILD_CONVERGENCE_TESTS": "OFF",
+      "RODIN_BUILD_EXAMPLES": "OFF",
+      "RODIN_BUILD_DOC": "OFF",
+      "RODIN_INSTALL_RESOURCES": "OFF",
+      "RODIN_CODE_COVERAGE": "OFF",
+      "RODIN_MULTITHREADED": "OFF",
+      "RODIN_USE_ASAN": "OFF",
+      "RODIN_USE_UBSAN": "OFF",
+      "RODIN_USE_MPI": "OFF",
+      "RODIN_USE_PETSC": "OFF"
+    },
+    "targets": [
+      "RodinConstrainedSolveBenchmarks",
+      "RodinCoupledReactionDiffusionSolveBenchmarks",
+      "RodinDiagonalPreconditionerBenchmarks",
+      "RodinHelmholtzSolveBenchmarks",
+      "RodinStokesGMRESBenchmarks"
+    ],
+    "stage": "components"
+  },
+  "ranks": 1,
+  "cases": [
+    {
+      "id": "aa139b97ebed2f481fb129d9293766280921cca030eed5190dffd44f8d04234e",
+      "name": "CoupledReactionDiffusion/CG/H1/P1/Complex/Hexahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/aa139b97ebed2f481fb129d9293766280921cca030eed5190dffd44f8d04234e.json"
+    },
+    {
+      "id": "a26f564e53c854b5f275c038c447379204ee42151f188d5659386b6717728008",
+      "name": "CoupledReactionDiffusion/CG/H1/P1/Complex/Hexahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/a26f564e53c854b5f275c038c447379204ee42151f188d5659386b6717728008.json"
+    },
+    {
+      "id": "0ea0d95a2591d5e3258c0c2d076751eee0427c11b31113087e70ee8226de9a34",
+      "name": "CoupledReactionDiffusion/CG/H1/P1/Complex/Hexahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/0ea0d95a2591d5e3258c0c2d076751eee0427c11b31113087e70ee8226de9a34.json"
+    },
+    {
+      "id": "f9b27758ded0c171ca0d44dd8dd6e1f8a7876c2958e47736d35a14178e30a853",
+      "name": "CoupledReactionDiffusion/CG/H1/P1/Complex/Pyramid/3/real_time",
+      "metric": "real_time",
+      "url": "cases/f9b27758ded0c171ca0d44dd8dd6e1f8a7876c2958e47736d35a14178e30a853.json"
+    },
+    {
+      "id": "7dbb3a034aa069277f3ea91f788ebf986abf712e316cb8938013c96853f8ccb3",
+      "name": "CoupledReactionDiffusion/CG/H1/P1/Complex/Pyramid/5/real_time",
+      "metric": "real_time",
+      "url": "cases/7dbb3a034aa069277f3ea91f788ebf986abf712e316cb8938013c96853f8ccb3.json"
+    },
+    {
+      "id": "934d82a42d14cec13c1beda17ed32e94c395e7be2577b5d113cd2b4f5074269f",
+      "name": "CoupledReactionDiffusion/CG/H1/P1/Complex/Pyramid/9/real_time",
+      "metric": "real_time",
+      "url": "cases/934d82a42d14cec13c1beda17ed32e94c395e7be2577b5d113cd2b4f5074269f.json"
+    },
+    {
+      "id": "775a03b17345f03789123836ec51bf6246d726e2b13ba2eb635f9b078762fb6d",
+      "name": "CoupledReactionDiffusion/CG/H1/P1/Complex/Quadrilateral/3/real_time",
+      "metric": "real_time",
+      "url": "cases/775a03b17345f03789123836ec51bf6246d726e2b13ba2eb635f9b078762fb6d.json"
+    },
+    {
+      "id": "35a9af404f1745c3409d58d1aec6c0bce6713754a688ade3bf03c9b7db9154d0",
+      "name": "CoupledReactionDiffusion/CG/H1/P1/Complex/Quadrilateral/5/real_time",
+      "metric": "real_time",
+      "url": "cases/35a9af404f1745c3409d58d1aec6c0bce6713754a688ade3bf03c9b7db9154d0.json"
+    },
+    {
+      "id": "1a6c0144b8531296212bdccca96e891b5b69c9b78fb8c481d6ee34c8e6df0d7c",
+      "name": "CoupledReactionDiffusion/CG/H1/P1/Complex/Quadrilateral/9/real_time",
+      "metric": "real_time",
+      "url": "cases/1a6c0144b8531296212bdccca96e891b5b69c9b78fb8c481d6ee34c8e6df0d7c.json"
+    },
+    {
+      "id": "50da8820ff0ede7d5c358ec17ce183c382e71c0a59f539cd2270086d1d7ec0ed",
+      "name": "CoupledReactionDiffusion/CG/H1/P1/Complex/Segment/3/real_time",
+      "metric": "real_time",
+      "url": "cases/50da8820ff0ede7d5c358ec17ce183c382e71c0a59f539cd2270086d1d7ec0ed.json"
+    },
+    {
+      "id": "690e9545f362403eedc4274ebe3e4f5c857efb7bf34adb2fa1dec6c49676995a",
+      "name": "CoupledReactionDiffusion/CG/H1/P1/Complex/Segment/5/real_time",
+      "metric": "real_time",
+      "url": "cases/690e9545f362403eedc4274ebe3e4f5c857efb7bf34adb2fa1dec6c49676995a.json"
+    },
+    {
+      "id": "b89fbb4b6c9182321e6029f505f45a2125ed0cf9ed8067187707b302b2d611be",
+      "name": "CoupledReactionDiffusion/CG/H1/P1/Complex/Segment/9/real_time",
+      "metric": "real_time",
+      "url": "cases/b89fbb4b6c9182321e6029f505f45a2125ed0cf9ed8067187707b302b2d611be.json"
+    },
+    {
+      "id": "069a7efad5a6e1b526b7fee3e28b22442bd1ed26f85395e1228b7fcdc72ec258",
+      "name": "CoupledReactionDiffusion/CG/H1/P1/Complex/Tetrahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/069a7efad5a6e1b526b7fee3e28b22442bd1ed26f85395e1228b7fcdc72ec258.json"
+    },
+    {
+      "id": "92b316c326dabf9fd29f2df657cec9bc1008d331297c60706315327781e24184",
+      "name": "CoupledReactionDiffusion/CG/H1/P1/Complex/Tetrahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/92b316c326dabf9fd29f2df657cec9bc1008d331297c60706315327781e24184.json"
+    },
+    {
+      "id": "1297424779e48210a8720e9a49ce27e5f12c75ebbb6e4114d2a844ed9ce97507",
+      "name": "CoupledReactionDiffusion/CG/H1/P1/Complex/Tetrahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/1297424779e48210a8720e9a49ce27e5f12c75ebbb6e4114d2a844ed9ce97507.json"
+    },
+    {
+      "id": "31b9b023ae16730d836678513cfef9b36e9d1c32deb89f655ebf8d4520b46638",
+      "name": "CoupledReactionDiffusion/CG/H1/P1/Complex/Triangle/3/real_time",
+      "metric": "real_time",
+      "url": "cases/31b9b023ae16730d836678513cfef9b36e9d1c32deb89f655ebf8d4520b46638.json"
+    },
+    {
+      "id": "e234fc306fae7e3b95652a7a7f563995799d6869b0c6d06a709639f23249eafe",
+      "name": "CoupledReactionDiffusion/CG/H1/P1/Complex/Triangle/5/real_time",
+      "metric": "real_time",
+      "url": "cases/e234fc306fae7e3b95652a7a7f563995799d6869b0c6d06a709639f23249eafe.json"
+    },
+    {
+      "id": "71a620c9d122fd06d2afce19092ecdd94f46519617fd14499f4728dff9361422",
+      "name": "CoupledReactionDiffusion/CG/H1/P1/Complex/Triangle/9/real_time",
+      "metric": "real_time",
+      "url": "cases/71a620c9d122fd06d2afce19092ecdd94f46519617fd14499f4728dff9361422.json"
+    },
+    {
+      "id": "25f7d645577875f8cf4e5f6827259d82aff2f120a2efd4c2b8a31a7e0ce8e189",
+      "name": "CoupledReactionDiffusion/CG/H1/P1/Complex/Wedge/3/real_time",
+      "metric": "real_time",
+      "url": "cases/25f7d645577875f8cf4e5f6827259d82aff2f120a2efd4c2b8a31a7e0ce8e189.json"
+    },
+    {
+      "id": "c29faed6dfd2a2591d1956b864dad3d6e0899f58fede2069cbaee925a1faddcd",
+      "name": "CoupledReactionDiffusion/CG/H1/P1/Complex/Wedge/5/real_time",
+      "metric": "real_time",
+      "url": "cases/c29faed6dfd2a2591d1956b864dad3d6e0899f58fede2069cbaee925a1faddcd.json"
+    },
+    {
+      "id": "9e493624eedd0f09495db2e4f8fbb66fb451fbbc825aa6d84b3bd388bee2a48d",
+      "name": "CoupledReactionDiffusion/CG/H1/P1/Complex/Wedge/9/real_time",
+      "metric": "real_time",
+      "url": "cases/9e493624eedd0f09495db2e4f8fbb66fb451fbbc825aa6d84b3bd388bee2a48d.json"
+    },
+    {
+      "id": "7d4afaaa2cc699bab743d69314c8cfce495054fd4596b9754050eb06995e3c72",
+      "name": "CoupledReactionDiffusion/CG/H1/P1/Real/Hexahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/7d4afaaa2cc699bab743d69314c8cfce495054fd4596b9754050eb06995e3c72.json"
+    },
+    {
+      "id": "18e2de101f131ec83d6e721a17151a406909b22e161cf7721e06c948e7da0699",
+      "name": "CoupledReactionDiffusion/CG/H1/P1/Real/Hexahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/18e2de101f131ec83d6e721a17151a406909b22e161cf7721e06c948e7da0699.json"
+    },
+    {
+      "id": "45eb0520976a6b53d1e9339aa2c44e237bd8e273f8317fba003c6a05888fdcce",
+      "name": "CoupledReactionDiffusion/CG/H1/P1/Real/Hexahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/45eb0520976a6b53d1e9339aa2c44e237bd8e273f8317fba003c6a05888fdcce.json"
+    },
+    {
+      "id": "659a4ef91be87c4b17d62a71daa7f100479e577760e8d6c6d2e0397d29b5609d",
+      "name": "CoupledReactionDiffusion/CG/H1/P1/Real/Pyramid/3/real_time",
+      "metric": "real_time",
+      "url": "cases/659a4ef91be87c4b17d62a71daa7f100479e577760e8d6c6d2e0397d29b5609d.json"
+    },
+    {
+      "id": "e56950ec3fdfbc14bc799400ff4c22a171f93c6885ecad512b98ce5a1571b144",
+      "name": "CoupledReactionDiffusion/CG/H1/P1/Real/Pyramid/5/real_time",
+      "metric": "real_time",
+      "url": "cases/e56950ec3fdfbc14bc799400ff4c22a171f93c6885ecad512b98ce5a1571b144.json"
+    },
+    {
+      "id": "81bc7a24913677e426c11b082d3f7e6985e37229930b02fde8cf04d9fcb2bc79",
+      "name": "CoupledReactionDiffusion/CG/H1/P1/Real/Pyramid/9/real_time",
+      "metric": "real_time",
+      "url": "cases/81bc7a24913677e426c11b082d3f7e6985e37229930b02fde8cf04d9fcb2bc79.json"
+    },
+    {
+      "id": "d84da0a893c1a50f5e1ee7370ecf6fb7acf37da49e7a33e15d4a4a4a3df29722",
+      "name": "CoupledReactionDiffusion/CG/H1/P1/Real/Quadrilateral/3/real_time",
+      "metric": "real_time",
+      "url": "cases/d84da0a893c1a50f5e1ee7370ecf6fb7acf37da49e7a33e15d4a4a4a3df29722.json"
+    },
+    {
+      "id": "6ecc81f23cae0ddb3dcc53d356c527fec6519be4216caae892fd3f22683770c0",
+      "name": "CoupledReactionDiffusion/CG/H1/P1/Real/Quadrilateral/5/real_time",
+      "metric": "real_time",
+      "url": "cases/6ecc81f23cae0ddb3dcc53d356c527fec6519be4216caae892fd3f22683770c0.json"
+    },
+    {
+      "id": "5ad4d2da4da6bfb5a3029f6e8fce3524e46ef179949fb343ffc3cdb1c1214691",
+      "name": "CoupledReactionDiffusion/CG/H1/P1/Real/Quadrilateral/9/real_time",
+      "metric": "real_time",
+      "url": "cases/5ad4d2da4da6bfb5a3029f6e8fce3524e46ef179949fb343ffc3cdb1c1214691.json"
+    },
+    {
+      "id": "6dfdf7eba6db40a58d6663d6c9ec39bbba0973ff8a0a580d756e5d9a843e0d4d",
+      "name": "CoupledReactionDiffusion/CG/H1/P1/Real/Segment/3/real_time",
+      "metric": "real_time",
+      "url": "cases/6dfdf7eba6db40a58d6663d6c9ec39bbba0973ff8a0a580d756e5d9a843e0d4d.json"
+    },
+    {
+      "id": "a486ab5981e2c0847b39e89dcc53a1746c61c33d36a02814778b079b1e52064e",
+      "name": "CoupledReactionDiffusion/CG/H1/P1/Real/Segment/5/real_time",
+      "metric": "real_time",
+      "url": "cases/a486ab5981e2c0847b39e89dcc53a1746c61c33d36a02814778b079b1e52064e.json"
+    },
+    {
+      "id": "2b13c856c5a087c28e504fc43afb8bb781b2fb9f9cb780c0cc3ae319cdcb1d9b",
+      "name": "CoupledReactionDiffusion/CG/H1/P1/Real/Segment/9/real_time",
+      "metric": "real_time",
+      "url": "cases/2b13c856c5a087c28e504fc43afb8bb781b2fb9f9cb780c0cc3ae319cdcb1d9b.json"
+    },
+    {
+      "id": "db504af7418e56280098389ec81092770f4694108c11a47c3fbd418d73a0b169",
+      "name": "CoupledReactionDiffusion/CG/H1/P1/Real/Tetrahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/db504af7418e56280098389ec81092770f4694108c11a47c3fbd418d73a0b169.json"
+    },
+    {
+      "id": "54838f664ff4c7a26886bf3d1bb238f7e0941de912dc7995fb97cf96d9734dde",
+      "name": "CoupledReactionDiffusion/CG/H1/P1/Real/Tetrahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/54838f664ff4c7a26886bf3d1bb238f7e0941de912dc7995fb97cf96d9734dde.json"
+    },
+    {
+      "id": "4ac9500548100e072318b60cd4de2fba4d3fd23c5def25341cc74bc336e7b91c",
+      "name": "CoupledReactionDiffusion/CG/H1/P1/Real/Tetrahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/4ac9500548100e072318b60cd4de2fba4d3fd23c5def25341cc74bc336e7b91c.json"
+    },
+    {
+      "id": "197d21fc65755b9a6dfdf51b6ff8ce52c2f01be1d063fc5fb8ad471b8f148342",
+      "name": "CoupledReactionDiffusion/CG/H1/P1/Real/Triangle/3/real_time",
+      "metric": "real_time",
+      "url": "cases/197d21fc65755b9a6dfdf51b6ff8ce52c2f01be1d063fc5fb8ad471b8f148342.json"
+    },
+    {
+      "id": "7e11a9effaf90a82f656925febc04079bb0b3a475ad54e027b9014388f0e195f",
+      "name": "CoupledReactionDiffusion/CG/H1/P1/Real/Triangle/5/real_time",
+      "metric": "real_time",
+      "url": "cases/7e11a9effaf90a82f656925febc04079bb0b3a475ad54e027b9014388f0e195f.json"
+    },
+    {
+      "id": "a036c89d7044c4c287ffb67649c35c65cf61dde4846c1dcf3925c57b7e259a78",
+      "name": "CoupledReactionDiffusion/CG/H1/P1/Real/Triangle/9/real_time",
+      "metric": "real_time",
+      "url": "cases/a036c89d7044c4c287ffb67649c35c65cf61dde4846c1dcf3925c57b7e259a78.json"
+    },
+    {
+      "id": "309f1353c1c25abe70e5f85b92a5c20fcb9a952b99465c2426cf6d5e0d26f53f",
+      "name": "CoupledReactionDiffusion/CG/H1/P1/Real/Wedge/3/real_time",
+      "metric": "real_time",
+      "url": "cases/309f1353c1c25abe70e5f85b92a5c20fcb9a952b99465c2426cf6d5e0d26f53f.json"
+    },
+    {
+      "id": "6576c03cc207cbd25a374b48f305916e3c5a31fff98c4d68cb6e070569a87028",
+      "name": "CoupledReactionDiffusion/CG/H1/P1/Real/Wedge/5/real_time",
+      "metric": "real_time",
+      "url": "cases/6576c03cc207cbd25a374b48f305916e3c5a31fff98c4d68cb6e070569a87028.json"
+    },
+    {
+      "id": "d9e96919907db97571a51e86758218abb04ed6794fd3e1ef89ae423ac8ab6d3f",
+      "name": "CoupledReactionDiffusion/CG/H1/P1/Real/Wedge/9/real_time",
+      "metric": "real_time",
+      "url": "cases/d9e96919907db97571a51e86758218abb04ed6794fd3e1ef89ae423ac8ab6d3f.json"
+    },
+    {
+      "id": "65e84fc592fdc17a6a87f1a0631ddde9531e27c6ee6412d8ea17c0b31a8ee7a6",
+      "name": "CoupledReactionDiffusion/CG/H1/P2/Complex/Hexahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/65e84fc592fdc17a6a87f1a0631ddde9531e27c6ee6412d8ea17c0b31a8ee7a6.json"
+    },
+    {
+      "id": "a21f540135bbeb3e32dd2305428974cfdbb1b7b55a9d9690dc4d33ebe0c78da8",
+      "name": "CoupledReactionDiffusion/CG/H1/P2/Complex/Hexahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/a21f540135bbeb3e32dd2305428974cfdbb1b7b55a9d9690dc4d33ebe0c78da8.json"
+    },
+    {
+      "id": "4b7c84f395382d16086899bdeaada42bd4a14e0f1b7898ba9243e03bde8dbeaa",
+      "name": "CoupledReactionDiffusion/CG/H1/P2/Complex/Hexahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/4b7c84f395382d16086899bdeaada42bd4a14e0f1b7898ba9243e03bde8dbeaa.json"
+    },
+    {
+      "id": "94884e7439c4894d911b6508baf9b445bada6bb325b42f40dcbab6d8d3786d7b",
+      "name": "CoupledReactionDiffusion/CG/H1/P2/Complex/Pyramid/3/real_time",
+      "metric": "real_time",
+      "url": "cases/94884e7439c4894d911b6508baf9b445bada6bb325b42f40dcbab6d8d3786d7b.json"
+    },
+    {
+      "id": "c0491dc7d7c75a608e73a56f46c1a48e9e0f9be8c817294cf45cf9a39b781d0e",
+      "name": "CoupledReactionDiffusion/CG/H1/P2/Complex/Pyramid/5/real_time",
+      "metric": "real_time",
+      "url": "cases/c0491dc7d7c75a608e73a56f46c1a48e9e0f9be8c817294cf45cf9a39b781d0e.json"
+    },
+    {
+      "id": "c24742086091a46cf94a5f09c345a226d5f13c07c037385a60dd6ffd546992b1",
+      "name": "CoupledReactionDiffusion/CG/H1/P2/Complex/Pyramid/9/real_time",
+      "metric": "real_time",
+      "url": "cases/c24742086091a46cf94a5f09c345a226d5f13c07c037385a60dd6ffd546992b1.json"
+    },
+    {
+      "id": "318b273affe35b87a518464e5ecf1c41d7126a7d50d600968e22015748e1aacc",
+      "name": "CoupledReactionDiffusion/CG/H1/P2/Complex/Quadrilateral/3/real_time",
+      "metric": "real_time",
+      "url": "cases/318b273affe35b87a518464e5ecf1c41d7126a7d50d600968e22015748e1aacc.json"
+    },
+    {
+      "id": "24bee9bfd3155a12967bd4cd6c97098bb69423b26fc19327f49ad1f44ff90178",
+      "name": "CoupledReactionDiffusion/CG/H1/P2/Complex/Quadrilateral/5/real_time",
+      "metric": "real_time",
+      "url": "cases/24bee9bfd3155a12967bd4cd6c97098bb69423b26fc19327f49ad1f44ff90178.json"
+    },
+    {
+      "id": "e36f8653e04effe9b4d8a5cab7fcb6f1261545a248ae99adb666ef627145c952",
+      "name": "CoupledReactionDiffusion/CG/H1/P2/Complex/Quadrilateral/9/real_time",
+      "metric": "real_time",
+      "url": "cases/e36f8653e04effe9b4d8a5cab7fcb6f1261545a248ae99adb666ef627145c952.json"
+    },
+    {
+      "id": "35c5e435d2ad2dad0f95f1fc42a4bf1ab94accaaf50ef9421c628ebef73f082c",
+      "name": "CoupledReactionDiffusion/CG/H1/P2/Complex/Segment/3/real_time",
+      "metric": "real_time",
+      "url": "cases/35c5e435d2ad2dad0f95f1fc42a4bf1ab94accaaf50ef9421c628ebef73f082c.json"
+    },
+    {
+      "id": "bf3b0eb4caff29d862649d2918ba48267d25985f3422ad9ff5a811e36a8e2f29",
+      "name": "CoupledReactionDiffusion/CG/H1/P2/Complex/Segment/5/real_time",
+      "metric": "real_time",
+      "url": "cases/bf3b0eb4caff29d862649d2918ba48267d25985f3422ad9ff5a811e36a8e2f29.json"
+    },
+    {
+      "id": "93d794d3cb5cf45a0ba8dc10cb5fb6da6c8f397f3b881e0a04e03055f8e7d532",
+      "name": "CoupledReactionDiffusion/CG/H1/P2/Complex/Segment/9/real_time",
+      "metric": "real_time",
+      "url": "cases/93d794d3cb5cf45a0ba8dc10cb5fb6da6c8f397f3b881e0a04e03055f8e7d532.json"
+    },
+    {
+      "id": "a5776036f049924ed7f406486f0c7319d07077888b4a7f9cb8b6951a0286e4a9",
+      "name": "CoupledReactionDiffusion/CG/H1/P2/Complex/Tetrahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/a5776036f049924ed7f406486f0c7319d07077888b4a7f9cb8b6951a0286e4a9.json"
+    },
+    {
+      "id": "ac658fb695e4e898191f983c90be0e2ca43b269e81d0455b09e417daa79b61cb",
+      "name": "CoupledReactionDiffusion/CG/H1/P2/Complex/Tetrahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/ac658fb695e4e898191f983c90be0e2ca43b269e81d0455b09e417daa79b61cb.json"
+    },
+    {
+      "id": "0e994dd34be159a3b97abff7baaa1961105771c7c866680cad0f72f4d8f4fb88",
+      "name": "CoupledReactionDiffusion/CG/H1/P2/Complex/Tetrahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/0e994dd34be159a3b97abff7baaa1961105771c7c866680cad0f72f4d8f4fb88.json"
+    },
+    {
+      "id": "7779196ba03899fa24311bba602256140e20eae6ab4f72e8fa350f94283a8c8c",
+      "name": "CoupledReactionDiffusion/CG/H1/P2/Complex/Triangle/3/real_time",
+      "metric": "real_time",
+      "url": "cases/7779196ba03899fa24311bba602256140e20eae6ab4f72e8fa350f94283a8c8c.json"
+    },
+    {
+      "id": "b314fb9f0b419814ccdeb0eb3b3d7e1d52dbe431fd4878b788387a841d87b930",
+      "name": "CoupledReactionDiffusion/CG/H1/P2/Complex/Triangle/5/real_time",
+      "metric": "real_time",
+      "url": "cases/b314fb9f0b419814ccdeb0eb3b3d7e1d52dbe431fd4878b788387a841d87b930.json"
+    },
+    {
+      "id": "b1ec7e69a61ed3addc674da3fb4f0cfde1d4d00fd759d529443aa9513113d9a7",
+      "name": "CoupledReactionDiffusion/CG/H1/P2/Complex/Triangle/9/real_time",
+      "metric": "real_time",
+      "url": "cases/b1ec7e69a61ed3addc674da3fb4f0cfde1d4d00fd759d529443aa9513113d9a7.json"
+    },
+    {
+      "id": "75139d146d714f448babd16576c62eab7f2d451efb93cdcd24f81a4ac59841fa",
+      "name": "CoupledReactionDiffusion/CG/H1/P2/Complex/Wedge/3/real_time",
+      "metric": "real_time",
+      "url": "cases/75139d146d714f448babd16576c62eab7f2d451efb93cdcd24f81a4ac59841fa.json"
+    },
+    {
+      "id": "3071a787f70168866c6f7f32e9d6eb5f3ba9152148dc419a09edbea134193718",
+      "name": "CoupledReactionDiffusion/CG/H1/P2/Complex/Wedge/5/real_time",
+      "metric": "real_time",
+      "url": "cases/3071a787f70168866c6f7f32e9d6eb5f3ba9152148dc419a09edbea134193718.json"
+    },
+    {
+      "id": "4d95c9344b4cb0ceffb0e92f5645a5ddfa0ac2834749df0f77f521fa744f948f",
+      "name": "CoupledReactionDiffusion/CG/H1/P2/Complex/Wedge/9/real_time",
+      "metric": "real_time",
+      "url": "cases/4d95c9344b4cb0ceffb0e92f5645a5ddfa0ac2834749df0f77f521fa744f948f.json"
+    },
+    {
+      "id": "4c42675babb3c7a36097172c6642632183d7aad1ebb730d029a02944b8667f82",
+      "name": "CoupledReactionDiffusion/CG/H1/P2/Real/Hexahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/4c42675babb3c7a36097172c6642632183d7aad1ebb730d029a02944b8667f82.json"
+    },
+    {
+      "id": "9ca1cdffe6e8d083348a3416af8ee9bb893c715fb04c051f1e6d99357ca06aa2",
+      "name": "CoupledReactionDiffusion/CG/H1/P2/Real/Hexahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/9ca1cdffe6e8d083348a3416af8ee9bb893c715fb04c051f1e6d99357ca06aa2.json"
+    },
+    {
+      "id": "23f8b275d63f996ccb04d673bd4a6f644c771f2e1eee50d2f38f7f24b0d67d5f",
+      "name": "CoupledReactionDiffusion/CG/H1/P2/Real/Hexahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/23f8b275d63f996ccb04d673bd4a6f644c771f2e1eee50d2f38f7f24b0d67d5f.json"
+    },
+    {
+      "id": "6a357673b6c7a31daf299e11b6aa460f6c7cbafb32431c43e3619a21171eea1e",
+      "name": "CoupledReactionDiffusion/CG/H1/P2/Real/Pyramid/3/real_time",
+      "metric": "real_time",
+      "url": "cases/6a357673b6c7a31daf299e11b6aa460f6c7cbafb32431c43e3619a21171eea1e.json"
+    },
+    {
+      "id": "cc4932264cbf8ef3c6ea3107dfdc5381879da067b9f953134ce6663b99a61689",
+      "name": "CoupledReactionDiffusion/CG/H1/P2/Real/Pyramid/5/real_time",
+      "metric": "real_time",
+      "url": "cases/cc4932264cbf8ef3c6ea3107dfdc5381879da067b9f953134ce6663b99a61689.json"
+    },
+    {
+      "id": "2d767ff5230b51afc05bc2fd14a5e15058f08ff7f0a92b0b46fc095c6bdf17f4",
+      "name": "CoupledReactionDiffusion/CG/H1/P2/Real/Pyramid/9/real_time",
+      "metric": "real_time",
+      "url": "cases/2d767ff5230b51afc05bc2fd14a5e15058f08ff7f0a92b0b46fc095c6bdf17f4.json"
+    },
+    {
+      "id": "301c818234019de8968ff9cd989e7b7fa5a3123376b26d2c185291d536919385",
+      "name": "CoupledReactionDiffusion/CG/H1/P2/Real/Quadrilateral/3/real_time",
+      "metric": "real_time",
+      "url": "cases/301c818234019de8968ff9cd989e7b7fa5a3123376b26d2c185291d536919385.json"
+    },
+    {
+      "id": "7c669e0983605c292637b224695ccf5865dfbce8ba02774db7ce111ff766fd9f",
+      "name": "CoupledReactionDiffusion/CG/H1/P2/Real/Quadrilateral/5/real_time",
+      "metric": "real_time",
+      "url": "cases/7c669e0983605c292637b224695ccf5865dfbce8ba02774db7ce111ff766fd9f.json"
+    },
+    {
+      "id": "1a60a6ce473a50080e798e94f047f75740726df0f2243df6da9d514e0f4b30b2",
+      "name": "CoupledReactionDiffusion/CG/H1/P2/Real/Quadrilateral/9/real_time",
+      "metric": "real_time",
+      "url": "cases/1a60a6ce473a50080e798e94f047f75740726df0f2243df6da9d514e0f4b30b2.json"
+    },
+    {
+      "id": "8c33daeacf9f330f06b085a13d89a14b7b77302873e3c74b22e6e3beb0ccf2ce",
+      "name": "CoupledReactionDiffusion/CG/H1/P2/Real/Segment/3/real_time",
+      "metric": "real_time",
+      "url": "cases/8c33daeacf9f330f06b085a13d89a14b7b77302873e3c74b22e6e3beb0ccf2ce.json"
+    },
+    {
+      "id": "99aa2c4740912aa5bbcea8d8b193232bae7dac829d57f11b48aade391a9d6c2c",
+      "name": "CoupledReactionDiffusion/CG/H1/P2/Real/Segment/5/real_time",
+      "metric": "real_time",
+      "url": "cases/99aa2c4740912aa5bbcea8d8b193232bae7dac829d57f11b48aade391a9d6c2c.json"
+    },
+    {
+      "id": "2824b44381dcc69409e1b524e05bf2b1d46d95573576b2bdb0430f37fd714139",
+      "name": "CoupledReactionDiffusion/CG/H1/P2/Real/Segment/9/real_time",
+      "metric": "real_time",
+      "url": "cases/2824b44381dcc69409e1b524e05bf2b1d46d95573576b2bdb0430f37fd714139.json"
+    },
+    {
+      "id": "7ad70117293bb53e9e698189a6580264f24b540ec996176270af4f3c98db6911",
+      "name": "CoupledReactionDiffusion/CG/H1/P2/Real/Tetrahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/7ad70117293bb53e9e698189a6580264f24b540ec996176270af4f3c98db6911.json"
+    },
+    {
+      "id": "47148a215ac0bdee01ae247568bf870b77d2d4dd2c3173c6c7f9960b02bb2af4",
+      "name": "CoupledReactionDiffusion/CG/H1/P2/Real/Tetrahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/47148a215ac0bdee01ae247568bf870b77d2d4dd2c3173c6c7f9960b02bb2af4.json"
+    },
+    {
+      "id": "1675f6b08b07dcf4c590dd9883545f8db814981c5e3acb7b5dae93412bee3278",
+      "name": "CoupledReactionDiffusion/CG/H1/P2/Real/Tetrahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/1675f6b08b07dcf4c590dd9883545f8db814981c5e3acb7b5dae93412bee3278.json"
+    },
+    {
+      "id": "10b5943b0281f8ef7c55e402e27ed1bc7e7ec6a28f9a4a5282c46a333eb91d09",
+      "name": "CoupledReactionDiffusion/CG/H1/P2/Real/Triangle/3/real_time",
+      "metric": "real_time",
+      "url": "cases/10b5943b0281f8ef7c55e402e27ed1bc7e7ec6a28f9a4a5282c46a333eb91d09.json"
+    },
+    {
+      "id": "a7f2de28fa9bd0871cac016bacfc83622fcfcfc4675ea203a472625317e8bc90",
+      "name": "CoupledReactionDiffusion/CG/H1/P2/Real/Triangle/5/real_time",
+      "metric": "real_time",
+      "url": "cases/a7f2de28fa9bd0871cac016bacfc83622fcfcfc4675ea203a472625317e8bc90.json"
+    },
+    {
+      "id": "9fc6f02ec95c4ed1c39374fe324e1a2595ca572524608569cd171ebb172626fb",
+      "name": "CoupledReactionDiffusion/CG/H1/P2/Real/Triangle/9/real_time",
+      "metric": "real_time",
+      "url": "cases/9fc6f02ec95c4ed1c39374fe324e1a2595ca572524608569cd171ebb172626fb.json"
+    },
+    {
+      "id": "d8d8696b2bcd9fc41261663ea85057f5ffbf313488ef3e507fb16acfb982fac4",
+      "name": "CoupledReactionDiffusion/CG/H1/P2/Real/Wedge/3/real_time",
+      "metric": "real_time",
+      "url": "cases/d8d8696b2bcd9fc41261663ea85057f5ffbf313488ef3e507fb16acfb982fac4.json"
+    },
+    {
+      "id": "34ddc3c3028ec6227f98498d222e2ba849a6a88f0ef60ba329aca2a6e5d73b95",
+      "name": "CoupledReactionDiffusion/CG/H1/P2/Real/Wedge/5/real_time",
+      "metric": "real_time",
+      "url": "cases/34ddc3c3028ec6227f98498d222e2ba849a6a88f0ef60ba329aca2a6e5d73b95.json"
+    },
+    {
+      "id": "088f964af4f9382b46fcbfa5fb9935469a6cb1683b24ccd42257612ef0e2d177",
+      "name": "CoupledReactionDiffusion/CG/H1/P2/Real/Wedge/9/real_time",
+      "metric": "real_time",
+      "url": "cases/088f964af4f9382b46fcbfa5fb9935469a6cb1683b24ccd42257612ef0e2d177.json"
+    },
+    {
+      "id": "0733d33d44c31255dab7d019a5fe16408ef07a01ac747f9484eff94112418111",
+      "name": "CoupledReactionDiffusion/CG/H1/P3/Complex/Hexahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/0733d33d44c31255dab7d019a5fe16408ef07a01ac747f9484eff94112418111.json"
+    },
+    {
+      "id": "6c63339ca0dac99559190aa2d9bb2a0377481c6cc85842a6024d5347ff5164d4",
+      "name": "CoupledReactionDiffusion/CG/H1/P3/Complex/Hexahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/6c63339ca0dac99559190aa2d9bb2a0377481c6cc85842a6024d5347ff5164d4.json"
+    },
+    {
+      "id": "f7b71c59dabd7ceefebbcea9c32e3fea80e8030a6004724edde53d4924fa1a59",
+      "name": "CoupledReactionDiffusion/CG/H1/P3/Complex/Hexahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/f7b71c59dabd7ceefebbcea9c32e3fea80e8030a6004724edde53d4924fa1a59.json"
+    },
+    {
+      "id": "566954ec39f225f7b1d48f50e331ac2e35fe756e4d4f79bc0a9ac1a77042c108",
+      "name": "CoupledReactionDiffusion/CG/H1/P3/Complex/Pyramid/3/real_time",
+      "metric": "real_time",
+      "url": "cases/566954ec39f225f7b1d48f50e331ac2e35fe756e4d4f79bc0a9ac1a77042c108.json"
+    },
+    {
+      "id": "15a92ab90385b4894943c3c4e9ae8fd8a13d86a1ec91e18acdc86385dd414a33",
+      "name": "CoupledReactionDiffusion/CG/H1/P3/Complex/Pyramid/5/real_time",
+      "metric": "real_time",
+      "url": "cases/15a92ab90385b4894943c3c4e9ae8fd8a13d86a1ec91e18acdc86385dd414a33.json"
+    },
+    {
+      "id": "5709d9b68779dcd1ba21780701963d3733618de9d5c062de3f20be047511e8ea",
+      "name": "CoupledReactionDiffusion/CG/H1/P3/Complex/Pyramid/9/real_time",
+      "metric": "real_time",
+      "url": "cases/5709d9b68779dcd1ba21780701963d3733618de9d5c062de3f20be047511e8ea.json"
+    },
+    {
+      "id": "8e84809d240300ab6bea2d2f654cb4b37dd196454fec343160dc3b0f5baf2ce4",
+      "name": "CoupledReactionDiffusion/CG/H1/P3/Complex/Quadrilateral/3/real_time",
+      "metric": "real_time",
+      "url": "cases/8e84809d240300ab6bea2d2f654cb4b37dd196454fec343160dc3b0f5baf2ce4.json"
+    },
+    {
+      "id": "22b36174610f28ee52c0e736e11b87ad1afbd7e0cf05f65a3161b7fe159f6ed6",
+      "name": "CoupledReactionDiffusion/CG/H1/P3/Complex/Quadrilateral/5/real_time",
+      "metric": "real_time",
+      "url": "cases/22b36174610f28ee52c0e736e11b87ad1afbd7e0cf05f65a3161b7fe159f6ed6.json"
+    },
+    {
+      "id": "fd38f6291dfcaf639ce983157c23a46cebab0695b0413c943a4de9f3056d0b10",
+      "name": "CoupledReactionDiffusion/CG/H1/P3/Complex/Quadrilateral/9/real_time",
+      "metric": "real_time",
+      "url": "cases/fd38f6291dfcaf639ce983157c23a46cebab0695b0413c943a4de9f3056d0b10.json"
+    },
+    {
+      "id": "4dcbd51011cfd96e668503e3245f48fd55442d3a5c829237ea20c37a156bd2d6",
+      "name": "CoupledReactionDiffusion/CG/H1/P3/Complex/Segment/3/real_time",
+      "metric": "real_time",
+      "url": "cases/4dcbd51011cfd96e668503e3245f48fd55442d3a5c829237ea20c37a156bd2d6.json"
+    },
+    {
+      "id": "0b1a81be80461c7fa3829ce971c8bea4499bf9d3157f6d90d80b1e2067cbc23c",
+      "name": "CoupledReactionDiffusion/CG/H1/P3/Complex/Segment/5/real_time",
+      "metric": "real_time",
+      "url": "cases/0b1a81be80461c7fa3829ce971c8bea4499bf9d3157f6d90d80b1e2067cbc23c.json"
+    },
+    {
+      "id": "c4e69fe7d8fdb6b2c85ea368f0b78fe6db321bf012bff8683ab065d3832589d0",
+      "name": "CoupledReactionDiffusion/CG/H1/P3/Complex/Segment/9/real_time",
+      "metric": "real_time",
+      "url": "cases/c4e69fe7d8fdb6b2c85ea368f0b78fe6db321bf012bff8683ab065d3832589d0.json"
+    },
+    {
+      "id": "1b6febc48d8e8ab5c2b85e4294ad410db5b8f57c8f1785d2680a8822ec976e38",
+      "name": "CoupledReactionDiffusion/CG/H1/P3/Complex/Tetrahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/1b6febc48d8e8ab5c2b85e4294ad410db5b8f57c8f1785d2680a8822ec976e38.json"
+    },
+    {
+      "id": "bfb604461b6437bbca04fc50806791fa095bc92b41a12572cf88ea8d1ceaa30f",
+      "name": "CoupledReactionDiffusion/CG/H1/P3/Complex/Tetrahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/bfb604461b6437bbca04fc50806791fa095bc92b41a12572cf88ea8d1ceaa30f.json"
+    },
+    {
+      "id": "456de0989b6752c7559a18996627d9406217a0c3e723cc92e7a15ce675b7e79d",
+      "name": "CoupledReactionDiffusion/CG/H1/P3/Complex/Tetrahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/456de0989b6752c7559a18996627d9406217a0c3e723cc92e7a15ce675b7e79d.json"
+    },
+    {
+      "id": "122d251b820ce58f28cdb1d8b15725a81eea65242251de469139ab0697a26b2f",
+      "name": "CoupledReactionDiffusion/CG/H1/P3/Complex/Triangle/3/real_time",
+      "metric": "real_time",
+      "url": "cases/122d251b820ce58f28cdb1d8b15725a81eea65242251de469139ab0697a26b2f.json"
+    },
+    {
+      "id": "9817e2f71a796aff41598973beff157a5393e6dbb0d0e4c6b0cc264e26edfb61",
+      "name": "CoupledReactionDiffusion/CG/H1/P3/Complex/Triangle/5/real_time",
+      "metric": "real_time",
+      "url": "cases/9817e2f71a796aff41598973beff157a5393e6dbb0d0e4c6b0cc264e26edfb61.json"
+    },
+    {
+      "id": "8a2547dc9a93fecd1763738442589c287c4a9e88500161c87255e3bfe28f093c",
+      "name": "CoupledReactionDiffusion/CG/H1/P3/Complex/Triangle/9/real_time",
+      "metric": "real_time",
+      "url": "cases/8a2547dc9a93fecd1763738442589c287c4a9e88500161c87255e3bfe28f093c.json"
+    },
+    {
+      "id": "2f2b28f3d092a6ba1bc763b5f854dead5e1ce7ba624e20c765ff6cedae6dcf17",
+      "name": "CoupledReactionDiffusion/CG/H1/P3/Complex/Wedge/3/real_time",
+      "metric": "real_time",
+      "url": "cases/2f2b28f3d092a6ba1bc763b5f854dead5e1ce7ba624e20c765ff6cedae6dcf17.json"
+    },
+    {
+      "id": "3956af8fb7db7f002f9e50c34791c88ea726dbfd1ca716e0dfc9585413fee70a",
+      "name": "CoupledReactionDiffusion/CG/H1/P3/Complex/Wedge/5/real_time",
+      "metric": "real_time",
+      "url": "cases/3956af8fb7db7f002f9e50c34791c88ea726dbfd1ca716e0dfc9585413fee70a.json"
+    },
+    {
+      "id": "4f17ef6f75331a713af83b4f9b14813bbd40535a27eddda97b32f04865b7e4ed",
+      "name": "CoupledReactionDiffusion/CG/H1/P3/Complex/Wedge/9/real_time",
+      "metric": "real_time",
+      "url": "cases/4f17ef6f75331a713af83b4f9b14813bbd40535a27eddda97b32f04865b7e4ed.json"
+    },
+    {
+      "id": "ef3beb1c222762c0d574461f4058f0e1d94e63292b95a724e9c09dde7dc5b61e",
+      "name": "CoupledReactionDiffusion/CG/H1/P3/Real/Hexahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/ef3beb1c222762c0d574461f4058f0e1d94e63292b95a724e9c09dde7dc5b61e.json"
+    },
+    {
+      "id": "6e6437cf652db55eaac8dd31aaec6eec22d1be62dd9cb59769190c0792eb3730",
+      "name": "CoupledReactionDiffusion/CG/H1/P3/Real/Hexahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/6e6437cf652db55eaac8dd31aaec6eec22d1be62dd9cb59769190c0792eb3730.json"
+    },
+    {
+      "id": "78a8b47e51e977c24a03a66a5a42666c1f619ebea740e1bfbd43502355eb8ebe",
+      "name": "CoupledReactionDiffusion/CG/H1/P3/Real/Hexahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/78a8b47e51e977c24a03a66a5a42666c1f619ebea740e1bfbd43502355eb8ebe.json"
+    },
+    {
+      "id": "5a7a2e75b8448b51e2b4fcdf4c94eaa438d4816cf880a7e53e4061c8180f77d3",
+      "name": "CoupledReactionDiffusion/CG/H1/P3/Real/Pyramid/3/real_time",
+      "metric": "real_time",
+      "url": "cases/5a7a2e75b8448b51e2b4fcdf4c94eaa438d4816cf880a7e53e4061c8180f77d3.json"
+    },
+    {
+      "id": "5594756d149bf640474a0f47e53508ae09854e5d122dc8c16cdc5be71f644975",
+      "name": "CoupledReactionDiffusion/CG/H1/P3/Real/Pyramid/5/real_time",
+      "metric": "real_time",
+      "url": "cases/5594756d149bf640474a0f47e53508ae09854e5d122dc8c16cdc5be71f644975.json"
+    },
+    {
+      "id": "74832596779ddd493e2300468087a20d28ea7f2f7aa0c66f2a2ecb7622bee7df",
+      "name": "CoupledReactionDiffusion/CG/H1/P3/Real/Pyramid/9/real_time",
+      "metric": "real_time",
+      "url": "cases/74832596779ddd493e2300468087a20d28ea7f2f7aa0c66f2a2ecb7622bee7df.json"
+    },
+    {
+      "id": "5c21ade2ba6f8006383305018c74d10334cc9c2c0dc2afc103d8f5bf9a2d833d",
+      "name": "CoupledReactionDiffusion/CG/H1/P3/Real/Quadrilateral/3/real_time",
+      "metric": "real_time",
+      "url": "cases/5c21ade2ba6f8006383305018c74d10334cc9c2c0dc2afc103d8f5bf9a2d833d.json"
+    },
+    {
+      "id": "b325db9e98e3467e6de1433eee294271500bb8ff6cf955dcd682b9537ec8d88a",
+      "name": "CoupledReactionDiffusion/CG/H1/P3/Real/Quadrilateral/5/real_time",
+      "metric": "real_time",
+      "url": "cases/b325db9e98e3467e6de1433eee294271500bb8ff6cf955dcd682b9537ec8d88a.json"
+    },
+    {
+      "id": "177d495d221e8fc779750411af482689b49200ac5a7e6658f12b8436fca10fe6",
+      "name": "CoupledReactionDiffusion/CG/H1/P3/Real/Quadrilateral/9/real_time",
+      "metric": "real_time",
+      "url": "cases/177d495d221e8fc779750411af482689b49200ac5a7e6658f12b8436fca10fe6.json"
+    },
+    {
+      "id": "058652b5f158f0370e06ee175dfe9c214004d1724a80ab75053b424e71eaf5e9",
+      "name": "CoupledReactionDiffusion/CG/H1/P3/Real/Segment/3/real_time",
+      "metric": "real_time",
+      "url": "cases/058652b5f158f0370e06ee175dfe9c214004d1724a80ab75053b424e71eaf5e9.json"
+    },
+    {
+      "id": "d3bc9c6cc3a1e702b9c581e5b25c8bc3879ebb39df4f1d79b70ef666a6950aef",
+      "name": "CoupledReactionDiffusion/CG/H1/P3/Real/Segment/5/real_time",
+      "metric": "real_time",
+      "url": "cases/d3bc9c6cc3a1e702b9c581e5b25c8bc3879ebb39df4f1d79b70ef666a6950aef.json"
+    },
+    {
+      "id": "0418509db55d5db740b5e5a8834b998339a0119ae6ade37b3c5cef9190eee988",
+      "name": "CoupledReactionDiffusion/CG/H1/P3/Real/Segment/9/real_time",
+      "metric": "real_time",
+      "url": "cases/0418509db55d5db740b5e5a8834b998339a0119ae6ade37b3c5cef9190eee988.json"
+    },
+    {
+      "id": "1305775cc00ad729a24ddef752401d2e8f17db717c13b00b1a5b7b763cb52fbc",
+      "name": "CoupledReactionDiffusion/CG/H1/P3/Real/Tetrahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/1305775cc00ad729a24ddef752401d2e8f17db717c13b00b1a5b7b763cb52fbc.json"
+    },
+    {
+      "id": "6772a0d351b71e2311dbfc2b94826935216597e7ecb656c3923726be9ad0f9da",
+      "name": "CoupledReactionDiffusion/CG/H1/P3/Real/Tetrahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/6772a0d351b71e2311dbfc2b94826935216597e7ecb656c3923726be9ad0f9da.json"
+    },
+    {
+      "id": "90f887d37bf721d64b72ea9d65bc954829eb6ac23145dd3a398e927f8040ed51",
+      "name": "CoupledReactionDiffusion/CG/H1/P3/Real/Tetrahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/90f887d37bf721d64b72ea9d65bc954829eb6ac23145dd3a398e927f8040ed51.json"
+    },
+    {
+      "id": "d1812a671a73befff34e9e3291298c7f6de77744f76ca6544b603ab33f72af1a",
+      "name": "CoupledReactionDiffusion/CG/H1/P3/Real/Triangle/3/real_time",
+      "metric": "real_time",
+      "url": "cases/d1812a671a73befff34e9e3291298c7f6de77744f76ca6544b603ab33f72af1a.json"
+    },
+    {
+      "id": "9edc04568f279b8eae8577caaaec38da27005e2bfeb774b741bb6b1481010414",
+      "name": "CoupledReactionDiffusion/CG/H1/P3/Real/Triangle/5/real_time",
+      "metric": "real_time",
+      "url": "cases/9edc04568f279b8eae8577caaaec38da27005e2bfeb774b741bb6b1481010414.json"
+    },
+    {
+      "id": "f5657c06b0536136f537419e4e0db98aa38082fa94d762dd9d894dd06e31c333",
+      "name": "CoupledReactionDiffusion/CG/H1/P3/Real/Triangle/9/real_time",
+      "metric": "real_time",
+      "url": "cases/f5657c06b0536136f537419e4e0db98aa38082fa94d762dd9d894dd06e31c333.json"
+    },
+    {
+      "id": "52e14a1d79483d53cab6eb3347bfdc30c616cb441761ac1d6ab6ec017f8829bc",
+      "name": "CoupledReactionDiffusion/CG/H1/P3/Real/Wedge/3/real_time",
+      "metric": "real_time",
+      "url": "cases/52e14a1d79483d53cab6eb3347bfdc30c616cb441761ac1d6ab6ec017f8829bc.json"
+    },
+    {
+      "id": "48860dba9164ef2d766461a57729d96205cbe9fa3f65c6ed915a57a60a045898",
+      "name": "CoupledReactionDiffusion/CG/H1/P3/Real/Wedge/5/real_time",
+      "metric": "real_time",
+      "url": "cases/48860dba9164ef2d766461a57729d96205cbe9fa3f65c6ed915a57a60a045898.json"
+    },
+    {
+      "id": "e1620439513a9f8917bd19159b838dc0d2a2de3d741bdde033d2018b3c58e971",
+      "name": "CoupledReactionDiffusion/CG/H1/P3/Real/Wedge/9/real_time",
+      "metric": "real_time",
+      "url": "cases/e1620439513a9f8917bd19159b838dc0d2a2de3d741bdde033d2018b3c58e971.json"
+    }
+  ]
+}

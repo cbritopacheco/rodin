@@ -1,0 +1,1966 @@
+{
+  "schema": 1,
+  "definition": {
+    "kind": "benchmark",
+    "mode": "local",
+    "compiler": "gcc-14",
+    "runner": "ubuntu-24.04",
+    "cmake": {
+      "CMAKE_BUILD_TYPE": "Release",
+      "CMAKE_CXX_COMPILER": "g++-14",
+      "CMAKE_C_COMPILER": "gcc-14",
+      "CMAKE_SUPPRESS_REGENERATION": "ON",
+      "RODIN_BUILD_SRC": "ON",
+      "RODIN_BUILD_BENCHMARKS": "ON",
+      "RODIN_BUILD_UNIT_TESTS": "OFF",
+      "RODIN_BUILD_MANUFACTURED_TESTS": "OFF",
+      "RODIN_BUILD_CONVERGENCE_TESTS": "OFF",
+      "RODIN_BUILD_EXAMPLES": "OFF",
+      "RODIN_BUILD_DOC": "OFF",
+      "RODIN_INSTALL_RESOURCES": "OFF",
+      "RODIN_CODE_COVERAGE": "OFF",
+      "RODIN_MULTITHREADED": "OFF",
+      "RODIN_USE_ASAN": "OFF",
+      "RODIN_USE_UBSAN": "OFF",
+      "RODIN_USE_MPI": "OFF",
+      "RODIN_USE_PETSC": "OFF"
+    },
+    "targets": [
+      "RodinMathBenchmarks",
+      "RodinMathSpatialMatrixBenchmarks",
+      "RodinMathSpatialVectorBenchmarks",
+      "RodinScalarDotBenchmarks",
+      "RodinSparseAlgebraBenchmarks",
+      "RodinSparseEliminationBenchmarks",
+      "RodinSpatialDotBenchmarks",
+      "RodinSpatialMatrixContractionBenchmarks",
+      "RodinSpatialMatrixProductBenchmarks",
+      "RodinSpatialMatrixVectorBenchmarks",
+      "RodinSpatialVectorStorageBenchmarks"
+    ],
+    "stage": "components"
+  },
+  "ranks": 1,
+  "cases": [
+    {
+      "id": "a7c3dd557a5fc901d642be387683195695c296a5d7a7efb2af5601aac4a387e1",
+      "name": "SpatialDot/Batch/Original/Full/ComplexComplex/0/16/real_time",
+      "metric": "real_time",
+      "url": "cases/a7c3dd557a5fc901d642be387683195695c296a5d7a7efb2af5601aac4a387e1.json"
+    },
+    {
+      "id": "18b5f85ccc2d436f52c36af780a5a692c2d9af4c93fa4b23c473e4246052f32c",
+      "name": "SpatialDot/Batch/Original/Full/ComplexComplex/0/4/real_time",
+      "metric": "real_time",
+      "url": "cases/18b5f85ccc2d436f52c36af780a5a692c2d9af4c93fa4b23c473e4246052f32c.json"
+    },
+    {
+      "id": "d9d332ba5be713d9511c59463a683c38e0adfbfe8f2670f514d7a597657561ec",
+      "name": "SpatialDot/Batch/Original/Full/ComplexComplex/0/64/real_time",
+      "metric": "real_time",
+      "url": "cases/d9d332ba5be713d9511c59463a683c38e0adfbfe8f2670f514d7a597657561ec.json"
+    },
+    {
+      "id": "2b76a75fdfcb178d9964b663db8adf2b14c963ed5e753773fdad99c5acc35e8f",
+      "name": "SpatialDot/Batch/Original/Full/ComplexComplex/1/16/real_time",
+      "metric": "real_time",
+      "url": "cases/2b76a75fdfcb178d9964b663db8adf2b14c963ed5e753773fdad99c5acc35e8f.json"
+    },
+    {
+      "id": "a9a1590b8ff046e7f2dd3445c68ebafdfa0aef73f636bdd25fbd2c309885efe9",
+      "name": "SpatialDot/Batch/Original/Full/ComplexComplex/1/4/real_time",
+      "metric": "real_time",
+      "url": "cases/a9a1590b8ff046e7f2dd3445c68ebafdfa0aef73f636bdd25fbd2c309885efe9.json"
+    },
+    {
+      "id": "aac4d33f3351596ee4ec4010d0601d5dfabd6c4f57eaa88aead1182d6803c729",
+      "name": "SpatialDot/Batch/Original/Full/ComplexComplex/1/64/real_time",
+      "metric": "real_time",
+      "url": "cases/aac4d33f3351596ee4ec4010d0601d5dfabd6c4f57eaa88aead1182d6803c729.json"
+    },
+    {
+      "id": "33cfa8fb5b3fef627083477b4cfa25bf999bcc6502848f8459fe0f7f5bb6b0d8",
+      "name": "SpatialDot/Batch/Original/Full/ComplexComplex/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/33cfa8fb5b3fef627083477b4cfa25bf999bcc6502848f8459fe0f7f5bb6b0d8.json"
+    },
+    {
+      "id": "1c6df59be4585ca6b56c690047aaa58ff4e2521a097f94e50c6147803084a08f",
+      "name": "SpatialDot/Batch/Original/Full/ComplexComplex/2/4/real_time",
+      "metric": "real_time",
+      "url": "cases/1c6df59be4585ca6b56c690047aaa58ff4e2521a097f94e50c6147803084a08f.json"
+    },
+    {
+      "id": "41c84c091e8de600357d7d3dea687af28cca567878f189ea8823ea857dc01014",
+      "name": "SpatialDot/Batch/Original/Full/ComplexComplex/2/64/real_time",
+      "metric": "real_time",
+      "url": "cases/41c84c091e8de600357d7d3dea687af28cca567878f189ea8823ea857dc01014.json"
+    },
+    {
+      "id": "ddbdddb9ef4062075338f359caf18931dcc3573665a8dffc7fd5713b81701547",
+      "name": "SpatialDot/Batch/Original/Full/ComplexComplex/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/ddbdddb9ef4062075338f359caf18931dcc3573665a8dffc7fd5713b81701547.json"
+    },
+    {
+      "id": "b4e05932de0a5365992f44f612bd62a7b4d590fe76e200392ed4f38417fbaa8a",
+      "name": "SpatialDot/Batch/Original/Full/ComplexComplex/3/4/real_time",
+      "metric": "real_time",
+      "url": "cases/b4e05932de0a5365992f44f612bd62a7b4d590fe76e200392ed4f38417fbaa8a.json"
+    },
+    {
+      "id": "582da52fb6cf7b192d0938418544113c66b8ea1ea5ade2c1812983bf4f3ea872",
+      "name": "SpatialDot/Batch/Original/Full/ComplexComplex/3/64/real_time",
+      "metric": "real_time",
+      "url": "cases/582da52fb6cf7b192d0938418544113c66b8ea1ea5ade2c1812983bf4f3ea872.json"
+    },
+    {
+      "id": "fd0b721dd6692c587885ac5d423166fe6aa1a1f02d22a3562c423ef03259f018",
+      "name": "SpatialDot/Batch/Original/Full/ComplexReal/0/16/real_time",
+      "metric": "real_time",
+      "url": "cases/fd0b721dd6692c587885ac5d423166fe6aa1a1f02d22a3562c423ef03259f018.json"
+    },
+    {
+      "id": "5e5c7e570be7ce9da2e7170ed9105cd2cbdd7798f1834ca97758539a4df763c3",
+      "name": "SpatialDot/Batch/Original/Full/ComplexReal/0/4/real_time",
+      "metric": "real_time",
+      "url": "cases/5e5c7e570be7ce9da2e7170ed9105cd2cbdd7798f1834ca97758539a4df763c3.json"
+    },
+    {
+      "id": "d258fb959f7088fbef9c1063d4e11e418bb026aa74ae57599f16e1e5acee9cab",
+      "name": "SpatialDot/Batch/Original/Full/ComplexReal/0/64/real_time",
+      "metric": "real_time",
+      "url": "cases/d258fb959f7088fbef9c1063d4e11e418bb026aa74ae57599f16e1e5acee9cab.json"
+    },
+    {
+      "id": "fdcd2568fa4320c546c250273d6b04350b45c2b8e7b560f475af42beeeeea136",
+      "name": "SpatialDot/Batch/Original/Full/ComplexReal/1/16/real_time",
+      "metric": "real_time",
+      "url": "cases/fdcd2568fa4320c546c250273d6b04350b45c2b8e7b560f475af42beeeeea136.json"
+    },
+    {
+      "id": "d298f399483c9d51bffc6e1794be4a6fce087a66f2f5378686a8abebf84086af",
+      "name": "SpatialDot/Batch/Original/Full/ComplexReal/1/4/real_time",
+      "metric": "real_time",
+      "url": "cases/d298f399483c9d51bffc6e1794be4a6fce087a66f2f5378686a8abebf84086af.json"
+    },
+    {
+      "id": "bd170db700b7256777692a77d8069357a2d5e935a167c5ed300cc6ff6d5d79c9",
+      "name": "SpatialDot/Batch/Original/Full/ComplexReal/1/64/real_time",
+      "metric": "real_time",
+      "url": "cases/bd170db700b7256777692a77d8069357a2d5e935a167c5ed300cc6ff6d5d79c9.json"
+    },
+    {
+      "id": "de78b164cef74b6442e81600866991236d19d2c499d3414de34bd74ba7b24e69",
+      "name": "SpatialDot/Batch/Original/Full/ComplexReal/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/de78b164cef74b6442e81600866991236d19d2c499d3414de34bd74ba7b24e69.json"
+    },
+    {
+      "id": "b3297b6ab2d8337a68c9b1299e0438b155c2718c820c9ea7d64a10ba90b13440",
+      "name": "SpatialDot/Batch/Original/Full/ComplexReal/2/4/real_time",
+      "metric": "real_time",
+      "url": "cases/b3297b6ab2d8337a68c9b1299e0438b155c2718c820c9ea7d64a10ba90b13440.json"
+    },
+    {
+      "id": "cbbdd4146b679b0e6f8922853de4b43f474555ee554428f73d150179f64c1eeb",
+      "name": "SpatialDot/Batch/Original/Full/ComplexReal/2/64/real_time",
+      "metric": "real_time",
+      "url": "cases/cbbdd4146b679b0e6f8922853de4b43f474555ee554428f73d150179f64c1eeb.json"
+    },
+    {
+      "id": "78d5a5c661668b505a35f98e13c2e9dfac9cbb50433d89443359014f4476dbc5",
+      "name": "SpatialDot/Batch/Original/Full/ComplexReal/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/78d5a5c661668b505a35f98e13c2e9dfac9cbb50433d89443359014f4476dbc5.json"
+    },
+    {
+      "id": "ea35ea80bb0efd7de651bb2e4b146e4f000f866f139ba4261442d8bd8cfaf6d1",
+      "name": "SpatialDot/Batch/Original/Full/ComplexReal/3/4/real_time",
+      "metric": "real_time",
+      "url": "cases/ea35ea80bb0efd7de651bb2e4b146e4f000f866f139ba4261442d8bd8cfaf6d1.json"
+    },
+    {
+      "id": "e0cadf4e011e7e446db18200c5d792044e97cde9fd9d401ef63f2a78a6bac210",
+      "name": "SpatialDot/Batch/Original/Full/ComplexReal/3/64/real_time",
+      "metric": "real_time",
+      "url": "cases/e0cadf4e011e7e446db18200c5d792044e97cde9fd9d401ef63f2a78a6bac210.json"
+    },
+    {
+      "id": "a7e80a0730134accad495358172089a11ccfd0ac8b7a96eaf9fa5dca0104b52b",
+      "name": "SpatialDot/Batch/Original/Full/RealComplex/0/16/real_time",
+      "metric": "real_time",
+      "url": "cases/a7e80a0730134accad495358172089a11ccfd0ac8b7a96eaf9fa5dca0104b52b.json"
+    },
+    {
+      "id": "8cc1337c9af8c202efe5ce0297561e0ab03d79a09ea9b1898db8aca39cf4bbb5",
+      "name": "SpatialDot/Batch/Original/Full/RealComplex/0/4/real_time",
+      "metric": "real_time",
+      "url": "cases/8cc1337c9af8c202efe5ce0297561e0ab03d79a09ea9b1898db8aca39cf4bbb5.json"
+    },
+    {
+      "id": "333ec0d83402f003ea0788c4e31ff771f5a1694bc91ad356db9c09f5d0f06525",
+      "name": "SpatialDot/Batch/Original/Full/RealComplex/0/64/real_time",
+      "metric": "real_time",
+      "url": "cases/333ec0d83402f003ea0788c4e31ff771f5a1694bc91ad356db9c09f5d0f06525.json"
+    },
+    {
+      "id": "2897b315e623b046e74b64773a945cac879a8dcce68d76751723af3237550214",
+      "name": "SpatialDot/Batch/Original/Full/RealComplex/1/16/real_time",
+      "metric": "real_time",
+      "url": "cases/2897b315e623b046e74b64773a945cac879a8dcce68d76751723af3237550214.json"
+    },
+    {
+      "id": "88b64b1cabd6fca652061a106d7a6b0be7f90c2f402c0b483746ee82fb22b4a4",
+      "name": "SpatialDot/Batch/Original/Full/RealComplex/1/4/real_time",
+      "metric": "real_time",
+      "url": "cases/88b64b1cabd6fca652061a106d7a6b0be7f90c2f402c0b483746ee82fb22b4a4.json"
+    },
+    {
+      "id": "782c05de10b959f99c0182b754926e093e51babb3b07a7ef9e31ea4c84776271",
+      "name": "SpatialDot/Batch/Original/Full/RealComplex/1/64/real_time",
+      "metric": "real_time",
+      "url": "cases/782c05de10b959f99c0182b754926e093e51babb3b07a7ef9e31ea4c84776271.json"
+    },
+    {
+      "id": "0dc538f38d637276d448e730ea336fc2e32ad26f5ceba4ed17825c0d5cecb6ff",
+      "name": "SpatialDot/Batch/Original/Full/RealComplex/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/0dc538f38d637276d448e730ea336fc2e32ad26f5ceba4ed17825c0d5cecb6ff.json"
+    },
+    {
+      "id": "5d80b6fe54baf5d3ba9a927c6597acb16847e59dc412f1f5d6bb5e27aee177f5",
+      "name": "SpatialDot/Batch/Original/Full/RealComplex/2/4/real_time",
+      "metric": "real_time",
+      "url": "cases/5d80b6fe54baf5d3ba9a927c6597acb16847e59dc412f1f5d6bb5e27aee177f5.json"
+    },
+    {
+      "id": "d971d7854a7b00e3d09a4d13cf18ac035710aaf08f9a6130cf3e111c3fe4da88",
+      "name": "SpatialDot/Batch/Original/Full/RealComplex/2/64/real_time",
+      "metric": "real_time",
+      "url": "cases/d971d7854a7b00e3d09a4d13cf18ac035710aaf08f9a6130cf3e111c3fe4da88.json"
+    },
+    {
+      "id": "5ecad926bf052f16426ec0358543cd49c08e62e0b1bbc531676cd23d4bf1bd7e",
+      "name": "SpatialDot/Batch/Original/Full/RealComplex/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/5ecad926bf052f16426ec0358543cd49c08e62e0b1bbc531676cd23d4bf1bd7e.json"
+    },
+    {
+      "id": "0ed34aebe593aa19eb33e044b6a293f3de54aa004bc8978e5bb5b298519d9fbd",
+      "name": "SpatialDot/Batch/Original/Full/RealComplex/3/4/real_time",
+      "metric": "real_time",
+      "url": "cases/0ed34aebe593aa19eb33e044b6a293f3de54aa004bc8978e5bb5b298519d9fbd.json"
+    },
+    {
+      "id": "e5c615e118f9931ad4ac83a99d8e13831590f973c34d6c5f3d6eabaa340535fc",
+      "name": "SpatialDot/Batch/Original/Full/RealComplex/3/64/real_time",
+      "metric": "real_time",
+      "url": "cases/e5c615e118f9931ad4ac83a99d8e13831590f973c34d6c5f3d6eabaa340535fc.json"
+    },
+    {
+      "id": "c8aa51cae6b97137f9d90cd459bb07575b18a26af97b3b7a68f92f64cb68524f",
+      "name": "SpatialDot/Batch/Original/Full/RealReal/0/16/real_time",
+      "metric": "real_time",
+      "url": "cases/c8aa51cae6b97137f9d90cd459bb07575b18a26af97b3b7a68f92f64cb68524f.json"
+    },
+    {
+      "id": "8ec24f8ca21cc32b510e120bbcad46f65ff00e12b00e560749da26ad4da69627",
+      "name": "SpatialDot/Batch/Original/Full/RealReal/0/4/real_time",
+      "metric": "real_time",
+      "url": "cases/8ec24f8ca21cc32b510e120bbcad46f65ff00e12b00e560749da26ad4da69627.json"
+    },
+    {
+      "id": "9fe2f25805ff23c89e9d52d4c5048b654d81944c9c848693cdd38c1a39ec2cca",
+      "name": "SpatialDot/Batch/Original/Full/RealReal/0/64/real_time",
+      "metric": "real_time",
+      "url": "cases/9fe2f25805ff23c89e9d52d4c5048b654d81944c9c848693cdd38c1a39ec2cca.json"
+    },
+    {
+      "id": "cc2b56928b7568ae7bd1630e8c79c64c1b44f5b2a7d5628ce0231d7aec1ecb67",
+      "name": "SpatialDot/Batch/Original/Full/RealReal/1/16/real_time",
+      "metric": "real_time",
+      "url": "cases/cc2b56928b7568ae7bd1630e8c79c64c1b44f5b2a7d5628ce0231d7aec1ecb67.json"
+    },
+    {
+      "id": "a04caeb533a6997ab2d57c12daf6595e7b38bc085ad5d1fcc3293a57e6525adb",
+      "name": "SpatialDot/Batch/Original/Full/RealReal/1/4/real_time",
+      "metric": "real_time",
+      "url": "cases/a04caeb533a6997ab2d57c12daf6595e7b38bc085ad5d1fcc3293a57e6525adb.json"
+    },
+    {
+      "id": "7873acc040be53e08424799476d0e76160e5a0a15aad41c3d43bdaeeae35b544",
+      "name": "SpatialDot/Batch/Original/Full/RealReal/1/64/real_time",
+      "metric": "real_time",
+      "url": "cases/7873acc040be53e08424799476d0e76160e5a0a15aad41c3d43bdaeeae35b544.json"
+    },
+    {
+      "id": "6c34dcacd629ca487530a67eb395fbac7394ee73c3e761e2d9a14e73ef9ac647",
+      "name": "SpatialDot/Batch/Original/Full/RealReal/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/6c34dcacd629ca487530a67eb395fbac7394ee73c3e761e2d9a14e73ef9ac647.json"
+    },
+    {
+      "id": "7e188ccf157b16c21846cc1df98028a8e28acc3d76c4de54a74b071e330876d4",
+      "name": "SpatialDot/Batch/Original/Full/RealReal/2/4/real_time",
+      "metric": "real_time",
+      "url": "cases/7e188ccf157b16c21846cc1df98028a8e28acc3d76c4de54a74b071e330876d4.json"
+    },
+    {
+      "id": "e48158e610ee5d9a035609b063ee3224914c0a7147a49792bf758cfa7710ae1c",
+      "name": "SpatialDot/Batch/Original/Full/RealReal/2/64/real_time",
+      "metric": "real_time",
+      "url": "cases/e48158e610ee5d9a035609b063ee3224914c0a7147a49792bf758cfa7710ae1c.json"
+    },
+    {
+      "id": "22a468e06e72b48b2e045274ef69197d2a2d3c28ba2612db6f43b92f18b2475d",
+      "name": "SpatialDot/Batch/Original/Full/RealReal/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/22a468e06e72b48b2e045274ef69197d2a2d3c28ba2612db6f43b92f18b2475d.json"
+    },
+    {
+      "id": "9565c8452ed369cdd874b03f58b718aa6e15137ac0faf6e3899d801aace0e76c",
+      "name": "SpatialDot/Batch/Original/Full/RealReal/3/4/real_time",
+      "metric": "real_time",
+      "url": "cases/9565c8452ed369cdd874b03f58b718aa6e15137ac0faf6e3899d801aace0e76c.json"
+    },
+    {
+      "id": "0b2b6c6409325afb6c8aa1320653349aa3b9888f4c94cd6258ab050fdfed6e18",
+      "name": "SpatialDot/Batch/Original/Full/RealReal/3/64/real_time",
+      "metric": "real_time",
+      "url": "cases/0b2b6c6409325afb6c8aa1320653349aa3b9888f4c94cd6258ab050fdfed6e18.json"
+    },
+    {
+      "id": "6d4ffca8755a50e2c044e6e1373cb41c2a8b5067914544385708e69bbbbaeee2",
+      "name": "SpatialDot/Batch/Original/Lower/ComplexComplex/0/16/real_time",
+      "metric": "real_time",
+      "url": "cases/6d4ffca8755a50e2c044e6e1373cb41c2a8b5067914544385708e69bbbbaeee2.json"
+    },
+    {
+      "id": "5150a92df150d838652f9242a4e1402f780d12012c9c9db222473f303f97966b",
+      "name": "SpatialDot/Batch/Original/Lower/ComplexComplex/0/4/real_time",
+      "metric": "real_time",
+      "url": "cases/5150a92df150d838652f9242a4e1402f780d12012c9c9db222473f303f97966b.json"
+    },
+    {
+      "id": "7bf886af9ca6b4e6acf616fa7833bd8c49f3bc43fa965571d621748ce34be1ac",
+      "name": "SpatialDot/Batch/Original/Lower/ComplexComplex/0/64/real_time",
+      "metric": "real_time",
+      "url": "cases/7bf886af9ca6b4e6acf616fa7833bd8c49f3bc43fa965571d621748ce34be1ac.json"
+    },
+    {
+      "id": "c83f36199f5e30046ce0a2cea7d37305bffb6eac9517f2809f1db938e5ccda6d",
+      "name": "SpatialDot/Batch/Original/Lower/ComplexComplex/1/16/real_time",
+      "metric": "real_time",
+      "url": "cases/c83f36199f5e30046ce0a2cea7d37305bffb6eac9517f2809f1db938e5ccda6d.json"
+    },
+    {
+      "id": "ec07af224e54a60e5efd21a3d12a5e52ccbabfab9e2671e353fba8ede8e4f997",
+      "name": "SpatialDot/Batch/Original/Lower/ComplexComplex/1/4/real_time",
+      "metric": "real_time",
+      "url": "cases/ec07af224e54a60e5efd21a3d12a5e52ccbabfab9e2671e353fba8ede8e4f997.json"
+    },
+    {
+      "id": "e7c3b5a13f5e9c28133dae897b27838ef54ec4157a5ce8cd2d604efbdcfbac90",
+      "name": "SpatialDot/Batch/Original/Lower/ComplexComplex/1/64/real_time",
+      "metric": "real_time",
+      "url": "cases/e7c3b5a13f5e9c28133dae897b27838ef54ec4157a5ce8cd2d604efbdcfbac90.json"
+    },
+    {
+      "id": "30572c8d6c8e3f39b591d447905d7a26f6812577ef967972e3e2ed218d0309b6",
+      "name": "SpatialDot/Batch/Original/Lower/ComplexComplex/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/30572c8d6c8e3f39b591d447905d7a26f6812577ef967972e3e2ed218d0309b6.json"
+    },
+    {
+      "id": "6f21a00b9070d0113f580adb6cf3e0bf5436467b1a8a4eecfe21de7b1d7ba324",
+      "name": "SpatialDot/Batch/Original/Lower/ComplexComplex/2/4/real_time",
+      "metric": "real_time",
+      "url": "cases/6f21a00b9070d0113f580adb6cf3e0bf5436467b1a8a4eecfe21de7b1d7ba324.json"
+    },
+    {
+      "id": "d504327748d3901524d1876d9e434c53cfb7cf76a36aa3ca0a2c59373abd9a1c",
+      "name": "SpatialDot/Batch/Original/Lower/ComplexComplex/2/64/real_time",
+      "metric": "real_time",
+      "url": "cases/d504327748d3901524d1876d9e434c53cfb7cf76a36aa3ca0a2c59373abd9a1c.json"
+    },
+    {
+      "id": "c6032b29cb5957c817f351fb72aebda33290e9e64f3c0b77d2ecccedb5bbcb00",
+      "name": "SpatialDot/Batch/Original/Lower/ComplexComplex/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/c6032b29cb5957c817f351fb72aebda33290e9e64f3c0b77d2ecccedb5bbcb00.json"
+    },
+    {
+      "id": "e0ac05cb0aafc5a0181250a1ad689d51417a0fbce0c6e27200ae658ac59968e1",
+      "name": "SpatialDot/Batch/Original/Lower/ComplexComplex/3/4/real_time",
+      "metric": "real_time",
+      "url": "cases/e0ac05cb0aafc5a0181250a1ad689d51417a0fbce0c6e27200ae658ac59968e1.json"
+    },
+    {
+      "id": "dfb18a3121d8ec973a4ea287688aaa99f828770591a7afc78a8a6b5113f8ada4",
+      "name": "SpatialDot/Batch/Original/Lower/ComplexComplex/3/64/real_time",
+      "metric": "real_time",
+      "url": "cases/dfb18a3121d8ec973a4ea287688aaa99f828770591a7afc78a8a6b5113f8ada4.json"
+    },
+    {
+      "id": "4612081e75f9897223f8d2ecf71f4fab0e48f1aa275167228552daf1fe384275",
+      "name": "SpatialDot/Batch/Original/Lower/ComplexReal/0/16/real_time",
+      "metric": "real_time",
+      "url": "cases/4612081e75f9897223f8d2ecf71f4fab0e48f1aa275167228552daf1fe384275.json"
+    },
+    {
+      "id": "41ad97b50a0142b7095154264ede7bbce0e5d37ea33bcbf19146ee60522276e3",
+      "name": "SpatialDot/Batch/Original/Lower/ComplexReal/0/4/real_time",
+      "metric": "real_time",
+      "url": "cases/41ad97b50a0142b7095154264ede7bbce0e5d37ea33bcbf19146ee60522276e3.json"
+    },
+    {
+      "id": "ff54ef355c5cb55b2839bea0b749cf3cbeaaf223759d9c1a8f9cd20b8e4d2434",
+      "name": "SpatialDot/Batch/Original/Lower/ComplexReal/0/64/real_time",
+      "metric": "real_time",
+      "url": "cases/ff54ef355c5cb55b2839bea0b749cf3cbeaaf223759d9c1a8f9cd20b8e4d2434.json"
+    },
+    {
+      "id": "46b0a01ba554a34a21152a95e283bffc8aba0ffa575d0e171a6afdc93772c25e",
+      "name": "SpatialDot/Batch/Original/Lower/ComplexReal/1/16/real_time",
+      "metric": "real_time",
+      "url": "cases/46b0a01ba554a34a21152a95e283bffc8aba0ffa575d0e171a6afdc93772c25e.json"
+    },
+    {
+      "id": "6adb8d27428179eadbb78b0ffc20a6656b7710e6573c2c10b5e25edff78196ff",
+      "name": "SpatialDot/Batch/Original/Lower/ComplexReal/1/4/real_time",
+      "metric": "real_time",
+      "url": "cases/6adb8d27428179eadbb78b0ffc20a6656b7710e6573c2c10b5e25edff78196ff.json"
+    },
+    {
+      "id": "cdef5c791b190674a15b063f94cdfa81e50541d6c3db1e7b37a6c6606cb099f5",
+      "name": "SpatialDot/Batch/Original/Lower/ComplexReal/1/64/real_time",
+      "metric": "real_time",
+      "url": "cases/cdef5c791b190674a15b063f94cdfa81e50541d6c3db1e7b37a6c6606cb099f5.json"
+    },
+    {
+      "id": "f440a6d112cdce2536b3d541755941092dfba501ae8a869e619b342235499098",
+      "name": "SpatialDot/Batch/Original/Lower/ComplexReal/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/f440a6d112cdce2536b3d541755941092dfba501ae8a869e619b342235499098.json"
+    },
+    {
+      "id": "b2f8223beee4fb7f838b4a1efe9ee0de811a19ee8b13353b92e0bfa538751367",
+      "name": "SpatialDot/Batch/Original/Lower/ComplexReal/2/4/real_time",
+      "metric": "real_time",
+      "url": "cases/b2f8223beee4fb7f838b4a1efe9ee0de811a19ee8b13353b92e0bfa538751367.json"
+    },
+    {
+      "id": "4fbe32e3056f93a3be4a97d2f959f463f72cc0b084d010a6bc17b3335ec26f6d",
+      "name": "SpatialDot/Batch/Original/Lower/ComplexReal/2/64/real_time",
+      "metric": "real_time",
+      "url": "cases/4fbe32e3056f93a3be4a97d2f959f463f72cc0b084d010a6bc17b3335ec26f6d.json"
+    },
+    {
+      "id": "0e6e66b91fb9842247545e0e184b24926e1cb91a36b1ecb5b22ce083c39c8bfb",
+      "name": "SpatialDot/Batch/Original/Lower/ComplexReal/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/0e6e66b91fb9842247545e0e184b24926e1cb91a36b1ecb5b22ce083c39c8bfb.json"
+    },
+    {
+      "id": "4a360c38dc65984fcce509c80c2ff96c7d35068378aab25967fdae21afee63fa",
+      "name": "SpatialDot/Batch/Original/Lower/ComplexReal/3/4/real_time",
+      "metric": "real_time",
+      "url": "cases/4a360c38dc65984fcce509c80c2ff96c7d35068378aab25967fdae21afee63fa.json"
+    },
+    {
+      "id": "ee7f07b42dc6700f20ad5498e46e7cf0fe1a9a31f105e6b18198dc3b99f9a33d",
+      "name": "SpatialDot/Batch/Original/Lower/ComplexReal/3/64/real_time",
+      "metric": "real_time",
+      "url": "cases/ee7f07b42dc6700f20ad5498e46e7cf0fe1a9a31f105e6b18198dc3b99f9a33d.json"
+    },
+    {
+      "id": "d5a7d97029910b9c16310506f924aea0c5493495a6459e60bbcd6b8d31ff71b8",
+      "name": "SpatialDot/Batch/Original/Lower/RealComplex/0/16/real_time",
+      "metric": "real_time",
+      "url": "cases/d5a7d97029910b9c16310506f924aea0c5493495a6459e60bbcd6b8d31ff71b8.json"
+    },
+    {
+      "id": "3779f9724763a2341551ec82d2dec04aafafa8efbc7a6de5a50b477e681e2224",
+      "name": "SpatialDot/Batch/Original/Lower/RealComplex/0/4/real_time",
+      "metric": "real_time",
+      "url": "cases/3779f9724763a2341551ec82d2dec04aafafa8efbc7a6de5a50b477e681e2224.json"
+    },
+    {
+      "id": "8087a2e6771f4a134ba9a6ce07d8d04f6d8c64737c532ee9817291156350f1c5",
+      "name": "SpatialDot/Batch/Original/Lower/RealComplex/0/64/real_time",
+      "metric": "real_time",
+      "url": "cases/8087a2e6771f4a134ba9a6ce07d8d04f6d8c64737c532ee9817291156350f1c5.json"
+    },
+    {
+      "id": "47bb411c6716177f3bf0780ea3d039b71d774a1f1adb34f644b356d64c703686",
+      "name": "SpatialDot/Batch/Original/Lower/RealComplex/1/16/real_time",
+      "metric": "real_time",
+      "url": "cases/47bb411c6716177f3bf0780ea3d039b71d774a1f1adb34f644b356d64c703686.json"
+    },
+    {
+      "id": "de53e2b042ef16f766c38c180f684d32b7a40c63b27ae2d739bceaf6e958f450",
+      "name": "SpatialDot/Batch/Original/Lower/RealComplex/1/4/real_time",
+      "metric": "real_time",
+      "url": "cases/de53e2b042ef16f766c38c180f684d32b7a40c63b27ae2d739bceaf6e958f450.json"
+    },
+    {
+      "id": "78a2456713a80b16246193dd14acf5bbd6d5845df75adee3ff491b446fc6dedd",
+      "name": "SpatialDot/Batch/Original/Lower/RealComplex/1/64/real_time",
+      "metric": "real_time",
+      "url": "cases/78a2456713a80b16246193dd14acf5bbd6d5845df75adee3ff491b446fc6dedd.json"
+    },
+    {
+      "id": "5a8d8582a482ce8567d39671cc1157c9de927ccc5d9df9cc3111a96cbb4730de",
+      "name": "SpatialDot/Batch/Original/Lower/RealComplex/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/5a8d8582a482ce8567d39671cc1157c9de927ccc5d9df9cc3111a96cbb4730de.json"
+    },
+    {
+      "id": "a908ecfc9d3003df52b07631b5e590e8eff633a5e5f4e335f4435ce211bfa242",
+      "name": "SpatialDot/Batch/Original/Lower/RealComplex/2/4/real_time",
+      "metric": "real_time",
+      "url": "cases/a908ecfc9d3003df52b07631b5e590e8eff633a5e5f4e335f4435ce211bfa242.json"
+    },
+    {
+      "id": "54cbcc481666b54ea1175f54e52f62a7553d70d6c2d9557ec0f70ee416633535",
+      "name": "SpatialDot/Batch/Original/Lower/RealComplex/2/64/real_time",
+      "metric": "real_time",
+      "url": "cases/54cbcc481666b54ea1175f54e52f62a7553d70d6c2d9557ec0f70ee416633535.json"
+    },
+    {
+      "id": "20edf603d97e28c8b7f371c0c3200a7683f22fe96c697f37381bf5318a51fe81",
+      "name": "SpatialDot/Batch/Original/Lower/RealComplex/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/20edf603d97e28c8b7f371c0c3200a7683f22fe96c697f37381bf5318a51fe81.json"
+    },
+    {
+      "id": "5ab1b9a475be687bc25360cae6bb2231ec6d5e3831652c1042a66697735d9889",
+      "name": "SpatialDot/Batch/Original/Lower/RealComplex/3/4/real_time",
+      "metric": "real_time",
+      "url": "cases/5ab1b9a475be687bc25360cae6bb2231ec6d5e3831652c1042a66697735d9889.json"
+    },
+    {
+      "id": "783f776c58bdabcf75d517613bf11e596167b6862e7b0a95e9b9971971ab3b06",
+      "name": "SpatialDot/Batch/Original/Lower/RealComplex/3/64/real_time",
+      "metric": "real_time",
+      "url": "cases/783f776c58bdabcf75d517613bf11e596167b6862e7b0a95e9b9971971ab3b06.json"
+    },
+    {
+      "id": "b72701af30cf5dba5c924496fb9a2c1b83dc477ddbcf4546a5215725b67362d6",
+      "name": "SpatialDot/Batch/Original/Lower/RealReal/0/16/real_time",
+      "metric": "real_time",
+      "url": "cases/b72701af30cf5dba5c924496fb9a2c1b83dc477ddbcf4546a5215725b67362d6.json"
+    },
+    {
+      "id": "6e8457da5544b2362294e456d9ee087fb43fcb4c41275ddf325c2f97ba470c7a",
+      "name": "SpatialDot/Batch/Original/Lower/RealReal/0/4/real_time",
+      "metric": "real_time",
+      "url": "cases/6e8457da5544b2362294e456d9ee087fb43fcb4c41275ddf325c2f97ba470c7a.json"
+    },
+    {
+      "id": "7ae4cd63f78a1550ab7c59b6dae64e5f091e2b1fe1200e0985f93903bab556fe",
+      "name": "SpatialDot/Batch/Original/Lower/RealReal/0/64/real_time",
+      "metric": "real_time",
+      "url": "cases/7ae4cd63f78a1550ab7c59b6dae64e5f091e2b1fe1200e0985f93903bab556fe.json"
+    },
+    {
+      "id": "02273d35f3b69378ef5b4d5a6972400f08eb9841a6d4c59c634c930c857daa3c",
+      "name": "SpatialDot/Batch/Original/Lower/RealReal/1/16/real_time",
+      "metric": "real_time",
+      "url": "cases/02273d35f3b69378ef5b4d5a6972400f08eb9841a6d4c59c634c930c857daa3c.json"
+    },
+    {
+      "id": "eb59d2dcaf8063ef465732511db2a0418f6ba193b9b0ee78999399a0e117c8cf",
+      "name": "SpatialDot/Batch/Original/Lower/RealReal/1/4/real_time",
+      "metric": "real_time",
+      "url": "cases/eb59d2dcaf8063ef465732511db2a0418f6ba193b9b0ee78999399a0e117c8cf.json"
+    },
+    {
+      "id": "5aa2a5b69163f75f72efe3f07213cb8efc34eb02d97d382c89513ee0e57b11da",
+      "name": "SpatialDot/Batch/Original/Lower/RealReal/1/64/real_time",
+      "metric": "real_time",
+      "url": "cases/5aa2a5b69163f75f72efe3f07213cb8efc34eb02d97d382c89513ee0e57b11da.json"
+    },
+    {
+      "id": "b97edf0bd7d4db362d73b32406fa8276f2583d1cea71d6b984312e1d5b9fe1ab",
+      "name": "SpatialDot/Batch/Original/Lower/RealReal/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/b97edf0bd7d4db362d73b32406fa8276f2583d1cea71d6b984312e1d5b9fe1ab.json"
+    },
+    {
+      "id": "9b232d86bd0cf17fb4778aa31c6e167f90bb1cfacc7289b2bb4aa4a8a0a42285",
+      "name": "SpatialDot/Batch/Original/Lower/RealReal/2/4/real_time",
+      "metric": "real_time",
+      "url": "cases/9b232d86bd0cf17fb4778aa31c6e167f90bb1cfacc7289b2bb4aa4a8a0a42285.json"
+    },
+    {
+      "id": "0d12380b3c8d80e01e626cf899a4f22771d224b0041e746037af98bf544e698f",
+      "name": "SpatialDot/Batch/Original/Lower/RealReal/2/64/real_time",
+      "metric": "real_time",
+      "url": "cases/0d12380b3c8d80e01e626cf899a4f22771d224b0041e746037af98bf544e698f.json"
+    },
+    {
+      "id": "7ae16165fe03ae7c9826c9d9f8e01628747e4783ae388c031ed77070072698a4",
+      "name": "SpatialDot/Batch/Original/Lower/RealReal/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/7ae16165fe03ae7c9826c9d9f8e01628747e4783ae388c031ed77070072698a4.json"
+    },
+    {
+      "id": "193f36e386409fc3c0784b45fd4373ec8155379011fd3dcdfb078e639432d6c3",
+      "name": "SpatialDot/Batch/Original/Lower/RealReal/3/4/real_time",
+      "metric": "real_time",
+      "url": "cases/193f36e386409fc3c0784b45fd4373ec8155379011fd3dcdfb078e639432d6c3.json"
+    },
+    {
+      "id": "0e3de8b5efc6e05c643c87cf97c1757c76887fb0fcbeb59b152520ac181c3eda",
+      "name": "SpatialDot/Batch/Original/Lower/RealReal/3/64/real_time",
+      "metric": "real_time",
+      "url": "cases/0e3de8b5efc6e05c643c87cf97c1757c76887fb0fcbeb59b152520ac181c3eda.json"
+    },
+    {
+      "id": "f8655feedc89c8c331acd2157024bbc97625cdb695663b3aa4bf2ff1ac5cb113",
+      "name": "SpatialDot/Batch/Public/Full/ComplexComplex/0/16/real_time",
+      "metric": "real_time",
+      "url": "cases/f8655feedc89c8c331acd2157024bbc97625cdb695663b3aa4bf2ff1ac5cb113.json"
+    },
+    {
+      "id": "4f2fb94bab01aee79fcd8628c9b0c5b032e71a41a1ff43bcb67930058cd36684",
+      "name": "SpatialDot/Batch/Public/Full/ComplexComplex/0/4/real_time",
+      "metric": "real_time",
+      "url": "cases/4f2fb94bab01aee79fcd8628c9b0c5b032e71a41a1ff43bcb67930058cd36684.json"
+    },
+    {
+      "id": "3da4d449e4a2a8e1b367ed38b83e6304afc2301efae430bc3ff7bba6ca051397",
+      "name": "SpatialDot/Batch/Public/Full/ComplexComplex/0/64/real_time",
+      "metric": "real_time",
+      "url": "cases/3da4d449e4a2a8e1b367ed38b83e6304afc2301efae430bc3ff7bba6ca051397.json"
+    },
+    {
+      "id": "60306496bd0056323f7ee2a5624bdb1c0b81b76537ece447da5b0be6f38a67d0",
+      "name": "SpatialDot/Batch/Public/Full/ComplexComplex/1/16/real_time",
+      "metric": "real_time",
+      "url": "cases/60306496bd0056323f7ee2a5624bdb1c0b81b76537ece447da5b0be6f38a67d0.json"
+    },
+    {
+      "id": "7cddadce2b00454597fed18e35be0dd5a46be4c55103b7d3be73e22b2a515464",
+      "name": "SpatialDot/Batch/Public/Full/ComplexComplex/1/4/real_time",
+      "metric": "real_time",
+      "url": "cases/7cddadce2b00454597fed18e35be0dd5a46be4c55103b7d3be73e22b2a515464.json"
+    },
+    {
+      "id": "31e6b9cbd7e3bb904f1ab6b22860399ebf621b7889ad303dddc157253b05a4eb",
+      "name": "SpatialDot/Batch/Public/Full/ComplexComplex/1/64/real_time",
+      "metric": "real_time",
+      "url": "cases/31e6b9cbd7e3bb904f1ab6b22860399ebf621b7889ad303dddc157253b05a4eb.json"
+    },
+    {
+      "id": "95125d651167076dd61df864e133b4f21e807c5ea1dfc72249269bc569f8c63b",
+      "name": "SpatialDot/Batch/Public/Full/ComplexComplex/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/95125d651167076dd61df864e133b4f21e807c5ea1dfc72249269bc569f8c63b.json"
+    },
+    {
+      "id": "d50387884bd3737a6ad17c49420481b09acb87e4e22993e5040137f46f7a5825",
+      "name": "SpatialDot/Batch/Public/Full/ComplexComplex/2/4/real_time",
+      "metric": "real_time",
+      "url": "cases/d50387884bd3737a6ad17c49420481b09acb87e4e22993e5040137f46f7a5825.json"
+    },
+    {
+      "id": "bfa8a27cd9f951add3c48ce8233c5ba4888ed739c5b00ba62a3aedad3f1a168e",
+      "name": "SpatialDot/Batch/Public/Full/ComplexComplex/2/64/real_time",
+      "metric": "real_time",
+      "url": "cases/bfa8a27cd9f951add3c48ce8233c5ba4888ed739c5b00ba62a3aedad3f1a168e.json"
+    },
+    {
+      "id": "c03fe3c531b26682a5e3a0411a37e956d9b28eade58f99249d7a94085dcd5d30",
+      "name": "SpatialDot/Batch/Public/Full/ComplexComplex/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/c03fe3c531b26682a5e3a0411a37e956d9b28eade58f99249d7a94085dcd5d30.json"
+    },
+    {
+      "id": "2af5d7d887cd022715305bd00343e30ef857a35599c4b2492753d99d1fe4395d",
+      "name": "SpatialDot/Batch/Public/Full/ComplexComplex/3/4/real_time",
+      "metric": "real_time",
+      "url": "cases/2af5d7d887cd022715305bd00343e30ef857a35599c4b2492753d99d1fe4395d.json"
+    },
+    {
+      "id": "2bd487f807c604136bf1fe2b92c2ecdb81fe0e5bbc02f7a42aa9e09bb356ab02",
+      "name": "SpatialDot/Batch/Public/Full/ComplexComplex/3/64/real_time",
+      "metric": "real_time",
+      "url": "cases/2bd487f807c604136bf1fe2b92c2ecdb81fe0e5bbc02f7a42aa9e09bb356ab02.json"
+    },
+    {
+      "id": "b69929240516221b1582cbda498684522a9564afcffd719edfa051ed596780cc",
+      "name": "SpatialDot/Batch/Public/Full/ComplexReal/0/16/real_time",
+      "metric": "real_time",
+      "url": "cases/b69929240516221b1582cbda498684522a9564afcffd719edfa051ed596780cc.json"
+    },
+    {
+      "id": "706af484a3ae6f05d235b26899310c6e516e00175c54786127a9f536626f3d62",
+      "name": "SpatialDot/Batch/Public/Full/ComplexReal/0/4/real_time",
+      "metric": "real_time",
+      "url": "cases/706af484a3ae6f05d235b26899310c6e516e00175c54786127a9f536626f3d62.json"
+    },
+    {
+      "id": "f23c9df84f9b879891e8b18892e29e7327971a132f595d6e99c2b1a73fb84692",
+      "name": "SpatialDot/Batch/Public/Full/ComplexReal/0/64/real_time",
+      "metric": "real_time",
+      "url": "cases/f23c9df84f9b879891e8b18892e29e7327971a132f595d6e99c2b1a73fb84692.json"
+    },
+    {
+      "id": "77176a704a943b5d8a9c08323478dc75ed524d3f64168e90fe07bf715998cd52",
+      "name": "SpatialDot/Batch/Public/Full/ComplexReal/1/16/real_time",
+      "metric": "real_time",
+      "url": "cases/77176a704a943b5d8a9c08323478dc75ed524d3f64168e90fe07bf715998cd52.json"
+    },
+    {
+      "id": "c9a43857d52ff77e7152e778f3143e754d3ed27cb5686fe362d103ae31257a5f",
+      "name": "SpatialDot/Batch/Public/Full/ComplexReal/1/4/real_time",
+      "metric": "real_time",
+      "url": "cases/c9a43857d52ff77e7152e778f3143e754d3ed27cb5686fe362d103ae31257a5f.json"
+    },
+    {
+      "id": "fe139235b6e5ea29b7d16811b591995c78ddbcaad65ede72afa87d3b7f2a95ce",
+      "name": "SpatialDot/Batch/Public/Full/ComplexReal/1/64/real_time",
+      "metric": "real_time",
+      "url": "cases/fe139235b6e5ea29b7d16811b591995c78ddbcaad65ede72afa87d3b7f2a95ce.json"
+    },
+    {
+      "id": "4966e4d4e369ecabcf9355c050559cbe384abdd2a8d2289e2c591a3397af5551",
+      "name": "SpatialDot/Batch/Public/Full/ComplexReal/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/4966e4d4e369ecabcf9355c050559cbe384abdd2a8d2289e2c591a3397af5551.json"
+    },
+    {
+      "id": "6532dc223e784511913392154d4799db407dd42086cfddc9173334022ec8f25e",
+      "name": "SpatialDot/Batch/Public/Full/ComplexReal/2/4/real_time",
+      "metric": "real_time",
+      "url": "cases/6532dc223e784511913392154d4799db407dd42086cfddc9173334022ec8f25e.json"
+    },
+    {
+      "id": "aab9201c9ebe6f39147ab872276153626c09883f85a3997e00a556f7b49f0a60",
+      "name": "SpatialDot/Batch/Public/Full/ComplexReal/2/64/real_time",
+      "metric": "real_time",
+      "url": "cases/aab9201c9ebe6f39147ab872276153626c09883f85a3997e00a556f7b49f0a60.json"
+    },
+    {
+      "id": "162c404c2a0840d4292bcc25ccf0f13bf106d3487b3a3d1ca6e95830ea1df9a7",
+      "name": "SpatialDot/Batch/Public/Full/ComplexReal/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/162c404c2a0840d4292bcc25ccf0f13bf106d3487b3a3d1ca6e95830ea1df9a7.json"
+    },
+    {
+      "id": "d6234219a32f1eb4b76b33c149db3b1314c066ea4e6d103f9b0710d72c0dce78",
+      "name": "SpatialDot/Batch/Public/Full/ComplexReal/3/4/real_time",
+      "metric": "real_time",
+      "url": "cases/d6234219a32f1eb4b76b33c149db3b1314c066ea4e6d103f9b0710d72c0dce78.json"
+    },
+    {
+      "id": "d0b7af2315270d924d919fa9565fffcbb71eeb34b4ecb0fec3793b4c024fe37b",
+      "name": "SpatialDot/Batch/Public/Full/ComplexReal/3/64/real_time",
+      "metric": "real_time",
+      "url": "cases/d0b7af2315270d924d919fa9565fffcbb71eeb34b4ecb0fec3793b4c024fe37b.json"
+    },
+    {
+      "id": "c461b8fe20704cccaa16ab87766342829215aa778385ecfa7abe7542fe346d99",
+      "name": "SpatialDot/Batch/Public/Full/RealComplex/0/16/real_time",
+      "metric": "real_time",
+      "url": "cases/c461b8fe20704cccaa16ab87766342829215aa778385ecfa7abe7542fe346d99.json"
+    },
+    {
+      "id": "1251b498537913060890dd4836a2ed64af424258ba2f51e0756a0e8846619cf6",
+      "name": "SpatialDot/Batch/Public/Full/RealComplex/0/4/real_time",
+      "metric": "real_time",
+      "url": "cases/1251b498537913060890dd4836a2ed64af424258ba2f51e0756a0e8846619cf6.json"
+    },
+    {
+      "id": "f02067d4f23833db4de4afde770b28cf9b900666e817fed514e62a85a7619fa9",
+      "name": "SpatialDot/Batch/Public/Full/RealComplex/0/64/real_time",
+      "metric": "real_time",
+      "url": "cases/f02067d4f23833db4de4afde770b28cf9b900666e817fed514e62a85a7619fa9.json"
+    },
+    {
+      "id": "5aa527276aa90cf60e63513ca47f3a96919a575cdceda0ce96d9f8224fdf078d",
+      "name": "SpatialDot/Batch/Public/Full/RealComplex/1/16/real_time",
+      "metric": "real_time",
+      "url": "cases/5aa527276aa90cf60e63513ca47f3a96919a575cdceda0ce96d9f8224fdf078d.json"
+    },
+    {
+      "id": "ee2a5fa5c0976d0f75380587010d91dd6c07aeb12631ed51790547a41cae816f",
+      "name": "SpatialDot/Batch/Public/Full/RealComplex/1/4/real_time",
+      "metric": "real_time",
+      "url": "cases/ee2a5fa5c0976d0f75380587010d91dd6c07aeb12631ed51790547a41cae816f.json"
+    },
+    {
+      "id": "8d71ae63d56312e5a9397b8c4c9e0947fd6be0df21a28fe6d0418e98459be705",
+      "name": "SpatialDot/Batch/Public/Full/RealComplex/1/64/real_time",
+      "metric": "real_time",
+      "url": "cases/8d71ae63d56312e5a9397b8c4c9e0947fd6be0df21a28fe6d0418e98459be705.json"
+    },
+    {
+      "id": "3d24e14b7c72a2124670cef8d093347ab08fa6cc61bec51e61dc3ae486c4b22d",
+      "name": "SpatialDot/Batch/Public/Full/RealComplex/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/3d24e14b7c72a2124670cef8d093347ab08fa6cc61bec51e61dc3ae486c4b22d.json"
+    },
+    {
+      "id": "4603eaf5c4772875eef57335db74fe4314449cb6f7705743ef0bcac83c0c1176",
+      "name": "SpatialDot/Batch/Public/Full/RealComplex/2/4/real_time",
+      "metric": "real_time",
+      "url": "cases/4603eaf5c4772875eef57335db74fe4314449cb6f7705743ef0bcac83c0c1176.json"
+    },
+    {
+      "id": "12cf957959c962203fbcbee4394b11d5ee846726b5c7cd8d40d79cbce51184ae",
+      "name": "SpatialDot/Batch/Public/Full/RealComplex/2/64/real_time",
+      "metric": "real_time",
+      "url": "cases/12cf957959c962203fbcbee4394b11d5ee846726b5c7cd8d40d79cbce51184ae.json"
+    },
+    {
+      "id": "ce9e7ac49a9a8f1c1d88eb2b2c1f43ca2cc63c6fa85fd0b402d48cf306f32143",
+      "name": "SpatialDot/Batch/Public/Full/RealComplex/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/ce9e7ac49a9a8f1c1d88eb2b2c1f43ca2cc63c6fa85fd0b402d48cf306f32143.json"
+    },
+    {
+      "id": "bfbbbc64714fe8b71fdda76af9b5a5f1cf539a1b0c92473496e60dd4548ec48e",
+      "name": "SpatialDot/Batch/Public/Full/RealComplex/3/4/real_time",
+      "metric": "real_time",
+      "url": "cases/bfbbbc64714fe8b71fdda76af9b5a5f1cf539a1b0c92473496e60dd4548ec48e.json"
+    },
+    {
+      "id": "b623c1356f18f78a754e6812a8a956bcbed112bc2ff3d478869da5d48a8a721a",
+      "name": "SpatialDot/Batch/Public/Full/RealComplex/3/64/real_time",
+      "metric": "real_time",
+      "url": "cases/b623c1356f18f78a754e6812a8a956bcbed112bc2ff3d478869da5d48a8a721a.json"
+    },
+    {
+      "id": "6c07bf8a255f9ce97e82ad142798dadcc58adb119960bcbb3b2137137c780ac3",
+      "name": "SpatialDot/Batch/Public/Full/RealReal/0/16/real_time",
+      "metric": "real_time",
+      "url": "cases/6c07bf8a255f9ce97e82ad142798dadcc58adb119960bcbb3b2137137c780ac3.json"
+    },
+    {
+      "id": "1849f5e379ac36ac1350716d6ebee74d0574445567f51dd079fde911806ad26a",
+      "name": "SpatialDot/Batch/Public/Full/RealReal/0/4/real_time",
+      "metric": "real_time",
+      "url": "cases/1849f5e379ac36ac1350716d6ebee74d0574445567f51dd079fde911806ad26a.json"
+    },
+    {
+      "id": "6ba415ad9b18c79b485d3529d1691b3c7863cf3300e0bf48d364339e6dbb2db1",
+      "name": "SpatialDot/Batch/Public/Full/RealReal/0/64/real_time",
+      "metric": "real_time",
+      "url": "cases/6ba415ad9b18c79b485d3529d1691b3c7863cf3300e0bf48d364339e6dbb2db1.json"
+    },
+    {
+      "id": "7497e043ae635566785d1b08849f18d7025b259afc1ca9f06f6b5fcba8c8fa36",
+      "name": "SpatialDot/Batch/Public/Full/RealReal/1/16/real_time",
+      "metric": "real_time",
+      "url": "cases/7497e043ae635566785d1b08849f18d7025b259afc1ca9f06f6b5fcba8c8fa36.json"
+    },
+    {
+      "id": "d13dc7516c93058e2e19844eaca189e4d3e95fdaaf55a1a9f1f2ace08829bad3",
+      "name": "SpatialDot/Batch/Public/Full/RealReal/1/4/real_time",
+      "metric": "real_time",
+      "url": "cases/d13dc7516c93058e2e19844eaca189e4d3e95fdaaf55a1a9f1f2ace08829bad3.json"
+    },
+    {
+      "id": "10c84987a31add4831b393f85739052f335f3b7d09f5141f43ea2d419e924ff2",
+      "name": "SpatialDot/Batch/Public/Full/RealReal/1/64/real_time",
+      "metric": "real_time",
+      "url": "cases/10c84987a31add4831b393f85739052f335f3b7d09f5141f43ea2d419e924ff2.json"
+    },
+    {
+      "id": "3b8721138134f93288b90a36eab75dc6465d65fe53922f94834c138ffcba13f9",
+      "name": "SpatialDot/Batch/Public/Full/RealReal/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/3b8721138134f93288b90a36eab75dc6465d65fe53922f94834c138ffcba13f9.json"
+    },
+    {
+      "id": "0392a876a4f748da6f7c8c8e13b0c03b21a1a182fb5a413099657b088f3b7835",
+      "name": "SpatialDot/Batch/Public/Full/RealReal/2/4/real_time",
+      "metric": "real_time",
+      "url": "cases/0392a876a4f748da6f7c8c8e13b0c03b21a1a182fb5a413099657b088f3b7835.json"
+    },
+    {
+      "id": "f21c402ca8a9053dd060797b52168f63f4dfabb11dc46d9051066231a25be9e1",
+      "name": "SpatialDot/Batch/Public/Full/RealReal/2/64/real_time",
+      "metric": "real_time",
+      "url": "cases/f21c402ca8a9053dd060797b52168f63f4dfabb11dc46d9051066231a25be9e1.json"
+    },
+    {
+      "id": "26c011f9d5aafb1d56fee87b384af3a2c7da98359706d0919d1d1cdb92eb5a95",
+      "name": "SpatialDot/Batch/Public/Full/RealReal/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/26c011f9d5aafb1d56fee87b384af3a2c7da98359706d0919d1d1cdb92eb5a95.json"
+    },
+    {
+      "id": "ac056e912d599b426a7977a2b7f0ee53024e1eb7426efeb2becd798dfcb02a8c",
+      "name": "SpatialDot/Batch/Public/Full/RealReal/3/4/real_time",
+      "metric": "real_time",
+      "url": "cases/ac056e912d599b426a7977a2b7f0ee53024e1eb7426efeb2becd798dfcb02a8c.json"
+    },
+    {
+      "id": "9ac3d9f01d30d61b533458f37eb9131db54a14de9dd1a11297b9e5e97e0fc9a6",
+      "name": "SpatialDot/Batch/Public/Full/RealReal/3/64/real_time",
+      "metric": "real_time",
+      "url": "cases/9ac3d9f01d30d61b533458f37eb9131db54a14de9dd1a11297b9e5e97e0fc9a6.json"
+    },
+    {
+      "id": "1784f9ca6f09cc7237bdfbb5cd2b8e5be4ccabcd3975e3be09845a0622a9f9b9",
+      "name": "SpatialDot/Batch/Public/Lower/ComplexComplex/0/16/real_time",
+      "metric": "real_time",
+      "url": "cases/1784f9ca6f09cc7237bdfbb5cd2b8e5be4ccabcd3975e3be09845a0622a9f9b9.json"
+    },
+    {
+      "id": "fdc343c6f0e0878bcb76775186e3f7fdc4aef1af3a99b66e9ef8c05957ae7190",
+      "name": "SpatialDot/Batch/Public/Lower/ComplexComplex/0/4/real_time",
+      "metric": "real_time",
+      "url": "cases/fdc343c6f0e0878bcb76775186e3f7fdc4aef1af3a99b66e9ef8c05957ae7190.json"
+    },
+    {
+      "id": "c66e6cc206142a90e796026b76242210642c15d90efb89aca65b623518eec7c5",
+      "name": "SpatialDot/Batch/Public/Lower/ComplexComplex/0/64/real_time",
+      "metric": "real_time",
+      "url": "cases/c66e6cc206142a90e796026b76242210642c15d90efb89aca65b623518eec7c5.json"
+    },
+    {
+      "id": "871b8a4fb0cbe4c9109d0d91a10ce837b1a13d4ac503c73d2c34a65539e994fa",
+      "name": "SpatialDot/Batch/Public/Lower/ComplexComplex/1/16/real_time",
+      "metric": "real_time",
+      "url": "cases/871b8a4fb0cbe4c9109d0d91a10ce837b1a13d4ac503c73d2c34a65539e994fa.json"
+    },
+    {
+      "id": "9dda8ce69213953c6f8fa96b690dcae6905e5dbe058137db6f85dd31c88ee0f4",
+      "name": "SpatialDot/Batch/Public/Lower/ComplexComplex/1/4/real_time",
+      "metric": "real_time",
+      "url": "cases/9dda8ce69213953c6f8fa96b690dcae6905e5dbe058137db6f85dd31c88ee0f4.json"
+    },
+    {
+      "id": "32e171589a26058531641cd06f51706938bb257105d985de4362b994f729ae8e",
+      "name": "SpatialDot/Batch/Public/Lower/ComplexComplex/1/64/real_time",
+      "metric": "real_time",
+      "url": "cases/32e171589a26058531641cd06f51706938bb257105d985de4362b994f729ae8e.json"
+    },
+    {
+      "id": "7ad22e5852068c176d98af202d72da139223bcc761eadb5025f095d0deb44131",
+      "name": "SpatialDot/Batch/Public/Lower/ComplexComplex/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/7ad22e5852068c176d98af202d72da139223bcc761eadb5025f095d0deb44131.json"
+    },
+    {
+      "id": "5e1a4155461710b108bd9d271ed3789a7380a47f89a668c81667c786cfb3963b",
+      "name": "SpatialDot/Batch/Public/Lower/ComplexComplex/2/4/real_time",
+      "metric": "real_time",
+      "url": "cases/5e1a4155461710b108bd9d271ed3789a7380a47f89a668c81667c786cfb3963b.json"
+    },
+    {
+      "id": "ef4918a258cb4776cce3e74a5bd8fbfef22c01b941612671a3d826ad1a7f8126",
+      "name": "SpatialDot/Batch/Public/Lower/ComplexComplex/2/64/real_time",
+      "metric": "real_time",
+      "url": "cases/ef4918a258cb4776cce3e74a5bd8fbfef22c01b941612671a3d826ad1a7f8126.json"
+    },
+    {
+      "id": "bbaf0bbd0699a4aecf3f0a04c8ac83b88eabb9985d4863cbde5e1156aebe2448",
+      "name": "SpatialDot/Batch/Public/Lower/ComplexComplex/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/bbaf0bbd0699a4aecf3f0a04c8ac83b88eabb9985d4863cbde5e1156aebe2448.json"
+    },
+    {
+      "id": "996371c6324d42ae127cb5a1d6c7950cd29b26d4fd29fcaf6e455f8f2516f6f6",
+      "name": "SpatialDot/Batch/Public/Lower/ComplexComplex/3/4/real_time",
+      "metric": "real_time",
+      "url": "cases/996371c6324d42ae127cb5a1d6c7950cd29b26d4fd29fcaf6e455f8f2516f6f6.json"
+    },
+    {
+      "id": "ce4be2ed210658c543db36d748f9558ae3c8e5d1611b1594c580d74ac3d85a5b",
+      "name": "SpatialDot/Batch/Public/Lower/ComplexComplex/3/64/real_time",
+      "metric": "real_time",
+      "url": "cases/ce4be2ed210658c543db36d748f9558ae3c8e5d1611b1594c580d74ac3d85a5b.json"
+    },
+    {
+      "id": "9e7cde89d74869e115d9b6634a7b2504531e49d296f9e32eb5f8b7558ff4f66a",
+      "name": "SpatialDot/Batch/Public/Lower/ComplexReal/0/16/real_time",
+      "metric": "real_time",
+      "url": "cases/9e7cde89d74869e115d9b6634a7b2504531e49d296f9e32eb5f8b7558ff4f66a.json"
+    },
+    {
+      "id": "f9aeb085e54236a05e537d6c6400a9d83bb29ec20d051745fd8f886f75e3a7d9",
+      "name": "SpatialDot/Batch/Public/Lower/ComplexReal/0/4/real_time",
+      "metric": "real_time",
+      "url": "cases/f9aeb085e54236a05e537d6c6400a9d83bb29ec20d051745fd8f886f75e3a7d9.json"
+    },
+    {
+      "id": "ddfc64fc966280eeddcc56671ac8aaaea86a71ea5524cc00f0fc0d3a032188c3",
+      "name": "SpatialDot/Batch/Public/Lower/ComplexReal/0/64/real_time",
+      "metric": "real_time",
+      "url": "cases/ddfc64fc966280eeddcc56671ac8aaaea86a71ea5524cc00f0fc0d3a032188c3.json"
+    },
+    {
+      "id": "8db65ea6cf444767795226a014651bc7228ef652bf9e2c12764883b9472384c9",
+      "name": "SpatialDot/Batch/Public/Lower/ComplexReal/1/16/real_time",
+      "metric": "real_time",
+      "url": "cases/8db65ea6cf444767795226a014651bc7228ef652bf9e2c12764883b9472384c9.json"
+    },
+    {
+      "id": "0e88ac53bd4257701c1dc40397e48ac053a92c336e0451f577c2a851b239f934",
+      "name": "SpatialDot/Batch/Public/Lower/ComplexReal/1/4/real_time",
+      "metric": "real_time",
+      "url": "cases/0e88ac53bd4257701c1dc40397e48ac053a92c336e0451f577c2a851b239f934.json"
+    },
+    {
+      "id": "487ff79cdadf8ffd466d5fec8d1df405867c34ba48fe644b25df4c581231550c",
+      "name": "SpatialDot/Batch/Public/Lower/ComplexReal/1/64/real_time",
+      "metric": "real_time",
+      "url": "cases/487ff79cdadf8ffd466d5fec8d1df405867c34ba48fe644b25df4c581231550c.json"
+    },
+    {
+      "id": "4fa1b411f6d0a76f8a2e5aa0c5e31fb61c707c5f9f4f3f9584a336cca694414c",
+      "name": "SpatialDot/Batch/Public/Lower/ComplexReal/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/4fa1b411f6d0a76f8a2e5aa0c5e31fb61c707c5f9f4f3f9584a336cca694414c.json"
+    },
+    {
+      "id": "d74b859be97f2266d239ff1d0e70ddabd2c41886f21752c86ba5b305a47ee318",
+      "name": "SpatialDot/Batch/Public/Lower/ComplexReal/2/4/real_time",
+      "metric": "real_time",
+      "url": "cases/d74b859be97f2266d239ff1d0e70ddabd2c41886f21752c86ba5b305a47ee318.json"
+    },
+    {
+      "id": "7ecf90006467e4bc06792583c872c6af8be625c57f8b33d0ce035d71f35abe8e",
+      "name": "SpatialDot/Batch/Public/Lower/ComplexReal/2/64/real_time",
+      "metric": "real_time",
+      "url": "cases/7ecf90006467e4bc06792583c872c6af8be625c57f8b33d0ce035d71f35abe8e.json"
+    },
+    {
+      "id": "92196a4a76bd6a64280826cf10494605e9a0b97d772a803f95004de1f568731b",
+      "name": "SpatialDot/Batch/Public/Lower/ComplexReal/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/92196a4a76bd6a64280826cf10494605e9a0b97d772a803f95004de1f568731b.json"
+    },
+    {
+      "id": "32b9a1b4e20b3aec9eddb2449a5a0a48f3ee5fd85e1143a7fac217cf41e40363",
+      "name": "SpatialDot/Batch/Public/Lower/ComplexReal/3/4/real_time",
+      "metric": "real_time",
+      "url": "cases/32b9a1b4e20b3aec9eddb2449a5a0a48f3ee5fd85e1143a7fac217cf41e40363.json"
+    },
+    {
+      "id": "88163f1322fbd43f66fbe48dadd80e32e3d3925d2cb82ffe2f41eee2917e171f",
+      "name": "SpatialDot/Batch/Public/Lower/ComplexReal/3/64/real_time",
+      "metric": "real_time",
+      "url": "cases/88163f1322fbd43f66fbe48dadd80e32e3d3925d2cb82ffe2f41eee2917e171f.json"
+    },
+    {
+      "id": "5f9de8030a21d5058437cfe09bb2de8593671dd2fc1603eebc38bf9fceaad74f",
+      "name": "SpatialDot/Batch/Public/Lower/RealComplex/0/16/real_time",
+      "metric": "real_time",
+      "url": "cases/5f9de8030a21d5058437cfe09bb2de8593671dd2fc1603eebc38bf9fceaad74f.json"
+    },
+    {
+      "id": "6ff5b96173513b73b9300f39628a680cd79523c0d18cefef66c8c055f1a2e034",
+      "name": "SpatialDot/Batch/Public/Lower/RealComplex/0/4/real_time",
+      "metric": "real_time",
+      "url": "cases/6ff5b96173513b73b9300f39628a680cd79523c0d18cefef66c8c055f1a2e034.json"
+    },
+    {
+      "id": "0695aad4e57f6a82a02e048d0a9deb59c46d99b4903ea48c426fef18cc2e2f5f",
+      "name": "SpatialDot/Batch/Public/Lower/RealComplex/0/64/real_time",
+      "metric": "real_time",
+      "url": "cases/0695aad4e57f6a82a02e048d0a9deb59c46d99b4903ea48c426fef18cc2e2f5f.json"
+    },
+    {
+      "id": "efb61dd4c693c1f2f0e0be3000fc53a6f8f43c78ea9ffcf556fe099288024488",
+      "name": "SpatialDot/Batch/Public/Lower/RealComplex/1/16/real_time",
+      "metric": "real_time",
+      "url": "cases/efb61dd4c693c1f2f0e0be3000fc53a6f8f43c78ea9ffcf556fe099288024488.json"
+    },
+    {
+      "id": "e7d53fa6a2525c52b6402a2d765cc21ae27a52244350c1646e7230de38723a69",
+      "name": "SpatialDot/Batch/Public/Lower/RealComplex/1/4/real_time",
+      "metric": "real_time",
+      "url": "cases/e7d53fa6a2525c52b6402a2d765cc21ae27a52244350c1646e7230de38723a69.json"
+    },
+    {
+      "id": "678b8b94b39839ff7576a6f1750e9b87fab72e0236aeef014a40b206c614bf17",
+      "name": "SpatialDot/Batch/Public/Lower/RealComplex/1/64/real_time",
+      "metric": "real_time",
+      "url": "cases/678b8b94b39839ff7576a6f1750e9b87fab72e0236aeef014a40b206c614bf17.json"
+    },
+    {
+      "id": "8a2cb13017dac306516a7e10b309076e1502003edbc2fa00ac0a14020225b29d",
+      "name": "SpatialDot/Batch/Public/Lower/RealComplex/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/8a2cb13017dac306516a7e10b309076e1502003edbc2fa00ac0a14020225b29d.json"
+    },
+    {
+      "id": "540fa6f21a424dce9e5bd059b0c8905629938c17cb477083d3ab021e8045828e",
+      "name": "SpatialDot/Batch/Public/Lower/RealComplex/2/4/real_time",
+      "metric": "real_time",
+      "url": "cases/540fa6f21a424dce9e5bd059b0c8905629938c17cb477083d3ab021e8045828e.json"
+    },
+    {
+      "id": "448ce16ed530315e7d52b016d04280cf628281f1e4e4c25282bdf74aa70f92d7",
+      "name": "SpatialDot/Batch/Public/Lower/RealComplex/2/64/real_time",
+      "metric": "real_time",
+      "url": "cases/448ce16ed530315e7d52b016d04280cf628281f1e4e4c25282bdf74aa70f92d7.json"
+    },
+    {
+      "id": "761b1bddba39264e9a45f17f485c4f6b4999e2eaac5f59ff2b6f118920c38b87",
+      "name": "SpatialDot/Batch/Public/Lower/RealComplex/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/761b1bddba39264e9a45f17f485c4f6b4999e2eaac5f59ff2b6f118920c38b87.json"
+    },
+    {
+      "id": "742211ad43bef4a112752bd9672d75c41d5d70616160281a49d3fd45556a5140",
+      "name": "SpatialDot/Batch/Public/Lower/RealComplex/3/4/real_time",
+      "metric": "real_time",
+      "url": "cases/742211ad43bef4a112752bd9672d75c41d5d70616160281a49d3fd45556a5140.json"
+    },
+    {
+      "id": "0d3d022847665c9e8e45148e4e78eae2e2aba7ab5858a3e0749565048a78f577",
+      "name": "SpatialDot/Batch/Public/Lower/RealComplex/3/64/real_time",
+      "metric": "real_time",
+      "url": "cases/0d3d022847665c9e8e45148e4e78eae2e2aba7ab5858a3e0749565048a78f577.json"
+    },
+    {
+      "id": "7c3713b95f324695fe9dd9393f1224e11ecbb9affacb5736de4932f813e950cf",
+      "name": "SpatialDot/Batch/Public/Lower/RealReal/0/16/real_time",
+      "metric": "real_time",
+      "url": "cases/7c3713b95f324695fe9dd9393f1224e11ecbb9affacb5736de4932f813e950cf.json"
+    },
+    {
+      "id": "4df7f6805d37ca7527387d30ba003cbefea502447cee7eec7d305ae759a07918",
+      "name": "SpatialDot/Batch/Public/Lower/RealReal/0/4/real_time",
+      "metric": "real_time",
+      "url": "cases/4df7f6805d37ca7527387d30ba003cbefea502447cee7eec7d305ae759a07918.json"
+    },
+    {
+      "id": "f3459ad8693e3847aece113f6df08691868336f7f643fe5573c54588fca83c16",
+      "name": "SpatialDot/Batch/Public/Lower/RealReal/0/64/real_time",
+      "metric": "real_time",
+      "url": "cases/f3459ad8693e3847aece113f6df08691868336f7f643fe5573c54588fca83c16.json"
+    },
+    {
+      "id": "06fa019160f2391a32527025eb62b6c116d681e1cdd68a20bb7c01578440e244",
+      "name": "SpatialDot/Batch/Public/Lower/RealReal/1/16/real_time",
+      "metric": "real_time",
+      "url": "cases/06fa019160f2391a32527025eb62b6c116d681e1cdd68a20bb7c01578440e244.json"
+    },
+    {
+      "id": "760a54562968be91b4224d1cce7b74c4e9d9a9529f3c4404f0bd8c049d1bf17a",
+      "name": "SpatialDot/Batch/Public/Lower/RealReal/1/4/real_time",
+      "metric": "real_time",
+      "url": "cases/760a54562968be91b4224d1cce7b74c4e9d9a9529f3c4404f0bd8c049d1bf17a.json"
+    },
+    {
+      "id": "ad64403eae1646d577d05dcc2542257330bf45ba15de2d21056525950212469d",
+      "name": "SpatialDot/Batch/Public/Lower/RealReal/1/64/real_time",
+      "metric": "real_time",
+      "url": "cases/ad64403eae1646d577d05dcc2542257330bf45ba15de2d21056525950212469d.json"
+    },
+    {
+      "id": "c880ce11c3eafd3084e6faaaae210f31ba99b57b945dc92087327e31e385420a",
+      "name": "SpatialDot/Batch/Public/Lower/RealReal/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/c880ce11c3eafd3084e6faaaae210f31ba99b57b945dc92087327e31e385420a.json"
+    },
+    {
+      "id": "e9d2bb37974980274f50d8a6d04cd79bf7f805afdb34c23c4c9c115114927b1e",
+      "name": "SpatialDot/Batch/Public/Lower/RealReal/2/4/real_time",
+      "metric": "real_time",
+      "url": "cases/e9d2bb37974980274f50d8a6d04cd79bf7f805afdb34c23c4c9c115114927b1e.json"
+    },
+    {
+      "id": "02b292d1a3068df1bf5e1b0c636d5fc61746a6c4b00d66af086488edb715bc73",
+      "name": "SpatialDot/Batch/Public/Lower/RealReal/2/64/real_time",
+      "metric": "real_time",
+      "url": "cases/02b292d1a3068df1bf5e1b0c636d5fc61746a6c4b00d66af086488edb715bc73.json"
+    },
+    {
+      "id": "30cd8501eb27292dd5942f4dad32ef0ffb77714c6df308f0fde044602c5b4144",
+      "name": "SpatialDot/Batch/Public/Lower/RealReal/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/30cd8501eb27292dd5942f4dad32ef0ffb77714c6df308f0fde044602c5b4144.json"
+    },
+    {
+      "id": "ec9ca7badf9e1c46741e0fde76e7360087100809f045c725708e98f7e03aca35",
+      "name": "SpatialDot/Batch/Public/Lower/RealReal/3/4/real_time",
+      "metric": "real_time",
+      "url": "cases/ec9ca7badf9e1c46741e0fde76e7360087100809f045c725708e98f7e03aca35.json"
+    },
+    {
+      "id": "336280ba0a5bcee4bb90b195858b488a7829f9d2f743b47f2325d2c780acec3a",
+      "name": "SpatialDot/Batch/Public/Lower/RealReal/3/64/real_time",
+      "metric": "real_time",
+      "url": "cases/336280ba0a5bcee4bb90b195858b488a7829f9d2f743b47f2325d2c780acec3a.json"
+    },
+    {
+      "id": "6ecc3e371a72455af97e5750d8d5c997015feec94650ee96f7811e33df88998e",
+      "name": "SpatialDot/Batch/RowSnapshot/Full/ComplexComplex/0/16/real_time",
+      "metric": "real_time",
+      "url": "cases/6ecc3e371a72455af97e5750d8d5c997015feec94650ee96f7811e33df88998e.json"
+    },
+    {
+      "id": "013d78c381363a6aa323d6f8601bfe401c07eb49eeab0b6e3b5d2f4dd74d6727",
+      "name": "SpatialDot/Batch/RowSnapshot/Full/ComplexComplex/0/4/real_time",
+      "metric": "real_time",
+      "url": "cases/013d78c381363a6aa323d6f8601bfe401c07eb49eeab0b6e3b5d2f4dd74d6727.json"
+    },
+    {
+      "id": "13913199336b04c4ff16eb73fd45bc7abd1a74db362a05203ed1b830b0d02417",
+      "name": "SpatialDot/Batch/RowSnapshot/Full/ComplexComplex/0/64/real_time",
+      "metric": "real_time",
+      "url": "cases/13913199336b04c4ff16eb73fd45bc7abd1a74db362a05203ed1b830b0d02417.json"
+    },
+    {
+      "id": "ad06275efde357d49f4fc957d27e875bc60a87d0f5ddac3fc5eae368690acb0c",
+      "name": "SpatialDot/Batch/RowSnapshot/Full/ComplexComplex/1/16/real_time",
+      "metric": "real_time",
+      "url": "cases/ad06275efde357d49f4fc957d27e875bc60a87d0f5ddac3fc5eae368690acb0c.json"
+    },
+    {
+      "id": "d49e1b3501402e8c87f42d89391c7eebb33a15eae7a1ad3ddbb7c44165818c90",
+      "name": "SpatialDot/Batch/RowSnapshot/Full/ComplexComplex/1/4/real_time",
+      "metric": "real_time",
+      "url": "cases/d49e1b3501402e8c87f42d89391c7eebb33a15eae7a1ad3ddbb7c44165818c90.json"
+    },
+    {
+      "id": "bc41d61aa4cfc204ec4182b98e56a6ea465093400c6bbc0c3cad058f50d06167",
+      "name": "SpatialDot/Batch/RowSnapshot/Full/ComplexComplex/1/64/real_time",
+      "metric": "real_time",
+      "url": "cases/bc41d61aa4cfc204ec4182b98e56a6ea465093400c6bbc0c3cad058f50d06167.json"
+    },
+    {
+      "id": "2d98f45851de1b91c7915a8624db714f8096d2c78274f135c4488e39644f62d7",
+      "name": "SpatialDot/Batch/RowSnapshot/Full/ComplexComplex/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/2d98f45851de1b91c7915a8624db714f8096d2c78274f135c4488e39644f62d7.json"
+    },
+    {
+      "id": "0001bb6fbe614cf7352935815b95f7b26b82cb98c302fc418e1196ccdc29cc4d",
+      "name": "SpatialDot/Batch/RowSnapshot/Full/ComplexComplex/2/4/real_time",
+      "metric": "real_time",
+      "url": "cases/0001bb6fbe614cf7352935815b95f7b26b82cb98c302fc418e1196ccdc29cc4d.json"
+    },
+    {
+      "id": "611e310afd7f5e16750408ca98466a6d2bcee29455d147979c3b2f9e5c92ef39",
+      "name": "SpatialDot/Batch/RowSnapshot/Full/ComplexComplex/2/64/real_time",
+      "metric": "real_time",
+      "url": "cases/611e310afd7f5e16750408ca98466a6d2bcee29455d147979c3b2f9e5c92ef39.json"
+    },
+    {
+      "id": "f11bf95c8d2762e42b89d211320eeb09bab59858acb8cdb5262fcc82b4074245",
+      "name": "SpatialDot/Batch/RowSnapshot/Full/ComplexComplex/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/f11bf95c8d2762e42b89d211320eeb09bab59858acb8cdb5262fcc82b4074245.json"
+    },
+    {
+      "id": "74a24ab50a596ccc312f46e8aced7281e297f317ab4ba14c1e4a54d12cc56ccc",
+      "name": "SpatialDot/Batch/RowSnapshot/Full/ComplexComplex/3/4/real_time",
+      "metric": "real_time",
+      "url": "cases/74a24ab50a596ccc312f46e8aced7281e297f317ab4ba14c1e4a54d12cc56ccc.json"
+    },
+    {
+      "id": "b18f433e017f96985c0a06b995ae26cf9b546c63133c9c8be81ad2885e6bc4b7",
+      "name": "SpatialDot/Batch/RowSnapshot/Full/ComplexComplex/3/64/real_time",
+      "metric": "real_time",
+      "url": "cases/b18f433e017f96985c0a06b995ae26cf9b546c63133c9c8be81ad2885e6bc4b7.json"
+    },
+    {
+      "id": "bf9527acb69af1e1a856e9c3c6c0811e45646e899d1b65459aecbe4d1473d1b1",
+      "name": "SpatialDot/Batch/RowSnapshot/Full/ComplexReal/0/16/real_time",
+      "metric": "real_time",
+      "url": "cases/bf9527acb69af1e1a856e9c3c6c0811e45646e899d1b65459aecbe4d1473d1b1.json"
+    },
+    {
+      "id": "ec62c8b92c60d3f103d24056a4504e9ead320047589f23e185fa8f1d361901a3",
+      "name": "SpatialDot/Batch/RowSnapshot/Full/ComplexReal/0/4/real_time",
+      "metric": "real_time",
+      "url": "cases/ec62c8b92c60d3f103d24056a4504e9ead320047589f23e185fa8f1d361901a3.json"
+    },
+    {
+      "id": "6f2799aec54b32e1ab1b106ad8b66897a670de2313a5250a280aa0dd44993776",
+      "name": "SpatialDot/Batch/RowSnapshot/Full/ComplexReal/0/64/real_time",
+      "metric": "real_time",
+      "url": "cases/6f2799aec54b32e1ab1b106ad8b66897a670de2313a5250a280aa0dd44993776.json"
+    },
+    {
+      "id": "63cf107b3fd8ed4fbb407fb0618db11da3bd90e2c5199ff75d39c94023882cad",
+      "name": "SpatialDot/Batch/RowSnapshot/Full/ComplexReal/1/16/real_time",
+      "metric": "real_time",
+      "url": "cases/63cf107b3fd8ed4fbb407fb0618db11da3bd90e2c5199ff75d39c94023882cad.json"
+    },
+    {
+      "id": "9f61c3fcaa73ff21dda46916a707f13904639f5ba14cfc00c8d68e41c3d0130b",
+      "name": "SpatialDot/Batch/RowSnapshot/Full/ComplexReal/1/4/real_time",
+      "metric": "real_time",
+      "url": "cases/9f61c3fcaa73ff21dda46916a707f13904639f5ba14cfc00c8d68e41c3d0130b.json"
+    },
+    {
+      "id": "10cb0b8d0256ae4daf38391e3a50dfb37bbbebe706e499fcf9aebf8feff9dfce",
+      "name": "SpatialDot/Batch/RowSnapshot/Full/ComplexReal/1/64/real_time",
+      "metric": "real_time",
+      "url": "cases/10cb0b8d0256ae4daf38391e3a50dfb37bbbebe706e499fcf9aebf8feff9dfce.json"
+    },
+    {
+      "id": "76d3e87f67d5925b27c77adedaa53aafcc18b76477c769af5122fe2664b94d09",
+      "name": "SpatialDot/Batch/RowSnapshot/Full/ComplexReal/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/76d3e87f67d5925b27c77adedaa53aafcc18b76477c769af5122fe2664b94d09.json"
+    },
+    {
+      "id": "3f12a690ffd6ea138b24f9ed287c7385ae0015ecf0178ded0cdce5fc50cd0e66",
+      "name": "SpatialDot/Batch/RowSnapshot/Full/ComplexReal/2/4/real_time",
+      "metric": "real_time",
+      "url": "cases/3f12a690ffd6ea138b24f9ed287c7385ae0015ecf0178ded0cdce5fc50cd0e66.json"
+    },
+    {
+      "id": "da0720afbe722038803ea08ca8b714f0dfc10444199250f2cebcad83e920710b",
+      "name": "SpatialDot/Batch/RowSnapshot/Full/ComplexReal/2/64/real_time",
+      "metric": "real_time",
+      "url": "cases/da0720afbe722038803ea08ca8b714f0dfc10444199250f2cebcad83e920710b.json"
+    },
+    {
+      "id": "b87147d4f8a7769d505d2b912a5a8a10cbb46d87dff930c8fd4bb7b1bf211449",
+      "name": "SpatialDot/Batch/RowSnapshot/Full/ComplexReal/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/b87147d4f8a7769d505d2b912a5a8a10cbb46d87dff930c8fd4bb7b1bf211449.json"
+    },
+    {
+      "id": "fe2bf3bb2f0f3a64520ebcc70c193be6ec8c9cfbaa4e27603d6112699b0cca3c",
+      "name": "SpatialDot/Batch/RowSnapshot/Full/ComplexReal/3/4/real_time",
+      "metric": "real_time",
+      "url": "cases/fe2bf3bb2f0f3a64520ebcc70c193be6ec8c9cfbaa4e27603d6112699b0cca3c.json"
+    },
+    {
+      "id": "5558d285e8f63e977855f841fd6c91147127e72196d4501515a21b52191edcbd",
+      "name": "SpatialDot/Batch/RowSnapshot/Full/ComplexReal/3/64/real_time",
+      "metric": "real_time",
+      "url": "cases/5558d285e8f63e977855f841fd6c91147127e72196d4501515a21b52191edcbd.json"
+    },
+    {
+      "id": "803e3a21510cc8398136fd27400b15d55e36232993f9a79430a756acfe2d7559",
+      "name": "SpatialDot/Batch/RowSnapshot/Full/RealComplex/0/16/real_time",
+      "metric": "real_time",
+      "url": "cases/803e3a21510cc8398136fd27400b15d55e36232993f9a79430a756acfe2d7559.json"
+    },
+    {
+      "id": "7c1117ce911053595d30a18b6b33f68e68029dce79ed1556ac4f35960e8cd572",
+      "name": "SpatialDot/Batch/RowSnapshot/Full/RealComplex/0/4/real_time",
+      "metric": "real_time",
+      "url": "cases/7c1117ce911053595d30a18b6b33f68e68029dce79ed1556ac4f35960e8cd572.json"
+    },
+    {
+      "id": "d8c724d3c1a41a3175664c759f402620f76784ac8fbbe6cb91d96d29d8aad383",
+      "name": "SpatialDot/Batch/RowSnapshot/Full/RealComplex/0/64/real_time",
+      "metric": "real_time",
+      "url": "cases/d8c724d3c1a41a3175664c759f402620f76784ac8fbbe6cb91d96d29d8aad383.json"
+    },
+    {
+      "id": "20effe1c676d8cadfb52f5b557a906441f953e1e323eb67f5b0d4eb9b8aba4d5",
+      "name": "SpatialDot/Batch/RowSnapshot/Full/RealComplex/1/16/real_time",
+      "metric": "real_time",
+      "url": "cases/20effe1c676d8cadfb52f5b557a906441f953e1e323eb67f5b0d4eb9b8aba4d5.json"
+    },
+    {
+      "id": "f0557fb3b641d38e7707c8fcf39322526f4d8c59d4046a7d3de9ceb31a477ff2",
+      "name": "SpatialDot/Batch/RowSnapshot/Full/RealComplex/1/4/real_time",
+      "metric": "real_time",
+      "url": "cases/f0557fb3b641d38e7707c8fcf39322526f4d8c59d4046a7d3de9ceb31a477ff2.json"
+    },
+    {
+      "id": "ed5ae550af8bc50cb3fc8326947ea774c55893257727e513afe6ff7127bab331",
+      "name": "SpatialDot/Batch/RowSnapshot/Full/RealComplex/1/64/real_time",
+      "metric": "real_time",
+      "url": "cases/ed5ae550af8bc50cb3fc8326947ea774c55893257727e513afe6ff7127bab331.json"
+    },
+    {
+      "id": "ffff99c759b1f6e8037b403b361ae9e3b0cb76901ff7f2f6cebb3b3a0c7f2298",
+      "name": "SpatialDot/Batch/RowSnapshot/Full/RealComplex/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/ffff99c759b1f6e8037b403b361ae9e3b0cb76901ff7f2f6cebb3b3a0c7f2298.json"
+    },
+    {
+      "id": "fbe7e09dc64dc00415b9efcc7c96f61437e34be5a4b823356f2f5aeb921803b0",
+      "name": "SpatialDot/Batch/RowSnapshot/Full/RealComplex/2/4/real_time",
+      "metric": "real_time",
+      "url": "cases/fbe7e09dc64dc00415b9efcc7c96f61437e34be5a4b823356f2f5aeb921803b0.json"
+    },
+    {
+      "id": "0c0801918c7d6c28e9940ff99c6bee076fd61240b2cbaef873c97b3e060146b4",
+      "name": "SpatialDot/Batch/RowSnapshot/Full/RealComplex/2/64/real_time",
+      "metric": "real_time",
+      "url": "cases/0c0801918c7d6c28e9940ff99c6bee076fd61240b2cbaef873c97b3e060146b4.json"
+    },
+    {
+      "id": "b15035500a0a7a652d8e31173debaab607063e35dc64a97b95d331ce3c301dd4",
+      "name": "SpatialDot/Batch/RowSnapshot/Full/RealComplex/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/b15035500a0a7a652d8e31173debaab607063e35dc64a97b95d331ce3c301dd4.json"
+    },
+    {
+      "id": "690399edcef10fcc35c3007b614abcdb3b98c864b2bec5632029af7ac5fa322b",
+      "name": "SpatialDot/Batch/RowSnapshot/Full/RealComplex/3/4/real_time",
+      "metric": "real_time",
+      "url": "cases/690399edcef10fcc35c3007b614abcdb3b98c864b2bec5632029af7ac5fa322b.json"
+    },
+    {
+      "id": "c31252cc912d92ebb44f5e5310febd83292183b7f4eb9909e71cdb75bde835b4",
+      "name": "SpatialDot/Batch/RowSnapshot/Full/RealComplex/3/64/real_time",
+      "metric": "real_time",
+      "url": "cases/c31252cc912d92ebb44f5e5310febd83292183b7f4eb9909e71cdb75bde835b4.json"
+    },
+    {
+      "id": "6fa957251a66cec51dbf9391b671a24d070332efc1421252d62f3d4524dda493",
+      "name": "SpatialDot/Batch/RowSnapshot/Full/RealReal/0/16/real_time",
+      "metric": "real_time",
+      "url": "cases/6fa957251a66cec51dbf9391b671a24d070332efc1421252d62f3d4524dda493.json"
+    },
+    {
+      "id": "0ccf1b614fff84bdbf41207690f66f165e746a2ca8c46bbff6c3b2e74762b389",
+      "name": "SpatialDot/Batch/RowSnapshot/Full/RealReal/0/4/real_time",
+      "metric": "real_time",
+      "url": "cases/0ccf1b614fff84bdbf41207690f66f165e746a2ca8c46bbff6c3b2e74762b389.json"
+    },
+    {
+      "id": "5d9dcff8453a71da383d198bc1cd5f5ec401be6fcb64c83820db275724a21c55",
+      "name": "SpatialDot/Batch/RowSnapshot/Full/RealReal/0/64/real_time",
+      "metric": "real_time",
+      "url": "cases/5d9dcff8453a71da383d198bc1cd5f5ec401be6fcb64c83820db275724a21c55.json"
+    },
+    {
+      "id": "18eebacc555595e2fc423a81257efce9cd71918eec2bde1102e11a8b798bcf85",
+      "name": "SpatialDot/Batch/RowSnapshot/Full/RealReal/1/16/real_time",
+      "metric": "real_time",
+      "url": "cases/18eebacc555595e2fc423a81257efce9cd71918eec2bde1102e11a8b798bcf85.json"
+    },
+    {
+      "id": "595082dd59e12ef6fa7d03bd85dbf118f2ff6822c6a89de0730d0c05ece1a5a8",
+      "name": "SpatialDot/Batch/RowSnapshot/Full/RealReal/1/4/real_time",
+      "metric": "real_time",
+      "url": "cases/595082dd59e12ef6fa7d03bd85dbf118f2ff6822c6a89de0730d0c05ece1a5a8.json"
+    },
+    {
+      "id": "1c0f1c0ea0f670ac3fc9455bc754ef7cdb396ade03e1606f80a64d1a2af7ff47",
+      "name": "SpatialDot/Batch/RowSnapshot/Full/RealReal/1/64/real_time",
+      "metric": "real_time",
+      "url": "cases/1c0f1c0ea0f670ac3fc9455bc754ef7cdb396ade03e1606f80a64d1a2af7ff47.json"
+    },
+    {
+      "id": "d4d80b99e290d88796aa0004338c613585c2a6722b1cdf25d8e93d8b73b73c0e",
+      "name": "SpatialDot/Batch/RowSnapshot/Full/RealReal/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/d4d80b99e290d88796aa0004338c613585c2a6722b1cdf25d8e93d8b73b73c0e.json"
+    },
+    {
+      "id": "37e43c6c864784fd20d6d059c7cdc26f8cbc2d3061ee126a8987e88092b2e07b",
+      "name": "SpatialDot/Batch/RowSnapshot/Full/RealReal/2/4/real_time",
+      "metric": "real_time",
+      "url": "cases/37e43c6c864784fd20d6d059c7cdc26f8cbc2d3061ee126a8987e88092b2e07b.json"
+    },
+    {
+      "id": "d9779c13d66e86eed108e37ec96c0e53fc032b90f42caa9d3c90ab305d363cb5",
+      "name": "SpatialDot/Batch/RowSnapshot/Full/RealReal/2/64/real_time",
+      "metric": "real_time",
+      "url": "cases/d9779c13d66e86eed108e37ec96c0e53fc032b90f42caa9d3c90ab305d363cb5.json"
+    },
+    {
+      "id": "3abb014554315368dd97ae30b9bb9cc9bf9664cd9761b414726d536747dc3ae9",
+      "name": "SpatialDot/Batch/RowSnapshot/Full/RealReal/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/3abb014554315368dd97ae30b9bb9cc9bf9664cd9761b414726d536747dc3ae9.json"
+    },
+    {
+      "id": "4082fa5d1248bac62be4c3f5949b4ab335e86d68ea875f48b78aef811ad1735e",
+      "name": "SpatialDot/Batch/RowSnapshot/Full/RealReal/3/4/real_time",
+      "metric": "real_time",
+      "url": "cases/4082fa5d1248bac62be4c3f5949b4ab335e86d68ea875f48b78aef811ad1735e.json"
+    },
+    {
+      "id": "c2b41f207d22683307649a55160ff77071a245fd1e0e53ced0fe12c19f9c3ff4",
+      "name": "SpatialDot/Batch/RowSnapshot/Full/RealReal/3/64/real_time",
+      "metric": "real_time",
+      "url": "cases/c2b41f207d22683307649a55160ff77071a245fd1e0e53ced0fe12c19f9c3ff4.json"
+    },
+    {
+      "id": "dc09d3a60be90c241123bcfbf2d7db3fc123dfc44561c4e90ff805529dbbcfb3",
+      "name": "SpatialDot/Batch/RowSnapshot/Lower/ComplexComplex/0/16/real_time",
+      "metric": "real_time",
+      "url": "cases/dc09d3a60be90c241123bcfbf2d7db3fc123dfc44561c4e90ff805529dbbcfb3.json"
+    },
+    {
+      "id": "f702665eb4459a6a3a2351c7cbb8d3fdf12e5d7c43b5c4fb68a4ea039771e3df",
+      "name": "SpatialDot/Batch/RowSnapshot/Lower/ComplexComplex/0/4/real_time",
+      "metric": "real_time",
+      "url": "cases/f702665eb4459a6a3a2351c7cbb8d3fdf12e5d7c43b5c4fb68a4ea039771e3df.json"
+    },
+    {
+      "id": "9cf25779e6861d4b9a8a12e6fb8d787d8848a5fd8431a0f00a72f920599c3b32",
+      "name": "SpatialDot/Batch/RowSnapshot/Lower/ComplexComplex/0/64/real_time",
+      "metric": "real_time",
+      "url": "cases/9cf25779e6861d4b9a8a12e6fb8d787d8848a5fd8431a0f00a72f920599c3b32.json"
+    },
+    {
+      "id": "db22fd238d27864c3d4c936177c8a7cf6ce5b33ba2899c641784eb89dc5d360c",
+      "name": "SpatialDot/Batch/RowSnapshot/Lower/ComplexComplex/1/16/real_time",
+      "metric": "real_time",
+      "url": "cases/db22fd238d27864c3d4c936177c8a7cf6ce5b33ba2899c641784eb89dc5d360c.json"
+    },
+    {
+      "id": "e046b059f0bc080c72079a46c5cee841dc96a0cc084b508934b95b771197cc95",
+      "name": "SpatialDot/Batch/RowSnapshot/Lower/ComplexComplex/1/4/real_time",
+      "metric": "real_time",
+      "url": "cases/e046b059f0bc080c72079a46c5cee841dc96a0cc084b508934b95b771197cc95.json"
+    },
+    {
+      "id": "8722bdea3cdaab59e6f6c980cc79b3fa2717636522b8bdb5ae5b14c9cc192b90",
+      "name": "SpatialDot/Batch/RowSnapshot/Lower/ComplexComplex/1/64/real_time",
+      "metric": "real_time",
+      "url": "cases/8722bdea3cdaab59e6f6c980cc79b3fa2717636522b8bdb5ae5b14c9cc192b90.json"
+    },
+    {
+      "id": "a15a4409af4c3888b740e88be220c40633cb7ff9c9549062364eb7133666f248",
+      "name": "SpatialDot/Batch/RowSnapshot/Lower/ComplexComplex/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/a15a4409af4c3888b740e88be220c40633cb7ff9c9549062364eb7133666f248.json"
+    },
+    {
+      "id": "ef1120439fefa5f08a07fb452ff34d34307f70c6e94528e5923b2f8be005a2aa",
+      "name": "SpatialDot/Batch/RowSnapshot/Lower/ComplexComplex/2/4/real_time",
+      "metric": "real_time",
+      "url": "cases/ef1120439fefa5f08a07fb452ff34d34307f70c6e94528e5923b2f8be005a2aa.json"
+    },
+    {
+      "id": "78dd35648a7de55fbc45431fe67015993131124ba9bf76600fc570e6016a1c8b",
+      "name": "SpatialDot/Batch/RowSnapshot/Lower/ComplexComplex/2/64/real_time",
+      "metric": "real_time",
+      "url": "cases/78dd35648a7de55fbc45431fe67015993131124ba9bf76600fc570e6016a1c8b.json"
+    },
+    {
+      "id": "64f008f07acf54f6e541e81a7ff3ae8391a9c815b794767e97c07c0a1c124531",
+      "name": "SpatialDot/Batch/RowSnapshot/Lower/ComplexComplex/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/64f008f07acf54f6e541e81a7ff3ae8391a9c815b794767e97c07c0a1c124531.json"
+    },
+    {
+      "id": "f9f11bb50b8bd3dd5e7fd1602f245fc78a486e760e30066a92a437fdb5319390",
+      "name": "SpatialDot/Batch/RowSnapshot/Lower/ComplexComplex/3/4/real_time",
+      "metric": "real_time",
+      "url": "cases/f9f11bb50b8bd3dd5e7fd1602f245fc78a486e760e30066a92a437fdb5319390.json"
+    },
+    {
+      "id": "d9d88c0b672cc7aa155232b029ff6c7c300e8a75027a7593d5c8a5e890c83a7f",
+      "name": "SpatialDot/Batch/RowSnapshot/Lower/ComplexComplex/3/64/real_time",
+      "metric": "real_time",
+      "url": "cases/d9d88c0b672cc7aa155232b029ff6c7c300e8a75027a7593d5c8a5e890c83a7f.json"
+    },
+    {
+      "id": "783737dd55117f4e9f8d4c6f9eefaafcefcb0e65e5f9b1faf104e875504ed24b",
+      "name": "SpatialDot/Batch/RowSnapshot/Lower/ComplexReal/0/16/real_time",
+      "metric": "real_time",
+      "url": "cases/783737dd55117f4e9f8d4c6f9eefaafcefcb0e65e5f9b1faf104e875504ed24b.json"
+    },
+    {
+      "id": "dd3b33d11edeb52ed3d48000177bb68e921ab1c4c4f4cf7c153683aa11a0cbe6",
+      "name": "SpatialDot/Batch/RowSnapshot/Lower/ComplexReal/0/4/real_time",
+      "metric": "real_time",
+      "url": "cases/dd3b33d11edeb52ed3d48000177bb68e921ab1c4c4f4cf7c153683aa11a0cbe6.json"
+    },
+    {
+      "id": "125f505eb4a53bc63946efab39ee56e0785724157ade61c48a1d176784cddba4",
+      "name": "SpatialDot/Batch/RowSnapshot/Lower/ComplexReal/0/64/real_time",
+      "metric": "real_time",
+      "url": "cases/125f505eb4a53bc63946efab39ee56e0785724157ade61c48a1d176784cddba4.json"
+    },
+    {
+      "id": "c27fd1ba644a93f1d7502e924843a4537663bd738f76b2749d8d8c6b8bfebc14",
+      "name": "SpatialDot/Batch/RowSnapshot/Lower/ComplexReal/1/16/real_time",
+      "metric": "real_time",
+      "url": "cases/c27fd1ba644a93f1d7502e924843a4537663bd738f76b2749d8d8c6b8bfebc14.json"
+    },
+    {
+      "id": "5a1e8eb7cfc9ad7594b19b944df1d0f082fefe065fac855968341008ab65e65a",
+      "name": "SpatialDot/Batch/RowSnapshot/Lower/ComplexReal/1/4/real_time",
+      "metric": "real_time",
+      "url": "cases/5a1e8eb7cfc9ad7594b19b944df1d0f082fefe065fac855968341008ab65e65a.json"
+    },
+    {
+      "id": "4d52329ca18a7250b40d0dda8b4f12893fec8ba956a200426dfcf2cc773648be",
+      "name": "SpatialDot/Batch/RowSnapshot/Lower/ComplexReal/1/64/real_time",
+      "metric": "real_time",
+      "url": "cases/4d52329ca18a7250b40d0dda8b4f12893fec8ba956a200426dfcf2cc773648be.json"
+    },
+    {
+      "id": "6b9d47839d0ba04b668c8fd68013636598c24f56cb94d8fa9a2defde343b93c3",
+      "name": "SpatialDot/Batch/RowSnapshot/Lower/ComplexReal/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/6b9d47839d0ba04b668c8fd68013636598c24f56cb94d8fa9a2defde343b93c3.json"
+    },
+    {
+      "id": "38e08882d77a89ab77e9f2bedcdd4764bf2c1c4193962481af084a67b11fb4a6",
+      "name": "SpatialDot/Batch/RowSnapshot/Lower/ComplexReal/2/4/real_time",
+      "metric": "real_time",
+      "url": "cases/38e08882d77a89ab77e9f2bedcdd4764bf2c1c4193962481af084a67b11fb4a6.json"
+    },
+    {
+      "id": "9c66251ef0968cb6ed94de3c3fdc61c626d936b4e94fc1d49e542782b3ccc558",
+      "name": "SpatialDot/Batch/RowSnapshot/Lower/ComplexReal/2/64/real_time",
+      "metric": "real_time",
+      "url": "cases/9c66251ef0968cb6ed94de3c3fdc61c626d936b4e94fc1d49e542782b3ccc558.json"
+    },
+    {
+      "id": "3e468030da082d551d432d061dc090891fd7704b8213e014d2601fd931f92a27",
+      "name": "SpatialDot/Batch/RowSnapshot/Lower/ComplexReal/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/3e468030da082d551d432d061dc090891fd7704b8213e014d2601fd931f92a27.json"
+    },
+    {
+      "id": "11b78ab99946ceb11edd8435943a13a497cca3fe68730898a2a20a4668feeb33",
+      "name": "SpatialDot/Batch/RowSnapshot/Lower/ComplexReal/3/4/real_time",
+      "metric": "real_time",
+      "url": "cases/11b78ab99946ceb11edd8435943a13a497cca3fe68730898a2a20a4668feeb33.json"
+    },
+    {
+      "id": "0a23ebbdc9e4e5367288eee8bc89f3ab8a05c3877b6579c00b021a8267b5e363",
+      "name": "SpatialDot/Batch/RowSnapshot/Lower/ComplexReal/3/64/real_time",
+      "metric": "real_time",
+      "url": "cases/0a23ebbdc9e4e5367288eee8bc89f3ab8a05c3877b6579c00b021a8267b5e363.json"
+    },
+    {
+      "id": "603b88f7bd1f82268a647f7203da3c768b2f36819a740141b6060ec08f012fb7",
+      "name": "SpatialDot/Batch/RowSnapshot/Lower/RealComplex/0/16/real_time",
+      "metric": "real_time",
+      "url": "cases/603b88f7bd1f82268a647f7203da3c768b2f36819a740141b6060ec08f012fb7.json"
+    },
+    {
+      "id": "8804987de21d5e9a66724fc607b9c6b8b86cb716a527bb7eefc622992a69a785",
+      "name": "SpatialDot/Batch/RowSnapshot/Lower/RealComplex/0/4/real_time",
+      "metric": "real_time",
+      "url": "cases/8804987de21d5e9a66724fc607b9c6b8b86cb716a527bb7eefc622992a69a785.json"
+    },
+    {
+      "id": "c189002a52001bc1717f6a1457a7241cb5d6a6b84f863c1e8f001089276865ff",
+      "name": "SpatialDot/Batch/RowSnapshot/Lower/RealComplex/0/64/real_time",
+      "metric": "real_time",
+      "url": "cases/c189002a52001bc1717f6a1457a7241cb5d6a6b84f863c1e8f001089276865ff.json"
+    },
+    {
+      "id": "3410adf28f6b3e8eff3f6f38e9912c506ec7a9ebaf002fab01759734f38f1896",
+      "name": "SpatialDot/Batch/RowSnapshot/Lower/RealComplex/1/16/real_time",
+      "metric": "real_time",
+      "url": "cases/3410adf28f6b3e8eff3f6f38e9912c506ec7a9ebaf002fab01759734f38f1896.json"
+    },
+    {
+      "id": "075d16fc975d5dd90d9d3f33672ca0f4bb6832af966d69ecfc365fb93a9fc6fe",
+      "name": "SpatialDot/Batch/RowSnapshot/Lower/RealComplex/1/4/real_time",
+      "metric": "real_time",
+      "url": "cases/075d16fc975d5dd90d9d3f33672ca0f4bb6832af966d69ecfc365fb93a9fc6fe.json"
+    },
+    {
+      "id": "8d28230808febcdd5b946a3ae6e24d3e0fde2d42a2327fe973593b4ccdc81c21",
+      "name": "SpatialDot/Batch/RowSnapshot/Lower/RealComplex/1/64/real_time",
+      "metric": "real_time",
+      "url": "cases/8d28230808febcdd5b946a3ae6e24d3e0fde2d42a2327fe973593b4ccdc81c21.json"
+    },
+    {
+      "id": "f7de0a8782398357ef357c0ca7fc27aa0e095c8513b996039066f6f29b82f929",
+      "name": "SpatialDot/Batch/RowSnapshot/Lower/RealComplex/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/f7de0a8782398357ef357c0ca7fc27aa0e095c8513b996039066f6f29b82f929.json"
+    },
+    {
+      "id": "0fb3a7cefe1970610b50e13040096bf0eeecdfde13274689717842714272ea9a",
+      "name": "SpatialDot/Batch/RowSnapshot/Lower/RealComplex/2/4/real_time",
+      "metric": "real_time",
+      "url": "cases/0fb3a7cefe1970610b50e13040096bf0eeecdfde13274689717842714272ea9a.json"
+    },
+    {
+      "id": "bcd3f17712630f8ebaa8f13c0b2cfb3fda9711b7f63d2c2c169c2b659dbb23a3",
+      "name": "SpatialDot/Batch/RowSnapshot/Lower/RealComplex/2/64/real_time",
+      "metric": "real_time",
+      "url": "cases/bcd3f17712630f8ebaa8f13c0b2cfb3fda9711b7f63d2c2c169c2b659dbb23a3.json"
+    },
+    {
+      "id": "11296e4e913994ebd11b35ebeccac1684c8f957cda7dbb46c1b64e91003eba22",
+      "name": "SpatialDot/Batch/RowSnapshot/Lower/RealComplex/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/11296e4e913994ebd11b35ebeccac1684c8f957cda7dbb46c1b64e91003eba22.json"
+    },
+    {
+      "id": "cf9cdacc493a62d97759b4b9c736b2362b2fba9f1fbc10cf37e8c03b56a47935",
+      "name": "SpatialDot/Batch/RowSnapshot/Lower/RealComplex/3/4/real_time",
+      "metric": "real_time",
+      "url": "cases/cf9cdacc493a62d97759b4b9c736b2362b2fba9f1fbc10cf37e8c03b56a47935.json"
+    },
+    {
+      "id": "34f913b3a6485df3ed7ddc1ed140293964084a9b3504351401e9efaba8206748",
+      "name": "SpatialDot/Batch/RowSnapshot/Lower/RealComplex/3/64/real_time",
+      "metric": "real_time",
+      "url": "cases/34f913b3a6485df3ed7ddc1ed140293964084a9b3504351401e9efaba8206748.json"
+    },
+    {
+      "id": "ce6fbd892ec70cf17df4e742cfef3c371350e73a880628c7987641b669ab1384",
+      "name": "SpatialDot/Batch/RowSnapshot/Lower/RealReal/0/16/real_time",
+      "metric": "real_time",
+      "url": "cases/ce6fbd892ec70cf17df4e742cfef3c371350e73a880628c7987641b669ab1384.json"
+    },
+    {
+      "id": "a101dc857ecf82d7f8bbee1817b80effde241cb7ba3c5820b5c1cef052dbee26",
+      "name": "SpatialDot/Batch/RowSnapshot/Lower/RealReal/0/4/real_time",
+      "metric": "real_time",
+      "url": "cases/a101dc857ecf82d7f8bbee1817b80effde241cb7ba3c5820b5c1cef052dbee26.json"
+    },
+    {
+      "id": "47d981b65df64053789782d1c8c0327cb7f7f7d99dcb2815a80fdca223f057a7",
+      "name": "SpatialDot/Batch/RowSnapshot/Lower/RealReal/0/64/real_time",
+      "metric": "real_time",
+      "url": "cases/47d981b65df64053789782d1c8c0327cb7f7f7d99dcb2815a80fdca223f057a7.json"
+    },
+    {
+      "id": "b91e66975c300e9af3d661886fdd40fdd9f10ef1f1c7495a18891f6b210db05f",
+      "name": "SpatialDot/Batch/RowSnapshot/Lower/RealReal/1/16/real_time",
+      "metric": "real_time",
+      "url": "cases/b91e66975c300e9af3d661886fdd40fdd9f10ef1f1c7495a18891f6b210db05f.json"
+    },
+    {
+      "id": "12f54eb5e367103fe99a2c101348ba6e504aa17ad8adde921098282835ebeb25",
+      "name": "SpatialDot/Batch/RowSnapshot/Lower/RealReal/1/4/real_time",
+      "metric": "real_time",
+      "url": "cases/12f54eb5e367103fe99a2c101348ba6e504aa17ad8adde921098282835ebeb25.json"
+    },
+    {
+      "id": "fb5ceb754c6f329878c0b0905cc1bcc2cf7d048123f066bc55e8ea18dd0d12ac",
+      "name": "SpatialDot/Batch/RowSnapshot/Lower/RealReal/1/64/real_time",
+      "metric": "real_time",
+      "url": "cases/fb5ceb754c6f329878c0b0905cc1bcc2cf7d048123f066bc55e8ea18dd0d12ac.json"
+    },
+    {
+      "id": "28022db6d3365e9e00b395cebfedcabe7779b73ce41c661e066472ea19959363",
+      "name": "SpatialDot/Batch/RowSnapshot/Lower/RealReal/2/16/real_time",
+      "metric": "real_time",
+      "url": "cases/28022db6d3365e9e00b395cebfedcabe7779b73ce41c661e066472ea19959363.json"
+    },
+    {
+      "id": "b5b8e1246bd7c35054f58c43770bd19ba3b625f29781c310656c31d07d3a76ec",
+      "name": "SpatialDot/Batch/RowSnapshot/Lower/RealReal/2/4/real_time",
+      "metric": "real_time",
+      "url": "cases/b5b8e1246bd7c35054f58c43770bd19ba3b625f29781c310656c31d07d3a76ec.json"
+    },
+    {
+      "id": "22a3d627eb5c0c3a77d7468724f4d5ce83c20924f20dff521c8709cf64aa9829",
+      "name": "SpatialDot/Batch/RowSnapshot/Lower/RealReal/2/64/real_time",
+      "metric": "real_time",
+      "url": "cases/22a3d627eb5c0c3a77d7468724f4d5ce83c20924f20dff521c8709cf64aa9829.json"
+    },
+    {
+      "id": "93f3f88159df988456b8333515c9e64005d744536aae6fa91cdc9b64a4b21fc6",
+      "name": "SpatialDot/Batch/RowSnapshot/Lower/RealReal/3/16/real_time",
+      "metric": "real_time",
+      "url": "cases/93f3f88159df988456b8333515c9e64005d744536aae6fa91cdc9b64a4b21fc6.json"
+    },
+    {
+      "id": "07c0d9da0fea8c9f3a24ff5e832724c6f98613bd8bd93c60a83d11a46a6f16b5",
+      "name": "SpatialDot/Batch/RowSnapshot/Lower/RealReal/3/4/real_time",
+      "metric": "real_time",
+      "url": "cases/07c0d9da0fea8c9f3a24ff5e832724c6f98613bd8bd93c60a83d11a46a6f16b5.json"
+    },
+    {
+      "id": "8fd906ace04503ca6bfec19ad5ffd32e5b3088bd1c521d2915db2f0b1e0c13c9",
+      "name": "SpatialDot/Batch/RowSnapshot/Lower/RealReal/3/64/real_time",
+      "metric": "real_time",
+      "url": "cases/8fd906ace04503ca6bfec19ad5ffd32e5b3088bd1c521d2915db2f0b1e0c13c9.json"
+    },
+    {
+      "id": "df6db3887c20f1b6603f0c3e3a2a4fa9a10b7c2889884fe4ace38d5de64f2745",
+      "name": "SpatialDot/Original/ComplexComplex/0/real_time",
+      "metric": "real_time",
+      "url": "cases/df6db3887c20f1b6603f0c3e3a2a4fa9a10b7c2889884fe4ace38d5de64f2745.json"
+    },
+    {
+      "id": "fdc1b25d5c7fb4ec89aa640e1b8c960dc22ce6865a3723b21e99697479f8aae4",
+      "name": "SpatialDot/Original/ComplexComplex/1/real_time",
+      "metric": "real_time",
+      "url": "cases/fdc1b25d5c7fb4ec89aa640e1b8c960dc22ce6865a3723b21e99697479f8aae4.json"
+    },
+    {
+      "id": "aa1c6dc66bbe0dcdf6d48e4a15d92114aaac63118c849dd95163be162a2a6162",
+      "name": "SpatialDot/Original/ComplexComplex/2/real_time",
+      "metric": "real_time",
+      "url": "cases/aa1c6dc66bbe0dcdf6d48e4a15d92114aaac63118c849dd95163be162a2a6162.json"
+    },
+    {
+      "id": "7638fe90aa93fb71571348f7ecbe31f9d16071674d946a8e85980a99dd2dddd9",
+      "name": "SpatialDot/Original/ComplexComplex/3/real_time",
+      "metric": "real_time",
+      "url": "cases/7638fe90aa93fb71571348f7ecbe31f9d16071674d946a8e85980a99dd2dddd9.json"
+    },
+    {
+      "id": "7eed9859e1d7510a5b21f033e8d29c8b926ceb302bc921dcddc191d0392c7573",
+      "name": "SpatialDot/Original/ComplexReal/0/real_time",
+      "metric": "real_time",
+      "url": "cases/7eed9859e1d7510a5b21f033e8d29c8b926ceb302bc921dcddc191d0392c7573.json"
+    },
+    {
+      "id": "426f64d3f2451b3ba96839578682a8b62a6f4dfed1787f543191f65ea08cc941",
+      "name": "SpatialDot/Original/ComplexReal/1/real_time",
+      "metric": "real_time",
+      "url": "cases/426f64d3f2451b3ba96839578682a8b62a6f4dfed1787f543191f65ea08cc941.json"
+    },
+    {
+      "id": "5cc387aa4dd3517823bb47ef51416ea6ec77a2ee9f8d6b6a9fe48c4989ed3bb7",
+      "name": "SpatialDot/Original/ComplexReal/2/real_time",
+      "metric": "real_time",
+      "url": "cases/5cc387aa4dd3517823bb47ef51416ea6ec77a2ee9f8d6b6a9fe48c4989ed3bb7.json"
+    },
+    {
+      "id": "64749de42b4a3cf396c44ad91724d9b78306deafc7ca30b9adcf6fde5254e757",
+      "name": "SpatialDot/Original/ComplexReal/3/real_time",
+      "metric": "real_time",
+      "url": "cases/64749de42b4a3cf396c44ad91724d9b78306deafc7ca30b9adcf6fde5254e757.json"
+    },
+    {
+      "id": "97114dad35ccb581634636bd7e243f0e26b8212a39d6fffb8a25e2fea6c607f6",
+      "name": "SpatialDot/Original/RealComplex/0/real_time",
+      "metric": "real_time",
+      "url": "cases/97114dad35ccb581634636bd7e243f0e26b8212a39d6fffb8a25e2fea6c607f6.json"
+    },
+    {
+      "id": "c84951192b9b6c7b8e5ef828b335374e7c9ecff1b85a189d6247bba3e12dcd9f",
+      "name": "SpatialDot/Original/RealComplex/1/real_time",
+      "metric": "real_time",
+      "url": "cases/c84951192b9b6c7b8e5ef828b335374e7c9ecff1b85a189d6247bba3e12dcd9f.json"
+    },
+    {
+      "id": "33724ec8293ed1e8a80f81c9c772159d010f5d814d75bbfd3b919bcb96904032",
+      "name": "SpatialDot/Original/RealComplex/2/real_time",
+      "metric": "real_time",
+      "url": "cases/33724ec8293ed1e8a80f81c9c772159d010f5d814d75bbfd3b919bcb96904032.json"
+    },
+    {
+      "id": "8a260d4b496e6ece1dd89a081fe666dd34ae07e5f6467d0aa984f00479c0fda9",
+      "name": "SpatialDot/Original/RealComplex/3/real_time",
+      "metric": "real_time",
+      "url": "cases/8a260d4b496e6ece1dd89a081fe666dd34ae07e5f6467d0aa984f00479c0fda9.json"
+    },
+    {
+      "id": "549537134b0b633ae3f96e80261853e5561b4485a1e4e1ce05997e0e23e5932d",
+      "name": "SpatialDot/Original/RealReal/0/real_time",
+      "metric": "real_time",
+      "url": "cases/549537134b0b633ae3f96e80261853e5561b4485a1e4e1ce05997e0e23e5932d.json"
+    },
+    {
+      "id": "d4b7a6f119ae52d16059ee4f9d167b032866a4a82644d3b3ed2884e9bef67f3b",
+      "name": "SpatialDot/Original/RealReal/1/real_time",
+      "metric": "real_time",
+      "url": "cases/d4b7a6f119ae52d16059ee4f9d167b032866a4a82644d3b3ed2884e9bef67f3b.json"
+    },
+    {
+      "id": "a2391cbec8330f8414bbd94f5fcd28dc101ee28e9e3d70c621c85aef36e1a7df",
+      "name": "SpatialDot/Original/RealReal/2/real_time",
+      "metric": "real_time",
+      "url": "cases/a2391cbec8330f8414bbd94f5fcd28dc101ee28e9e3d70c621c85aef36e1a7df.json"
+    },
+    {
+      "id": "72a1aa133794241ddae041ec0a84558e39a716ac9feda270de5b300ee5a1fae7",
+      "name": "SpatialDot/Original/RealReal/3/real_time",
+      "metric": "real_time",
+      "url": "cases/72a1aa133794241ddae041ec0a84558e39a716ac9feda270de5b300ee5a1fae7.json"
+    },
+    {
+      "id": "79fb9633e8b083275971bcf9b9ae67373dd75326c9e01b407b177736a948fb49",
+      "name": "SpatialDot/Public/ComplexComplex/0/real_time",
+      "metric": "real_time",
+      "url": "cases/79fb9633e8b083275971bcf9b9ae67373dd75326c9e01b407b177736a948fb49.json"
+    },
+    {
+      "id": "c389e023ab6ef78eb30f41eb4eae2513b37349bd62a1fbfcc8ca457b0ccd7f95",
+      "name": "SpatialDot/Public/ComplexComplex/1/real_time",
+      "metric": "real_time",
+      "url": "cases/c389e023ab6ef78eb30f41eb4eae2513b37349bd62a1fbfcc8ca457b0ccd7f95.json"
+    },
+    {
+      "id": "6fe38af601b7a88808beb0924119d46993a7418286eb5214d1b015c7583de730",
+      "name": "SpatialDot/Public/ComplexComplex/2/real_time",
+      "metric": "real_time",
+      "url": "cases/6fe38af601b7a88808beb0924119d46993a7418286eb5214d1b015c7583de730.json"
+    },
+    {
+      "id": "a4b34b6f086f93ea72eeb343787a75b1ceac38838ffacd63346c993948b64aad",
+      "name": "SpatialDot/Public/ComplexComplex/3/real_time",
+      "metric": "real_time",
+      "url": "cases/a4b34b6f086f93ea72eeb343787a75b1ceac38838ffacd63346c993948b64aad.json"
+    },
+    {
+      "id": "adb634ce29fe5fb22be3f8b3951fd4e912504f67285f3fb5ef12f646db4fe4c9",
+      "name": "SpatialDot/Public/ComplexReal/0/real_time",
+      "metric": "real_time",
+      "url": "cases/adb634ce29fe5fb22be3f8b3951fd4e912504f67285f3fb5ef12f646db4fe4c9.json"
+    },
+    {
+      "id": "0a62ee0f8860b2ccd8da20894ae57b90228476a5c4a1e7a29026aa6e4ede239a",
+      "name": "SpatialDot/Public/ComplexReal/1/real_time",
+      "metric": "real_time",
+      "url": "cases/0a62ee0f8860b2ccd8da20894ae57b90228476a5c4a1e7a29026aa6e4ede239a.json"
+    },
+    {
+      "id": "4b20fb1ecbc8cd064a45f00c763b3b9f1fadc0de6e835b3d8d92223113a3f2c9",
+      "name": "SpatialDot/Public/ComplexReal/2/real_time",
+      "metric": "real_time",
+      "url": "cases/4b20fb1ecbc8cd064a45f00c763b3b9f1fadc0de6e835b3d8d92223113a3f2c9.json"
+    },
+    {
+      "id": "f2314d795a511c4da019ad76f47efc9e42a152193bd3ee0a963e3d339754de97",
+      "name": "SpatialDot/Public/ComplexReal/3/real_time",
+      "metric": "real_time",
+      "url": "cases/f2314d795a511c4da019ad76f47efc9e42a152193bd3ee0a963e3d339754de97.json"
+    },
+    {
+      "id": "693df7511fd42b67e5d19bd1d81e6d030020147cacc91a3fff7ce0cfd9be265d",
+      "name": "SpatialDot/Public/RealComplex/0/real_time",
+      "metric": "real_time",
+      "url": "cases/693df7511fd42b67e5d19bd1d81e6d030020147cacc91a3fff7ce0cfd9be265d.json"
+    },
+    {
+      "id": "e9b47c7844674f96af1768e2c155f29706ea9b68de53ed53aedfb833fb8b3909",
+      "name": "SpatialDot/Public/RealComplex/1/real_time",
+      "metric": "real_time",
+      "url": "cases/e9b47c7844674f96af1768e2c155f29706ea9b68de53ed53aedfb833fb8b3909.json"
+    },
+    {
+      "id": "8c39e56fabd11ffbcf3e26cb2003aae24c8cdc9a78927178b8a514775898a79d",
+      "name": "SpatialDot/Public/RealComplex/2/real_time",
+      "metric": "real_time",
+      "url": "cases/8c39e56fabd11ffbcf3e26cb2003aae24c8cdc9a78927178b8a514775898a79d.json"
+    },
+    {
+      "id": "febe3ee361b9d9d3c64f7965aa9aaae2b3323b219d9adf69fcd627e2745ddf85",
+      "name": "SpatialDot/Public/RealComplex/3/real_time",
+      "metric": "real_time",
+      "url": "cases/febe3ee361b9d9d3c64f7965aa9aaae2b3323b219d9adf69fcd627e2745ddf85.json"
+    },
+    {
+      "id": "1b1925ad4ca08fd16e5a4631effbc320f0a95f6956b9292ab10cbab073f144f5",
+      "name": "SpatialDot/Public/RealReal/0/real_time",
+      "metric": "real_time",
+      "url": "cases/1b1925ad4ca08fd16e5a4631effbc320f0a95f6956b9292ab10cbab073f144f5.json"
+    },
+    {
+      "id": "e06c88c4a3617c65169d58bbf44aa61fc27763252d72e1af23136cb3f2f5388b",
+      "name": "SpatialDot/Public/RealReal/1/real_time",
+      "metric": "real_time",
+      "url": "cases/e06c88c4a3617c65169d58bbf44aa61fc27763252d72e1af23136cb3f2f5388b.json"
+    },
+    {
+      "id": "20c41f5b2c619b4d41e83fc641b0f3f7e113d1af0f469036b61d0740cdfe8934",
+      "name": "SpatialDot/Public/RealReal/2/real_time",
+      "metric": "real_time",
+      "url": "cases/20c41f5b2c619b4d41e83fc641b0f3f7e113d1af0f469036b61d0740cdfe8934.json"
+    },
+    {
+      "id": "638d8a363fd5ee2aad9b298d96c452f5aa714156dcc559a966f2503202fc50b2",
+      "name": "SpatialDot/Public/RealReal/3/real_time",
+      "metric": "real_time",
+      "url": "cases/638d8a363fd5ee2aad9b298d96c452f5aa714156dcc559a966f2503202fc50b2.json"
+    }
+  ]
+}

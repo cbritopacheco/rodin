@@ -1,0 +1,3072 @@
+{
+  "schema": 1,
+  "definition": {
+    "kind": "benchmark",
+    "mode": "local",
+    "compiler": "gcc-14",
+    "runner": "ubuntu-24.04",
+    "cmake": {
+      "CMAKE_BUILD_TYPE": "Release",
+      "CMAKE_CXX_COMPILER": "g++-14",
+      "CMAKE_C_COMPILER": "gcc-14",
+      "CMAKE_SUPPRESS_REGENERATION": "ON",
+      "RODIN_BUILD_SRC": "ON",
+      "RODIN_BUILD_BENCHMARKS": "ON",
+      "RODIN_BUILD_UNIT_TESTS": "OFF",
+      "RODIN_BUILD_MANUFACTURED_TESTS": "OFF",
+      "RODIN_BUILD_CONVERGENCE_TESTS": "OFF",
+      "RODIN_BUILD_EXAMPLES": "OFF",
+      "RODIN_BUILD_DOC": "OFF",
+      "RODIN_INSTALL_RESOURCES": "OFF",
+      "RODIN_CODE_COVERAGE": "OFF",
+      "RODIN_MULTITHREADED": "OFF",
+      "RODIN_USE_ASAN": "OFF",
+      "RODIN_USE_UBSAN": "OFF",
+      "RODIN_USE_MPI": "OFF",
+      "RODIN_USE_PETSC": "OFF"
+    },
+    "targets": [
+      "RodinAssemblyBenchmarks",
+      "RodinConstrainedAssemblyBenchmarks",
+      "RodinConvectionAssemblyBenchmarks",
+      "RodinCoupledReactionDiffusionAssemblyBenchmarks",
+      "RodinHelmholtzAssemblyBenchmarks",
+      "RodinMassAssemblyBenchmarks",
+      "RodinMassOperandOrderAssemblyBenchmarks",
+      "RodinMatrixMassAssemblyBenchmarks",
+      "RodinNonlinearPoissonAssemblyBenchmarks",
+      "RodinPhysicsAssemblyBenchmarks",
+      "RodinPhysicsStageBenchmarks",
+      "RodinSpatialMatrixBenchmarks",
+      "RodinStokesAssemblyBenchmarks"
+    ],
+    "stage": "components"
+  },
+  "ranks": 1,
+  "cases": [
+    {
+      "id": "2b76efe94344d387eb6c6bc8d1d3e51d2ed59d588bcad457061f841001300926",
+      "name": "Binding/Conductivity/P1/Hexahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/2b76efe94344d387eb6c6bc8d1d3e51d2ed59d588bcad457061f841001300926.json"
+    },
+    {
+      "id": "fa8266eda7020f15f77ac36bfb42a7412bc7e33cb1cc98121b9d472fe2315d64",
+      "name": "Binding/Conductivity/P1/Hexahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/fa8266eda7020f15f77ac36bfb42a7412bc7e33cb1cc98121b9d472fe2315d64.json"
+    },
+    {
+      "id": "e34251827d13fc1db6f9a9e0d5e26fd0f235b50251babede9d809a2d773342d5",
+      "name": "Binding/Conductivity/P1/Hexahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/e34251827d13fc1db6f9a9e0d5e26fd0f235b50251babede9d809a2d773342d5.json"
+    },
+    {
+      "id": "83daf4d7ab85ccb77d56cf1f4fd2727acdf5ba9364c62534f9841679028f34b3",
+      "name": "Binding/Conductivity/P1/Pyramid/3/real_time",
+      "metric": "real_time",
+      "url": "cases/83daf4d7ab85ccb77d56cf1f4fd2727acdf5ba9364c62534f9841679028f34b3.json"
+    },
+    {
+      "id": "ca4f191ae632ba6611b5e4335765f0ff594348dc782204d709a5ce2601c378e3",
+      "name": "Binding/Conductivity/P1/Pyramid/5/real_time",
+      "metric": "real_time",
+      "url": "cases/ca4f191ae632ba6611b5e4335765f0ff594348dc782204d709a5ce2601c378e3.json"
+    },
+    {
+      "id": "c451eb7e45c13285b2bc7fa50e6d1f54c7412041e2e36bf6057c89a08c4a2efe",
+      "name": "Binding/Conductivity/P1/Pyramid/9/real_time",
+      "metric": "real_time",
+      "url": "cases/c451eb7e45c13285b2bc7fa50e6d1f54c7412041e2e36bf6057c89a08c4a2efe.json"
+    },
+    {
+      "id": "dbb629f2f3dafa76d244864e05e6da6e639bc833b3e903eed48939971c63920f",
+      "name": "Binding/Conductivity/P1/Quadrilateral/3/real_time",
+      "metric": "real_time",
+      "url": "cases/dbb629f2f3dafa76d244864e05e6da6e639bc833b3e903eed48939971c63920f.json"
+    },
+    {
+      "id": "80d35f852baee08ee37e39b55502bdd8bd07cffdf373e7f2acccd0f2ad105c76",
+      "name": "Binding/Conductivity/P1/Quadrilateral/5/real_time",
+      "metric": "real_time",
+      "url": "cases/80d35f852baee08ee37e39b55502bdd8bd07cffdf373e7f2acccd0f2ad105c76.json"
+    },
+    {
+      "id": "17659634b6748f4a11dfaad1c88fa960e473b2d71a9c8767aedad9de8746b9b8",
+      "name": "Binding/Conductivity/P1/Quadrilateral/9/real_time",
+      "metric": "real_time",
+      "url": "cases/17659634b6748f4a11dfaad1c88fa960e473b2d71a9c8767aedad9de8746b9b8.json"
+    },
+    {
+      "id": "496496e5b77b1136ba689404318adadb0ed901205391082bcaf6b6edb878837c",
+      "name": "Binding/Conductivity/P1/Segment/3/real_time",
+      "metric": "real_time",
+      "url": "cases/496496e5b77b1136ba689404318adadb0ed901205391082bcaf6b6edb878837c.json"
+    },
+    {
+      "id": "d2cdbcd7ed235d0cb141a535fa7375c8b38cb0fc0a3b668ba23f89f62c2628d6",
+      "name": "Binding/Conductivity/P1/Segment/5/real_time",
+      "metric": "real_time",
+      "url": "cases/d2cdbcd7ed235d0cb141a535fa7375c8b38cb0fc0a3b668ba23f89f62c2628d6.json"
+    },
+    {
+      "id": "f75d155bf3173a4300d99abeb68149d4ba780d200df9be447549650a74114b74",
+      "name": "Binding/Conductivity/P1/Segment/9/real_time",
+      "metric": "real_time",
+      "url": "cases/f75d155bf3173a4300d99abeb68149d4ba780d200df9be447549650a74114b74.json"
+    },
+    {
+      "id": "1b31f4c00a37ee5a7e703dbdf73775a3eba5c3ffea096c157f80e4af4fb2a897",
+      "name": "Binding/Conductivity/P1/Tetrahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/1b31f4c00a37ee5a7e703dbdf73775a3eba5c3ffea096c157f80e4af4fb2a897.json"
+    },
+    {
+      "id": "da41c6629add79a592062b4d0ebd65033c12622430d719f72a8c5f342361e0e6",
+      "name": "Binding/Conductivity/P1/Tetrahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/da41c6629add79a592062b4d0ebd65033c12622430d719f72a8c5f342361e0e6.json"
+    },
+    {
+      "id": "a8c90e018279b24c57a199052f0914058bd8fd2bab1a04340bc708599ad46bad",
+      "name": "Binding/Conductivity/P1/Tetrahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/a8c90e018279b24c57a199052f0914058bd8fd2bab1a04340bc708599ad46bad.json"
+    },
+    {
+      "id": "01cece18431941555af7df39ad44ea33a1677aaecc7264999af276ea7afb43f9",
+      "name": "Binding/Conductivity/P1/Triangle/3/real_time",
+      "metric": "real_time",
+      "url": "cases/01cece18431941555af7df39ad44ea33a1677aaecc7264999af276ea7afb43f9.json"
+    },
+    {
+      "id": "9d269c165dc120093085763f95555155375dfc602484e9f1ace35e50b448503d",
+      "name": "Binding/Conductivity/P1/Triangle/5/real_time",
+      "metric": "real_time",
+      "url": "cases/9d269c165dc120093085763f95555155375dfc602484e9f1ace35e50b448503d.json"
+    },
+    {
+      "id": "13aa338c7ea370225255965cefcb81d770fccd3474a80dc4c9fa008ed7f076d3",
+      "name": "Binding/Conductivity/P1/Triangle/9/real_time",
+      "metric": "real_time",
+      "url": "cases/13aa338c7ea370225255965cefcb81d770fccd3474a80dc4c9fa008ed7f076d3.json"
+    },
+    {
+      "id": "0a2adee8d91b1e63772be543ea127c0622be534ca8ba86a30b244e87a6449440",
+      "name": "Binding/Conductivity/P1/Wedge/3/real_time",
+      "metric": "real_time",
+      "url": "cases/0a2adee8d91b1e63772be543ea127c0622be534ca8ba86a30b244e87a6449440.json"
+    },
+    {
+      "id": "eb7b97d936b00f3bc52e30245e050124da6521a22d317f46bee53998becf4865",
+      "name": "Binding/Conductivity/P1/Wedge/5/real_time",
+      "metric": "real_time",
+      "url": "cases/eb7b97d936b00f3bc52e30245e050124da6521a22d317f46bee53998becf4865.json"
+    },
+    {
+      "id": "8c56da9c570faafaf44172dd88ed3e5b8490a1de3e0d024a698f7f43a03bc6b8",
+      "name": "Binding/Conductivity/P1/Wedge/9/real_time",
+      "metric": "real_time",
+      "url": "cases/8c56da9c570faafaf44172dd88ed3e5b8490a1de3e0d024a698f7f43a03bc6b8.json"
+    },
+    {
+      "id": "fd443ecf941bae66cb57d8e71b33a7634dcfe53dd294443f04e0b579a082005f",
+      "name": "Binding/Conductivity/P2/Hexahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/fd443ecf941bae66cb57d8e71b33a7634dcfe53dd294443f04e0b579a082005f.json"
+    },
+    {
+      "id": "a9ed65d360396dee54966f3d0903d8e7224a3c97832ac747e2d70d4754c6837b",
+      "name": "Binding/Conductivity/P2/Hexahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/a9ed65d360396dee54966f3d0903d8e7224a3c97832ac747e2d70d4754c6837b.json"
+    },
+    {
+      "id": "7eb2f34a3c04932c060a577b761d61f2b2a0506158cebc37af131e90e7864ff1",
+      "name": "Binding/Conductivity/P2/Hexahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/7eb2f34a3c04932c060a577b761d61f2b2a0506158cebc37af131e90e7864ff1.json"
+    },
+    {
+      "id": "f2581bd71331a37d9333701435688066bd3fe9cbd5508641d4cb47b4dbdb8f8f",
+      "name": "Binding/Conductivity/P2/Pyramid/3/real_time",
+      "metric": "real_time",
+      "url": "cases/f2581bd71331a37d9333701435688066bd3fe9cbd5508641d4cb47b4dbdb8f8f.json"
+    },
+    {
+      "id": "c738fb62bf3ae66d4c4510c8e2f3b757e1351b16f0b95a08ab1d57adf326a05e",
+      "name": "Binding/Conductivity/P2/Pyramid/5/real_time",
+      "metric": "real_time",
+      "url": "cases/c738fb62bf3ae66d4c4510c8e2f3b757e1351b16f0b95a08ab1d57adf326a05e.json"
+    },
+    {
+      "id": "ab5ca300569f35508156d5d98dd3a7b82d3ea5b8faadd4bcac16db2c56313a3b",
+      "name": "Binding/Conductivity/P2/Pyramid/9/real_time",
+      "metric": "real_time",
+      "url": "cases/ab5ca300569f35508156d5d98dd3a7b82d3ea5b8faadd4bcac16db2c56313a3b.json"
+    },
+    {
+      "id": "148b7ab40e4c54aff2448d6bcf86bca6f8981ed0f97423955a89a439a3ae89cc",
+      "name": "Binding/Conductivity/P2/Quadrilateral/3/real_time",
+      "metric": "real_time",
+      "url": "cases/148b7ab40e4c54aff2448d6bcf86bca6f8981ed0f97423955a89a439a3ae89cc.json"
+    },
+    {
+      "id": "6c6a4ff4ac7cf4155c83f9cee557aa653b8dce4bc4244c44924c956e5eb8fe5d",
+      "name": "Binding/Conductivity/P2/Quadrilateral/5/real_time",
+      "metric": "real_time",
+      "url": "cases/6c6a4ff4ac7cf4155c83f9cee557aa653b8dce4bc4244c44924c956e5eb8fe5d.json"
+    },
+    {
+      "id": "d1eea0039f93e0ee5c7c4c0f664dff6ed6a3831351b264dbde4924a37bcb6dd6",
+      "name": "Binding/Conductivity/P2/Quadrilateral/9/real_time",
+      "metric": "real_time",
+      "url": "cases/d1eea0039f93e0ee5c7c4c0f664dff6ed6a3831351b264dbde4924a37bcb6dd6.json"
+    },
+    {
+      "id": "30e71c2cba0088909d1ed44682527867d560701fdc41bdab5cd7970ecd0ec278",
+      "name": "Binding/Conductivity/P2/Segment/3/real_time",
+      "metric": "real_time",
+      "url": "cases/30e71c2cba0088909d1ed44682527867d560701fdc41bdab5cd7970ecd0ec278.json"
+    },
+    {
+      "id": "40b3535a1946965e77b75151a3173222938a8def58a67f1546d2b72ad48af825",
+      "name": "Binding/Conductivity/P2/Segment/5/real_time",
+      "metric": "real_time",
+      "url": "cases/40b3535a1946965e77b75151a3173222938a8def58a67f1546d2b72ad48af825.json"
+    },
+    {
+      "id": "a8c9396afa9e6a8360d5906402c930b92861d3e0617da14a91919476b5cf4e3f",
+      "name": "Binding/Conductivity/P2/Segment/9/real_time",
+      "metric": "real_time",
+      "url": "cases/a8c9396afa9e6a8360d5906402c930b92861d3e0617da14a91919476b5cf4e3f.json"
+    },
+    {
+      "id": "0e7a44dcb882a09b6eff8849c607529663ed94e78c678695d3beea8141183185",
+      "name": "Binding/Conductivity/P2/Tetrahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/0e7a44dcb882a09b6eff8849c607529663ed94e78c678695d3beea8141183185.json"
+    },
+    {
+      "id": "7473ea2bc7901b43931a8355bf34ea16a89a32d1691200ea624fa28572512be8",
+      "name": "Binding/Conductivity/P2/Tetrahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/7473ea2bc7901b43931a8355bf34ea16a89a32d1691200ea624fa28572512be8.json"
+    },
+    {
+      "id": "7ba0ac7d69d974164578552fc9154e65d824fdbda3a66ad5de392bac51223b7c",
+      "name": "Binding/Conductivity/P2/Tetrahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/7ba0ac7d69d974164578552fc9154e65d824fdbda3a66ad5de392bac51223b7c.json"
+    },
+    {
+      "id": "75dffde63e78738e40b1c4e9e7757673a2983f7232ed724a8fb340c409892b9a",
+      "name": "Binding/Conductivity/P2/Triangle/3/real_time",
+      "metric": "real_time",
+      "url": "cases/75dffde63e78738e40b1c4e9e7757673a2983f7232ed724a8fb340c409892b9a.json"
+    },
+    {
+      "id": "2658bf165b0304b6835442a1adb0da9cc80ba938ca6fe8d267cf52f5ef6b1b5f",
+      "name": "Binding/Conductivity/P2/Triangle/5/real_time",
+      "metric": "real_time",
+      "url": "cases/2658bf165b0304b6835442a1adb0da9cc80ba938ca6fe8d267cf52f5ef6b1b5f.json"
+    },
+    {
+      "id": "1892fccd4918f968da77bc59ac8155321e1e68c9b55235466c5d4b8f2e3bd014",
+      "name": "Binding/Conductivity/P2/Triangle/9/real_time",
+      "metric": "real_time",
+      "url": "cases/1892fccd4918f968da77bc59ac8155321e1e68c9b55235466c5d4b8f2e3bd014.json"
+    },
+    {
+      "id": "2876d8cdb6c74711082ab3a142e358f3f9a07f4948831abcbc0dac91688cb6ab",
+      "name": "Binding/Conductivity/P2/Wedge/3/real_time",
+      "metric": "real_time",
+      "url": "cases/2876d8cdb6c74711082ab3a142e358f3f9a07f4948831abcbc0dac91688cb6ab.json"
+    },
+    {
+      "id": "8b9dae84a122a061756dda633a71ade76ab9eee7aa87516d304d7a3e998f3f2d",
+      "name": "Binding/Conductivity/P2/Wedge/5/real_time",
+      "metric": "real_time",
+      "url": "cases/8b9dae84a122a061756dda633a71ade76ab9eee7aa87516d304d7a3e998f3f2d.json"
+    },
+    {
+      "id": "7d607a06926f2170e801ca5708f42ab54a8cc3b8b9d6e2fbe460e5cc2d3a9e0c",
+      "name": "Binding/Conductivity/P2/Wedge/9/real_time",
+      "metric": "real_time",
+      "url": "cases/7d607a06926f2170e801ca5708f42ab54a8cc3b8b9d6e2fbe460e5cc2d3a9e0c.json"
+    },
+    {
+      "id": "305a6eb486cf5caed0a3661d9a118c7c8ea7b0e2a584ecb750f982432aaa3c57",
+      "name": "Binding/LinearElasticity/P1/Hexahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/305a6eb486cf5caed0a3661d9a118c7c8ea7b0e2a584ecb750f982432aaa3c57.json"
+    },
+    {
+      "id": "04602deb8847230e7b956feb3b3c32952c35330fdda14f12dc76f04e2053fe05",
+      "name": "Binding/LinearElasticity/P1/Hexahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/04602deb8847230e7b956feb3b3c32952c35330fdda14f12dc76f04e2053fe05.json"
+    },
+    {
+      "id": "011e481fce179c53cf2b9d42d7c6b6b6bdb3e6685810679a64a7d9a6a2457dd8",
+      "name": "Binding/LinearElasticity/P1/Hexahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/011e481fce179c53cf2b9d42d7c6b6b6bdb3e6685810679a64a7d9a6a2457dd8.json"
+    },
+    {
+      "id": "78cf3d53557f7896a8978436cf5eed93b3ae1c1425657fd959f174fc8f9341e6",
+      "name": "Binding/LinearElasticity/P1/Pyramid/3/real_time",
+      "metric": "real_time",
+      "url": "cases/78cf3d53557f7896a8978436cf5eed93b3ae1c1425657fd959f174fc8f9341e6.json"
+    },
+    {
+      "id": "40436eedddcf785286dcd823bcc0e4af11aad008b8b2f2bcc9e89c0015f939b5",
+      "name": "Binding/LinearElasticity/P1/Pyramid/5/real_time",
+      "metric": "real_time",
+      "url": "cases/40436eedddcf785286dcd823bcc0e4af11aad008b8b2f2bcc9e89c0015f939b5.json"
+    },
+    {
+      "id": "fb4d32670b595f49585f06622b26081a88acbd277083bc49a4d65da73584fe64",
+      "name": "Binding/LinearElasticity/P1/Pyramid/9/real_time",
+      "metric": "real_time",
+      "url": "cases/fb4d32670b595f49585f06622b26081a88acbd277083bc49a4d65da73584fe64.json"
+    },
+    {
+      "id": "2ec127bb8524296388ea31b7de06d57d63268f34de4a4bcf10b75fd25cded66a",
+      "name": "Binding/LinearElasticity/P1/Quadrilateral/3/real_time",
+      "metric": "real_time",
+      "url": "cases/2ec127bb8524296388ea31b7de06d57d63268f34de4a4bcf10b75fd25cded66a.json"
+    },
+    {
+      "id": "f836260487c179ea0020c562d2ac045177fc9bd16867c5395ffb364fdf95c031",
+      "name": "Binding/LinearElasticity/P1/Quadrilateral/5/real_time",
+      "metric": "real_time",
+      "url": "cases/f836260487c179ea0020c562d2ac045177fc9bd16867c5395ffb364fdf95c031.json"
+    },
+    {
+      "id": "b4a07f5b01e9bafc1245bd16f2186b18e21810901f46c01bd5bfad7de39c917b",
+      "name": "Binding/LinearElasticity/P1/Quadrilateral/9/real_time",
+      "metric": "real_time",
+      "url": "cases/b4a07f5b01e9bafc1245bd16f2186b18e21810901f46c01bd5bfad7de39c917b.json"
+    },
+    {
+      "id": "05fdc3172a730436e7bc6b6d665885041ae925046f18b7ac7f125f122aabd077",
+      "name": "Binding/LinearElasticity/P1/Segment/3/real_time",
+      "metric": "real_time",
+      "url": "cases/05fdc3172a730436e7bc6b6d665885041ae925046f18b7ac7f125f122aabd077.json"
+    },
+    {
+      "id": "54eb76799a474fded025f2e5b8adc8408704259c9f605743b1db9aabada011f4",
+      "name": "Binding/LinearElasticity/P1/Segment/5/real_time",
+      "metric": "real_time",
+      "url": "cases/54eb76799a474fded025f2e5b8adc8408704259c9f605743b1db9aabada011f4.json"
+    },
+    {
+      "id": "d60753bde293ce5b0c15018fbed15b8d2db95fa1b61cc8a41c9f9504d55e5ab5",
+      "name": "Binding/LinearElasticity/P1/Segment/9/real_time",
+      "metric": "real_time",
+      "url": "cases/d60753bde293ce5b0c15018fbed15b8d2db95fa1b61cc8a41c9f9504d55e5ab5.json"
+    },
+    {
+      "id": "0d5d271f16f81d96b14618b851d17b78266d605bb58fc3f00df7e0c8afc8fc27",
+      "name": "Binding/LinearElasticity/P1/Tetrahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/0d5d271f16f81d96b14618b851d17b78266d605bb58fc3f00df7e0c8afc8fc27.json"
+    },
+    {
+      "id": "55b1a274bbbc8d7790532ddb59cf42fe992ad12485201e4468415c13ee86ac65",
+      "name": "Binding/LinearElasticity/P1/Tetrahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/55b1a274bbbc8d7790532ddb59cf42fe992ad12485201e4468415c13ee86ac65.json"
+    },
+    {
+      "id": "f704ffaf6fa3de214ca10f2b819d2f2eae51266d46d4a2378cea1c52ce0ddb72",
+      "name": "Binding/LinearElasticity/P1/Tetrahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/f704ffaf6fa3de214ca10f2b819d2f2eae51266d46d4a2378cea1c52ce0ddb72.json"
+    },
+    {
+      "id": "168be15a9c93be3ccca01980d424cd4487240ec4b670f721d6a6c4c01945453d",
+      "name": "Binding/LinearElasticity/P1/Triangle/3/real_time",
+      "metric": "real_time",
+      "url": "cases/168be15a9c93be3ccca01980d424cd4487240ec4b670f721d6a6c4c01945453d.json"
+    },
+    {
+      "id": "2f0331a50ac36fa29c46676a4a64ee5d69213803c03a5e553013115194d35c8d",
+      "name": "Binding/LinearElasticity/P1/Triangle/5/real_time",
+      "metric": "real_time",
+      "url": "cases/2f0331a50ac36fa29c46676a4a64ee5d69213803c03a5e553013115194d35c8d.json"
+    },
+    {
+      "id": "fb0284ea54dc62535f4a41c6243c79f41c8e78c8f818c3e4d8aff7462843385e",
+      "name": "Binding/LinearElasticity/P1/Triangle/9/real_time",
+      "metric": "real_time",
+      "url": "cases/fb0284ea54dc62535f4a41c6243c79f41c8e78c8f818c3e4d8aff7462843385e.json"
+    },
+    {
+      "id": "b08cde2f35cf9e1d91c8f2753f396ea7d18ed6a4e3b0456df0aacdb4ec497818",
+      "name": "Binding/LinearElasticity/P1/Wedge/3/real_time",
+      "metric": "real_time",
+      "url": "cases/b08cde2f35cf9e1d91c8f2753f396ea7d18ed6a4e3b0456df0aacdb4ec497818.json"
+    },
+    {
+      "id": "baee85f562111306c2b279ad9234685a7685aa389d271e94a920a8d59252d1a3",
+      "name": "Binding/LinearElasticity/P1/Wedge/5/real_time",
+      "metric": "real_time",
+      "url": "cases/baee85f562111306c2b279ad9234685a7685aa389d271e94a920a8d59252d1a3.json"
+    },
+    {
+      "id": "180e954d00354a815c575d2908f57b9d06fcb1723acfb6fc9201992881d936cc",
+      "name": "Binding/LinearElasticity/P1/Wedge/9/real_time",
+      "metric": "real_time",
+      "url": "cases/180e954d00354a815c575d2908f57b9d06fcb1723acfb6fc9201992881d936cc.json"
+    },
+    {
+      "id": "ad223ccb67c8cd64dddfd0f9b10feb72edf010c23f13e6934de5a6d2088847cc",
+      "name": "Binding/LinearElasticity/P2/Hexahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/ad223ccb67c8cd64dddfd0f9b10feb72edf010c23f13e6934de5a6d2088847cc.json"
+    },
+    {
+      "id": "ddae7bea697ea295fba481ebf5b2d8255bf4f2d2bb805b20c2d0d788a60d5da7",
+      "name": "Binding/LinearElasticity/P2/Hexahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/ddae7bea697ea295fba481ebf5b2d8255bf4f2d2bb805b20c2d0d788a60d5da7.json"
+    },
+    {
+      "id": "91d70435564998db61e9faa9d3b2bd0628e6d2d933cea3740c510e0a6974d3f8",
+      "name": "Binding/LinearElasticity/P2/Hexahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/91d70435564998db61e9faa9d3b2bd0628e6d2d933cea3740c510e0a6974d3f8.json"
+    },
+    {
+      "id": "6e02abdfb01b9e64bd8a47026dc76699749894a150ca0bc74c75518cf8d90bcb",
+      "name": "Binding/LinearElasticity/P2/Pyramid/3/real_time",
+      "metric": "real_time",
+      "url": "cases/6e02abdfb01b9e64bd8a47026dc76699749894a150ca0bc74c75518cf8d90bcb.json"
+    },
+    {
+      "id": "4dfcf82e40ea6fba734c073cf663b6315205235b631d3fbbaa8bcdb40df7a56a",
+      "name": "Binding/LinearElasticity/P2/Pyramid/5/real_time",
+      "metric": "real_time",
+      "url": "cases/4dfcf82e40ea6fba734c073cf663b6315205235b631d3fbbaa8bcdb40df7a56a.json"
+    },
+    {
+      "id": "5df181fa681d1bdb2f4df92bc2795dbfbcab0761bd39ef5e77a70dc3f980f8c6",
+      "name": "Binding/LinearElasticity/P2/Pyramid/9/real_time",
+      "metric": "real_time",
+      "url": "cases/5df181fa681d1bdb2f4df92bc2795dbfbcab0761bd39ef5e77a70dc3f980f8c6.json"
+    },
+    {
+      "id": "8931d8b167213cda25e3255a8aa036208c7b5161989c81523c327869391ac3a8",
+      "name": "Binding/LinearElasticity/P2/Quadrilateral/3/real_time",
+      "metric": "real_time",
+      "url": "cases/8931d8b167213cda25e3255a8aa036208c7b5161989c81523c327869391ac3a8.json"
+    },
+    {
+      "id": "276b19bdc970891099a6253e264ccbbdd2a832a6117951cb0819c47485424f1d",
+      "name": "Binding/LinearElasticity/P2/Quadrilateral/5/real_time",
+      "metric": "real_time",
+      "url": "cases/276b19bdc970891099a6253e264ccbbdd2a832a6117951cb0819c47485424f1d.json"
+    },
+    {
+      "id": "4031b448cf8ce63266e0db7f67d3a5798e0cdcc300378d84a4a115219570d0fd",
+      "name": "Binding/LinearElasticity/P2/Quadrilateral/9/real_time",
+      "metric": "real_time",
+      "url": "cases/4031b448cf8ce63266e0db7f67d3a5798e0cdcc300378d84a4a115219570d0fd.json"
+    },
+    {
+      "id": "04b54e624ee3441876a58f9355a1593b15086a9807b8081ff31c3212e0bef174",
+      "name": "Binding/LinearElasticity/P2/Segment/3/real_time",
+      "metric": "real_time",
+      "url": "cases/04b54e624ee3441876a58f9355a1593b15086a9807b8081ff31c3212e0bef174.json"
+    },
+    {
+      "id": "cc0c3acb7830fa11b528a77a22e2c7e1cad6424435c34b52ed4b53d8c164eee5",
+      "name": "Binding/LinearElasticity/P2/Segment/5/real_time",
+      "metric": "real_time",
+      "url": "cases/cc0c3acb7830fa11b528a77a22e2c7e1cad6424435c34b52ed4b53d8c164eee5.json"
+    },
+    {
+      "id": "6c41ea85e73e47a670af82a7f90630b227fdee080c99e48df6fc6ae4a4d78828",
+      "name": "Binding/LinearElasticity/P2/Segment/9/real_time",
+      "metric": "real_time",
+      "url": "cases/6c41ea85e73e47a670af82a7f90630b227fdee080c99e48df6fc6ae4a4d78828.json"
+    },
+    {
+      "id": "8716aba67c25f9a5b3477d55ad703d630f2ad8ee7faff9d3507c9f5e583191ff",
+      "name": "Binding/LinearElasticity/P2/Tetrahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/8716aba67c25f9a5b3477d55ad703d630f2ad8ee7faff9d3507c9f5e583191ff.json"
+    },
+    {
+      "id": "ab7b3b9c1f582632cbe66df601a1567a45954e01ad9f7259cff3bb7e8cc9e16a",
+      "name": "Binding/LinearElasticity/P2/Tetrahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/ab7b3b9c1f582632cbe66df601a1567a45954e01ad9f7259cff3bb7e8cc9e16a.json"
+    },
+    {
+      "id": "77abc1980bc5ce95c581ea0be85bda2461cd4d7218669cdd4f2ecce06bdb49a8",
+      "name": "Binding/LinearElasticity/P2/Tetrahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/77abc1980bc5ce95c581ea0be85bda2461cd4d7218669cdd4f2ecce06bdb49a8.json"
+    },
+    {
+      "id": "66dea2a1fe0689fd333c07db2e0396e760d9f6bb0d3c0eb6f19403a4832d320a",
+      "name": "Binding/LinearElasticity/P2/Triangle/3/real_time",
+      "metric": "real_time",
+      "url": "cases/66dea2a1fe0689fd333c07db2e0396e760d9f6bb0d3c0eb6f19403a4832d320a.json"
+    },
+    {
+      "id": "5aff4e61bbc1f179b2e46fa1b478393007b788002b04f619ae15573042ec0f45",
+      "name": "Binding/LinearElasticity/P2/Triangle/5/real_time",
+      "metric": "real_time",
+      "url": "cases/5aff4e61bbc1f179b2e46fa1b478393007b788002b04f619ae15573042ec0f45.json"
+    },
+    {
+      "id": "6c1bde656bab3271283d81e316f2a26372bd77cf23ada534b777b413bbbb1945",
+      "name": "Binding/LinearElasticity/P2/Triangle/9/real_time",
+      "metric": "real_time",
+      "url": "cases/6c1bde656bab3271283d81e316f2a26372bd77cf23ada534b777b413bbbb1945.json"
+    },
+    {
+      "id": "f48cfde7bc3faba7576f02f17f84c066424f4d3d4b3901d9ee64bd22d27e5d19",
+      "name": "Binding/LinearElasticity/P2/Wedge/3/real_time",
+      "metric": "real_time",
+      "url": "cases/f48cfde7bc3faba7576f02f17f84c066424f4d3d4b3901d9ee64bd22d27e5d19.json"
+    },
+    {
+      "id": "0bab694b8b357741e75d6c7f3d2cd4ff880bb235837bc17ec3c44afad1bad196",
+      "name": "Binding/LinearElasticity/P2/Wedge/5/real_time",
+      "metric": "real_time",
+      "url": "cases/0bab694b8b357741e75d6c7f3d2cd4ff880bb235837bc17ec3c44afad1bad196.json"
+    },
+    {
+      "id": "46545784bc96a46331e6098757d08e6bbff291bae8d10f8a15278054e855a70a",
+      "name": "Binding/LinearElasticity/P2/Wedge/9/real_time",
+      "metric": "real_time",
+      "url": "cases/46545784bc96a46331e6098757d08e6bbff291bae8d10f8a15278054e855a70a.json"
+    },
+    {
+      "id": "91a0809bb4f5268708ce9246db31542a85243cd94a1c7478f8490033b1f3e8b4",
+      "name": "Binding/Poisson/P1/Hexahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/91a0809bb4f5268708ce9246db31542a85243cd94a1c7478f8490033b1f3e8b4.json"
+    },
+    {
+      "id": "de2936677a1607a85b38054853d0ddaece220d30931f84a708a48bd7331c2e4c",
+      "name": "Binding/Poisson/P1/Hexahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/de2936677a1607a85b38054853d0ddaece220d30931f84a708a48bd7331c2e4c.json"
+    },
+    {
+      "id": "265ef067f7cdac070cd911d07ac827f44a346d3e4f7d4335356e0165eeb4703b",
+      "name": "Binding/Poisson/P1/Hexahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/265ef067f7cdac070cd911d07ac827f44a346d3e4f7d4335356e0165eeb4703b.json"
+    },
+    {
+      "id": "8e62a87c219362e5d8351be8e77102a45ee450e6075f7cbcaf5397caea5462de",
+      "name": "Binding/Poisson/P1/Pyramid/3/real_time",
+      "metric": "real_time",
+      "url": "cases/8e62a87c219362e5d8351be8e77102a45ee450e6075f7cbcaf5397caea5462de.json"
+    },
+    {
+      "id": "227243019cddbfea303591fe1a61c75c2f13514517e616b50ca560eea4d31ee6",
+      "name": "Binding/Poisson/P1/Pyramid/5/real_time",
+      "metric": "real_time",
+      "url": "cases/227243019cddbfea303591fe1a61c75c2f13514517e616b50ca560eea4d31ee6.json"
+    },
+    {
+      "id": "c53b2347946094c3a2501bba2dbab9adaf451a98f901b7742bbef3092c9e03f4",
+      "name": "Binding/Poisson/P1/Pyramid/9/real_time",
+      "metric": "real_time",
+      "url": "cases/c53b2347946094c3a2501bba2dbab9adaf451a98f901b7742bbef3092c9e03f4.json"
+    },
+    {
+      "id": "dcd149b68bc1eadaa0eae4a6f38f7536ba9bdd40b718d37dd201fd01934af549",
+      "name": "Binding/Poisson/P1/Quadrilateral/3/real_time",
+      "metric": "real_time",
+      "url": "cases/dcd149b68bc1eadaa0eae4a6f38f7536ba9bdd40b718d37dd201fd01934af549.json"
+    },
+    {
+      "id": "2b4ded2c0390475ccbf8268372e579dfaa6478841f3e15e209b95bc7fd0f6585",
+      "name": "Binding/Poisson/P1/Quadrilateral/5/real_time",
+      "metric": "real_time",
+      "url": "cases/2b4ded2c0390475ccbf8268372e579dfaa6478841f3e15e209b95bc7fd0f6585.json"
+    },
+    {
+      "id": "76f43e42d732afa93fff2c40ae28743c74bdb7cb59c39fc9fa04216a70430e19",
+      "name": "Binding/Poisson/P1/Quadrilateral/9/real_time",
+      "metric": "real_time",
+      "url": "cases/76f43e42d732afa93fff2c40ae28743c74bdb7cb59c39fc9fa04216a70430e19.json"
+    },
+    {
+      "id": "4a6b1895d609282d5d37686ea75805a081b0adc83c0100939335a29841bac583",
+      "name": "Binding/Poisson/P1/Segment/3/real_time",
+      "metric": "real_time",
+      "url": "cases/4a6b1895d609282d5d37686ea75805a081b0adc83c0100939335a29841bac583.json"
+    },
+    {
+      "id": "0a6ce08fa204da76cb57c1578f77af41dca56e31b25e2595fff01dc20c5adbe8",
+      "name": "Binding/Poisson/P1/Segment/5/real_time",
+      "metric": "real_time",
+      "url": "cases/0a6ce08fa204da76cb57c1578f77af41dca56e31b25e2595fff01dc20c5adbe8.json"
+    },
+    {
+      "id": "f3ce6c122c112d599e4ea7f50ddbc96a7e9a4fe94ab6e7f9cfe14fedbc1ff32a",
+      "name": "Binding/Poisson/P1/Segment/9/real_time",
+      "metric": "real_time",
+      "url": "cases/f3ce6c122c112d599e4ea7f50ddbc96a7e9a4fe94ab6e7f9cfe14fedbc1ff32a.json"
+    },
+    {
+      "id": "b75f0b8385acfb1425b79b83b177c88adc725d1fd280753b87e2afbcd0b929e3",
+      "name": "Binding/Poisson/P1/Tetrahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/b75f0b8385acfb1425b79b83b177c88adc725d1fd280753b87e2afbcd0b929e3.json"
+    },
+    {
+      "id": "23457e2cb161195f09e1b46b74ee2b14b1f4dbeabfa829710c4954d357bccc9f",
+      "name": "Binding/Poisson/P1/Tetrahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/23457e2cb161195f09e1b46b74ee2b14b1f4dbeabfa829710c4954d357bccc9f.json"
+    },
+    {
+      "id": "4ba9d164ef780c4f66ed32c2ad5880cd6b41e046d45b320876a179f50a9ab15f",
+      "name": "Binding/Poisson/P1/Tetrahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/4ba9d164ef780c4f66ed32c2ad5880cd6b41e046d45b320876a179f50a9ab15f.json"
+    },
+    {
+      "id": "df49693147c5a723b632edb53c11d7c9a7c57be333db1c06c15de6638e39bd06",
+      "name": "Binding/Poisson/P1/Triangle/3/real_time",
+      "metric": "real_time",
+      "url": "cases/df49693147c5a723b632edb53c11d7c9a7c57be333db1c06c15de6638e39bd06.json"
+    },
+    {
+      "id": "5e468cfeda21b645ccd475b453608ff2d7449afef89e2756b477000770210d53",
+      "name": "Binding/Poisson/P1/Triangle/5/real_time",
+      "metric": "real_time",
+      "url": "cases/5e468cfeda21b645ccd475b453608ff2d7449afef89e2756b477000770210d53.json"
+    },
+    {
+      "id": "26383b9eedee3450faa0997ca4951ebdb33901775645a7e010e4b3f78f8cc128",
+      "name": "Binding/Poisson/P1/Triangle/9/real_time",
+      "metric": "real_time",
+      "url": "cases/26383b9eedee3450faa0997ca4951ebdb33901775645a7e010e4b3f78f8cc128.json"
+    },
+    {
+      "id": "694897424e1d69fa0153cdf72d08cc13f9301da6593c5ecfd690a7eac77417b7",
+      "name": "Binding/Poisson/P1/Wedge/3/real_time",
+      "metric": "real_time",
+      "url": "cases/694897424e1d69fa0153cdf72d08cc13f9301da6593c5ecfd690a7eac77417b7.json"
+    },
+    {
+      "id": "bc5a40f512dbbe1aeb987c9d8bd252c28c753eca0e7cd26d82dd6733985f3f51",
+      "name": "Binding/Poisson/P1/Wedge/5/real_time",
+      "metric": "real_time",
+      "url": "cases/bc5a40f512dbbe1aeb987c9d8bd252c28c753eca0e7cd26d82dd6733985f3f51.json"
+    },
+    {
+      "id": "debb986464164f92ce59fc7a4e25b1c410021e80fe0ed3a455cc7546b363ba05",
+      "name": "Binding/Poisson/P1/Wedge/9/real_time",
+      "metric": "real_time",
+      "url": "cases/debb986464164f92ce59fc7a4e25b1c410021e80fe0ed3a455cc7546b363ba05.json"
+    },
+    {
+      "id": "f0ddb50dfab39dfaccde55ad0ffbd7292a66b1861ec0e01a687ed2a56d872d18",
+      "name": "Binding/Poisson/P2/Hexahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/f0ddb50dfab39dfaccde55ad0ffbd7292a66b1861ec0e01a687ed2a56d872d18.json"
+    },
+    {
+      "id": "689dde3306a98a3573aa6a8db441368904b31222b473a46df0d4b0148b0bc7a4",
+      "name": "Binding/Poisson/P2/Hexahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/689dde3306a98a3573aa6a8db441368904b31222b473a46df0d4b0148b0bc7a4.json"
+    },
+    {
+      "id": "9bcbe288bec98a403b45d795cf5a90fee412286ebb8ff88579fd88ed1824ab38",
+      "name": "Binding/Poisson/P2/Hexahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/9bcbe288bec98a403b45d795cf5a90fee412286ebb8ff88579fd88ed1824ab38.json"
+    },
+    {
+      "id": "14257a3497ce35ee9102418ec384c98093c285c53e33e6d79baf546ffd3f6043",
+      "name": "Binding/Poisson/P2/Pyramid/3/real_time",
+      "metric": "real_time",
+      "url": "cases/14257a3497ce35ee9102418ec384c98093c285c53e33e6d79baf546ffd3f6043.json"
+    },
+    {
+      "id": "9e25bc3169064ce0fed18d59e1ab381787a57dfaaf2cbad9efac7874eb55a601",
+      "name": "Binding/Poisson/P2/Pyramid/5/real_time",
+      "metric": "real_time",
+      "url": "cases/9e25bc3169064ce0fed18d59e1ab381787a57dfaaf2cbad9efac7874eb55a601.json"
+    },
+    {
+      "id": "5b4581fe8e513dd24705625db63d7b0391cdb0deb709f9db46b5dc94dd8dcd82",
+      "name": "Binding/Poisson/P2/Pyramid/9/real_time",
+      "metric": "real_time",
+      "url": "cases/5b4581fe8e513dd24705625db63d7b0391cdb0deb709f9db46b5dc94dd8dcd82.json"
+    },
+    {
+      "id": "f8373ee46fbac5cf30206f58c71a0af367b209aaf2716e039034a3c56297189d",
+      "name": "Binding/Poisson/P2/Quadrilateral/3/real_time",
+      "metric": "real_time",
+      "url": "cases/f8373ee46fbac5cf30206f58c71a0af367b209aaf2716e039034a3c56297189d.json"
+    },
+    {
+      "id": "ada13f49d713fd3d03e4b46ad24aa79fc1d82f2d8ae55b9337c642b21dc40699",
+      "name": "Binding/Poisson/P2/Quadrilateral/5/real_time",
+      "metric": "real_time",
+      "url": "cases/ada13f49d713fd3d03e4b46ad24aa79fc1d82f2d8ae55b9337c642b21dc40699.json"
+    },
+    {
+      "id": "0bd0b5dfcc519333a689bb573770ea01a246116b3161c45b2a5524ad69e6fac1",
+      "name": "Binding/Poisson/P2/Quadrilateral/9/real_time",
+      "metric": "real_time",
+      "url": "cases/0bd0b5dfcc519333a689bb573770ea01a246116b3161c45b2a5524ad69e6fac1.json"
+    },
+    {
+      "id": "7df8926e6f689727007ed9dd45cfca8f04f27b9b6d960ff5f90750c104ccda3a",
+      "name": "Binding/Poisson/P2/Segment/3/real_time",
+      "metric": "real_time",
+      "url": "cases/7df8926e6f689727007ed9dd45cfca8f04f27b9b6d960ff5f90750c104ccda3a.json"
+    },
+    {
+      "id": "6bea46c4c2414a786a22149f7e2c180496be90e5050f74b9923c3ee37811092d",
+      "name": "Binding/Poisson/P2/Segment/5/real_time",
+      "metric": "real_time",
+      "url": "cases/6bea46c4c2414a786a22149f7e2c180496be90e5050f74b9923c3ee37811092d.json"
+    },
+    {
+      "id": "e70fddcddef75327cea808b4d5e73ee8f9300cb4dd2258522576ae76627dfa9f",
+      "name": "Binding/Poisson/P2/Segment/9/real_time",
+      "metric": "real_time",
+      "url": "cases/e70fddcddef75327cea808b4d5e73ee8f9300cb4dd2258522576ae76627dfa9f.json"
+    },
+    {
+      "id": "4c1463fd1e50a9a7eb91b0bca76e5179c8338d4c2993c564daaba32fc374a0a2",
+      "name": "Binding/Poisson/P2/Tetrahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/4c1463fd1e50a9a7eb91b0bca76e5179c8338d4c2993c564daaba32fc374a0a2.json"
+    },
+    {
+      "id": "39061a67e65a6963dd0372827c98ea967ea03190f20a1eebf618c5836273ad89",
+      "name": "Binding/Poisson/P2/Tetrahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/39061a67e65a6963dd0372827c98ea967ea03190f20a1eebf618c5836273ad89.json"
+    },
+    {
+      "id": "db8dd2f20e303aadeab05f6faa9afdd4b15c13c36354434bf2fee15440808b39",
+      "name": "Binding/Poisson/P2/Tetrahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/db8dd2f20e303aadeab05f6faa9afdd4b15c13c36354434bf2fee15440808b39.json"
+    },
+    {
+      "id": "a46cd3b740de433fa353a4e0fd08413ecccbb8c1670b7d8a4b87f14f13d0b8ab",
+      "name": "Binding/Poisson/P2/Triangle/3/real_time",
+      "metric": "real_time",
+      "url": "cases/a46cd3b740de433fa353a4e0fd08413ecccbb8c1670b7d8a4b87f14f13d0b8ab.json"
+    },
+    {
+      "id": "8e0745f8e895ae471e4e8f2727b1435ce3a80d2519d8b29590ee4cb677964a0f",
+      "name": "Binding/Poisson/P2/Triangle/5/real_time",
+      "metric": "real_time",
+      "url": "cases/8e0745f8e895ae471e4e8f2727b1435ce3a80d2519d8b29590ee4cb677964a0f.json"
+    },
+    {
+      "id": "6e6d68b4aede9d6718e8dde88f01c3044463cce07c4114d4c1a9a212e215c393",
+      "name": "Binding/Poisson/P2/Triangle/9/real_time",
+      "metric": "real_time",
+      "url": "cases/6e6d68b4aede9d6718e8dde88f01c3044463cce07c4114d4c1a9a212e215c393.json"
+    },
+    {
+      "id": "89ecf210669288abcef8478d57838e533361a58b5bae5ca6305383b3f823aa77",
+      "name": "Binding/Poisson/P2/Wedge/3/real_time",
+      "metric": "real_time",
+      "url": "cases/89ecf210669288abcef8478d57838e533361a58b5bae5ca6305383b3f823aa77.json"
+    },
+    {
+      "id": "170500a5aff7fa047f4cb7215f8716f24065f3c1a354b2efbae78969f2ee7fed",
+      "name": "Binding/Poisson/P2/Wedge/5/real_time",
+      "metric": "real_time",
+      "url": "cases/170500a5aff7fa047f4cb7215f8716f24065f3c1a354b2efbae78969f2ee7fed.json"
+    },
+    {
+      "id": "751f1851389bd1193a1ef7fbb3bf0dac1f0eac03d0c537129d453c5a6c1630d5",
+      "name": "Binding/Poisson/P2/Wedge/9/real_time",
+      "metric": "real_time",
+      "url": "cases/751f1851389bd1193a1ef7fbb3bf0dac1f0eac03d0c537129d453c5a6c1630d5.json"
+    },
+    {
+      "id": "547e57fdc4ae7f4655aed798d15a0e04940c9abe56211f79a7ccba4baef24c4f",
+      "name": "Finalize/Conductivity/P1/Hexahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/547e57fdc4ae7f4655aed798d15a0e04940c9abe56211f79a7ccba4baef24c4f.json"
+    },
+    {
+      "id": "957f4183f2e8e94af8851be42305c9b3afeae0831239282a2135da24fbe6f06c",
+      "name": "Finalize/Conductivity/P1/Hexahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/957f4183f2e8e94af8851be42305c9b3afeae0831239282a2135da24fbe6f06c.json"
+    },
+    {
+      "id": "2372954aedc2e0bdf25b21a109e5a99c6bb842e6f6afbff2e07a055af4d7cc43",
+      "name": "Finalize/Conductivity/P1/Hexahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/2372954aedc2e0bdf25b21a109e5a99c6bb842e6f6afbff2e07a055af4d7cc43.json"
+    },
+    {
+      "id": "f08ff26eb031da98e7ccc5337f9360bd3086b1ab213708ea2be91cdc65bfb7e5",
+      "name": "Finalize/Conductivity/P1/Pyramid/3/real_time",
+      "metric": "real_time",
+      "url": "cases/f08ff26eb031da98e7ccc5337f9360bd3086b1ab213708ea2be91cdc65bfb7e5.json"
+    },
+    {
+      "id": "c945ec3873ba6b190188bab1185bc4f1fdb9b7dc7b96e19e1425bb737854221c",
+      "name": "Finalize/Conductivity/P1/Pyramid/5/real_time",
+      "metric": "real_time",
+      "url": "cases/c945ec3873ba6b190188bab1185bc4f1fdb9b7dc7b96e19e1425bb737854221c.json"
+    },
+    {
+      "id": "42a25441db34e18b2c484de951cf76ab8900b3c3284aa4352f184fd43e57acdb",
+      "name": "Finalize/Conductivity/P1/Pyramid/9/real_time",
+      "metric": "real_time",
+      "url": "cases/42a25441db34e18b2c484de951cf76ab8900b3c3284aa4352f184fd43e57acdb.json"
+    },
+    {
+      "id": "6d7a6e1f6c59d02c690084f8cd77bfcec1c85bda28a80cd7cd3450656d3d6927",
+      "name": "Finalize/Conductivity/P1/Quadrilateral/3/real_time",
+      "metric": "real_time",
+      "url": "cases/6d7a6e1f6c59d02c690084f8cd77bfcec1c85bda28a80cd7cd3450656d3d6927.json"
+    },
+    {
+      "id": "c37e139fb02f4df17f926f7dc632b91194f45730ae99ddb22945553b0bf7fd59",
+      "name": "Finalize/Conductivity/P1/Quadrilateral/5/real_time",
+      "metric": "real_time",
+      "url": "cases/c37e139fb02f4df17f926f7dc632b91194f45730ae99ddb22945553b0bf7fd59.json"
+    },
+    {
+      "id": "1cc4f20b05d9e4ecd912d1a0741921180ff79f618c25224d2c3d83cbfc2af3dd",
+      "name": "Finalize/Conductivity/P1/Quadrilateral/9/real_time",
+      "metric": "real_time",
+      "url": "cases/1cc4f20b05d9e4ecd912d1a0741921180ff79f618c25224d2c3d83cbfc2af3dd.json"
+    },
+    {
+      "id": "ffc48e8762ed879b75777a352aec82433c942c34686beba754fe12178eb9bd6f",
+      "name": "Finalize/Conductivity/P1/Segment/3/real_time",
+      "metric": "real_time",
+      "url": "cases/ffc48e8762ed879b75777a352aec82433c942c34686beba754fe12178eb9bd6f.json"
+    },
+    {
+      "id": "09a22a4ea637735c4b9898b49a6ab47a43a22be66b9c6a87e5b98d1031be25fd",
+      "name": "Finalize/Conductivity/P1/Segment/5/real_time",
+      "metric": "real_time",
+      "url": "cases/09a22a4ea637735c4b9898b49a6ab47a43a22be66b9c6a87e5b98d1031be25fd.json"
+    },
+    {
+      "id": "fce58f6bd6ec3cccbbda7f172f8ab5a0746ebf61ea4ab6f03bbb445ab4b276e5",
+      "name": "Finalize/Conductivity/P1/Segment/9/real_time",
+      "metric": "real_time",
+      "url": "cases/fce58f6bd6ec3cccbbda7f172f8ab5a0746ebf61ea4ab6f03bbb445ab4b276e5.json"
+    },
+    {
+      "id": "f67c180d652b6bfe69e57e6862ccd4b26271460af23244cf694537684e48f49c",
+      "name": "Finalize/Conductivity/P1/Tetrahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/f67c180d652b6bfe69e57e6862ccd4b26271460af23244cf694537684e48f49c.json"
+    },
+    {
+      "id": "5d534f13ad41ec24e2c10eca2ccb584d9fa4cfc3f9428caa4df7ff6d8fdbf683",
+      "name": "Finalize/Conductivity/P1/Tetrahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/5d534f13ad41ec24e2c10eca2ccb584d9fa4cfc3f9428caa4df7ff6d8fdbf683.json"
+    },
+    {
+      "id": "1b6129f6491f2077f3aadeebc1aebe84831d3263527156ba111c0291ae57a62e",
+      "name": "Finalize/Conductivity/P1/Tetrahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/1b6129f6491f2077f3aadeebc1aebe84831d3263527156ba111c0291ae57a62e.json"
+    },
+    {
+      "id": "13ff8ac2400c1fb2d2bfb84f7fbe5e9639e25b9dedbd1ae67a69ce95c66e7cd4",
+      "name": "Finalize/Conductivity/P1/Triangle/3/real_time",
+      "metric": "real_time",
+      "url": "cases/13ff8ac2400c1fb2d2bfb84f7fbe5e9639e25b9dedbd1ae67a69ce95c66e7cd4.json"
+    },
+    {
+      "id": "b88b748e8412fae6083498d273ff847fa1c40a0dc1667f054488208eafbdce7e",
+      "name": "Finalize/Conductivity/P1/Triangle/5/real_time",
+      "metric": "real_time",
+      "url": "cases/b88b748e8412fae6083498d273ff847fa1c40a0dc1667f054488208eafbdce7e.json"
+    },
+    {
+      "id": "1588d2bfb11c025256ec4cef031be7222f79214c0924e31c467185aa5fbf538b",
+      "name": "Finalize/Conductivity/P1/Triangle/9/real_time",
+      "metric": "real_time",
+      "url": "cases/1588d2bfb11c025256ec4cef031be7222f79214c0924e31c467185aa5fbf538b.json"
+    },
+    {
+      "id": "ddff71827ab5910a1e3919870bba59b2f25970c2cb5759fcc2d16dd546f8c78d",
+      "name": "Finalize/Conductivity/P1/Wedge/3/real_time",
+      "metric": "real_time",
+      "url": "cases/ddff71827ab5910a1e3919870bba59b2f25970c2cb5759fcc2d16dd546f8c78d.json"
+    },
+    {
+      "id": "8a20ebcce64ecc0cd1e620b38b42acff24eead906201f46cc2bb8358486664cc",
+      "name": "Finalize/Conductivity/P1/Wedge/5/real_time",
+      "metric": "real_time",
+      "url": "cases/8a20ebcce64ecc0cd1e620b38b42acff24eead906201f46cc2bb8358486664cc.json"
+    },
+    {
+      "id": "fe43a6eeac359af953c2a9a8d352d808d73b0645f3594edca5f3b7163f9c2235",
+      "name": "Finalize/Conductivity/P1/Wedge/9/real_time",
+      "metric": "real_time",
+      "url": "cases/fe43a6eeac359af953c2a9a8d352d808d73b0645f3594edca5f3b7163f9c2235.json"
+    },
+    {
+      "id": "025785731f4562cc312ab0fda05d3fdabf19095aa095dc570113315d1953d8d7",
+      "name": "Finalize/Conductivity/P2/Hexahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/025785731f4562cc312ab0fda05d3fdabf19095aa095dc570113315d1953d8d7.json"
+    },
+    {
+      "id": "a9d98c49bd8fcb9dda8cc8a4ac8bcf701b00df0f4a08b9815625ae8bacbea0d1",
+      "name": "Finalize/Conductivity/P2/Hexahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/a9d98c49bd8fcb9dda8cc8a4ac8bcf701b00df0f4a08b9815625ae8bacbea0d1.json"
+    },
+    {
+      "id": "956c69d98b3cf1c09b436df1f59cc06204ebf9da5bd47f86fe90b82f029856d7",
+      "name": "Finalize/Conductivity/P2/Hexahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/956c69d98b3cf1c09b436df1f59cc06204ebf9da5bd47f86fe90b82f029856d7.json"
+    },
+    {
+      "id": "8ca05cf5d88262d51bb9e47ebef6cc07efa52bfd9fb9abf246f7034d695f0067",
+      "name": "Finalize/Conductivity/P2/Pyramid/3/real_time",
+      "metric": "real_time",
+      "url": "cases/8ca05cf5d88262d51bb9e47ebef6cc07efa52bfd9fb9abf246f7034d695f0067.json"
+    },
+    {
+      "id": "58bd915a0624ba8ae49bff3f2117e79a5aad40a76b01a9f9f3684ad533e64baa",
+      "name": "Finalize/Conductivity/P2/Pyramid/5/real_time",
+      "metric": "real_time",
+      "url": "cases/58bd915a0624ba8ae49bff3f2117e79a5aad40a76b01a9f9f3684ad533e64baa.json"
+    },
+    {
+      "id": "0af9c438bdf1dc3694736c4167f68e1b5052c5300ae4b7889b9752e1a427a783",
+      "name": "Finalize/Conductivity/P2/Pyramid/9/real_time",
+      "metric": "real_time",
+      "url": "cases/0af9c438bdf1dc3694736c4167f68e1b5052c5300ae4b7889b9752e1a427a783.json"
+    },
+    {
+      "id": "2f9dd7b1986fd79f635dd99a91d4bb9d6c38060d1d002c42c1ebbbe8c5b0437d",
+      "name": "Finalize/Conductivity/P2/Quadrilateral/3/real_time",
+      "metric": "real_time",
+      "url": "cases/2f9dd7b1986fd79f635dd99a91d4bb9d6c38060d1d002c42c1ebbbe8c5b0437d.json"
+    },
+    {
+      "id": "a92e2af415a4d23d1b81841132017905e76ca4551319c7ad6b4f4844d2be2ced",
+      "name": "Finalize/Conductivity/P2/Quadrilateral/5/real_time",
+      "metric": "real_time",
+      "url": "cases/a92e2af415a4d23d1b81841132017905e76ca4551319c7ad6b4f4844d2be2ced.json"
+    },
+    {
+      "id": "dc33800a749f7d3ec1b20a6c4617a62070d634f67389f4521131103809d90dae",
+      "name": "Finalize/Conductivity/P2/Quadrilateral/9/real_time",
+      "metric": "real_time",
+      "url": "cases/dc33800a749f7d3ec1b20a6c4617a62070d634f67389f4521131103809d90dae.json"
+    },
+    {
+      "id": "4a72322d0affc0b659ac0b459097c054c11511040b2831c4a46eba12d3bba8ea",
+      "name": "Finalize/Conductivity/P2/Segment/3/real_time",
+      "metric": "real_time",
+      "url": "cases/4a72322d0affc0b659ac0b459097c054c11511040b2831c4a46eba12d3bba8ea.json"
+    },
+    {
+      "id": "8498a336c719cb21b5d92dfcd8913fe24db4144260ffd93add59b989bcb9ba20",
+      "name": "Finalize/Conductivity/P2/Segment/5/real_time",
+      "metric": "real_time",
+      "url": "cases/8498a336c719cb21b5d92dfcd8913fe24db4144260ffd93add59b989bcb9ba20.json"
+    },
+    {
+      "id": "2d557c45160c8a5deaf93d2f93eccd71ec5d6df853ea1ac670069db25f9f8767",
+      "name": "Finalize/Conductivity/P2/Segment/9/real_time",
+      "metric": "real_time",
+      "url": "cases/2d557c45160c8a5deaf93d2f93eccd71ec5d6df853ea1ac670069db25f9f8767.json"
+    },
+    {
+      "id": "15a2a37be60b7ba1255d1a1ee4f7528a118044217e4c5928c7754480da71e054",
+      "name": "Finalize/Conductivity/P2/Tetrahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/15a2a37be60b7ba1255d1a1ee4f7528a118044217e4c5928c7754480da71e054.json"
+    },
+    {
+      "id": "2373c37041657812001586321791c905f8e0c07c6c30c991618e6595fbaceefe",
+      "name": "Finalize/Conductivity/P2/Tetrahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/2373c37041657812001586321791c905f8e0c07c6c30c991618e6595fbaceefe.json"
+    },
+    {
+      "id": "6016c980380013528d1d37dbc92f35877f1515cca06e22d65cc3b72b197c05e3",
+      "name": "Finalize/Conductivity/P2/Tetrahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/6016c980380013528d1d37dbc92f35877f1515cca06e22d65cc3b72b197c05e3.json"
+    },
+    {
+      "id": "9c441e06cd10e6bf2dc6dcdca58572d3d953f74a30940b5bfc374c74dc003767",
+      "name": "Finalize/Conductivity/P2/Triangle/3/real_time",
+      "metric": "real_time",
+      "url": "cases/9c441e06cd10e6bf2dc6dcdca58572d3d953f74a30940b5bfc374c74dc003767.json"
+    },
+    {
+      "id": "45f7a6c24115e8a2d1a1552fa1d80c0afcae5a69ab73c4b0091db2b2ad9cf12e",
+      "name": "Finalize/Conductivity/P2/Triangle/5/real_time",
+      "metric": "real_time",
+      "url": "cases/45f7a6c24115e8a2d1a1552fa1d80c0afcae5a69ab73c4b0091db2b2ad9cf12e.json"
+    },
+    {
+      "id": "d92c126cd0aa3b95ebab3d5ace484a6ceaf7527433a73694e11a2a725a66d38c",
+      "name": "Finalize/Conductivity/P2/Triangle/9/real_time",
+      "metric": "real_time",
+      "url": "cases/d92c126cd0aa3b95ebab3d5ace484a6ceaf7527433a73694e11a2a725a66d38c.json"
+    },
+    {
+      "id": "aab01b75e486500fd47350b06fd2fa946f2d6bac52f866eee07f6bda54aa9c3e",
+      "name": "Finalize/Conductivity/P2/Wedge/3/real_time",
+      "metric": "real_time",
+      "url": "cases/aab01b75e486500fd47350b06fd2fa946f2d6bac52f866eee07f6bda54aa9c3e.json"
+    },
+    {
+      "id": "58ccb96dcd4e89e9a47628472860543f2d8ae3b6aba9856aab52a12a6cf73440",
+      "name": "Finalize/Conductivity/P2/Wedge/5/real_time",
+      "metric": "real_time",
+      "url": "cases/58ccb96dcd4e89e9a47628472860543f2d8ae3b6aba9856aab52a12a6cf73440.json"
+    },
+    {
+      "id": "8ff2edf5d8ffea8edc25ce8f5c9811e2bd553873e24fbe00f0a5dfe7f5309d86",
+      "name": "Finalize/Conductivity/P2/Wedge/9/real_time",
+      "metric": "real_time",
+      "url": "cases/8ff2edf5d8ffea8edc25ce8f5c9811e2bd553873e24fbe00f0a5dfe7f5309d86.json"
+    },
+    {
+      "id": "67f65e7c3ee3506f62e4a060adf8ab6f4026b8c4f4bdadd9200b5760c3df5b7a",
+      "name": "Finalize/LinearElasticity/P1/Hexahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/67f65e7c3ee3506f62e4a060adf8ab6f4026b8c4f4bdadd9200b5760c3df5b7a.json"
+    },
+    {
+      "id": "8536d80c6d513328b2f3460a240d31a980332f4b5b5a74e7b8b1802d81b93bf3",
+      "name": "Finalize/LinearElasticity/P1/Hexahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/8536d80c6d513328b2f3460a240d31a980332f4b5b5a74e7b8b1802d81b93bf3.json"
+    },
+    {
+      "id": "316531af8ddffe1880cbe5468fe4b5aae7b5417584fd41bd02fe89a358d743f7",
+      "name": "Finalize/LinearElasticity/P1/Hexahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/316531af8ddffe1880cbe5468fe4b5aae7b5417584fd41bd02fe89a358d743f7.json"
+    },
+    {
+      "id": "f507fc7a71a610eff6b11941a2c30adc5d5de32af612a1ae16961ff6cf397393",
+      "name": "Finalize/LinearElasticity/P1/Pyramid/3/real_time",
+      "metric": "real_time",
+      "url": "cases/f507fc7a71a610eff6b11941a2c30adc5d5de32af612a1ae16961ff6cf397393.json"
+    },
+    {
+      "id": "6ba3c1720b057bb2bb52d098dd0b94d3db3b0307e30c239e66959c5a9d7c298d",
+      "name": "Finalize/LinearElasticity/P1/Pyramid/5/real_time",
+      "metric": "real_time",
+      "url": "cases/6ba3c1720b057bb2bb52d098dd0b94d3db3b0307e30c239e66959c5a9d7c298d.json"
+    },
+    {
+      "id": "cf5a6c83ace2515b15490073ab698510b7a987fdc80fa28b78a056ce495b518b",
+      "name": "Finalize/LinearElasticity/P1/Pyramid/9/real_time",
+      "metric": "real_time",
+      "url": "cases/cf5a6c83ace2515b15490073ab698510b7a987fdc80fa28b78a056ce495b518b.json"
+    },
+    {
+      "id": "e242a958775e23c7aca15909061b92da9bdb2bcff61a43fc05cfc0fc1e2460c5",
+      "name": "Finalize/LinearElasticity/P1/Quadrilateral/3/real_time",
+      "metric": "real_time",
+      "url": "cases/e242a958775e23c7aca15909061b92da9bdb2bcff61a43fc05cfc0fc1e2460c5.json"
+    },
+    {
+      "id": "367497d1b9a4c23b1971fc9fe8358816beb635f36f81c0c95d1f2ef9611dc0c2",
+      "name": "Finalize/LinearElasticity/P1/Quadrilateral/5/real_time",
+      "metric": "real_time",
+      "url": "cases/367497d1b9a4c23b1971fc9fe8358816beb635f36f81c0c95d1f2ef9611dc0c2.json"
+    },
+    {
+      "id": "3402b9f6e1f7dceda1601b84959463b72fd169e6a11e4a883f132814e167e506",
+      "name": "Finalize/LinearElasticity/P1/Quadrilateral/9/real_time",
+      "metric": "real_time",
+      "url": "cases/3402b9f6e1f7dceda1601b84959463b72fd169e6a11e4a883f132814e167e506.json"
+    },
+    {
+      "id": "1098f92119ce5382e010bce9c08d9c04da88b13977a87bf594ea0c429604186b",
+      "name": "Finalize/LinearElasticity/P1/Segment/3/real_time",
+      "metric": "real_time",
+      "url": "cases/1098f92119ce5382e010bce9c08d9c04da88b13977a87bf594ea0c429604186b.json"
+    },
+    {
+      "id": "26aafbe3c072c9dc0eca8c4e496bb04a252931a5089dedaf7784a54932c34054",
+      "name": "Finalize/LinearElasticity/P1/Segment/5/real_time",
+      "metric": "real_time",
+      "url": "cases/26aafbe3c072c9dc0eca8c4e496bb04a252931a5089dedaf7784a54932c34054.json"
+    },
+    {
+      "id": "afa0815ab5cfb47114d0f8e01763b2301aba6017b104778ff5ad13c8b96c69b0",
+      "name": "Finalize/LinearElasticity/P1/Segment/9/real_time",
+      "metric": "real_time",
+      "url": "cases/afa0815ab5cfb47114d0f8e01763b2301aba6017b104778ff5ad13c8b96c69b0.json"
+    },
+    {
+      "id": "9549fbea28e5197807bf76deefe412f0b044d7c270de2f1df7bb4e994f39d796",
+      "name": "Finalize/LinearElasticity/P1/Tetrahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/9549fbea28e5197807bf76deefe412f0b044d7c270de2f1df7bb4e994f39d796.json"
+    },
+    {
+      "id": "de653b75c8ddcdae38ea3f4c40cd22db489ab03bc837c2ce289a0ee907201105",
+      "name": "Finalize/LinearElasticity/P1/Tetrahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/de653b75c8ddcdae38ea3f4c40cd22db489ab03bc837c2ce289a0ee907201105.json"
+    },
+    {
+      "id": "fba9b669187b435451f9d50955d966c18ebc802aa1f7f48196ae16b63550a5d2",
+      "name": "Finalize/LinearElasticity/P1/Tetrahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/fba9b669187b435451f9d50955d966c18ebc802aa1f7f48196ae16b63550a5d2.json"
+    },
+    {
+      "id": "442d5756de9126d3dd61e478370118611faaedc9594f53cc86afe16337ab363e",
+      "name": "Finalize/LinearElasticity/P1/Triangle/3/real_time",
+      "metric": "real_time",
+      "url": "cases/442d5756de9126d3dd61e478370118611faaedc9594f53cc86afe16337ab363e.json"
+    },
+    {
+      "id": "72cd6ae2cb396a9769daeae8dd076e18166ea04204a40c7a9353e63fc5328d5e",
+      "name": "Finalize/LinearElasticity/P1/Triangle/5/real_time",
+      "metric": "real_time",
+      "url": "cases/72cd6ae2cb396a9769daeae8dd076e18166ea04204a40c7a9353e63fc5328d5e.json"
+    },
+    {
+      "id": "12dd95d43b61d7216a6a7bfd0299403b0e22b246228a6c6653410a1ff164b565",
+      "name": "Finalize/LinearElasticity/P1/Triangle/9/real_time",
+      "metric": "real_time",
+      "url": "cases/12dd95d43b61d7216a6a7bfd0299403b0e22b246228a6c6653410a1ff164b565.json"
+    },
+    {
+      "id": "dc1bed6d85ec9509237fd2adca4eec2c21e7bab523ca827f811d6c93889b900e",
+      "name": "Finalize/LinearElasticity/P1/Wedge/3/real_time",
+      "metric": "real_time",
+      "url": "cases/dc1bed6d85ec9509237fd2adca4eec2c21e7bab523ca827f811d6c93889b900e.json"
+    },
+    {
+      "id": "59b2b943654dda3f7f60152a42c545871784a5ca61682a534375e564d80b6690",
+      "name": "Finalize/LinearElasticity/P1/Wedge/5/real_time",
+      "metric": "real_time",
+      "url": "cases/59b2b943654dda3f7f60152a42c545871784a5ca61682a534375e564d80b6690.json"
+    },
+    {
+      "id": "c72916df52b5fc2cda0f30cb6572ed8589715f4396012b930ebf79a81a9fb58b",
+      "name": "Finalize/LinearElasticity/P1/Wedge/9/real_time",
+      "metric": "real_time",
+      "url": "cases/c72916df52b5fc2cda0f30cb6572ed8589715f4396012b930ebf79a81a9fb58b.json"
+    },
+    {
+      "id": "e44cd924df03d7f48d8ae0add0e55b99a06a9f1e73de21ff27e73d8d27691e5c",
+      "name": "Finalize/LinearElasticity/P2/Hexahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/e44cd924df03d7f48d8ae0add0e55b99a06a9f1e73de21ff27e73d8d27691e5c.json"
+    },
+    {
+      "id": "af8500ba46fe08f228e627035ab9788ff462fe6d78c493ae3d8863688c82e6a2",
+      "name": "Finalize/LinearElasticity/P2/Hexahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/af8500ba46fe08f228e627035ab9788ff462fe6d78c493ae3d8863688c82e6a2.json"
+    },
+    {
+      "id": "8335183d660f145ecdb5959169637f892738fa32bc54092af75bc84889730e8d",
+      "name": "Finalize/LinearElasticity/P2/Hexahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/8335183d660f145ecdb5959169637f892738fa32bc54092af75bc84889730e8d.json"
+    },
+    {
+      "id": "ffb68973043f9b5fcb3947d41a45240a25760bde8f3e0f59510ba819053dcd33",
+      "name": "Finalize/LinearElasticity/P2/Pyramid/3/real_time",
+      "metric": "real_time",
+      "url": "cases/ffb68973043f9b5fcb3947d41a45240a25760bde8f3e0f59510ba819053dcd33.json"
+    },
+    {
+      "id": "6b194b582671b1ccdeff0fc88f1de0b33ce9db1c48fa2d7279058c6e0429ef3b",
+      "name": "Finalize/LinearElasticity/P2/Pyramid/5/real_time",
+      "metric": "real_time",
+      "url": "cases/6b194b582671b1ccdeff0fc88f1de0b33ce9db1c48fa2d7279058c6e0429ef3b.json"
+    },
+    {
+      "id": "928835dec8536672ccae713078e1f604bb5cecd9bdb7726e6fd480efa85f5a29",
+      "name": "Finalize/LinearElasticity/P2/Pyramid/9/real_time",
+      "metric": "real_time",
+      "url": "cases/928835dec8536672ccae713078e1f604bb5cecd9bdb7726e6fd480efa85f5a29.json"
+    },
+    {
+      "id": "44bfbf961d7e886ebacff4a4ee91b3d61b5f7e22ba0a01c54d38026cfcb40d38",
+      "name": "Finalize/LinearElasticity/P2/Quadrilateral/3/real_time",
+      "metric": "real_time",
+      "url": "cases/44bfbf961d7e886ebacff4a4ee91b3d61b5f7e22ba0a01c54d38026cfcb40d38.json"
+    },
+    {
+      "id": "1e90723d43083988994ff9aa4fb710eaf5a0655eb4b81348cd804ba85f78a8a9",
+      "name": "Finalize/LinearElasticity/P2/Quadrilateral/5/real_time",
+      "metric": "real_time",
+      "url": "cases/1e90723d43083988994ff9aa4fb710eaf5a0655eb4b81348cd804ba85f78a8a9.json"
+    },
+    {
+      "id": "d22b78c222a6b67ef80c9d8ace8fe405cfffc10818ff103bfb3f15dd790eced5",
+      "name": "Finalize/LinearElasticity/P2/Quadrilateral/9/real_time",
+      "metric": "real_time",
+      "url": "cases/d22b78c222a6b67ef80c9d8ace8fe405cfffc10818ff103bfb3f15dd790eced5.json"
+    },
+    {
+      "id": "e998fcfb25046de33ff8f6f7d915c1464dac1e6c618d57cbbcef9e05531631a1",
+      "name": "Finalize/LinearElasticity/P2/Segment/3/real_time",
+      "metric": "real_time",
+      "url": "cases/e998fcfb25046de33ff8f6f7d915c1464dac1e6c618d57cbbcef9e05531631a1.json"
+    },
+    {
+      "id": "5624597ae07fcde21ca8e0f77da6e99be58cf160febf4e67432f1322ed2aa3b3",
+      "name": "Finalize/LinearElasticity/P2/Segment/5/real_time",
+      "metric": "real_time",
+      "url": "cases/5624597ae07fcde21ca8e0f77da6e99be58cf160febf4e67432f1322ed2aa3b3.json"
+    },
+    {
+      "id": "700ea0b832113f94016693911a0dd55fdd167fc5fb0d806e9c50079d6fb5de6e",
+      "name": "Finalize/LinearElasticity/P2/Segment/9/real_time",
+      "metric": "real_time",
+      "url": "cases/700ea0b832113f94016693911a0dd55fdd167fc5fb0d806e9c50079d6fb5de6e.json"
+    },
+    {
+      "id": "b9167300fbacd2a7e4df4a182b3060146d3253577ca24f022be6763a450408cb",
+      "name": "Finalize/LinearElasticity/P2/Tetrahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/b9167300fbacd2a7e4df4a182b3060146d3253577ca24f022be6763a450408cb.json"
+    },
+    {
+      "id": "ea0dafa391e77f0e1f3a9f0adeb3c8b7af47e72f525b3d93d83d1b492ae6a86a",
+      "name": "Finalize/LinearElasticity/P2/Tetrahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/ea0dafa391e77f0e1f3a9f0adeb3c8b7af47e72f525b3d93d83d1b492ae6a86a.json"
+    },
+    {
+      "id": "6c3953ad55dd573dfdb25ec4e5e73fd3f1bec279d86333d5da6e78adf2e01828",
+      "name": "Finalize/LinearElasticity/P2/Tetrahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/6c3953ad55dd573dfdb25ec4e5e73fd3f1bec279d86333d5da6e78adf2e01828.json"
+    },
+    {
+      "id": "295c783bed0bbac60b041965f6a70c4758f1c004e5e93d8b057f1c3ba92afcae",
+      "name": "Finalize/LinearElasticity/P2/Triangle/3/real_time",
+      "metric": "real_time",
+      "url": "cases/295c783bed0bbac60b041965f6a70c4758f1c004e5e93d8b057f1c3ba92afcae.json"
+    },
+    {
+      "id": "da0baa1c3b699ffd5dbdfc16b124b8504ad9fbbc28dc400e79b73de0c6d4637f",
+      "name": "Finalize/LinearElasticity/P2/Triangle/5/real_time",
+      "metric": "real_time",
+      "url": "cases/da0baa1c3b699ffd5dbdfc16b124b8504ad9fbbc28dc400e79b73de0c6d4637f.json"
+    },
+    {
+      "id": "cd2270d7ba47f2916b48bcd3c9b5df9d45f647d8791e5ecbe146ef56ffbeffaa",
+      "name": "Finalize/LinearElasticity/P2/Triangle/9/real_time",
+      "metric": "real_time",
+      "url": "cases/cd2270d7ba47f2916b48bcd3c9b5df9d45f647d8791e5ecbe146ef56ffbeffaa.json"
+    },
+    {
+      "id": "442eba59bb0f33e25beb9f52db7f7ed451571c4f4910385f79b36d3aa8d9f4c2",
+      "name": "Finalize/LinearElasticity/P2/Wedge/3/real_time",
+      "metric": "real_time",
+      "url": "cases/442eba59bb0f33e25beb9f52db7f7ed451571c4f4910385f79b36d3aa8d9f4c2.json"
+    },
+    {
+      "id": "42c5358db6daa656dddf4132286879b525ef4431937c38b1f9e33ed388c510f6",
+      "name": "Finalize/LinearElasticity/P2/Wedge/5/real_time",
+      "metric": "real_time",
+      "url": "cases/42c5358db6daa656dddf4132286879b525ef4431937c38b1f9e33ed388c510f6.json"
+    },
+    {
+      "id": "8dc2fb2f40af3509b8faf53f9bb74d78d87b1ea21e4446c79dcc266161e4af8b",
+      "name": "Finalize/LinearElasticity/P2/Wedge/9/real_time",
+      "metric": "real_time",
+      "url": "cases/8dc2fb2f40af3509b8faf53f9bb74d78d87b1ea21e4446c79dcc266161e4af8b.json"
+    },
+    {
+      "id": "c37a50e5a0d825ea6fc165ffabf424594fd42786bf2cc5154412b306d66b55a0",
+      "name": "Finalize/Poisson/P1/Hexahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/c37a50e5a0d825ea6fc165ffabf424594fd42786bf2cc5154412b306d66b55a0.json"
+    },
+    {
+      "id": "4d63df47cb81ac08f280316ab4bcd9ea7f0d6e774dcfc7f57b1988b6c1e3af2f",
+      "name": "Finalize/Poisson/P1/Hexahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/4d63df47cb81ac08f280316ab4bcd9ea7f0d6e774dcfc7f57b1988b6c1e3af2f.json"
+    },
+    {
+      "id": "7b47a8c8f1f63545ca9d49bf5a5687e2b9741565b251f518aa3384dd78452cd7",
+      "name": "Finalize/Poisson/P1/Hexahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/7b47a8c8f1f63545ca9d49bf5a5687e2b9741565b251f518aa3384dd78452cd7.json"
+    },
+    {
+      "id": "ee961436b891d8a4cdb03274cbd2e13af38615c4d16b897368fa5a682d967401",
+      "name": "Finalize/Poisson/P1/Pyramid/3/real_time",
+      "metric": "real_time",
+      "url": "cases/ee961436b891d8a4cdb03274cbd2e13af38615c4d16b897368fa5a682d967401.json"
+    },
+    {
+      "id": "179a432ed8b4ceaf88dfb0a9cd6ebf270bf0fd30144f77d39df9692d0b2aa9ce",
+      "name": "Finalize/Poisson/P1/Pyramid/5/real_time",
+      "metric": "real_time",
+      "url": "cases/179a432ed8b4ceaf88dfb0a9cd6ebf270bf0fd30144f77d39df9692d0b2aa9ce.json"
+    },
+    {
+      "id": "b2e4a766276d3a4e5e8ed38447422406528ebb7d3434c2f0c9672e3b5f16c77d",
+      "name": "Finalize/Poisson/P1/Pyramid/9/real_time",
+      "metric": "real_time",
+      "url": "cases/b2e4a766276d3a4e5e8ed38447422406528ebb7d3434c2f0c9672e3b5f16c77d.json"
+    },
+    {
+      "id": "f813871cb9921f65b528e61fa2f1e048bdbfd47144c98c3637979ee26a681c5d",
+      "name": "Finalize/Poisson/P1/Quadrilateral/3/real_time",
+      "metric": "real_time",
+      "url": "cases/f813871cb9921f65b528e61fa2f1e048bdbfd47144c98c3637979ee26a681c5d.json"
+    },
+    {
+      "id": "dfcdeccfc42dc6f7b2480acfb3c67291af8750ea19fc8b90b4e656107ba4ef34",
+      "name": "Finalize/Poisson/P1/Quadrilateral/5/real_time",
+      "metric": "real_time",
+      "url": "cases/dfcdeccfc42dc6f7b2480acfb3c67291af8750ea19fc8b90b4e656107ba4ef34.json"
+    },
+    {
+      "id": "55dbe31f94c289004c5ebc0eb5b96d93293d71eb2d06bff8e448fe86ea7db8e5",
+      "name": "Finalize/Poisson/P1/Quadrilateral/9/real_time",
+      "metric": "real_time",
+      "url": "cases/55dbe31f94c289004c5ebc0eb5b96d93293d71eb2d06bff8e448fe86ea7db8e5.json"
+    },
+    {
+      "id": "6cd468c96baa4344fe9fbf6de1b0ba087117cb6eeee74b23143e015e5084637b",
+      "name": "Finalize/Poisson/P1/Segment/3/real_time",
+      "metric": "real_time",
+      "url": "cases/6cd468c96baa4344fe9fbf6de1b0ba087117cb6eeee74b23143e015e5084637b.json"
+    },
+    {
+      "id": "5a5df936332854e7e679daeeae894630ebba8fad794bef0c5a5ef14d69c680de",
+      "name": "Finalize/Poisson/P1/Segment/5/real_time",
+      "metric": "real_time",
+      "url": "cases/5a5df936332854e7e679daeeae894630ebba8fad794bef0c5a5ef14d69c680de.json"
+    },
+    {
+      "id": "cfad06a67ec311cc37755cd97d3e8f9f28593d4999aeeb2bf6678fa56be26376",
+      "name": "Finalize/Poisson/P1/Segment/9/real_time",
+      "metric": "real_time",
+      "url": "cases/cfad06a67ec311cc37755cd97d3e8f9f28593d4999aeeb2bf6678fa56be26376.json"
+    },
+    {
+      "id": "9dc5cca8855073ace3db371fb4958e736a57953f4d54b720db8d346b80b1acba",
+      "name": "Finalize/Poisson/P1/Tetrahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/9dc5cca8855073ace3db371fb4958e736a57953f4d54b720db8d346b80b1acba.json"
+    },
+    {
+      "id": "ce275008b217b403f13f224e175f986f15d0e21f3b80947476808dfc90a107f5",
+      "name": "Finalize/Poisson/P1/Tetrahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/ce275008b217b403f13f224e175f986f15d0e21f3b80947476808dfc90a107f5.json"
+    },
+    {
+      "id": "5aa0182723bd98e0a403f75ef771cc575882f4385f571bdadcf8dbb7c2b0c532",
+      "name": "Finalize/Poisson/P1/Tetrahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/5aa0182723bd98e0a403f75ef771cc575882f4385f571bdadcf8dbb7c2b0c532.json"
+    },
+    {
+      "id": "54075223f7d2144922fca96ad2eb1e5efe0aef45b589f57982617d73133c4b71",
+      "name": "Finalize/Poisson/P1/Triangle/3/real_time",
+      "metric": "real_time",
+      "url": "cases/54075223f7d2144922fca96ad2eb1e5efe0aef45b589f57982617d73133c4b71.json"
+    },
+    {
+      "id": "37a03f6c02168f55ed5c2936ba9f8ddbf8f32c8560592576c624bc1fcf54547c",
+      "name": "Finalize/Poisson/P1/Triangle/5/real_time",
+      "metric": "real_time",
+      "url": "cases/37a03f6c02168f55ed5c2936ba9f8ddbf8f32c8560592576c624bc1fcf54547c.json"
+    },
+    {
+      "id": "ef61ff01bf2be8c5ba590f607aa4f8f22bff4b28d42adedad97b83a5b64457aa",
+      "name": "Finalize/Poisson/P1/Triangle/9/real_time",
+      "metric": "real_time",
+      "url": "cases/ef61ff01bf2be8c5ba590f607aa4f8f22bff4b28d42adedad97b83a5b64457aa.json"
+    },
+    {
+      "id": "c2d9630dcb643b0e572d62a9bdda1be5edbc4b4e193789f97c59a9d6956f1682",
+      "name": "Finalize/Poisson/P1/Wedge/3/real_time",
+      "metric": "real_time",
+      "url": "cases/c2d9630dcb643b0e572d62a9bdda1be5edbc4b4e193789f97c59a9d6956f1682.json"
+    },
+    {
+      "id": "203455bb1c6b83b57f9f140941646600c074693ce27304e8903a417fccff7436",
+      "name": "Finalize/Poisson/P1/Wedge/5/real_time",
+      "metric": "real_time",
+      "url": "cases/203455bb1c6b83b57f9f140941646600c074693ce27304e8903a417fccff7436.json"
+    },
+    {
+      "id": "f1902ae3790f2973a134497c7e023d53dacfb6e058641bc483ccd8112b003758",
+      "name": "Finalize/Poisson/P1/Wedge/9/real_time",
+      "metric": "real_time",
+      "url": "cases/f1902ae3790f2973a134497c7e023d53dacfb6e058641bc483ccd8112b003758.json"
+    },
+    {
+      "id": "5cb00f8b7f4c5a44eb56d4ad3688d6ad489561cad003e80d54d1ac81ba0ace84",
+      "name": "Finalize/Poisson/P2/Hexahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/5cb00f8b7f4c5a44eb56d4ad3688d6ad489561cad003e80d54d1ac81ba0ace84.json"
+    },
+    {
+      "id": "0d9eaeaee51981d3669c9ae6441870979b783960caa3776e5b063a40d5819f8f",
+      "name": "Finalize/Poisson/P2/Hexahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/0d9eaeaee51981d3669c9ae6441870979b783960caa3776e5b063a40d5819f8f.json"
+    },
+    {
+      "id": "a9a91c663d1302a27d9936e18e972e5b18467b0c7369157c11c793c18c448a73",
+      "name": "Finalize/Poisson/P2/Hexahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/a9a91c663d1302a27d9936e18e972e5b18467b0c7369157c11c793c18c448a73.json"
+    },
+    {
+      "id": "07e897330c8af44a3e57e8584f51f2f27448870a11758bb4092f846e6f21fb35",
+      "name": "Finalize/Poisson/P2/Pyramid/3/real_time",
+      "metric": "real_time",
+      "url": "cases/07e897330c8af44a3e57e8584f51f2f27448870a11758bb4092f846e6f21fb35.json"
+    },
+    {
+      "id": "3821cdaf5bff8c6a830d9c00bdea43fe52a37fbb1504f2050ea2db85ead76885",
+      "name": "Finalize/Poisson/P2/Pyramid/5/real_time",
+      "metric": "real_time",
+      "url": "cases/3821cdaf5bff8c6a830d9c00bdea43fe52a37fbb1504f2050ea2db85ead76885.json"
+    },
+    {
+      "id": "0b2684d9ceca0daa26ab551dd1c9ba500dc13a991badc1747c0a2f1a885ae2ec",
+      "name": "Finalize/Poisson/P2/Pyramid/9/real_time",
+      "metric": "real_time",
+      "url": "cases/0b2684d9ceca0daa26ab551dd1c9ba500dc13a991badc1747c0a2f1a885ae2ec.json"
+    },
+    {
+      "id": "de2a2b1611fa1bba3128f8cd53a85fe356a2dc1917ec2c7bd834ac9630e4d062",
+      "name": "Finalize/Poisson/P2/Quadrilateral/3/real_time",
+      "metric": "real_time",
+      "url": "cases/de2a2b1611fa1bba3128f8cd53a85fe356a2dc1917ec2c7bd834ac9630e4d062.json"
+    },
+    {
+      "id": "68db480118beda82db58daa6744f6bd683859306b1f5ce60229e79f30415a202",
+      "name": "Finalize/Poisson/P2/Quadrilateral/5/real_time",
+      "metric": "real_time",
+      "url": "cases/68db480118beda82db58daa6744f6bd683859306b1f5ce60229e79f30415a202.json"
+    },
+    {
+      "id": "97c7dee1e1de03af0ec90fd4b81005d000122b583524fe14d61e8499f5d64ee9",
+      "name": "Finalize/Poisson/P2/Quadrilateral/9/real_time",
+      "metric": "real_time",
+      "url": "cases/97c7dee1e1de03af0ec90fd4b81005d000122b583524fe14d61e8499f5d64ee9.json"
+    },
+    {
+      "id": "e1a61f046ef1272a98904ac730916b51ff42c00ffb5380aa7196020d5e22a0cb",
+      "name": "Finalize/Poisson/P2/Segment/3/real_time",
+      "metric": "real_time",
+      "url": "cases/e1a61f046ef1272a98904ac730916b51ff42c00ffb5380aa7196020d5e22a0cb.json"
+    },
+    {
+      "id": "63516f6d6f36b45dd8585a15aafbc755c565b91325a5ad613798bdd086ee6fc2",
+      "name": "Finalize/Poisson/P2/Segment/5/real_time",
+      "metric": "real_time",
+      "url": "cases/63516f6d6f36b45dd8585a15aafbc755c565b91325a5ad613798bdd086ee6fc2.json"
+    },
+    {
+      "id": "2515ba66e335573c8fe1e71ad55c6296183d143930b8a67fc825bbb9de526e27",
+      "name": "Finalize/Poisson/P2/Segment/9/real_time",
+      "metric": "real_time",
+      "url": "cases/2515ba66e335573c8fe1e71ad55c6296183d143930b8a67fc825bbb9de526e27.json"
+    },
+    {
+      "id": "c60938b8b81f9bc3b3e11cae780c7b8a33bb53b4fecf21cb1afdc311773eb30d",
+      "name": "Finalize/Poisson/P2/Tetrahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/c60938b8b81f9bc3b3e11cae780c7b8a33bb53b4fecf21cb1afdc311773eb30d.json"
+    },
+    {
+      "id": "c85bd3850ab2cd263704bcf504f8ca892982a1a143dde8eb56fd8ffe3198e2cc",
+      "name": "Finalize/Poisson/P2/Tetrahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/c85bd3850ab2cd263704bcf504f8ca892982a1a143dde8eb56fd8ffe3198e2cc.json"
+    },
+    {
+      "id": "37cdf04f78d848e2d555a59a67f32442ab5f4e378328b4228c59e0e53e1a8a78",
+      "name": "Finalize/Poisson/P2/Tetrahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/37cdf04f78d848e2d555a59a67f32442ab5f4e378328b4228c59e0e53e1a8a78.json"
+    },
+    {
+      "id": "92b949c29d119ba8f630203f9235dcd9b25169077b051d9a76cfdf33c8a9997a",
+      "name": "Finalize/Poisson/P2/Triangle/3/real_time",
+      "metric": "real_time",
+      "url": "cases/92b949c29d119ba8f630203f9235dcd9b25169077b051d9a76cfdf33c8a9997a.json"
+    },
+    {
+      "id": "834f371135bc542a6a9d41f65090a582384d4922953792ba0620241ec03bae60",
+      "name": "Finalize/Poisson/P2/Triangle/5/real_time",
+      "metric": "real_time",
+      "url": "cases/834f371135bc542a6a9d41f65090a582384d4922953792ba0620241ec03bae60.json"
+    },
+    {
+      "id": "df871adbf57c6ae35445b5c9727b719eb4bc3be3d934c020fee1f9c427a2c9cc",
+      "name": "Finalize/Poisson/P2/Triangle/9/real_time",
+      "metric": "real_time",
+      "url": "cases/df871adbf57c6ae35445b5c9727b719eb4bc3be3d934c020fee1f9c427a2c9cc.json"
+    },
+    {
+      "id": "51bd233cb6964eae76fa7a5f231f9de100e3278a0596f831d285bb076c15ff6d",
+      "name": "Finalize/Poisson/P2/Wedge/3/real_time",
+      "metric": "real_time",
+      "url": "cases/51bd233cb6964eae76fa7a5f231f9de100e3278a0596f831d285bb076c15ff6d.json"
+    },
+    {
+      "id": "a2504c3ca31204a36464ed4917021888c3d366405cf4343aefc18fcbb666b2a0",
+      "name": "Finalize/Poisson/P2/Wedge/5/real_time",
+      "metric": "real_time",
+      "url": "cases/a2504c3ca31204a36464ed4917021888c3d366405cf4343aefc18fcbb666b2a0.json"
+    },
+    {
+      "id": "2734612133b9e39717f4e9cc53277c7f57172783f8071c5f5a37a00395ae95d9",
+      "name": "Finalize/Poisson/P2/Wedge/9/real_time",
+      "metric": "real_time",
+      "url": "cases/2734612133b9e39717f4e9cc53277c7f57172783f8071c5f5a37a00395ae95d9.json"
+    },
+    {
+      "id": "3080a88fdb9982bcd1047ecb3d15c39c7c2824ea7d104c554c4d0eee89ab6d5d",
+      "name": "Kernel/Conductivity/P1/Hexahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/3080a88fdb9982bcd1047ecb3d15c39c7c2824ea7d104c554c4d0eee89ab6d5d.json"
+    },
+    {
+      "id": "db2105f6fe04089eb2bc21bc9eb15d7ed720d1484c47969035564c7656a2f3ab",
+      "name": "Kernel/Conductivity/P1/Hexahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/db2105f6fe04089eb2bc21bc9eb15d7ed720d1484c47969035564c7656a2f3ab.json"
+    },
+    {
+      "id": "ef89af334c06a58801bcbc29bc3736a1ada3f8b75b844fbd7ed0e908d5c5ede0",
+      "name": "Kernel/Conductivity/P1/Hexahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/ef89af334c06a58801bcbc29bc3736a1ada3f8b75b844fbd7ed0e908d5c5ede0.json"
+    },
+    {
+      "id": "f1d3033b50852c8559b2715ee4d50659e16d71983b479618276df11be7284187",
+      "name": "Kernel/Conductivity/P1/Pyramid/3/real_time",
+      "metric": "real_time",
+      "url": "cases/f1d3033b50852c8559b2715ee4d50659e16d71983b479618276df11be7284187.json"
+    },
+    {
+      "id": "72dbf2bca0b55757f329cef4a7a7162653ab5f295b1d378a774c007a1871ec2a",
+      "name": "Kernel/Conductivity/P1/Pyramid/5/real_time",
+      "metric": "real_time",
+      "url": "cases/72dbf2bca0b55757f329cef4a7a7162653ab5f295b1d378a774c007a1871ec2a.json"
+    },
+    {
+      "id": "dc64785239699a134b0005502f7cfd668d2785aee4765be1ad20402f134e6df2",
+      "name": "Kernel/Conductivity/P1/Pyramid/9/real_time",
+      "metric": "real_time",
+      "url": "cases/dc64785239699a134b0005502f7cfd668d2785aee4765be1ad20402f134e6df2.json"
+    },
+    {
+      "id": "90c6d624fd24261635200f6a8fc90738d51d507e24ed32657330be550498f066",
+      "name": "Kernel/Conductivity/P1/Quadrilateral/3/real_time",
+      "metric": "real_time",
+      "url": "cases/90c6d624fd24261635200f6a8fc90738d51d507e24ed32657330be550498f066.json"
+    },
+    {
+      "id": "d2ea63166dbb901ae7defe394adc05f66774fcd9d048835d7ff5885aa86e37aa",
+      "name": "Kernel/Conductivity/P1/Quadrilateral/5/real_time",
+      "metric": "real_time",
+      "url": "cases/d2ea63166dbb901ae7defe394adc05f66774fcd9d048835d7ff5885aa86e37aa.json"
+    },
+    {
+      "id": "d19440037799bd8fcb6edb3f58d8bffd1f4abace2e0128c1f4f8b9067850ba8d",
+      "name": "Kernel/Conductivity/P1/Quadrilateral/9/real_time",
+      "metric": "real_time",
+      "url": "cases/d19440037799bd8fcb6edb3f58d8bffd1f4abace2e0128c1f4f8b9067850ba8d.json"
+    },
+    {
+      "id": "e73b34e376f57ef8ecafa8c79563f4aabe4ccc7715b83c830bd1cc0dfc3af4d9",
+      "name": "Kernel/Conductivity/P1/Segment/3/real_time",
+      "metric": "real_time",
+      "url": "cases/e73b34e376f57ef8ecafa8c79563f4aabe4ccc7715b83c830bd1cc0dfc3af4d9.json"
+    },
+    {
+      "id": "379de9f9dc44a0a3cdc41887037baed7c898174490dffa9f62e732c6475c9e3a",
+      "name": "Kernel/Conductivity/P1/Segment/5/real_time",
+      "metric": "real_time",
+      "url": "cases/379de9f9dc44a0a3cdc41887037baed7c898174490dffa9f62e732c6475c9e3a.json"
+    },
+    {
+      "id": "d34de53d04b69c9077d527c43a26c63f7f16026589cbef1efc8569ec91f14fe4",
+      "name": "Kernel/Conductivity/P1/Segment/9/real_time",
+      "metric": "real_time",
+      "url": "cases/d34de53d04b69c9077d527c43a26c63f7f16026589cbef1efc8569ec91f14fe4.json"
+    },
+    {
+      "id": "ea174b5cc2b6eb30a2fc74d2f27a08124344708e4d3ef26b157bb6718f160fe4",
+      "name": "Kernel/Conductivity/P1/Tetrahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/ea174b5cc2b6eb30a2fc74d2f27a08124344708e4d3ef26b157bb6718f160fe4.json"
+    },
+    {
+      "id": "31f7ef6ed1d82b48d0fcf3a91b55b9b700d020820285332ff523bec8b760342c",
+      "name": "Kernel/Conductivity/P1/Tetrahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/31f7ef6ed1d82b48d0fcf3a91b55b9b700d020820285332ff523bec8b760342c.json"
+    },
+    {
+      "id": "977684885252888dc28c227015830184ea7921a6cfcd66150a7eb824deb4a1d7",
+      "name": "Kernel/Conductivity/P1/Tetrahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/977684885252888dc28c227015830184ea7921a6cfcd66150a7eb824deb4a1d7.json"
+    },
+    {
+      "id": "1879ed5565c240cec8453d79bb678c50117adcf27282cb76a50bf4e05f36cc51",
+      "name": "Kernel/Conductivity/P1/Triangle/3/real_time",
+      "metric": "real_time",
+      "url": "cases/1879ed5565c240cec8453d79bb678c50117adcf27282cb76a50bf4e05f36cc51.json"
+    },
+    {
+      "id": "3761065826d45c3c0bd80e71708c085c49c212d4bb6538c6a2b1e11abff7762c",
+      "name": "Kernel/Conductivity/P1/Triangle/5/real_time",
+      "metric": "real_time",
+      "url": "cases/3761065826d45c3c0bd80e71708c085c49c212d4bb6538c6a2b1e11abff7762c.json"
+    },
+    {
+      "id": "7fc3447751ca4fc950b275a3899dcc073e3e33950317a2a02d8d7d6856081ee5",
+      "name": "Kernel/Conductivity/P1/Triangle/9/real_time",
+      "metric": "real_time",
+      "url": "cases/7fc3447751ca4fc950b275a3899dcc073e3e33950317a2a02d8d7d6856081ee5.json"
+    },
+    {
+      "id": "0c83100ac5788795205090e9f7c98a9fa28ee018fb77e335aab98a1d7c3728b4",
+      "name": "Kernel/Conductivity/P1/Wedge/3/real_time",
+      "metric": "real_time",
+      "url": "cases/0c83100ac5788795205090e9f7c98a9fa28ee018fb77e335aab98a1d7c3728b4.json"
+    },
+    {
+      "id": "be30487658dca6e9e5a05fe6c5a930dd54124c06fff12c93443456c15c8d8857",
+      "name": "Kernel/Conductivity/P1/Wedge/5/real_time",
+      "metric": "real_time",
+      "url": "cases/be30487658dca6e9e5a05fe6c5a930dd54124c06fff12c93443456c15c8d8857.json"
+    },
+    {
+      "id": "fb8d11530b39a7d4233fa634e31c2d7fa1f96b1c1fcfc01102a12336788ca6c5",
+      "name": "Kernel/Conductivity/P1/Wedge/9/real_time",
+      "metric": "real_time",
+      "url": "cases/fb8d11530b39a7d4233fa634e31c2d7fa1f96b1c1fcfc01102a12336788ca6c5.json"
+    },
+    {
+      "id": "544b30061c4f7f151d763e47c1201bb321c1ddc5dcba10385376aaa270e5bf5b",
+      "name": "Kernel/Conductivity/P2/Hexahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/544b30061c4f7f151d763e47c1201bb321c1ddc5dcba10385376aaa270e5bf5b.json"
+    },
+    {
+      "id": "43b7ee91df5e616b60c43a33c3042832b6be30926e626fe2450d9e1debb744f8",
+      "name": "Kernel/Conductivity/P2/Hexahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/43b7ee91df5e616b60c43a33c3042832b6be30926e626fe2450d9e1debb744f8.json"
+    },
+    {
+      "id": "789eeaea49f2982192dea5c7244d666b5eb55f9b09019baf1981ff3d528cb722",
+      "name": "Kernel/Conductivity/P2/Hexahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/789eeaea49f2982192dea5c7244d666b5eb55f9b09019baf1981ff3d528cb722.json"
+    },
+    {
+      "id": "e83b19329aeeb906635f05fb321e9e1d43180a8dfc1ba0b61bc5d946baaa8e0b",
+      "name": "Kernel/Conductivity/P2/Pyramid/3/real_time",
+      "metric": "real_time",
+      "url": "cases/e83b19329aeeb906635f05fb321e9e1d43180a8dfc1ba0b61bc5d946baaa8e0b.json"
+    },
+    {
+      "id": "245b4ddd70a268cc7bac77ac31a0ef3d99f44d946e99360a96a645945ba99b34",
+      "name": "Kernel/Conductivity/P2/Pyramid/5/real_time",
+      "metric": "real_time",
+      "url": "cases/245b4ddd70a268cc7bac77ac31a0ef3d99f44d946e99360a96a645945ba99b34.json"
+    },
+    {
+      "id": "d2e0a3c390e09ca2f9930e39b1fa3e5cdc379a24c0900b39f8362fec7aabbac9",
+      "name": "Kernel/Conductivity/P2/Pyramid/9/real_time",
+      "metric": "real_time",
+      "url": "cases/d2e0a3c390e09ca2f9930e39b1fa3e5cdc379a24c0900b39f8362fec7aabbac9.json"
+    },
+    {
+      "id": "9a13e127c66691c74ce57b5daf37914b35fc753c139a34f56f852f9e22ccdd04",
+      "name": "Kernel/Conductivity/P2/Quadrilateral/3/real_time",
+      "metric": "real_time",
+      "url": "cases/9a13e127c66691c74ce57b5daf37914b35fc753c139a34f56f852f9e22ccdd04.json"
+    },
+    {
+      "id": "2b0350966b5f690e75f542516d3a494f4fb283f4fce06f29c3c464e90892817f",
+      "name": "Kernel/Conductivity/P2/Quadrilateral/5/real_time",
+      "metric": "real_time",
+      "url": "cases/2b0350966b5f690e75f542516d3a494f4fb283f4fce06f29c3c464e90892817f.json"
+    },
+    {
+      "id": "97e901bd23a7f391fba890296b612a649462241d043f94651d4611ec5300c6bd",
+      "name": "Kernel/Conductivity/P2/Quadrilateral/9/real_time",
+      "metric": "real_time",
+      "url": "cases/97e901bd23a7f391fba890296b612a649462241d043f94651d4611ec5300c6bd.json"
+    },
+    {
+      "id": "966600be32f9ae09ede1bfb8cb948c9ad23a021350453fcb6584b2c2a6994e93",
+      "name": "Kernel/Conductivity/P2/Segment/3/real_time",
+      "metric": "real_time",
+      "url": "cases/966600be32f9ae09ede1bfb8cb948c9ad23a021350453fcb6584b2c2a6994e93.json"
+    },
+    {
+      "id": "bccedddf994d6eea6579ebe2b5a98ff2e03b2e7f5b012db423862fd5101cc951",
+      "name": "Kernel/Conductivity/P2/Segment/5/real_time",
+      "metric": "real_time",
+      "url": "cases/bccedddf994d6eea6579ebe2b5a98ff2e03b2e7f5b012db423862fd5101cc951.json"
+    },
+    {
+      "id": "342458519ebd1049ae60f49cd678b858f5121b71c5a0c5b11e6d36be35089690",
+      "name": "Kernel/Conductivity/P2/Segment/9/real_time",
+      "metric": "real_time",
+      "url": "cases/342458519ebd1049ae60f49cd678b858f5121b71c5a0c5b11e6d36be35089690.json"
+    },
+    {
+      "id": "a2802d5d06a427bedaeb3c1fb26cc6a1d0e1061449c15509e00a84dbbcf02771",
+      "name": "Kernel/Conductivity/P2/Tetrahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/a2802d5d06a427bedaeb3c1fb26cc6a1d0e1061449c15509e00a84dbbcf02771.json"
+    },
+    {
+      "id": "370624b39c5c2ff153c032272845cc06fbd003bcf99d9afedff37cbb5967aa26",
+      "name": "Kernel/Conductivity/P2/Tetrahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/370624b39c5c2ff153c032272845cc06fbd003bcf99d9afedff37cbb5967aa26.json"
+    },
+    {
+      "id": "4cb03a50b2ea5aed36e0b3fe70083a0cb17511faedaf6a44a1e8c497cba4bd63",
+      "name": "Kernel/Conductivity/P2/Tetrahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/4cb03a50b2ea5aed36e0b3fe70083a0cb17511faedaf6a44a1e8c497cba4bd63.json"
+    },
+    {
+      "id": "b6a467c2b22d8028516ad900f244c5b949c7d6ab7e7388ce0ed17dee67f45e13",
+      "name": "Kernel/Conductivity/P2/Triangle/3/real_time",
+      "metric": "real_time",
+      "url": "cases/b6a467c2b22d8028516ad900f244c5b949c7d6ab7e7388ce0ed17dee67f45e13.json"
+    },
+    {
+      "id": "d4d21d32a00dbbbabfce7257967b318fbc5aba377e1dca5949cc3d10f9f00535",
+      "name": "Kernel/Conductivity/P2/Triangle/5/real_time",
+      "metric": "real_time",
+      "url": "cases/d4d21d32a00dbbbabfce7257967b318fbc5aba377e1dca5949cc3d10f9f00535.json"
+    },
+    {
+      "id": "2c8f16aa9cf564efdbc1502b31e89e97cf106aaef0b90f1b756f07a194f157bc",
+      "name": "Kernel/Conductivity/P2/Triangle/9/real_time",
+      "metric": "real_time",
+      "url": "cases/2c8f16aa9cf564efdbc1502b31e89e97cf106aaef0b90f1b756f07a194f157bc.json"
+    },
+    {
+      "id": "18efcedb0404c3ee8c2206e3d2cd4f8b0a2dca7698416c4fac056583b2360d93",
+      "name": "Kernel/Conductivity/P2/Wedge/3/real_time",
+      "metric": "real_time",
+      "url": "cases/18efcedb0404c3ee8c2206e3d2cd4f8b0a2dca7698416c4fac056583b2360d93.json"
+    },
+    {
+      "id": "d82c45d10d0dbea362147622cc1c41e29ba32f5128c8054fc59e1fa81ec12001",
+      "name": "Kernel/Conductivity/P2/Wedge/5/real_time",
+      "metric": "real_time",
+      "url": "cases/d82c45d10d0dbea362147622cc1c41e29ba32f5128c8054fc59e1fa81ec12001.json"
+    },
+    {
+      "id": "4c87ab9d3e744385f63c3096390c87a0eb8b23340bf4661f83640bc8a02816d4",
+      "name": "Kernel/Conductivity/P2/Wedge/9/real_time",
+      "metric": "real_time",
+      "url": "cases/4c87ab9d3e744385f63c3096390c87a0eb8b23340bf4661f83640bc8a02816d4.json"
+    },
+    {
+      "id": "7bb744ab25d763c37a13a8c0a2e5b2f28f2e49e5a67a819d36adb652daa77bc4",
+      "name": "Kernel/LinearElasticity/P1/Hexahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/7bb744ab25d763c37a13a8c0a2e5b2f28f2e49e5a67a819d36adb652daa77bc4.json"
+    },
+    {
+      "id": "813c6b30d2c533a6e47cddf7d43e6e9c819423c398e10507e9c626f3570ca8c5",
+      "name": "Kernel/LinearElasticity/P1/Hexahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/813c6b30d2c533a6e47cddf7d43e6e9c819423c398e10507e9c626f3570ca8c5.json"
+    },
+    {
+      "id": "9ec97d156d86a8c7dc706dd9f4b57528705d3b3b6facb4d88858868ae58f1cbb",
+      "name": "Kernel/LinearElasticity/P1/Hexahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/9ec97d156d86a8c7dc706dd9f4b57528705d3b3b6facb4d88858868ae58f1cbb.json"
+    },
+    {
+      "id": "0000b819bd0404553fc6b2e5e239e8512df54fc395573715f18fac21bac8c0ac",
+      "name": "Kernel/LinearElasticity/P1/Pyramid/3/real_time",
+      "metric": "real_time",
+      "url": "cases/0000b819bd0404553fc6b2e5e239e8512df54fc395573715f18fac21bac8c0ac.json"
+    },
+    {
+      "id": "51d97b35fef28bcf10a12e3f1e0ecee7f8818f00ae346e9ecba27d63a59058f6",
+      "name": "Kernel/LinearElasticity/P1/Pyramid/5/real_time",
+      "metric": "real_time",
+      "url": "cases/51d97b35fef28bcf10a12e3f1e0ecee7f8818f00ae346e9ecba27d63a59058f6.json"
+    },
+    {
+      "id": "52b7537fb7b0b778a37610dacc0ad5da79b5b46c919e655424e592c1c3fc0c07",
+      "name": "Kernel/LinearElasticity/P1/Pyramid/9/real_time",
+      "metric": "real_time",
+      "url": "cases/52b7537fb7b0b778a37610dacc0ad5da79b5b46c919e655424e592c1c3fc0c07.json"
+    },
+    {
+      "id": "817c3cd705a22073f71fab001bd867bac9d6aa11b4dc772a5acda270734b2984",
+      "name": "Kernel/LinearElasticity/P1/Quadrilateral/3/real_time",
+      "metric": "real_time",
+      "url": "cases/817c3cd705a22073f71fab001bd867bac9d6aa11b4dc772a5acda270734b2984.json"
+    },
+    {
+      "id": "e90dbea1a2b2be404aac758c059f247deff614c9b4be063b3ce8f2c19bc72315",
+      "name": "Kernel/LinearElasticity/P1/Quadrilateral/5/real_time",
+      "metric": "real_time",
+      "url": "cases/e90dbea1a2b2be404aac758c059f247deff614c9b4be063b3ce8f2c19bc72315.json"
+    },
+    {
+      "id": "3691809e1bd16fca297c1eb72d6462a09f7ac91ba769f16884372e1463d51ada",
+      "name": "Kernel/LinearElasticity/P1/Quadrilateral/9/real_time",
+      "metric": "real_time",
+      "url": "cases/3691809e1bd16fca297c1eb72d6462a09f7ac91ba769f16884372e1463d51ada.json"
+    },
+    {
+      "id": "4e99a5148871a67922fc345691b3f63083a793707c27549baf47bf8b75ac5be0",
+      "name": "Kernel/LinearElasticity/P1/Segment/3/real_time",
+      "metric": "real_time",
+      "url": "cases/4e99a5148871a67922fc345691b3f63083a793707c27549baf47bf8b75ac5be0.json"
+    },
+    {
+      "id": "7280008cd76042bc8bfab5112ebeb387e200772afdae26af1f0ffd1d43815883",
+      "name": "Kernel/LinearElasticity/P1/Segment/5/real_time",
+      "metric": "real_time",
+      "url": "cases/7280008cd76042bc8bfab5112ebeb387e200772afdae26af1f0ffd1d43815883.json"
+    },
+    {
+      "id": "d0ef5afa47fbb09f5ed0b4ff935026e20352c95ce9963e5bba1233218b157c6b",
+      "name": "Kernel/LinearElasticity/P1/Segment/9/real_time",
+      "metric": "real_time",
+      "url": "cases/d0ef5afa47fbb09f5ed0b4ff935026e20352c95ce9963e5bba1233218b157c6b.json"
+    },
+    {
+      "id": "1a028e05aa41e0c4134534664d1ad6bb0f4bda5df0ae0a2cfdd6b1d9ba527fb6",
+      "name": "Kernel/LinearElasticity/P1/Tetrahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/1a028e05aa41e0c4134534664d1ad6bb0f4bda5df0ae0a2cfdd6b1d9ba527fb6.json"
+    },
+    {
+      "id": "85e79402745c1b5b7ad7921048ec5af017ee58ffaa4e5e2ffc14bcad597d8e09",
+      "name": "Kernel/LinearElasticity/P1/Tetrahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/85e79402745c1b5b7ad7921048ec5af017ee58ffaa4e5e2ffc14bcad597d8e09.json"
+    },
+    {
+      "id": "6af22ddc2f5501fda6af918faee3d38982daa2426bb3ac59d942fb8d4ec8121c",
+      "name": "Kernel/LinearElasticity/P1/Tetrahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/6af22ddc2f5501fda6af918faee3d38982daa2426bb3ac59d942fb8d4ec8121c.json"
+    },
+    {
+      "id": "840abbd8beb20f08b1afa7be92d70bac2e2d9184368053fcc397dadf17000f50",
+      "name": "Kernel/LinearElasticity/P1/Triangle/3/real_time",
+      "metric": "real_time",
+      "url": "cases/840abbd8beb20f08b1afa7be92d70bac2e2d9184368053fcc397dadf17000f50.json"
+    },
+    {
+      "id": "ced5b5ee8c6fbf642de9c8c7982d1da84096f38d85e715904488b46687e83038",
+      "name": "Kernel/LinearElasticity/P1/Triangle/5/real_time",
+      "metric": "real_time",
+      "url": "cases/ced5b5ee8c6fbf642de9c8c7982d1da84096f38d85e715904488b46687e83038.json"
+    },
+    {
+      "id": "9650ee70d6cd437b43e3695f8d23b62d05b9e67fa971524d466b342ff93019aa",
+      "name": "Kernel/LinearElasticity/P1/Triangle/9/real_time",
+      "metric": "real_time",
+      "url": "cases/9650ee70d6cd437b43e3695f8d23b62d05b9e67fa971524d466b342ff93019aa.json"
+    },
+    {
+      "id": "2eed1b4438efab49175a161491acd96aea663b9353058d677a677856aae5f265",
+      "name": "Kernel/LinearElasticity/P1/Wedge/3/real_time",
+      "metric": "real_time",
+      "url": "cases/2eed1b4438efab49175a161491acd96aea663b9353058d677a677856aae5f265.json"
+    },
+    {
+      "id": "ad3808c3d123c3b4a8da699abec8f946f7b70ab5267845e7761a107683949651",
+      "name": "Kernel/LinearElasticity/P1/Wedge/5/real_time",
+      "metric": "real_time",
+      "url": "cases/ad3808c3d123c3b4a8da699abec8f946f7b70ab5267845e7761a107683949651.json"
+    },
+    {
+      "id": "1491bd5fb79e7f4e9a6a07f4d0786f59928a42cdc4ea01e4ae51fe670a25aa40",
+      "name": "Kernel/LinearElasticity/P1/Wedge/9/real_time",
+      "metric": "real_time",
+      "url": "cases/1491bd5fb79e7f4e9a6a07f4d0786f59928a42cdc4ea01e4ae51fe670a25aa40.json"
+    },
+    {
+      "id": "aea2f1203616e30ead108b9146def0a6a954d56efbe67386dde8d0daf93cfe0f",
+      "name": "Kernel/LinearElasticity/P2/Hexahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/aea2f1203616e30ead108b9146def0a6a954d56efbe67386dde8d0daf93cfe0f.json"
+    },
+    {
+      "id": "93d54d71197096b4c6e9ed93e573ad103eced239ee5b93d755f5f72025361e9f",
+      "name": "Kernel/LinearElasticity/P2/Hexahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/93d54d71197096b4c6e9ed93e573ad103eced239ee5b93d755f5f72025361e9f.json"
+    },
+    {
+      "id": "c191c80a736e61e3c41c0a60489448d6f5957bb22e5c305b6acd64d271abe0cb",
+      "name": "Kernel/LinearElasticity/P2/Hexahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/c191c80a736e61e3c41c0a60489448d6f5957bb22e5c305b6acd64d271abe0cb.json"
+    },
+    {
+      "id": "4e343e3345234e16b6fe22f92a96688d66f0840e983f4e4b4eab65ee3e94fb70",
+      "name": "Kernel/LinearElasticity/P2/Pyramid/3/real_time",
+      "metric": "real_time",
+      "url": "cases/4e343e3345234e16b6fe22f92a96688d66f0840e983f4e4b4eab65ee3e94fb70.json"
+    },
+    {
+      "id": "1696c1d42274a769b6129c44143cbb93a51b25c913f28c4daa0e7ddb942f381f",
+      "name": "Kernel/LinearElasticity/P2/Pyramid/5/real_time",
+      "metric": "real_time",
+      "url": "cases/1696c1d42274a769b6129c44143cbb93a51b25c913f28c4daa0e7ddb942f381f.json"
+    },
+    {
+      "id": "232342352c8f6caac01601ff863ab99859fd95b0b666b48fe55c8eb6ed19a5fe",
+      "name": "Kernel/LinearElasticity/P2/Pyramid/9/real_time",
+      "metric": "real_time",
+      "url": "cases/232342352c8f6caac01601ff863ab99859fd95b0b666b48fe55c8eb6ed19a5fe.json"
+    },
+    {
+      "id": "8ac307afd108653ab81638a3eb95daf692a4a299241eb5c226ac787f6bd1cc3c",
+      "name": "Kernel/LinearElasticity/P2/Quadrilateral/3/real_time",
+      "metric": "real_time",
+      "url": "cases/8ac307afd108653ab81638a3eb95daf692a4a299241eb5c226ac787f6bd1cc3c.json"
+    },
+    {
+      "id": "0840e4cc85e7d64c0bcabf2afd3bef9b4f4901849b5f62f5c67cd73feb0c141e",
+      "name": "Kernel/LinearElasticity/P2/Quadrilateral/5/real_time",
+      "metric": "real_time",
+      "url": "cases/0840e4cc85e7d64c0bcabf2afd3bef9b4f4901849b5f62f5c67cd73feb0c141e.json"
+    },
+    {
+      "id": "88e25ab0669cf616cafbcd4afafb767519295dbee676edcd6cb8e4eaec94db57",
+      "name": "Kernel/LinearElasticity/P2/Quadrilateral/9/real_time",
+      "metric": "real_time",
+      "url": "cases/88e25ab0669cf616cafbcd4afafb767519295dbee676edcd6cb8e4eaec94db57.json"
+    },
+    {
+      "id": "88e143fca3ebb94ae8245a2f95f871e5a018398e647729fcf5c587a02c19173d",
+      "name": "Kernel/LinearElasticity/P2/Segment/3/real_time",
+      "metric": "real_time",
+      "url": "cases/88e143fca3ebb94ae8245a2f95f871e5a018398e647729fcf5c587a02c19173d.json"
+    },
+    {
+      "id": "6eb5574883d1c8fbfe854408c689097a0141785de42281252b98ec578f73e522",
+      "name": "Kernel/LinearElasticity/P2/Segment/5/real_time",
+      "metric": "real_time",
+      "url": "cases/6eb5574883d1c8fbfe854408c689097a0141785de42281252b98ec578f73e522.json"
+    },
+    {
+      "id": "df752fa360b7d6eaf4e9c4e01b9dd3882acaae2b8e4a21a4683766b18c57aec2",
+      "name": "Kernel/LinearElasticity/P2/Segment/9/real_time",
+      "metric": "real_time",
+      "url": "cases/df752fa360b7d6eaf4e9c4e01b9dd3882acaae2b8e4a21a4683766b18c57aec2.json"
+    },
+    {
+      "id": "6eab3fe6140d5b800eae75a901fb30438fe3325b71e528c1e38a637b32eb184b",
+      "name": "Kernel/LinearElasticity/P2/Tetrahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/6eab3fe6140d5b800eae75a901fb30438fe3325b71e528c1e38a637b32eb184b.json"
+    },
+    {
+      "id": "f1f41154227555097d071f9715fba089d2d77d3a5736f13180746923acdca1b9",
+      "name": "Kernel/LinearElasticity/P2/Tetrahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/f1f41154227555097d071f9715fba089d2d77d3a5736f13180746923acdca1b9.json"
+    },
+    {
+      "id": "f5848167baf2cdd0e37dbd5e8b1c20498cecf74f9293f67d9e53291c8df225e7",
+      "name": "Kernel/LinearElasticity/P2/Tetrahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/f5848167baf2cdd0e37dbd5e8b1c20498cecf74f9293f67d9e53291c8df225e7.json"
+    },
+    {
+      "id": "2dbe33b3784741d6e43aae0ba4688e5952f28e09344d7c551aba81e099daec0b",
+      "name": "Kernel/LinearElasticity/P2/Triangle/3/real_time",
+      "metric": "real_time",
+      "url": "cases/2dbe33b3784741d6e43aae0ba4688e5952f28e09344d7c551aba81e099daec0b.json"
+    },
+    {
+      "id": "9b721d4479e05b57ee11fa86b9d76061e7f649fa92cf12d18b9fa46a271975a9",
+      "name": "Kernel/LinearElasticity/P2/Triangle/5/real_time",
+      "metric": "real_time",
+      "url": "cases/9b721d4479e05b57ee11fa86b9d76061e7f649fa92cf12d18b9fa46a271975a9.json"
+    },
+    {
+      "id": "11d26838b743e34d209433ad6d37c04d97cf578aa385e9d3ea91f8be3c7be459",
+      "name": "Kernel/LinearElasticity/P2/Triangle/9/real_time",
+      "metric": "real_time",
+      "url": "cases/11d26838b743e34d209433ad6d37c04d97cf578aa385e9d3ea91f8be3c7be459.json"
+    },
+    {
+      "id": "48e218ae37dd34b37b8d32e12ea535544ec768701e89998e49a11ca49e520f39",
+      "name": "Kernel/LinearElasticity/P2/Wedge/3/real_time",
+      "metric": "real_time",
+      "url": "cases/48e218ae37dd34b37b8d32e12ea535544ec768701e89998e49a11ca49e520f39.json"
+    },
+    {
+      "id": "d5be3b16affb3b993725d4e7fb50b3d88990af5f1e669bcd40528d09294d577d",
+      "name": "Kernel/LinearElasticity/P2/Wedge/5/real_time",
+      "metric": "real_time",
+      "url": "cases/d5be3b16affb3b993725d4e7fb50b3d88990af5f1e669bcd40528d09294d577d.json"
+    },
+    {
+      "id": "1ba5ed585fd9feb6cc914df51bf3a25562afdd2f2b9fbb031ef52bb4e1c74123",
+      "name": "Kernel/LinearElasticity/P2/Wedge/9/real_time",
+      "metric": "real_time",
+      "url": "cases/1ba5ed585fd9feb6cc914df51bf3a25562afdd2f2b9fbb031ef52bb4e1c74123.json"
+    },
+    {
+      "id": "520036409037b6bd4f9a4ad4b9f4593d73d4182852f537ac60d6841b9729689c",
+      "name": "Kernel/Poisson/P1/Hexahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/520036409037b6bd4f9a4ad4b9f4593d73d4182852f537ac60d6841b9729689c.json"
+    },
+    {
+      "id": "c64d8123714a5a990aa3c7bf50528c1e8458ca969f814e952880c456c8d75c6a",
+      "name": "Kernel/Poisson/P1/Hexahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/c64d8123714a5a990aa3c7bf50528c1e8458ca969f814e952880c456c8d75c6a.json"
+    },
+    {
+      "id": "bd6f90089c0de924838bd1642c19e83c31829560f95f32c7f6f168d3e3216699",
+      "name": "Kernel/Poisson/P1/Hexahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/bd6f90089c0de924838bd1642c19e83c31829560f95f32c7f6f168d3e3216699.json"
+    },
+    {
+      "id": "1f4c96457b004b33eabb2cb6a24b0b1e80882cfa8e141d3cf13fdae254f238bb",
+      "name": "Kernel/Poisson/P1/Pyramid/3/real_time",
+      "metric": "real_time",
+      "url": "cases/1f4c96457b004b33eabb2cb6a24b0b1e80882cfa8e141d3cf13fdae254f238bb.json"
+    },
+    {
+      "id": "f6adab4eb0fb3ed8497398c9704798400dc55a829385cb277742e69c856f00d1",
+      "name": "Kernel/Poisson/P1/Pyramid/5/real_time",
+      "metric": "real_time",
+      "url": "cases/f6adab4eb0fb3ed8497398c9704798400dc55a829385cb277742e69c856f00d1.json"
+    },
+    {
+      "id": "3a0e15b992c8f88749e254d69026f374a6a95fe4ad3c1963869c2b0da768b048",
+      "name": "Kernel/Poisson/P1/Pyramid/9/real_time",
+      "metric": "real_time",
+      "url": "cases/3a0e15b992c8f88749e254d69026f374a6a95fe4ad3c1963869c2b0da768b048.json"
+    },
+    {
+      "id": "bdd9c0297b5709e3c22b1948be37d9d1b11d61acc050fa1c6098ed3f96e9b82b",
+      "name": "Kernel/Poisson/P1/Quadrilateral/3/real_time",
+      "metric": "real_time",
+      "url": "cases/bdd9c0297b5709e3c22b1948be37d9d1b11d61acc050fa1c6098ed3f96e9b82b.json"
+    },
+    {
+      "id": "f5e2c5dec112df8bb0ba8cd7725a196fd6abef68e118f50a6587af6fe9d10165",
+      "name": "Kernel/Poisson/P1/Quadrilateral/5/real_time",
+      "metric": "real_time",
+      "url": "cases/f5e2c5dec112df8bb0ba8cd7725a196fd6abef68e118f50a6587af6fe9d10165.json"
+    },
+    {
+      "id": "b3a75399dbe600cf22e5cc280e916058b57d53fb58bd578ff1b368ebedface52",
+      "name": "Kernel/Poisson/P1/Quadrilateral/9/real_time",
+      "metric": "real_time",
+      "url": "cases/b3a75399dbe600cf22e5cc280e916058b57d53fb58bd578ff1b368ebedface52.json"
+    },
+    {
+      "id": "25b9d46410c4793fb71fa5338a4a30954ed1a5edccc6bb4ccdaff892694da84e",
+      "name": "Kernel/Poisson/P1/Segment/3/real_time",
+      "metric": "real_time",
+      "url": "cases/25b9d46410c4793fb71fa5338a4a30954ed1a5edccc6bb4ccdaff892694da84e.json"
+    },
+    {
+      "id": "33b97b64e5a2dba0f2ec0ecf229f8b633ad87ae68d95d152f5cc6000164d812a",
+      "name": "Kernel/Poisson/P1/Segment/5/real_time",
+      "metric": "real_time",
+      "url": "cases/33b97b64e5a2dba0f2ec0ecf229f8b633ad87ae68d95d152f5cc6000164d812a.json"
+    },
+    {
+      "id": "5346167fa3a277cfea742ddfddb7fb36d75a4475e29a32903213a908028716b8",
+      "name": "Kernel/Poisson/P1/Segment/9/real_time",
+      "metric": "real_time",
+      "url": "cases/5346167fa3a277cfea742ddfddb7fb36d75a4475e29a32903213a908028716b8.json"
+    },
+    {
+      "id": "f594df732746f8a7dd1f9c0ba68672fe790b36c1387715a0996b50da71992814",
+      "name": "Kernel/Poisson/P1/Tetrahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/f594df732746f8a7dd1f9c0ba68672fe790b36c1387715a0996b50da71992814.json"
+    },
+    {
+      "id": "b1b114cba27a592403d9b2cff951ed7544038283a3331cef9c0b4ff13c14ce70",
+      "name": "Kernel/Poisson/P1/Tetrahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/b1b114cba27a592403d9b2cff951ed7544038283a3331cef9c0b4ff13c14ce70.json"
+    },
+    {
+      "id": "a7f6321893ead9a47ea7936a49e292211f13e00dd0e1e52ebaf2856dd4084d2d",
+      "name": "Kernel/Poisson/P1/Tetrahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/a7f6321893ead9a47ea7936a49e292211f13e00dd0e1e52ebaf2856dd4084d2d.json"
+    },
+    {
+      "id": "1715e862fb566df91d54587421840d535188a87d109526d401f134fd55c18630",
+      "name": "Kernel/Poisson/P1/Triangle/3/real_time",
+      "metric": "real_time",
+      "url": "cases/1715e862fb566df91d54587421840d535188a87d109526d401f134fd55c18630.json"
+    },
+    {
+      "id": "b98c5eb251a46e1cd959418cbf878f89bc4e7b04f9ca28729621df86938186e3",
+      "name": "Kernel/Poisson/P1/Triangle/5/real_time",
+      "metric": "real_time",
+      "url": "cases/b98c5eb251a46e1cd959418cbf878f89bc4e7b04f9ca28729621df86938186e3.json"
+    },
+    {
+      "id": "8ccd64fe24306acfe97ae3ed9e7f4c2a789854a995e9de6ecc88c7b1bb5af29a",
+      "name": "Kernel/Poisson/P1/Triangle/9/real_time",
+      "metric": "real_time",
+      "url": "cases/8ccd64fe24306acfe97ae3ed9e7f4c2a789854a995e9de6ecc88c7b1bb5af29a.json"
+    },
+    {
+      "id": "ab057e8592b13b6d9249540b515af68d7c82b7f74624acf6c06943340c6076e9",
+      "name": "Kernel/Poisson/P1/Wedge/3/real_time",
+      "metric": "real_time",
+      "url": "cases/ab057e8592b13b6d9249540b515af68d7c82b7f74624acf6c06943340c6076e9.json"
+    },
+    {
+      "id": "668dbcb2b411736b2f1438b9f1cd04153f6cfdfc561ee621bd92df8539521aff",
+      "name": "Kernel/Poisson/P1/Wedge/5/real_time",
+      "metric": "real_time",
+      "url": "cases/668dbcb2b411736b2f1438b9f1cd04153f6cfdfc561ee621bd92df8539521aff.json"
+    },
+    {
+      "id": "f41116ebd896dfaed27ecc0ad3edd2954d5ee5e2e62e88c7b0fe5c034dbae9a7",
+      "name": "Kernel/Poisson/P1/Wedge/9/real_time",
+      "metric": "real_time",
+      "url": "cases/f41116ebd896dfaed27ecc0ad3edd2954d5ee5e2e62e88c7b0fe5c034dbae9a7.json"
+    },
+    {
+      "id": "44158e9a4d80cf2e058ce79629241977a21bbbab08c562592b346de27e3eb673",
+      "name": "Kernel/Poisson/P2/Hexahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/44158e9a4d80cf2e058ce79629241977a21bbbab08c562592b346de27e3eb673.json"
+    },
+    {
+      "id": "846dad17305b4c514b22bbcf5926af0326dcceb93b80347adc8aaa1917532e38",
+      "name": "Kernel/Poisson/P2/Hexahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/846dad17305b4c514b22bbcf5926af0326dcceb93b80347adc8aaa1917532e38.json"
+    },
+    {
+      "id": "574d51d1f0a7d1c70f2a781e48e35f7f3fc81a9d379c46026246676272165e43",
+      "name": "Kernel/Poisson/P2/Hexahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/574d51d1f0a7d1c70f2a781e48e35f7f3fc81a9d379c46026246676272165e43.json"
+    },
+    {
+      "id": "2b1fcd95b4d76f9d349f79ee242d3cddd540a7392c373a782a0c48309ba505bc",
+      "name": "Kernel/Poisson/P2/Pyramid/3/real_time",
+      "metric": "real_time",
+      "url": "cases/2b1fcd95b4d76f9d349f79ee242d3cddd540a7392c373a782a0c48309ba505bc.json"
+    },
+    {
+      "id": "118bc518685b196dcc816c4da399a0812e67427bdd7b1955fbcf3719a2a7ce4a",
+      "name": "Kernel/Poisson/P2/Pyramid/5/real_time",
+      "metric": "real_time",
+      "url": "cases/118bc518685b196dcc816c4da399a0812e67427bdd7b1955fbcf3719a2a7ce4a.json"
+    },
+    {
+      "id": "4572f5fc44352e68e2df30655f399abccfb36d177cad1f81070815d098423122",
+      "name": "Kernel/Poisson/P2/Pyramid/9/real_time",
+      "metric": "real_time",
+      "url": "cases/4572f5fc44352e68e2df30655f399abccfb36d177cad1f81070815d098423122.json"
+    },
+    {
+      "id": "18ac27233599277613826a086b24815e1dad26da31cea8b12f16d5a619687b41",
+      "name": "Kernel/Poisson/P2/Quadrilateral/3/real_time",
+      "metric": "real_time",
+      "url": "cases/18ac27233599277613826a086b24815e1dad26da31cea8b12f16d5a619687b41.json"
+    },
+    {
+      "id": "a23a061b8967f531ff6892a4b7a416baccffb9712c7719b7790c966a5eaa3c77",
+      "name": "Kernel/Poisson/P2/Quadrilateral/5/real_time",
+      "metric": "real_time",
+      "url": "cases/a23a061b8967f531ff6892a4b7a416baccffb9712c7719b7790c966a5eaa3c77.json"
+    },
+    {
+      "id": "ff3e8b2df104854eba6caf25de5da5e607081352850b8963808cc0ff994faec8",
+      "name": "Kernel/Poisson/P2/Quadrilateral/9/real_time",
+      "metric": "real_time",
+      "url": "cases/ff3e8b2df104854eba6caf25de5da5e607081352850b8963808cc0ff994faec8.json"
+    },
+    {
+      "id": "2e5afc40bf4ee11595380ebbaf6fdbb86d802cc5fb633459b7b46a9f37281fb2",
+      "name": "Kernel/Poisson/P2/Segment/3/real_time",
+      "metric": "real_time",
+      "url": "cases/2e5afc40bf4ee11595380ebbaf6fdbb86d802cc5fb633459b7b46a9f37281fb2.json"
+    },
+    {
+      "id": "a7be15ba82a1cb57d7e1ac93b53e6158a202b542ba3d98c6a2d691c16ca9f2c1",
+      "name": "Kernel/Poisson/P2/Segment/5/real_time",
+      "metric": "real_time",
+      "url": "cases/a7be15ba82a1cb57d7e1ac93b53e6158a202b542ba3d98c6a2d691c16ca9f2c1.json"
+    },
+    {
+      "id": "9ba9aa00a3a77a77fc5e45f9c8e926f972f201e9cfb456004acb8787ef1962b0",
+      "name": "Kernel/Poisson/P2/Segment/9/real_time",
+      "metric": "real_time",
+      "url": "cases/9ba9aa00a3a77a77fc5e45f9c8e926f972f201e9cfb456004acb8787ef1962b0.json"
+    },
+    {
+      "id": "92ec5d16ee7d499def5e381088847450cc9266bda9a7a5b616440768e9794fe6",
+      "name": "Kernel/Poisson/P2/Tetrahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/92ec5d16ee7d499def5e381088847450cc9266bda9a7a5b616440768e9794fe6.json"
+    },
+    {
+      "id": "5e5599474155c9e4b3d9279282643e2e76d30b94e005cc356fa590eb24e7bc05",
+      "name": "Kernel/Poisson/P2/Tetrahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/5e5599474155c9e4b3d9279282643e2e76d30b94e005cc356fa590eb24e7bc05.json"
+    },
+    {
+      "id": "43a5458f805b39882433ed795f49cf884ead97260c54f2d029eeb5ffdc80a624",
+      "name": "Kernel/Poisson/P2/Tetrahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/43a5458f805b39882433ed795f49cf884ead97260c54f2d029eeb5ffdc80a624.json"
+    },
+    {
+      "id": "27a6511ebcd18d278d0cd9829a5a98741db35a0f50bd8d8e2f710dffcc79b6e9",
+      "name": "Kernel/Poisson/P2/Triangle/3/real_time",
+      "metric": "real_time",
+      "url": "cases/27a6511ebcd18d278d0cd9829a5a98741db35a0f50bd8d8e2f710dffcc79b6e9.json"
+    },
+    {
+      "id": "c5ed6ca358787f482648e53716d4f9ac8189661a134fdc65c82d6dbbcc2b65c0",
+      "name": "Kernel/Poisson/P2/Triangle/5/real_time",
+      "metric": "real_time",
+      "url": "cases/c5ed6ca358787f482648e53716d4f9ac8189661a134fdc65c82d6dbbcc2b65c0.json"
+    },
+    {
+      "id": "cc552f3ddfe2ae706ec93a54dafdab8233560f59b99fa76f96a0095e0c09bf19",
+      "name": "Kernel/Poisson/P2/Triangle/9/real_time",
+      "metric": "real_time",
+      "url": "cases/cc552f3ddfe2ae706ec93a54dafdab8233560f59b99fa76f96a0095e0c09bf19.json"
+    },
+    {
+      "id": "bfae68ebf227010aa7492a5aa8abf69ee93d0ebfa34a3ba7924defc2c947565f",
+      "name": "Kernel/Poisson/P2/Wedge/3/real_time",
+      "metric": "real_time",
+      "url": "cases/bfae68ebf227010aa7492a5aa8abf69ee93d0ebfa34a3ba7924defc2c947565f.json"
+    },
+    {
+      "id": "5d2106bbaab5dfec0c9a9da7a99f6ba82e7c5030b8408affc0049078121f897b",
+      "name": "Kernel/Poisson/P2/Wedge/5/real_time",
+      "metric": "real_time",
+      "url": "cases/5d2106bbaab5dfec0c9a9da7a99f6ba82e7c5030b8408affc0049078121f897b.json"
+    },
+    {
+      "id": "609c4ee7ca2d9577ad6c975a63682185b860df4053b60375ab6b710222f77eaa",
+      "name": "Kernel/Poisson/P2/Wedge/9/real_time",
+      "metric": "real_time",
+      "url": "cases/609c4ee7ca2d9577ad6c975a63682185b860df4053b60375ab6b710222f77eaa.json"
+    },
+    {
+      "id": "a7b850857791b8f547696fd244bdc5fcd5642ac7bcabbeff833bf44dd592c050",
+      "name": "Triplets/Conductivity/P1/Hexahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/a7b850857791b8f547696fd244bdc5fcd5642ac7bcabbeff833bf44dd592c050.json"
+    },
+    {
+      "id": "68a05331b8708c987df1d8165b11457f5389954ff066186f7fd5f826e61d9b8f",
+      "name": "Triplets/Conductivity/P1/Hexahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/68a05331b8708c987df1d8165b11457f5389954ff066186f7fd5f826e61d9b8f.json"
+    },
+    {
+      "id": "088864067e4651337df219bcbb5e2706a132b6d2e59e34dcbaa29a81e024dba6",
+      "name": "Triplets/Conductivity/P1/Hexahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/088864067e4651337df219bcbb5e2706a132b6d2e59e34dcbaa29a81e024dba6.json"
+    },
+    {
+      "id": "528a672c377822f35a84931fa18657bcc95b77d9e658e458aaa471572e27138a",
+      "name": "Triplets/Conductivity/P1/Pyramid/3/real_time",
+      "metric": "real_time",
+      "url": "cases/528a672c377822f35a84931fa18657bcc95b77d9e658e458aaa471572e27138a.json"
+    },
+    {
+      "id": "c806574efd0fa2f6a73d4b109a147e63d439324d512ab509c1b06190d836e592",
+      "name": "Triplets/Conductivity/P1/Pyramid/5/real_time",
+      "metric": "real_time",
+      "url": "cases/c806574efd0fa2f6a73d4b109a147e63d439324d512ab509c1b06190d836e592.json"
+    },
+    {
+      "id": "c75f864c681c01cff97e5c61d797467b8ab2052404de9dc84fa1282f796ac82e",
+      "name": "Triplets/Conductivity/P1/Pyramid/9/real_time",
+      "metric": "real_time",
+      "url": "cases/c75f864c681c01cff97e5c61d797467b8ab2052404de9dc84fa1282f796ac82e.json"
+    },
+    {
+      "id": "f27d6404dd275d383ea037fef616a5f240324f0e4b7ffd0571eadf439c8f6a93",
+      "name": "Triplets/Conductivity/P1/Quadrilateral/3/real_time",
+      "metric": "real_time",
+      "url": "cases/f27d6404dd275d383ea037fef616a5f240324f0e4b7ffd0571eadf439c8f6a93.json"
+    },
+    {
+      "id": "1cdb5573eb68d225239c129294f70ac0ec6fa188b2ff556970f50757bbf1a5a2",
+      "name": "Triplets/Conductivity/P1/Quadrilateral/5/real_time",
+      "metric": "real_time",
+      "url": "cases/1cdb5573eb68d225239c129294f70ac0ec6fa188b2ff556970f50757bbf1a5a2.json"
+    },
+    {
+      "id": "d7142feeff18e16efef1c88bb4de4e36b879414a3e874675f171dd1d611644be",
+      "name": "Triplets/Conductivity/P1/Quadrilateral/9/real_time",
+      "metric": "real_time",
+      "url": "cases/d7142feeff18e16efef1c88bb4de4e36b879414a3e874675f171dd1d611644be.json"
+    },
+    {
+      "id": "303ce9953728d59008b042ebca5be0bad829dd66b2b9fbb23b1d91a2b64d5ea1",
+      "name": "Triplets/Conductivity/P1/Segment/3/real_time",
+      "metric": "real_time",
+      "url": "cases/303ce9953728d59008b042ebca5be0bad829dd66b2b9fbb23b1d91a2b64d5ea1.json"
+    },
+    {
+      "id": "dfed18820aa5a6810b20b7654fbaf12e7b33f475b075498758af4d7d9ec7a846",
+      "name": "Triplets/Conductivity/P1/Segment/5/real_time",
+      "metric": "real_time",
+      "url": "cases/dfed18820aa5a6810b20b7654fbaf12e7b33f475b075498758af4d7d9ec7a846.json"
+    },
+    {
+      "id": "0c12a079cf1d7564779d7d5df09c1717b7f42bb9920e84c734f1fb0b83ffc006",
+      "name": "Triplets/Conductivity/P1/Segment/9/real_time",
+      "metric": "real_time",
+      "url": "cases/0c12a079cf1d7564779d7d5df09c1717b7f42bb9920e84c734f1fb0b83ffc006.json"
+    },
+    {
+      "id": "d9e69aa090bc74df7c6a22fa86cc495b2afabdba1bdca7d95969eb1b42200ee8",
+      "name": "Triplets/Conductivity/P1/Tetrahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/d9e69aa090bc74df7c6a22fa86cc495b2afabdba1bdca7d95969eb1b42200ee8.json"
+    },
+    {
+      "id": "063347a036787879dde14b64fee70357bd2c61745dff313815c22b52bb491312",
+      "name": "Triplets/Conductivity/P1/Tetrahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/063347a036787879dde14b64fee70357bd2c61745dff313815c22b52bb491312.json"
+    },
+    {
+      "id": "f03c953d3e78ddaad0f87345ba082889c4213e6f5ed0d97c61c8555b27624b93",
+      "name": "Triplets/Conductivity/P1/Tetrahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/f03c953d3e78ddaad0f87345ba082889c4213e6f5ed0d97c61c8555b27624b93.json"
+    },
+    {
+      "id": "679bc618fac408e27839e9e06f2fc3aaa0eee1cdce2b34cd57f1a665a9924707",
+      "name": "Triplets/Conductivity/P1/Triangle/3/real_time",
+      "metric": "real_time",
+      "url": "cases/679bc618fac408e27839e9e06f2fc3aaa0eee1cdce2b34cd57f1a665a9924707.json"
+    },
+    {
+      "id": "8f1c155ef4c9e2c8f34ddf1d3c354072cad24d9dd57b0035cbca6325e44101db",
+      "name": "Triplets/Conductivity/P1/Triangle/5/real_time",
+      "metric": "real_time",
+      "url": "cases/8f1c155ef4c9e2c8f34ddf1d3c354072cad24d9dd57b0035cbca6325e44101db.json"
+    },
+    {
+      "id": "17dbfc02d86950184458ce17136d2b354b7e14cce5702d7d8ce2fea9754b3af5",
+      "name": "Triplets/Conductivity/P1/Triangle/9/real_time",
+      "metric": "real_time",
+      "url": "cases/17dbfc02d86950184458ce17136d2b354b7e14cce5702d7d8ce2fea9754b3af5.json"
+    },
+    {
+      "id": "b948de0bffa903e658854de3e400218ea64f1e23f5e7c853a68ec800f017dece",
+      "name": "Triplets/Conductivity/P1/Wedge/3/real_time",
+      "metric": "real_time",
+      "url": "cases/b948de0bffa903e658854de3e400218ea64f1e23f5e7c853a68ec800f017dece.json"
+    },
+    {
+      "id": "c76ce3dc8ba12cc130018c2b4c334c17bf66be48ef4b53c1e84338c60e7ba1cc",
+      "name": "Triplets/Conductivity/P1/Wedge/5/real_time",
+      "metric": "real_time",
+      "url": "cases/c76ce3dc8ba12cc130018c2b4c334c17bf66be48ef4b53c1e84338c60e7ba1cc.json"
+    },
+    {
+      "id": "98d7bd8caab1b78dd151e97f3d4ca9e8a32003e572a0c8c1b71c3cfa53afacfa",
+      "name": "Triplets/Conductivity/P1/Wedge/9/real_time",
+      "metric": "real_time",
+      "url": "cases/98d7bd8caab1b78dd151e97f3d4ca9e8a32003e572a0c8c1b71c3cfa53afacfa.json"
+    },
+    {
+      "id": "69dba9444cea522c8e9202a2d7b716a2c335510aaa9d6d96005a94e8ee1e2189",
+      "name": "Triplets/Conductivity/P2/Hexahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/69dba9444cea522c8e9202a2d7b716a2c335510aaa9d6d96005a94e8ee1e2189.json"
+    },
+    {
+      "id": "f5ee3dbc5c8e6733ce74acd77ef8f73605ab17988f84518dab29b6c9883108df",
+      "name": "Triplets/Conductivity/P2/Hexahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/f5ee3dbc5c8e6733ce74acd77ef8f73605ab17988f84518dab29b6c9883108df.json"
+    },
+    {
+      "id": "95e63e2f4ae7926645ad8893e4b13901c6a89362a3c714af5aa42df7f75f0861",
+      "name": "Triplets/Conductivity/P2/Hexahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/95e63e2f4ae7926645ad8893e4b13901c6a89362a3c714af5aa42df7f75f0861.json"
+    },
+    {
+      "id": "a092f489d2ea412c9474ace1fbc716c3b029bfe24df8613e83fda9ba48378126",
+      "name": "Triplets/Conductivity/P2/Pyramid/3/real_time",
+      "metric": "real_time",
+      "url": "cases/a092f489d2ea412c9474ace1fbc716c3b029bfe24df8613e83fda9ba48378126.json"
+    },
+    {
+      "id": "eab5057bf1dcb301b2268c31f1988dccc3d5d2d9428175377ddb2140c8929441",
+      "name": "Triplets/Conductivity/P2/Pyramid/5/real_time",
+      "metric": "real_time",
+      "url": "cases/eab5057bf1dcb301b2268c31f1988dccc3d5d2d9428175377ddb2140c8929441.json"
+    },
+    {
+      "id": "e4f69c44ee0cd91d857d001082b2951f53eba382d992bdb7237958742d37e95f",
+      "name": "Triplets/Conductivity/P2/Pyramid/9/real_time",
+      "metric": "real_time",
+      "url": "cases/e4f69c44ee0cd91d857d001082b2951f53eba382d992bdb7237958742d37e95f.json"
+    },
+    {
+      "id": "95d3342f4a788f281a616ccd11981bf13bde7dafbacb8d87a1bd586a0b3a96fa",
+      "name": "Triplets/Conductivity/P2/Quadrilateral/3/real_time",
+      "metric": "real_time",
+      "url": "cases/95d3342f4a788f281a616ccd11981bf13bde7dafbacb8d87a1bd586a0b3a96fa.json"
+    },
+    {
+      "id": "7fb7fc103e3cf31d40224a93ef36c76bd68705078bf1f98256c1a578e7af66ba",
+      "name": "Triplets/Conductivity/P2/Quadrilateral/5/real_time",
+      "metric": "real_time",
+      "url": "cases/7fb7fc103e3cf31d40224a93ef36c76bd68705078bf1f98256c1a578e7af66ba.json"
+    },
+    {
+      "id": "1ae02ce436f2bcd10206be60d92a0738a8aabb2b111e64e8584c66d589c9e5e2",
+      "name": "Triplets/Conductivity/P2/Quadrilateral/9/real_time",
+      "metric": "real_time",
+      "url": "cases/1ae02ce436f2bcd10206be60d92a0738a8aabb2b111e64e8584c66d589c9e5e2.json"
+    },
+    {
+      "id": "f8ffd6c867be0af1d6d617dc0bd1cb6b702b1b31d12067195a23c921b20390f7",
+      "name": "Triplets/Conductivity/P2/Segment/3/real_time",
+      "metric": "real_time",
+      "url": "cases/f8ffd6c867be0af1d6d617dc0bd1cb6b702b1b31d12067195a23c921b20390f7.json"
+    },
+    {
+      "id": "2d0f2b9fb151ea533ed66916f6f693ea5ef805736e99f557e9a9055931ac6ad7",
+      "name": "Triplets/Conductivity/P2/Segment/5/real_time",
+      "metric": "real_time",
+      "url": "cases/2d0f2b9fb151ea533ed66916f6f693ea5ef805736e99f557e9a9055931ac6ad7.json"
+    },
+    {
+      "id": "788a81a8ba97ec45486d1f3be29d4f59842edb89d265df43d2a847c4f6467f1d",
+      "name": "Triplets/Conductivity/P2/Segment/9/real_time",
+      "metric": "real_time",
+      "url": "cases/788a81a8ba97ec45486d1f3be29d4f59842edb89d265df43d2a847c4f6467f1d.json"
+    },
+    {
+      "id": "e2ab180a3d348679a2dbbd53f20a2cccb4631bab79028683ee3c10c72398210e",
+      "name": "Triplets/Conductivity/P2/Tetrahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/e2ab180a3d348679a2dbbd53f20a2cccb4631bab79028683ee3c10c72398210e.json"
+    },
+    {
+      "id": "2601ab76d192a6dcc44a2669db408a3456f80520305c64f2de3717b2731b3549",
+      "name": "Triplets/Conductivity/P2/Tetrahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/2601ab76d192a6dcc44a2669db408a3456f80520305c64f2de3717b2731b3549.json"
+    },
+    {
+      "id": "8a4e3ce3136a843c4aae5c5882bf400a24f738e62083ae5385f3ba2fd1e47504",
+      "name": "Triplets/Conductivity/P2/Tetrahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/8a4e3ce3136a843c4aae5c5882bf400a24f738e62083ae5385f3ba2fd1e47504.json"
+    },
+    {
+      "id": "f9bab351b8c43db9c4e6aacfd2398eae2133a630eee85f634b2dfde999edd150",
+      "name": "Triplets/Conductivity/P2/Triangle/3/real_time",
+      "metric": "real_time",
+      "url": "cases/f9bab351b8c43db9c4e6aacfd2398eae2133a630eee85f634b2dfde999edd150.json"
+    },
+    {
+      "id": "9ca2b06441da9c747ec7ce2727891212f0133add58f3fd71029cc9d9239a9666",
+      "name": "Triplets/Conductivity/P2/Triangle/5/real_time",
+      "metric": "real_time",
+      "url": "cases/9ca2b06441da9c747ec7ce2727891212f0133add58f3fd71029cc9d9239a9666.json"
+    },
+    {
+      "id": "1dd04c19d3dbbe6675f38edf5d41b11e6710d2bc878d1ac0aa36b3dd8e6f1cf2",
+      "name": "Triplets/Conductivity/P2/Triangle/9/real_time",
+      "metric": "real_time",
+      "url": "cases/1dd04c19d3dbbe6675f38edf5d41b11e6710d2bc878d1ac0aa36b3dd8e6f1cf2.json"
+    },
+    {
+      "id": "0823f76490dfa2c29f4295ca5916653ccecd7f17d9eabf443e03bbe119de11e7",
+      "name": "Triplets/Conductivity/P2/Wedge/3/real_time",
+      "metric": "real_time",
+      "url": "cases/0823f76490dfa2c29f4295ca5916653ccecd7f17d9eabf443e03bbe119de11e7.json"
+    },
+    {
+      "id": "8ce5e0434b22de51efabf9e0b3d66206ca12f58aefd82ed465a686574e886e2b",
+      "name": "Triplets/Conductivity/P2/Wedge/5/real_time",
+      "metric": "real_time",
+      "url": "cases/8ce5e0434b22de51efabf9e0b3d66206ca12f58aefd82ed465a686574e886e2b.json"
+    },
+    {
+      "id": "ecb4822c1386189fff1f9763f69941048a8ef0b073b8fe3dcadd4e1fc2e7091f",
+      "name": "Triplets/Conductivity/P2/Wedge/9/real_time",
+      "metric": "real_time",
+      "url": "cases/ecb4822c1386189fff1f9763f69941048a8ef0b073b8fe3dcadd4e1fc2e7091f.json"
+    },
+    {
+      "id": "789530eedb4aa1f808552d37860b68e09b00d2624390026558b51eb81cda0116",
+      "name": "Triplets/LinearElasticity/P1/Hexahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/789530eedb4aa1f808552d37860b68e09b00d2624390026558b51eb81cda0116.json"
+    },
+    {
+      "id": "606fe4edfdcad3aabd2fd6425afb6d47fe172fd5a43e514714e954f955b19ad2",
+      "name": "Triplets/LinearElasticity/P1/Hexahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/606fe4edfdcad3aabd2fd6425afb6d47fe172fd5a43e514714e954f955b19ad2.json"
+    },
+    {
+      "id": "9674a956296b92949894100bc08bd4e5bb2c0b60cb44fa3abf5ab5174a5dfc13",
+      "name": "Triplets/LinearElasticity/P1/Hexahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/9674a956296b92949894100bc08bd4e5bb2c0b60cb44fa3abf5ab5174a5dfc13.json"
+    },
+    {
+      "id": "02fdff8fba0a1d5bf6d2038eda0f67d16273bb502f18721eee858eb26ac2d497",
+      "name": "Triplets/LinearElasticity/P1/Pyramid/3/real_time",
+      "metric": "real_time",
+      "url": "cases/02fdff8fba0a1d5bf6d2038eda0f67d16273bb502f18721eee858eb26ac2d497.json"
+    },
+    {
+      "id": "fa740f2e4956f232c304681a3b85135f94eaae8063d532f579feb38816256dd0",
+      "name": "Triplets/LinearElasticity/P1/Pyramid/5/real_time",
+      "metric": "real_time",
+      "url": "cases/fa740f2e4956f232c304681a3b85135f94eaae8063d532f579feb38816256dd0.json"
+    },
+    {
+      "id": "6ad6cedc47568cfe33cf6dc5d4ec00e66035ff9862410f814759bb8a329063d9",
+      "name": "Triplets/LinearElasticity/P1/Pyramid/9/real_time",
+      "metric": "real_time",
+      "url": "cases/6ad6cedc47568cfe33cf6dc5d4ec00e66035ff9862410f814759bb8a329063d9.json"
+    },
+    {
+      "id": "7d935705a0c9c86111f213dfb370f148af964aba5d9ffe9751cea99af41c3abf",
+      "name": "Triplets/LinearElasticity/P1/Quadrilateral/3/real_time",
+      "metric": "real_time",
+      "url": "cases/7d935705a0c9c86111f213dfb370f148af964aba5d9ffe9751cea99af41c3abf.json"
+    },
+    {
+      "id": "fdb3d5757495ca62624979e6ee8ff4304b13babd64352578655590ea9a484ce8",
+      "name": "Triplets/LinearElasticity/P1/Quadrilateral/5/real_time",
+      "metric": "real_time",
+      "url": "cases/fdb3d5757495ca62624979e6ee8ff4304b13babd64352578655590ea9a484ce8.json"
+    },
+    {
+      "id": "484c18e0eda8d7390eab216aa087db1da78c050ea57887ae70adeb23e400149d",
+      "name": "Triplets/LinearElasticity/P1/Quadrilateral/9/real_time",
+      "metric": "real_time",
+      "url": "cases/484c18e0eda8d7390eab216aa087db1da78c050ea57887ae70adeb23e400149d.json"
+    },
+    {
+      "id": "046afa85656735af73d26e748be8cacaeae16181606d50e253167abe1498eb4f",
+      "name": "Triplets/LinearElasticity/P1/Segment/3/real_time",
+      "metric": "real_time",
+      "url": "cases/046afa85656735af73d26e748be8cacaeae16181606d50e253167abe1498eb4f.json"
+    },
+    {
+      "id": "4a67074a1acf21531c017ed4e37f23a3082245f337593fa64850ec2c5086f247",
+      "name": "Triplets/LinearElasticity/P1/Segment/5/real_time",
+      "metric": "real_time",
+      "url": "cases/4a67074a1acf21531c017ed4e37f23a3082245f337593fa64850ec2c5086f247.json"
+    },
+    {
+      "id": "7a29db92ce2028d0ff6c62ccb5b18f05126e7a2fa599d395627d20762b2896a2",
+      "name": "Triplets/LinearElasticity/P1/Segment/9/real_time",
+      "metric": "real_time",
+      "url": "cases/7a29db92ce2028d0ff6c62ccb5b18f05126e7a2fa599d395627d20762b2896a2.json"
+    },
+    {
+      "id": "b95237a873445f9aa5e55b05d072f350f63b96610d133fe5d0a0385767acf250",
+      "name": "Triplets/LinearElasticity/P1/Tetrahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/b95237a873445f9aa5e55b05d072f350f63b96610d133fe5d0a0385767acf250.json"
+    },
+    {
+      "id": "9d9ce42afb35be274e24ff8314b99c6a467ffd2b9db98c9f2d79a6dd700a15ff",
+      "name": "Triplets/LinearElasticity/P1/Tetrahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/9d9ce42afb35be274e24ff8314b99c6a467ffd2b9db98c9f2d79a6dd700a15ff.json"
+    },
+    {
+      "id": "7472d1419fff89767b1e6be2fcb1ad0c4c4e37660a8b2562630e088ca80ad75e",
+      "name": "Triplets/LinearElasticity/P1/Tetrahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/7472d1419fff89767b1e6be2fcb1ad0c4c4e37660a8b2562630e088ca80ad75e.json"
+    },
+    {
+      "id": "743ae79148064fe47bf369f1440bafdf2be87834b489ec8efdc6f72dbf59b87c",
+      "name": "Triplets/LinearElasticity/P1/Triangle/3/real_time",
+      "metric": "real_time",
+      "url": "cases/743ae79148064fe47bf369f1440bafdf2be87834b489ec8efdc6f72dbf59b87c.json"
+    },
+    {
+      "id": "53ee4a9089e25d661d09c10124e0e058cd151539c45d87dbe9d845eddffa985b",
+      "name": "Triplets/LinearElasticity/P1/Triangle/5/real_time",
+      "metric": "real_time",
+      "url": "cases/53ee4a9089e25d661d09c10124e0e058cd151539c45d87dbe9d845eddffa985b.json"
+    },
+    {
+      "id": "d50004b5b89888df73edbfa302f7737990c3c9bdf083ddd1e88aa8095256ebb5",
+      "name": "Triplets/LinearElasticity/P1/Triangle/9/real_time",
+      "metric": "real_time",
+      "url": "cases/d50004b5b89888df73edbfa302f7737990c3c9bdf083ddd1e88aa8095256ebb5.json"
+    },
+    {
+      "id": "4ae2c3afb5253a4dcae144dfc7d24e8b5af3d171acbc33ba612fff1c292db597",
+      "name": "Triplets/LinearElasticity/P1/Wedge/3/real_time",
+      "metric": "real_time",
+      "url": "cases/4ae2c3afb5253a4dcae144dfc7d24e8b5af3d171acbc33ba612fff1c292db597.json"
+    },
+    {
+      "id": "b1636a56139f1b8265aed601bd99f2f2600bc046a31bacef6504e38bab7317ac",
+      "name": "Triplets/LinearElasticity/P1/Wedge/5/real_time",
+      "metric": "real_time",
+      "url": "cases/b1636a56139f1b8265aed601bd99f2f2600bc046a31bacef6504e38bab7317ac.json"
+    },
+    {
+      "id": "b60b65916e9e17fca1691025b21b6075f9a8e57b635dc715533d7de266bde4a3",
+      "name": "Triplets/LinearElasticity/P1/Wedge/9/real_time",
+      "metric": "real_time",
+      "url": "cases/b60b65916e9e17fca1691025b21b6075f9a8e57b635dc715533d7de266bde4a3.json"
+    },
+    {
+      "id": "53d40d8fd9449730c5f59d732feeb6e06d6c470031bd2562ded845a32b7647fd",
+      "name": "Triplets/LinearElasticity/P2/Hexahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/53d40d8fd9449730c5f59d732feeb6e06d6c470031bd2562ded845a32b7647fd.json"
+    },
+    {
+      "id": "ecfab8a133944ff252f1be7aecb3d8fd2532757fd56536b1c703db6f1b592520",
+      "name": "Triplets/LinearElasticity/P2/Hexahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/ecfab8a133944ff252f1be7aecb3d8fd2532757fd56536b1c703db6f1b592520.json"
+    },
+    {
+      "id": "67f7f49b9e3f0f1900bdbf743ec7e0b4cc16411d98f5928128d3f5f48dbb4f77",
+      "name": "Triplets/LinearElasticity/P2/Hexahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/67f7f49b9e3f0f1900bdbf743ec7e0b4cc16411d98f5928128d3f5f48dbb4f77.json"
+    },
+    {
+      "id": "208d24788a1f53ac7f330dc043f703f79ceccc9615ebc14da2b3f1fec547eed4",
+      "name": "Triplets/LinearElasticity/P2/Pyramid/3/real_time",
+      "metric": "real_time",
+      "url": "cases/208d24788a1f53ac7f330dc043f703f79ceccc9615ebc14da2b3f1fec547eed4.json"
+    },
+    {
+      "id": "fb9eaad0f74be8539b525931e29c60a05a71a1aca9034764abfa6ad441474154",
+      "name": "Triplets/LinearElasticity/P2/Pyramid/5/real_time",
+      "metric": "real_time",
+      "url": "cases/fb9eaad0f74be8539b525931e29c60a05a71a1aca9034764abfa6ad441474154.json"
+    },
+    {
+      "id": "edbbf7906e825598ceb38f5819fb33508dd4bd46a533e24f9d50bd132dab6ef3",
+      "name": "Triplets/LinearElasticity/P2/Pyramid/9/real_time",
+      "metric": "real_time",
+      "url": "cases/edbbf7906e825598ceb38f5819fb33508dd4bd46a533e24f9d50bd132dab6ef3.json"
+    },
+    {
+      "id": "a498cf8c44ce5628c5591a2e1b7c2ddc5260a993cbb493f82849f04dc970b517",
+      "name": "Triplets/LinearElasticity/P2/Quadrilateral/3/real_time",
+      "metric": "real_time",
+      "url": "cases/a498cf8c44ce5628c5591a2e1b7c2ddc5260a993cbb493f82849f04dc970b517.json"
+    },
+    {
+      "id": "1cf32eeaedbdf1892798fda6a07a5c6f72d9d773cf3e9b7fd815bc3c417cd9a0",
+      "name": "Triplets/LinearElasticity/P2/Quadrilateral/5/real_time",
+      "metric": "real_time",
+      "url": "cases/1cf32eeaedbdf1892798fda6a07a5c6f72d9d773cf3e9b7fd815bc3c417cd9a0.json"
+    },
+    {
+      "id": "d5e8143329712f18e02f24995b2a4faa114d4e2531094b1d9a5203c42abe3aa8",
+      "name": "Triplets/LinearElasticity/P2/Quadrilateral/9/real_time",
+      "metric": "real_time",
+      "url": "cases/d5e8143329712f18e02f24995b2a4faa114d4e2531094b1d9a5203c42abe3aa8.json"
+    },
+    {
+      "id": "6daa290af8aa509cf2f986d0db2ab97d85037510c1642057d3552ad4f70a7b10",
+      "name": "Triplets/LinearElasticity/P2/Segment/3/real_time",
+      "metric": "real_time",
+      "url": "cases/6daa290af8aa509cf2f986d0db2ab97d85037510c1642057d3552ad4f70a7b10.json"
+    },
+    {
+      "id": "87ed3ea258971b41446f6cae39da3c50c972bf341549192f2c91020a5f51b17c",
+      "name": "Triplets/LinearElasticity/P2/Segment/5/real_time",
+      "metric": "real_time",
+      "url": "cases/87ed3ea258971b41446f6cae39da3c50c972bf341549192f2c91020a5f51b17c.json"
+    },
+    {
+      "id": "82b7f56893bd67c8cd333bbc4ce1d7a6e72b7e87f5fb3fc3b90b129af2da18e6",
+      "name": "Triplets/LinearElasticity/P2/Segment/9/real_time",
+      "metric": "real_time",
+      "url": "cases/82b7f56893bd67c8cd333bbc4ce1d7a6e72b7e87f5fb3fc3b90b129af2da18e6.json"
+    },
+    {
+      "id": "7df81ff186f67bd66175973c13a526ea7a766b30e4659328a60c41b767c36976",
+      "name": "Triplets/LinearElasticity/P2/Tetrahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/7df81ff186f67bd66175973c13a526ea7a766b30e4659328a60c41b767c36976.json"
+    },
+    {
+      "id": "c60fa472250fe82662c6d19b2e0100ba1ddfe12903594237ff2c2268de0d3d38",
+      "name": "Triplets/LinearElasticity/P2/Tetrahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/c60fa472250fe82662c6d19b2e0100ba1ddfe12903594237ff2c2268de0d3d38.json"
+    },
+    {
+      "id": "a5bf337d04a2b427db6c2838be65accaa95b01c879267a5e050e07131d551b6a",
+      "name": "Triplets/LinearElasticity/P2/Tetrahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/a5bf337d04a2b427db6c2838be65accaa95b01c879267a5e050e07131d551b6a.json"
+    },
+    {
+      "id": "39725b63f9261f04d9d1ebc803b75ee18014f70ccf5f62bb49aa707f0f641fd8",
+      "name": "Triplets/LinearElasticity/P2/Triangle/3/real_time",
+      "metric": "real_time",
+      "url": "cases/39725b63f9261f04d9d1ebc803b75ee18014f70ccf5f62bb49aa707f0f641fd8.json"
+    },
+    {
+      "id": "1fdd359302ef9a22d5d7536f8882c27d09f725ae9fc75aebb0cfe1cb83f9cb4e",
+      "name": "Triplets/LinearElasticity/P2/Triangle/5/real_time",
+      "metric": "real_time",
+      "url": "cases/1fdd359302ef9a22d5d7536f8882c27d09f725ae9fc75aebb0cfe1cb83f9cb4e.json"
+    },
+    {
+      "id": "d15a10e81098e6cc8b092e36a47efcea515521b0a80f520fdf838ef9ad92d783",
+      "name": "Triplets/LinearElasticity/P2/Triangle/9/real_time",
+      "metric": "real_time",
+      "url": "cases/d15a10e81098e6cc8b092e36a47efcea515521b0a80f520fdf838ef9ad92d783.json"
+    },
+    {
+      "id": "03a61a1cc853d7a2b0a5a9cc0bf7e1c254004d43faaf8a6f542d51ee5fc56df8",
+      "name": "Triplets/LinearElasticity/P2/Wedge/3/real_time",
+      "metric": "real_time",
+      "url": "cases/03a61a1cc853d7a2b0a5a9cc0bf7e1c254004d43faaf8a6f542d51ee5fc56df8.json"
+    },
+    {
+      "id": "6963f7816c8870666ce4c6fc4dc98f9451f272b7c3700da4576dc20b1d3b371f",
+      "name": "Triplets/LinearElasticity/P2/Wedge/5/real_time",
+      "metric": "real_time",
+      "url": "cases/6963f7816c8870666ce4c6fc4dc98f9451f272b7c3700da4576dc20b1d3b371f.json"
+    },
+    {
+      "id": "10201a1c4cbcc2516c44760e906c92dfb1f9e153b74a0702bdaeb358c7e54e5f",
+      "name": "Triplets/LinearElasticity/P2/Wedge/9/real_time",
+      "metric": "real_time",
+      "url": "cases/10201a1c4cbcc2516c44760e906c92dfb1f9e153b74a0702bdaeb358c7e54e5f.json"
+    },
+    {
+      "id": "d39a3d76d51c12a63663c781ed65e7a779afc754ca92b8eb975b27add1bf3e38",
+      "name": "Triplets/Poisson/P1/Hexahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/d39a3d76d51c12a63663c781ed65e7a779afc754ca92b8eb975b27add1bf3e38.json"
+    },
+    {
+      "id": "f378fefa7b536a53d8fa456f60068998f1e2b0e4683acd43ab702c31b389ae7f",
+      "name": "Triplets/Poisson/P1/Hexahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/f378fefa7b536a53d8fa456f60068998f1e2b0e4683acd43ab702c31b389ae7f.json"
+    },
+    {
+      "id": "2172f0d6f09b378826ec65235d79278ea078e1fb6483a1d312195544b1c60b85",
+      "name": "Triplets/Poisson/P1/Hexahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/2172f0d6f09b378826ec65235d79278ea078e1fb6483a1d312195544b1c60b85.json"
+    },
+    {
+      "id": "988a6e3bac8a89ec6da431b5aa8b9653d17dc9aa63d3f9ca931aee96673552eb",
+      "name": "Triplets/Poisson/P1/Pyramid/3/real_time",
+      "metric": "real_time",
+      "url": "cases/988a6e3bac8a89ec6da431b5aa8b9653d17dc9aa63d3f9ca931aee96673552eb.json"
+    },
+    {
+      "id": "1e3dcca1ddbf04e20b52ffa29081258b5f34bc552b5f5d33962b109b897e94ed",
+      "name": "Triplets/Poisson/P1/Pyramid/5/real_time",
+      "metric": "real_time",
+      "url": "cases/1e3dcca1ddbf04e20b52ffa29081258b5f34bc552b5f5d33962b109b897e94ed.json"
+    },
+    {
+      "id": "4cd9d9346256964728a0c3569c9ca59ed27ec9f85245330c7f7eedf99df6ce4d",
+      "name": "Triplets/Poisson/P1/Pyramid/9/real_time",
+      "metric": "real_time",
+      "url": "cases/4cd9d9346256964728a0c3569c9ca59ed27ec9f85245330c7f7eedf99df6ce4d.json"
+    },
+    {
+      "id": "fbcca0c9f044f25261dd69068be8c7715ee0b4c1b462d092c9fae95a0fde0d79",
+      "name": "Triplets/Poisson/P1/Quadrilateral/3/real_time",
+      "metric": "real_time",
+      "url": "cases/fbcca0c9f044f25261dd69068be8c7715ee0b4c1b462d092c9fae95a0fde0d79.json"
+    },
+    {
+      "id": "07bcd2410426b51264bee4bcf0dab95668ec01c2d28277c48bef6a39bdcd8683",
+      "name": "Triplets/Poisson/P1/Quadrilateral/5/real_time",
+      "metric": "real_time",
+      "url": "cases/07bcd2410426b51264bee4bcf0dab95668ec01c2d28277c48bef6a39bdcd8683.json"
+    },
+    {
+      "id": "dbb639ae722be1a06f52d762fe8d0def29fc53b626b03927ec15b943f2ac6846",
+      "name": "Triplets/Poisson/P1/Quadrilateral/9/real_time",
+      "metric": "real_time",
+      "url": "cases/dbb639ae722be1a06f52d762fe8d0def29fc53b626b03927ec15b943f2ac6846.json"
+    },
+    {
+      "id": "6c3cd2e28f149d4c3222f73f0528996ae650321cea8703860b83a0d87feddb60",
+      "name": "Triplets/Poisson/P1/Segment/3/real_time",
+      "metric": "real_time",
+      "url": "cases/6c3cd2e28f149d4c3222f73f0528996ae650321cea8703860b83a0d87feddb60.json"
+    },
+    {
+      "id": "29ad9bb1e6f765f7a7b27d406ef028c793e1524e0cdf3bdea448c663791ba48c",
+      "name": "Triplets/Poisson/P1/Segment/5/real_time",
+      "metric": "real_time",
+      "url": "cases/29ad9bb1e6f765f7a7b27d406ef028c793e1524e0cdf3bdea448c663791ba48c.json"
+    },
+    {
+      "id": "4ab2847f2af07b2966014a19b60a7b43a6ec9cdf093e2f0ebdd6ac36abe991bc",
+      "name": "Triplets/Poisson/P1/Segment/9/real_time",
+      "metric": "real_time",
+      "url": "cases/4ab2847f2af07b2966014a19b60a7b43a6ec9cdf093e2f0ebdd6ac36abe991bc.json"
+    },
+    {
+      "id": "04ba607208dc9b8391c6fc649ec1878e5baa022f50999382504cc05e0326bf7c",
+      "name": "Triplets/Poisson/P1/Tetrahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/04ba607208dc9b8391c6fc649ec1878e5baa022f50999382504cc05e0326bf7c.json"
+    },
+    {
+      "id": "5d6852967ad55e9591550136c07ea9a83db0e3a1fd183c4c249307642d6d6bea",
+      "name": "Triplets/Poisson/P1/Tetrahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/5d6852967ad55e9591550136c07ea9a83db0e3a1fd183c4c249307642d6d6bea.json"
+    },
+    {
+      "id": "6d346d5c99dd7ff205e6f138ed892fadd42c8569019205b29f754b2ffb318d7d",
+      "name": "Triplets/Poisson/P1/Tetrahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/6d346d5c99dd7ff205e6f138ed892fadd42c8569019205b29f754b2ffb318d7d.json"
+    },
+    {
+      "id": "76da663c3ed03375d11e1ce92c2377b248d76a5a8b7ba35d551c4e171c8db081",
+      "name": "Triplets/Poisson/P1/Triangle/3/real_time",
+      "metric": "real_time",
+      "url": "cases/76da663c3ed03375d11e1ce92c2377b248d76a5a8b7ba35d551c4e171c8db081.json"
+    },
+    {
+      "id": "6b02423f502e05ee86f35f75c6061eb548f59292f34e2a991a0d59fb3ee32721",
+      "name": "Triplets/Poisson/P1/Triangle/5/real_time",
+      "metric": "real_time",
+      "url": "cases/6b02423f502e05ee86f35f75c6061eb548f59292f34e2a991a0d59fb3ee32721.json"
+    },
+    {
+      "id": "78fff28519429fd7a691375658e668b01ded86a0c3fdc1ecfd2a5b7abb9351b6",
+      "name": "Triplets/Poisson/P1/Triangle/9/real_time",
+      "metric": "real_time",
+      "url": "cases/78fff28519429fd7a691375658e668b01ded86a0c3fdc1ecfd2a5b7abb9351b6.json"
+    },
+    {
+      "id": "c4c5d3523cf6240c0d11193d3106ff1d30963d1669a17ed2f0eb843053b36e83",
+      "name": "Triplets/Poisson/P1/Wedge/3/real_time",
+      "metric": "real_time",
+      "url": "cases/c4c5d3523cf6240c0d11193d3106ff1d30963d1669a17ed2f0eb843053b36e83.json"
+    },
+    {
+      "id": "c117c44ce910fa84240e5b7f5c32da431f0195dda922ae3bca5a6e35e10abf9d",
+      "name": "Triplets/Poisson/P1/Wedge/5/real_time",
+      "metric": "real_time",
+      "url": "cases/c117c44ce910fa84240e5b7f5c32da431f0195dda922ae3bca5a6e35e10abf9d.json"
+    },
+    {
+      "id": "ebd42d04f01c131a0155504a7136bfe35f16d4ba7735425d425882a5a36b2643",
+      "name": "Triplets/Poisson/P1/Wedge/9/real_time",
+      "metric": "real_time",
+      "url": "cases/ebd42d04f01c131a0155504a7136bfe35f16d4ba7735425d425882a5a36b2643.json"
+    },
+    {
+      "id": "ce6d1f5241c48e02cc543b0c4ca18315ddc0d6f7a10e3d4683b8086325a34f57",
+      "name": "Triplets/Poisson/P2/Hexahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/ce6d1f5241c48e02cc543b0c4ca18315ddc0d6f7a10e3d4683b8086325a34f57.json"
+    },
+    {
+      "id": "09bf599a9bb031bb2069cca938a24fc0d0da6635077ce12a030b9b9417222c1b",
+      "name": "Triplets/Poisson/P2/Hexahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/09bf599a9bb031bb2069cca938a24fc0d0da6635077ce12a030b9b9417222c1b.json"
+    },
+    {
+      "id": "e9da061f822c7ba008e9c7354d130ece27b44113884b081b0d726cf5061431b0",
+      "name": "Triplets/Poisson/P2/Hexahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/e9da061f822c7ba008e9c7354d130ece27b44113884b081b0d726cf5061431b0.json"
+    },
+    {
+      "id": "b2a45f108594c9c979b653748bde4324a1ce015ecc77804b9fe5c2082f6f739d",
+      "name": "Triplets/Poisson/P2/Pyramid/3/real_time",
+      "metric": "real_time",
+      "url": "cases/b2a45f108594c9c979b653748bde4324a1ce015ecc77804b9fe5c2082f6f739d.json"
+    },
+    {
+      "id": "e5a9f1298ac1e694e124343c873d1b4d1921f87c5ac018c6ee0af993ca80cc3d",
+      "name": "Triplets/Poisson/P2/Pyramid/5/real_time",
+      "metric": "real_time",
+      "url": "cases/e5a9f1298ac1e694e124343c873d1b4d1921f87c5ac018c6ee0af993ca80cc3d.json"
+    },
+    {
+      "id": "e842df747831b95654308ec352c566a7d392ae7d28613d57db3079d7d823af3f",
+      "name": "Triplets/Poisson/P2/Pyramid/9/real_time",
+      "metric": "real_time",
+      "url": "cases/e842df747831b95654308ec352c566a7d392ae7d28613d57db3079d7d823af3f.json"
+    },
+    {
+      "id": "e16c033f4a94cd32fa0dd7bcf3bce119df0838543a6f41e34386c93d3ab2197a",
+      "name": "Triplets/Poisson/P2/Quadrilateral/3/real_time",
+      "metric": "real_time",
+      "url": "cases/e16c033f4a94cd32fa0dd7bcf3bce119df0838543a6f41e34386c93d3ab2197a.json"
+    },
+    {
+      "id": "b7f1f12538a3b31405bee2b9fafb0c52f43f5c9cb230d6f9970f05047fd7e61d",
+      "name": "Triplets/Poisson/P2/Quadrilateral/5/real_time",
+      "metric": "real_time",
+      "url": "cases/b7f1f12538a3b31405bee2b9fafb0c52f43f5c9cb230d6f9970f05047fd7e61d.json"
+    },
+    {
+      "id": "14da94492e42a6c11ac1365b1c7a86661a1a115474063926a7e6e0235990b278",
+      "name": "Triplets/Poisson/P2/Quadrilateral/9/real_time",
+      "metric": "real_time",
+      "url": "cases/14da94492e42a6c11ac1365b1c7a86661a1a115474063926a7e6e0235990b278.json"
+    },
+    {
+      "id": "4c36e3e603227e67c136427622c8af88d87bd7f6aa7b1acd3ed6cfa457c20c1e",
+      "name": "Triplets/Poisson/P2/Segment/3/real_time",
+      "metric": "real_time",
+      "url": "cases/4c36e3e603227e67c136427622c8af88d87bd7f6aa7b1acd3ed6cfa457c20c1e.json"
+    },
+    {
+      "id": "386dd9953d5bae40214c635782d45b9171d458fdc98d4e43305a8ba3736d901f",
+      "name": "Triplets/Poisson/P2/Segment/5/real_time",
+      "metric": "real_time",
+      "url": "cases/386dd9953d5bae40214c635782d45b9171d458fdc98d4e43305a8ba3736d901f.json"
+    },
+    {
+      "id": "5f3729f2f4a00fb05f2572f157d35299dd96621096b07033c7b0015dc1a4f11e",
+      "name": "Triplets/Poisson/P2/Segment/9/real_time",
+      "metric": "real_time",
+      "url": "cases/5f3729f2f4a00fb05f2572f157d35299dd96621096b07033c7b0015dc1a4f11e.json"
+    },
+    {
+      "id": "090fa1670eecd171d4dd31a80e8033a6446e626e709ef2ae690ea908a902a60d",
+      "name": "Triplets/Poisson/P2/Tetrahedron/3/real_time",
+      "metric": "real_time",
+      "url": "cases/090fa1670eecd171d4dd31a80e8033a6446e626e709ef2ae690ea908a902a60d.json"
+    },
+    {
+      "id": "064ac76ff70a162a66c52272b11d51757ef59a88c6341e20065e8c101d42137e",
+      "name": "Triplets/Poisson/P2/Tetrahedron/5/real_time",
+      "metric": "real_time",
+      "url": "cases/064ac76ff70a162a66c52272b11d51757ef59a88c6341e20065e8c101d42137e.json"
+    },
+    {
+      "id": "9119638a294841cdd65f51be2736bef679789b3326b776cbb77871acf6dbcb71",
+      "name": "Triplets/Poisson/P2/Tetrahedron/9/real_time",
+      "metric": "real_time",
+      "url": "cases/9119638a294841cdd65f51be2736bef679789b3326b776cbb77871acf6dbcb71.json"
+    },
+    {
+      "id": "6f7e6dba6b009fb77e2ef05e38846dd9a2942eb021e2deede5e87a9a3a06dda3",
+      "name": "Triplets/Poisson/P2/Triangle/3/real_time",
+      "metric": "real_time",
+      "url": "cases/6f7e6dba6b009fb77e2ef05e38846dd9a2942eb021e2deede5e87a9a3a06dda3.json"
+    },
+    {
+      "id": "ab6fd2bc3c3ee79c80a41db6b2ce3d1f046c7daceeedc30e222818013c80e360",
+      "name": "Triplets/Poisson/P2/Triangle/5/real_time",
+      "metric": "real_time",
+      "url": "cases/ab6fd2bc3c3ee79c80a41db6b2ce3d1f046c7daceeedc30e222818013c80e360.json"
+    },
+    {
+      "id": "9ab64d47af42aa4eabbb9c4b07b2bfe6e49ff57a06469792bf3c515b046d46f3",
+      "name": "Triplets/Poisson/P2/Triangle/9/real_time",
+      "metric": "real_time",
+      "url": "cases/9ab64d47af42aa4eabbb9c4b07b2bfe6e49ff57a06469792bf3c515b046d46f3.json"
+    },
+    {
+      "id": "4be82707e0683d38b15c59f793bfbfdd0ddacf2e0a62f9bf7c7a7e2137fbd957",
+      "name": "Triplets/Poisson/P2/Wedge/3/real_time",
+      "metric": "real_time",
+      "url": "cases/4be82707e0683d38b15c59f793bfbfdd0ddacf2e0a62f9bf7c7a7e2137fbd957.json"
+    },
+    {
+      "id": "0c4d24cca5a15e950eb92d0eab27d98a6078eb3da934cf8fceab843dae02369b",
+      "name": "Triplets/Poisson/P2/Wedge/5/real_time",
+      "metric": "real_time",
+      "url": "cases/0c4d24cca5a15e950eb92d0eab27d98a6078eb3da934cf8fceab843dae02369b.json"
+    },
+    {
+      "id": "a59033cdb27ea5d0a6fc0f309ecf2a461883c229d98a8a73b8115172b91da44e",
+      "name": "Triplets/Poisson/P2/Wedge/9/real_time",
+      "metric": "real_time",
+      "url": "cases/a59033cdb27ea5d0a6fc0f309ecf2a461883c229d98a8a73b8115172b91da44e.json"
+    }
+  ]
+}

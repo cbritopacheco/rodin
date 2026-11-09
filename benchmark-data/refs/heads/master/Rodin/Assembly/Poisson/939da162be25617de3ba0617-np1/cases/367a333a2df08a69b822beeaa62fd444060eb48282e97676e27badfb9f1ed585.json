@@ -1,0 +1,86 @@
+{
+  "schema": 1,
+  "component": "Rodin/Assembly/Poisson",
+  "configuration": "939da162be25617de3ba0617-np1",
+  "name": "Poisson_UniformGrid_16x16/Assembly_ConstantCoefficient_ConstantSource",
+  "metric": "cpu_time",
+  "entries": [
+    {
+      "commit": "08f2b1df730e2f6c6ec854001b199f67c990ac38",
+      "date": "2026-11-09T20:14:21.513262+00:00",
+      "run": "42617234567.1",
+      "results": [
+        {
+          "name": "Poisson_UniformGrid_16x16/Assembly_ConstantCoefficient_ConstantSource",
+          "value": 237262.69205569205,
+          "unit": "ns",
+          "metric": "cpu_time",
+          "samples": [
+            237262.69205569205
+          ],
+          "records": [
+            {
+              "name": "Poisson_UniformGrid_16x16/Assembly_ConstantCoefficient_ConstantSource",
+              "family_index": 1,
+              "per_family_instance_index": 0,
+              "run_name": "Poisson_UniformGrid_16x16/Assembly_ConstantCoefficient_ConstantSource",
+              "run_type": "iteration",
+              "repetitions": 1,
+              "repetition_index": 0,
+              "threads": 1,
+              "iterations": 1221,
+              "real_time": 237265.60606060128,
+              "cpu_time": 237262.69205569205,
+              "time_unit": "ns"
+            }
+          ],
+          "context": {
+            "date": "2026-11-09T13:11:34+00:00",
+            "host_name": "runnervm7aw5e",
+            "executable": "/home/runner/work/rodin/rodin/build-benchmarks/tests/benchmarks/RodinAssemblyBenchmarks",
+            "num_cpus": 4,
+            "mhz_per_cpu": 2800,
+            "cpu_scaling_enabled": true,
+            "aslr_enabled": false,
+            "caches": [
+              {
+                "type": "Data",
+                "level": 1,
+                "size": 49152,
+                "num_sharing": 2
+              },
+              {
+                "type": "Instruction",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 2,
+                "size": 1310720,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 3,
+                "size": 50331648,
+                "num_sharing": 4
+              }
+            ],
+            "load_avg": [
+              0.949707,
+              0.322266,
+              0.115234
+            ],
+            "library_version": "v1.9.4",
+            "library_build_type": "release",
+            "json_schema_version": 1
+          }
+        }
+      ]
+    }
+  ],
+  "format": "googlecpp",
+  "window": 20
+}

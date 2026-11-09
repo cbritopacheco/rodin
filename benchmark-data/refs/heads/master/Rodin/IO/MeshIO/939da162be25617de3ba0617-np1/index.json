@@ -1,0 +1,48 @@
+{
+  "schema": 1,
+  "definition": {
+    "kind": "benchmark",
+    "mode": "local",
+    "compiler": "gcc-14",
+    "runner": "ubuntu-24.04",
+    "cmake": {
+      "CMAKE_BUILD_TYPE": "Release",
+      "CMAKE_CXX_COMPILER": "g++-14",
+      "CMAKE_C_COMPILER": "gcc-14",
+      "CMAKE_SUPPRESS_REGENERATION": "ON",
+      "RODIN_BUILD_SRC": "ON",
+      "RODIN_BUILD_BENCHMARKS": "ON",
+      "RODIN_BUILD_UNIT_TESTS": "OFF",
+      "RODIN_BUILD_MANUFACTURED_TESTS": "OFF",
+      "RODIN_BUILD_CONVERGENCE_TESTS": "OFF",
+      "RODIN_BUILD_EXAMPLES": "OFF",
+      "RODIN_BUILD_DOC": "OFF",
+      "RODIN_INSTALL_RESOURCES": "OFF",
+      "RODIN_CODE_COVERAGE": "OFF",
+      "RODIN_MULTITHREADED": "OFF",
+      "RODIN_USE_ASAN": "OFF",
+      "RODIN_USE_UBSAN": "OFF",
+      "RODIN_USE_MPI": "OFF",
+      "RODIN_USE_PETSC": "OFF"
+    },
+    "targets": [
+      "RodinIOBenchmarks"
+    ],
+    "stage": "components"
+  },
+  "ranks": 1,
+  "cases": [
+    {
+      "id": "6620857ba82a2f2dae8573dcf7438eba453c5f65f161a2f33bbd40240a1df96e",
+      "name": "MeshIO/Load_MEDIT_2D_Square",
+      "metric": "cpu_time",
+      "url": "cases/6620857ba82a2f2dae8573dcf7438eba453c5f65f161a2f33bbd40240a1df96e.json"
+    },
+    {
+      "id": "81f8c5566c30364894b9a064606c2628e25168184ac5d240a9b213c4a6a2cf29",
+      "name": "MeshIO/Load_MEDIT_2D_UniformTriangular64",
+      "metric": "cpu_time",
+      "url": "cases/81f8c5566c30364894b9a064606c2628e25168184ac5d240a9b213c4a6a2cf29.json"
+    }
+  ]
+}
