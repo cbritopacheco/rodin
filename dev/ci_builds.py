@@ -110,7 +110,7 @@ def definition(job, row):
         'RODIN_USE_ASAN': 'OFF', 'RODIN_USE_UBSAN': 'OFF',
     }
     return {'mode': mode, 'compiler': 'gcc-14',
-            'runner': 'ubuntu-latest' if mode == 'native' else 'ubuntu-24.04',
+            'runner': 'ubuntu-24.04',
             'cmake': flags, 'targets': sorted(names)}
 
 

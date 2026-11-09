@@ -747,3 +747,9 @@ refinements and numerical requirements. Coverage runs have a 3,600-second
 allowance, matching the existing local P3 pyramid allowance. Its first two
 hosted levels took 25 and 194 seconds before the final level exhausted the
 former 1,800-second limit. MPI cases and non-coverage watchdogs remain unchanged.
+
+Linux jobs and shared-build runner identities pin `ubuntu-24.04`. This preserves
+the validated Python 3.12.0 and Boost 1.74 environment after `ubuntu-latest`
+moved to Ubuntu 26.04. Runner changes require reviewing dependency availability
+and rerunning the complete configurations; compiler, numerical and coverage
+requirements remain unchanged.

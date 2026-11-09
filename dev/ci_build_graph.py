@@ -43,7 +43,7 @@ def specification(job, matrix):
     if job == 'Ordinary':
         flags = tests.configuration(matrix['group'], matrix['profile'], matrix['build_type'],
                                     matrix['multithreaded'], matrix['asan'], matrix['ubsan'], matrix['backend'])
-        return {'mode': matrix['backend'], 'runner': 'ubuntu-latest', 'compiler': 'gcc-14',
+        return {'mode': matrix['backend'], 'runner': 'ubuntu-24.04', 'compiler': 'gcc-14',
                 'cmake': flags, 'targets': []}
     if job == 'ConvergenceBaseline':
         return archive.definition('Convergence', dict(multithreaded=matrix['multithreaded'],
@@ -51,7 +51,7 @@ def specification(job, matrix):
     if job == 'PETScMatrixRanges':
         spec = archive.definition('PETScComplexConvergence', dict(multithreaded=matrix['multithreaded'], suite='bulk'))
         spec['mode'] = 'ranges_' + matrix['scalar']
-        spec['runner'] = 'ubuntu-latest'
+        spec['runner'] = 'ubuntu-24.04'
         spec['cmake']['RODIN_BUILD_CONVERGENCE_TESTS'] = 'OFF'
         # These are the original explicit build targets; execution regex/ranks
         # stay in the workflow and are independently guarded by the inventory.

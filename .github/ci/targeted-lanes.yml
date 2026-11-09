@@ -1,7 +1,7 @@
 # Source definitions for dedicated numerical lanes. Run dev/ci_schedule.py --write after editing.
 jobs:
   Convergence:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: ${{ (matrix.suite == 'curved_nonlinear_pyramid' || matrix.suite == 'pressure_pyramid' || endsWith(matrix.group,
       '/NonlinearPoisson')) && 360 || matrix.suite == 'baseline' && 90 || 180 }}
     strategy:
@@ -199,7 +199,7 @@ jobs:
         definition: '{"job":"${{ github.job }}","matrix":${{ toJSON(matrix) }}}'
     name: ${{ matrix.path }} (MT=${{ matrix.multithreaded }}, Suite=${{ matrix.suite }})
   ConvergenceBaseline:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: ${{ (matrix.suite == 'curved_nonlinear_pyramid' || matrix.suite == 'pressure_pyramid' || endsWith(matrix.group,
       '/NonlinearPoisson')) && 360 || matrix.suite == 'baseline' && 90 || 180 }}
     strategy:
@@ -5791,7 +5791,7 @@ jobs:
     name: ${{ matrix.path }} (MT=${{ matrix.multithreaded }}, Suite=${{ matrix.suite }}, Context=${{ matrix.context
       }})
   PETScMatrixRanges:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 90
     strategy:
       fail-fast: false

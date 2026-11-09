@@ -18,7 +18,7 @@ jobs:
   Plan:
     if: ${{ !github.event.pull_request.draft }}
     name: CMake / CI
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     outputs:
       configurations_baseline: ${{ steps.common.outputs.configurations_baseline }}
       configurations_complex: ${{ steps.common.outputs.configurations_complex }}
@@ -221,7 +221,7 @@ jobs:
     strategy:
       matrix:
         os:
-        - ubuntu-latest
+        - ubuntu-24.04
         compiler:
         - gcc-12
         - gcc-13
@@ -354,7 +354,7 @@ jobs:
     - Configurations_ranges_real
     - InstallationUbuntu
     - InstallationMacOS
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
     - uses: actions/checkout@v4
       with:

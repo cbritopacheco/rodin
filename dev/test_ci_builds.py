@@ -27,7 +27,7 @@ class SharedBuildPlanTest(unittest.TestCase):
                  for row in self.workflow['jobs'][job]['strategy']['matrix']['include']}
         self.assertEqual(len(specs), 84)
         self.assertEqual(hashlib.sha256('\n'.join(sorted(specs)).encode()).hexdigest(),
-                         '817bd43886398c45fbbbd6c30b005e597402761cd76ba8448a4418ed810cdee4')
+                         '071360980b35537ab411bffbf4cc03397029eb8e102bcc665cdff0382a5dc717')
 
     def test_every_execution_lane_has_exactly_one_compatible_producer(self):
         builds = ci.plan(self.workflow)

@@ -20,7 +20,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest]
+        os: [ubuntu-24.04]
         compiler: [gcc-12]
         build_type: ['Release', 'Debug']
         multithreaded: ['ON', 'OFF']

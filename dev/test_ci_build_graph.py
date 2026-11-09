@@ -199,7 +199,7 @@ class BuildGraphPlanTest(unittest.TestCase):
             snapshot[name]['execution'] = [s for s in job['steps'] if s.get('name', '').startswith(
                 ('Run ', 'Discover ', 'Record native MPI CPU', 'Hydrate '))]
         digest = hashlib.sha256(json.dumps(snapshot, sort_keys=True, separators=(',', ':')).encode()).hexdigest()
-        self.assertEqual(digest, '80d3c56d83605e067ea75fa22cce0517ddd9cc426f7e1b95dfba4c77a733bba5')
+        self.assertEqual(digest, '4756ed377cd5da8a8cfff339d393996be9fb60ade7517a973b348e55502b6a5b')
 
 
 class BuildGraphExecutionTest(unittest.TestCase):
