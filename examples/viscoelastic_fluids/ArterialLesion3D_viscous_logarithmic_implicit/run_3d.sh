@@ -9,7 +9,8 @@
 #     FLUIDS=D ./run_3d.sh 600 S75   # only D (run N in another terminal)
 #
 #  Fluids (same parameters as run_axi_re.sh):
-#     N   Newtonian: the sPTT at Wi = 0.01                 -> <geo>/N/
+#     N   Newtonian, eta = eta_ref, two-field (u, p)       -> <geo>/N/
+#     NP  the former N: the sPTT at Wi = 0.01               -> <geo>/NP/
 #     D   weak-elasticity sPTT (beta 0.889, eps 0.1), Wi    -> <geo>/Wi<wi>/
 #     CY  Carreau-Yasuda of whole blood (eta_ref 3.45 mPa s) -> <geo>/CY/
 #     R   generalised sPTT, the viscoelastic twin of CY      -> <geo>/R/
@@ -161,6 +162,7 @@ PC_REUSE="${PC_REUSE:-20}"
 PC_REUSE_GROWTH="${PC_REUSE_GROWTH:-2}"
 OUTLET_PSI="${OUTLET_PSI:-1}"
 PSI_SKEW="${PSI_SKEW:-0}"
+RESIDENCE="${RESIDENCE:-1}"
 OUT="${OUT3D:-${OUT:-$HOME/Results/axi_jfm}/3D}/Re${RE}_Wo${WO}"   # never inside the axisymmetric folders
 [[ -n "$WAVEFORM" ]] && OUT="${OUT}_$(basename "${WAVEFORM%.*}")"
 MESH="$MESHDIR/${GEO}_pipe_${MESH_LEVEL}.mesh"
@@ -183,7 +185,8 @@ SUMMARY="$OUT/summary.csv"
 run_case() {   # fluid steps dir solver
   local fluid="$1" steps="$2" dir="$3" solver="$4" wi fargs cycles="$CYCLES"
   case "$fluid" in
-    N)  wi=0.01; fargs=(-al_wi 0.01 -al_ptt_epsilon "$PTT_EPS") ;;
+    N)  wi=0; fargs=(-al_fluid newtonian -al_eta_ref "$ETA_REF") ;;   # (u, p): eta = eta_ref
+    NP) wi=0.01; fargs=(-al_wi 0.01 -al_ptt_epsilon "$PTT_EPS") ;;   # former N: sPTT at Wi 0.01
     D)  wi="$WI"; fargs=(-al_wi "$WI" -al_ptt_epsilon "$PTT_EPS") ;;
     CY) wi=-; fargs=(-al_fluid cy -al_eta_ref "$ETA_REF") ;;
     R)  wi=-; cycles="$CYCLES_R"
@@ -194,7 +197,7 @@ run_case() {   # fluid steps dir solver
                -al_owens_eta_plasma "$ETA_PLASMA" -al_owens_a0 "$A0_O" -al_owens_a_crit "$ACRIT_O"
                -al_owens_epsilon "$EPS_O" -al_owens_n0 "$N0_O" -al_owens_n_inlet "$NIN_O"
                -al_de 0 -al_wi 0 -al_inlet_developed_conformation 1) ;;
-    *) echo "unknown fluid $fluid (3D: N, D, CY, R or O)"; return 2 ;;
+    *) echo "unknown fluid $fluid (3D: N, NP, D, CY, R or O)"; return 2 ;;
   esac
   if [[ -f "$dir/DONE" ]]; then
     echo "[skip] $GEO $fluid Re=$RE Wo=$WO (DONE)"; return 0
@@ -209,7 +212,8 @@ run_case() {   # fluid steps dir solver
     -al_formulation "$FORMULATION" -al_dynamic_subscales "$DYNAMIC"
     -al_adaptive_dt "$ADAPTIVE_DT" -al_newton_predict "$NEWTON_PREDICT"
     -al_pc_reuse_solves "$PC_REUSE" -al_pc_reuse_growth "$PC_REUSE_GROWTH"
-    -al_outlet_conformation_inflow "$OUTLET_PSI" -al_psi_skew "$PSI_SKEW")
+    -al_outlet_conformation_inflow "$OUTLET_PSI" -al_psi_skew "$PSI_SKEW"
+    -al_residence_time "$RESIDENCE")
   [[ -n "$WAVEFORM" ]] && cmd+=(-al_waveform "$WAVEFORM" -al_harmonics "$HARMONICS")
   # shellcheck disable=SC2206
   [[ "$solver" == gmres ]] && cmd+=($GMRES_OPTS)

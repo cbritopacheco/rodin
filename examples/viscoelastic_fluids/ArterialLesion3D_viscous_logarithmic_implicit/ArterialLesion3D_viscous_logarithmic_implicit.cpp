@@ -1408,6 +1408,15 @@ namespace Rodin::Examples::ViscoelasticFluids
       m_subscaleSweep(m_qFlux),
       m_flow(m_u, m_p, m_psiD, m_psiO, m_v, m_q, m_chiD, m_chiO),
       m_flowKSP(m_flow),
+      m_flow2(m_u, m_p, m_v, m_q),
+      m_flow2KSP(m_flow2),
+      m_age(m_sh),
+      m_ageTest(m_sh),
+      m_ageOld(m_sh),
+      m_ageNm1(m_sh),
+      m_ageHist(m_sh),
+      m_ageProblem(m_age, m_ageTest),
+      m_ageKSP(m_ageProblem),
       m_vectorProjection(m_wTrial, m_wTest),
       m_vectorProjectionKSP(m_vectorProjection),
       m_wssTrial(m_vh),
@@ -1480,8 +1489,8 @@ namespace Rodin::Examples::ViscoelasticFluids
     if (m_cfg.formulation != "psi" && m_cfg.psiSkewAdvection)
       throw std::runtime_error("psi_skew is a term of the psi formulation only.");
     if (m_cfg.fluid != "sptt" && m_cfg.fluid != "cy" && m_cfg.fluid != "gsptt" &&
-        m_cfg.fluid != "owens")
-      throw std::runtime_error("fluid must be sptt, cy, gsptt or owens.");
+        m_cfg.fluid != "owens" && m_cfg.fluid != "newtonian")
+      throw std::runtime_error("fluid must be sptt, cy, gsptt, newtonian or owens.");
     if (m_cfg.fluid == "owens")
     {
       // Plasma solvent; the polymer at infinite shear, eta_p,inf = eta_CY(inf)
@@ -1534,6 +1543,23 @@ namespace Rodin::Examples::ViscoelasticFluids
       ob.lambda0Factor = 1.0;
       ob.lambda0Min = 0.0;
     }
+    if (m_cfg.fluid == "newtonian")
+    {
+      // Constant viscosity eta_ref (eta_inf by default): Re, Wo, Ubar and T
+      // are those of "cy" and "gsptt". The polymer is the passive one of
+      // "cy" (unused by the two-field system).
+      ob.etaS = m_cfg.etaRef > 0.0 ? m_cfg.etaRef : m_cfg.carreauYasuda.etaInf;
+      ob.etaP = 1.0e-6 * ob.etaS;
+      m_cfg.deborah = 1.0e-5;
+      m_cfg.weissenberg = 0.0;
+      ob.pttEpsilon = 0.5;
+      ob.lambda0Factor = 1.0;
+      ob.lambda0Min = 0.0;
+    }
+    if (twoField() && m_cfg.formulation != "psi_rb")
+      throw std::runtime_error("the two-field system (cy, newtonian) is written for formulation psi_rb.");
+    if (twoField() && m_cfg.inletDevelopedConformation)
+      m_cfg.inletDevelopedConformation = false;
     if ((m_cfg.fluid == "gsptt" || m_cfg.inletDevelopedConformation) &&
         (ob.lambda0Factor != 1.0 || ob.lambda0Min > 0.0))
       throw std::runtime_error("gsptt and inlet_developed_conformation require lambda0 = lambda "
@@ -1569,7 +1595,7 @@ namespace Rodin::Examples::ViscoelasticFluids
       m_inflow.setSinusoidal(m_cfg.amplitude);
     else
       m_inflow.load(m_cfg.flowWaveformPath, static_cast<size_t>(std::max(1, m_cfg.harmonics)));
-    if (m_cfg.fluid == "sptt")
+    if (m_cfg.fluid == "sptt" || m_cfg.fluid == "newtonian")
       m_inflow.setFluid(rho, ob.etaS, ob.etaP, ob.lambda, omega, 0.5 * D);
     else
     {
@@ -1615,7 +1641,7 @@ namespace Rodin::Examples::ViscoelasticFluids
                     << "  UT/D=" << (m_meanVelocity * m_period / D)
                     << "  beta=" << (ob.etaS / (ob.etaS + ob.etaP)) << "  epsilon=" << ob.pttEpsilon
                     << "  fluid=" << m_cfg.fluid << "  eta_ref=" << eta0 << Alert::Raise;
-      if (m_cfg.fluid != "sptt")
+      if (m_cfg.fluid != "sptt" && m_cfg.fluid != "newtonian")
       {
         const auto& cy = m_cfg.carreauYasuda;
         Alert::Info() << "[fluid] Carreau-Yasuda eta_0=" << cy.etaZero << " eta_inf=" << cy.etaInf
@@ -1740,6 +1766,8 @@ namespace Rodin::Examples::ViscoelasticFluids
       return m_cfg.etaRef;
     if (m_cfg.fluid == "sptt")
       return m_cfg.oldroydB.etaS + m_cfg.oldroydB.etaP;
+    if (m_cfg.fluid == "newtonian")
+      return m_cfg.oldroydB.etaS;
     return m_cfg.carreauYasuda.etaInf;
   }
 
@@ -2133,6 +2161,13 @@ namespace Rodin::Examples::ViscoelasticFluids
 
   void ArterialLesion3DViscousLogImplicit::updateConformation()
   {
+    if (twoField())
+    {
+      const auto zero = Math::SpatialVector<Real>{{0.0, 0.0, 0.0}};
+      m_sigmaD = zero;
+      m_sigmaO = zero;
+      return;
+    }
     const Real s = m_cfg.oldroydB.etaP / lambda0();
     const auto field = [](auto f) { return VectorFunction(size_t(3), f); };
     const auto sigmaAt = [this, s](const Point& p) -> Eigen::Matrix3d {
@@ -2265,6 +2300,8 @@ namespace Rodin::Examples::ViscoelasticFluids
     setupFlow();
     if (isOwens())
       setupStructure();
+    if (m_cfg.residenceTime)
+      setupResidence();
     setupWallShear();
 
     if (isRoot())
@@ -2317,6 +2354,10 @@ namespace Rodin::Examples::ViscoelasticFluids
       m_lambdaCell = Real(m_cfg.oldroydB.lambda);
       m_lambdaMax = m_cfg.oldroydB.lambda;
     }
+    m_ageOld = Real(0);
+    m_ageNm1 = Real(0);
+    m_ageHist = Real(0);
+    m_age.getSolution() = Real(0);
     m_psiOldD = zero;
     m_psiOldO = zero;
     m_psiNm1D = zero;
@@ -2376,6 +2417,16 @@ namespace Rodin::Examples::ViscoelasticFluids
       m_nOld.setName("aggregateSize");
       m_xdmf.add("aggregateSize", m_nOld);
     }
+    if (m_cfg.residenceTime)
+    {
+      m_ageOld.setName("residenceTime");
+      m_xdmf.add("residenceTime", m_ageOld);
+      // The age transport is not symmetric: GMRES + block Jacobi (ILU).
+      setPrefixedDefault("al_age_", "ksp_type", "gmres");
+      setPrefixedDefault("al_age_", "pc_type", "bjacobi");
+      setPrefixedDefault("al_age_", "ksp_rtol", "1e-10");
+      m_ageKSP.setPrefix("al_age_");
+    }
 
     // In 3D these are areas. The inlet must measure pi D^2/4, up to the
     // polygonal approximation of the circle.
@@ -2384,6 +2435,18 @@ namespace Rodin::Examples::ViscoelasticFluids
     m_flux = Integral(m_one, m_qFlux);
     m_flux.assemble();
     m_volume = std::max<Real>(m_flux(m_one), 1e-30);
+    {
+      // The sac of an aneurysm: the part of the domain outside the parent
+      // cylinder r > D/2 (none for a stenosis).
+      const Real R = 0.5 * m_cfg.diameter;
+      m_flux = Integral(RealFunction([R](const Point& p) {
+        const auto& x = p.getPhysicalCoordinates();
+        return std::hypot(x(1), x(2)) > R ? 1.0 : 0.0; }), m_qFlux);
+      m_flux.assemble();
+      m_sacVolume = m_flux(m_one);
+      if (!(m_sacVolume > 1.0e-6 * m_volume))
+        m_sacVolume = 0.0;
+    }
 
     // Nodal wall/lesion indicators (see m_wallArea). Interpolating a P1 field
     // at its own node leaves O(1e-21) round-off where it is zero, hence the
@@ -2986,10 +3049,13 @@ namespace Rodin::Examples::ViscoelasticFluids
     // polymer viscosity eta_p/f of eta_0.
     // Owens: eta_p = G lambda(p), G = eta_p,inf/lambda_H, so f/(2 eta_p) = (f
     // lambda_H/lambda(p))/(2 eta_p,inf) and eta_p/f likewise: the factor rides on f.
-    m_pttN.project(RealFunction([this](const Point& p) {
-      const Real f = pttFactor(logEig(unpack(m_psiOldD.getValue(p), m_psiOldO.getValue(p))).exp().trace());
-      return isOwens() ? f * m_cfg.oldroydB.lambda / m_lambdaCell.getValue(p) : f;
-    }));
+    if (twoField())
+      m_pttN = Real(1);   // psi = 0
+    else
+      m_pttN.project(RealFunction([this](const Point& p) {
+        const Real f = pttFactor(logEig(unpack(m_psiOldD.getValue(p), m_psiOldO.getValue(p))).exp().trace());
+        return isOwens() ? f * m_cfg.oldroydB.lambda / m_lambdaCell.getValue(p) : f;
+      }));
     // alpha1 = [c1 eta_0/h1^2 + c2 rho |u|/h2]^-1, eta_0 = eta_s + eta_p/f.
     m_alpha1.project(RealFunction([this, rho](const Point& p) {
       const auto u = m_uOld.getValue(p);
@@ -3101,6 +3167,37 @@ namespace Rodin::Examples::ViscoelasticFluids
 
   void ArterialLesion3DViscousLogImplicit::updateSubscalesPsiRB()
   {
+    if (twoField())
+    {
+      // u1 and u2 only (u3 and psi~ vanish with sigma); Pi[R_psi] stays 0.
+      if (!m_cfg.dynamicSubscales)
+        return;
+      const Real rho = m_cfg.rho;
+      const Real memU = rho / m_dt;
+      const auto& pSol = m_p.getSolution();
+      auto sweep = Integral(PointwiseScalar([this, rho, memU, &pSol](const Point& p) -> Real {
+        const SubscaleStore::Entry& old = subscales().at(p);
+        const Real a1 = m_tauK.getValue(p);
+        const auto toEigen = [](const auto& v) { return Eigen::Vector3d(v(0), v(1), v(2)); };
+        const auto J = Jacobian(m_uIt).getValue(p);
+        const Eigen::Vector3d un = toEigen(m_uOld.getValue(p));
+        Eigen::Vector3d conv;
+        for (int a = 0; a < 3; ++a)
+          conv(a) = J(a, 0) * un(0) + J(a, 1) * un(1) + J(a, 2) * un(2);
+        SubscaleStore::Entry e;
+        e.u1 = a1 * (memU * old.u1 - rho * (conv - toEigen(m_piConv.get().getValue(p))));
+        e.u2 = a1 * (memU * old.u2 - (toEigen(Grad(pSol).getValue(p)) - toEigen(m_piGradP.get().getValue(p))));
+        e.u3.setZero();
+        e.sig.setZero();
+        subscales().stage(p, e);
+        return 0.0;
+      }, 2), m_qFlux);
+      sweep.setOrder(static_cast<size_t>(std::max(1, m_cfg.psiQuadratureOrder)));
+      m_subscaleSweep = sweep;
+      m_subscaleSweep.assemble();
+      subscales().commit();
+      return;
+    }
     const Real rho = m_cfg.rho;
     const Real dt = m_dt;
     const Real dtM = massStep();
@@ -3187,8 +3284,168 @@ namespace Rodin::Examples::ViscoelasticFluids
     m_piRO.project(voigtO(R));
   }
 
+  void ArterialLesion3DViscousLogImplicit::setupFlowTwoField()
+  {
+    // setupFlowPsiRB with sigma = 0: momentum with the generalised Newtonian
+    // viscosity eta(gd(u*)) (eta_ref for "newtonian"), continuity, the split
+    // OSS with dynamic subscales (u1 convection, u2 pressure gradient; u3 =
+    // Pi^perp[div sigma] vanishes), the algebraic pressure subscale, and the
+    // same boundary conditions. Linear in (u, p) for the frozen u* and eta:
+    // one Newton iteration is exact.
+    const size_t dim = m_mesh.getSpaceDimension();
+    const auto normal = BoundaryNormal(m_mesh);
+    const Real rho = m_cfg.rho;
+    const Real dt = m_dt;
+    const Real dtM = massStep();
+    m_formDt = dt;
+    m_formMassStep = dtM;
+    const auto etaS = PointwiseScalar([this](const Point& p) -> Real {
+      return solventViscosityAt(p); }, constantSolvent() ? size_t(0) : size_t(2));
+    const Real memU = m_cfg.dynamicSubscales ? rho / dt : 0.0;
+    const Real vms = m_cfg.useVMS ? m_cfg.vmsScale : 0.0;
+    const Real ps = m_cfg.pressureScale;
+    const size_t order = static_cast<size_t>(std::max(1, m_cfg.psiQuadratureOrder));
+    const auto withOrder = [order](auto integral) {
+      integral.setOrder(order);
+      return integral;
+    };
+
+    const auto symU = 0.5 * (Jacobian(m_u) + Transpose(Jacobian(m_u)));
+    const auto symV = 0.5 * (Jacobian(m_v) + Transpose(Jacobian(m_v)));
+    const auto convU = Mult(Jacobian(m_u), m_uAdv);
+    const auto temam = Dot(Div(m_uAdv) * m_u, m_v);
+    const auto outletBackflow =
+      0.5 * rho * m_cfg.outletBackflowStabilization * Max(-Dot(m_uAdv, normal), 0.0);
+    RealFunction pOutFn = [this](const Point&) { return m_cfg.outletPressure; };
+    VectorFunction inletVelocity(dim, [this](const Point& p) -> Math::SpatialVector<Real> {
+      const auto& x = p.getPhysicalCoordinates();
+      const Real r = std::sqrt(x(1) * x(1) + x(2) * x(2));
+      const Real R = 0.5 * m_cfg.diameter;
+      const Real seed = (m_cfg.inletPerturbation != 0.0 &&
+          m_t < m_cfg.perturbationCycles * m_period) ? 1.0 + m_cfg.inletPerturbation * x(1) / R : 1.0;
+      return Math::SpatialVector<Real>{{
+        m_meanVelocity * ramp(m_t) * m_inflow.velocity(r, m_t) * seed, 0.0, 0.0 }};
+    });
+    const auto streamV = Mult(Jacobian(m_v), m_uOld);
+    const auto uu = PointwiseTensor([this](const Point& p) -> Eigen::Matrix3d {
+      const auto u = m_uOld.getValue(p);
+      const Eigen::Vector3d w(u(0), u(1), u(2));
+      return w * w.transpose();
+    });
+    const auto u1n = subscaleVector([](const SubscaleStore::Entry& e) { return e.u1; });
+    const auto u2n = subscaleVector([](const SubscaleStore::Entry& e) { return e.u2; });
+
+    m_flow2 =
+      // ---- Momentum -------------------------------------------------------
+        (rho / dtM) * Integral(m_u, m_v) - (rho / dtM) * Integral(m_uHist, m_v)
+      + rho * Integral(Dot(convU, m_v)) + 0.5 * rho * Integral(temam)
+      + withOrder(Integral(2.0 * etaS * symU, symV))
+      - Integral(m_p, Div(m_v))
+      // ---- Continuity -----------------------------------------------------
+      + Integral(Div(m_u), m_q) + m_cfg.pressurePenalty * Integral(m_p, m_q)
+      // ---- Split OSS, dynamic subscales ----------------------------------
+      + vms * rho * rho * Integral(m_tauK * Mult(Jacobian(m_u), uu), Jacobian(m_v))
+      - vms * rho * rho * withOrder(Integral(m_tauK * (m_piConv.get() + (memU / rho) * u1n), streamV))
+      + ps * Integral(m_tauK * Grad(m_p), Grad(m_q))
+      - ps * withOrder(Integral(m_tauK * (m_piGradP.get() + memU * u2n), Grad(m_q)))
+      // ---- Continuity, OSS of div u (algebraic subscale) ------------------
+      + Integral(m_alpha2 * Div(m_u), Div(m_v))
+      - Integral(m_alpha2 * m_piDiv.get(), Div(m_v))
+      // ---- Outlet: traction p_out n and directional do-nothing -----------
+      + BoundaryIntegral(pOutFn * Dot(m_v, normal)).over(m_cfg.labels.outlet)
+      + BoundaryIntegral(outletBackflow * Dot(m_u, m_v)).over(m_cfg.labels.outlet)
+      // ---- Inlet: developed pulsatile profile; walls: no slip -------------
+      + DirichletBC(m_u, inletVelocity).on(m_cfg.labels.inlet)
+      + DirichletBC(m_u, Zero(dim)).on(m_wallSet);
+  }
+
+  void ArterialLesion3DViscousLogImplicit::setupResidence()
+  {
+    // Age a of the blood: d_t a + u.grad a = 1, BDF with the mass step of the
+    // flow (a_hist as x_hist), advected by u^{n+1}; a = 0 on the inlet, and on
+    // the outlet the backflow brings in the age a^n of the boundary (upwind).
+    // SUPG with tau = [(2/dtM)^2 + (2 |u|/h)^2]^-1/2. Solved after the flow
+    // step is accepted, with u^{n+1} in m_uOld.
+    const auto normal = BoundaryNormal(m_mesh);
+    const auto tau = [this](const Point& p) -> Real {
+      const auto uc = m_uOld.getValue(p);
+      const Real a = 2.0 / massStep();
+      const Real b = 2.0 * std::sqrt(Math::dot(uc, uc)) / cellSize(p);
+      return 1.0 / std::sqrt(a * a + b * b);
+    };
+    RealFunction massFn = [this](const Point&) { return 1.0 / massStep(); };
+    RealFunction tauFn = [tau](const Point& p) { return tau(p); };
+    RealFunction tauMassFn = [this, tau](const Point& p) { return tau(p) / massStep(); };
+    RealFunction knownFn = [this](const Point& p) { return 1.0 + m_ageHist.getValue(p) / massStep(); };
+    RealFunction tauKnownFn = [this, tau](const Point& p) {
+      return tau(p) * (1.0 + m_ageHist.getValue(p) / massStep()); };
+    const auto adv = Dot(m_uOld, Grad(m_age));
+    const auto advTest = Dot(m_uOld, Grad(m_ageTest));
+    const auto inflowOut = Max(-Dot(m_uOld, normal), 0.0);
+    m_ageProblem =
+        Integral(massFn * m_age, m_ageTest)
+      + Integral(adv, m_ageTest)
+      - Integral(knownFn, m_ageTest)
+      + Integral(tauMassFn * m_age, advTest)
+      + Integral(tauFn * adv, advTest)
+      - Integral(tauKnownFn, advTest)
+      + BoundaryIntegral(inflowOut * m_age, m_ageTest).over(m_cfg.labels.outlet)
+      - BoundaryIntegral(inflowOut * m_ageOld, m_ageTest).over(m_cfg.labels.outlet)
+      + DirichletBC(m_age, Zero()).on(m_cfg.labels.inlet);
+  }
+
+  void ArterialLesion3DViscousLogImplicit::solveResidence()
+  {
+    if (m_cfg.timeOrder == 2)
+    {
+      const Real w = bdfRatio();
+      const Real a = (1.0 + w) * (1.0 + w) / (1.0 + 2.0 * w);
+      const Real b = -w * w / (1.0 + 2.0 * w);
+      combine(a, m_ageOld.getData(), b, m_ageNm1.getData(), m_ageHist.getData());
+    }
+    else
+      m_ageHist.setData(m_ageOld.getData());
+    m_ageProblem.assemble();
+    m_ageProblem.solve(m_ageKSP);
+    // SUPG is not monotone: 0 <= a <= t.
+    {
+      ::Vec v = m_age.getSolution().getData();
+      PetscInt size = 0;
+      PetscScalar* data = nullptr;
+      PetscErrorCode ierr = VecGetLocalSize(v, &size);
+      assert(ierr == PETSC_SUCCESS);
+      ierr = VecGetArray(v, &data);
+      assert(ierr == PETSC_SUCCESS);
+      for (PetscInt i = 0; i < size; ++i)
+        data[i] = std::isfinite(data[i]) ? std::clamp<Real>(data[i], 0.0, m_t) : 0.0;
+      ierr = VecRestoreArray(v, &data);
+      assert(ierr == PETSC_SUCCESS);
+      (void)ierr;
+    }
+    m_ageNm1.setData(m_ageOld.getData());
+    m_ageOld.setData(m_age.getSolution().getData());
+    // Volume mean, and mean over the sac r > D/2 (empty for a stenosis).
+    m_flux = Integral(m_ageOld, m_qFlux);
+    m_flux.assemble();
+    m_ageMean = m_flux(m_one) / m_volume;
+    if (m_sacVolume > 0.0)
+    {
+      const Real R = 0.5 * m_cfg.diameter;
+      m_flux = Integral(RealFunction([this, R](const Point& p) {
+        const auto& x = p.getPhysicalCoordinates();
+        return std::hypot(x(1), x(2)) > R ? m_ageOld.getValue(p) : 0.0; }), m_qFlux);
+      m_flux.assemble();
+      m_ageSac = m_flux(m_one) / m_sacVolume;
+    }
+  }
+
   void ArterialLesion3DViscousLogImplicit::setupFlow()
   {
+    if (twoField())
+    {
+      setupFlowTwoField();
+      return;
+    }
     if (m_cfg.formulation == "exp")
     {
       setupFlowExp();
@@ -3506,6 +3763,8 @@ namespace Rodin::Examples::ViscoelasticFluids
     const VectorGridFunctionType& psiAO = pick(16u) ? m_psiItO : m_psiOldO;
     m_piDiv.project(Div(uDiv));
     m_piGradP.project(Grad(p));
+    if (twoField())
+      return;   // sigma = 0: Pi[div sigma] stays 0
     const auto& ob = m_cfg.oldroydB;
     const Real l0 = lambda0();
     const Real s = ob.etaP / l0;
@@ -3649,16 +3908,53 @@ namespace Rodin::Examples::ViscoelasticFluids
       if (k == 0 && m_cfg.timeOrder == 2)
         m_p.getSolution().setData(m_pIt.getData());
 
+      const bool two = twoField();
       const auto assemblyStart = CoronaryClock::now();
-      m_flow.assemble();
+      if (two)
+        m_flow2.assemble();
+      else
+        m_flow.assemble();
       m_timing.assembly += secondsSince(assemblyStart);
 
-      if (!m_flowFieldSplitsSet)
+      if (two ? !m_flow2FieldSplitsSet : !m_flowFieldSplitsSet)
       {
         if (isRoot())
           ThreeDInfo() << "Creating field splits ..." << Alert::Raise;
-        m_flow.setFieldSplits();
-        m_flowFieldSplitsSet = true;
+        if (two)
+        {
+          m_flow2.setFieldSplits();
+          m_flow2FieldSplitsSet = true;
+        }
+        else
+        {
+          m_flow.setFieldSplits();
+          m_flowFieldSplitsSet = true;
+        }
+      }
+      const auto solveSystem = [&]() {
+        if (two)
+          m_flow2.solve(m_flow2KSP);
+        else
+          m_flow.solve(m_flowKSP);
+      };
+
+      // Config::jacobianCheck: copies of the system of iterate 0.
+      const bool check = !two && m_cfg.jacobianCheck > 0 && k == 0 && m_step + 1 == m_cfg.jacobianCheck;
+      ::Mat checkA = PETSC_NULLPTR;
+      ::Vec checkB = PETSC_NULLPTR, checkX = PETSC_NULLPTR;
+      if (check)
+      {
+        auto& ls = m_flow.getLinearSystem();
+        ierr = MatDuplicate(ls.getOperator(), MAT_COPY_VALUES, &checkA);
+        assert(ierr == PETSC_SUCCESS);
+        ierr = VecDuplicate(ls.getVector(), &checkB);
+        assert(ierr == PETSC_SUCCESS);
+        ierr = VecCopy(ls.getVector(), checkB);
+        assert(ierr == PETSC_SUCCESS);
+        ierr = VecDuplicate(ls.getSolution(), &checkX);
+        assert(ierr == PETSC_SUCCESS);
+        ierr = VecCopy(ls.getSolution(), checkX);
+        assert(ierr == PETSC_SUCCESS);
       }
 
       // Lagged preconditioner (Config::pcReuseSolves): reused while the Krylov
@@ -3666,8 +3962,8 @@ namespace Rodin::Examples::ViscoelasticFluids
       // with a fresh one; a solve that fails with it is repeated, from the
       // same guess, with a fresh one.
       const auto solveStart = CoronaryClock::now();
-      ::KSP ksp = m_flowKSP.getHandle();
-      ::Vec x = m_flow.getLinearSystem().getSolution();
+      ::KSP ksp = two ? m_flow2KSP.getHandle() : m_flowKSP.getHandle();
+      ::Vec x = two ? m_flow2.getLinearSystem().getSolution() : m_flow.getLinearSystem().getSolution();
       // A lagged preconditioner needs a Krylov method: with preonly it would be
       // the solution operator of an earlier matrix.
       ::KSPType kspType = nullptr;
@@ -3688,7 +3984,7 @@ namespace Rodin::Examples::ViscoelasticFluids
       }
       ierr = KSPSetReusePreconditioner(ksp, reuse ? PETSC_TRUE : PETSC_FALSE);
       assert(ierr == PETSC_SUCCESS);
-      m_flow.solve(m_flowKSP);
+      solveSystem();
       PetscInt its = 0;
       ierr = KSPGetConvergedReason(ksp, &reason);
       assert(ierr == PETSC_SUCCESS);
@@ -3701,7 +3997,7 @@ namespace Rodin::Examples::ViscoelasticFluids
         assert(ierr == PETSC_SUCCESS);
         ierr = KSPSetReusePreconditioner(ksp, PETSC_FALSE);
         assert(ierr == PETSC_SUCCESS);
-        m_flow.solve(m_flowKSP);
+        solveSystem();
         ierr = KSPGetConvergedReason(ksp, &reason);
         assert(ierr == PETSC_SUCCESS);
         ierr = KSPGetIterationNumber(ksp, &its);
@@ -3727,6 +4023,16 @@ namespace Rodin::Examples::ViscoelasticFluids
       m_timing.kspIterations += static_cast<int>(its);
       m_timing.solve += secondsSince(solveStart);
 
+      if (check && reason > 0)
+      {
+        checkJacobian(checkA, checkB, checkX, x);
+        MatDestroy(&checkA);
+        VecDestroy(&checkB);
+        VecDestroy(&checkX);
+        m_failure = "Jacobian check done (Config::jacobianCheck): stop";
+        m_jacobianChecked = true;
+        break;
+      }
       if (reason <= 0)
       {
         m_failure = "linear solver failed (KSPConvergedReason " +
@@ -3861,6 +4167,133 @@ namespace Rodin::Examples::ViscoelasticFluids
     return true;
   }
 
+  void ArterialLesion3DViscousLogImplicit::checkJacobian(::Mat A0, ::Vec b0, ::Vec x0, ::Vec x1)
+  {
+    // The system of a Newton iterate is A(x^k) x = b(x^k), the linearisation
+    // of F about x^k: F(x) = A(x) x - b(x), F'(x^k) = A(x^k). With d = x1 - x0
+    // (the Newton increment), (F(x0 + e d) - F(x0))/e - A0 d = O(e) when A0
+    // is the exact Jacobian; a wrong term leaves an O(1) residue.
+    PetscErrorCode ierr = PETSC_SUCCESS;
+    const auto copy = [&ierr](::Vec v) {
+      ::Vec c = PETSC_NULLPTR;
+      ierr = VecDuplicate(v, &c);
+      assert(ierr == PETSC_SUCCESS);
+      ierr = VecCopy(v, c);
+      assert(ierr == PETSC_SUCCESS);
+      return c;
+    };
+    // The field parts: x0 is the iterate, x1 the solution of the solve.
+    ::Vec u0 = copy(m_uIt.getData()), u1 = copy(m_u.getSolution().getData());
+    ::Vec d0 = copy(m_psiItD.getData()), d1 = copy(m_psiD.getSolution().getData());
+    ::Vec o0 = copy(m_psiItO.getData()), o1 = copy(m_psiO.getSolution().getData());
+    ::Vec p0 = copy(m_cfg.timeOrder == 2 ? m_pIt.getData() : m_pN.getData());
+    ::Vec p1 = copy(m_p.getSolution().getData());
+
+    ::Vec F0 = copy(b0), Fe = copy(b0), Jd = copy(b0), dx = copy(x0);
+    ierr = MatMult(A0, x0, F0);
+    assert(ierr == PETSC_SUCCESS);
+    ierr = VecAXPY(F0, -1.0, b0);
+    assert(ierr == PETSC_SUCCESS);
+    Real normD = 0.0;
+    ierr = VecWAXPY(dx, -1.0, x0, x1);
+    assert(ierr == PETSC_SUCCESS);
+    ierr = VecNorm(dx, NORM_2, &normD);
+    assert(ierr == PETSC_SUCCESS);
+    if (isRoot())
+      Alert::Info() << "[jacobian] step " << (m_step + 1) << ", t = " << m_t << " s: |d| = " << normD
+                    << "; err(e) = |(F(x0 + e d) - F(x0))/e - A0 d| / |A0 d| should fall like e"
+                    << Alert::Raise;
+    for (const Real e : { 1.0e-1, 1.0e-2, 1.0e-3, 1.0e-4, 1.0e-5, 1.0e-6, 1.0e-7 })
+    {
+      combine(1.0 - e, u0, e, u1, m_uIt.getData());
+      combine(1.0 - e, d0, e, d1, m_psiItD.getData());
+      combine(1.0 - e, o0, e, o1, m_psiItO.getData());
+      m_u.getSolution().setData(m_uIt.getData());
+      m_psiD.getSolution().setData(m_psiItD.getData());
+      m_psiO.getSolution().setData(m_psiItO.getData());
+      combine(1.0 - e, p0, e, p1, m_p.getSolution().getData());
+      ++m_psiRevision;
+      m_flow.assemble();
+      auto& ls = m_flow.getLinearSystem();
+      ierr = MatMult(ls.getOperator(), ls.getSolution(), Fe);
+      assert(ierr == PETSC_SUCCESS);
+      ierr = VecAXPY(Fe, -1.0, ls.getVector());
+      assert(ierr == PETSC_SUCCESS);
+      // FD = (Fe - F0)/e and Jd = A0 (x_e - x0)/e, x_e as gathered.
+      ierr = VecAXPY(Fe, -1.0, F0);
+      assert(ierr == PETSC_SUCCESS);
+      ierr = VecScale(Fe, 1.0 / e);
+      assert(ierr == PETSC_SUCCESS);
+      ierr = VecWAXPY(dx, -1.0, x0, ls.getSolution());
+      assert(ierr == PETSC_SUCCESS);
+      ierr = VecScale(dx, 1.0 / e);
+      assert(ierr == PETSC_SUCCESS);
+      ierr = MatMult(A0, dx, Jd);
+      assert(ierr == PETSC_SUCCESS);
+      // By block: the rows of u, p, psi_D, psi_O, at the trial offsets (the
+      // block vector holds field k at offset_k + its global field index).
+      std::array<Real, 4> bJ{}, bE{};
+      {
+        const ::Vec fields[4] = { m_uIt.getData(), m_pIt.getData(), m_psiItD.getData(), m_psiItO.getData() };
+        PetscInt off = 0;
+        for (size_t b = 0; b < 4; ++b)
+        {
+          PetscInt rb = 0, re = 0, n = 0;
+          ierr = VecGetOwnershipRange(fields[b], &rb, &re);
+          assert(ierr == PETSC_SUCCESS);
+          ierr = VecGetSize(fields[b], &n);
+          assert(ierr == PETSC_SUCCESS);
+          MPI_Comm comm;
+          ierr = PetscObjectGetComm((PetscObject)Jd, &comm);
+          assert(ierr == PETSC_SUCCESS);
+          ::IS is = PETSC_NULLPTR;
+          ierr = ISCreateStride(comm, re - rb, off + rb, 1, &is);
+          assert(ierr == PETSC_SUCCESS);
+          ::Vec sj = PETSC_NULLPTR, se = PETSC_NULLPTR, diff = PETSC_NULLPTR;
+          ierr = VecGetSubVector(Jd, is, &sj);
+          assert(ierr == PETSC_SUCCESS);
+          ierr = VecGetSubVector(Fe, is, &se);
+          assert(ierr == PETSC_SUCCESS);
+          ierr = VecDuplicate(se, &diff);
+          assert(ierr == PETSC_SUCCESS);
+          ierr = VecWAXPY(diff, -1.0, sj, se);
+          assert(ierr == PETSC_SUCCESS);
+          ierr = VecNorm(sj, NORM_2, &bJ[b]);
+          assert(ierr == PETSC_SUCCESS);
+          ierr = VecNorm(diff, NORM_2, &bE[b]);
+          assert(ierr == PETSC_SUCCESS);
+          VecDestroy(&diff);
+          VecRestoreSubVector(Fe, is, &se);
+          VecRestoreSubVector(Jd, is, &sj);
+          ISDestroy(&is);
+          off += n;
+        }
+      }
+      Real nJ = 0.0, nJmax = 0.0;
+      ierr = VecNorm(Jd, NORM_2, &nJ);
+      assert(ierr == PETSC_SUCCESS);
+      ierr = VecNorm(Jd, NORM_INFINITY, &nJmax);
+      assert(ierr == PETSC_SUCCESS);
+      ierr = VecAXPY(Fe, -1.0, Jd);
+      assert(ierr == PETSC_SUCCESS);
+      Real nE = 0.0, nEmax = 0.0;
+      ierr = VecNorm(Fe, NORM_2, &nE);
+      assert(ierr == PETSC_SUCCESS);
+      ierr = VecNorm(Fe, NORM_INFINITY, &nEmax);
+      assert(ierr == PETSC_SUCCESS);
+      if (isRoot())
+        Alert::Info() << "[jacobian] e = " << e << "  err_2 = " << nE / std::max<Real>(nJ, 1e-300)
+                      << "  err_inf = " << nEmax / std::max<Real>(nJmax, 1e-300)
+                      << "  | by block u, p, psi_D, psi_O: " << bE[0] / std::max<Real>(bJ[0], 1e-300)
+                      << ", " << bE[1] / std::max<Real>(bJ[1], 1e-300) << ", "
+                      << bE[2] / std::max<Real>(bJ[2], 1e-300) << ", " << bE[3] / std::max<Real>(bJ[3], 1e-300)
+                      << Alert::Raise;
+    }
+    for (::Vec* v : { &u0, &u1, &d0, &d1, &o0, &o1, &p0, &p1, &F0, &Fe, &Jd, &dx })
+      VecDestroy(v);
+    (void)ierr;
+  }
+
   void ArterialLesion3DViscousLogImplicit::computeWallShear()
   {
     const auto shearStart = CoronaryClock::now();
@@ -3993,7 +4426,7 @@ namespace Rodin::Examples::ViscoelasticFluids
   {
     m_csv << "t,cycle,qTarget,qIn,qOut,pInletMean,pOutletMean,dp,maxU,maxSigma,"
           << "newtonIts,dpsi,maxTAWSS,maxOSI,maxTAWSSLesion,maxOSILesion,uyMean,uzMean,dt,retries,"
-          << "nMin,nMax,lambdaMax\n";
+          << "nMin,nMax,lambdaMax,ageMean,ageSac\n";
   }
 
   void ArterialLesion3DViscousLogImplicit::writeCSVRow(int cycle)
@@ -4015,7 +4448,7 @@ namespace Rodin::Examples::ViscoelasticFluids
           << ',' << m_conformationIts << ',' << m_psiIncrement << ',' << tawss << ',' << osi
           << ',' << tawssLesion << ',' << osiLesion << ',' << m_uyMean << ',' << m_uzMean
           << ',' << m_dt << ',' << m_timing.retries << ',' << m_nMin << ',' << m_nMax << ','
-          << m_lambdaMax << '\n';
+          << m_lambdaMax << ',' << m_ageMean << ',' << m_ageSac << '\n';
     m_csv.flush();
   }
 
@@ -4048,7 +4481,8 @@ namespace Rodin::Examples::ViscoelasticFluids
                     << (m_cfg.dynamicSubscales ? "dynamic" : "quasi-static") << " subscales"
                     << (m_cfg.formulation == "psi" ? ""
                           : (m_cfg.subscaleTimeResidual ? ", d_t of the FE field in the stress subscale residual" : ", stress subscale residual without d_t of the FE field"))
-                    << "; Newton on (u, p, psi) with the momentum convection at u* (BDF extrapolation);"
+                    << (twoField() ? "; two-field (u, p), generalised Newtonian, convection at u* (BDF extrapolation): one linear solve per step;"
+                                   : "; Newton on (u, p, psi) with the momentum convection at u* (BDF extrapolation);")
                     << " the PC is an LU of an earlier Jacobian, GMRES solves the current one" << Alert::Raise;
       if (m_cfg.adaptiveTimeStep)
         Alert::Info() << "[run] step control: retry with dt x " << m_cfg.dtShrink << " (at most "
@@ -4103,6 +4537,8 @@ namespace Rodin::Examples::ViscoelasticFluids
         prepareStep();
         if (solveFlow())
           break;
+        if (m_jacobianChecked)
+          return 0;
 
         rejectStep();
         const Real next = m_cfg.dtShrink * m_dt;
@@ -4125,6 +4561,8 @@ namespace Rodin::Examples::ViscoelasticFluids
       }
       if (isOwens())
         solveStructure();
+      if (m_cfg.residenceTime)
+        solveResidence();
       m_dtPrev = m_dt;
       ++m_history;
       ++step;
@@ -4358,6 +4796,9 @@ int main(int argc, char** argv)
       getReal("-al_max_velocity_factor", cfg.maxVelocityFactor);
       getReal("-al_dump_stress", cfg.dumpStress);
       getBool("-al_wall_kinematics", cfg.wallKinematics);
+      getBool("-al_two_field", cfg.twoField);
+      getBool("-al_residence_time", cfg.residenceTime);
+      getInt("-al_jacobian_check", cfg.jacobianCheck);
       getInt("-al_dump_max", cfg.dumpMax);
       getBool("-al_vms", cfg.useVMS);
       getBool("-al_inlet_conformation", cfg.inletConformation);

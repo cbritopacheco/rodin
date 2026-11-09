@@ -402,8 +402,27 @@ namespace Rodin::Examples::ViscoelasticFluids
           ///        the u-psi coupling changes sign. The S75 Re 600 test grew
           ///        at ~8000 1/s from t = 0.135 s (deceleration) whatever dt.
           bool subscaleTimeResidual = true;
-          /// @brief "sptt", "gsptt", "cy" or "owens" (file header, Owens).
+          /// @brief "sptt", "gsptt", "cy", "newtonian" or "owens" (file
+          ///        header, Owens). "newtonian": constant viscosity eta_ref
+          ///        (default eta_inf of the Carreau-Yasuda law), so that Re and
+          ///        Wo, hence Ubar and T, are those of "cy" and "gsptt".
           std::string fluid = "sptt";
+          /// @brief "cy" and "newtonian" solve (u, p) only (twoField()): the
+          ///        same momentum, continuity and split OSS as the three-field
+          ///        system with sigma = 0, without the psi unknowns, their
+          ///        equation and their projections. Off: the former passive
+          ///        polymer (psi kept, same cost as "gsptt").
+          bool twoField = true;
+          /// @brief Eulerian residence time (age) of the blood, solved after
+          ///        each accepted step: d_t a + u.grad a = 1, a = 0 on the
+          ///        inlet, upwind on the outlet backflow, SUPG; written as
+          ///        "residenceTime" and its volume and sac means in the CSV.
+          bool residenceTime = true;
+          /// @brief Finite-difference check of the Newton Jacobian at this
+          ///        step (>= 1; 0 is off): F(x) = A(x) x - b(x) at x^k and at
+          ///        x^k + e d, d the first Newton increment, against A(x^k) d,
+          ///        for e = 1e-1 ... 1e-7; the run stops after the check.
+          int jacobianCheck = 0;
           CarreauYasuda carreauYasuda;
           Owens owens;
           /// @brief Viscosity defining Re and Wo (Pa s); 0 means eta_s + eta_p
@@ -754,8 +773,22 @@ namespace Rodin::Examples::ViscoelasticFluids
       /// @brief The solvent viscosity does not depend on the shear rate.
       bool constantSolvent() const
       {
-        return m_cfg.fluid == "sptt" || m_cfg.fluid == "owens";
+        return m_cfg.fluid == "sptt" || m_cfg.fluid == "owens" || m_cfg.fluid == "newtonian";
       }
+      /// @brief (u, p) only: generalised Newtonian fluids (Config::twoField).
+      bool twoField() const
+      {
+        return m_cfg.twoField && (m_cfg.fluid == "cy" || m_cfg.fluid == "newtonian");
+      }
+      /// @brief The (u, p) system of twoField().
+      void setupFlowTwoField();
+      /// @brief Eulerian residence time (Config::residenceTime).
+      void setupResidence();
+      void solveResidence();
+      /// @brief Config::jacobianCheck, on the assembled system of Newton
+      ///        iterate 0 (x0, A0, b0 copies, d the increment); returns after
+      ///        printing, the caller stops the run.
+      void checkJacobian(::Mat A0, ::Vec b0, ::Vec x0, ::Vec x1);
       bool isOwens() const
       {
         return m_cfg.fluid == "owens";
@@ -972,6 +1005,26 @@ namespace Rodin::Examples::ViscoelasticFluids
       // ---- Problems and solvers --------------------------------------------
       FlowProblemType m_flow;
       Rodin::Solver::KSP m_flowKSP;
+      /// @brief twoField(): (u, p; v, q), the same trial and test functions.
+      using TwoFieldProblemType = Rodin::Variational::Problem<LinearSystemType,
+        VectorTrialFunctionType, ScalarTrialFunctionType,
+        VectorTestFunctionType, ScalarTestFunctionType>;
+      TwoFieldProblemType m_flow2;
+      Rodin::Solver::KSP m_flow2KSP;
+      bool m_flow2FieldSplitsSet = false;
+      bool m_jacobianChecked = false;
+      /// @brief Eulerian residence time a (P1), its last two steps, BDF
+      ///        history, and the volume and sac (r > D/2) means.
+      ScalarTrialFunctionType m_age;
+      ScalarTestFunctionType m_ageTest;
+      ScalarGridFunctionType m_ageOld;
+      ScalarGridFunctionType m_ageNm1;
+      ScalarGridFunctionType m_ageHist;
+      ScalarProblemType m_ageProblem;
+      Rodin::Solver::KSP m_ageKSP;
+      Real m_ageMean = 0.0;
+      Real m_ageSac = 0.0;
+      Real m_sacVolume = 0.0;
       VectorProblemType m_vectorProjection;
       Rodin::Solver::KSP m_vectorProjectionKSP;
       VectorTrialFunctionType m_wssTrial;

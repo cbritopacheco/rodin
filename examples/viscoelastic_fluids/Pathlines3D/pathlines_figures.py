@@ -54,8 +54,12 @@ import sys
 FLUIDS = ("N", "CY", "R")
 PAIRS = (("CY", "N"), ("R", "CY"), ("R", "N"))
 ARTERY_LABEL = {"aorta": "abdominal aorta", "carotid": "carotid", "coronary": "coronary",
-                "femoral": "femoral", "small": "radial"}
-ARTERY_ORDER = ("coronary", "carotid", "femoral", "aorta", "small")
+                "femoral": "femoral", "small": "radial",
+                # campaign v3: points of the (Wo, UT/D) plane
+                "A": r"A: $Wo=2.7$, $UT/D=47$", "B": r"B: $Wo=4.6$, $UT/D=48$",
+                "C": r"C: $Wo=5.3$, $UT/D=10$", "D": r"D: $Wo=11.4$, $UT/D=10$",
+                "E": r"E: $Wo=1.9$, $UT/D=27$"}
+ARTERY_ORDER = ("A", "B", "C", "D", "E", "coronary", "carotid", "femoral", "aorta", "small")
 
 
 # =========================================================================================
@@ -194,8 +198,39 @@ def load_case(folder):
         "event": (exitc == "outlet")[ok],       # left for good (else censored)
     }
     d["entered"] = d["t_in"] > 0.0
+    d["entry_phase"] = np.array(cols["sacEntryPhase"], float)[ok] if "sacEntryPhase" in cols else None
+    d["inflow"] = inflow_shape(folder)
     d["releases"] = int(d["release"].max()) + 1 if len(d["release"]) else 1
     return d
+
+
+def inflow_shape(folder, n=400):
+    """q(t)/q_mean over one cycle from run.log ("[inflow] ... modes=<file>"):
+    the sinusoid 1 + A sin, or the file's Fourier series (10 harmonics, as
+    the driver). None if unknown."""
+    import numpy as np
+    try:
+        log = open(os.path.join(folder, "run.log"), errors="replace").read()
+    except OSError:
+        return None
+    m = re.search(r"modes=(\S+)", log)
+    ph = np.linspace(0.0, 1.0, n)
+    if not m:
+        return None
+    if m.group(1) == "sinusoid":
+        a = re.search(r"-al_amplitude\s+([\d.e+-]+)", open(os.path.join(folder, "params.txt")).read()) \
+            if os.path.exists(os.path.join(folder, "params.txt")) else None
+        A = float(a.group(1)) if a else 0.5
+        return ph, 1.0 + A * np.sin(2 * np.pi * ph)
+    if not os.path.exists(m.group(1)):
+        return None
+    d = np.loadtxt(m.group(1))
+    t, q = d[:, 0], d[:, 1]
+    P = t[-1] - t[0]
+    tz = getattr(np, "trapezoid", None) or np.trapz
+    mean = tz(q, t) / P
+    c = [tz(q / mean * np.exp(-2j * np.pi * k * (t - t[0]) / P), t) / P for k in range(11)]
+    return ph, 1.0 + sum(2 * (c[k] * np.exp(2j * np.pi * k * ph)).real for k in range(1, 11))
 
 
 def kaplan_meier(t, event):
@@ -387,6 +422,42 @@ def fig_entry_phase(data, out):
     save(fig, out, "fig_entry_phase")
 
 
+def fig_sac_entry(data, out):
+    """When, in the cycle, the blood reaches the sac: the density of the phase
+    of first entry, over the inflow q(t)/q_mean (grey)."""
+    import numpy as np
+    if not any(c.get("entry_phase") is not None for _, cases in data for c in cases.values()):
+        return
+    fig, axes = panel_grid(len(data))
+    edges = np.linspace(0, 1, 21)
+    for k, (art, cases) in enumerate(data):
+        ax = axes[k]
+        shape = next((c["inflow"] for c in cases.values() if c.get("inflow") is not None), None)
+        if shape is not None:
+            ax2 = ax.twinx()
+            ax2.fill_between(shape[0], 0, shape[1], color="0.92", lw=0, zorder=0)
+            ax2.set_ylim(0, None)
+            ax2.set_ylabel(r"$q/\bar q$", color="0.5")
+            ax2.tick_params(axis="y", colors="0.5")
+            ax.set_zorder(ax2.get_zorder() + 1)
+            ax.patch.set_visible(False)
+        for f in FLUIDS:
+            if f not in cases or cases[f].get("entry_phase") is None:
+                continue
+            ph = cases[f]["entry_phase"]
+            ph = ph[cases[f]["entered"] & (ph >= 0)]
+            h, _ = np.histogram(ph, bins=edges, density=True)
+            ax.step(np.append(edges[:-1], 1.0), np.append(h, h[-1]), where="post", **STYLE[f])
+        ax.set_xlim(0, 1)
+        ax.set_ylim(0, None)
+        ax.set_xlabel(r"phase of entry into the sac, $t/T$")
+        ax.set_ylabel("probability density")
+        label(ax, k, ARTERY_LABEL.get(art, art))
+    fig.tight_layout(rect=(0, 0, 1, 0.93))
+    shared_legend(fig, axes[0])
+    save(fig, out, "fig_sac_entry_phase")
+
+
 def crop_white(img, pad=6):
     import numpy as np
     rgb = img[..., :3]
@@ -533,6 +604,7 @@ def main():
     fig_washout(data, out)
     fig_time_pdf(data, out)
     fig_entry_phase(data, out)
+    fig_sac_entry(data, out)
     print("statistics and figures in %s" % out)
     if args.no_render:
         return

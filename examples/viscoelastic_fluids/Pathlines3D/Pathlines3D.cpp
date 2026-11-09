@@ -818,7 +818,7 @@ namespace Rodin::Examples::ViscoelasticFluids
         {
           std::ofstream csv(stem.string() + ".csv");
           csv << "release,releaseTime,seed,x0,y0,z0,exit,residence,length,maxSpeed,samples,"
-                 "lesionTime,lesionSpan,sacTime,sacSpan\n";
+                 "lesionTime,lesionSpan,sacTime,sacSpan,lesionEntryPhase,sacEntryPhase\n";
           for (const auto& tr : m_trajectories)
           {
             const auto& x0 = tr.samples.front().x;
@@ -827,6 +827,11 @@ namespace Rodin::Examples::ViscoelasticFluids
                 << tr.maxSpeed << ',' << tr.samples.size();
             for (size_t k = 0; k < 2; ++k)
               csv << ',' << tr.inside[k] << ',' << (tr.firstIn[k] < 0.0 ? 0.0 : tr.lastIn[k] - tr.firstIn[k]);
+            // Phase of the first entry, t/T mod 1 of the run's clock (the inflow
+            // starts at t = 0): when, in the cycle, the blood reaches the region.
+            for (size_t k = 0; k < 2; ++k)
+              csv << ',' << (tr.firstIn[k] < 0.0 ? -1.0
+                               : std::fmod(tr.firstIn[k], m_period) / m_period);
             csv << '\n';
           }
         }

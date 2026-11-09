@@ -684,6 +684,12 @@ def analyse(case, out, figures=True):
         "newton_mean": float(newton.mean()), "retries": int(retries),
     }
     metrics.update(rel)
+    # Eulerian residence time (driver Config::residenceTime): the volume and
+    # sac means of the age, over the last cycle, in cycles.
+    if csvrows and "ageSac" in csvrows[0]:
+        for key, col in (("age_mean_T", "ageMean"), ("age_sac_T", "ageSac")):
+            a = np.array([r[col] for r in csvrows])[last]
+            metrics[key] = float(_trapz(a, tt) / (tt[-1] - tt[0]) / case.T)
     smetrics, spectra = jet_spectra(case, csvrows)
     metrics.update(smetrics)
     # Kinematics of the jet region (lesion end to POST_LESION_LENGTH D downstream):
@@ -1125,7 +1131,8 @@ def compare(cases):
                  "throat_tau_peak": (ssa, ssb), "umax": (sua, sub)}
         for k in ("dp_mean", "dp_peak", "tawss_lesion_mean", "tawss_max", "recirc_max_D", "recirc_mean_D", "recirc_peak_D",
                   "low_tawss_area", "high_osi_area", "osi_lesion_max", "throat_tau_peak", "umax",
-                  "low_tawss_rel_area", "high_rrt_area", "rrt_lesion_median", "rrt_lesion_p90") + tuple(
+                  "low_tawss_rel_area", "high_rrt_area", "rrt_lesion_median", "rrt_lesion_p90",
+                  "age_mean_T", "age_sac_T") + tuple(
                       "%s_%s" % (g, k) for g in ("lesion", "sac") for k in PATHLINE_KEYS if k != "censored"):
             if k not in Ma or k not in Mb:
                 continue
