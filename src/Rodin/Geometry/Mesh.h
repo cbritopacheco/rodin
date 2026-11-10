@@ -1696,8 +1696,9 @@ namespace Rodin::Geometry
       /**
        * @brief Returns a copy of the mesh whose numbering follows space.
        *
-       * The default is MortonOrdering. Vertices follow a Morton curve of their coordinates in
-       * the bounding box, so that vertices close in space get close indices.
+       * The default is Ordering<OrderingType::Morton>. Vertices follow a Morton
+       * curve of their coordinates in the bounding box, so that vertices close
+       * in space get close indices.
        * The polytopes of every other dimension held by the connectivity are
        * then ordered by their smallest new vertex index, ties keeping their
        * original order. Coordinates, vertex lists, orientations and attributes
@@ -1719,15 +1720,15 @@ namespace Rodin::Geometry
 
       /**
        * @brief Renumbers a copy using a vertex ordering policy.
-       * @tparam Ordering Callable returning an IndexVector for this local mesh.
-       * @param[in] ordering Policy such as MortonOrdering, HilbertOrdering or RCMOrdering.
+       * @tparam OrderingPolicy Callable returning an IndexVector for this local mesh.
+       * @param[in] ordering Vertex ordering policy; see Geometry::Ordering.
        * @returns Renumbered mesh, with the reconstruction semantics of renumber().
        *
        * The policy returns newToOld[newIndex] = oldIndex. Apply before building
        * finite element spaces; existing fields and spaces are not transferred.
        */
-      template <class Ordering>
-      Mesh renumber(const Ordering& ordering) const
+      template <class OrderingPolicy>
+      Mesh renumber(const OrderingPolicy& ordering) const
       {
         return renumber(ordering(*this));
       }

@@ -22,7 +22,7 @@
 #include "Rodin/IO/HDF5.h"
 
 #include "Mesh.h"
-#include "MortonOrdering.h"
+#include "Ordering.h"
 #include "SubMesh.h"
 
 #include "Polytope.h"
@@ -368,7 +368,7 @@ namespace Rodin::Geometry
 
   Mesh<Context::Local> Mesh<Context::Local>::renumber() const
   {
-    return renumber(MortonOrdering{});
+    return renumber(Ordering<OrderingType::Morton>{});
   }
 
   Mesh<Context::Local> Mesh<Context::Local>::renumber(

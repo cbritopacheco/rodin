@@ -7,9 +7,7 @@ Distributed under the Boost Software License, Version 1.0.
 
 set(RodinGeometry_HEADERS
   Mesh.h
-  MortonOrdering.h
-  HilbertOrdering.h
-  RCMOrdering.h
+  Ordering.h
   SpaceFillingCurveOrdering.h
   SubMesh.h
   Polytope.h
@@ -23,8 +21,7 @@ set(RodinGeometry_HEADERS
 set(RodinGeometry_SRCS
   Bounds.cpp
   Mesh.cpp
-  HilbertOrdering.cpp
-  RCMOrdering.cpp
+  Ordering.cpp
   Point.cpp
   Polytope.cpp
   PolytopeQuadrature.cpp

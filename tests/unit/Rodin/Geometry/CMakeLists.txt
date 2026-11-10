@@ -397,17 +397,7 @@ rodin_discover_tests(RodinGeometryBoundsTest
   DISCOVERY_MODE PRE_TEST
   PROPERTIES LABELS unit)
 
-add_executable(RodinGeometryMortonOrderingTest MortonOrderingTest.cpp)
-target_link_libraries(RodinGeometryMortonOrderingTest PRIVATE GTest::gtest_main Rodin::Geometry)
-rodin_discover_tests(RodinGeometryMortonOrderingTest
-  DISCOVERY_MODE PRE_TEST PROPERTIES LABELS unit)
-
-add_executable(RodinGeometryHilbertOrderingTest HilbertOrderingTest.cpp)
-target_link_libraries(RodinGeometryHilbertOrderingTest PRIVATE GTest::gtest_main Rodin::Geometry)
-rodin_discover_tests(RodinGeometryHilbertOrderingTest
-  DISCOVERY_MODE PRE_TEST PROPERTIES LABELS unit)
-
-add_executable(RodinGeometryRCMOrderingTest RCMOrderingTest.cpp)
-target_link_libraries(RodinGeometryRCMOrderingTest PRIVATE GTest::gtest_main Rodin::Geometry)
-rodin_discover_tests(RodinGeometryRCMOrderingTest
+add_executable(RodinGeometryOrderingTest OrderingTest.cpp)
+target_link_libraries(RodinGeometryOrderingTest PRIVATE GTest::gtest_main Rodin::Geometry)
+rodin_discover_tests(RodinGeometryOrderingTest
   DISCOVERY_MODE PRE_TEST PROPERTIES LABELS unit)
