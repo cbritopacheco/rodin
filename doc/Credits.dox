@@ -29,7 +29,9 @@
 
   @parblock
   <img src="Images/JeanBaptisteKeck.jpg" alt="Portrait of Jean-Baptiste Keck" />
-  <h3>Jean-Baptiste Keck</h3>
+  @htmlonly
+  <h4><a href="https://www.keckj.fr/">Jean-Baptiste Keck</a></h4>
+  @endhtmlonly
 
   <em>Laboratoire Jean Kuntzmann.</em>
 
@@ -82,8 +84,8 @@
   adaptation, quality optimization and level-set reconstruction through
   Rodin's MMG interfaces. The project distributes its
   [license terms](https://github.com/MmgTools/mmg/blob/master/LICENSE).
-  @cite dapogny2014three describes three-dimensional mesh adaptation and
-  level-set domain meshing.
+  Dapogny, Dobrzynski and Frey describe three-dimensional adaptive remeshing
+  and implicit domain meshing @cite dapogny2014three.
 
   @subsection credits-index-hdf5 HDF5
 
