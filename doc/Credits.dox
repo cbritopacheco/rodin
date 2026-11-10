@@ -26,9 +26,10 @@
   Contributes biomechanical models for finite element simulation.
   @endparblock
 
-  @m_class{m-block m-info}
+  @m_class{m-block m-info m-badge rodin-credit-person}
 
   @parblock
+  <img src="Images/JeanBaptisteKeck.jpg" alt="Portrait of Jean-Baptiste Keck" />
   <h3>Jean-Baptiste Keck</h3>
 
   <em>Laboratoire Jean Kuntzmann.</em>
