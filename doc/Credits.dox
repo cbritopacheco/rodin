@@ -20,8 +20,7 @@
   <img src="Images/OscarRuz.jpeg" alt="Portrait of Oscar Ruz" />
   <h3>Oscar Ruz</h3>
 
-  <em>Universidad de Santiago de Chile. Member of the
-  <a href="https://cfdusach.cl/">Computational Heat and Fluid Flow Lab</a>.</em>
+  <em>Universidad de Santiago de Chile.</em>
 
   Contributes biomechanical models for finite element simulation.
   @endparblock
