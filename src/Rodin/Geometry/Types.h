@@ -21,6 +21,14 @@
 
 namespace Rodin::Geometry
 {
+  /// @brief Available local mesh vertex ordering algorithms.
+  enum class OrderingType
+  {
+    Morton, ///< Morton (Z-curve) ordering.
+    Hilbert, ///< Hilbert space-filling curve ordering.
+    RCM ///< Reverse Cuthill-McKee graph ordering.
+  };
+
   /**
    * @brief Standard type for representing material attributes in a mesh.
    *

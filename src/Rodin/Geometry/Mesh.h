@@ -44,6 +44,7 @@
 #include "Rodin/Alert/MemberFunctionException.h"
 
 #include "ForwardDecls.h"
+#include "Types.h"
 #include "Connectivity.h"
 #include "Point.h"
 #include "PointCloud.h"
@@ -1719,19 +1720,37 @@ namespace Rodin::Geometry
       Mesh renumber() const;
 
       /**
-       * @brief Renumbers a copy using a vertex ordering policy.
-       * @tparam OrderingPolicy Callable returning an IndexVector for this local mesh.
-       * @param[in] ordering Vertex ordering policy; see Geometry::Ordering.
+       * @brief Renumbers a copy using the Morton ordering.
+       * @param[in] ordering Configured vertex ordering policy.
        * @returns Renumbered mesh, with the reconstruction semantics of renumber().
        *
-       * The policy returns newToOld[newIndex] = oldIndex. Apply before building
-       * finite element spaces; existing fields and spaces are not transferred.
+       * Apply before building finite element spaces; existing fields and
+       * spaces are not transferred. The policy can also be called directly
+       * to retain its new-to-old vertex permutation.
        */
-      template <class OrderingPolicy>
-      Mesh renumber(const OrderingPolicy& ordering) const
-      {
-        return renumber(ordering(*this));
-      }
+      Mesh renumber(const Ordering<OrderingType::Morton>& ordering) const;
+
+      /**
+       * @brief Renumbers a copy using the Hilbert ordering.
+       * @param[in] ordering Configured vertex ordering policy.
+       * @returns Renumbered mesh, with the reconstruction semantics of renumber().
+       *
+       * Apply before building finite element spaces; existing fields and
+       * spaces are not transferred. The policy can also be called directly
+       * to retain its new-to-old vertex permutation.
+       */
+      Mesh renumber(const Ordering<OrderingType::Hilbert>& ordering) const;
+
+      /**
+       * @brief Renumbers a copy using the RCM ordering.
+       * @param[in] ordering Configured vertex ordering policy.
+       * @returns Renumbered mesh, with the reconstruction semantics of renumber().
+       *
+       * Apply before building finite element spaces; existing fields and
+       * spaces are not transferred. The policy can also be called directly
+       * to retain its new-to-old vertex permutation.
+       */
+      Mesh renumber(const Ordering<OrderingType::RCM>& ordering) const;
 
       /**
        * @brief Rebuilds a copy using an explicit vertex permutation.

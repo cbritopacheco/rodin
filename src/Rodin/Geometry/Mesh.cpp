@@ -372,6 +372,24 @@ namespace Rodin::Geometry
   }
 
   Mesh<Context::Local> Mesh<Context::Local>::renumber(
+    const Ordering<OrderingType::Morton>& ordering) const
+  {
+    return renumber(ordering(*this));
+  }
+
+  Mesh<Context::Local> Mesh<Context::Local>::renumber(
+    const Ordering<OrderingType::Hilbert>& ordering) const
+  {
+    return renumber(ordering(*this));
+  }
+
+  Mesh<Context::Local> Mesh<Context::Local>::renumber(
+    const Ordering<OrderingType::RCM>& ordering) const
+  {
+    return renumber(ordering(*this));
+  }
+
+  Mesh<Context::Local> Mesh<Context::Local>::renumber(
     const IndexVector& vertexOrder) const
   {
     const size_t sdim = getSpaceDimension();

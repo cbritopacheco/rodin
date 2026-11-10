@@ -11,14 +11,6 @@
 
 namespace Rodin::Geometry
 {
-  /// @brief Available local mesh vertex ordering algorithms.
-  enum class OrderingType
-  {
-    Morton, ///< Morton (Z-curve) ordering.
-    Hilbert, ///< Hilbert space-filling curve ordering.
-    RCM ///< Reverse Cuthill-McKee graph ordering.
-  };
-
   /**
    * @brief Vertex ordering policy selected by its algorithm.
    * @tparam Type Ordering algorithm; Morton is the default.
