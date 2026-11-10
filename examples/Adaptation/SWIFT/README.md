@@ -92,7 +92,7 @@ for general build procedures.
 
 For optional MUMPS support, add `-DRODIN_USE_MUMPS=ON` when configuring, with
 MUMPS and its dependencies installed. SWIFT selects MUMPS when compiled in;
-otherwise its default direct solver is SparseLU. Add `-DRODIN_USE_OPENMP=ON`
+otherwise it falls back to CG. Add `-DRODIN_USE_OPENMP=ON`
 for an OpenMP-enabled build. Thread environment variables control the features enabled at configuration.
 
 An existing configured build can be reused by replacing `build` in the
@@ -302,6 +302,14 @@ scales the quadratic model before affine quadratic quality hinges recover the
 direction. Armijo backtracking accepts a trial only when energy decrease and
 the actual sampled Jacobian/distortion checks both pass. The sampled quality budget is enforced during trial acceptance.
 
+MUMPS is the default when available; CG is the fallback in builds without it.
+SWIFT adapts the centered operator for the selected backend and consumes its
+success status without imposing an additional residual veto. The augmented
+direct system uses Rodin's MUMPS wrapper; matrix-free CG uses Eigen within the
+SWIFT adapter. No changes to the core solver classes are needed.
+The linear relative tolerance controls CG only. MUMPS retains its own backend
+status contract, and a MUMPS failure does not silently switch to CG.
+
 The reference scale `model.h` is derived from `--n` and held fixed. All other
 values below start from production defaults and can be overridden by the
 named flags. The complete model/control mapping is:
@@ -340,7 +348,7 @@ named flags. The complete model/control mapping is:
 | `globalization.directionalNewton` | Predictor/model directional scaling | `true` |
 | `globalization.maxStepOverH` | Optional predictor-motion cap divided by reference spacing | `0`: unrestricted |
 | `globalization.armijo` | Sufficient-decrease coefficient | `1e-4` |
-| `linear.solver` | Local linear backend | MUMPS if compiled in; otherwise SparseLU |
+| `linear.solver` | Local linear backend | MUMPS if compiled in; otherwise CG |
 | `linear.threads` | Backend thread policy | `0`: unchanged |
 | `trace` | Iteration diagnostics | `false` |
 | `traceQualityWitness` | Limiting-cell predicted/actual quality diagnostics | `false` |
@@ -378,7 +386,7 @@ parameters.linear.solver = Adaptation::SWIFT::Parameters::LinearSolver::SparseLU
 | `convergence.tolerance.geometric` | Sampled maximum-error success target | `0`: automatic \(h^{p+1}\) for displacement degree \(p\) |
 | `convergence.tolerance.innerRelative` | Inner stationarity residual relative to fitting force | `1e-3` |
 | `convergence.tolerance.innerAbsolute` | Absolute inner stationarity allowance | `1e-12` |
-| `convergence.tolerance.linearRelative` | Linear residual tolerance for all backends | `1e-6` |
+| `convergence.tolerance.linearRelative` | CG relative residual tolerance | `1e-6` |
 | `convergence.tolerance.energy` | Relative energy-change stagnation threshold | `1e-8` |
 | `convergence.tolerance.step` | Absolute accepted-motion stagnation threshold | `0` |
 | `convergence.tolerance.stepOverH` | Accepted-motion/reference-spacing stagnation threshold | `5e-4` |
@@ -408,8 +416,8 @@ maps to `--convergence-iterations-outer`. Previous flat flag names are rejected.
 
 | Displacement/geometry | Surface integration | Volume integration | Quality sampling | Geometric sampling |
 |-----------------------|---------------------|--------------------|------------------|--------------------|
-| Affine simplicial \(P_1\) | `8` | `2` | `2` covering subdivisions | `32` plus facet vertices |
-| These \(P_2/P_3\) examples | `12` | `8` | `16` covering subdivisions | `32` plus facet vertices |
+| Affine simplicial \(P_1\) | `8` | `2` | `2` covering subdivisions | Facet covering, `2` subdivisions |
+| These \(P_2/P_3\) examples | `12` | `8` | `16` covering subdivisions | Facet covering, `16` subdivisions |
 
 `quadrature.order` overrides common integration order; `quadrature.surface`
 and `quadrature.volume` override their respective integrations independently.
@@ -433,7 +441,11 @@ capped at 100, and an inverted predictor receives maximal distortion risk.
 Actual quality checks take unweighted extrema over all witnesses. These sets define the sample points for nonlinear quality checks.
 The default simplex counts are 6/10 witnesses on triangles/tetrahedra for
 affine \(P_1\), and 153/969 for \(P_2/P_3\).
-`quadrature.validation` controls independent geometric sampling.
+The interface maximum uses the same covering construction on facets, with
+resolution selected by `sampling.subdivision`. It does not add vertices or
+quadrature points. `quadrature.validation` controls the independent
+RMS and normal-error integrals and physical-motion diagnostics (automatic
+order `32` for interface integrals).
 All default to `0`, selecting the automatic policy.
 The higher-order policies are provisional integration and sampling choices. Their
   accuracy for nonpolynomial level sets and nonlinear quality expressions is

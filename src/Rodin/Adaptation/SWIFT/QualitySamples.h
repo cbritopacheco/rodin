@@ -11,6 +11,7 @@
 #ifndef RODIN_ADAPTATION_SWIFT_QUALITYSAMPLES_H
 #define RODIN_ADAPTATION_SWIFT_QUALITYSAMPLES_H
 
+#include "Rodin/Geometry/PolytopeQuadrature.h"
 #include <algorithm>
 #include <vector>
 
@@ -29,6 +30,8 @@ namespace Rodin::Adaptation::SWIFT
    * and actual quality checks use the same points. Equal positive reference
    * weights determine mapped cell mass; adaptive hinge weights redistribute
    * that mass. These witnesses are not degree-exact integration rules.
+   * Mapped points belong to the current visit, rather than the mesh cache;
+   * callbacks consume their integration points before the visit returns.
    */
   class QualitySamples
   {
@@ -59,7 +62,7 @@ namespace Rodin::Adaptation::SWIFT
       {
         const auto& cell = m_cell.get();
         const auto& formula = m_formula.get();
-        const auto& quadrature = cell.getQuadrature(formula);
+        const Geometry::PolytopeQuadrature quadrature(cell, formula);
         // Covering base weights are uniform and fixed throughout evaluation.
         const Real weight = formula.getWeight(0);
         for (size_t q = 0; q < quadrature.getSize(); ++q)

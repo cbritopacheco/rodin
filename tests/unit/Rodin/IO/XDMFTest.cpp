@@ -49,6 +49,116 @@ namespace Rodin::Tests::Unit
       boost::filesystem::path m_directory; ///< Per-test output directory.
   };
 
+  TEST_F(XDMFTest, IndexedNodalAttributesAreLazyAndMatchGridFunctions)
+  {
+    auto mesh = LocalMesh::UniformGrid(Geometry::Polytope::Type::Triangle, {3, 3});
+    P1 scalarSpace(mesh);
+    P1 vectorSpace(mesh, 3);
+    GridFunction scalar(scalarSpace);
+    GridFunction vector(vectorSpace);
+    scalar =
+      RealFunction([](const Geometry::Point& p) { return Real(2) * p.x() - p.y(); });
+    vector = VectorFunction(3, [](const Geometry::Point& p) {
+      Math::SpatialVector<Real> value(3);
+      value(0) = p.x();
+      value(1) = p.y();
+      value(2) = Real(1);
+      return value;
+    });
+    XDMF reference(m_directory / "reference");
+    reference.setMesh(mesh).add("Scalar", scalar).add("Vector", vector).write(0);
+    reference.close();
+    XDMF writer(m_directory / "indexed");
+    auto grid = writer.grid();
+    size_t calls = 0;
+    EXPECT_ANY_THROW(grid.add("MissingMesh", 1, [&](Index, std::span<Real>) {}));
+    grid.setMesh(mesh);
+    grid.add("Scalar", 1, [&](Index vertex, std::span<Real> value) {
+      ++calls;
+      value[0] = scalar.getData()(scalarSpace.getDOFs(0, vertex)(0));
+    });
+    grid.add("Vector", 3, [&](Index vertex, std::span<Real> value) {
+      ++calls;
+      const auto dofs = vectorSpace.getDOFs(0, vertex);
+      for (size_t component = 0; component < 3; ++component)
+        value[component] = vector.getData()(dofs(component));
+    });
+    EXPECT_EQ(calls, 0u);
+    EXPECT_ANY_THROW(grid.add("Zero", 0, [&](Index, std::span<Real>) {}));
+    EXPECT_ANY_THROW(grid.add("Empty", 1, XDMF::NodeSampler{}));
+    EXPECT_ANY_THROW(grid.add("Scalar", 1, [&](Index, std::span<Real>) {}));
+    writer.write(0);
+    EXPECT_EQ(calls, 2 * mesh.getVertexCount());
+    writer.close();
+    for (const auto* name : {"Scalar", "Vector"})
+    {
+      const auto suffix = std::string(".") + name + ".000000.h5";
+      const auto expected = HDF5::File(H5Fopen(
+        (m_directory / ("reference" + suffix)).c_str(), H5F_ACC_RDONLY, H5P_DEFAULT));
+      const auto actual = HDF5::File(H5Fopen(
+        (m_directory / ("indexed" + suffix)).c_str(), H5F_ACC_RDONLY, H5P_DEFAULT));
+      ASSERT_TRUE(expected);
+      ASSERT_TRUE(actual);
+      EXPECT_EQ(HDF5::readVectorDataset<HDF5::F64>(
+                  expected.get(), HDF5::Path::GridFunctionValuesData),
+        HDF5::readVectorDataset<HDF5::F64>(
+          actual.get(), HDF5::Path::GridFunctionValuesData));
+    }
+  }
+
+  TEST_F(XDMFTest, PerGridWritesPermitSequentialMeshLifetimes)
+  {
+    XDMF writer(m_directory / "sequential");
+    auto first = writer.grid("First");
+    auto second = writer.grid("Second");
+    for (size_t step = 0; step < 2; ++step)
+    {
+      {
+        auto mesh = LocalMesh::UniformGrid(Geometry::Polytope::Type::Triangle, {2, 2});
+        first.setMesh(mesh, XDMF::MeshPolicy::Transient);
+        first.add("Value", 1, [step](Index vertex, std::span<Real> value) {
+          value[0] = Real(step + vertex);
+        });
+        first.write(Real(step)).clear();
+      }
+      // Flushing uses recorded metadata after the observed mesh has expired.
+      writer.flush();
+      {
+        auto mesh = LocalMesh::UniformGrid(Geometry::Polytope::Type::Triangle, {3, 3});
+        second.setMesh(mesh, XDMF::MeshPolicy::Transient);
+        second.add("Value", 1, [step](Index vertex, std::span<Real> value) {
+          value[0] = Real(step + vertex);
+        });
+        second.write(Real(step)).clear();
+      }
+      EXPECT_EQ(writer.getSnapshotCount(), step + 1);
+    }
+    writer.close();
+    std::ifstream input((m_directory / "sequential.xdmf").string());
+    const std::string xml(
+      (std::istreambuf_iterator<char>(input)), std::istreambuf_iterator<char>());
+    for (const auto* time : {"<Time Value=\"0\"", "<Time Value=\"1\""})
+    {
+      size_t count = 0;
+      size_t position = 0;
+      while ((position = xml.find(time, position)) != std::string::npos)
+      {
+        ++count;
+        ++position;
+      }
+      EXPECT_EQ(count, 2u);
+    }
+    for (const auto* grid : {"First", "Second"})
+    {
+      for (const auto* index : {"000000", "000001"})
+      {
+        EXPECT_TRUE(boost::filesystem::exists(
+          m_directory / (std::string("sequential.") + grid + ".mesh." + index + ".h5")));
+      }
+    }
+    EXPECT_ANY_THROW(first.write(2));
+  }
+
   /// @brief Cell geometry and the independently specified XDMF node counts.
   struct XDMFGeometryCase
   {
