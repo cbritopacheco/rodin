@@ -18,3 +18,6 @@ target_link_libraries(RodinSolidActiveContractionPlaneWave
   Rodin::Solid
   Rodin::Variational
   Rodin::IO)
+
+add_executable(ConstitutiveResponse ConstitutiveResponse.cpp)
+target_link_libraries(ConstitutiveResponse PUBLIC Rodin::Solid)

@@ -1324,9 +1324,22 @@ namespace Rodin::Assembly
             },
             dbc.getDOFs());
         }
+        for (auto& pbc : pb.getPBCs())
+        {
+          if (pbc.getOperand().getUUID() != u.getUUID())
+            continue;
+          constexpr size_t offset = 0;
+          pbc.assemble();
+          for (const auto& [slave, relation] : pbc.getDOFs())
+          {
+            std::vector<typename ConstraintMap<ScalarType>::Entry> entries;
+            for (Index k = 0; k < static_cast<Index>(relation.first.size()); ++k)
+              entries.push_back({offset + relation.first[k], relation.second[k]});
+            constraints.setIdentification(offset + slave, entries);
+          }
+        }
         if (!constraints.getIdentifiedRows().empty())
           constraints.finalize();
-
 
         if constexpr (IsSparse)
         {
@@ -2165,9 +2178,20 @@ namespace Rodin::Assembly
             },
             dbc.getDOFs());
         }
+        for (auto& pbc : pb.getPBCs())
+        {
+          const size_t offset = trialOffsets[findTrialBlock(pbc.getOperand().getUUID())];
+          pbc.assemble();
+          for (const auto& [slave, relation] : pbc.getDOFs())
+          {
+            std::vector<typename ConstraintMap<ScalarType>::Entry> entries;
+            for (Index k = 0; k < static_cast<Index>(relation.first.size()); ++k)
+              entries.push_back({offset + relation.first[k], relation.second[k]});
+            constraints.setIdentification(offset + slave, entries);
+          }
+        }
         if (!constraints.getIdentifiedRows().empty())
           constraints.finalize();
-
 
         // ------------------------------------------------------------------
         // Thread-local accumulators

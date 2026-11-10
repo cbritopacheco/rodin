@@ -46,7 +46,7 @@ namespace Rodin::Alert
    * The Warning class provides stream-like insertion operators for building
    * detailed warning messages with formatting capabilities.
    *
-   * Example usage:
+   * The following example illustrates usage.
    * @code{.cpp}
    * Warning() << "This operation is deprecated" << Raise;
    * @endcode

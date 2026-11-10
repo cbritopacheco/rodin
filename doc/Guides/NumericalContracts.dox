@@ -10,35 +10,35 @@
   precise numerical contracts. This page collects the rules that affect
   accuracy and solver behavior across modules.
 
-  @section guides-numerical-contracts-interpolation Interpolation vs Projection
+  @section guides-numerical-contracts-interpolation Interpolation vs projection
 
   Assigning an expression to a `GridFunction` applies the finite element
-  space's degree-of-freedom functionals to that expression:
+  space's degree-of-freedom functionals to that expression.
 
   @code{.cpp}
   GridFunction uh(Vh);
   uh = f;        // interpolate f in the DOF sense of Vh
   @endcode
 
-  This is interpolation, not an @f$ L^2 @f$-orthogonal projection. For nodal
+  Assignment applies the interpolation functionals of the selected space. An @f$ L^2
+  @f$-orthogonal projection requires a variational mass-matrix solve. For nodal
   @ref Rodin::Variational::P1 "P1" spaces, the DOF functionals are vertex
   evaluations, so the assignment stores nodal values. For higher-order
-  `H1<K>` spaces, Rodin uses higher-order bases and DOF machinery; coefficients
-  should not be read as nodal values. Evaluate the
-  @ref Rodin::Variational::GridFunction "GridFunction" at a
-  @ref Rodin::Geometry::Point "Point" instead.
+  `H1<K>` spaces, Rodin uses higher-order bases and DOF machinery; coefficient interpretation follows the space's DOF map. Point values are obtained
+  by evaluating the @ref Rodin::Variational::GridFunction "GridFunction" at a @ref
+  Rodin::Geometry::Point "Point".
 
-  @subsection guides-numerical-contracts-l2 L2 Projection
+  @subsection guides-numerical-contracts-l2 L2 projection
 
   When the mathematical operation is the @f$ L^2 @f$ projection, assemble the
-  mass problem:
+  mass problem.
 
   @f[
     \int_\Omega u_h v_h\,dx = \int_\Omega f v_h\,dx
     \qquad \forall v_h \in V_h.
   @f]
 
-  In Rodin this is written as:
+  The mass problem is assembled and solved with the form language.
 
   @code{.cpp}
   TrialFunction u(Vh);
@@ -55,7 +55,7 @@
   projection workflows, or whenever the variational definition of the
   projection matters.
 
-  @section guides-numerical-contracts-signs Problem Sign Convention
+  @section guides-numerical-contracts-signs Problem sign convention
 
   A `Problem` assignment writes the residual equation with all terms on the
   left-hand side. The Poisson weak form
@@ -64,7 +64,7 @@
     a(u,v) = \ell(v)
   @f]
 
-  becomes:
+  gives the following residual assignment.
 
   @code{.cpp}
   Problem poisson(u, v);
@@ -82,21 +82,20 @@
     J(x^k)\,\delta x^k = -F(x^k).
   @f]
 
-  Do not write a second manual negation around a residual term that the
-  `Problem` assembly already moves to the right-hand side.
+  `Problem` assembly applies the residual-to-right-hand-side sign convention once.
 
-  @section guides-numerical-contracts-linearsystem LinearSystem Lifetime
+  @section guides-numerical-contracts-linearsystem LinearSystem lifetime
 
   A @ref Rodin::Math::LinearSystem "LinearSystem" is tied to the finite
   element spaces and block layout that created it. If the mesh, finite element
   space, number of fields, or global size changes, create a new problem or
   linear system.
 
-  PETSc makes this rule explicit: once a `Mat` or `Vec` has been laid out and
+  Once a PETSc `Mat` or `Vec` has been laid out and
   assembled, it cannot be resized in place. Reassembly may reuse storage when
   sizes and sparsity structure match, but changed structure is a new system.
 
-  @section guides-numerical-contracts-quadrature Quadrature Exactness
+  @section guides-numerical-contracts-quadrature Quadrature exactness
 
   Quadrature order controls the mathematical form being assembled. For
   polynomial integrands on affine elements, choose a rule exact for the
@@ -109,10 +108,10 @@
   assembled values, convergence rates, and any invariants the form is expected
   to satisfy.
 
-  @section guides-numerical-contracts-tangent Residual and Tangent Consistency
+  @section guides-numerical-contracts-tangent Residual and tangent consistency
 
   Nonlinear residual/tangent pairs must be consistent. For a residual
-  @f$ R(x) @f$ and tangent @f$ J(x) @f$, the check is:
+  @f$ R(x) @f$ and tangent @f$ J(x) @f$, the consistency check compares the following quantities.
 
   @f[
     J(x)w \approx
@@ -130,7 +129,7 @@
   expanded algebraically. Use penalty terms only when the model is explicitly
   a penalty method.
 
-  @section guides-numerical-contracts-see-also See Also
+  @section guides-numerical-contracts-see-also See also
 
   - @ref guides-getting-started-core-concepts "Core concepts"
   - @ref guides-variational "Variational formulations"

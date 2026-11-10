@@ -3,6 +3,7 @@
 import importlib.util
 import json
 import os
+import shutil
 from pathlib import Path
 import subprocess
 import tempfile
@@ -59,6 +60,93 @@ class ExecutionProfilesTest(unittest.TestCase):
             with patch.object(ci, 'targets', return_value=[dict(row, target='UnscheduledConvergenceTarget')]):
                 with self.assertRaisesRegex(ValueError, 'missing from the execution plan'):
                     ci.configured_profiles(build)
+
+    def test_all_halo_degrees_remain_scheduled_with_independent_watchdogs(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            assembly = Path(__file__).resolve().parents[1] / 'tests/unit/Rodin/MPI/Assembly'
+            (root / 'MPIAssemblyTest.cpp').write_text('int main() { return 0; }\n')
+            (root / 'assembly.cmake').write_text((assembly / 'CMakeLists.txt').read_text())
+            (root / 'CMakeLists.txt').write_text("""\
+cmake_minimum_required(VERSION 3.20)
+project(HaloRegistration CXX)
+enable_testing()
+foreach(name Geometry Variational MPI)
+  add_library(Rodin::${name} INTERFACE IMPORTED)
+endforeach()
+add_library(GTest::gtest INTERFACE IMPORTED)
+function(rodin_suppress_external_mpi_lsan_for_test name)
+endfunction()
+# Registration-only fixture; the guard runner need not have MPI installed.
+# CTest omits command when its launcher cannot be resolved.
+set(MPIEXEC_EXECUTABLE "${CMAKE_COMMAND}")
+set(MPIEXEC_NUMPROC_FLAG -n)
+include(assembly.cmake)
+""")
+            subprocess.run(['cmake', '-S', str(root), '-B', str(root / 'build')],
+                           check=True, capture_output=True)
+            result = subprocess.check_output(['ctest', '--test-dir', str(root / 'build'),
+                                              '--show-only=json-v1'], text=True)
+            registered = json.loads(result)['tests']
+            halos = [t for t in registered if '_Halo' in t['name']]
+            self.assertEqual(len(halos), 5 * 7 * 7)
+            for test in halos:
+                self.assertTrue(ci.selected('unit', test), test['name'])
+                props = {p['name']: p['value'] for p in test['properties']}
+                self.assertEqual(props['TIMEOUT'], 600)
+                self.assertEqual(int(props.get('PROCESSORS', 1)),
+                                 int(test['name'].split('_np')[1].split('_')[0]))
+                expression = next(a for a in test['command'] if a.startswith('--gtest_filter='))
+                self.assertNotIn(':', expression)
+            filters = [a for t in registered for a in t.get('command', [])
+                       if a.startswith('--gtest_filter=')]
+            self.assertTrue(any('HaloContainsRequiredPhysicalBoundaryIncidence*/*' in f
+                                for f in filters if f.startswith('--gtest_filter=-')))
+
+    def test_elasticity_partitions_are_a_disjoint_complete_invocation_union(self):
+        tests = [{"name": f"PolytopeCoverage3D/Elasticity3DTest8.Case{i}/{geometry}",
+                  "command": ["solver", f"--case={i}", f"--geometry={geometry}"],
+                  "properties": [{"name": "TIMEOUT", "value": 1200}]}
+                 for geometry in ci.ELASTICITY3D_PARTITIONS for i in range(6)]
+        parts = [ci.partition_tests(tests, ci.ELASTICITY3D_GROUP, geometry)
+                 for geometry in ci.ELASTICITY3D_PARTITIONS]
+        self.assertEqual([len(part) for part in parts], [6] * 4)
+        union = [test for part in parts for test in part]
+        self.assertEqual(sorted(union, key=lambda t: t['name']),
+                         sorted(tests, key=lambda t: t['name']))
+        self.assertEqual(len({test['name'] for test in union}), len(tests))
+        with self.assertRaisesRegex(ValueError, 'unaccounted geometry'):
+            ci.partition_tests(tests + [dict(tests[0], name='NewGeometry')],
+                               ci.ELASTICITY3D_GROUP, 'Tetrahedron')
+        with self.assertRaisesRegex(ValueError, 'Unknown execution partition'):
+            ci.partition_tests(tests, 'unit/Rodin', 'Tetrahedron')
+        with self.assertRaisesRegex(ValueError, 'Empty elasticity'):
+            ci.partition_tests([], ci.ELASTICITY3D_GROUP, 'Tetrahedron')
+
+    def test_elasticity_geometry_filter_executes_exact_recorded_ctest_commands(self):
+        with tempfile.TemporaryDirectory() as directory:
+            build = Path(directory)
+            commands = []
+            for geometry in ci.ELASTICITY3D_PARTITIONS:
+                for index in range(6):
+                    name = f'Suite.Case{index}/{geometry}'
+                    commands += [f'add_test({ci.quote(name)} {ci.quote(shutil.which("cmake"))} -E true)',
+                                 f'set_tests_properties({ci.quote(name)} PROPERTIES LABELS manufactured TIMEOUT 600)']
+            (build / 'CTestTestfile.cmake').write_text('\n'.join(commands))
+            report = json.loads(subprocess.check_output(
+                ['ctest', '--test-dir', str(build), '--show-only=json-v1'], text=True))
+            selected = []
+            with patch.object(ci, 'prepare', return_value=(build, report)), \
+                    patch.object(ci, 'selected_targets', return_value=[]):
+                for geometry in ci.ELASTICITY3D_PARTITIONS:
+                    self.assertEqual(ci.run_group(build, ci.ELASTICITY3D_GROUP, 'manufactured',
+                                                  partition=geometry), 0)
+                    inventory = json.loads((build / 'ci-selection.json').read_text())
+                    self.assertEqual(inventory['partition'], geometry)
+                    self.assertEqual(len(inventory['selected']), 6)
+                    selected.extend(inventory['selected'])
+            self.assertEqual(sorted(selected, key=lambda t: t['name']),
+                             sorted(report['tests'], key=lambda t: t['name']))
 
     def test_preserve_old_selections(self):
         def test(name, *labels):
@@ -156,6 +244,40 @@ set_property(DIRECTORY APPEND PROPERTY TEST_INCLUDE_FILES
 
 
 class GoogleTestForwardingTest(unittest.TestCase):
+    def test_slow_discovery_has_bounded_allowance_and_honors_explicit_timeout(self):
+        with tempfile.TemporaryDirectory(prefix="rodin-ci-discovery-startup-") as directory:
+            root = Path(directory)
+            registration = (ci.ROOT / "tests/CMakeLists.txt").read_text()
+            begin = registration.index("function(rodin_discover_tests")
+            end = registration.index("endfunction()", begin) + len("endfunction()")
+            (root / "Registration.cmake").write_text(registration[begin:end])
+            (root / "fake.cpp").write_text(
+                '#include <chrono>\n#include <thread>\n#include <iostream>\n'
+                'int main() { std::this_thread::sleep_for(std::chrono::seconds(6)); '
+                'std::cout << "Suite.\\n  One\\n"; }\n')
+            (root / "CMakeLists.txt").write_text('''cmake_minimum_required(VERSION 3.20)
+project(DiscoveryStartup CXX)
+enable_testing()
+include(GoogleTest)
+include(Registration.cmake)
+add_executable(Default fake.cpp)
+rodin_discover_tests(Default PROPERTIES LABELS unit TIMEOUT 17)
+add_executable(Explicit fake.cpp)
+rodin_discover_tests(Explicit DISCOVERY_TIMEOUT 1 PROPERTIES LABELS unit TIMEOUT 17)
+''')
+            build = root / 'build'
+            subprocess.run(['cmake', '-S', str(root), '-B', str(build)], check=True, capture_output=True)
+            subprocess.run(['cmake', '--build', str(build), '--target', 'Default'],
+                           check=True, capture_output=True)
+            failed = subprocess.run(['cmake', '--build', str(build), '--target', 'Explicit'],
+                                    capture_output=True, text=True)
+            self.assertNotEqual(failed.returncode, 0)
+            self.assertIn('timeout', failed.stdout + failed.stderr)
+            generated = next(build.glob('Default*_tests.cmake')).read_text()
+            self.assertIn('Suite.One', generated)
+            self.assertIn('TIMEOUT', generated)
+            self.assertIn('17', generated)
+
     def test_semicolon_properties_and_empty_arguments_are_preserved(self):
         with tempfile.TemporaryDirectory(prefix="rodin-ci-forward-") as directory:
             source = Path(directory) / "source"

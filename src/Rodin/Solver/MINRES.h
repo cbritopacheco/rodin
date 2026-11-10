@@ -9,7 +9,7 @@
  * @brief MINRES solver for symmetric (possibly indefinite) linear systems.
  *
  * This header provides the MINRES (Minimum Residual) solver class, an iterative
- * method for solving linear systems:
+ * method for solving linear systems.
  * @f[
  *   Ax = b
  * @f]

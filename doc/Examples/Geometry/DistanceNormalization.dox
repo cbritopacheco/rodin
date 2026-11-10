@@ -1,0 +1,140 @@
+/**
+  @page examples-distance-normalization Constructing a distance approximation from a Poisson field
+  @brief Mesh three implicit disks, solve a signed auxiliary problem and inspect its normalization error.
+
+  @tableofcontents
+  @m_footernavigation
+
+  @section examples-distance-setting The geometric reference
+
+  Let @f$D=[0,1]^2@f$ contain three disks with centers and radii
+
+  | Center | Radius |
+  | :--- | ---: |
+  | @f$(0.75,0.25)@f$ | @f$0.05@f$ |
+  | @f$(0.25,0.25)@f$ | @f$0.25@f$ |
+  | @f$(0.75,0.75)@f$ | @f$0.10@f$ |
+
+  The largest disk touches the square at two points. The disks have disjoint
+  interiors. Their union has signed distance
+  @f[
+    d(x)=\min_{i=1,2,3}\bigl(\lVert x-c_i\rVert-R_i\bigr),
+  @f]
+  negative inside and positive outside. This analytic field supplies both the
+  implicit geometry and a reference for the normalized output.
+
+  @snippet Models/Distance/SpaldingTucker.cpp distance-target
+
+  @section examples-distance-mesh Resolve and label the interface
+
+  The background has 32 vertices per axis. Its nodal @f$P_1@f$ interpolation
+  approximates the signed-distance field. MMG cuts the zero level set of that
+  interpolant and remeshes with maximum requested edge size @f$0.02@f$.
+
+  @snippet Models/Distance/SpaldingTucker.cpp distance-remesh
+
+  The material split explicitly assigns inside cells attribute 3, outside
+  cells attribute 2 and interface edges attribute 5. The field used to drive
+  remeshing is scoped to that operation. The following solve uses a new space
+  on the returned mesh.
+
+  In the checked run, the result has 3,852 vertices and 7,458 triangles. Its
+  inside area is @f$0.2339284@f$, compared with the analytic disk area
+  @f$\pi\sum_iR_i^2=0.2356194@f$. Refining the background interpolation is
+  part of controlling this geometric discrepancy; remeshing a fixed
+  interpolant retains its zero-set approximation.
+
+  @section examples-distance-potential Solve the auxiliary problem
+
+  With @f$\Omega_-@f$ the mesh's inside region and @f$\Gamma_h@f$ its marked
+  interface, the scalar potential satisfies
+  @f[
+    -\Delta u=1-2\chi_{\Omega_-}\quad\text{in }D,
+    \qquad u=0\quad\text{on }\Gamma_h.
+  @f]
+  The exterior boundary portions have the homogeneous Neumann condition of
+  the weak formulation. The force is negative inside and positive outside.
+  The fitted interface provides the essential condition that anchors each
+  region. The corresponding constrained stiffness matrix is symmetric
+  positive definite.
+
+  The program constructs this problem explicitly so that CG convergence and
+  the assembled residual can be checked before normalization. The same
+  attributed forcing is used by @ref Rodin::Distance::SignedPoisson.
+
+  @snippet Models/Distance/SpaldingTucker.cpp distance-potential
+
+  @ref Rodin::Distance::SpaldingTucker evaluates
+  @f[
+    d_{ST}=\frac{2u}{\lVert\nabla u\rVert+
+      \sqrt{\lVert\nabla u\rVert^2+2|u|}}
+  @f]
+  and interpolates it into the input space. A positive denominator preserves
+  the sign of the potential pointwise. The expression requires a defined
+  gradient and becomes undefined when the potential and its gradient vanish
+  together. The executable checks the resulting nodal values for finiteness.
+
+  @section examples-distance-results Inspect the approximation
+
+  @m_class{rodin-mesh-stages}
+
+  @parblock
+  @image html DistanceNormalization-reference.png "Analytic nodal distance on the fitted mesh."
+  @image html DistanceNormalization-normalized.png "Normalized signed Poisson field."
+  @image html DistanceNormalization-error.png "Absolute difference of the two nodal fields."
+  @endparblock
+
+  The two signed fields use the same color range,
+  @f$[-0.55,0.55]@f$. The error range is @f$[0,0.12]@f$.
+  Dark contours show the meshed interface. Dense triangle edges are omitted
+  to keep the scalar fields readable.
+
+  The checked local run produced:
+
+  | Quantity | Value |
+  | :--- | ---: |
+  | Maximum absolute nodal error | @f$0.110375@f$ |
+  | Arithmetic mean absolute nodal error | @f$0.0191554@f$ |
+  | Maximum normalized value on interface vertices | @f$0@f$ |
+  | @f$\lVert Au-b\rVert_2/\max(1,\lVert b\rVert_2)@f$ | @f$1.13\times10^{-12}@f$ |
+
+  The arithmetic mean is over mesh vertices and differs from an area-weighted
+  error norm. The maximum occurs on the upper boundary near
+  @f$(0.2000,1)@f$, where the normalized value is @f$0.391290@f$ and the
+  reference value is @f$0.501665@f$.
+
+  The normalization has an intrinsic multidimensional approximation error.
+  For a single disk with the exact radial interior potential
+  @f$u(r)=(r^2-R^2)/4@f$, the center value becomes
+  @f$d_{ST}(0)=-R/\sqrt2@f$, whereas the signed distance is @f$-R@f$.
+  For @f$R=0.25@f$, this gives an absolute center discrepancy of
+  @f$0.0732233@f$ before any discretization. The three-disk computation also
+  includes interface approximation, finite element gradients and the outer
+  Neumann boundary. Distance accuracy is assessed through the reference
+  comparison in addition to the linear residual.
+
+  @section examples-distance-run Build and inspect the output
+
+  Build the `SpaldingTucker` target and run it in a scratch directory. It
+  generates its input mesh and writes `DistanceNormalization.xdmf` with its
+  HDF5 companions. The arrays are `potential`, `normalized` and `reference`.
+  `DistanceNormalization.csv` records mesh counts, inside area, nodal errors,
+  interface values and the relative algebraic residual.
+
+  The program requires CG success, a residual below @f$10^{-9}@f$, finite
+  nodal fields, nonempty inside/outside regions and interface values within
+  @f$10^{-12}@f$ of zero. The recorded distance errors describe this
+  approximation and geometry.
+
+  @section examples-distance-source Complete program
+
+  The complete program is available in @ref Models/Distance/SpaldingTucker.cpp "SpaldingTucker.cpp".
+
+  @section examples-distance-next Continue
+
+  - @ref examples-eikonal-fmm — Arrival-time propagation and mesh refinement.
+  - @ref examples-swift-background — Interface fitting driven by signed distance.
+  - @ref guides-shape-optimization — Level-set transport and redistancing.
+
+  @example Models/Distance/SpaldingTucker.cpp
+*/

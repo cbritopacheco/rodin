@@ -23,7 +23,7 @@
  * @f$ u \in U_h @f$ and a test function @f$ v \in V_h @f$. It is bilinear
  * over the reals and, over the complex numbers, linear in @f$ u @f$ and
  * conjugate-linear in @f$ v @f$.
- * After discretisation, its entries are:
+ * After discretisation, its entries are
  * @f[
  *   A_{ij} = a(\psi_j, \phi_i), \quad
  *   i = 1,\ldots,M, \;\; j = 1,\ldots,N

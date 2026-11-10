@@ -1,258 +1,306 @@
 /**
-  @page examples-shapeoptimization-levelset_cantilever Shape optimization of a cantilever via the level set method
-  @brief Body-fitted optimization of a cantilever via the level set method
+  @page examples-shapeoptimization-levelset_cantilever Optimizing a level-set cantilever
+  @brief Couple elasticity, descent regularization, transport and body-fitted remeshing.
 
-  @image html LevelSetCantilever.png width=410px
-
-  @m_keywords{Cantilever, Levelset, Shape Optimization, Topology, Eikonal}
+  The material boundary in this example is represented by the zero set of a
+  scalar field. Each iteration solves the elastic body, extends a descent
+  direction through its surrounding domain, transports the field and
+  reconstructs a fitted mesh. This tutorial explains how those operations
+  exchange geometry and fields in `LevelSetCantilever2D`.
 
   @tableofcontents
-
   @m_footernavigation
 
-  @section examples-shapeopt-ls-intro Introduction
+  @section examples-shapeopt-ls-intro Domain representation
 
-  This advanced example combines **level-set shape optimization** with
-  body-fitted meshing. Unlike the
-  @ref examples-shapeoptimization-simple_cantilever "simple cantilever"
-  which only moves the boundary, this algorithm can perform **topology
-  changes** (create holes, merge components) by advecting a level-set
-  function and recovering the implicit domain at each iteration.
-
-  The optimization minimizes compliance with a volume penalty. Let
-  @f$\Omega \subset D@f$ be the material region, let @f$\Gamma_D@f$ be the
-  clamped boundary, and let @f$\Gamma_N@f$ be the loaded boundary. The state
-  displacement @f$u : \Omega \to \mathbb{R}^d@f$ solves linear elasticity:
-
+  A background domain @f$D@f$ contains material @f$\Omega@f$ and exterior
+  cells. Cell labels one and two identify those regions, while facet label
+  four identifies their interface. The signed-distance construction assigns
+  negative values in the material.
   @f[
-    \int_\Omega A e(u) : e(v)\,dx
-      = \int_{\Gamma_N} f \cdot v\,ds
-      \qquad
-      \forall v \in H^1_{\Gamma_D}(\Omega;\mathbb{R}^d),
+    \Omega=\{x:\phi(x)<0\},\qquad\Gamma=\{x:\phi(x)=0\}.
   @f]
+  At each iteration, the level set is transported and MMG reconstructs a
+  body-fitted interface. Its connectivity and entity numbering can change.
 
-  where
-
+  The objective is compliance plus material-area penalty.
   @f[
-    e(u) = \frac{1}{2}\left(\nabla u + \nabla u^T\right),
-    \qquad
-    A e(u) = 2\mu e(u) + \lambda \operatorname{tr}(e(u)) I.
+    J(\Omega)=\int_\Omega\sigma(u):\varepsilon(u)\,dx+\ell|\Omega|.
   @f]
+  The elastic state has a fixed clamp and a downward traction on the loaded
+  boundary. The optimizable material interface is traction-free.
 
-  The minimized functional is
+  Compliance measures load work, and the positive area penalty assigns a
+  cost to retaining material. With the load fixed, the objective balances
+  stiffness against material usage. The
+  @ref examples-shapeoptimization-simple_cantilever "boundary-deformation tutorial"
+  develops the same objective and free-boundary derivative using an explicitly
+  displaced material mesh. The examples use different initial domains, area
+  weights and update scales; comparisons between their numerical histories
+  require matching those choices.
 
-  @f[
-    \min_\Omega \; J(\Omega) = \int_\Omega A e(u) : e(u)\,dx
-                               + \ell\,|\Omega_{\mathrm{int}}|
-  @f]
+  @subsection examples-shapeopt-ls-fields Two meshes and their fields
 
-  with @f$\ell@f$ the volume penalty. The level-set function @f$\phi@f$
-  represents the material by sign:
+  @m_class{m-scroll}
 
-  @f[
-    \Omega = \{x \in D : \phi(x) > 0\}, \qquad
-    D \setminus \overline{\Omega} = \{x \in D : \phi(x) < 0\},
-    \qquad
-    \Gamma = \{x \in D : \phi(x) = 0\}.
-  @f]
+  @parblock
+  | Object | C++ storage | Purpose |
+  | :--- | :--- | :--- |
+  | Background @f$D_h@f$ | `th` | Contains both material and exterior cells; carries descent and transport |
+  | Material @f$\Omega_h@f$ | `trimmed` | Extracted cell submesh on which elasticity is solved |
+  | Elastic displacement @f$u_h@f$ | `u.getSolution()` | Response of the current material body to its load |
+  | Design direction @f$\theta_h@f$ | `g.getSolution()`, aliased by `dJ` | Regularized motion extended across the background |
+  | Signed distance and transported field | `dist`, `advect.getSolution()` | Encode the current and proposed material interface |
+  @endparblock
 
-  The shape derivative is converted into a smooth vector field @f$g@f$ by a
-  Hilbertian regularization:
+  Cell and facet attributes belong to different entity dimensions. Cell label
+  2 marks exterior material, while facet label 2 marks the clamp. Their equal
+  integer values do not identify the same geometric entities.
 
-  @f[
-    \int_D \alpha^2 \nabla g : \nabla w + g \cdot w\,dx
-      =
-    \int_\Gamma \left(A e(u):e(u) - \ell\right) n \cdot w\,ds
-      \qquad \forall w.
-  @f]
+  @section examples-shapeopt-ls-setup Input and controls
 
-  The level set is then transported by a descent velocity using the advection
-  equation
+  @subsection examples-shapeopt-ls-setup-includes Modules
 
-  @f[
-    \partial_t \phi + g \cdot \nabla \phi = 0,
-  @f]
-
-  and the zero level set is re-discretized with
-  @ref Rodin::MMG::LevelSetDiscretizer "MMG::LevelSetDiscretizer".
-
-  @section examples-shapeopt-ls-setup Problem Setup
-
-  @subsection examples-shapeopt-ls-setup-includes Includes
-
-  In addition to the standard Rodin modules, we need the
-  @ref Rodin::Distance "Distance" module (Eikonal solver), the
-  @ref Rodin::Advection "Advection" module (Lagrangian advection):
-
-  @code{.cpp}
-  #include <Rodin/IO/XDMF.h>
-  #include <Rodin/Advection/Lagrangian.h>
-  #include <Rodin/Distance/Eikonal.h>
-  #include <Rodin/Solver.h>
-  #include <Rodin/Assembly.h>
-  #include <Rodin/Geometry.h>
-  #include <Rodin/Variational.h>
-  #include <Rodin/Solid.h>
-  #include <Rodin/MMG.h>
-
-  using namespace Rodin;
-  using namespace Rodin::Geometry;
-  using namespace Rodin::Variational;
-  @endcode
+  The program combines local elasticity, `Distance::Eikonal`,
+  `Advection::Lagrangian`, MMG and XDMF output. These operations each act on
+  the mesh and finite element spaces belonging to the current iteration.
 
   @subsection examples-shapeopt-ls-setup-params Parameters
 
-  The mesh is partitioned into `interior` (material present) and `exterior`
-  (void) regions. The example uses a positive-inside level-set convention:
+  The Lamé coefficients are @f$\lambda=0.5769@f$ and @f$\mu=0.3846@f$.
+  The area penalty is @f$\ell=0.4@f$, the regularization length is
+  @f$\alpha=0.1@f$, and the initial MMG size bounds are 0.005 and 0.05.
+  A normalized descent field is transported with fixed step 0.0225.
+  The default budget is 300 updates.
 
-  @code{.cpp}
-  static constexpr Attribute interior = 1, exterior = 2;
-  static constexpr Attribute Gamma0 = 1, GammaD = 2, GammaN = 3, Gamma = 4;
+  The executable takes the hydrated resource
+  `LevelSetCantilever2D.mfem.mesh`
+  as its first argument. A second positive integer optionally selects the
+  iteration budget. Run in a scratch directory; the program creates `out/`
+  for its history files.
 
-  static constexpr Real mu = 0.3846, lambda = 0.5769;  // Lamé coefficients
-  static size_t maxIt = 300;                             // Max iterations
-  static Real hmax = 0.05, hmin = 0.005;                // Mesh sizes
-  static Real ell = 0.4;                                 // Volume penalty
-  static Real alpha = 0.1;                               // Regularization
+  Build and run the example from a configured checkout with these commands.
+
+  @code{.sh}
+  git lfs pull --include="resources/examples/ShapeOptimization/LevelSetCantilever2D.mfem.mesh"
+  cmake --build build --target LevelSetCantilever2D
+  mkdir -p results/level-set-cantilever
+  cd results/level-set-cantilever
+  ../../build/examples/ShapeOptimization/LevelSetCantilever2D \
+    ../../resources/examples/ShapeOptimization/LevelSetCantilever2D.mfem.mesh 300
   @endcode
 
-  @section examples-shapeopt-ls-loop Optimization Loop
+  Replacing the final argument with a smaller positive integer selects a
+  shorter execution check. The 300-state measurements below use the full
+  budget. A replacement input mesh must carry the material labels above,
+  facet label 4 on the design interface, label 2 on the clamp and label 3
+  on the loaded boundary.
 
-  Each iteration consists of six steps:
+  @section examples-shapeopt-ls-loop One iteration
 
-  @subsection examples-shapeopt-ls-loop-remesh Step 1 — Remesh
+  @subsection examples-shapeopt-ls-loop-remesh 1. Prepare the current geometry
 
-  At the start of each iteration, we improve the current body-fitted mesh
-  using @ref Rodin::MMG::Optimizer "MMG::Optimizer":
+  MMG quality optimization prepares the body-fitted mesh. Facet-to-cell
+  incidence is then recomputed for boundary and interface operations.
+  Remeshing failures reduce the requested sizes and retry, with a cap of
+  eight consecutive failures.
 
-  @code{.cpp}
-  MMG::Optimizer().setHMax(hmax)
-                  .setHMin(hmin)
-                  .setHausdorff(hausd)
-                  .setAngleDetection(false)
-                  .optimize(th);
-  @endcode
+  @subsection examples-shapeopt-ls-loop-trim 2. Extract the elastic body
 
-  @subsection examples-shapeopt-ls-loop-trim Step 2 — Trim the Mesh
+  `th.trim(exterior)` constructs the material submesh. New spaces on that
+  submesh describe the state, while full-background spaces describe the
+  descent and transport fields.
 
-  We extract the interior subdomain by trimming the exterior region. The
-  resulting @ref Rodin::Geometry::SubMesh "SubMesh" inherits boundary
-  attributes from the parent mesh:
+  This separation gives the state its physical material domain while retaining
+  a field in the surrounding cells through which the interface can move.
+  The state bilinear form is assembled only on the extracted material body.
 
-  @code{.cpp}
-  SubMesh trimmed = th.trim(exterior);
-  @endcode
+  @subsection examples-shapeopt-ls-loop-state 3. Solve elasticity
 
-  @subsection examples-shapeopt-ls-loop-state Step 3 — Solve the State Equation
+  The state displacement is zero on the clamp and is loaded by
+  @f$f=(0,-1)@f$. On the material domain, the weak equation is
+  @f[
+    \int_{\Omega_h}\sigma(u_h):\varepsilon(v_h)\,dx
+      =\int_{\Gamma_N}f\cdot v_h\,ds,
+  @f]
+  with @f$\varepsilon(u)=\operatorname{sym}\nabla u@f$ and
+  @f$\sigma(u)=2\mu\varepsilon(u)+\lambda\operatorname{tr}\varepsilon(u)I@f$.
+  Test fields vanish on the clamp. The free interface has the natural
+  zero-traction condition.
 
-  We solve the elasticity problem on the trimmed (interior) domain:
+  @snippet ShapeOptimization/LevelSetCantilever2D.cpp levelset-state
 
-  @code{.cpp}
-  P1 vhInt(trimmed, d);
-  TrialFunction u(vhInt);
-  TestFunction  v(vhInt);
+  The conjugate-gradient result is checked before the displacement is used.
 
-  Problem elasticity(u, v);
-  elasticity = LinearElasticityIntegral(u, v)(lambda, mu)
-             - BoundaryIntegral(f, v).over(GammaN)
-             + DirichletBC(u, VectorFunction{0, 0}).on(GammaD);
-  Solver::CG(elasticity).solve();
-  @endcode
+  @subsection examples-shapeopt-ls-loop-gradient 4. Extend a regularized descent
 
-  @subsection examples-shapeopt-ls-loop-gradient Step 4 — Shape Gradient
+  The displacement derivative and interface normal are evaluated from the
+  material side. For fixed supports and load boundary, the negative shape
+  derivative supplies the density @f$\sigma(u):\varepsilon(u)-\ell@f$.
+  The clamped and loaded boundary parts receive zero two-component velocity.
 
-  The shape gradient is computed on the **full** mesh (not trimmed), using
-  `traceOf` to evaluate quantities from the interior side of the interface
-  @f$ \Gamma @f$:
+  Write @f$W=\sigma(u_h):\varepsilon(u_h)@f$ and take @f$n@f$ outward
+  from the material. The free-boundary derivative density is
+  @f$\ell-W@f$, so its negative is used on the right-hand side of
+  @f[
+    \alpha^2\int_{D_h}\nabla\theta_h:\nabla w_h\,dx
+      +\int_{D_h}\theta_h\cdot w_h\,dx
+      =\int_{\Gamma_h}(W-\ell)n\cdot w_h\,ds.
+  @f]
+  The full-background solve spreads the interface load into neighboring
+  cells and regularizes its variation. Its coefficient is
+  @f$\alpha^2@f$, giving the smoothing length @f$\alpha@f$ in this program.
+  The vector @f$\theta_h@f$ then supplies the transport velocity.
 
-  @code{.cpp}
-  auto jac = Jacobian(u.getSolution());
-  jac.traceOf(interior);
-  auto e  = 0.5 * (jac + jac.T());
-  auto Ae = 2.0 * mu * e + lambda * Trace(e) * IdentityMatrix(d);
-  auto n  = FaceNormal(th);
-  n.traceOf(interior);
+  `jac.traceOf(interior)` selects the material-side displacement derivative
+  on an internal facet; `n.traceOf(interior)` selects the corresponding
+  outward material normal. These choices orient material growth and removal
+  consistently. `FaceIntegral` assembles the load on marked internal facets.
 
-  TrialFunction g(vh);
-  TestFunction  w(vh);
-  Problem hilbert(g, w);
-  hilbert = Integral(alpha * alpha * Jacobian(g), Jacobian(w))
-          + Integral(g, w)
-          - FaceIntegral(Dot(Ae, e) - ell, Dot(n, w)).over(Gamma)
-          + DirichletBC(g, VectorFunction{0, 0, 0}).on(GammaN);
-  Solver::CG(hilbert).solve();
-  @endcode
+  @snippet ShapeOptimization/LevelSetCantilever2D.cpp levelset-gradient
 
-  @subsection examples-shapeopt-ls-loop-advect Step 5 — Advect the Level Set
+  @subsection examples-shapeopt-ls-loop-advect 5. Construct and transport the distance
 
-  The signed distance function is first computed by solving the
-  Eikonal equation @f$ |\nabla d| = 1 @f$. Then it is advected along the
-  descent direction using a **Lagrangian advection** scheme:
+  The Eikonal step reconstructs distance from the tagged interface, then
+  `sign()` makes the material side negative. The descent is normalized before
+  transport. Non-finite norms fail the run; a zero norm ends the updates.
 
-  @code{.cpp}
-  // Compute signed distance
-  GridFunction dist(sh);
-  Distance::Eikonal(dist).setInterior(interior)
-                         .setInterface(Gamma)
-                         .solve()
-                         .sign();
+  Distance is reconstructed from the current fitted interface at every
+  iteration. Its sign identifies material and exterior, and its approximately
+  unit gradient near the interface gives the scalar field a geometric scale.
+  The normalized velocity is
+  @f$V_h=\theta_h/\max|\theta_h|@f$, using the program's nodal norm sampling.
+  The transport problem is
+  @f[
+    \partial_s\phi+V_h\cdot\nabla\phi=0,
+    \qquad \phi(\cdot,0)=d_h,
+  @f]
+  where @f$d_h@f$ is the signed-distance approximation. The parameter
+  @f$s@f$ advances the design; each elastic state is static.
+  `Advection::Lagrangian` advances this field along characteristics.
 
-  // Advect the level set
-  TrialFunction advect(sh);
-  TestFunction  test(sh);
-  Advection::Lagrangian(advect, test, dist, dJ).step(dt);
-  @endcode
+  The fixed increment @f$\Delta s=0.0225@f$ sets a nominal interface-motion
+  scale after velocity normalization. It retains its initial value when a
+  meshing retry reduces the requested mesh size. Step acceptance therefore
+  needs to be assessed together with the current mesh and objective history.
 
-  @subsection examples-shapeopt-ls-loop-recover Step 6 — Recover the Domain
+  @snippet ShapeOptimization/LevelSetCantilever2D.cpp levelset-transport
 
-  The new domain is recovered by applying
-  @ref Rodin::MMG::LevelSetDiscretizer "MMG::LevelSetDiscretizer" to the
-  advected level-set function:
+  @subsection examples-shapeopt-ls-loop-recover 6. Recover the interface
 
-  @code{.cpp}
-  th = MMG::LevelSetDiscretizer()
-        .split(interior, {interior, exterior})
-        .split(exterior, {interior, exterior})
-        .setRMC(1e-6)
-        .setHMax(hmax).setHMin(hmin).setHausdorff(hausd)
-        .setBoundaryReference(Gamma)
-        .setBaseReferences(GammaD)
-        .discretize(advect.getSolution());
-  @endcode
+  The transported field supplies the zero level set for MMG reconstruction.
 
-  @section examples-shapeopt-ls-xdmf XDMF Output
+  @snippet ShapeOptimization/LevelSetCantilever2D.cpp levelset-discretize
 
-  The @ref Rodin::IO::XDMF "XDMF" class exports the evolving mesh, distance,
-  and state fields at each iteration for visualization in ParaView:
+  The next iteration constructs fresh spaces and problems on that new mesh.
+  The @ref examples-mmg-behavior "MMG behavior guide" describes preservation
+  of required entities and material labels at level-set cuts.
 
-  @code{.cpp}
-  IO::XDMF xdmf("out/ShapeOptimization");
+  Both existing cell references are configured to split into material label
+  1 and exterior label 2 according to the transported sign. The new interface
+  receives facet label 4. MMG can insert, remove and renumber mesh entities
+  while constructing this fitted interface. The following iteration extracts
+  its material body and recomputes the state, descent and distance fields.
 
-  auto domain = xdmf.grid("domain");
-  domain.setMesh(th, IO::XDMF::MeshPolicy::Transient);
+  The output snapshot is written just before this reconstruction. It combines
+  the current state with the proposed transported field, so the next frame
+  shows the recovered geometry after its preparation step.
 
-  auto state = xdmf.grid("state");
-  // ... inside loop:
-  domain.add("dist", dist, IO::XDMF::Center::Node);
-  state.setMesh(trimmed, IO::XDMF::MeshPolicy::Transient);
-  state.add("u", u.getSolution(), IO::XDMF::Center::Node);
-  xdmf.write(i).flush();
-  @endcode
+  @m_class{rodin-mesh-stages}
 
-  @section examples-shapeopt-ls-full Full Source Code
+  @parblock
+  @image html LevelSetStages-descent.png "Computed normalized descent on the first background mesh. Arrows show direction; the navy contour marks the current material interface."
+  @image html LevelSetStages-distance.png "Current signed-distance approximation at the first state. The navy zero contour marks the material boundary; colors saturate outside the interval from -0.05 to 0.05."
+  @image html LevelSetStages-transport.png "Transported field after the first design step. Navy marks the current zero contour and cyan the proposed zero contour; the same clipped color interval is used."
+  @image html LevelSetStages-remeshed.png "Material mesh used by the second elastic state, after interface reconstruction and preparation. Edges show the fitted triangulation."
+  @endparblock
 
-  The complete source code is:
-  -   @ref ShapeOptimization/LevelSetCantilever2D.cpp "LevelSetCantilever2D.cpp"
+  @section examples-shapeopt-ls-output Inspect the numerical history
 
-  @section examples-shapeopt-ls-see-also See Also
+  @m_class{rodin-mesh-stages}
 
-  - @ref examples-shapeoptimization-simple_cantilever "Simple cantilever" —
-    Boundary-variation approach
-  - @ref examples-mmg-behavior "MMG behavior and guarantees"
-  - @ref examples-pdes-elasticity "Linear elasticity"
-  - @ref gallery "Gallery"
+  @parblock
+  @image html LevelSetCantilever-initial.png "Elastic state on the initial material mesh."
+  @image html LevelSetCantilever-final.png "Elastic state on the last recorded material mesh, using the same color scale."
+  @endparblock
+
+  The checked 300-state run reduced the objective from approximately 1.19842
+  to 0.942951. Its history contains 138 increasing steps, consistent with a
+  fixed-step policy that accepts updates without an objective-decrease test.
+  This run establishes successful execution of the specified update sequence.
+  Assessing stationarity requires an additional stopping criterion.
+
+  An independent geometry check found positive signed Jacobians in all
+  600 exported domain/state grids. Its minimum triangle shape measure was
+  approximately @f$8.83\times10^{-7}@f$ at iteration 26. A stage-by-stage
+  probe traced this sliver to the preceding level-set reconstruction.
+  The minimum was approximately @f$8.39\times10^{-7}@f$ after that cut and
+  remained approximately @f$8.83\times10^{-7}@f$ after quality optimization.
+  Monitor shape quality as well as Jacobian signs when using this workflow.
+  Metric-driven cleanup or step rejection requires its own geometric
+  acceptance policy and validation.
+
+  A positive Jacobian records orientation and nonzero cell area. The
+  normalized triangle shape measure
+  @f[
+    q_K=\frac{4\sqrt3\,|K|}
+               {\sum_{e\subset\partial K}|e|^2}
+  @f]
+  equals one for an equilateral triangle and approaches zero for a sliver.
+  The recorded small value identifies a cell that remains positive in area
+  while having very poor shape. Such cells can affect conditioning and field
+  gradients, so geometry checks should accompany an objective plot.
+
+  `obj.txt` records the objective at solved states. The transient XDMF file
+  `out/ShapeOptimization.xdmf` contains a full-background **domain** grid with
+  descent, distance and transported level set, and a material **state** grid
+  with displacement. Open the file in ParaView, select **Apply** and choose
+  the grid and field to inspect.
+
+  @m_class{m-scroll}
+
+  @parblock
+  | Output | Interpretation |
+  | :--- | :--- |
+  | `obj.txt` | Weighted objective at each recorded solved state |
+  | `domain` block | Background geometry with normalized descent **dJ**, current distance **dist** and transported field **advect** |
+  | `state` block | Material submesh with elastic displacement **u** |
+  | `out/Omega.<i>.mesh` | Background mesh after the corresponding interface reconstruction |
+  @endparblock
+
+  In ParaView, select **Extract Block** to compare `domain` and `state`.
+  Inspect the zero contour of **advect** on a current frame, then compare it
+  with the next frame's material boundary. On `state`, color by the magnitude
+  of **u** and select **Surface With Edges** to inspect the load path and cell
+  shapes. The displayed mesh represents the design geometry and the colors
+  represent its elastic response.
+
+  The complete run records state indices 0 through 299. The final reconstruction
+  is saved as `out/Omega.300.mesh`; its elastic state would require another
+  iteration. The observed objective reduction, 138 increasing steps and
+  local sliver formation describe separate properties of this run.
+
+  The intermediate-stage figures use recorded states 0 and 1 from the same
+  history. `visualize_stages.py --mode levelset`
+  renders the exported **dist**, **dJ**, **advect** and next material mesh.
+
+  Fixed-step transport and remeshing define this demonstration. Objective
+  histories, interface geometry and solver status should be inspected when
+  choosing a step or assessing stationarity.
+
+  @section examples-shapeopt-ls-full Complete source
+
+  Build `LevelSetCantilever2D`. The source
+  @ref ShapeOptimization/LevelSetCantilever2D.cpp includes the command-line
+  checks, bounded remeshing retries, solve checks and output handling.
+
+  @section examples-shapeopt-ls-see-also Continue
+
+  - @ref examples-shapeoptimization-simple_cantilever "Boundary-variation example"
+  - @ref guides-shape-optimization "Derivative and velocity conventions"
+  - @ref examples-mmg-behavior "Remeshing behavior"
 
   @example ShapeOptimization/LevelSetCantilever2D.cpp
   @m_examplenavigation{examples-shapeoptimization-levelset_cantilever,ShapeOptimization/}
   @m_footernavigation
-  */
+*/

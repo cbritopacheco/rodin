@@ -242,6 +242,19 @@ int main(int argc, char** argv) {
             with self.assertRaisesRegex(ValueError, "DistributedFixture ranks=4.*'Kernel/3': 2"):
                 ci.discover(entry, 4)
 
+    def test_csv_failure_preserves_completed_cases_without_a_success_receipt(self):
+        with tempfile.TemporaryDirectory() as folder, patch.object(ci.archive, 'restore'), patch.object(ci, 'command', return_value=['fixture']):
+            root = Path(folder)
+            lane = dict(id='lane', definition={}, entry={'format': 'csv'}, ranks=1,
+                        cases=['Triangle/1/1/0/0', 'Triangle/2/1/0/0'])
+            ci.dump(root / 'build/execution.json', {'lanes': [lane]})
+            with patch.object(ci.subprocess, 'check_output', side_effect=[
+                    'case,ns\nfirst,12\n', subprocess.CalledProcessError(1, ['fixture'])]):
+                with self.assertRaises(subprocess.CalledProcessError):
+                    ci.run_lane(root / 'build', 'lane', root / 'output')
+            self.assertIn('first,12', (root / 'output/report.csv').read_text())
+            self.assertFalse((root / 'output/receipt.json').exists())
+
     def test_execution_discovers_exact_names_and_writes_a_validated_receipt(self):
         with tempfile.TemporaryDirectory() as folder, patch.object(ci.archive, 'restore') as restore, patch.object(ci.archive, 'commit', return_value=COMMIT):
             root = Path(folder)

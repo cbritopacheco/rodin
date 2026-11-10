@@ -1,146 +1,119 @@
 /**
   @page examples-pdes-surfacemesh Solving PDEs on surface meshes
-  @brief Reaction-diffusion equation on a 3D surface mesh
+  @brief Solve reaction–diffusion on a triangulated unit sphere.
 
-  @m_keywords{Surface, Manifold, Reaction-Diffusion, H1, 3D}
+  A surface mesh has two-dimensional cells whose coordinates lie in
+  three-dimensional space. This example builds a closed spherical surface and
+  solves a scalar reaction–diffusion equation on it. The same variational syntax
+  as in a planar problem uses tangential gradients and surface measure.
 
   @tableofcontents
-
   @m_footernavigation
 
-  @section examples-pdes-surface-intro Introduction
+  @section examples-pdes-surface-intro The mathematical problem
 
-  Rodin can solve PDEs not only on 2D planar domains or 3D volumes, but
-  also on **surface meshes** — 2D manifolds embedded in 3D space. This is
-  useful for modeling phenomena on shells, biological membranes, or
-  curved interfaces.
-
-  This example solves a **reaction-diffusion** steady-state problem on a
-  surface mesh:
-
+  Let @f$\Gamma=\{x\in\mathbb R^3:|x|=1\}@f$ be the unit sphere. Solve
   @f[
-    \left\{
-    \begin{aligned}
-      -\Delta_\Gamma u + u &= f && \text{on } \Gamma \\
-    \end{aligned}
-    \right.
+    -\Delta_\Gamma u+u=f,\qquad f(x,y,z)=7xy.
   @f]
+  The operator @f$\Delta_\Gamma@f$ is the Laplace–Beltrami operator. Since
+  @f$-\Delta_\Gamma(xy)=6xy@f$ on the unit sphere, the exact smooth-surface
+  solution is @f$u_{\mathrm{ex}}=xy@f$.
 
-  where @f$ \Delta_\Gamma @f$ is the **Laplace–Beltrami operator** (the
-  surface Laplacian) and @f$ \Gamma @f$ is a curved surface in
-  @f$ \mathbb{R}^3 @f$.
-
-  The weak formulation is identical to the planar case — Rodin handles
-  the surface geometry automatically through the mesh metric:
-
+  Multiplying by @f$v\in H^1(\Gamma)@f$ and integrating over the closed surface
+  gives
   @f[
-    \int_\Gamma \nabla_\Gamma u \cdot \nabla_\Gamma v \, ds
-    + \int_\Gamma u \, v \, ds
-    = \int_\Gamma f \, v \, ds
+    \int_\Gamma\nabla_\Gamma u\cdot\nabla_\Gamma v\,ds
+       +\int_\Gamma uv\,ds=\int_\Gamma fv\,ds.
   @f]
+  There is no exterior boundary on which to prescribe a boundary condition.
+  The positive reaction term removes the constant kernel of the surface Laplacian.
 
-  @section examples-pdes-surface-impl Implementation
+  @section examples-pdes-surface-mesh 1. Build the surface geometry
 
-  @subsection examples-pdes-surface-mesh Loading the Surface Mesh
+  A tetrahedral cube is centered at the origin. Its boundary is extracted with
+  `skin()`, then each surface vertex is projected radially onto the unit sphere.
 
-  The surface mesh is loaded from an MFEM file. The mesh has topological
-  dimension 2 (triangles) but space dimension 3 (vertices live in
-  @f$ \mathbb{R}^3 @f$):
+  @snippet PDEs/SurfaceMesh.cpp surface-mesh
 
-  @code{.cpp}
-  #include <Rodin/Geometry.h>
-  #include <Rodin/Assembly.h>
-  #include <Rodin/Solver.h>
-  #include <Rodin/Variational.h>
+  The default result has 602 vertices and 1200 triangular facets. Its topological
+  dimension is two and its embedding dimension is three. The flat facets define a polyhedral approximation @f$\Gamma_h@f$ to the sphere. Interior points of a facet generally lie inside the sphere.
 
-  using namespace Rodin;
-  using namespace Rodin::Geometry;
-  using namespace Rodin::Variational;
+  @section examples-pdes-surface-problem 2. Define the surface problem
 
-  Mesh Omega;
-  Omega.load("surface-meshes-example.mesh", IO::FileFormat::MFEM);
-  @endcode
+  `P1` defines a continuous field affine on each facet. Rodin uses the
+  rectangular geometric Jacobian to evaluate the tangential gradient and the
+  surface measure used by the weak form.
 
-  @subsection examples-pdes-surface-space Finite Element Space
+  @snippet PDEs/SurfaceMesh.cpp surface-form
 
-  We use `H1` elements (higher-order continuous
-  Lagrange elements) to better approximate the solution on the curved
-  surface:
+  The formula is assembled on @f$\Gamma_h@f$, with the source evaluated at
+  its integration points. Comparing with @f$xy@f$ therefore includes both
+  finite element error and geometric approximation error. Higher geometric accuracy requires refinement or a curved representation of the
+  mesh.
 
-  @code{.cpp}
-  H1 Vh(Omega);
-  TrialFunction u(Vh);
-  TestFunction  v(Vh);
-  @endcode
+  @section examples-pdes-surface-output 3. Solve and visualize the field
 
-  @subsection examples-pdes-surface-rhs Right-Hand Side
+  The stiffness plus reaction matrix is symmetric positive definite, so
+  conjugate gradients is appropriate. The mesh and scalar field are exported
+  together after convergence is checked.
 
-  The source term is defined in terms of the 3D coordinates of points on
-  the surface:
+  @snippet PDEs/SurfaceMesh.cpp surface-solve
 
-  @code{.cpp}
-  auto f = RealFunction(
-    [](const Point& x)
-    {
-      double l2 = x(0) * x(0) + x(1) * x(1) + x(2) * x(2);
-      return 7 * x(0) * x(1) / l2;
-    });
-  @endcode
+  After the error and residual checks below pass, export the field.
 
-  @subsection examples-pdes-surface-problem Problem Assembly
+  @snippet PDEs/SurfaceMesh.cpp surface-export
 
-  The problem is assembled exactly as in the planar case. The
-  `Integral(Grad(u), Grad(v))` automatically uses the surface gradient:
+  @image html PDEs/SurfaceMesh.png "Computed reaction–diffusion field on the triangulated sphere. Color represents the scalar field on the original triangulated geometry." width=720px
 
-  @code{.cpp}
-  Solver::CG cg;
-  cg.setMaxIterations(200);
-  cg.setRelativeTolerance(1e-12);
-  cg.printIterations(true);
+  Open `SurfaceMesh.xdmf` in ParaView, color by **u**, and select **Surface With
+  Edges** to inspect the geometry. Positive and negative lobes reflect the sign
+  of @f$xy@f$. The surface is displayed in its three-dimensional embedding.
 
-  Problem rd(u, v);
-  rd = Integral(Grad(u), Grad(v))    // Surface stiffness: \int_\Gamma \nabla_\Gamma u \cdot \nabla_\Gamma v ds
-     + Integral(u, v)                // Mass term: \int_\Gamma u v ds
-     - Integral(f, v);               // Load: \int_\Gamma f v ds
-  rd.solve(cg);
-  @endcode
+  @section examples-pdes-surface-error 4. Check geometry and field refinement
 
-  @note No boundary conditions are needed here because the surface
-  @f$ \Gamma @f$ has no boundary (it is a closed manifold). The mass term
-  @f$ \int u \, v \, ds @f$ makes the bilinear form coercive.
+  The executable records the relative algebraic residual and the field error
+  @f[
+    e_h=\frac{\lVert u_h-xy\rVert_{L^2(\Gamma_h)}}
+                 {\lVert xy\rVert_{L^2(\Gamma_h)}}.
+  @f]
+  Here @f$xy@f$ is the ambient polynomial evaluated on each flat facet.
+  The norm is therefore taken on the actual mesh surface, using that
+  extension of the smooth-sphere solution. It includes the effect of both
+  field discretization and approximate geometry. Sixth-order triangle
+  quadrature evaluates the squared-error polynomial.
 
-  @subsection examples-pdes-surface-save Saving Results
+  @snippet PDEs/SurfaceMesh.cpp surface-error
 
-  @code{.cpp}
-  u.getSolution().save("u.gf", IO::FileFormat::MFEM);
-  Omega.save("Omega.mesh", IO::FileFormat::MFEM);
-  @endcode
+  An optional positive integer argument selects the number of background
+  vertices per axis, with at least three required. The following checked
+  sequence halves the original cube-grid spacing at each step:
 
-  @section examples-pdes-surface-key Key Observations
+  | Vertices per axis | Surface vertices | Triangles | Surface area | Relative field error |
+  | ---: | ---: | ---: | ---: | ---: |
+  | 6 | 152 | 300 | @f$12.27686@f$ | @f$0.0940273@f$ |
+  | 11 | 602 | 1200 | @f$12.49211@f$ | @f$0.0251292@f$ |
+  | 21 | 2402 | 4800 | @f$12.54768@f$ | @f$0.00640798@f$ |
 
-  - **No special operators needed**: Rodin automatically computes the
-    surface gradient @f$ \nabla_\Gamma @f$ from the mesh geometry. The
-    code is identical to the planar case.
-  - **H1 elements on surfaces**: Higher-order elements are recommended
-    on curved surfaces for better geometric approximation.
-  - **Boundary-free manifolds**: Closed surfaces have no boundary, so
-    no boundary conditions are required. The mass term provides
-    coercivity.
-  - **Surface integrals**: The `Integral(...)` operator automatically
-    uses the surface measure @f$ ds @f$ instead of @f$ dx @f$.
+  @image html SurfaceMeshConvergence.png "Measured relative field error and relative surface-area error against the analytic sphere area. The dashed curve is a quadratic reference anchored at the finest field error."
 
-  @section examples-pdes-surface-full Full Source Code
+  The field errors decrease by factors @f$3.74@f$ and @f$3.92@f$,
+  approaching quadratic behavior on this sequence. The area approaches
+  @f$4\pi@f$. Every assembled residual is below @f$6.1\times10^{-11}@f$
+  after normalization by @f$\max(1,\lVert b\rVert_2)@f$.
 
-  The complete source code is:
-  -   @ref PDEs/SurfaceMesh.cpp "SurfaceMesh.cpp"
+  Run the three cases one at a time in separate directories to retain their
+  XDMF/HDF5 output and `SurfaceMesh.csv` statistics. The executable checks
+  solver success, finite measurements and a relative residual below
+  @f$10^{-9}@f$ before writing the field.
 
-  @section examples-pdes-surface-see-also See Also
+  @section examples-pdes-surface-full Complete program
 
-  - @ref examples-pdes-poisson "Poisson equation" — Planar equivalent
-  - @ref fem-spaces "Finite element spaces" — H1 elements
-  - @ref guides-solvers "Solvers guide"
+  The program generates its mesh at startup.
 
-  @example PDEs/SurfaceMesh.cpp
-  @m_examplenavigation{examples-pdes-surfacemesh,PDEs/}
-  @m_footernavigation
-  */
+  See @ref PDEs/SurfaceMesh.cpp "SurfaceMesh.cpp", the
+  @ref guides-meshes-creation "mesh creation guide", and the
+  @ref guides-io "I/O guide" for related operations.
+
+  @example PDEs/SurfaceMesh.cpp @m_examplenavigation{examples-pdes-surfacemesh,PDEs/} @m_footernavigation
+*/

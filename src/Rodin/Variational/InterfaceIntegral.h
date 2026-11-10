@@ -14,7 +14,7 @@
  * faces, focusing on element-to-element coupling.
  *
  * # Mathematical Foundation
- * Interface integrals compute:
+ * Interface integrals compute the following quantity.
  * @f[
  *   \int_{\Gamma_h} f(x) \, ds
  * @f]
@@ -28,7 +28,7 @@
  * - **Stability**: Add necessary stabilization terms
  *
  * # Interior Penalty Method
- * A typical IP-DG formulation includes:
+ * A typical IP-DG formulation includes
  * @f[
  *   a(u,v) = \int_\Omega \nabla u \cdot \nabla v \, dx
  *          - \int_{\Gamma_h} \{\!\{\nabla u\}\!\} \cdot [\![v]\!] \, ds
@@ -81,7 +81,7 @@ namespace Rodin::Variational
    * @f[
    *   A : U_h \rightarrow \mathbb{R}^{p \times q}, \quad B : V_h \rightarrow \mathbb{R}^{p \times q},
    * @f]
-   * this class represents the integral of their dot product:
+   * this class represents the following integral of their dot product.
    * @f[
    *   \int_{\mathcal{F}_h} A(u) : B(v) \ d\sigma(x) \ .
    * @f]

@@ -45,7 +45,7 @@ namespace Rodin::Variational
    * Eviction and cross-thread misses permit direct pointwise evaluation.
    * Cells share reference data, not geometry-dependent matrices.
    * Both public lookup operations use the same formula search. Construction
-   * is a separate stage: it retires an evicted key before changing storage and
+   * is a separate stage that retires an evicted key before changing storage and
    * publishes the new key only after the element has filled the complete table.
    * A request obtains its thread-local cache once and shares that reference
    * between its lookup and construction stages.

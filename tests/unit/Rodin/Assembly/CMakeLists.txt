@@ -61,3 +61,8 @@ add_executable(RodinAssemblyConstraintChainTest ConstraintChainTest.cpp)
 target_link_libraries(RodinAssemblyConstraintChainTest
   PRIVATE GTest::gtest_main Rodin::Geometry Rodin::Variational)
 rodin_discover_tests(RodinAssemblyConstraintChainTest PROPERTIES LABELS unit TIMEOUT 60)
+
+add_executable(RodinAssemblyPeriodicConstraintTest PeriodicConstraintTest.cpp)
+target_link_libraries(RodinAssemblyPeriodicConstraintTest PRIVATE
+  GTest::gtest_main Rodin::Geometry Rodin::Variational)
+rodin_discover_tests(RodinAssemblyPeriodicConstraintTest PROPERTIES LABELS unit TIMEOUT 60)

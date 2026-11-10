@@ -29,7 +29,7 @@ namespace Rodin::Variational
    * @ingroup SqrtSpecializations
    * @brief Square root operation for functions.
    *
-   * This class represents the square root operation applied to a scalar function:
+   * This class represents the square root operation applied to a scalar function.
    * @f[
    *    \text{Sqrt}(f)(x) = \sqrt{f(x)}
    * @f]

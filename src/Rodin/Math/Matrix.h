@@ -744,7 +744,7 @@ namespace Rodin::FormLanguage
     using ScalarType = Number;
   };
 
-  /// @brief Type traits for a dense Math::Matrix: exposes the scalar type.
+  /// @brief Type traits for a dense Math::Matrix, exposing the scalar type.
   template <class Number>
   struct Traits<Math::Matrix<Number>>
   {

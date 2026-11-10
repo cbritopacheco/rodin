@@ -120,12 +120,14 @@ int main(int argc, char** argv)
     }
 
     // The only degree-dependent choice: all spaces use the same SWIFT problem.
+    //! [swift-problem]
     H1 space(std::integral_constant<size_t, Degree>{}, mesh, dimension);
     TrialFunction u(space);
     TestFunction v(space);
     Adaptation::SWIFT::Problem fitting(u, v);
     fitting.setParameters(options.parameters).setInterfaceAttribute(Interface);
     const auto report = fitting.solve(phi, gradient);
+    //! [swift-problem]
 
     // A valid best-effort fit may miss the target: report fit and quality separately.
     std::cout << std::scientific
@@ -145,6 +147,7 @@ int main(int argc, char** argv)
 
     // Apply the solution to a separate mesh, including all higher-order geometry nodes.
     const auto& displacement = u.getSolution();
+    //! [swift-geometry]
     Mesh<Context::Local> moved(mesh);
     for (auto vertex = mesh.getVertex(); vertex; ++vertex)
     {
@@ -171,6 +174,7 @@ int main(int argc, char** argv)
             std::move(nodes), geometry));
       }
     }
+    //! [swift-geometry]
     const std::filesystem::path stem = options.output.empty()
       ? "swift/ReconstructionP" + std::to_string(Degree)
       : options.output;

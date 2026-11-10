@@ -1,87 +1,63 @@
 /**
-  @page examples-mmg-mesh_adaptation Adapting the mesh
-  @brief How to adapt a mesh based on a solution field
-
-  @m_keywords{MMG, Adaptation, Refinement, Solution-Based}
+  @page examples-mmg-mesh_adaptation Adapting to a size field
+  @brief Prescribe local edge lengths and inspect the resulting mesh density.
 
   @tableofcontents
-
   @m_footernavigation
 
-  @section examples-mmg-adapt-intro Introduction
+  @section examples-mmg-adapt-intro A spatially varying target
 
-  Mesh **adaptation** (or adaptive refinement) modifies the mesh density
-  based on a computed solution. Regions where the solution has sharp gradients
-  or features receive finer elements, while smooth regions are coarsened.
-  This produces more accurate results with fewer degrees of freedom.
+  On the unit square, prescribe the scalar edge-size field
+  @f[
+    h(x,y)=0.05+0.15x.
+  @f]
+  The requested size is smallest at the left edge and largest at the right
+  edge. This known field isolates the remeshing operation before a PDE error
+  estimator is introduced. MMG inserts, removes and moves vertices to approach
+  the prescribed sizes under its geometric and gradation constraints.
 
-  The @ref Rodin::MMG "MMG" module supports metric-based mesh
-  adaptation where a solution field or metric tensor guides the remesher.
+  @section examples-mmg-adapt-workflow Construct and pass the size field
 
-  @section examples-mmg-adapt-workflow Typical Workflow
+  The initial mesh has 81 vertices and 128 triangles.
 
-  A typical solve–adapt cycle looks like:
+  @snippet MMG/MeshAdaptation.cpp mmg-adapt-setup
 
-  @code{.cpp}
-  #include <Rodin/Solver.h>
-  #include <Rodin/Geometry.h>
-  #include <Rodin/Variational.h>
-  #include <Rodin/MMG.h>
+  A scalar nodal field supplies the target edge lengths. `MMG::Adapt::adapt`
+  consumes that field while changing the mesh. Its space is scoped to this
+  call; construct new spaces on the resulting topology before subsequent
+  field interpolation or PDE solves.
 
-  using namespace Rodin;
-  using namespace Rodin::Geometry;
-  using namespace Rodin::Variational;
+  @snippet MMG/MeshAdaptation.cpp mmg-adapt-call
 
-  int main()
-  {
-    // 1. Start with a coarse mesh
-    MMG::Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 8, 8 });
+  @section examples-mmg-adapt-behavior Inspect density and domain preservation
 
-    for (int adapt = 0; adapt < 3; ++adapt)
-    {
-      mesh.getConnectivity().compute(1, 2);
+  @m_class{rodin-mesh-stages}
 
-      // 2. Solve the PDE on the current mesh
-      P1 vh(mesh);
-      TrialFunction u(vh);
-      TestFunction  v(vh);
-      Problem poisson(u, v);
-      poisson = Integral(Grad(u), Grad(v))
-              - Integral(RealFunction(1.0), v)
-              + DirichletBC(u, Zero());
-      Solver::CG(poisson).solve();
+  @parblock
+  @image html MMGAdaptation-before.png "Mesh before adaptation, with the same plotting scale."
+  @image html MMGAdaptation-after.png "Mesh after adaptation, with the same plotting scale."
+  @endparblock
 
-      // 3. Adapt the mesh using MMG with solution-driven sizing
-      MMG::Optimizer()
-        .setHMax(0.2)
-        .setHMin(0.01)
-        .optimize(mesh);
-    }
+  The size field is an input to remeshing. A solve–estimate–adapt loop also
+  needs a specified error indicator, its conversion to positive target sizes,
+  field transfer and a stopping criterion. Each of those choices affects the
+  numerical approximation and should be checked for the intended PDE.
 
-    mesh.save("Adapted.mesh", IO::FileFormat::MFEM);
-    return 0;
-  }
-  @endcode
+  @section examples-mmg-adapt-run Build and run
 
-  @section examples-mmg-adapt-behavior Expected Behavior
+  Build the `MeshAdaptation` target. It writes the input and output meshes as
+  `Before.medit.mesh` and `After.medit.mesh`, along with triangle CSV files
+  used for the figure. The program checks positive triangle areas and unit
+  total area with tolerance @f$10^{-10}@f$.
 
-  `MMG::Adapt` is intended for size-map-driven remeshing. It may insert,
-  remove, and move vertices to match the requested metric subject to the
-  configured `hmin`, `hmax`, Hausdorff, and gradation constraints. For pure
-  mesh-quality cleanup without an external size map, use
-  @ref Rodin::MMG::Optimizer "MMG::Optimizer".
+  The complete program is available in @ref MMG/MeshAdaptation.cpp "MeshAdaptation.cpp".
 
-  Required entities can be marked on @ref Rodin::MMG::Mesh "MMG::Mesh" and
-  are converted to MMG `MG_REQ` tags. See
-  @ref examples-mmg-behavior-required "Required entity behavior" for the
-  distinction between uncut entities, optimization, and level-set cuts.
+  @section examples-mmg-adapt-see-also Continue
 
-  @section examples-mmg-adapt-see-also See Also
+  - @ref examples-mmg-mesh_optimization "Quality optimization"
+  - @ref examples-mmg-behavior "Required geometry and level-set cuts"
+  - @ref guides-numerical-contracts "Field and mesh lifetimes"
 
-  - @ref examples-mmg-mesh_optimization "Mesh optimization"
-  - @ref examples-mmg-behavior "MMG behavior and guarantees"
-  - @ref examples-pdes-poisson "Poisson equation"
-  - @ref Rodin::MMG "MMG namespace"
-
-  */
+  @example MMG/MeshAdaptation.cpp
+  @m_footernavigation
+*/

@@ -1394,7 +1394,7 @@ namespace Rodin::Variational
    * @brief Combines a preassembled BilinearForm with a DirichletBC into a
    * ProblemBody.
    *
-   * Enables expression chains such as:
+   * Supports the following expression chains.
    * @code
    *   problem = preassembledBF + DirichletBC(u, g);
    * @endcode
@@ -1483,7 +1483,7 @@ namespace Rodin::Variational
    * @brief Combines a list of local bilinear form integrators with a
    * preassembled BilinearForm into a ProblemBody.
    *
-   * Enables expression chains such as:
+   * Supports the following expression chains.
    * @code
    *   problem = Integral(u, v) - Integral(p, v) + preassembledBF - ...;
    * @endcode
@@ -1513,7 +1513,7 @@ namespace Rodin::Variational
    * @brief Subtracts a preassembled LinearForm from a single local bilinear
    * form integrator to create a ProblemBody.
    *
-   * Enables expression chains such as:
+   * Supports the following expression chains.
    * @code
    *   problem = Integral(Grad(u), Grad(v)) - assembledLoadForm;
    * @endcode
@@ -1543,7 +1543,7 @@ namespace Rodin::Variational
    * @brief Subtracts a preassembled LinearForm from a list of local bilinear
    * form integrators to create a ProblemBody.
    *
-   * Enables expression chains such as:
+   * Supports the following expression chains.
    * @code
    *   problem = Integral(u, v) - Integral(p, v) + Integral(p, q) - loadP0;
    * @endcode
@@ -1573,7 +1573,7 @@ namespace Rodin::Variational
    * @brief Subtracts a preassembled LinearForm from a ProblemBody that has
    * an OperatorType but no VectorType yet.
    *
-   * Enables expression chains such as:
+   * Supports the following expression chains.
    * @code
    *   problem = Integral(u, v) - Integral(p, v) + preassembledBF - loadP0;
    * @endcode
@@ -1605,7 +1605,7 @@ namespace Rodin::Variational
    * The @f$ \mathrm{void} @f$-vector overload above covers the case where the
    * LinearForm is what introduces the vector; this one covers a body that
    * already holds linear-form content, so that several preassembled forms can
-   * be reused in one chain:
+   * be reused in one chain.
    * @code
    *   problem = preassembledBF + Integral(u, v) - Integral(f, v) - preassembledLF;
    * @endcode

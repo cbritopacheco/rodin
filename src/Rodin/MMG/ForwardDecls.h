@@ -13,8 +13,8 @@
 
 namespace Rodin::MMG
 {
-  /// @brief Base wrapper for MMG configuration and low-level mesh/solution conversion.
-  class MMG5;
+  /// @brief Shared configuration for MMG-backed remeshing operations.
+  class Base;
 
   /// @brief MMG-aware mesh type extending @ref Rodin::Geometry::Mesh.
   class Mesh;

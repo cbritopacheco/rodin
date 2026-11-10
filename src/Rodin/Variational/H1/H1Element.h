@@ -56,7 +56,7 @@
 namespace Rodin::FormLanguage
 {
   /**
-   * @brief Type traits for @c H1Element: exposes the scalar type and the
+   * @brief Type traits for @c H1Element, exposing the scalar type and the
    * range type of the element.
    */
   template <size_t K, class Range>
@@ -206,10 +206,10 @@ namespace Rodin::Variational
       /**
        * @brief Represents a Lagrange basis function of degree K.
        *
-       * A basis function φ_i satisfies the Lagrange property:
+       * A basis function φ_i satisfies the Lagrange property.
        * @f$ \phi_i(x_j) = \delta_{ij} @f$ where x_j are the Lagrange nodes.
        *
-       * The basis functions form a partition of unity: @f$ \sum_i \phi_i(x) = 1 @f$.
+       * The basis functions form a partition of unity with @f$ \sum_i \phi_i(x) = 1 @f$.
        *
        * # Evaluation Methods
        * - `operator()(point)`: Evaluates the basis function at a spatial point
@@ -276,7 +276,7 @@ namespace Rodin::Variational
           /**
            * @brief Represents the gradient of a basis function.
            *
-           * The gradient is the vector of first-order partial derivatives:
+           * The gradient is the vector of first-order partial derivatives.
            * @f$ \nabla \phi = \left( \frac{\partial \phi}{\partial x}, \frac{\partial \phi}{\partial y}, \frac{\partial \phi}{\partial z} \right) @f$
            */
           class GradientFunction
@@ -943,10 +943,10 @@ namespace Rodin::Variational
    * Vector-valued H1 element for approximating vector fields (e.g., displacement, velocity).
    *
    * # Mathematical Properties
-   * - **DOF count**: @f$ d \times n_s @f$ where:
+   * - **DOF count**: @f$ d \times n_s @f$ Here,
    *   - @f$ d @f$ is the vector dimension (vdim)
    *   - @f$ n_s @f$ is the number of scalar DOFs for the underlying H1 element
-   * - **Basis functions**: @f$ \boldsymbol{\phi}_{i,c}(x) = \phi_i(x) \mathbf{e}_c @f$ where:
+   * - **Basis functions**: @f$ \boldsymbol{\phi}_{i,c}(x) = \phi_i(x) \mathbf{e}_c @f$ Here,
    *   - @f$ \phi_i(x) @f$ is the scalar H1 basis function
    *   - @f$ \mathbf{e}_c @f$ is the unit vector in direction c
    * - **Jacobian**: @f$ J_{ij} = \frac{\partial u_i}{\partial x_j} @f$ where @f$ \mathbf{u} @f$ is the vector field

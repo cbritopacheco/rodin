@@ -12,7 +12,7 @@
  * problems using the conjugate gradient method applied to the normal equations.
  *
  * # Algorithm
- * Solves the least-squares problem:
+ * Solves the least-squares problem.
  * @f[
  *   \min_x \|Ax - b\|^2
  * @f]
@@ -92,7 +92,7 @@ namespace Rodin::Solver
    *
    * @tparam Scalar The scalar type (e.g., Real, Complex)
    *
-   * **Example usage:**
+   * **The following example illustrates usage.**
    * @code{.cpp}
    * Problem problem(u, v);
    * problem = Integral(Grad(u), Grad(v)) - Integral(f, v);

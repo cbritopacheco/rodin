@@ -106,7 +106,7 @@ namespace Rodin::Alert
    * colors, and various text attributes for rich terminal output. The class uses
    * template parameters to specify color types at compile time for type safety.
    *
-   * Example usage:
+   * The following example illustrates usage.
    * @code{.cpp}
    * auto redText = Text<RedT>("Error message");
    * auto boldText = Text("Important").setBold();

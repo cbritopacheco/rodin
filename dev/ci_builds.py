@@ -17,6 +17,8 @@ import re
 import subprocess
 import tarfile
 
+import ci_environment
+
 ROOT = Path(__file__).resolve().parents[1]
 FAMILIES = {
     'Convergence': 'native',
@@ -108,7 +110,7 @@ def definition(job, row):
         'RODIN_USE_ASAN': 'OFF', 'RODIN_USE_UBSAN': 'OFF',
     }
     return {'mode': mode, 'compiler': 'gcc-14',
-            'runner': 'ubuntu-latest' if mode == 'native' else 'ubuntu-24.04',
+            'runner': 'ubuntu-24.04',
             'cmake': flags, 'targets': sorted(names)}
 
 
@@ -236,6 +238,11 @@ def restore(spec, build_dir, source, overlay=False):
                 target = (destination.parent if member.issym() else build_dir) / member.linkname
                 target.resolve().relative_to(build_dir.resolve())
         options = {'filter': 'data'} if hasattr(tarfile, 'data_filter') else {}
+        # Downloaded compressed inputs still occupy the same runner disk.
+        # Reserve the complete expanded payload plus execution/coverage headroom
+        # before extracting, including when overlaying another directory build.
+        expanded = sum(member.size for member in tar.getmembers() if member.isfile())
+        ci_environment.disk_space(build_dir, ci_environment.MIN_FREE_GIB + expanded / ci_environment.GIB)
         tar.extractall(build_dir, **options)
     for path, expected_hash in metadata['runtime_libraries'].items():
         if not Path(path).is_file() or digest(Path(path)) != expected_hash:

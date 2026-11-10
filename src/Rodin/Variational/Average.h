@@ -44,7 +44,7 @@ namespace Rodin::Variational
    * @brief Average of a FunctionBase instance across an interface.
    *
    * The Average operator computes the average value of a function across an
-   * interface (face) between two adjacent elements:
+   * interface (face) between two adjacent elements.
    * @f[
    *   \{\!\{u\}\!\} = \frac{1}{2}(u^+ + u^-)
    * @f]

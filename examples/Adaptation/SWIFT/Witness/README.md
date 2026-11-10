@@ -7,7 +7,7 @@ SWIFT's production quality witnesses or a running calibration campaign.
 
 ## Build
 
-The executable is disabled by default. CGAL is discovered only when it is enabled:
+The executable is disabled by default. CGAL is discovered only when it is enabled.
 
 ```sh
 cmake -S . -B build -DRODIN_BUILD_EXAMPLES=ON -DRODIN_BUILD_SWIFT_WITNESS=ON
@@ -26,7 +26,7 @@ obligations. Distribution of the combined Witness executable must comply with
 the applicable CGAL license. See [CGAL licensing](https://www.cgal.org/license.html)
 and the [package reference](https://doc.cgal.org/latest/Bounding_volumes/group__PkgBoundingVolumesRef.html).
 
-The visualizers require only NumPy:
+The visualizers require only NumPy.
 
 ```sh
 python3 -m pip install -r examples/Adaptation/SWIFT/Witness/requirements.txt
@@ -34,7 +34,7 @@ python3 -m pip install -r examples/Adaptation/SWIFT/Witness/requirements.txt
 
 ## Generate
 
-Run from the repository root, replacing `build` with the configured build path:
+Run from the repository root, replacing `build` with the configured build path.
 
 ```sh
 # Default triangle; all witness locations are free.
@@ -119,7 +119,7 @@ maximum is attained at a cell vertex. Continuous coverage is therefore evaluated
 from these vertices in floating-point arithmetic, not from a sampling grid.
 
 Each sweep freezes those cells and replaces every site by its cell's smallest
-enclosing-ball center:
+enclosing-ball center.
 
 \[
 \xi_i^{\mathrm{new}}
@@ -160,7 +160,7 @@ anisotropic mapping.
 
 ## Visualize
 
-Use `plot.py` with a single-geometry JSON object:
+Use `plot.py` with a single-geometry JSON object.
 
 ```sh
 python3 examples/Adaptation/SWIFT/Witness/plot.py \
@@ -177,7 +177,7 @@ The output is vector SVG. Python does not optimize or recompute coverage.
 
 ## Verification
 
-An independent SciPy/Qhull oracle is used only by the tests:
+An independent SciPy/Qhull oracle is used only by the tests.
 
 ```sh
 python3 -m pip install -r examples/Adaptation/SWIFT/Witness/tests/requirements.txt
@@ -193,7 +193,7 @@ refinement, evaluation budgets, invalid inputs and figure generation.
 smooth-Newton and differential-evolution measurements; it is not a CGAL timing
 benchmark.
 
-Supplied sets can be evaluated without optimization:
+Supplied sets can be evaluated without optimization.
 
 ```sh
 # Input: {"geometry": "triangle", "points": [[0,0], [1,0], [0,1]]}.

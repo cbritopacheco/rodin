@@ -13,6 +13,45 @@
     dark: 'M21 13a9 9 0 0 1-10-10A9 9 0 1 0 21 13Z'
   };
 
+  let figureVariants = {};
+  function applyFigureTheme(light) {
+    for (const image of document.querySelectorAll('main article img, main article video')) {
+      const attribute = image.tagName === 'VIDEO' ? 'poster' : 'src';
+      const original = image.dataset.rodinFigure || image.getAttribute(attribute);
+      if (!original) continue;
+      const name = original.split('/').pop();
+      if (!figureVariants[name]) continue;
+      image.dataset.rodinFigure = original;
+      const selected = light ? original : original.replace(name, figureVariants[name]);
+      if (image.getAttribute(attribute) !== selected) image.setAttribute(attribute, selected);
+    }
+    for (const video of document.querySelectorAll('main article video')) {
+      const source = video.querySelector('source');
+      if (!source) continue;
+      const original = source.dataset.rodinFigure || source.getAttribute('src');
+      if (!original) continue;
+      const name = original.split('/').pop();
+      if (!figureVariants[name]) continue;
+      source.dataset.rodinFigure = original;
+      const selected = light ? original : original.replace(name, figureVariants[name]);
+      if (source.getAttribute('src') === selected) continue;
+      const time = video.currentTime;
+      const playing = !video.paused;
+      source.setAttribute('src', selected);
+      video.addEventListener('loadedmetadata', () => {
+        video.currentTime = time;
+        if (playing) video.play().catch(() => {});
+      }, {once: true});
+      video.load();
+    }
+  }
+  document.addEventListener('DOMContentLoaded', async () => {
+    const response = await fetch('rodin-figure-themes.json');
+    if (!response.ok) return;
+    figureVariants = await response.json();
+    applyTheme();
+  }, {once: true});
+
   function applyTheme() {
     if (theme === 'system') delete document.documentElement.dataset.theme;
     else document.documentElement.dataset.theme = theme;
@@ -22,6 +61,7 @@
       option.setAttribute('aria-checked', String(option.dataset.theme === theme));
     }
     const light = theme === 'light' || (theme === 'system' && system.matches);
+    applyFigureTheme(light);
     document.querySelector('meta[name="theme-color"]')?.setAttribute('content', light ? '#f7f8fa' : '#20252d');
   }
   applyTheme();
@@ -35,6 +75,11 @@
       'files.html': 'M6 3h9l4 4v14H6z M14 3v5h5'
     };
     for (const link of document.querySelectorAll('#m-navbar-collapse > .m-row > ol > li > a')) {
+      const label = link.textContent.trim() || link.getAttribute('title');
+      if (label) {
+        link.setAttribute('aria-label', label);
+        link.setAttribute('title', label);
+      }
       const drawing = paths[link.getAttribute('href')?.split('/').pop()];
       if (!drawing || link.querySelector('svg')) continue;
       const icon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -54,6 +99,8 @@
   function initializeControl() {
     const brand = document.querySelector('#m-navbar-brand');
     if (!brand) return false;
+    brand.setAttribute('aria-label', 'Rodin home');
+    brand.setAttribute('title', 'Rodin home');
     if (document.querySelector('#rodin-theme-trigger')) return true;
     if (!brand.querySelector('.rodin-home-icon')) {
       const home = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -64,6 +111,14 @@
       homePath.setAttribute('d', 'M3 10 12 3l9 7 M5 9v12h5v-7h4v7h5V9');
       home.append(homePath);
       brand.prepend(home);
+    }
+    for (const node of [...brand.childNodes]) {
+      if (node.nodeType === Node.TEXT_NODE && node.textContent.trim() === 'Rodin') {
+        const wordmark = document.createElement('span');
+        wordmark.className = 'rodin-wordmark';
+        wordmark.textContent = 'Rodin';
+        node.replaceWith(wordmark);
+      }
     }
     const github = document.querySelector('#m-navbar-collapse a[href="https://github.com/cbritopacheco/rodin"]');
     if (github) {

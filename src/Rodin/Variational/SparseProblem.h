@@ -19,7 +19,7 @@
  * - **Sparse storage**: @f$ O(N) @f$ memory (for 2D/3D problems)
  *
  * # Sparsity Pattern
- * The sparsity pattern is determined by the mesh connectivity:
+ * The sparsity pattern is determined by the mesh connectivity.
  * @f[
  *   A_{ij} \neq 0 \iff \text{DOFs } i \text{ and } j \text{ share an element}
  * @f]

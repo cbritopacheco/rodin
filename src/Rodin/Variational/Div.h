@@ -14,7 +14,7 @@
  *
  * # Mathematical Foundation
  * For a vector field @f$ \mathbf{u} : \Omega \subset \mathbb{R}^d \to \mathbb{R}^d @f$,
- * the divergence is defined as:
+ * the divergence is defined as
  * @f[
  *   \nabla \cdot \mathbf{u} = \sum_{i=1}^d \frac{\partial u_i}{\partial x_i}
  * @f]

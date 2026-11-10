@@ -1,0 +1,12 @@
+<p>Measures the public native GMRES solver on the complete Taylor–Hood Stokes system, with the original pressure-mean multiplier and unit viscosity.</p>
+<h2>Measured operation</h2>
+<p>Each invocation starts from zero and includes fixed block-preconditioner setup and a restarted GMRES solve. The velocity block uses incomplete Cholesky; a pressure mass factorization approximates the Schur complement, with the mean constraint handled explicitly. No dense Stokes Schur matrix is constructed. Meshes, assembly and pressure mass construction are outside timing. This measurement has no residual-correction solve.</p>
+<h2>Numerical qualification</h2>
+<p>All original cell families, degrees and resolutions remain registered. Restart is 60, the maximum iteration count is 1200 and the backend tolerance is 1e-13. Setup and repeated solves retain the original independent coefficient-error, true-residual, affine-patch and sensitivity checks. The backend error estimate is recorded separately and does not replace the true residual.</p>
+
+<p>The missing-pressure control is scaled by the independently assembled forcing
+load on unconstrained velocity test DOFs, not by Dirichlet-elimination entries
+in the full right-hand side. Since the affine field has zero viscous divergence,
+the omitted residual must equal the negative load within the full-RHS-normalized
+10<sup>−11</sup> residual tolerance, with relative magnitude above 10<sup>−4</sup>.
+The original full-RHS-normalized counter is retained for comparison.</p>

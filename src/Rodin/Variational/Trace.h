@@ -12,7 +12,7 @@
  * elements) of matrix-valued functions in variational formulations.
  *
  * # Mathematical Foundation
- * For a square matrix @f$ A \in \mathbb{R}^{n \times n} @f$, the trace is:
+ * For a square matrix @f$ A \in \mathbb{R}^{n \times n} @f$, the trace is
  * @f[
  *   \text{tr}(A) = \sum_{i=1}^n A_{ii}
  * @f]
@@ -50,7 +50,7 @@
 namespace Rodin::FormLanguage
 {
   /**
-   * @brief Type traits for @c Trace over a shape function: exposes the finite element
+   * @brief Type traits for @c Trace over a shape function, exposing the finite element
    * space and the shape function space.
    */
   template <class NestedDerived, class FES, Variational::ShapeFunctionSpaceType Space>

@@ -36,7 +36,7 @@ namespace Rodin::Variational
        * @brief Computes @f$ P_K(x) @f$ and @f$ P'_K(x) @f$ using the
        * three-term recurrence relation.
        *
-       * For @f$ K = 0 @f$ and @f$ K = 1 @f$, explicit closed forms are used:
+       * For @f$ K = 0 @f$ and @f$ K = 1 @f$, explicit closed forms are used.
        * @f$ P_0(x) = 1 @f$, @f$ P_1(x) = x @f$.
        * For @f$ K \ge 2 @f$, the standard recurrence
        * @f[

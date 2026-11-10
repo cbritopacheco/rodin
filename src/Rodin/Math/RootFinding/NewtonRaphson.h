@@ -31,7 +31,7 @@ namespace Rodin::Math::RootFinding
    * method with interval bracketing and automatic fallbacks to ensure convergence.
    *
    * # Algorithm
-   * The Newton-Raphson iteration is:
+   * The Newton-Raphson iteration is
    * @f[
    *   x_{n+1} = x_n - \frac{f(x_n)}{f'(x_n)}
    * @f]
@@ -73,11 +73,11 @@ namespace Rodin::Math::RootFinding
       /**
        * @brief Constructs a Newton-Raphson solver with specified tolerances.
        *
-       * @param[in] absTTol Absolute tolerance for interval width (default: @f$ 10^{-12} @f$)
-       * @param[in] relTTol Relative tolerance for interval width (default: @f$ 10^{-9} @f$)
-       * @param[in] absGTol Absolute tolerance for function value (default: @f$ 10^{-12} @f$).
+       * @param[in] absTTol Absolute tolerance for interval width (default @f$ 10^{-12} @f$)
+       * @param[in] relTTol Relative tolerance for interval width (default @f$ 10^{-9} @f$)
+       * @param[in] absGTol Absolute tolerance for function value (default @f$ 10^{-12} @f$).
        * Exact zeros are accepted also when this tolerance is zero.
-       * @param[in] maxIter Maximum number of iterations (default: 25)
+       * @param[in] maxIter Maximum number of iterations (default 25)
        */
       NewtonRaphson(Scalar absTTol = DefaultAbsoluteIntervalTolerance,
         Scalar relTTol = DefaultRelativeIntervalTolerance,

@@ -1,85 +1,70 @@
 /**
   @page examples-geometry-connectivity Computing mesh connectivity
-  @brief How to compute and use topological connectivity
+  @brief Inspect edge-to-cell incidence on a square split into two triangles.
 
-  @m_keywords{Connectivity, Incidence, Boundary, Adjacency, Performance}
+  Coordinates locate vertices in space. Connectivity records incidence between
+  vertices, edges, and cells. A mesh of two triangles is used to enumerate these
+  relations explicitly.
 
   @tableofcontents
-
   @m_footernavigation
 
-  @section examples-geom-conn-intro Introduction
+  @section examples-geom-conn-compute Construct the incidence relations
 
-  Mesh connectivity describes how polytopes of different dimensions relate
-  to each other. This example demonstrates computing various incidence
-  relations and measuring the performance.
+  A two-by-two vertex grid gives four vertices and two triangles. The diagonal
+  is an interior edge shared by both cells; the four exterior edges belong to
+  one cell each.
 
-  @section examples-geom-conn-compute Computing Connectivity
+  @snippet Geometry/Connectivity.cpp connectivity-mesh
 
-  The @ref Rodin::Geometry::Connectivity "Connectivity::compute(d1, d2)"
-  method computes the incidence mapping from polytopes of dimension @f$ d_1 @f$
-  to polytopes of dimension @f$ d_2 @f$:
+  `compute(1, 2)` constructs edge-to-cell incidence. `compute(2, 1)` constructs
+  the reverse cell-to-edge relation. These are requested explicitly before
+  queries that depend on them.
 
-  @code{.cpp}
-  #include <Rodin/Geometry.h>
+  @section examples-geom-conn-visualization Inspect the actual topology
 
-  using namespace Rodin;
-  using namespace Rodin::Geometry;
+  @image html Geometry/Connectivity.png "The generated square mesh. Exterior edges have one incident cell; the interior diagonal has two. Labels use the indices exported by the C++ program." width=720px
 
-  int main()
-  {
-    Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 1024, 1024 });
+  The diagram uses the vertex and edge indices exported by the program.
+  Four vertices, five edges, and two cells give the Euler count
+  @f$4-5+2=1@f$ for this triangulated disk.
 
-    // Compute various connectivity relations
-    mesh.getConnectivity().compute(1, 2);  // edges → cells
-    mesh.getConnectivity().compute(2, 1);  // cells → edges
-    mesh.getConnectivity().compute(1, 1);  // edge adjacency
+  @section examples-geom-conn-boundary Query the incident cells
 
-    return 0;
-  }
-  @endcode
+  @snippet Geometry/Connectivity.cpp connectivity-incidence
 
-  @section examples-geom-conn-common Common Relations
+  On a conforming two-dimensional manifold mesh, an exterior edge has one incident
+  cell and an interior edge has two. For non-manifold input, incidence counts must
+  be interpreted using the mesh topology.
 
-  | Relation | Use Case |
-  |----------|----------|
-  | `compute(1, 2)` | **Required** for boundary detection and Dirichlet BC |
-  | `compute(0, 2)` | Vertex-to-cell: which cells share a vertex |
-  | `compute(2, 1)` | Cell-to-edge: enumerate edges of each cell |
-  | `compute(1, 1)` | Edge adjacency: which edges share a vertex |
+  This edge-to-cell relation is also what lets the
+  @ref examples-pdes-poisson "Poisson tutorial" recognize exterior edges for
+  its Dirichlet condition. Boundary labels and boundary detection are separate.
+  An integer attribute selects a region after the topology identifies it.
 
-  @section examples-geom-conn-boundary Why Boundary Detection Needs Connectivity
+  @section examples-geom-conn-common Select the relation needed by the operation
 
-  The @f$ (d{-}1, d) @f$ connectivity tells us which faces belong to
-  exactly one cell — those are the boundary faces. This is why you must
-  call `compute(1, 2)` before using `DirichletBC` on a 2D mesh:
+  | Relation on this 2D mesh | Question answered |
+  | :--- | :--- |
+  | `compute(1, 2)` | Which cells contain an edge? |
+  | `compute(2, 1)` | Which edges bound a cell? |
+  | `compute(0, 2)` | Which cells contain a vertex? |
 
-  @code{.cpp}
-  mesh.getConnectivity().compute(1, 2);
+  Incidence records shared entities. Geometric proximity is determined from
+  coordinates, while same-dimension adjacency follows the relation documented by
+  its API.
 
-  P1 vh(mesh);
-  TrialFunction u(vh);
-  TestFunction  v(vh);
+  @section examples-geom-conn-full Complete program
 
-  Problem poisson(u, v);
-  poisson = Integral(Grad(u), Grad(v))
-          - Integral(RealFunction(1.0), v)
-          + DirichletBC(u, Zero());  // needs (1,2) connectivity
-  Solver::CG(poisson).solve();
-  @endcode
+  Build the `Connectivity` example target and run it from an output directory.
+  It prints the incident-cell counts and writes `Connectivity.vertices.csv`
+  and `Connectivity.edges.csv`, which reproduce the diagram.
 
-  @section examples-geom-conn-full Full Source Code
-
-  -   @ref Geometry/Connectivity.cpp "Connectivity.cpp"
-
-  @section examples-geom-conn-see-also See Also
-
-  - @ref guides-connectivity "Connectivity guide"
-  - @ref guides-polytopes "Polytopes"
-  - @ref examples-geometry-uniformgrid "UniformGrid"
+  See @ref Geometry/Connectivity.cpp "Connectivity.cpp", the
+  @ref guides-connectivity "connectivity guide", and the
+  @ref guides-polytopes "polytope guide" for related concepts.
 
   @example Geometry/Connectivity.cpp
   @m_examplenavigation{examples-geometry-connectivity,Geometry/}
   @m_footernavigation
-  */
+*/

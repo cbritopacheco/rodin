@@ -24,7 +24,7 @@ namespace Rodin::Utility
    * parsed. This is essential for implementing proper error messages in template
    * specializations that should never be instantiated.
    *
-   * Example usage:
+   * The following example illustrates usage.
    * @code{.cpp}
    * template <typename T>
    * struct MyStruct

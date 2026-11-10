@@ -8,9 +8,9 @@
  * @file Output.h
  * @brief Extensible extraction mechanism for constitutive evaluation.
  *
- * An Output is the dual of Input: where an Input populates a
+ * An Output is the dual of Input. An Input populates a
  * ConstitutivePoint with auxiliary data before the constitutive law is
- * evaluated, an Output reads the prepared law at each quadrature point
+ * evaluated, while an Output reads the prepared law at each quadrature point
  * afterwards. This is the extraction site for quantities derived from the
  * evaluation -- committed internal variables, recovered stresses, strain
  * energy, diagnostics -- without hard-coding them into the integrator or the

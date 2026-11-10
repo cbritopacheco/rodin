@@ -1,243 +1,142 @@
 /**
   @page fem-ciarlet Ciarlet's definition of a finite element
-  @brief The mathematical foundation of finite elements
+  @brief Separate the reference cell, approximation space, and degrees of freedom.
 
-  @m_keywords{Ciarlet, Finite Element, Basis Functions, Reference Element}
+  A finite element is a local construction. It specifies which functions can be
+  represented on one cell and which measurements determine those functions.
+  A @ref fem-spaces "finite element space" combines these local constructions
+  over a mesh, with the required continuity between neighboring cells.
 
   @tableofcontents
-
   @m_footernavigation
 
-  @section fem-ciarlet-intro Introduction
+  @section fem-ciarlet-definition The finite element triple
 
-  The finite element method (FEM) is a powerful technique for numerically
-  solving partial differential equations. At its heart lies the concept of a
-  finite element, which provides a systematic way to construct
-  piecewise-polynomial approximations on a mesh.
+  A finite element is a triple @f$(\widehat K,\widehat P,\widehat\Sigma)@f$
+  with the following components:
 
-  The most widely used formal definition of a finite element was introduced by
-  Philippe G. Ciarlet. This definition provides a clean mathematical
-  framework that separates three concerns:
+  | Object | Role |
+  | :--- | :--- |
+  | @f$\widehat K@f$ | Reference cell on which the local construction is defined |
+  | @f$\widehat P@f$ | Finite-dimensional space of functions on that cell |
+  | @f$\widehat\Sigma=\{\sigma_0,\ldots,\sigma_{N-1}\}@f$ | Linear functionals determining a function in @f$\widehat P@f$ |
 
-  1. **Geometry**: on which shape is the element defined?
-  2. **Approximation**: which polynomial space is used?
-  3. **Degrees of freedom**: how are functions in the space uniquely determined?
+  The functionals are the **degrees of freedom**. Depending on the element family,
+  they measure point values, moments, normal components, or tangential components.
+  Together with the reference cell and approximation space, they specify the
+  finite element.
 
-  This separation is precisely mirrored in Rodin's architecture: the
-  @ref Rodin::Geometry "Geometry" module handles shapes, the
-  @ref Rodin::Variational "Variational" module defines polynomial spaces and
-  DOFs, and the @ref Rodin::Assembly "Assembly" module puts them together.
+  @subsection fem-ciarlet-unisolvence Require unique reconstruction
 
-  @section fem-ciarlet-definition The Ciarlet Triple
-
-  A **finite element** in the sense of Ciarlet is defined as a triple
-  @f$ (K, P, \Sigma) @f$ where:
-
-  - @f$ K @f$ is a **geometric domain** — a compact, connected subset of
-    @f$ \mathbb{R}^d @f$ with nonempty interior (e.g. a triangle,
-    tetrahedron, quadrilateral). This is also called the **reference element**.
-    In Rodin, reference element geometry is defined by the
-    @ref Rodin::Geometry::Polytope::Type "Polytope::Type" enumeration
-    (Triangle, Tetrahedron, Quadrilateral, etc.).
-
-  - @f$ P @f$ is a finite-dimensional **function space** defined on @f$ K @f$
-    — typically a space of polynomials of a certain degree. For instance,
-    @f$ P = \mathbb{P}_k(K) @f$, the space of polynomials of degree at most
-    @f$ k @f$, whose dimension is:
-    @f[
-      \dim \mathbb{P}_k(\mathbb{R}^d) = \binom{k + d}{d}
-    @f]
-    For @f$ d = 2 @f$: @f$ \dim \mathbb{P}_1 = 3 @f$,
-    @f$ \dim \mathbb{P}_2 = 6 @f$.
-    For @f$ d = 3 @f$: @f$ \dim \mathbb{P}_1 = 4 @f$,
-    @f$ \dim \mathbb{P}_2 = 10 @f$.
-
-  - @f$ \Sigma = \{ \sigma_1, \sigma_2, \ldots, \sigma_n \} @f$ is a set of
-    degrees of freedom (DOFs) — linear functionals
-    @f$ \sigma_i : P \to \mathbb{R} @f$ — such that any function
-    @f$ p \in P @f$ is uniquely determined by the values
-    @f$ \sigma_1(p), \ldots, \sigma_n(p) @f$.
-
-  The key requirement is that the DOFs must form a **basis** for the dual
-  space @f$ P' @f$. This means @f$ \dim(P) = n @f$, and the map
+  The functionals must be unisolvent on the approximation space. With
+  @f$N=\dim\widehat P@f$, the map
   @f[
-    p \mapsto (\sigma_1(p), \ldots, \sigma_n(p))
+    \widehat p\longmapsto
+      (\sigma_0(\widehat p),\ldots,\sigma_{N-1}(\widehat p))
   @f]
-  is an isomorphism from @f$ P @f$ to @f$ \mathbb{R}^n @f$. Equivalently,
-  if @f$ \sigma_i(p) = 0 @f$ for all @f$ i @f$, then @f$ p = 0 @f$.
-  This property is called **unisolvence**.
-
-  @section fem-ciarlet-basis Basis Functions
-
-  Given a Ciarlet triple @f$ (K, P, \Sigma) @f$, there exists a unique set of
-  basis functions @f$ \{ \phi_1, \ldots, \phi_n \} \subset P @f$ such that:
-
+  must be an isomorphism. Equivalently, the only function with every DOF equal
+  to zero is the zero function. This condition gives a dual shape-function basis
+  @f$\{\widehat\phi_i\}@f$ satisfying
   @f[
-    \sigma_i(\phi_j) = \delta_{ij}
+    \sigma_j(\widehat\phi_i)=\delta_{ij},\qquad
+    \widehat p=\sum_i\sigma_i(\widehat p)\widehat\phi_i.
   @f]
 
-  where @f$ \delta_{ij} @f$ is the Kronecker delta. This is called the
-  nodal basis of the finite element. These basis functions are the shape
-  functions that are used to represent any function in the finite element
-  space.
+  @section fem-ciarlet-p1 A linear triangle
 
-  Any function @f$ p \in P @f$ can then be written as:
-
+  On the reference triangle with vertices @f$(0,0)@f$, @f$(1,0)@f$, and
+  @f$(0,1)@f$, choose affine polynomials and vertex evaluations. The three basis
+  functions are
   @f[
-    p = \sum_{i=1}^{n} \sigma_i(p) \, \phi_i
+    \widehat\phi_0(r,s)=1-r-s,\qquad
+    \widehat\phi_1(r,s)=r,\qquad
+    \widehat\phi_2(r,s)=s.
   @f]
+  Each is one at its own vertex and zero at the other two. Their sum is one,
+  so constant fields are reproduced exactly.
 
-  The values @f$ \sigma_i(p) @f$ are the **degrees of freedom** (DOF values)
-  of @f$ p @f$. In Rodin, these DOF values are stored as the coefficient
-  vector of a `GridFunction`.
+  @m_class{rodin-mesh-stages}
 
-  @section fem-ciarlet-examples Common Finite Elements
+  @parblock
+  @image html Images/P1Basis-0.png "Reference triangle basis function 0, evaluated by Rodin. All three use the same color scale."
+  @image html Images/P1Basis-1.png "Reference triangle basis function 1, evaluated by Rodin. All three use the same color scale."
+  @image html Images/P1Basis-2.png "Reference triangle basis function 2, evaluated by Rodin. All three use the same color scale."
+  @endparblock
 
-  @subsection fem-ciarlet-p1 P1 (Piecewise Linear) Elements
+  The figure is generated from the reference-element evaluations in this
+  runnable example.
 
-  The simplest and most widely used finite element is the **P1 element**
-  on a triangle:
+  @snippet Variational/FiniteElementSpaces.cpp spaces-reference
 
-  - @f$ K @f$ = a triangle with vertices @f$ a_1, a_2, a_3 @f$
-  - @f$ P = \mathbb{P}_1(K) @f$ = polynomials of degree @f$ \leq 1 @f$
-    (i.e. @f$ p(x, y) = \alpha + \beta x + \gamma y @f$), dimension 3
-  - @f$ \Sigma = \{ \sigma_1, \sigma_2, \sigma_3 \} @f$ where
-    @f$ \sigma_i(p) = p(a_i) @f$ (point evaluations at vertices)
+  The reference cell is used here, so the sampling coordinates are reference
+  coordinates. A value evaluated on a physical mesh cell must also use that
+  cell's geometric mapping.
 
-  The basis functions are the **barycentric coordinates**
-  @f$ \lambda_1, \lambda_2, \lambda_3 @f$, satisfying
-  @f$ \lambda_i(a_j) = \delta_{ij} @f$. Each basis function is 1 at one
-  vertex and 0 at the other two, varying linearly between them.
+  @section fem-ciarlet-polynomials Match the approximation space to the cell
 
-  In Rodin, a P1 finite element space is created with:
+  On a simplex, total-degree polynomials have
+  @f[
+    \dim\mathbb P_k(\mathbb R^d)=\binom{k+d}{d}.
+  @f]
+  For a triangle, this gives three scalar DOFs at degree one and six at degree
+  two. On a tetrahedron it gives four and ten, respectively.
 
-  @code{.cpp}
-  P1 Vh(mesh);
-  // Number of DOFs = number of vertices
-  std::cout << Vh.getSize() << std::endl;
-  @endcode
+  Tensor-product cells use a different construction. For a quadrilateral,
+  @f$\mathbb Q_k@f$ contains polynomials of degree at most @f$k@f$ in each
+  reference coordinate and has @f$(k+1)^2@f$ DOFs. A bilinear quadrilateral therefore has four vertex DOFs. The element reference
+  specifies the approximation space for each cell family.
 
-  The `P1` class constructs one DOF per mesh
-  vertex, producing a space of continuous piecewise linear functions that
-  is @f$ H^1 @f$-conforming.
+  @section fem-ciarlet-global Map the element to physical cells
 
-  @subsection fem-ciarlet-p0 P0 (Piecewise Constant) Elements
+  Let @f$F_K:\widehat K\to K@f$ map the reference cell to a physical cell.
+  Scalar basis functions are transported by composition.
+  @f[
+    \phi_i^K=\widehat\phi_i\circ F_K^{-1}.
+  @f]
+  For an invertible square Jacobian @f$J_K=DF_K@f$,
+  @f[
+    \nabla_x\phi_i^K=J_K^{-T}\widehat\nabla\widehat\phi_i,
+    \qquad dx=|\det J_K|\,d\widehat x.
+  @f]
+  Embedded surfaces instead have rectangular Jacobians and use the induced
+  metric and tangential gradient. The @ref examples-pdes-surfacemesh "surface PDE tutorial" illustrates that setting.
 
-  An even simpler element is the **P0 element**, used for discontinuous
-  quantities:
+  Polynomial degree is a property of the reference approximation space.
+  Under a non-affine geometry map, the physical basis is the composition of a
+  reference polynomial with the inverse map. Field degree and geometry degree are
+  selected independently.
 
-  - @f$ K @f$ = a polytope (triangle, tetrahedron, etc.)
-  - @f$ P = \mathbb{P}_0(K) @f$ = constant functions, dimension 1
-  - @f$ \Sigma = \{ \sigma_1 \} @f$ where @f$ \sigma_1(p) @f$ is the value
-    of the constant, often defined as the average over @f$ K @f$
+  @section fem-ciarlet-conformity Assemble a global space
 
-  In Rodin:
+  Local DOFs on shared mesh entities are identified when the chosen continuity
+  requires it. Continuous nodal spaces share vertex values and, at higher degree,
+  the appropriate edge and face data. Discontinuous spaces retain independent
+  cell data.
 
-  @code{.cpp}
-  P0 Wh(mesh);
-  // Number of DOFs = number of cells
-  std::cout << Wh.getSize() << std::endl;
-  @endcode
+  | Conformity | Intercell requirement | Examples in this guide |
+  | :--- | :--- | :--- |
+  | @f$H^1@f$ | Compatible continuous traces | `P1`, `H1` |
+  | @f$L^2@f$ only | No intercell continuity imposed | `P0` |
+  | @f$H(\mathrm{div})@f$ | Compatible normal traces | Requires an appropriate vector element family |
+  | @f$H(\mathrm{curl})@f$ | Compatible tangential traces | Requires an appropriate vector element family |
 
-  The `P0` class constructs one DOF per mesh
-  cell. Functions in P0 are discontinuous across cell boundaries, making this
-  space a subspace of @f$ L^2(\Omega) @f$ (not @f$ H^1 @f$).
+  The last two conformity classes require element families with the corresponding
+  normal or tangential trace DOFs; the table identifies their mathematical
+  requirements.
 
-  @subsection fem-ciarlet-hk Higher-Order Elements (H1<k>)
+  @section fem-ciarlet-rodin Locate the objects in Rodin
 
-  For polynomial degree @f$ k \geq 2 @f$, additional DOFs are placed on edges
-  and (for @f$ k \geq 3 @f$) on cell interiors. For example, the P2 element
-  on a triangle has:
+  `Polytope::Type` identifies a reference geometry. Element classes such as
+  @ref Rodin::Variational::P1Element "P1Element" provide local basis evaluations
+  and DOF functionals. Space objects distribute DOFs over a mesh, while
+  @ref Rodin::Variational::GridFunction "GridFunction" represents one discrete
+  field in that space.
 
-  - @f$ K @f$ = a triangle
-  - @f$ P = \mathbb{P}_2(K) @f$ = quadratic polynomials, dimension 6
-  - @f$ \Sigma @f$ = point evaluations at the 3 vertices and 3 edge midpoints
+  @snippet Variational/FiniteElementSpaces.cpp spaces-setup
 
-  In Rodin, higher-order elements are provided by the
-  `H1<k>` class:
-
-  @code{.cpp}
-  // Quadratic (P2) finite element space
-  H1 Vh(std::integral_constant<size_t, 2>{}, mesh);
-  @endcode
-
-  The polynomial order @f$ k @f$ is a compile-time template parameter.
-
-  @section fem-ciarlet-global From Local to Global
-
-  The Ciarlet definition describes a **local** finite element on a single
-  reference cell @f$ \hat{K} @f$. To construct a **global** finite element
-  space on an entire mesh @f$ \mathcal{T}_h @f$, we:
-
-  1. **Define** a reference element @f$ (\hat{K}, \hat{P}, \hat{\Sigma}) @f$
-  2. **Map** it to each physical cell @f$ K \in \mathcal{T}_h @f$ using a
-     geometric transformation @f$ F_K : \hat{K} \to K @f$. In Rodin, the
-     Jacobian of this transformation is accessible through
-     @ref Rodin::Geometry::Point "Point::getJacobian()".
-  3. **Assemble** local DOFs into global DOFs, enforcing inter-element
-     continuity conditions at shared entities (vertices, edges, faces)
-
-  The result is a finite-dimensional subspace @f$ V_h @f$ of the function
-  space in which we seek our approximate solution.
-
-  The assembly of local DOFs into global DOFs is handled automatically when
-  you create a finite element space. For example, `P1 Vh(mesh)` constructs
-  the global DOF numbering by identifying vertex-based DOFs on shared mesh
-  vertices.
-
-  @section fem-ciarlet-conformity Conformity
-
-  Different types of inter-element continuity give rise to different types
-  of conforming finite element spaces:
-
-  | Conformity | Continuity requirement | Typical use | Rodin class |
-  |------------|----------------------|-------------|-------------|
-  | @f$ H^1 @f$-conforming | Continuous across element boundaries | Scalar PDEs (Poisson, heat) | `P1`, `H1` |
-  | @f$ H(\mathrm{div}) @f$-conforming | Normal component continuous | Mixed methods, fluid flow | — |
-  | @f$ H(\mathrm{curl}) @f$-conforming | Tangential component continuous | Electromagnetics | — |
-  | @f$ L^2 @f$ (no conformity) | No continuity required | Discontinuous Galerkin, indicators | `P0` |
-
-  Rodin currently provides @f$ H^1 @f$-conforming elements (P1, H1) and
-  @f$ L^2 @f$ elements (P0). The P1 and H1 spaces produce global functions
-  that are continuous across element boundaries: values at shared vertices
-  (and shared edge/face DOFs for higher order) are identified.
-
-  @section fem-ciarlet-rodin Connection to Rodin
-
-  In Rodin, the Ciarlet definition is realized through the interaction of
-  several classes:
-
-  | Ciarlet component | Mathematical object | Rodin class |
-  |-------------------|---------------------|-------------|
-  | @f$ K @f$ | Reference element geometry | @ref Rodin::Geometry::Polytope "Polytope" + @ref Rodin::Geometry::Polytope::Type "Polytope::Type" |
-  | @f$ P @f$ | Local polynomial space | Defined internally by `P0`, `P1`, `H1` |
-  | @f$ \Sigma @f$ | Degrees of freedom | DOF numbering managed by the finite element space class |
-  | @f$ V_h @f$ | Global finite element space | The space object itself (e.g. `P1 Vh(mesh)`) |
-  | @f$ u_h \in V_h @f$ | Discrete function | `GridFunction` |
-  | @f$ u @f$ (unknown) | Trial function | `TrialFunction` |
-  | @f$ v @f$ (weight) | Test function | `TestFunction` |
-
-  @code{.cpp}
-  // The mesh provides the cells K and the geometric transformations F_K
-  Mesh mesh;
-  mesh = mesh.UniformGrid(Polytope::Type::Triangle, {16, 16});
-
-  // P1 defines the local element (K, P1, point evaluations at vertices)
-  // and assembles them into a global space Vh
-  P1 Vh(mesh);
-
-  // Trial and test functions live in this global space
-  TrialFunction u(Vh);
-  TestFunction  v(Vh);
-  @endcode
-
-  @section fem-ciarlet-see-also See Also
-
-  - @ref fem-spaces "Finite element spaces" — Available spaces in Rodin
-  - @ref guides-getting-started-core-concepts "Core Concepts" — Practical
-    guide to using finite elements in Rodin
-  - @ref guides-polytopes "Polytopes" — Geometric shapes used as reference
-    elements
-  - @ref notation-index "Notation" — Mathematical notation reference
-
-  */
+  This setup defines several spaces on the same mesh for comparison.
+  The @ref fem-spaces "finite element spaces guide" checks their global counts,
+  assigns a known function, and evaluates the interpolated fields. See also the
+  @ref guides-polytopes "polytope guide" and
+  @ref guides-numerical-contracts "numerical contracts".
+*/

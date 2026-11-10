@@ -1,0 +1,63 @@
+name: Upload artifacts with bounded network retries
+description: Preserve upload-artifact paths and outputs while retrying transient transfers up to three times.
+inputs:
+  name:
+    description: Exact artifact name.
+    required: true
+  path:
+    description: Files, directories or newline-separated glob patterns.
+    required: true
+  overwrite:
+    description: Replace an existing artifact with the same name before each attempt.
+    default: 'false'
+  if-no-files-found:
+    description: Missing-file policy (error, warn or ignore).
+    default: warn
+  compression-level:
+    description: ZIP compression level, from zero to nine.
+    default: '6'
+  retention-days:
+    description: Retention period; zero uses the repository default.
+    default: '0'
+  include-hidden-files:
+    description: Include hidden files in path matches.
+    default: 'false'
+outputs:
+  artifact-id:
+    description: Finalized artifact ID.
+    value: ${{ steps.upload.outputs.artifact-id }}
+  artifact-url:
+    description: URL of the finalized artifact.
+    value: ${{ steps.upload.outputs.artifact-url }}
+  artifact-digest:
+    description: SHA-256 digest of the uploaded ZIP.
+    value: ${{ steps.upload.outputs.artifact-digest }}
+runs:
+  using: composite
+  steps:
+    - name: Install pinned artifact client once per runner
+      shell: bash
+      run: |
+        python3 "$GITHUB_WORKSPACE/dev/ci_artifact_client.py" \
+          --action "$GITHUB_WORKSPACE/.github/actions/download-artifacts" \
+          --client "$RUNNER_TEMP/rodin-artifact-client"
+    - name: Upload and finalize artifact with bounded retries
+      id: upload
+      uses: actions/github-script@v8
+      env:
+        UPLOAD_ACTION_PATH: ${{ github.action_path }}
+        UPLOAD_NAME: ${{ inputs.name }}
+        UPLOAD_PATH: ${{ inputs.path }}
+        UPLOAD_OVERWRITE: ${{ inputs.overwrite }}
+        UPLOAD_NO_FILES: ${{ inputs.if-no-files-found }}
+        UPLOAD_COMPRESSION: ${{ inputs.compression-level }}
+        UPLOAD_RETENTION: ${{ inputs.retention-days }}
+        UPLOAD_HIDDEN: ${{ inputs.include-hidden-files }}
+      with:
+        script: |
+          const path = require('node:path');
+          const root = path.join(process.env.RUNNER_TEMP, 'rodin-artifact-client/node_modules');
+          const {DefaultArtifactClient} = require(path.join(root, '@actions/artifact'));
+          const artifactGlob = require(path.join(root, '@actions/glob'));
+          const {uploadArtifact, readInputs} = require(path.join(process.env.UPLOAD_ACTION_PATH, 'upload.js'));
+          await uploadArtifact(new DefaultArtifactClient(), artifactGlob, readInputs(process.env), core);

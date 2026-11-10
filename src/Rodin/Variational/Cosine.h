@@ -29,7 +29,7 @@ namespace Rodin::Variational
   /**
    * @brief Cosine function operator for real-valued scalar functions.
    *
-   * Applies the cosine function pointwise to a given function:
+   * Applies the cosine function pointwise to a given function.
    * @f[
    *    \text{Cos}(f)(x) = \cos(f(x))
    * @f]

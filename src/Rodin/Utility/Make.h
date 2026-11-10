@@ -30,7 +30,7 @@ namespace Rodin::Utility
    * forwarding semantics and can be used in situations where direct construction
    * is not possible or convenient.
    *
-   * Example usage:
+   * The following example illustrates usage.
    * @code{.cpp}
    * auto factory = Make<std::vector<int>>{};
    * auto vec = factory(10, 42);  // Creates std::vector<int>(10, 42)

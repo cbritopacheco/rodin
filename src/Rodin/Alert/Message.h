@@ -136,7 +136,7 @@ namespace Rodin::Alert
    * - Stream-like insertion operators for content
    * - Integration with the Alert tag types (NewLine, Raise, etc.)
    *
-   * Example usage (through derived classes):
+   * The following example uses a derived class.
    * @code{.cpp}
    * Exception() << "Error in function: " << funcName << NewLine
    *             << "Invalid parameter value: " << value << Raise;

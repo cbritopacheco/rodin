@@ -13,7 +13,7 @@
  *
  * The QF (Quadrature Formula) module provides numerical integration rules
  * for computing integrals over reference polytopes. These quadrature rules
- * approximate integrals by weighted sums:
+ * approximate integrals by weighted sums.
  * @f[
  *   \int_K f(x) \, dx \approx \sum_{i=1}^n w_i f(x_i)
  * @f]

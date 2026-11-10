@@ -73,10 +73,10 @@ namespace Rodin::Variational
       /// @brief Bidirectional map between local and global DOF indices.
       struct IndexBimap
       {
-        /// Local-to-global: `left[localDof] = globalDof`.
+        /// Local-to-global map with `left[localDof] = globalDof`.
         std::vector<Index> left;
 
-        /// Global-to-local: `right[globalDof] = localDof`.
+        /// Global-to-local map with `right[globalDof] = localDof`.
         FlatMap<Index, Index> right;
       };
 
@@ -765,7 +765,7 @@ namespace Rodin::Variational
       }
 
       /**
-       * @brief Core DOF-numbering algorithm: builds m_localToGlobal.
+       * @brief Builds m_localToGlobal with the core DOF-numbering algorithm.
        *
        * For each entity dimension d = 0..D, owned entities receive contiguous
        * global DOF indices.  Non-owned entities obtain their global DOF
@@ -1035,7 +1035,7 @@ namespace Rodin::Variational
    *
    * Each scalar interior DOF node is replicated @p vdim times (once per
    * component). Internally this builds a scalar MPI H1 space and derives
-   * the vector DOF mappings as:
+   * the vector DOF mappings as
    *
    * @f[
    *   \text{globalVecDOF}(q, c) =

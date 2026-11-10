@@ -13,7 +13,7 @@
  * Cholesky factorization.
  *
  * # Algorithm
- * CHOLMOD computes:
+ * CHOLMOD computes the factorization
  * @f[
  *   A = LL^T
  * @f]

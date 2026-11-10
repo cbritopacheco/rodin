@@ -23,7 +23,7 @@ namespace Rodin::Utility
    * innermost type. For a non-template type T, the result is T itself.
    * For a nested template like A<B<C<D>>>, the result is D.
    *
-   * Example usage:
+   * The following example illustrates usage.
    * @code{.cpp}
    * using Nested = std::vector<std::optional<int>>;
    * using Bottom = BottomTemplate<Nested>::Type;

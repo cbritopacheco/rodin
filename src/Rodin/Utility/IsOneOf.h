@@ -23,7 +23,7 @@ namespace Rodin::Utility
    * The primary template handles the base case of an empty type list,
    * for which the result is always false.
    *
-   * Example usage:
+   * The following example illustrates usage.
    * @code{.cpp}
    * static_assert(IsOneOf<int, float, int, double>::Value == true);
    * static_assert(IsOneOf<char, float, int, double>::Value == false);

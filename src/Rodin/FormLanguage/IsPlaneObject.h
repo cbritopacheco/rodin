@@ -52,7 +52,7 @@ namespace Rodin::FormLanguage
   struct IsPlainObject;
 
   /**
-   * @brief General case: checks if type derives from Eigen::PlainObjectBase.
+   * @brief Checks whether a type derives from Eigen::PlainObjectBase in the general case.
    * @tparam T Type to check
    */
   template <class T>

@@ -11,11 +11,11 @@ namespace Rodin::MMG
 {
   void Adapt::adapt(MMG::Mesh& mesh, const RealGridFunction& sizeMap)
   {
-    MMG5_pMesh mmgMesh = rodinToMesh(mesh);
-    MMG5_pSol mmgSol = createSolution(mmgMesh, 1);
-    copySolution(sizeMap, mmgSol);
+    MMG5_pMesh mmgMesh = MMG::V5::Mesh::toV5(mesh);
+    MMG5_pSol mmgSol = MMG::V5::Solution::create(mmgMesh, 1);
+    MMG::V5::Solution::copy(sizeMap, mmgSol);
 
-    MMG5::setParameters(mmgMesh);
+    Base::setParameters(mmgMesh);
 
     bool isSurface = mesh.isSurface();
     ReturnCode retcode = MMG5_STRONGFAILURE;
@@ -43,10 +43,10 @@ namespace Rodin::MMG
         << "Failed to adapt the mesh." << Alert::Raise;
     }
 
-    mesh = meshToRodin(mmgMesh);
+    mesh = MMG::V5::Mesh::fromV5(mmgMesh);
 
-    destroySolution(mmgSol);
-    destroyMesh(mmgMesh);
+    MMG::V5::Solution::destroy(mmgSol);
+    MMG::V5::Mesh::destroy(mmgMesh);
   }
 
   ReturnCode Adapt::adaptMMG2D(MMG5_pMesh mesh, MMG5_pSol size)

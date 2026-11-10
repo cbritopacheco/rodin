@@ -30,7 +30,7 @@ namespace Rodin::Alert
    * used throughout Rodin, such as polytope identifiers, incidence relations,
    * and numeric values.
    *
-   * Example usage:
+   * The following example illustrates usage.
    * @code{.cpp}
    * Exception() << "Invalid polytope " << Notation::Polytope(2, 5) << Raise;
    * @endcode

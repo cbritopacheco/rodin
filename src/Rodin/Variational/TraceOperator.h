@@ -14,7 +14,7 @@
  *
  * # Mathematical Foundation
  * For a function @f$ u : \Omega \to \mathbb{R} @f$ and boundary @f$ \Gamma \subset \partial\Omega @f$,
- * the trace operator computes:
+ * the trace operator computes
  * @f[
  *   \gamma_\Gamma(u) = u|_\Gamma
  * @f]

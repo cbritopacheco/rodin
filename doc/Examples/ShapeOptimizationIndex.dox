@@ -1,8 +1,52 @@
 /**
   @page examples-shapeoptimization-index Shape optimization examples
-  @brief Implementation of shape optimization algorithms
+  @brief Use a state solve and a shape derivative to evolve a design boundary.
 
-  - @subpage examples-shapeoptimization-simple_cantilever
-  - @subpage examples-shapeoptimization-levelset_cantilever
+  The design is an elastic body's material domain. Compliance and an area
+  penalty define the objective; the state equation supplies displacement and
+  stress. A regularized shape derivative determines the geometry update.
 
-  */
+  @tableofcontents
+
+  @section examples-shapeoptimization-start Prerequisites
+
+  The @ref examples-pdes-elasticity "elasticity tutorial" supplies the state
+  problem. The @ref guides-shape-optimization "shape optimization guide"
+  derives the derivative, descent sign and regularization conventions.
+  Both examples use MMG and require a hydrated input mesh from the repository's
+  Git LFS resources.
+
+  @section examples-shapeoptimization-route Choose a representation
+
+  Start with direct boundary deformation to follow the state, derivative and
+  remeshing steps. Then use the level-set example to study transport and
+  reconstruction of a material interface inside a background domain.
+
+  1. @subpage examples-shapeoptimization-simple_cantilever — A cantilever
+     with an explicitly displaced boundary and remeshing after each update.
+  2. @subpage examples-shapeoptimization-levelset_cantilever — A cantilever
+     whose material interface is transported through a signed field and
+     reconstructed by MMG.
+
+  @section examples-shapeoptimization-results Assess an update sequence
+
+  Each tutorial provides computed geometry, recorded objectives, output-file
+  descriptions and the complete example source. Compare compliance, material
+  area and their weighted objective at solved states. Check solver status,
+  Jacobian signs and element quality after geometry updates.
+
+  The examples use fixed update budgets. The level-set tutorial also records
+  increasing objective steps and a reproduced low-quality triangle after
+  interface reconstruction. These measurements guide the choice of step
+  acceptance, geometric quality controls and stopping criteria for a new
+  application.
+
+  @section examples-shapeoptimization-next Geometry and material fields
+
+  - @ref examples-swift-background "MMG–SWIFT interface fitting" — Isolate
+    classification and geometric fitting before coupling a state equation.
+  - @ref examples-density_optimization-index "Density optimization" — Vary
+    a material coefficient on a fixed domain.
+
+  @m_footernavigation
+*/

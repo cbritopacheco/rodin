@@ -28,7 +28,7 @@ namespace Rodin::Variational
   /**
    * @brief Hyperbolic sine function operator for real-valued scalar functions.
    *
-   * Applies the hyperbolic sine function pointwise to a given function:
+   * Applies the hyperbolic sine function pointwise to a given function.
    * @f[
    *    \text{Sinh}(f)(x) = \sinh(f(x)) = \frac{e^{f(x)} - e^{-f(x)}}{2}
    * @f]

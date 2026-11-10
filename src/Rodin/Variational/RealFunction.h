@@ -9,7 +9,7 @@
  * @brief Real-valued scalar functions for variational formulations.
  *
  * This file defines RealFunctionBase and RealFunction, representing functions
- * mapping points to real numbers: @f$ f: \Omega \to \mathbb{R} @f$.
+ * mapping points to real numbers with @f$ f: \Omega \to \mathbb{R} @f$.
  */
 #ifndef RODIN_VARIATIONAL_REALFUNCTION_H
 #define RODIN_VARIATIONAL_REALFUNCTION_H

@@ -13,7 +13,7 @@
  * multifrontal LU factorization.
  *
  * # Algorithm
- * UMFPACK computes:
+ * UMFPACK computes the factorization
  * @f[
  *   PAQ = LU
  * @f]
@@ -97,7 +97,7 @@ namespace Rodin::Solver
    * - **Memory**: Efficient for sparse systems
    * - **Performance**: Excellent for large sparse systems
    *
-   * Info::status holds UMFPACK's own status: zero on success, a negative
+   * Info::status holds UMFPACK's own status, with zero on success, a negative
    * value for an error such as @c UMFPACK_ERROR_out_of_memory, and a positive
    * one for a warning such as @c UMFPACK_WARNING_singular_matrix.
    *

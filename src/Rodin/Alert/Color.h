@@ -111,7 +111,7 @@ namespace Rodin::Alert
    * The color components are constrained to the range [0, 255] using static
    * assertions. This enables type-safe custom terminal colors.
    *
-   * Example usage:
+   * The following example illustrates usage.
    * @code{.cpp}
    * using MyColor = RGB<128, 64, 255>;
    * @endcode

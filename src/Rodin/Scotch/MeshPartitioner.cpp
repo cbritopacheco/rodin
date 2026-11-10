@@ -69,7 +69,7 @@ namespace Rodin::Scotch
     }
     if (n > MaxScotchCount)
       Exception("Entity count exceeds Scotch's integer range", *this, __func__).raise();
-    RODIN_GEOMETRY_REQUIRE_INCIDENCE(mesh, d, d)
+    RODIN_GEOMETRY_REQUIRE_INCIDENCE(mesh, d, d);
     const auto& dual = conn.getIncidence(d, d);
     std::vector<SCOTCH_Num> verttab(n + 1, 0);
     std::vector<SCOTCH_Num> edgetab;

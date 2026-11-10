@@ -31,7 +31,7 @@ namespace Rodin::QF
    *
    * # Mathematical Foundation
    *
-   * For the unit interval @f$ [0,1] @f$, the rule approximates:
+   * For the unit interval @f$ [0,1] @f$, the rule approximates.
    * @f[
    *   \int_0^1 f(x) \, dx \approx \sum_{i=1}^n w_i f(x_i)
    * @f]
@@ -78,7 +78,7 @@ namespace Rodin::QF
        *
        * The reference pyramid collapses as
        * @f$ (x,y,z) = ((1-z)u, (1-z)v, z) @f$, contributing a Jacobian
-       * @f$ (1-z)^2 @f$, and its P1 basis is *rational*: with @f$ q = 1-z @f$
+       * @f$ (1-z)^2 @f$, and its P1 basis is *rational*. With @f$ q = 1-z @f$
        * the shape functions are @f$ (q-x)(q-y)/q @f$, @f$ x(q-y)/q @f$ and
        * @f$ xy/q @f$. A product of two of them carries @f$ q^{-2} @f$, which
        * the Jacobian cancels exactly --- but only if the @f$ q^2 @f$ is
@@ -114,8 +114,8 @@ namespace Rodin::QF
        * @param n Number of quadrature points
        * @param x Output vector for quadrature point coordinates
        * @param w Output vector for quadrature weights
-       * @param maxIt Maximum Newton iterations for finding nodes (default: 100)
-       * @param tol Convergence tolerance for Newton iteration (default: 1e-14)
+       * @param maxIt Maximum Newton iterations for finding nodes (default 100)
+       * @param tol Convergence tolerance for Newton iteration (default 1e-14)
        *
        * Computes the @f$ n @f$ Gauss-Legendre quadrature nodes and weights
        * on the unit interval @f$ [0,1] @f$. Nodes are the zeros of the

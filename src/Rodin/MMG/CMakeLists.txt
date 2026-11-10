@@ -9,7 +9,8 @@ include (ExternalProject)
 
 # ---- Add main targets ------------------------------------------------------
 set(RodinMMG_HEADERS
-  MMG5.h
+  Base.h
+  V5.h
   Mesh.h
   Adapt.h
   Common.h
@@ -20,7 +21,7 @@ set(RodinMMG_HEADERS
   )
 
 set(RodinMMG_SRCS
-  MMG5.cpp
+  V5.cpp
   Mesh.cpp
   Common.cpp
   Adapt.cpp

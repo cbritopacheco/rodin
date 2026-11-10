@@ -34,7 +34,7 @@ namespace Rodin::Hilbert
    * a regularization length-scale parameter.
    *
    * This class implements a Hilbert space extension operator that solves 
-   * regularized problems of the form:
+   * regularized problems of the form
    * @f[
    * a(u, v) := \alpha^2 \int_{\mathbb{R}^d} \nabla u : \nabla v \, dx +
    * \int_{\mathbb{R}^d} u \cdot v \, dx

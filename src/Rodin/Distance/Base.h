@@ -30,7 +30,7 @@ namespace Rodin::Distance
    *
    * # Usage
    * Derived classes should inherit from this base class to automatically
-   * gain methods for setting and retrieving interior and interface regions:
+   * gain methods for setting and retrieving interior and interface regions.
    * ```cpp
    * class MyDistanceModel : public Base<MyDistanceModel>
    * {

@@ -5,6 +5,7 @@ if (RODIN_BUILD_EXAMPLES)
   add_subdirectory(Adaptation)
   add_subdirectory(Geometry)
   add_subdirectory(Variational)
+  add_subdirectory(DG)
 
   add_subdirectory(QF)
   add_subdirectory(MMG)

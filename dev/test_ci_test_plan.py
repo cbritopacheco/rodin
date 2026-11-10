@@ -54,6 +54,26 @@ class TestPlanTest(unittest.TestCase):
         self.assertFalse(any(r["profile"] == "coverage" and not r["baseline"] for r in rows))
         self.assertTrue(any(r["group"] == "cmake/ThirdPartyIsolation" for r in rows))
 
+    def test_every_elasticity_configuration_requires_all_four_geometry_receipts(self):
+        from ci_tests import ELASTICITY3D_GROUP, ELASTICITY3D_PARTITIONS
+        import ci_build_graph as graph
+        from ci_test_plan import entry
+        rows = [r for entries in plan().values() for r in entries
+                if r['group'] == ELASTICITY3D_GROUP and not r['baseline']]
+        configurations = {}
+        for row in rows:
+            coordinates = tuple(row[k] for k in ('profile', 'backend', 'build_type',
+                                                 'multithreaded', 'asan', 'ubsan'))
+            configurations.setdefault(coordinates, []).append(row)
+        self.assertEqual(len(configurations), 20)
+        for parts in configurations.values():
+            self.assertEqual({r['partition'] for r in parts}, set(ELASTICITY3D_PARTITIONS))
+            self.assertEqual(len({r['id'] for r in parts}), 4)
+            # Geometry partitions reuse the same compiled program/configuration.
+            self.assertEqual(len({str(graph.specification('Ordinary', r)) for r in parts}), 1)
+        self.assertFalse(any(r['partition'] for entries in plan().values() for r in entries
+                             if r['group'] != ELASTICITY3D_GROUP or r['baseline']))
+
     def test_old_coverage_configuration_moves_to_ordinary_lanes(self):
         rows = [r for entries in plan().values() for r in entries]
         for profile in ["unit", "manufactured"]:
@@ -106,7 +126,8 @@ class TestPlanTest(unittest.TestCase):
         rows = job["strategy"]["matrix"]["include"]
         command = next(s["run"] for s in job["steps"] if s.get("name") == "Run native MPI restriction rank partition")
         self.assertIn("-j 1", command)
-        self.assertEqual(job["timeout-minutes"], 90)
+        self.assertEqual(job["timeout-minutes"],
+                         "${{ matrix.partition == 'pyramid' && matrix.np == '8' && 180 || 90 }}")
         self.assertEqual(job["env"]["OMP_NUM_THREADS"], 2)
         self.assertEqual(job["env"]["OMP_WAIT_POLICY"], "PASSIVE")
         self.assertEqual(job["env"]["OMPI_MCA_hwloc_base_binding_policy"], "none")

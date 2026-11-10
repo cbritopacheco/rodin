@@ -24,18 +24,26 @@ on:
         type: string
         default: gcc-14
   push:
+    branches: [master, develop]
     paths:
       - .github/workflows/copilot-setup-steps.yml
   pull_request:
+    branches: [master, develop]
+    types: [opened, synchronize, reopened, ready_for_review, converted_to_draft]
     paths:
       - .github/workflows/copilot-setup-steps.yml
+
+concurrency:
+  group: Copilot-setup-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
 
 jobs:
   copilot-setup-steps:
-    runs-on: ubuntu-latest
+    if: ${{ !github.event.pull_request.draft }}
+    runs-on: ubuntu-24.04
 
     steps:
       # Submodules are not optional: googletest and benchmark live in

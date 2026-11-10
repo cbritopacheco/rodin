@@ -94,12 +94,12 @@ namespace Rodin::Variational::F
    * @brief First coordinate projection function
    *
    * Represents the function @f$ f : \mathcal{T}_h \rightarrow \mathbb{R} @f$
-   * defined by:
+   * defined by
    * @f[
    *   f(x, y, z) = x
    * @f]
    *
-   * @par Usage Example:
+   * @par Usage example
    * @code{.cpp}
    * using namespace Rodin::Variational;
    * auto bc = DirichletBC(u, F::x); // u = x on boundary
@@ -172,12 +172,12 @@ namespace Rodin::Variational::F
    * @brief Second coordinate projection function
    *
    * Represents the function @f$ f : \mathcal{T}_h \rightarrow \mathbb{R} @f$
-   * defined by:
+   * defined by
    * @f[
    *   f(x, y, z) = y
    * @f]
    *
-   * @par Usage Example:
+   * @par Usage example
    * @code{.cpp}
    * using namespace Rodin::Variational;
    * auto bc = DirichletBC(u, F::y); // u = y on boundary
@@ -250,12 +250,12 @@ namespace Rodin::Variational::F
    * @brief Third coordinate projection function
    *
    * Represents the function @f$ f : \mathcal{T}_h \rightarrow \mathbb{R} @f$
-   * defined by:
+   * defined by
    * @f[
    *   f(x, y, z) = z
    * @f]
    *
-   * @par Usage Example:
+   * @par Usage example
    * @code{.cpp}
    * using namespace Rodin::Variational;
    * auto bc = DirichletBC(u, F::z); // u = z on boundary

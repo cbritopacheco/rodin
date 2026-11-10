@@ -17,7 +17,7 @@ namespace Rodin::Geometry::Euclidean
   /**
    * @brief Computes the barycenter (centroid) of multiple points.
    *
-   * Given points @f$ p_0, p_1, \ldots, p_n @f$, computes:
+   * Given points @f$ p_0, p_1, \ldots, p_n @f$, computes
    * @f[
    *   \text{barycenter} = \frac{1}{n+1} \sum_{i=0}^{n} p_i
    * @f]

@@ -12,7 +12,7 @@
  * decomposition without square root for symmetric positive definite sparse matrices.
  *
  * # Algorithm
- * The solver computes:
+ * The solver computes the following quantity.
  * @f[
  *   A = LDL^T
  * @f]

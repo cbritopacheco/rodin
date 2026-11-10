@@ -66,7 +66,7 @@ namespace Rodin::Variational
   /**
    * @brief Discrete mass form @f$ m(u,v) = \int_\Omega c\, u \cdot v\,dx @f$.
    *
-   * The coefficient @f$ c @f$ is optional: with @p CoefficientDerived
+   * The coefficient @f$ c @f$ is optional. With @p CoefficientDerived
    * @c void the form is the unweighted mass form. It computes the same
    * operator as <tt>Integral(c * u, v)</tt>, respectively
    * <tt>Integral(u, v)</tt>, including the quadrature order that path picks.

@@ -32,7 +32,7 @@
 namespace Rodin::FormLanguage
 {
   /**
-   * @brief Type traits for @c Sum over a function expression: exposes the left-hand side
+   * @brief Type traits for @c Sum over a function expression, exposing the left-hand side
    * operand and the right-hand side operand.
    */
   template <class LHSDerived, class RHSDerived>
@@ -47,7 +47,7 @@ namespace Rodin::FormLanguage
   };
 
   /**
-   * @brief Type traits for @c Sum over a shape function: exposes the finite element
+   * @brief Type traits for @c Sum over a shape function, exposing the finite element
    * space, the left-hand side operand, the right-hand side operand and the shape
    * function space.
    */
@@ -70,7 +70,7 @@ namespace Rodin::FormLanguage
   };
 
   /**
-   * @brief Type traits for @c Sum over linear form integrators: exposes the left-hand
+   * @brief Type traits for @c Sum over linear form integrators, exposing the left-hand
    * side operand, the right-hand side operand and the scalar type.
    */
   template <class LHSNumber, class RHSNumber>
@@ -111,7 +111,7 @@ namespace Rodin::Variational
   /**
    * @brief Addition of two functions.
    *
-   * Computes pointwise sum of two functions:
+   * Computes pointwise sum of two functions.
    * @f[
    *    (f + g)(x) = f(x) + g(x)
    * @f]
@@ -328,7 +328,7 @@ namespace Rodin::Variational
    * @brief Addition of two shape functions.
    *
    * Computes basis-wise sum of two trial or test functions in the same
-   * finite element space:
+   * finite element space.
    * @f[
    *    (u + v)_i = u_i + v_i
    * @f]

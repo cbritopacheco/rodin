@@ -10,7 +10,7 @@
  *
  * This file provides the Eikonal class, which computes distance functions
  * by solving the Eikonal equation using the Fast Marching Method (FMM).
- * The Eikonal equation is given by:
+ * The Eikonal equation is given by
  * @f[
  *   |\nabla d| = 1
  * @f]
@@ -58,7 +58,7 @@ namespace Rodin::Distance
   class Eikonal : public Base<Eikonal<FES, Data>>
   {
     public:
-      /// Solution type: grid function containing the distance values
+      /// Grid function containing the distance values.
       using SolutionType = Variational::GridFunction<FES, Data>;
 
       /**

@@ -28,22 +28,12 @@ jobs:
       with:
         submodules: recursive
         lfs: false
-    - uses: ./.github/actions/prepare-apt
-    - name: Setup Cpp
-      uses: aminya/setup-cpp@v1
-      with:
-        compiler: gcc-14
-        cmake: true
-    - name: Install dependencies
-      uses: ./.github/actions/apt-dependencies
-      with:
-        packages: lcov libboost1.74-all-dev libsuitesparse-dev libeigen3-dev libscotch-dev libmetis-dev libhdf5-dev petsc-dev
-          mpich
     - name: Restore shared test build
       uses: ./.github/actions/test-build
       with:
         job: PETScCurvedBoundaryConvergence
         matrix: ${{ toJSON(matrix) }}
+        environment: 'true'
     - name: Run curved boundary convergence partition
       run: "case \"${{ matrix.geometry }}\" in\n  tetrahedron) geometry_pattern='Tetrahedron' ;;\n  pyramid) geometry_pattern='Pyramid'\
         \ ;;\n  light) geometry_pattern='(Segment|Triangle|Quadrilateral|Hexahedron|Wedge)' ;;\n  *) exit 1 ;;\nesac\ncase\

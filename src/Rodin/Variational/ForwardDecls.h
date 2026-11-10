@@ -228,7 +228,7 @@ namespace Rodin::Variational
    * operator on the @f$ \mathcal{T}_h @f$-based family of finite elements
    * @f$ \{ K, P_K, \Sigma_K  \}_{K \in \mathcal{T}_h } @f$. More precisely, it
    * defines the global interpolation operator @f$ \mathcal{I}_h :
-   * D(\mathcal{I}_h) \rightarrow V_h @f$, where:
+   * D(\mathcal{I}_h) \rightarrow V_h @f$, Here,
    * @f[
    *  D(\mathcal{I}_h) := \{ v \in V(\mathcal{T}_h) : \forall K \in
    *  \mathcal{T}_h, \: v|_K \in V(K) \} \: .
@@ -276,7 +276,7 @@ namespace Rodin::Variational
    * @brief Abstract base class for objects of type BilinearForm.
    * @tparam OperatorType Type of operator which will be assembled
    *
-   * Represents a bilinear form:
+   * Represents a bilinear form.
    * @f[
    * a : V_h \times U_h \rightarrow \mathbb{R}
    * @f]
@@ -290,7 +290,7 @@ namespace Rodin::Variational
    * @tparam TrialFES Type of trial finite element space
    * @tparam TestFES Type of test finite element space
    *
-   * An object of type BilinearForm represents a bilinear map:
+   * An object of type BilinearForm represents a bilinear map.
    * @f[
    * \begin{aligned}
    *   a : U \times V &\rightarrow \mathbb{R}\\
@@ -343,7 +343,7 @@ namespace Rodin::Variational
    * @tparam Context Type of context for the finite element space
    *
    * Given some triangulation @f$ \mathcal{T}_h @f$ of @f$ \Omega @f$,
-   * instances of this class will represent the finite element space:
+   * instances of this class will represent the finite element space.
    * @f[
    *   H^1(\mathcal{T}_h)^d := \left\{ v \in L^2(\Omega)^d : \forall \tau \in
    *   \mathcal{T}_h, \ v |_\tau \in H^1 (\tau)^d \right\}
@@ -392,7 +392,7 @@ namespace Rodin::Variational
    * @tparam Base Type of the base expression
    * @tparam Exponent Type of the exponent expression
    *
-   * Represents the mathematical expression:
+   * Represents the following mathematical expression.
    * @f[
    *   \text{Base}^\text{Exponent}
    * @f]
@@ -420,7 +420,7 @@ namespace Rodin::Variational
    * @f$.
    * @tparam Operand Type of operand
    *
-   * Represents the mathematical expression:
+   * Represents the following mathematical expression.
    * @f[
    *   \text{Operand}^T
    * @f]
@@ -448,14 +448,14 @@ namespace Rodin::Variational
    * @f$ u @f$.
    * @tparam Operand Type of operand
    *
-   * Represents the mathematical expression:
+   * Represents the following mathematical expression.
    * @f[
    *   \nabla \text{Operand}
    * @f]
    * where Operand is a type representing a scalar function
    * @f$ u : \mathbb{R}^n \rightarrow \mathbb{R} @f$ and the gradient
    * @f$ \nabla u : \mathbb{R}^n \rightarrow \mathbb{R}^n @f$ at the point
-   * @f$ x = (x_1, \ldots, x_n) @f$ is defined by:
+   * @f$ x = (x_1, \ldots, x_n) @f$ is defined by
    * @f[
    *   \nabla u (x) =
    *   \left[
@@ -488,14 +488,14 @@ namespace Rodin::Variational
    * @brief Represents the Jacobian matrix of a type
    * @tparam Operand Type of operand
    *
-   * Represents the following mathematical expression:
+   * Represents the following mathematical expression.
    * @f[
    *   \mathbf{J}_\mathrm{Operand}
    * @f]
    * where Operand is a type representing a function @f$ u : \mathbb{R}^s
    * \rightarrow \mathbb{R}^d @f$ whose Jacobian matrix @f$ \mathbf{J}_u(x)
    * @f$ at any point @f$ x = (x_1, \ldots, x_s) @f$ is defined by the @f$ d
-   * \times s @f$ matrix:
+   * \times s @f$ matrix.
    * @f[
    * \mathbf{J}_u = \begin{bmatrix}
    * \dfrac{\partial u_1}{\partial x_1} & \ldots & \dfrac{\partial u_s}{\partial x_1}\\
@@ -528,14 +528,14 @@ namespace Rodin::Variational
    * @note For an overview of all the possible specializations of the
    * UnaryMinus class, please see @ref UnaryMinusSpecializations.
    *
-   * Represents the following mathematical expression:
+   * Represents the following mathematical expression.
    * @f[
    *   - \text{Operand}
    * @f]
    *
    * # Range Deduction Rules
    *  The rule for deducing the range of a UnaryMinus object, denoted @f$
-   *  \texttt{Range}[-\text{Operand}] @f$, is the following:
+   *  \texttt{Range}[-\text{Operand}] @f$, is given by
    *  @f[
    *      \dfrac
    *      {\vdash \texttt{Range}[\text{Operand}] : \texttt{R}}
@@ -555,7 +555,7 @@ namespace Rodin::Variational
    * @note For an overview of all the possible specializations of the
    * Sum class, please see @ref SumSpecializations.
    *
-   * Represents the following mathematical expression:
+   * Represents the following mathematical expression.
    * @f[
    * \text{LHS} + \text{RHS}
    * @f]
@@ -563,7 +563,7 @@ namespace Rodin::Variational
    *
    * # Range Deduction Rules
    *  The rule for deducing the range of a Sum object, denoted @f$
-   *  \texttt{Range}[\text{LHS} + \text{RHS}]@f$, is the following:
+   *  \texttt{Range}[\text{LHS} + \text{RHS}]@f$, is given by
    *  @f[
    *      \dfrac
    *      {\vdash \texttt{Range}[\text{LHS}] = \texttt{Range}[\text{RHS}] =: \texttt{R}}
@@ -583,14 +583,14 @@ namespace Rodin::Variational
    * @note For an overview of all the possible specializations of the
    * Mult class, please see @ref MultSpecializations.
    *
-   * Represents the following mathematical expression:
+   * Represents the following mathematical expression.
    * @f[
    * \text{LHS} * \text{RHS}
    * @f]
    *
    * # Range Deduction Rules
    *  The rules for deducing the range of a Mult object, denoted @f$
-   *  \texttt{Range}[\text{LHS} * \text{RHS}]@f$, are the following:
+   *  \texttt{Range}[\text{LHS} * \text{RHS}]@f$, are given by
    *  - @f$ \vdash \texttt{Range}[\text{LHS}] : \texttt{Real} @f$
    *    1.  @f[
    *          \dfrac
@@ -653,7 +653,7 @@ namespace Rodin::Variational
    * @note For an overview of all the possible specializations of the
    * Division class, please see @ref DivisionSpecializations.
    *
-   * Represents the following mathematical expression:
+   * Represents the following mathematical expression.
    * @f[
    * \text{LHS} \div \text{RHS}
    * @f]
@@ -668,7 +668,7 @@ namespace Rodin::Variational
    * @tparam LHS Type of left hand side operand
    * @tparam RHS Type of right hand side operand
    *
-   * Represents the following mathematical expression:
+   * Represents the following mathematical expression.
    * @f[
    *   \mathrm{LHS} : \mathrm{RHS}
    * @f]
@@ -688,7 +688,7 @@ namespace Rodin::Variational
    * @brief Represents the absolute value of a value.
    * @tparam Operand Type of operand
    *
-   * Represents the following mathematical expression:
+   * Represents the following mathematical expression.
    * @f[
    *   | \ \text{Operand} \ |
    * @f]
@@ -710,12 +710,12 @@ namespace Rodin::Variational
    * @brief Represents the Frobenius norm.
    * @tparam Operand Type of operand
    *
-   * Represents the following mathematical expression:
+   * Represents the following mathematical expression.
    * @f[
    *   || \ \text{Operand} \ ||
    * @f]
    * where Operand represents a scalar, vector or matrix @f$ A @f$, whose
-   * Frobenius norm is defined by:
+   * Frobenius norm is defined by
    * @f[
    *   || A || = \sqrt{\mathrm{tr}(A^T A)} \ .
    * @f]
@@ -732,7 +732,7 @@ namespace Rodin::Variational
    * @brief Represents the cosine function.
    * @tparam Operand Type of operand
    *
-   * Represents the following mathematical expression:
+   * Represents the following mathematical expression.
    * @f[
    *   \cos{\text{Operand}}
    * @f]
@@ -759,7 +759,7 @@ namespace Rodin::Variational
    * @brief Represents the tangent function.
    * @tparam Operand Type of operand
    *
-   * Represents the following mathematical expression:
+   * Represents the following mathematical expression.
    * @f[
    *   \tan{\text{Operand}} = \dfrac{\sin{\text{Operand}}}{\cos{\text{Operand}}}
    * @f]
@@ -774,13 +774,13 @@ namespace Rodin::Variational
    * @brief Represents the trace of a matrix function
    * @tparam Operand Type of operand
    *
-   * Represents the trace of a matrix valued operand:
+   * Represents the trace of a matrix valued operand.
    * @f[
    *   \mathrm{tr} \left( \mathrm{Operand} \right)
    * @f]
    * where Operand represents a matrix valued function @f$ A : \Omega
    * \rightarrow \mathbb{R}^{n \times n} @f$ and its trace @f$ \mathrm{tr} @f$
-   * is defined by:
+   * is defined by
    * @f[
    *   \mathrm{tr}(A) = \sum_{i = 1}^n A_{ii} \ .
    * @f]
@@ -797,13 +797,13 @@ namespace Rodin::Variational
    * @tparam LHS Type of left hand side operand
    * @tparam RHS Type of right hand side operand
    *
-   * Represents the mathematical expression:
+   * Represents the following mathematical expression.
    * @f[
    * \text{LHS} \circ \text{RHS}
    * @f]
    * where LHS and RHS are types which represent, respectively, functions @f$
    * f : B \rightarrow C @f$ and @f$ g : A \rightarrow B @f$. Then their
-   * composition at each point @f$ x @f$ is defined by:
+   * composition at each point @f$ x @f$ is defined by
    * @f[
    *   (f \circ g)(x) := f(g(x)) \ .
    * @f]
@@ -834,7 +834,7 @@ namespace Rodin::Variational
    * @tparam LHS Type of left hand side operand
    * @tparam RHS Type of right hand side operand
    *
-   * Represents the logical LT operation between two templated types:
+   * Represents the logical LT operation between two templated types.
    * @f[
    *   \mathrm{LHS} < \mathrm{RHS} \ .
    * @f]
@@ -851,7 +851,7 @@ namespace Rodin::Variational
    * @tparam LHS Type of left hand side operand
    * @tparam RHS Type of right hand side operand
    *
-   * Represents the logical GT operation between two templated types:
+   * Represents the logical GT operation between two templated types.
    * @f[
    *   \mathrm{LHS} > \mathrm{RHS} \ .
    * @f]
@@ -868,7 +868,7 @@ namespace Rodin::Variational
    * @tparam LHS Type of left hand side operand
    * @tparam RHS Type of right hand side operand
    *
-   * Represents the logical EQ operation between two templated types:
+   * Represents the logical EQ operation between two templated types.
    * @f[
    *   \mathrm{LHS} == \mathrm{RHS} \ .
    * @f]
@@ -885,7 +885,7 @@ namespace Rodin::Variational
    * @tparam LHS Type of left hand side operand
    * @tparam RHS Type of right hand side operand
    *
-   * Represents the logical LEQ operation between two templated types:
+   * Represents the logical LEQ operation between two templated types.
    * @f[
    *   \mathrm{LHS} <= \mathrm{RHS} \ .
    * @f]
@@ -902,7 +902,7 @@ namespace Rodin::Variational
    * @tparam LHS Type of left hand side operand
    * @tparam RHS Type of right hand side operand
    *
-   * Represents the logical GEQ operation between two templated types:
+   * Represents the logical GEQ operation between two templated types.
    * @f[
    *   \mathrm{LHS} >= \mathrm{RHS} \ .
    * @f]
@@ -919,7 +919,7 @@ namespace Rodin::Variational
    * @tparam LHS Type of left hand side operand
    * @tparam RHS Type of right hand side operand
    *
-   * Represents the logical NEQ operation between two templated types:
+   * Represents the logical NEQ operation between two templated types.
    * @f[
    *   \mathrm{LHS} != \mathrm{RHS} \ .
    * @f]
@@ -937,7 +937,7 @@ namespace Rodin::Variational
    * @tparam LHS Type of left hand side operand
    * @tparam RHS Type of right hand side operand
    *
-   * Represents the logical AND operation between two templated types:
+   * Represents the logical AND operation between two templated types.
    * @f[
    *   \mathrm{LHS} \land \mathrm{RHS} \ .
    * @f]
@@ -954,7 +954,7 @@ namespace Rodin::Variational
    * @tparam LHS Type of left hand side operand
    * @tparam RHS Type of right hand side operand
    *
-   * Represents the logical OR operation between two templated types:
+   * Represents the logical OR operation between two templated types.
    * @f[
    *   \mathrm{LHS} \lor \mathrm{RHS} \ .
    * @f]
@@ -970,7 +970,7 @@ namespace Rodin::Variational
   /**
    * @tparam Integrand Type of the integrand
    *
-   * Represents the quadrature rule approximation of an integral:
+   * Represents the quadrature rule approximation of an integral.
    * @f[
    *  \int_{\mathcal{R}_h} \mathrm{Integrand}
    * @f]
@@ -989,13 +989,13 @@ namespace Rodin::Variational
    * domain.
    * @tparam Integrand Type of the integrand
    *
-   * Represents the integral operator with a templated integrand type:
+   * Represents an integral operator with a templated integrand type.
    * @f[
    *   \int_{\mathcal{C}_h} \mathrm{Integrand}
    * @f]
    * on the cells @f$ \mathcal{C}_h @f$ of a triangulation @f$ \mathcal{T}_h
    * @f$. The domain integral is defined as the sum of all members of the
-   * triangulation:
+   * triangulation.
    * @f[
    *   \int_{\mathcal{C}_h} \mathrm{Integrand} := \sum_{T \in \mathcal{C}_h}
    *   \int_T \mathrm{Integrand} \ .
@@ -1014,14 +1014,14 @@ namespace Rodin::Variational
    * a mesh.
    * @tparam Integrand Type of the integrand
    *
-   * Represents the integral operator with a templated integrand type:
+   * Represents an integral operator with a templated integrand type.
    * @f[
    *   \int_{\mathcal{F}_h} \mathrm{Integrand}
    * @f]
    * on the faces @f$ \mathcal{F}_h @f$ of a triangulation @f$
    * \mathcal{T}_h @f$ a domain @f$ \Omega @f$.
    * Then the boundary integral is just the sum of integrals over each face of
-   * the mesh:
+   * the mesh.
    * @f[
    *   \int_{\mathcal{F}_h} \mathrm{Integrand} := \sum_{F \in \mathcal{F}_h}
    *   \int_F \mathrm{Integrand} \ .
@@ -1040,20 +1040,20 @@ namespace Rodin::Variational
    * a domain.
    * @tparam Integrand Type of the integrand
    *
-   * Represents the integral operator with a templated integrand type:
+   * Represents an integral operator with a templated integrand type.
    * @f[
    *   \int_{\mathcal{B}_h} \mathrm{Integrand}
    * @f]
    * on the boundary @f$ \mathcal{B}_h @f$ of a triangulation @f$
    * \mathcal{T}_h @f$ a domain @f$ \Omega @f$ with boundary @f$ \partial
    * \Omega @f$. The boundary @f$ \mathcal{B}_h @f$ is defined as the union of
-   * the boundary faces:
+   * the boundary faces.
    * @f[
    *   \mathcal{B}_h := \left\{ \partial T \cap \partial \Omega : T \in
    *   \mathcal{T}_h \right\} \ .
    * @f]
    * Then the boundary integral is just the sum of integrals over each member
-   * of the boundary:
+   * of the boundary.
    * @f[
    *   \int_{\mathcal{B}_h} \mathrm{Integrand} := \sum_{F \in \mathcal{B}_h}
    *   \int_F \mathrm{Integrand} \ .
@@ -1072,19 +1072,19 @@ namespace Rodin::Variational
    * of a domain.
    * @tparam Integrand Type of the integrand
    *
-   * Represents the integral operator with a templated integrand type:
+   * Represents an integral operator with a templated integrand type.
    * @f[
    *   \int_{\mathcal{I}_h} \mathrm{Integrand}
    * @f]
    * on the interface @f$ \mathcal{I}_h @f$ of a triangulation @f$
    * \mathcal{T}_h @f$ of a domain @f$ \Omega @f$. The interface @f$
-   * \mathcal{I}_h @f$ is defined as the union of interfaces between elements:
+   * \mathcal{I}_h @f$ is defined as the union of interfaces between elements.
    * @f[
    *   \mathcal{I}_h := \left\{ \partial T_1 \cap \partial T_2 : T_1, T_2 \in
    *   \mathcal{T}_h \right\} \ .
    * @f]
    * Then then the interface integral is just the sum of integrals over each
-   * member of the interface:
+   * member of the interface.
    * @f[
    *   \int_{\mathcal{I}_h} \mathrm{Integrand} := \sum_{F \in \mathcal{I}_h}
    *   \int_F \mathrm{Integrand} \ .
@@ -1106,7 +1106,7 @@ namespace Rodin::Variational
    * @tparam Operand Type of operand
    * @tparam Value Type of value
    *
-   * Represents a Dirichlet boundary condition:
+   * Represents a Dirichlet boundary condition.
    * @f[
    *   \mathrm{Operand} = \mathrm{Value} \ \text{ on } \ \Gamma_D
    * @f]

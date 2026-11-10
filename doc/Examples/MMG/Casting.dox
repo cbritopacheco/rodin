@@ -1,86 +1,48 @@
 /**
-  @page examples-mmg-casting Casting between MMG and Rodin
-  @brief How to convert from MMG to Rodin objects and vice-versa
-
-  @m_keywords{MMG, Casting, Conversion, Interop}
+  @page examples-mmg-casting Using an MMG mesh in Rodin
+  @brief Share the geometry interface and manage remeshing lifetimes.
 
   @tableofcontents
-
   @m_footernavigation
 
-  @section examples-mmg-cast-intro Introduction
+  @section examples-mmg-cast-intro Mesh interfaces
 
-  The @ref Rodin::MMG "MMG::Mesh" class extends
-  @ref Rodin::Geometry::Mesh "Mesh<Context::Local>" and can be used wherever
-  a regular mesh is expected. This section explains how to work with both
-  types interchangeably.
+  `MMG::Mesh` derives from `Geometry::Mesh<Context::Local>`. It can therefore
+  be supplied to local finite element spaces and variational problems through
+  the geometry interface. Its additional metadata records MMG corners, ridges
+  and required entities.
 
-  @note Assigning from a plain @ref Rodin::Geometry::Mesh "Geometry::Mesh" to
-  an `MMG::Mesh` keeps the topology and coordinates but clears MMG-specific
-  metadata, because the base mesh does not carry corners, ridges, or required
-  entity sets.
+  @section examples-mmg-cast-create Initialize from generated geometry
 
-  @section examples-mmg-cast-create Creating an MMG Mesh
+  Assignment from a plain geometry mesh copies its topology and coordinates
+  and clears MMG-specific metadata. Apply feature labels after that assignment.
 
-  An `MMG::Mesh` is created the same way as a standard mesh:
+  @snippet MMG/MeshIO.cpp mmg-io-create
 
-  @code{.cpp}
-  // Standard Rodin mesh
-  Mesh mesh;
-  mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 16, 16 });
+  @section examples-mmg-cast-fes Scope spaces around remeshing
 
-  // MMG mesh (supports remeshing operations)
-  MMG::Mesh mmgMesh;
-  mmgMesh = mmgMesh.UniformGrid(Polytope::Type::Triangle, { 16, 16 });
-  @endcode
+  A finite element space borrows its mesh and determines degrees of freedom
+  from the current topology. The adaptation example constructs a nodal size
+  field on that mesh and passes it to MMG.
 
-  @section examples-mmg-cast-fes Using MMG Meshes with FE Spaces
+  @snippet MMG/MeshAdaptation.cpp mmg-adapt-call
 
-  Since `MMG::Mesh` inherits from @ref Rodin::Geometry::Mesh "Mesh",
-  finite element spaces and all variational tools work transparently:
+  After the call, the old size field's topology-dependent representation is
+  no longer used. The program leaves its scope before continuing. Construct
+  fresh spaces, trial/test functions and problems for the new mesh; transfer
+  fields through a specified interpolation or projection procedure when their
+  state is needed for the next solve.
 
-  @code{.cpp}
-  MMG::Mesh mesh;
-  mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 16, 16 });
-  mesh.getConnectivity().compute(1, 2);
+  @section examples-mmg-cast-io Keep the feature representation
 
-  // Create P1 space directly on MMG mesh
-  P1 vh(mesh);
-  TrialFunction u(vh);
-  TestFunction  v(vh);
+  @ref examples-mmg-simple_io "MEDIT I/O" stores the MMG metadata used by the
+  wrapper. Passing the object through a plain geometry interface provides the
+  operations supported by that interface. Select an MMG-aware representation
+  when the corner, ridge and required-entity sets must be retained.
 
-  Problem poisson(u, v);
-  poisson = Integral(Grad(u), Grad(v))
-          - Integral(RealFunction(1.0), v)
-          + DirichletBC(u, Zero());
-  Solver::CG(poisson).solve();
+  @section examples-mmg-cast-see-also Continue
 
-  // Now remesh for the next iteration
-  MMG::Optimizer().setHMax(0.1).optimize(mesh);
-  @endcode
-
-  @section examples-mmg-cast-io Loading and Saving
-
-  Both mesh types support the same I/O formats. The format must be specified
-  explicitly via @ref Rodin::IO::FileFormat "IO::FileFormat":
-
-  @code{.cpp}
-  // Save in MFEM format
-  mmgMesh.save("output.mesh", IO::FileFormat::MFEM);
-
-  // Save in MEDIT format (native for MMG)
-  mmgMesh.save("output.medit.mesh", IO::FileFormat::MEDIT);
-
-  // Load back
-  MMG::Mesh loaded;
-  loaded.load("output.medit.mesh", IO::FileFormat::MEDIT);
-  @endcode
-
-  @section examples-mmg-cast-see-also See Also
-
-  - @ref examples-mmg-simple_io "MMG I/O" - File I/O details
-  - @ref examples-mmg-mesh_optimization "Mesh optimization" - Remeshing
-  - @ref examples-mmg-behavior "MMG behavior and guarantees"
-  - @ref Rodin::MMG "MMG namespace"
-
-  */
+  - @ref examples-mmg-simple_io "Checked metadata round trip"
+  - @ref examples-mmg-mesh_adaptation "Adapt to a nodal size field"
+  - @ref guides-numerical-contracts "Mesh and field lifetimes"
+*/

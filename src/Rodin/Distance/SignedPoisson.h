@@ -30,7 +30,7 @@ namespace Rodin::Distance
    *
    * This class computes an approximation to the signed distance function by
    * solving a Poisson equation with different forcing terms in interior and
-   * exterior regions:
+   * exterior regions.
    * @f[
    *   -\Delta u = f \quad \text{in } \Omega
    * @f]

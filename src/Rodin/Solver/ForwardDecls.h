@@ -23,7 +23,7 @@ namespace Rodin::Solver
    * @brief Abstract base class for linear system solvers.
    * @tparam LinearSystem Type of linear system to solve
    *
-   * Represents an object which can solve systems of the type:
+   * Represents an object which can solve systems of the type.
    * @f[
    *  Ax = b \: ,
    * @f]

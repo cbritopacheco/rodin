@@ -13,7 +13,7 @@
  * function indicating where one function is at least as large as another.
  *
  * # Mathematical Foundation
- * For functions @f$ f, g : \Omega \to \mathbb{R} @f$, the GEQ operator:
+ * For functions @f$ f, g : \Omega \to \mathbb{R} @f$, the GEQ operator is defined by
  * @f[
  *   (f \geq g)(x) = \begin{cases} 1 & \text{if } f(x) \geq g(x) \\ 0 & \text{otherwise} \end{cases}
  * @f]

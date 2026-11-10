@@ -27,7 +27,7 @@ class SharedBuildPlanTest(unittest.TestCase):
                  for row in self.workflow['jobs'][job]['strategy']['matrix']['include']}
         self.assertEqual(len(specs), 84)
         self.assertEqual(hashlib.sha256('\n'.join(sorted(specs)).encode()).hexdigest(),
-                         '817bd43886398c45fbbbd6c30b005e597402761cd76ba8448a4418ed810cdee4')
+                         '071360980b35537ab411bffbf4cc03397029eb8e102bcc665cdff0382a5dc717')
 
     def test_every_execution_lane_has_exactly_one_compatible_producer(self):
         builds = ci.plan(self.workflow)
@@ -43,8 +43,13 @@ class SharedBuildPlanTest(unittest.TestCase):
             for row in definition['strategy']['matrix']['include']:
                 expected = ci.definition(job, row)
                 self.assertEqual(expected['runner'], definition['runs-on'])
-                setup = next(step for step in definition['steps'] if step.get('uses') == 'aminya/setup-cpp@v1')
-                self.assertEqual(expected['compiler'], setup['with']['compiler'])
+                restore = next(step for step in definition['steps']
+                               if step.get('uses') == './.github/actions/test-build')
+                self.assertEqual(restore['with']['environment'], 'true')
+                self.assertEqual(expected['compiler'], 'gcc-14')
+                self.assertFalse(any(step.get('uses') in [
+                    'aminya/setup-cpp@v1', './.github/actions/apt-dependencies']
+                    for step in definition['steps']))
                 matches = [entry for entry in builds[family] if entry['id'] == ci.identity(expected)]
                 self.assertEqual(matches, [{'id': ci.identity(expected), 'definition': expected}])
         self.assertEqual(sum(map(len, builds.values())), 84)
@@ -121,6 +126,16 @@ class SharedBuildArchiveTest(unittest.TestCase):
         self.fixture()
         ci.pack(self.spec, self.build, self.artifact)
         self.build.rename(self.root / 'producer-build')
+
+    def test_restore_reserves_expanded_payload_before_extraction(self):
+        self.package()
+        with patch.object(ci.ci_environment, 'disk_space', side_effect=RuntimeError('disk full')) as check:
+            with self.assertRaisesRegex(RuntimeError, 'disk full'):
+                ci.restore(self.spec, self.build, self.artifact)
+        self.assertFalse((self.build / 'test').exists())
+        self.assertGreater(check.call_args.args[1], ci.ci_environment.MIN_FREE_GIB)
+        # Capacity failure leaves the immutable input available for diagnosis.
+        self.assertTrue((self.artifact / 'build.tar.gz').is_file())
 
     def test_two_restores_have_independent_clean_counters_and_complete_notes(self):
         self.package()

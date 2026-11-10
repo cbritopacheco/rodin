@@ -8,12 +8,12 @@
  * @file MooneyRivlin.h
  * @brief Compressible Mooney-Rivlin hyperelastic constitutive law.
  *
- * Implements the stored energy density:
+ * Implements the following stored energy density.
  * @f[
  *   W = c_1(\bar{I}_1 - d) + c_2(\bar{I}_2 - d)
  *     + \frac{\kappa}{2}(J - 1)^2
  * @f]
- * where the modified invariants are:
+ * where the modified invariants are
  * @f[
  *   \bar{I}_1 = J^{-2/d} I_1, \quad
  *   \bar{I}_2 = J^{-4/d} I_2

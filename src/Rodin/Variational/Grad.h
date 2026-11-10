@@ -28,7 +28,7 @@
 namespace Rodin::FormLanguage
 {
   /**
-   * @brief Type traits for @c Grad over a grid function: exposes the finite element
+   * @brief Type traits for @c Grad over a grid function, exposing the finite element
    * space, the operand type and the range type.
    */
   template <class FES, class Data>
@@ -46,7 +46,7 @@ namespace Rodin::FormLanguage
   };
 
   /**
-   * @brief Type traits for @c Grad over a shape function: exposes the finite element
+   * @brief Type traits for @c Grad over a shape function, exposing the finite element
    * space, the shape function space, the operand type and the range type.
    */
   template <class NestedDerived, class FES, Variational::ShapeFunctionSpaceType Space>
@@ -103,7 +103,7 @@ namespace Rodin::Variational
    * @ingroup GradSpecializations
    * @brief Gradient operator for grid functions.
    *
-   * Computes the spatial gradient of a scalar grid function:
+   * Computes the spatial gradient of a scalar grid function.
    * @f[
    *   \nabla u = \left(\frac{\partial u}{\partial x_1}, \frac{\partial u}{\partial x_2}, \ldots, \frac{\partial u}{\partial x_d}\right)^T
    * @f]
@@ -111,12 +111,12 @@ namespace Rodin::Variational
    *
    * # Mathematical Foundation
    * For a scalar function @f$ u : \Omega \subset \mathbb{R}^d \to \mathbb{R} @f$,
-   * the gradient is a vector field:
+   * the gradient is a vector field.
    * @f[
    *   \nabla u : \Omega \to \mathbb{R}^d
    * @f]
    *
-   * In the finite element context, for @f$ u_h = \sum_i u_i \phi_i @f$:
+   * In the finite element context, for @f$ u_h = \sum_i u_i \phi_i @f$.
    * @f[
    *   \nabla u_h = \sum_i u_i \nabla \phi_i
    * @f]

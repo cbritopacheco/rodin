@@ -90,7 +90,7 @@ namespace Rodin::Geometry
    * - every distributed entity present on multiple partitions has exactly one
    *   owner.
    *
-   * After finalization, users normally reason in terms of:
+   * After finalization, entity membership can be queried through these predicates:
    * - `isOwned(d, i)`
    * - `isShared(d, i)`
    * - `isGhost(d, i)`
@@ -154,7 +154,7 @@ namespace Rodin::Geometry
    * - a parent mesh (`Mode::Parent`), or
    * - explicit direct insertion of vertices and polytopes (`Mode::Direct`).
    *
-   * In parent-based mode, a typical construction pattern is:
+   * The following example constructs a shard in parent-based mode.
    *
    * @code{.cpp}
    * Shard::Builder builder;
@@ -169,8 +169,8 @@ namespace Rodin::Geometry
    * Shard shard = builder.finalize();
    * @endcode
    *
-   * `include()` is idempotent with respect to the parent index:
-   * if the entity is already present in the shard, it is not duplicated.
+   * `include()` is idempotent with respect to the parent index.
+   * If the entity is already present in the shard, it is not duplicated.
    * The returned pair is:
    * - the local shard index of the entity,
    * - a boolean telling whether the entity was newly inserted.
@@ -358,7 +358,7 @@ namespace Rodin::Geometry
            * @param[in] p Pair `(d, parentIdx)` identifying an entity in the parent mesh.
            * @param[in] state Local state to assign if the entity is newly inserted.
            *
-           * @return Pair `(localIdx, inserted)` where:
+           * @return Pair `(localIdx, inserted)` Here,
            * - `localIdx` is the shard-local index of the entity,
            * - `inserted` is `true` iff the entity was not already present.
            *
@@ -390,7 +390,7 @@ namespace Rodin::Geometry
           /**
            * @brief Returns the owner map for dimension `d`.
            *
-           * The map stores:
+           * The map stores the following association.
            *
            * @f[
            *   \text{local non-owned index} \mapsto \text{owner rank}
@@ -405,7 +405,7 @@ namespace Rodin::Geometry
           /**
            * @brief Returns the halo map for owned entities of dimension `d`.
            *
-           * The map stores:
+           * The map stores the following association.
            *
            * @f[
            *   \text{owned local index} \mapsto \{\text{remote ranks containing the same entity}\}

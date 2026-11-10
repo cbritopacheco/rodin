@@ -45,7 +45,7 @@ namespace Rodin::Geometry
        * @brief Constructs the enclosure of a certified reference-space map.
        *
        * The caller must establish containment in the degree-p Bernstein
-       * reference space: simplex, tensor, triangle-segment product, or rational
+       * reference space, whether simplex, tensor, triangle-segment product or rational
        * collapsed pyramid. This is a representation bound, not a family index
        * inferred from an arbitrary transformation's samples.
        * @param transformation Coordinate map to enclose.

@@ -10,6 +10,9 @@ inputs:
   path:
     description: Destination directory; each artifact gets its own subdirectory.
     required: true
+  merge-single:
+    description: Merge one exact artifact into the destination without adding a name subdirectory.
+    default: 'false'
 runs:
   using: composite
   steps:
@@ -18,19 +21,15 @@ runs:
       env:
         ACTION_PATH: ${{ github.action_path }}
       run: |
-        client="$RUNNER_TEMP/rodin-artifact-client"
-        if ! cmp -s "$ACTION_PATH/package-lock.json" "$client/installed-package-lock.json"; then
-          mkdir -p "$client"
-          cp "$ACTION_PATH/package.json" "$ACTION_PATH/package-lock.json" "$client/"
-          npm ci --prefix "$client" --ignore-scripts --no-audit --no-fund
-          cp "$ACTION_PATH/package-lock.json" "$client/installed-package-lock.json"
-        fi
+        python3 "$GITHUB_WORKSPACE/dev/ci_artifact_client.py" \
+          --action "$ACTION_PATH" --client "$RUNNER_TEMP/rodin-artifact-client"
     - name: Download every mandatory artifact by exact name
       uses: actions/github-script@v8
       env:
         ARTIFACT_NAMES: ${{ inputs.names }}
         ARTIFACT_NAMES_FILE: ${{ inputs.names-file }}
         ARTIFACT_DESTINATION: ${{ inputs.path }}
+        ARTIFACT_MERGE_SINGLE: ${{ inputs.merge-single }}
         ARTIFACT_ACTION_PATH: ${{ github.action_path }}
       with:
         script: |
@@ -40,4 +39,5 @@ runs:
           const {downloadArtifacts, readNames} = require(path.join(
             process.env.ARTIFACT_ACTION_PATH, 'download.js'));
           await downloadArtifacts(new DefaultArtifactClient(), readNames(process.env),
-            process.env.ARTIFACT_DESTINATION, core);
+            process.env.ARTIFACT_DESTINATION, core, undefined,
+            process.env.ARTIFACT_MERGE_SINGLE === 'true');

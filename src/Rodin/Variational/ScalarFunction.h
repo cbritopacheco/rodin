@@ -22,7 +22,7 @@
 namespace Rodin::FormLanguage
 {
   /**
-   * @brief Type traits for @c ScalarFunctionBase: exposes the scalar type and the
+   * @brief Type traits for @c ScalarFunctionBase, exposing the scalar type and the
    * derived type.
    */
   template <class Scalar, class Derived>
@@ -43,7 +43,7 @@ namespace Rodin::Variational
    * @brief Base class for scalar-valued functions with templated scalar type.
    *
    * ScalarFunctionBase extends FunctionBase to represent functions mapping
-   * points in the domain to scalar values:
+   * points in the domain to scalar values.
    * @f[
    *    f: \Omega \to \mathbb{F}
    * @f]

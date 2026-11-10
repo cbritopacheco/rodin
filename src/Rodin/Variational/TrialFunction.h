@@ -26,7 +26,7 @@
 namespace Rodin::FormLanguage
 {
   /**
-   * @brief Type traits for @c TrialFunction: exposes the finite element space, the shape
+   * @brief Type traits for @c TrialFunction, exposing the finite element space, the shape
    * function space and the solution type.
    */
   template <class Solution, class FES>
@@ -265,11 +265,11 @@ namespace Rodin::Variational
    * determined by solving the variational problem.
    *
    * # Mathematical Foundation
-   * The weak formulation seeks @f$ u \in U_h @f$ such that:
+   * The weak formulation seeks @f$ u \in U_h @f$ such that
    * @f[
    *   a(u, v) = l(v) \quad \forall v \in V_h
    * @f]
-   * where:
+   * Here,
    * - @f$ u @f$ is the trial function (unknown)
    * - @f$ v @f$ is a test function
    * - @f$ a(\cdot, \cdot) @f$ is a bilinear form
@@ -453,7 +453,7 @@ namespace Rodin::Variational
   /**
    * @brief Deduction guide for TrialFunction.
    *
-   * Allows automatic type deduction when constructing a TrialFunction:
+   * Allows automatic type deduction when constructing a TrialFunction.
    * ```cpp
    * P1 Uh(mesh);
    * TrialFunction u(Uh);  // Type deduced automatically

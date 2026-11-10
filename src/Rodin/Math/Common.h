@@ -363,7 +363,7 @@ namespace Rodin::Math
   /**
    * @brief Computes the sign (signum) function.
    *
-   * Returns:
+   * Returns the following value.
    * @f[
    *   \text{sgn}(x) = \begin{cases}
    *     -1 & \text{if } x < 0 \\
@@ -374,7 +374,7 @@ namespace Rodin::Math
    *
    * @tparam T Type of value
    * @param[in] x Value
-   * @return Sign of @f$ x @f$: -1, 0, or +1
+   * @return The sign of @f$ x @f$, represented by -1, 0 or +1.
    */
   template <typename T>
   constexpr T sgn(const T& x)
@@ -629,7 +629,7 @@ namespace Rodin::Math
   /**
    * @brief Computes the dot product of two Eigen vectors/matrices.
    *
-   * For vectors @f$ \mathbf{u} @f$ and @f$ \mathbf{v} @f$, computes:
+   * For vectors @f$ \mathbf{u} @f$ and @f$ \mathbf{v} @f$, computes
    * @f[
    *   \mathbf{u} \cdot \mathbf{v} = \sum_i u_i \overline{v_i}
    * @f]

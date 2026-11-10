@@ -35,7 +35,7 @@ namespace Rodin::Utility
    *
    * Both tuples must have the same number of elements (enforced by static_assert).
    *
-   * Example usage:
+   * The following example illustrates usage.
    * @code{.cpp}
    * using A = Tuple<int, double, char>;
    * using B = Tuple<bool, float, short>;

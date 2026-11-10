@@ -10,7 +10,7 @@
 #include <string>
 #include <sstream>
 #include "Rodin/MMG/MeshLoader.h"
-#include "Rodin/MMG/MMG5.h"
+#include "Rodin/MMG/V5.h"
 #include "Rodin/MMG/Mesh.h"
 #include "Rodin/IO/ForwardDecls.h"
 #include "Rodin/Alert/MemberFunctionException.h"
@@ -120,5 +120,5 @@ TEST_F(MMGMeshIO, MetadataBoundsAndLoaderReuse)
   EXPECT_THROW(
     mesh.setRequiredEdge(mesh.getConnectivity().getCount(1)), Alert::Exception);
   mesh.getCorners().insert(mesh.getVertexCount());
-  EXPECT_THROW(MMG::MMG5::rodinToMesh(mesh), Alert::Exception);
+  EXPECT_THROW(MMG::V5::Mesh::toV5(mesh), Alert::Exception);
 }

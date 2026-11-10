@@ -27,7 +27,7 @@ namespace Rodin::Variational
    * @ingroup ANDSpecializations
    * @brief Logical AND operator between two boolean functions.
    *
-   * Returns a boolean function that evaluates to the logical conjunction:
+   * Returns a boolean function that evaluates to the logical conjunction.
    * @f[
    *    \text{AND}(f, g)(x) = f(x) \land g(x)
    * @f]

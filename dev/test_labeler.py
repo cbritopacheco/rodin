@@ -2,15 +2,18 @@
 from __future__ import annotations
 
 import base64
+import colorsys
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import json
 import os
+import re
 from pathlib import Path
 import shutil
 import subprocess
 import tempfile
 import threading
 import unittest
+import xml.etree.ElementTree as ET
 from urllib.parse import parse_qs, unquote, urlsplit
 
 import yaml
@@ -25,6 +28,95 @@ MODULES = {
     'QF': 'qf', 'Scotch': 'scotch', 'Serialization': 'serialization', 'Solid': 'solid',
     'Solver': 'solver', 'Test': 'test', 'Utility': 'utility', 'Variational': 'variational',
 }
+
+
+class LabelCatalogTest(unittest.TestCase):
+    def test_every_labeler_rule_has_documented_catalog_metadata(self):
+        rules = yaml.safe_load((ROOT / '.github/labeler.yml').read_text())
+        catalog = yaml.safe_load((ROOT / '.github/labels.yml').read_text())
+        self.assertLessEqual(set(rules), set(catalog))
+        for name, metadata in catalog.items():
+            with self.subTest(label=name):
+                self.assertEqual(set(metadata), {'color', 'description'})
+                self.assertRegex(metadata['color'], r'^[0-9A-Fa-f]{6}$')
+                self.assertTrue(metadata['description'].strip())
+                self.assertLessEqual(len(metadata['description']), 100)
+                self.assertLessEqual(len(name), 50)
+        for name in ['convergence', 'installation', 'nafems']:
+            self.assertIn(name, rules)
+            self.assertNotIn(name + '-tests', rules)
+            self.assertNotIn(name + '-tests', catalog)
+
+    def test_each_category_uses_one_colour(self):
+        catalog = yaml.safe_load((ROOT / '.github/labels.yml').read_text())
+        for group in [
+                ['core', 'geometry', 'math', 'qf', 'form-language', 'variational', 'assembly', 'solver', 'io'],
+                ['alerts', 'context', 'utility', 'location', 'serialization'],
+                ['adaptation', 'advection', 'distance', 'eikonal', 'heart', 'hilbert', 'solid', 'linear-elasticity'],
+                ['mfem', 'mmg', 'mpi', 'petsc', 'scotch', 'dependencies', 'python'],
+                ['unit-tests', 'manufactured-tests', 'convergence', 'installation', 'nafems', 'benchmarks', 'test'],
+                ['ci', 'cmake', 'developer-tooling', 'resources', 'codex'],
+                ['docs', 'examples'], ['bug', 'hotfix'],
+                ['good first issue', 'help wanted'], ['duplicate', 'invalid', 'wontfix']]:
+            with self.subTest(group=group):
+                self.assertEqual(len({catalog[name]['color'].lower() for name in group}), 1)
+
+    def test_module_hues_follow_the_documentation_architecture(self):
+        catalog = yaml.safe_load((ROOT / '.github/labels.yml').read_text())
+        diagram = ET.parse(ROOT / 'doc/Images/Architecture.svg').getroot()
+        ns = {'svg': 'http://www.w3.org/2000/svg'}
+        styles = diagram.find('svg:style', ns).text
+        roles = set()
+        for group in diagram.findall('svg:g', ns):
+            role = group.get('class')
+            if role not in {'core', 'model', 'backend', 'shared'}:
+                continue
+            roles.add(role)
+            color = re.search(r'\.' + role + r'\s*\{\s*color:\s*#([0-9a-fA-F]{6})', styles)[1]
+            expected = colorsys.rgb_to_hls(*[int(color[i:i + 2], 16) / 255 for i in (0, 2, 4)])[0]
+            for node in group.findall('svg:text', ns):
+                if node.get('class') != 'name':
+                    continue
+                for name in node.text.split(' · '):
+                    label = MODULES.get(name.split(' / ')[0])
+                    # Test helpers follow the user's grey test-label override.
+                    if label is None or label == 'test':
+                        continue
+                    with self.subTest(module=name, role=role):
+                        shade = catalog[label]['color']
+                        hue = colorsys.rgb_to_hls(*[int(shade[i:i + 2], 16) / 255
+                                                   for i in (0, 2, 4)])[0]
+                        self.assertLessEqual(min(abs(hue - expected), 1 - abs(hue - expected)), 1 / 12)
+        self.assertEqual(roles, {'core', 'model', 'backend', 'shared'})
+
+    def test_tests_are_grey_and_developer_tools_are_brown(self):
+        catalog = yaml.safe_load((ROOT / '.github/labels.yml').read_text())
+        for name in ['unit-tests', 'manufactured-tests', 'convergence', 'installation',
+                     'nafems', 'benchmarks', 'test']:
+            rgb = [int(catalog[name]['color'][i:i + 2], 16) / 255 for i in (0, 2, 4)]
+            self.assertLessEqual(colorsys.rgb_to_hls(*rgb)[2], 0.08)
+        for name in ['ci', 'cmake', 'developer-tooling', 'resources', 'codex']:
+            rgb = [int(catalog[name]['color'][i:i + 2], 16) / 255 for i in (0, 2, 4)]
+            hue, lightness, saturation = colorsys.rgb_to_hls(*rgb)
+            self.assertTrue(20 / 360 <= hue <= 35 / 360)
+            self.assertLess(lightness, 0.45)
+
+    def test_label_colours_have_readable_contrast(self):
+        catalog = yaml.safe_load((ROOT / '.github/labels.yml').read_text())
+        for name, metadata in catalog.items():
+            with self.subTest(label=name):
+                rgb = [int(metadata['color'][i:i + 2], 16) / 255 for i in (0, 2, 4)]
+                linear = [c / 12.92 if c <= 0.04045 else ((c + 0.055) / 1.055) ** 2.4
+                          for c in rgb]
+                luminance = sum(c * w for c, w in zip(linear, (0.2126, 0.7152, 0.0722)))
+                brightness = sum(c * w for c, w in zip(rgb, (0.2126, 0.7152, 0.0722)))
+                # Avoid mid-tones, leaving room for GitHub's foreground selection.
+                if brightness < 0.42:
+                    contrast = 1.05 / (luminance + 0.05)  # Light text on dark fill.
+                else:
+                    self.assertGreater(brightness, 0.65)
+                    contrast = (luminance + 0.05) / 0.05  # Dark text on light fill.
+                self.assertGreaterEqual(contrast, 4.5)
 
 
 class LabelerTest(unittest.TestCase):
@@ -163,11 +255,11 @@ class LabelerTest(unittest.TestCase):
 
     def test_convergence_physics_and_backend_paths(self):
         cases = {
-            'tests/convergence/h/PETScMPIPoisson/Only.cpp': {'convergence-tests', 'petsc', 'mpi', 'variational'},
+            'tests/convergence/h/PETScMPIPoisson/Only.cpp': {'convergence', 'petsc', 'mpi', 'variational'},
             'tests/convergence/hp/PETScLinearElasticity/Only.cpp':
-                {'convergence-tests', 'petsc', 'solid', 'linear-elasticity', 'variational'},
+                {'convergence', 'petsc', 'solid', 'linear-elasticity', 'variational'},
             'tests/convergence/isoparametric/GeometryApproximation/Only.cpp':
-                {'convergence-tests', 'geometry', 'variational'},
+                {'convergence', 'geometry', 'variational'},
         }
         for path, expected in cases.items():
             with self.subTest(path=path):
@@ -183,7 +275,7 @@ class LabelerTest(unittest.TestCase):
     def test_documentation_matches_root_nested_and_dot_directories(self):
         for path, expected in {
             'README.md': {'docs'}, '.github/workflows/README.md': {'docs', 'ci'},
-            'tests/convergence/README.md': {'docs', 'convergence-tests', 'variational'},
+            'tests/convergence/README.md': {'docs', 'convergence', 'variational'},
             'examples/Geometry/README.md': {'docs', 'examples'},
         }.items():
             with self.subTest(path=path):
@@ -192,12 +284,13 @@ class LabelerTest(unittest.TestCase):
     def test_infrastructure_categories(self):
         cases = {
             '.github/workflows/Tests.yml': {'ci'}, 'codecov.yml': {'ci'},
+            '.github/labels.yml': {'ci'},
             'dev/check_something.py': {'developer-tooling'},
             'src/Rodin/Math/CMakeLists.txt': {'cmake', 'math'},
             'tests/unit/Rodin/Geometry/CMakeLists.txt': {'cmake', 'geometry', 'unit-tests'},
             'tests/cmake/ThirdPartyIsolation/Only.cmake': {'cmake'},
-            'tests/installation/Only.cpp': {'installation-tests'},
-            'tests/nafems/cases/Only.cpp': {'nafems-tests'},
+            'tests/installation/Only.cpp': {'installation'},
+            'tests/nafems/cases/Only.cpp': {'nafems'},
             'py/Rodin/Only.cpp': {'python'}, 'resources/Only.mesh': {'resources'},
             'third-party/mmg/Only.h': {'dependencies', 'mmg'},
         }
@@ -234,11 +327,11 @@ class LabelerTest(unittest.TestCase):
         self.assertIs(action['with']['dot'], True)
         self.assertIs(action['with']['sync-labels'], False)
         self.assertEqual(job['permissions'], {'contents': 'read', 'pull-requests': 'write', 'issues': 'write'})
-        checks = yaml.safe_load((ROOT / '.github/workflows/LabelerRules.yml').read_text())
+        checks = yaml.safe_load((ROOT / '.github/workflows/Preflight.yml').read_text())
         self.assertEqual(set(checks['on']), {'pull_request', 'push'})
         self.assertNotIn('paths', checks['on']['pull_request'] or {})
         self.assertEqual(checks['permissions'], {'contents': 'read'})
-        checkout = next(s for s in checks['jobs']['Rules']['steps'] if
+        checkout = next(s for s in checks['jobs']['Labeler']['steps'] if
                         s.get('with', {}).get('repository') == 'actions/labeler')
         self.assertEqual(checkout['with']['ref'], revision)
         self.assertFalse(checkout['with']['persist-credentials'])

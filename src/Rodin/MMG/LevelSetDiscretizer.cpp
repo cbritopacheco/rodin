@@ -258,7 +258,7 @@ namespace Rodin::MMG
 
   void LevelSetDiscretizer::deleteBoundaryRef(MMG5_pMesh mesh, Geometry::Attribute ref)
   {
-    if (m_meshTheSurface || MMG5::isSurfaceMesh(mesh) || mesh->dim == 2)
+    if (m_meshTheSurface || V5::Mesh::isSurface(mesh) || mesh->dim == 2)
     {
       size_t oldna = mesh->na;
       std::vector<size_t> ids;
@@ -324,9 +324,9 @@ namespace Rodin::MMG
   {
     const auto& fes = ls.getFiniteElementSpace();
     const auto& mesh = fes.getMesh();
-    using MeshOwner = std::unique_ptr<MMG5_Mesh, decltype(&MMG5::destroyMesh)>;
-    using SolutionOwner = std::unique_ptr<MMG5_Sol, decltype(&MMG5::destroySolution)>;
-    MeshOwner meshOwner(rodinToMesh(mesh), &MMG5::destroyMesh);
+    using MeshOwner = std::unique_ptr<MMG5_Mesh, decltype(&V5::Mesh::destroy)>;
+    using SolutionOwner = std::unique_ptr<MMG5_Sol, decltype(&V5::Solution::destroy)>;
+    MeshOwner meshOwner(MMG::V5::Mesh::toV5(mesh), &V5::Mesh::destroy);
     MMG5_pMesh mmgMesh = meshOwner.get();
 
     // Erase boundary elements which have the isoref
@@ -334,10 +334,11 @@ namespace Rodin::MMG
       deleteBoundaryRef(mmgMesh, *m_isoref);
 
     SolutionOwner solutionOwner(
-      createSolution(mmgMesh, fes.getVectorDimension()), &MMG5::destroySolution);
+      MMG::V5::Solution::create(mmgMesh, fes.getVectorDimension()),
+      &V5::Solution::destroy);
     MMG5_pSol sol = solutionOwner.get();
-    copySolution(ls, sol);
-    MMG5::setParameters(mmgMesh);
+    MMG::V5::Solution::copy(ls, sol);
+    Base::setParameters(mmgMesh);
     const bool isSurface = ls.getFiniteElementSpace().getMesh().isSurface();
     const size_t meshDim = mesh.getDimension();
 
@@ -381,7 +382,7 @@ namespace Rodin::MMG
     // Delete zero ref
     // deleteBoundaryRef(mmgMesh, 0);
 
-    auto rodinMesh = meshToRodin(mmgMesh);
+    auto rodinMesh = MMG::V5::Mesh::fromV5(mmgMesh);
     // Conversion reads the remesher's output tags after entity renumbering.
     // Input numeric indices no longer identify the same output entities.
     solutionOwner.reset();

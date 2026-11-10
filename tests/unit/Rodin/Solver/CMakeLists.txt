@@ -31,6 +31,11 @@ target_link_libraries(RodinGMRESTest PRIVATE
   GTest::gtest GTest::gtest_main Rodin::Geometry Rodin::Variational Rodin::Solver)
 rodin_discover_tests(RodinGMRESTest PROPERTIES LABELS unit)
 
+add_executable(RodinGMRESPreconditionerTest GMRESPreconditionerTest.cpp)
+target_link_libraries(RodinGMRESPreconditionerTest PRIVATE
+  GTest::gtest_main Rodin::Geometry Rodin::Variational Rodin::Solver)
+rodin_discover_tests(RodinGMRESPreconditionerTest PROPERTIES LABELS unit)
+
 add_executable(RodinNewtonSolverTest NewtonSolverTest.cpp)
 target_link_libraries(RodinNewtonSolverTest
   PUBLIC

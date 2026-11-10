@@ -19,7 +19,7 @@
 namespace Rodin::FormLanguage
 {
   /**
-   * @brief Type traits for @c Division over a shape function: exposes the finite element
+   * @brief Type traits for @c Division over a shape function, exposing the finite element
    * space, the shape function space, the left-hand side operand, the right-hand side
    * operand and the range type.
    */
@@ -58,7 +58,7 @@ namespace Rodin::Variational
    * @ingroup DivisionSpecializations
    * @brief Division of a function by another function.
    *
-   * Represents the mathematical expression:
+   * Represents the following mathematical expression.
    * @f[
    *    \left(\frac{f}{g}\right)(x) = \frac{f(x)}{g(x)}
    * @f]

@@ -198,23 +198,40 @@ namespace
     }
   }
 
-  /** Checks distributed named forms on P1 and P2 tetrahedra. */
-  TEST(PETSc_MPI_Form, NamedScalarAndVectorP1AndP2MatchIntegrals)
+  /// @brief Checks scalar P1 named forms against independently assembled integrals.
+  TEST(PETSc_MPI_Form, NamedScalarP1MatchesIntegrals)
   {
     Context::MPI ctx(*g_env, *g_world);
-    // Multiple cells, interior DOFs and partition interfaces are sufficient
-    // for these matrix comparisons; the legacy constraint regressions below
-    // retain their larger mesh. Keep the full P2 oracle affordable in Debug.
     auto mesh = distributeP2Tetrahedron(ctx, 4);
-    P1 scalarLinear(mesh);
-    checkDistributedScalarNamedForms(scalarLinear);
-    H1 scalarQuadratic(std::integral_constant<size_t, 2>{}, mesh);
-    checkDistributedScalarNamedForms(scalarQuadratic);
-    P1 vectorLinear(mesh, mesh.getSpaceDimension());
-    checkDistributedVectorNamedForms(vectorLinear);
-    H1 vectorQuadratic(
-      std::integral_constant<size_t, 2>{}, mesh, mesh.getSpaceDimension());
-    checkDistributedVectorNamedForms(vectorQuadratic);
+    P1 space(mesh);
+    checkDistributedScalarNamedForms(space);
+  }
+
+  /// @brief Checks scalar P2 named forms against independently assembled integrals.
+  TEST(PETSc_MPI_Form, NamedScalarP2MatchesIntegrals)
+  {
+    Context::MPI ctx(*g_env, *g_world);
+    auto mesh = distributeP2Tetrahedron(ctx, 4);
+    H1 space(std::integral_constant<size_t, 2>{}, mesh);
+    checkDistributedScalarNamedForms(space);
+  }
+
+  /// @brief Checks vector P1 named forms against independently assembled integrals.
+  TEST(PETSc_MPI_Form, NamedVectorP1MatchesIntegrals)
+  {
+    Context::MPI ctx(*g_env, *g_world);
+    auto mesh = distributeP2Tetrahedron(ctx, 4);
+    P1 space(mesh, mesh.getSpaceDimension());
+    checkDistributedVectorNamedForms(space);
+  }
+
+  /// @brief Checks vector P2 named forms against independently assembled integrals.
+  TEST(PETSc_MPI_Form, NamedVectorP2MatchesIntegrals)
+  {
+    Context::MPI ctx(*g_env, *g_world);
+    auto mesh = distributeP2Tetrahedron(ctx, 4);
+    H1 space(std::integral_constant<size_t, 2>{}, mesh, mesh.getSpaceDimension());
+    checkDistributedVectorNamedForms(space);
   }
 
   /**

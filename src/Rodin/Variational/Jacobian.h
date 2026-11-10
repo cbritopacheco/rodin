@@ -14,7 +14,7 @@
  *
  * # Mathematical Foundation
  * For a vector-valued function @f$ \mathbf{u} : \Omega \subset \mathbb{R}^d \to \mathbb{R}^n @f$,
- * the Jacobian matrix is defined as:
+ * the Jacobian matrix is defined as
  * @f[
  *   J_{ij} = \frac{\partial u_i}{\partial x_j}
  * @f]

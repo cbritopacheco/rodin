@@ -9,7 +9,7 @@
  * @brief Vector-valued functions for variational formulations.
  *
  * This file defines VectorFunctionBase and VectorFunction for representing
- * functions mapping points to vectors: @f$ \mathbf{f}: \Omega \to \mathbb{R}^d @f$.
+ * functions mapping points to vectors with @f$ \mathbf{f}: \Omega \to \mathbb{R}^d @f$.
  * These are used for vector fields such as velocity, displacement, or force fields.
  */
 #ifndef RODIN_VARIATIONAL_VECTORFUNCTION_H
@@ -61,7 +61,7 @@ namespace Rodin::Variational
   /**
    * @brief Base class for vector-valued functions defined on a mesh.
    *
-   * VectorFunctionBase extends FunctionBase to represent vector-valued functions:
+   * VectorFunctionBase extends FunctionBase to represent vector-valued functions.
    * @f[
    *    \mathbf{f}: \Omega \to \mathbb{R}^d
    * @f]
@@ -153,7 +153,7 @@ namespace Rodin::Variational
       /**
        * @brief Accesses the i-th component of the vector function.
        *
-       * Returns a scalar function representing the specified component:
+       * Returns a scalar function representing the specified component.
        * @f$ f_i(x) = (\mathbf{f}(x))_i @f$
        *
        * @param[in] i Component index (0-based)
@@ -367,12 +367,12 @@ namespace Rodin::Variational
    *
    * In general one may construct any VectorFunction by specifying its values
    * in a uniform initialization manner. For example, to construct a
-   * VectorFunction with constant entries (1, 2, 3) :
+   * VectorFunction with constant entries (1, 2, 3) .
    * @code{.cpp}
    * auto v = VectorFunction{1, 2, 3};
    * @endcode
    * Alternatively, we may construct instances of VectorFunction from any type
-   * which is convertible to specializations of RealFunction:
+   * which is convertible to specializations of RealFunction.
    * @code{.cpp}
    * auto s = RealFunction(3.1416);
    * auto v = VectorFunction{Dx(s), 42, s};

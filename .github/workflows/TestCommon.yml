@@ -29,15 +29,16 @@ jobs:
           definition: ${{ inputs.definition }}
       - name: Install pinned lane planning dependency
         run: python3 dev/ci_environment.py python
-      - uses: actions/download-artifact@v4
+      - uses: ./.github/actions/download-artifacts
         with:
-          name: ci-test-plan
+          names: '["ci-test-plan"]'
           path: .
+          merge-single: true
       - name: Compile common libraries once
         env:
           DEFINITION: ${{ inputs.definition }}
         run: python3 dev/ci_build_graph.py common --definition "$DEFINITION"
-      - uses: actions/upload-artifact@v4
+      - uses: ./.github/actions/upload-artifacts
         with:
           overwrite: true
           name: ci-common-${{ inputs.id }}
@@ -45,7 +46,7 @@ jobs:
           compression-level: 0
           retention-days: 7
           if-no-files-found: error
-      - uses: actions/upload-artifact@v4
+      - uses: ./.github/actions/upload-artifacts
         with:
           overwrite: true
           name: ci-common-manifest-${{ fromJSON(inputs.definition).mode }}-${{ inputs.id }}

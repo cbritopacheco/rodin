@@ -14,7 +14,7 @@
  *
  * # Mathematical Foundation
  * Given a kernel @f$ K(x,y) @f$ and source distribution @f$ f(y) @f$, the
- * potential at point @f$ x @f$ is:
+ * potential at point @f$ x @f$ is
  * @f[
  *   u(x) = \int_\Omega K(x,y) f(y) \, dy
  * @f]
@@ -382,13 +382,13 @@ namespace Rodin::Variational
   /**
    * @ingroup PotentialSpecializations
    *
-   * Represents the expression:
+   * Represents the expression.
    * @f[
    *  (K u)(x) = \sum_{\tau \in \mathcal{T}_h} (K_\tau u)(x)
    *  = \sum_{\tau \in \mathcal{T}_h} \sum^{n(\tau)}_{\ell = 1} w_{\tau, \ell}
    *  (K_\tau \phi_{\tau, \ell})(x), \quad w_{\tau, \ell} \in \mathbb{R}
    *  @f]
-   *  where:
+   *  Here,
    *  @f[
    *    (K_\tau \phi_{\tau, \ell})(x) := \ \mathrm{p.v.} \int_{\tau} k(x, y) \phi_{\tau, \ell}(y) \ dy
    *  @f]

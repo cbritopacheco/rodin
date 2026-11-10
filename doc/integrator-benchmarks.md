@@ -58,7 +58,7 @@ cost.
 
 ## Running
 
-Build and list the repertoire with:
+Build and list the repertoire with these commands.
 
 ```sh
 cmake --build build -j --target RodinVariationalIntegratorsBenchmarks
@@ -66,7 +66,7 @@ build/tests/benchmarks/RodinVariationalIntegratorsBenchmarks \
   --benchmark_list_tests=true | grep '^Integrator/'
 ```
 
-Run only local kernels or complete assembly with:
+Run only local kernels or complete assembly with these commands.
 
 ```sh
 build/tests/benchmarks/RodinVariationalIntegratorsBenchmarks \
@@ -78,7 +78,7 @@ OMP_NUM_THREADS=8 build/tests/benchmarks/RodinVariationalIntegratorsBenchmarks \
 
 For a reproducible comparison, use the same build type, compiler, thread
 count, CPU frequency policy, and benchmark filter on both revisions, and emit
-Google Benchmark JSON:
+Google Benchmark JSON.
 
 ```sh
 build/tests/benchmarks/RodinVariationalIntegratorsBenchmarks \
@@ -89,7 +89,7 @@ build/tests/benchmarks/RodinVariationalIntegratorsBenchmarks \
 ```
 
 Compare two saved runs with the Google Benchmark comparison tool vendored in
-the repository:
+the repository.
 
 ```sh
 python3 third-party/benchmark/tools/compare.py benchmarks \
@@ -98,8 +98,8 @@ python3 third-party/benchmark/tools/compare.py benchmarks \
 
 Kernel cases report processed local entries per second. Assembly cases report
 processed cells per second and the assembled nonzero count. Comparisons across
-different polynomial degrees should use both elapsed time and throughput:
-elapsed time describes application cost, whereas entry throughput describes
+different polynomial degrees should use both elapsed time and throughput.
+Elapsed time describes application cost, whereas entry throughput describes
 the efficiency of the integrator as its mathematically required local work
 increases.
 
@@ -117,7 +117,7 @@ count; tensor-product elements may request more quadrature points than their
 factor degree alone suggests.
 
 Build the opt-in target with `RODIN_BUILD_BENCHMARKS=ON`. For example, run a
-single case using:
+single case with the following command.
 
 ```sh
 build/tests/benchmarks/RodinHyperElasticityKernelBenchmarks \
@@ -128,7 +128,7 @@ build/tests/benchmarks/RodinHyperElasticityKernelBenchmarks \
 Use the CPU-time column and run benchmark processes serially. Compare the
 same compiler, optimization settings, case, quadrature and input data, with
 alternating baseline/current runs. Short runs and a sum of all matrix entries
-are insufficient validation: rigid translation modes can make that sum nearly
+are insufficient validation because rigid translation modes can make that sum nearly
 zero. The benchmark checks repeatability of the complete matrix; the Solid
 unit regressions separately compare every entry against explicit component
 contraction for changed displacements, non-axis-aligned fibers, and both

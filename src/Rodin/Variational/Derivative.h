@@ -13,13 +13,13 @@
  * in specific directions.
  *
  * # Mathematical Foundation
- * The directional derivative of a function @f$ u @f$ in direction @f$ \mathbf{v} @f$ is:
+ * The directional derivative of a function @f$ u @f$ in direction @f$ \mathbf{v} @f$ is
  * @f[
  *   D_{\mathbf{v}} u = \nabla u \cdot \mathbf{v} = \lim_{h \to 0} \frac{u(x + h\mathbf{v}) - u(x)}{h}
  * @f]
  *
  * # Coordinate Derivatives
- * Special cases are partial derivatives:
+ * Special cases are partial derivatives.
  * - @f$ \frac{\partial u}{\partial x_i} = D_{\mathbf{e}_i} u @f$
  * where @f$ \mathbf{e}_i @f$ is the @f$ i @f$-th coordinate direction.
  *
@@ -53,7 +53,7 @@
 namespace Rodin::FormLanguage
 {
   /**
-   * @brief Type traits for @c Derivative over a shape function: exposes the shape
+   * @brief Type traits for @c Derivative over a shape function, exposing the shape
    * function space, the finite element space, the scalar type and the operand type.
    */
   template <class NestedDerived, class FES, Variational::ShapeFunctionSpaceType Space>

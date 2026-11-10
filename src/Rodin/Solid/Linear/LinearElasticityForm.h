@@ -84,7 +84,7 @@ namespace Rodin::Variational
    *
    * Computes the same operator as
    * <tt>LinearElasticityIntegral(u, v)(lambda, mu)</tt>, including the
-   * quadrature order that integrator picks: the highest order either Lamé
+   * quadrature order that integrator picks, namely the highest order either Lamé
    * parameter reports, counting an unknown order as zero, plus the orders of
    * the two bases. Vector-valued spaces whose dimension matches the mesh's.
    *

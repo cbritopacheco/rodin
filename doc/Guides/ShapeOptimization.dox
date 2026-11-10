@@ -1,6 +1,6 @@
 /**
   @page guides-shape-optimization Shape and topology optimization
-  @brief Level-set shape optimization: shape derivatives, Hilbertian regularization, and the optimization loop
+  @brief Shape derivatives and Hilbertian regularization in a level-set optimization loop.
 
   @tableofcontents
 
@@ -16,7 +16,7 @@
 
   where @f$ u_\Omega @f$ solves a PDE posed on @f$ \Omega @f$ (the *state
   equation*) and @f$ \ell @f$ is a Lagrange multiplier penalizing volume.
-  The canonical benchmark is *compliance minimization*: the state is linear
+  The canonical benchmark is *compliance minimization*, where the state is linear
   elasticity and @f$ J @f$ is the work of the loads,
   @f$ \int_\Omega Ae(u):e(u) @f$. Rodin was designed around this problem
   class — this guide explains the moving parts and how the examples
@@ -46,7 +46,7 @@
 
   The Hadamard structure theorem states that, for smooth data, the
   derivative concentrates on the boundary and depends only on the normal
-  component:
+  component.
 
   @f[
     J'(\Omega)(\theta) = \int_{\partial\Omega} g\; \theta \cdot n\; ds,
@@ -54,14 +54,17 @@
 
   with a scalar density @f$ g @f$ computed from the state (and, for
   non-self-adjoint objectives, an adjoint state). For compliance with a
-  traction-free optimizable boundary, @f$ g = Ae(u):e(u) - \ell @f$.
+  traction-free optimizable boundary with fixed loads and supports,
+  @f$g=\ell-Ae(u):e(u)@f$. A descent load therefore contains
+  @f$Ae(u):e(u)-\ell@f$.
 
-  Two equivalent discrete realizations exist, and the choice matters:
+  Boundary and distributed forms represent the continuous differential.
+  Their discrete realizations can differ:
 
   - **Boundary (Hadamard) form.** Assemble
     @f$ \int_\Gamma g\, \theta\cdot n @f$ on the interface facets. Exact in
-    the continuous setting, but discretely *concentrated* on the interface:
-    the density is quadratic in the strain and inherits mesh noise.
+    the continuous setting, but discretely *concentrated* on the interface.
+    The density is quadratic in the strain and inherits mesh noise.
   - **Distributed (volume) form.** Assemble
     @f$ \int_\Omega E : \nabla\theta @f$ with an Eshelby-type tensor
     @f$ E @f$; integrating by parts with the state equation recovers the
@@ -69,7 +72,7 @@
     robust* gradient and is generally preferred.
 
   @note When implementing or modifying a shape-derivative density, verify
-  it with a directional finite-difference test: pick a localized
+  it with a directional finite-difference test. Choose a localized
   @f$ \theta @f$, and compare the assembled @f$ \int E:\nabla\theta @f$
   against a central finite difference of the *discrete* objective under
   the mesh perturbation @f$ x \mapsto x \pm t\,\theta(x) @f$. An incorrect
@@ -77,11 +80,10 @@
   symptom is a descent direction that keeps flagging regions the boundary
   has already reached.
 
-  @section guides-shapeopt-hilbertian From derivative to velocity: Hilbertian regularization
+  @section guides-shapeopt-hilbertian Hilbertian regularization from derivative to velocity
 
-  @f$ J'(\Omega) @f$ is a linear functional, not a vector field. To
-  descend, compute its Riesz representative in an @f$ H^1 @f$-type inner
-  product — this simultaneously *extends* the boundary information into
+  The linear functional @f$ J'(\Omega) @f$ is represented by a vector field through
+  a Riesz problem in an @f$ H^1 @f$-type inner product — this simultaneously *extends* the boundary information into
   the bulk and *smooths* it. This is the
   @ref Rodin::Hilbert::H1a "Hilbert::H1a" operator, which solves
 
@@ -90,13 +92,24 @@
       = -J'(\Omega)(\xi) \qquad \forall \xi,
   @f]
 
-  and returns @f$ \theta @f$:
+  and returns @f$ \theta @f$.
 
   @code{.cpp}
-  Hilbert::H1a extension(vectorFes);
-  extension.setAlpha(alpha);                  // regularization length scale
-  auto theta = extension(dJ);                 // dJ: the assembled shape differential
+  using Space = decltype(vectorFes);
+  using Field = GridFunction<Space, Math::Vector<Real>>;
+  Hilbert::H1a<Field, Space> extension(vectorFes);
+  extension.setAlpha(alpha);
+  const auto& test = extension.getTestFunction();
+  auto descentLoad = BoundaryIntegral(
+    energy - ell, Dot(BoundaryNormal(mesh), test)).over(freeBoundary);
+  auto theta = extension(descentLoad);
   @endcode
+
+  Here `energy` is the elastic strain-energy contraction
+  @f$Ae(u):e(u)@f$ and `freeBoundary` labels the optimizable boundary.
+  The extension operator solves for the supplied load; the descent sign is
+  supplied when that load is constructed.
+
 
   The parameter @f$ \alpha @f$ has units of length and is the
   *smoothing radius* of the descent direction:
@@ -114,14 +127,14 @@
   and splitting) without any surgery. The shape is advanced by
   transporting @f$ \phi @f$ with the descent velocity — the
   Hamilton–Jacobi/advection step
-  (@ref Rodin::Advection "Advection module"):
+  (@ref Rodin::Advection "Advection module").
 
   @f[
     \partial_t \phi + \theta \cdot \nabla\phi = 0.
   @f]
 
-  Two maintenance obligations follow from the mathematics, not from
-  implementation taste:
+  The numerical transport procedure also determines the distance-field
+  maintenance and step-size controls:
 
   1. **Redistancing.** Transport degrades the signed-distance property
      (@f$ |\nabla\phi| = 1 @f$); normals, band widths, and step-size
@@ -134,22 +147,21 @@
      bounded number of cells per iteration; combine a time-step cap with
      a line search on the true objective. A descent step accepted without
      an objective decrease check can jump out of the basin entirely (a
-     classic failure mode: the "optimized" material floods the whole
-     bounding box).
+     failure mode in which material floods the whole bounding box).
 
   @section guides-shapeopt-discretization Getting a computable domain from the level set
 
-  The state equation needs a domain to integrate over. Two strategies:
+  The state equation needs a domain to integrate over. The following
+  representations supply it:
 
   - **Body-fitted discretization.** Cut the zero set into the mesh so
-    that @f$ \Gamma @f$ becomes a set of interface facets:
+    that @f$ \Gamma @f$ becomes a set of interface facets.
     MMG's `LevelSetDiscretizer` produces the
-    body-fitted mesh, `MMG::Adapt` and `MMG::MeshOptimizer` maintain
+    body-fitted mesh, `MMG::Adapt` and `MMG::Optimizer` maintain
     metric conformity and element quality across iterations. Accurate
     domain and interface integrals; the cost is remeshing every
     iteration.
-  - **Interface registration (SWIFT).** Instead of remeshing, displace
-    the existing mesh so its interface tracks @f$ \{\phi=0\} @f$: the
+  - **Interface registration (SWIFT).** Displace the existing mesh so its interface tracks @f$ \{\phi=0\} @f$ using the
     @ref Rodin::Adaptation "Adaptation" module's SWIFT solver. Keeps the
     mesh topology and connectivity stable between iterations.
   - **Ersatz material / density.** Keep a fixed mesh and interpolate
@@ -160,8 +172,7 @@
 
   @section guides-shapeopt-loop The optimization loop
 
-  Putting it together, one iteration of a level-set shape optimization
-  reads:
+  One iteration of level-set shape optimization follows the sequence below.
 
   @code{.cpp}
   // 1. Discretize the current domain from phi (remesh / register).
@@ -173,8 +184,8 @@
   // 7. Redistance phi (every few iterations).
   @endcode
 
-  Judge a run by measured quantities: a monotone objective history (the
-  line search guarantees it), the volume tracking its multiplier target,
+  Judge a run by the objective history, the directional
+  derivative check, volume and its specified penalty or constraint,
   interface quality (no inverted elements), and — after changes to any
   derivative — the finite-difference check of
   @ref guides-shapeopt-derivative "the shape derivative".
@@ -184,7 +195,7 @@
   - @ref guides-variational — assembling the state problem
   - @ref guides-solvers — solving the state and extension systems
   - @ref Rodin::Hilbert "Hilbert" — extension-regularization
-  - @ref Rodin::Distance "Distance", @ref Rodin::Eikonal "Eikonal" —
+  - @ref Rodin::Distance "Distance", @ref Rodin::Eikonal "Eikonal::FMM" —
     redistancing
   - @ref Rodin::MMG "MMG" — remeshing and implicit-domain discretization
   - @ref examples-shapeoptimization-index "Shape optimization examples"

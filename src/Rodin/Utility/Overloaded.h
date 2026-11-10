@@ -28,7 +28,7 @@ namespace Rodin::Utility
    * operator() functions into scope using the 'using' declaration, creating
    * an overload set that can be used for pattern matching on variants.
    *
-   * Example usage:
+   * The following example illustrates usage.
    * @code{.cpp}
    * std::variant<int, std::string, double> var = 42;
    *

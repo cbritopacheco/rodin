@@ -32,7 +32,7 @@ foreach(np 1 2 3 4 8)
   # positive-dimensional SubMesh value-type probes are still passing.
   # Isolate every geometry without removing sanitizer or space coverage.
   set(_RODIN_MPI_SLOW_GEOMETRY_FILTER
-    "AllGeometries/MPITraceGeometryTest.BoundaryConstraintsReachOwnersAcrossSpaces/*:AllGeometries/MPITraceGeometryTest.HaloContainsRequiredPhysicalBoundaryIncidence/*:AllGeometries/MPITraceGeometryTest.SubMeshBoundaryConstraintsMatchPhysicalBoundary/*:AllGeometries/MPITraceGeometryTest.PointSubMeshReproducesAllValueTypes/*:AllGeometries/MPITraceGeometryTest.PositiveSubMeshesPreserveAllValueTypeIndices/*")
+    "AllGeometries/MPITraceGeometryTest.BoundaryConstraintsReachOwnersAcrossSpaces/*:AllGeometries/MPITraceGeometryTest.HaloContainsRequiredPhysicalBoundaryIncidence*/*:AllGeometries/MPITraceGeometryTest.SubMeshBoundaryConstraintsMatchPhysicalBoundary/*:AllGeometries/MPITraceGeometryTest.PointSubMeshReproducesAllValueTypes/*:AllGeometries/MPITraceGeometryTest.PositiveSubMeshesPreserveAllValueTypeIndices/*")
   add_test(
     NAME RodinMPIAssemblyTest_np${np}
     COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
@@ -53,19 +53,31 @@ foreach(np 1 2 3 4 8)
     LABELS "unit;distributed" TIMEOUT 30 PROCESSORS ${np})
   rodin_suppress_external_mpi_lsan_for_test(RodinMPISpaceSizeTest_np${np})
 
-  # Ten minutes per geometry retains the existing slow-probe watchdog.
+  # Separate halo degrees from the other probes: the combined tetrahedron
+  # process exceeded 600 seconds while every completed check passed.
+  # Retain the existing watchdog for each independent degree and geometry.
   # It is execution headroom, not a numerical or performance bound.
   set(_RODIN_MPI_GEOMETRY_SLOW_TIMEOUT 600)
   foreach(geometry Segment Triangle Quadrilateral Tetrahedron Pyramid Hexahedron Wedge)
     add_test(NAME RodinMPIAssemblyGeometrySlowTest_np${np}_${geometry}
       COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
         ${_RODIN_MPI_OVERSUBSCRIBE_FLAG} $<TARGET_FILE:RodinMPIAssemblyTest>
-        "--gtest_filter=AllGeometries/MPITraceGeometryTest.BoundaryConstraintsReachOwnersAcrossSpaces/${geometry}:AllGeometries/MPITraceGeometryTest.HaloContainsRequiredPhysicalBoundaryIncidence/${geometry}:AllGeometries/MPITraceGeometryTest.SubMeshBoundaryConstraintsMatchPhysicalBoundary/${geometry}:AllGeometries/MPITraceGeometryTest.PointSubMeshReproducesAllValueTypes/${geometry}:AllGeometries/MPITraceGeometryTest.PositiveSubMeshesPreserveAllValueTypeIndices/${geometry}")
+        "--gtest_filter=AllGeometries/MPITraceGeometryTest.BoundaryConstraintsReachOwnersAcrossSpaces/${geometry}:AllGeometries/MPITraceGeometryTest.SubMeshBoundaryConstraintsMatchPhysicalBoundary/${geometry}:AllGeometries/MPITraceGeometryTest.PointSubMeshReproducesAllValueTypes/${geometry}:AllGeometries/MPITraceGeometryTest.PositiveSubMeshesPreserveAllValueTypeIndices/${geometry}")
     set_tests_properties(RodinMPIAssemblyGeometrySlowTest_np${np}_${geometry}
       PROPERTIES LABELS "unit;distributed;slow"
       TIMEOUT ${_RODIN_MPI_GEOMETRY_SLOW_TIMEOUT} PROCESSORS ${np})
     rodin_suppress_external_mpi_lsan_for_test(
       RodinMPIAssemblyGeometrySlowTest_np${np}_${geometry})
+    foreach(space P1 H1Degree1 H1Degree2 H1Degree3 H1Degree4 H1Degree5 H1Degree6)
+      set(halo_test RodinMPIAssemblyGeometrySlowTest_np${np}_${geometry}_Halo${space})
+      add_test(NAME ${halo_test}
+        COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
+          ${_RODIN_MPI_OVERSUBSCRIBE_FLAG} $<TARGET_FILE:RodinMPIAssemblyTest>
+          "--gtest_filter=AllGeometries/MPITraceGeometryTest.HaloContainsRequiredPhysicalBoundaryIncidence${space}/${geometry}")
+      set_tests_properties(${halo_test} PROPERTIES LABELS "unit;distributed;slow"
+        TIMEOUT ${_RODIN_MPI_GEOMETRY_SLOW_TIMEOUT} PROCESSORS ${np})
+      rodin_suppress_external_mpi_lsan_for_test(${halo_test})
+    endforeach()
   endforeach()
 
   # Each geometry gets the existing watchdog independently. CI's np3

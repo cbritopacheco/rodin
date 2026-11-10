@@ -9,7 +9,7 @@
  * @brief Matrix-valued functions for variational formulations.
  *
  * This file defines MatrixFunctionBase and MatrixFunction for representing
- * functions mapping points to matrices: @f$ A: \Omega \to \mathbb{R}^{m \times n} @f$.
+ * functions mapping points to matrices with @f$ A: \Omega \to \mathbb{R}^{m \times n} @f$.
  * These are used for tensors, stress/strain fields, and coefficient matrices.
  */
 #ifndef RODIN_VARIATIONAL_MATRIXFUNCTION_H
@@ -28,7 +28,7 @@
 namespace Rodin::FormLanguage
 {
   /**
-   * @brief Type traits for @c MatrixFunctionBase: exposes the scalar type and the
+   * @brief Type traits for @c MatrixFunctionBase, exposing the scalar type and the
    * derived type.
    */
   template <class Scalar, class Derived>
@@ -53,7 +53,7 @@ namespace Rodin::Variational
   /**
    * @brief Base class for matrix-valued functions.
    *
-   * MatrixFunctionBase extends FunctionBase to represent matrix-valued functions:
+   * MatrixFunctionBase extends FunctionBase to represent matrix-valued functions.
    * @f[
    *    A: \Omega \to \mathbb{R}^{m \times n}
    * @f]

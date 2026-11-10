@@ -1,716 +1,224 @@
 /**
-  @page guides-getting-started-core-concepts Understanding Core Concepts
-  @brief Deep dive into meshes, finite elements, and variational formulations
+  @page guides-getting-started-core-concepts Core concepts
+  @brief Follow the path from a geometric domain to a discrete solution.
+
+  A Rodin solve connects a mesh, a finite element space,
+  fields, a variational problem, and a solver. This guide explains their roles
+  and the information passed between them. The
+  @ref examples-pdes-poisson "Poisson tutorial" supplies a complete executable.
 
   @tableofcontents
-
   @m_footernavigation
 
-  This section provides a deeper understanding of the core concepts in Rodin,
-  building on what you learned in the previous sections.
+  @section guides-getting-started-core-concepts-geometry Describe the domain
 
-  @note Before relying on finite element coefficient values, solver reuse, or
-  constraint behavior, read @ref guides-numerical-contracts "Numerical
-  contracts". It explains where interpolation, `L2` projection, assembly signs,
-  and solver lifetimes differ.
+  @subsection guides-getting-started-core-concepts-mesh Mesh geometry and topology
 
-  @section guides-getting-started-core-concepts-geometry Geometry and Meshes
+  A mesh discretizes a domain into cells. Coordinates describe where the
+  vertices lie; connectivity describes how vertices, edges, faces, and cells
+  meet. These are related but distinct pieces of data.
 
-  @subsection guides-getting-started-core-concepts-mesh The Mesh Object
-
-  A @ref Rodin::Geometry::Mesh "Mesh" is the fundamental geometric object in
-  Rodin. It represents a discretization of your domain into simple shapes
-  (polytopes).
-
-  Key concepts:
-  - **Vertices** (dimension 0): Points in space
-  - **Edges/Faces** (dimension 1 in 2D, 1-2 in 3D): Line segments or faces
-  - **Cells** (dimension 2 in 2D, 3 in 3D): Triangles, quads, tetrahedra, etc.
+  The following code constructs a triangular mesh of the unit square.
 
   @code{.cpp}
-  Mesh mesh;
-  mesh = mesh.UniformGrid(Polytope::Type::Triangle, {16, 16});
-
-  std::cout << "Dimension: " << mesh.getDimension() << std::endl;
-  std::cout << "Vertices: " << mesh.getVertexCount() << std::endl;
-  std::cout << "Cells: " << mesh.getCellCount() << std::endl;
+  Mesh mesh = Mesh().UniformGrid(Polytope::Type::Triangle, {16, 16});
+  mesh.scale(1.0 / 15.0);
   @endcode
 
-  @subsection guides-getting-started-core-concepts-polytopes Polytopes
+  The grid parameters count vertices. There are 15 intervals per direction,
+  hence 256 vertices and 450 triangles. The scaling maps unit grid spacing
+  onto the unit square.
 
-  A @ref Rodin::Geometry::Polytope "Polytope" is a geometric shape. Rodin
-  supports various polytope types:
+  @subsection guides-getting-started-core-concepts-polytopes Cells and ambient dimension
 
-  | Type | Dimension | Description |
-  |------|-----------|-------------|
-  | `Point` | 0 | A point/vertex |
-  | `Segment` | 1 | A line segment |
-  | `Triangle` | 2 | A triangle |
-  | `Quadrilateral` | 2 | A quadrilateral |
-  | `Tetrahedron` | 3 | A tetrahedron |
-  | `Hexahedron` | 3 | A hexahedron (cube) |
-  | `Wedge` | 3 | A triangular prism |
+  A polytope describes an entity such as a segment, triangle, or tetrahedron.
+  Cells have the mesh's topological dimension; boundary faces have one lower
+  dimension. Ambient dimension records the number of coordinate components.
+  A surface triangulation in three-dimensional space therefore has
+  `getDimension() == 2` and `getSpaceDimension() == 3`.
 
-  @code{.cpp}
-  // Create different mesh types
-  Mesh tri_mesh = Mesh().UniformGrid(Polytope::Type::Triangle, {8, 8});
-  Mesh tet_mesh = Mesh().UniformGrid(Polytope::Type::Tetrahedron, {4, 4, 4});
-  @endcode
+  See @ref guides-polytopes for reference elements and geometric mappings,
+  and @ref guides-meshes for mesh creation and queries.
 
-  @section guides-getting-started-core-concepts-connectivity Connectivity
+  @section guides-getting-started-core-concepts-connectivity Establish incidence relations
 
-  Connectivity describes the relationships between polytopes of different
-  dimensions. You need to compute connectivity before certain operations.
+  Algorithms need particular incidence relations. For boundary conditions on a
+  two-dimensional mesh, edge-to-cell connectivity identifies exterior edges.
 
   @code{.cpp}
-  Mesh mesh;
-  mesh = mesh.UniformGrid(Polytope::Type::Triangle, {16, 16});
-
-  // Face-to-cell connectivity (needed for boundary operations)
   mesh.getConnectivity().compute(1, 2);
-
-  // Vertex-to-cell connectivity
-  mesh.getConnectivity().compute(0, 2);
-
-  // Cell-to-cell connectivity (for finding neighbors)
-  mesh.getConnectivity().compute(2, 2);
   @endcode
 
-  Common connectivity patterns:
-  - `(1, 2)`: Edges to cells - needed for boundary conditions in 2D
-  - `(2, 3)`: Faces to cells - needed for boundary conditions in 3D
-  - `(0, d)`: Vertices to cells - for vertex-based operations
-  - `(d, d)`: Cell-to-cell adjacency
+  The arguments are entity dimensions. In a three-dimensional volume mesh,
+  the corresponding face-to-cell relation is `(2, 3)`. Each required incidence relation is computed explicitly. The
+  @ref guides-connectivity "connectivity guide" explains the supported queries.
 
-  @subsection guides-getting-started-core-concepts-iterators Mesh Iteration
+  @subsection guides-getting-started-core-concepts-iterators Traverse mesh entities
 
-  You can iterate over polytopes of a specific dimension:
+  Mesh iterators expose cells, faces, and vertices. Traversal and geometric
+  evaluation serve different purposes. An entity index identifies topology,
+  while a `Geometry::Point` combines an entity with a reference coordinate
+  for field evaluation. See @ref guides-meshes-iteration "Mesh iteration".
+
+  @section guides-getting-started-core-concepts-variational Choose an approximation
+
+  @subsection guides-getting-started-core-concepts-fe-spaces Finite element spaces
+
+  A finite element space determines the local approximation and how degrees
+  of freedom are shared between cells. For scalar fields on a triangular mesh:
+
+  | Space | Approximation | Continuity |
+  | :--- | :--- | :--- |
+  | `P0` | Constant on each cell | Discontinuous |
+  | `P1` | Affine on each cell | Continuous across cell boundaries |
+  | `H1` | Configurable higher order | Conforming continuity |
 
   @code{.cpp}
-  Mesh mesh;
-  mesh = mesh.UniformGrid(Polytope::Type::Triangle, {8, 8});
-
-  // Iterate over all cells
-  for (auto it = mesh.getCell(); it; ++it) {
-    // Access cell information
-    std::cout << "Cell " << it->getIndex() << std::endl;
-  }
-
-  // Iterate over all vertices
-  for (auto it = mesh.getVertex(); it; ++it) {
-    Point p = it->getCoordinates();
-    std::cout << "Vertex at (" << p.x() << ", " << p.y() << ")" << std::endl;
-  }
-
-  // Iterate over faces (edges in 2D)
-  for (auto it = mesh.getFace(); it; ++it) {
-    // Access face information
-  }
+  P1 vh(mesh);
   @endcode
 
-  @section guides-getting-started-core-concepts-variational Variational Formulations
+  Scalar `P1` has one degree of freedom per vertex. Higher-order and vector spaces
+  use their own DOF maps and numbering. The
+  @ref fem-ciarlet "finite element definition" and @ref fem-spaces "space guide"
+  develop this distinction. Quadratic elements are constructed with `H1` of order two.
 
-  @subsection guides-getting-started-core-concepts-fe-spaces Finite Element Spaces
+  @section guides-getting-started-core-concepts-gridfunctions Distinguish fields from symbolic unknowns
 
-  A **finite element space** @f$ V_h @f$ is a finite-dimensional subspace of a
-  function space (such as @f$ H^1(\Omega) @f$ or @f$ L^2(\Omega) @f$), built by
-  assembling local polynomial spaces on each cell of the mesh. In Rodin, finite
-  element spaces are the bridge between the mesh geometry and the variational
-  formulation of a PDE.
+  A `GridFunction` stores coefficients in a finite element space. For the
+  scalar nodal `P1` space, these coefficients are vertex values. For other spaces, the DOF functionals determine the meaning of each coefficient;
+  field values are obtained by evaluation.
 
-  Rodin provides the following standard spaces:
+  @subsection guides-getting-started-core-concepts-gf-create Interpolate a known field
 
-  | Space | Polynomial degree | Continuity | DOF location | Typical use |
-  |-------|-------------------|------------|--------------|-------------|
-  | `P0` | 0 (constant) | Discontinuous | One per cell | Material indicators, piecewise constant data |
-  | `P1` | 1 (linear) | @f$ C^0 @f$ continuous | One per vertex | Most scalar and vector PDEs |
-  | `H1<k>` | @f$ k @f$ (arbitrary) | @f$ C^0 @f$ continuous | Vertices + edges + interior | Higher-order accuracy, mixed formulations |
-
-  @note There is no separate `P2` class. Quadratic elements are obtained via
-  `H1` with order 2: `H1 Vh(std::integral_constant<size_t, 2>{}, mesh)`.
+  Assignment applies the space's degree-of-freedom functionals to an expression.
 
   @code{.cpp}
-  Mesh mesh;
-  mesh = mesh.UniformGrid(Polytope::Type::Triangle, {16, 16});
-
-  // Piecewise constant space: 1 DOF per cell
-  P0 Wh(mesh);
-  std::cout << "P0 DOFs: " << Wh.getSize() << std::endl;  // = number of cells
-
-  // Piecewise linear space: 1 DOF per vertex
-  P1 Vh(mesh);
-  std::cout << "P1 DOFs: " << Vh.getSize() << std::endl;  // = number of vertices
-
-  // Quadratic H1 space (order 2)
-  H1 Qh(std::integral_constant<size_t, 2>{}, mesh);
-  std::cout << "H1<2> DOFs: " << Qh.getSize() << std::endl;
+  GridFunction field(vh);
+  field = [](const Geometry::Point& p) { return p.x() * p.y(); };
   @endcode
 
-  @subsection guides-getting-started-core-concepts-trial-test Trial and Test Functions
+  This assignment interpolates the prescribed function. An @f$L^2@f$ projection is
+  obtained from a variational mass-matrix problem. See @ref guides-numerical-contracts.
 
-  In the finite element method, we express problems in **weak form** using
-  trial and test functions. These are abstract symbolic objects that represent
-  functions in the finite element space — they do not store numerical values
-  themselves.
+  @subsection guides-getting-started-core-concepts-gf-access Coefficients and evaluation
+
+  `getData()` exposes coefficients. Evaluation at a `Geometry::Point` uses the
+  element basis and its mapping. The distinction matters for higher-order
+  elements, vector components, and non-nodal spaces. Component expressions such
+  as `field.x()` are available for compatible vector-valued fields.
+
+  @subsection guides-getting-started-core-concepts-trial-test Trial and test functions
+
+  Trial and test functions construct the discrete equations symbolically.
 
   @code{.cpp}
-  P1 Vh(mesh);
-
-  // Trial function: represents the unknown solution u ∈ Vh
-  TrialFunction u(Vh);
-
-  // Test function: represents the weighting function v ∈ Vh
-  TestFunction v(Vh);
+  TrialFunction u(vh);
+  TestFunction v(vh);
   @endcode
 
-  Mathematical background:
+  The trial function represents the unknown. Its associated grid function,
+  `u.getSolution()`, stores the coefficients computed by the solve. The test
+  function supplies the test basis used to form the equations.
 
-  The finite element method seeks an approximate solution @f$ u_h @f$ in the
-  finite-dimensional space @f$ V_h @f$ by requiring the **residual** to be
-  orthogonal to all test functions:
-
+  For a linear weak problem, the discrete task is to find @f$u_h\in V_h@f$ such that
   @f[
-    \text{Find } u_h \in V_h \text{ such that } a(u_h, v_h) = \ell(v_h)
-    \quad \forall\, v_h \in V_h
+    a(u_h,v_h)=\ell(v_h)\qquad\text{for every }v_h\in V_h.
   @f]
+  With basis functions @f$\phi_j@f$ and expansion
+  @f$u_h=\sum_j x_j\phi_j@f$, the system is @f$A\mathbf{x}=\mathbf{b}@f$,
+  where @f$A_{ij}=a(\phi_j,\phi_i)@f$ and @f$b_i=\ell(\phi_i)@f$.
+  Prescribed boundary values restrict the admissible trial and test fields.
 
-  - The **trial function** @f$ u_h @f$ (represented by `TrialFunction`) is the
-    unknown being solved for. After solving, its coefficients are stored in the
-    associated `GridFunction`, accessible
-    via `u.getSolution()`.
-  - The **test function** @f$ v_h @f$ (represented by `TestFunction`) is used
-    to generate the equations of the discrete system. Each basis function
-    @f$ \phi_i @f$ of @f$ V_h @f$ produces one equation @f$ a(u_h, \phi_i)
-    = \ell(\phi_i) @f$, yielding the linear system @f$ A\mathbf{x}
-    = \mathbf{b} @f$.
+  @section guides-getting-started-core-concepts-functions Supply coefficients and data
 
-  @subsection guides-getting-started-core-concepts-operators Differential Operators
-
-  Rodin provides differential operators that work on trial and test functions.
-  These operators are **expression templates**: they are not evaluated
-  immediately but are stored as symbolic expressions and evaluated during
-  assembly.
-
-  | Operator | Mathematical meaning | Result type |
-  |----------|---------------------|-------------|
-  | `Grad(u)` | @f$ \nabla u @f$ | Vector (for scalar @f$ u @f$) |
-  | `Div(u)` | @f$ \nabla \cdot \mathbf{u} @f$ | Scalar (for vector @f$ \mathbf{u} @f$) |
-  | `Jacobian(u)` | @f$ \nabla \mathbf{u} @f$ | Matrix (for vector @f$ \mathbf{u} @f$) |
-  | `Transpose(A)` | @f$ A^T @f$ | Transpose of a matrix expression |
-  | `Trace(A)` | @f$ \text{tr}(A) @f$ | Scalar (sum of diagonal entries) |
-  | `Frobenius(A)` | @f$ \lVert A\rVert_F @f$ | Scalar (Frobenius norm) |
-  | `Dot(a, b)` | @f$ \mathbf{a} \cdot \mathbf{b} @f$ | Scalar (inner product or double contraction) |
-  | `Component(u, i)` | @f$ u_i @f$ | Scalar (i-th component of vector @f$ \mathbf{u} @f$) |
-  | `BoundaryNormal(mesh)` | @f$ \mathbf{n} @f$ | Outward unit normal on @f$ \partial\Omega @f$ |
-  | `FaceNormal(mesh)` | @f$ \mathbf{n}_F @f$ | Unit normal on mesh faces (DG formulations) |
-  | `IdentityMatrix(n)` | @f$ I_n @f$ | @f$ n \times n @f$ identity matrix |
-  | `Potential(K, u)` | @f$ \int K(\mathbf{x}, \mathbf{y}) u(\mathbf{y}) \, d\mathbf{y} @f$ | Integral convolution (BEM/integral equations) |
-  | `Flow(t, u, vel)` | @f$ u \circ \Phi_t @f$ | Flow composition (semi-Lagrangian advection) |
-  | `TraceOperator(u, attr)` | @f$ u\vert_{\partial\Omega} @f$ | Boundary trace (restriction to boundary) |
+  Function expressions describe known source terms, material coefficients,
+  and boundary values. They are evaluated at geometric points during
+  integration or interpolation.
 
   @code{.cpp}
-  TrialFunction u(Vh);
-  TestFunction v(Vh);
-
-  // The gradient of a scalar function is a vector
-  auto grad_u = Grad(u);
-  auto grad_v = Grad(v);
-
-  // Used in integrals: the dot product is taken implicitly
-  auto stiffness = Integral(Grad(u), Grad(v));  // \int \nabla u \cdot \nabla v dx
+  RealFunction source = 1;
+  RealFunction boundary([](const Geometry::Point& p) { return p.x(); });
+  VectorFunction force{0, -1};
   @endcode
 
-  @subsection guides-getting-started-core-concepts-integrals Integrals
+  `Zero()` supplies scalar zero data; `Zero(dimension)` supplies vector zero
+  data. Coordinate expressions in `F`, pointwise mathematical operators,
+  and complex expressions such as `Re`, `Im`, and `Conjugate` are described
+  in @ref guides-variational and the @ref Rodin::Variational "Variational reference".
 
-  The `Integral` function represents integration over the domain or boundary:
+  @section guides-getting-started-core-concepts-problem Express the weak problem
 
-  @code{.cpp}
-  // Domain integral: \int_\Omega \nabla u \cdot \nabla v dx
-  auto stiffness = Integral(Grad(u), Grad(v));
+  @subsection guides-getting-started-core-concepts-operators Operators and integrals
 
-  // Domain integral with function: \int_\Omega f v dx
-  RealFunction f = 1.0;
-  auto load = Integral(f, v);
-
-  // The dot product is implicit for vector quantities
-  auto inner_product = Integral(Grad(u), Grad(v));
-  @endcode
-
-  @subsection guides-getting-started-core-concepts-bc Boundary Conditions
-
-  Rodin supports different types of boundary conditions:
-
-  Dirichlet (essential) boundary conditions:
-  @code{.cpp}
-  // Homogeneous: u = 0 on boundary
-  DirichletBC(u, Zero())
-
-  // Non-homogeneous: u = g on boundary
-  RealFunction g([](const Point& p) { return p.x(); });
-  DirichletBC(u, g)
-
-  // On specific boundary: u = 0 on boundary with attribute 1
-  DirichletBC(u, Zero()).on(1)
-  @endcode
-
-  Neumann (natural) boundary conditions:
-  @code{.cpp}
-  // Neumann conditions appear as boundary integrals
-  RealFunction g = 1.0;
-  auto neumann = Integral(g, v).over(BoundaryAttribute(2));
-  @endcode
-
-  @section guides-getting-started-core-concepts-problem Defining Problems
-
-  @subsection guides-getting-started-core-concepts-problem-assembly Problem Assembly
-
-  The `Problem` class represents a complete
-  variational problem:
+  Expressions retain the mathematical structure until evaluation is required.
+  `Grad(u)` is the gradient of a scalar field; pairing it with `Grad(v)` inside
+  an integral gives the Poisson stiffness form.
 
   @code{.cpp}
-  Problem problem(u, v);
-  problem = Integral(Grad(u), Grad(v))  // Bilinear form
-          - Integral(f, v)               // Linear form
-          + DirichletBC(u, Zero());      // Boundary conditions
-  @endcode
-
-  What happens internally:
-  1. Rodin assembles the stiffness matrix from `Integral(Grad(u), Grad(v))`
-  2. Assembles the load vector from `Integral(f, v)`
-  3. Applies boundary conditions by modifying the system
-  4. Prepares the linear system @f$ Ax = b @f$
-
-  @subsection guides-getting-started-core-concepts-solving Solving
-
-  After defining a problem, solve it with an appropriate solver from the
-  @ref Rodin::Solver "Solver" module. The most common pattern constructs the
-  solver with the problem and calls `solve()` inline:
-
-  @code{.cpp}
-  // Inline: construct solver with problem, solve immediately
-  Solver::CG(problem).solve();
-
-  // Or: direct solver
-  Solver::SparseLU(problem).solve();
-  @endcode
-
-  For finer control, construct the solver, configure it, then solve:
-
-  @code{.cpp}
-  Solver::CG solver(problem);
-  solver.setMaxIterations(1000);
-  solver.setTolerance(1e-10);
-  solver.solve();
-
-  if (solver.success())
-    std::cout << "Converged." << std::endl;
-  @endcode
-
-  You can also pass a standalone solver to `problem.solve()`:
-
-  @code{.cpp}
-  Solver::SparseLU lu;
-  problem.solve(lu);
-  @endcode
-
-  After solving, access the solution as a GridFunction:
-
-  @code{.cpp}
-  auto& solution = u.getSolution();
-  @endcode
-
-  The solution is stored in the `GridFunction` associated with the trial function. You can evaluate it at
-  any point, compute norms, or export it for visualization.
-
-  @section guides-getting-started-core-concepts-workflow Typical Workflow
-
-  Here's a summary of the typical workflow for solving a PDE with Rodin.
-  Each step corresponds to one of the core abstractions:
-
-  1. **Create or load a Mesh** — discretize the domain @f$ \Omega @f$
-     @code{.cpp}
-     Mesh mesh;
-     mesh = mesh.UniformGrid(Polytope::Type::Triangle, {16, 16});
-     mesh.getConnectivity().compute(1, 2);  // Needed for boundary detection
-     @endcode
-
-  2. **Choose a Finite Element Space** — define @f$ V_h @f$
-     @code{.cpp}
-     P1 Vh(mesh);                  // Piecewise linear
-     // or: P0 Wh(mesh);           // Piecewise constant
-     // or: H1 Vh(std::integral_constant<size_t, 2>{}, mesh);  // Quadratic
-     @endcode
-
-  3. **Create Trial and Test Functions** — the symbolic unknowns
-     @code{.cpp}
-     TrialFunction u(Vh);
-     TestFunction v(Vh);
-     @endcode
-
-  4. **Define the Variational Problem** — translate the weak form
-     @code{.cpp}
-     Problem problem(u, v);
-     problem = [bilinear forms] - [linear forms] + [boundary conditions];
-     @endcode
-
-  5. **Solve** — choose a solver and compute the solution
-     @code{.cpp}
-     Solver::CG(problem).solve();
-     @endcode
-
-  6. **Post-Process** — export for visualization
-     @code{.cpp}
-     IO::XDMF xdmf("Results");
-     xdmf.grid().setMesh(mesh).add("u", u.getSolution());
-     xdmf.write();
-     @endcode
-
-  @section guides-getting-started-core-concepts-gridfunctions Grid Functions
-
-  A `GridFunction` represents a discrete
-  function in a finite element space — it stores the actual coefficient values
-  (degrees of freedom) and provides assignment, evaluation, and I/O.
-
-  Assignment from a function expression interpolates values into the finite
-  element space by applying the space's DOF functionals. This is different from
-  an `L2` projection, which is a variational problem solved through a mass
-  matrix; see @ref guides-numerical-contracts "Numerical contracts".
-
-  @subsection guides-getting-started-core-concepts-gf-create Creating Grid Functions
-
-  @code{.cpp}
-  P1 Vh(mesh);
-
-  // Create a grid function in the space (coefficients initialized to zero)
-  GridFunction u(Vh);
-
-  // Interpolate a lambda expression into the space
-  u = [](const Geometry::Point& p) { return p.x() * p.y(); };
-
-  // Use the project() convenience API for the same DOF assignment
-  RealFunction f = 1;
-  GridFunction v(Vh);
-  v.project(f);
-  @endcode
-
-  @subsection guides-getting-started-core-concepts-gf-access Accessing Values
-
-  Individual degrees of freedom can be read or written using `operator[]`:
-
-  @code{.cpp}
-  GridFunction u(Vh);
-  u[0] = 1.0;                  // Set DOF 0
-  Real val = u[42];            // Read DOF 42
-  @endcode
-
-  The full coefficient vector is available via `getData()`:
-
-  @code{.cpp}
-  auto& coeffs = u.getData();  // Returns Math::Vector<Real>&
-  @endcode
-
-  @subsection guides-getting-started-core-concepts-gf-eval Evaluating at Points
-
-  A grid function can be evaluated at any @ref Rodin::Geometry::Point "Point"
-  on the mesh. The `getValue()` method performs finite element interpolation
-  using the basis functions of the element containing the point:
-
-  @code{.cpp}
-  GridFunction u(Vh);
-  u = [](const Geometry::Point& p) { return std::sin(p.x()); };
-
-  // Evaluate at a quadrature point during assembly (inside integrals)
-  // or explicitly via getValue():
-  // Real val = u.getValue(point);
-  @endcode
-
-  For **vector-valued** grid functions, component extraction is available:
-
-  @code{.cpp}
-  P1 Vh(mesh, 2);              // 2D vector P1 space
-  GridFunction u(Vh);
-  auto ux = u.x();             // Component 0 as scalar function
-  auto uy = u.y();             // Component 1 as scalar function
-  @endcode
-
-  @subsection guides-getting-started-core-concepts-gf-io Saving and Loading
-
-  Grid functions can be saved and loaded in MFEM format:
-
-  @code{.cpp}
-  u.save("solution.gf", IO::FileFormat::MFEM);
-  u.load("solution.gf", IO::FileFormat::MFEM);
-  @endcode
-
-  @subsection guides-getting-started-core-concepts-gf-name Naming Grid Functions
-
-  Assigning a name is required when adding grid functions to XDMF output:
-
-  @code{.cpp}
-  GridFunction u(Vh);
-  u.setName("velocity");
-
-  IO::XDMF xdmf("Output");
-  auto grid = xdmf.grid();
-  grid.setMesh(mesh);
-  grid.add(u);                 // Uses the name "velocity"
-  xdmf.write();
-  @endcode
-
-  @section guides-getting-started-core-concepts-functions Function Classes
-
-  Rodin provides several function classes for defining source terms,
-  boundary data, and coefficients. All are expression templates that compose
-  with integrals and boundary conditions.
-
-  @subsection guides-getting-started-core-concepts-functions-real RealFunction
-
-  `RealFunction` represents a
-  scalar-valued function @f$ f : \Omega \to \mathbb{R} @f$. It can be
-  constructed from a constant, an integer, or a callable:
-
-  @code{.cpp}
-  // Constant function
-  RealFunction f = 1;
-  RealFunction g = 3.14;
-
-  // Lambda function of the spatial coordinates
-  RealFunction h([](const Geometry::Point& p) {
-    return std::sin(M_PI * p.x()) * std::cos(M_PI * p.y());
-  });
-  @endcode
-
-  @subsection guides-getting-started-core-concepts-functions-vector VectorFunction
-
-  `VectorFunction` represents a
-  vector-valued function @f$ \mathbf{f} : \Omega \to \mathbb{R}^d @f$.
-  Components can be constants, RealFunctions, or mixed:
-
-  @code{.cpp}
-  // Constant vector
-  VectorFunction gravity{0, -9.81};
-
-  // Mixed: combine constants with symbolic expressions
-  VectorFunction load{0, RealFunction([](const Geometry::Point& p) {
-    return -std::sin(p.x());
-  })};
-  @endcode
-
-  @subsection guides-getting-started-core-concepts-functions-zero Zero
-
-  `Zero` is a class (not a free function) that
-  produces the zero function. It supports both scalar and vector forms:
-
-  @code{.cpp}
-  // Scalar zero (CTAD: Zero() deduces Zero<Real>)
-  DirichletBC(u, Zero())
-
-  // Vector zero: Zero(dimension)
-  DirichletBC(u, Zero(3))     // Zero vector in 3D
-  @endcode
-
-  @subsection guides-getting-started-core-concepts-functions-math Mathematical Functions
-
-  Rodin provides pointwise mathematical function operators that compose with
-  any scalar function expression:
-
-  | Function | Code | Mathematical meaning |
-  |----------|------|---------------------|
-  | Power | `Pow(f, n)` | @f$ f^n @f$ |
-  | Exponential | `Exp(f)` | @f$ e^f @f$ |
-  | Square root | `Sqrt(f)` | @f$ \sqrt{f} @f$ |
-  | Sine | `Sin(f)` | @f$ \sin(f) @f$ |
-  | Cosine | `Cos(f)` | @f$ \cos(f) @f$ |
-  | Tangent | `Tan(f)` | @f$ \tan(f) @f$ |
-  | Absolute value | `Abs(f)` | @f$ \lvert f\rvert @f$ |
-  | Maximum | `Max(f, g)` | @f$ \max(f, g) @f$ |
-  | Minimum | `Min(f, g)` | @f$ \min(f, g) @f$ |
-
-  @code{.cpp}
-  RealFunction u_exact([](const Geometry::Point& p) {
-    return std::sin(M_PI * p.x());
-  });
-  // Or equivalently, composing Rodin operators:
-  // auto u_exact = Sin(RealFunction([](const Geometry::Point& p) { ... }));
-  @endcode
-
-  @subsection guides-getting-started-core-concepts-functions-coords Coordinate Functions
-
-  The `F` namespace provides built-in coordinate projection functions that
-  extract spatial coordinates at evaluation points. These are particularly
-  convenient for defining spatially varying source terms and exact solutions:
-
-  | Function | Description | Mathematical meaning |
-  |----------|------------|---------------------|
-  | `F::x` | @f$ x @f$-coordinate | @f$ x \mapsto x_1 @f$ |
-  | `F::y` | @f$ y @f$-coordinate | @f$ x \mapsto x_2 @f$ |
-  | `F::z` | @f$ z @f$-coordinate | @f$ x \mapsto x_3 @f$ |
-
-  @code{.cpp}
-  #include <Rodin/Variational/F.h>
-
-  // Define a source term using coordinate functions
-  auto f = cos(2 * pi() * F::x + pi() / 2) * sin(2 * pi() * F::y);
-
-  // Boolean operations using coordinate functions
-  GridFunction gf(Vh);
-  gf = F::x > 0.5;  // 1 where x > 0.5, 0 elsewhere
-  @endcode
-
-  @subsection guides-getting-started-core-concepts-functions-complex Complex Functions
-
-  For complex-valued problems (e.g.\ Helmholtz, electromagnetics):
-
-  | Function | Description |
-  |----------|-------------|
-  | `Re(u)` | Real part of complex-valued function |
-  | `Im(u)` | Imaginary part of complex-valued function |
-  | `Conjugate(u)` | Complex conjugate |
-
-  @code{.cpp}
-  P1<Complex> Vh(mesh);
-  GridFunction gf(Vh);
-  gf = [](const Geometry::Point& p) { return Complex(p.x(), p.y()); };
-
-  // Extract real and imaginary parts
-  P1<Real> realVh(mesh);
-  GridFunction re(realVh), im(realVh);
-  re = Re(gf);
-  im = Im(gf);
-  @endcode
-
-  @section guides-getting-started-core-concepts-dg Discontinuous Galerkin Operators
-
-  Rodin supports discontinuous Galerkin (DG) methods through several
-  specialized operators and integral types. These are designed for problems
-  where the finite element space is discontinuous across element boundaries
-  (e.g.\ P0, or DG formulations with penalty terms).
-
-  @subsection guides-getting-started-core-concepts-dg-ops Jump and Average
-
-  The `Jump` and
-  `Average` operators act on inter-element
-  faces. For a function @f$ u @f$ with values @f$ u^+ @f$ and @f$ u^- @f$
-  on the two sides of an internal face:
-
-  | Operator | Definition | Code |
-  |----------|-----------|------|
-  | Jump | @f$ [u] = u^+ - u^- @f$ | `Jump(u)` |
-  | Average | @f$ \{u\} = \frac{1}{2}(u^+ + u^-) @f$ | `Average(u)` |
-
-  @subsection guides-getting-started-core-concepts-dg-integrals Face and Interface Integrals
-
-  In addition to `Integral` (cell interior) and `BoundaryIntegral`
-  (boundary faces), Rodin provides:
-
-  - `FaceIntegral` — integrates over
-    all faces (interior and boundary)
-  - `InterfaceIntegral` —
-    integrates over **interior** faces only (excludes boundary)
-
-  These are essential for DG penalty and consistency terms:
-
-  @code{.cpp}
-  // DG Poisson example (interior penalty method)
-  P1 Vh(mesh);
-  TrialFunction u(Vh);
-  TestFunction  v(Vh);
-
-  Real sigma = 10.0;  // penalty parameter
-
   Problem poisson(u, v);
-  poisson = Integral(Grad(u), Grad(v))
-          - InterfaceIntegral(Average(Grad(u)), Jump(v))
-          - InterfaceIntegral(Jump(u), Average(Grad(v)))
-          + InterfaceIntegral(sigma * Jump(u), Jump(v))
-          - Integral(f, v)
-          + DirichletBC(u, Zero());
+  poisson = Integral(Grad(u), Grad(v)) - Integral(source, v)
+             + DirichletBC(u, Zero());
   @endcode
 
-  @section guides-getting-started-core-concepts-advanced Advanced Operators
+  `Integral` integrates over cells. `BoundaryIntegral` integrates over exterior
+  faces; natural boundary loads enter through such boundary terms. Essential
+  boundary conditions constrain the unknown. Selecting an attribute with
+  `.on(attribute)` or `.over(attribute)` requires that the mesh already carries
+  the intended labels. See @ref guides-boundary-conditions.
 
-  Beyond the basic differential operators, Rodin provides several specialized
-  operators for more advanced applications.
+  @subsection guides-getting-started-core-concepts-problem-assembly From forms to a system
 
-  @subsection guides-getting-started-core-concepts-flow Flow Operator
+  The expression represents the residual @f$a(u_h,v_h)-\ell(v_h)@f$ together
+  with constraints. Assembly evaluates local contributions using quadrature,
+  combines them into the matrix and vector, and applies the constraints.
+  The minus sign on the source therefore yields a positive right-hand side
+  in @f$A\mathbf{x}=\mathbf{b}@f$.
 
-  The `Flow` operator computes the composition
-  @f$ u \circ \Phi @f$, where @f$ \Phi @f$ is the flow map generated by a
-  velocity field @f$ \mathbf{v} @f$:
-  @f[
-    \frac{d\Phi}{dt}(\mathbf{x}, t) = \mathbf{v}(\Phi(\mathbf{x}, t), t), \quad
-    \Phi(\mathbf{x}, 0) = \mathbf{x}
-  @f]
+  @subsection guides-getting-started-core-concepts-solving Choose a compatible solver
 
-  `Flow` traces characteristics backward in time and evaluates the function at
-  the departure point. It is the core mechanism behind the semi-Lagrangian
-  advection in the @ref Rodin::Advection "Advection module". The tracing uses
-  robust cell-by-cell intersection with adaptive substepping and configurable
-  boundary policies.
+  The Poisson problem with these boundary conditions gives a symmetric positive
+  definite system, so conjugate gradient is appropriate.
 
   @code{.cpp}
-  VectorFunction velocity{1.0, 0.0};
-  auto departure = Flow(-dt, phi, velocity);  // backward trace
+  Solver::CG solver(poisson);
+  solver.solve();
   @endcode
 
-  @subsection guides-getting-started-core-concepts-potential Potential Operator
+  Check `solver.success()` before treating `u.getSolution()` as a completed
+  result. CG requires a symmetric or Hermitian positive definite system; solver selection
+  follows the assembled matrix properties. See @ref guides-solvers.
 
-  The `Potential` operator computes integral
-  convolutions of the form:
-  @f[
-    u(\mathbf{x}) = \int_\Omega K(\mathbf{x}, \mathbf{y}) \, f(\mathbf{y}) \, d\mathbf{y}
-  @f]
-  where @f$ K @f$ is a kernel function. This is fundamental for boundary element
-  methods (BEM) and integral equation formulations.
+  @section guides-getting-started-core-concepts-workflow Interpret and export the solution
+
+  The computed grid function can be evaluated, used in another form, or
+  exported with its mesh.
 
   @code{.cpp}
-  // Newtonian potential (3D Laplace kernel)
-  auto K = [](const Geometry::Point& x, const Geometry::Point& y) -> Real {
-    return 1.0 / (4.0 * M_PI * (x.getPhysicalCoordinates() - y.getPhysicalCoordinates()).norm());
-  };
-
-  Problem eq(u, v);
-  eq = Integral(0.0001 * Grad(u), Grad(v))
-     + Integral(Potential(K, u), v)
-     - Integral(v);
+  IO::XDMF xdmf("Poisson");
+  xdmf.grid().setMesh(mesh).add("u", u.getSolution());
+  xdmf.write().flush();
   @endcode
 
-  @note The kernel @f$ K(\mathbf{x}, \mathbf{y}) @f$ is singular when
-  @f$ \mathbf{x} = \mathbf{y} @f$. The small regularization term
-  @f$ \varepsilon \int \nabla u \cdot \nabla v @f$ stabilizes the formulation.
-  See the [IntegralEquations examples](https://github.com/cbritopacheco/rodin/tree/develop/examples/IntegralEquations)
-  directory for complete implementations.
+  The explicit name `"u"` labels the exported field. Alternatively, set a
+  grid-function name before calling the unnamed `add(field)` overload.
+  Meshes, spaces, and fields must remain valid while the writer observes them.
+  See @ref guides-io for file formats and visualization.
 
-  @subsection guides-getting-started-core-concepts-trace TraceOperator
+  @section guides-getting-started-core-concepts-advanced Continue to specialized formulations
 
-  The `TraceOperator` restricts a function to a specified mesh boundary:
-  @f$ u|_{\partial\Omega} @f$. For @f$ u \in H^1(\Omega) @f$, the trace belongs
-  to @f$ H^{1/2}(\partial\Omega) @f$.
+  Once the local conforming workflow is understood, these guides introduce
+  additional numerical requirements:
 
-  @code{.cpp}
-  auto u_boundary = TraceOperator(u, boundaryAttribute);
-  @endcode
+  - @ref guides-interfaces-dg — Traces, jumps, averages, and facet integrals.
+  - @ref guides-variational — Vector and complex expressions and integral forms.
+  - @ref examples-index-integral — Integral-potential source examples.
+  - @ref examples-index-surfevol — Advection and surface-evolution source examples.
+  - @ref guides-backends — OpenMP, MPI, and PETSc execution paths.
 
-  @section guides-getting-started-core-concepts-next What's Next?
+  @section guides-getting-started-core-concepts-next Numerical contracts
 
-  You now have a solid understanding of Rodin's core concepts! Here are some
-  suggestions for continuing your journey:
-
-  - **Explore Examples**: Check out @ref examples-index for more complex
-    problems and techniques
-  - **Read Guides**: The @ref guides-index provide deeper dives into specific
-    topics
-  - **API Reference**: Browse the API documentation to discover all available
-    features
-  - **Try Your Own Problems**: Apply what you've learned to your own PDE
-    problems
-
-  For more detailed information on specific topics:
-  - @ref guides-meshes - Comprehensive guide to mesh operations
-  - @ref guides-polytopes - Detailed information about polytopes
-  - @ref guides-connectivity - Understanding connectivity in depth
-  - @ref fem-ciarlet - Mathematical foundations of finite elements
-  - @ref guides-io - Input/output and XDMF visualization
-  - @ref guides-variational - Variational formulations in detail
-
-  */
+  Read @ref guides-numerical-contracts before relying on coefficient layouts,
+  projection semantics, assembly reuse, or nonlinear tangent consistency.
+  These contracts connect the mathematical formulation to the behavior of the
+  numerical implementation.
+*/

@@ -11,7 +11,7 @@
  * @file
  * @brief Divergence operator specialization for P0g (global constant) vector functions.
  *
- * For a globally constant vector field u in P0g:
+ * A globally constant vector field u in P0g has zero divergence.
  *   div(u) = 0.
  *
  * This holds on cells and on faces/boundary (trace choice irrelevant since it is zero).
@@ -29,7 +29,7 @@
 namespace Rodin::FormLanguage
 {
   /**
-   * @brief Type traits for @c Div over a grid function: exposes the finite element
+   * @brief Type traits for @c Div over a grid function, exposing the finite element
    * space, the scalar type and the operand type.
    */
   template <class Scalar, class Data, class Mesh>
@@ -47,7 +47,7 @@ namespace Rodin::FormLanguage
   };
 
   /**
-   * @brief Type traits for @c Div over a shape function: exposes the finite element
+   * @brief Type traits for @c Div over a shape function, exposing the finite element
    * space, the shape function space, the scalar type and the operand type.
    */
   template <class NestedDerived, class Scalar, class Mesh,

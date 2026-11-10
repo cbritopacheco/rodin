@@ -8,12 +8,12 @@
  * @file Yeoh.h
  * @brief Compressible Yeoh hyperelastic constitutive law.
  *
- * Implements the stored energy density:
+ * Implements the following stored energy density.
  * @f[
  *   W = c_1(\bar{I}_1 - d) + c_2(\bar{I}_1 - d)^2 + c_3(\bar{I}_1 - d)^3
  *     + \frac{\kappa}{2}(J - 1)^2
  * @f]
- * where the modified first invariant is:
+ * where the modified first invariant is
  * @f[
  *   \bar{I}_1 = J^{-2/d} I_1
  * @f]
@@ -57,7 +57,7 @@ namespace Rodin::Solid
     public:
       /**
        * @brief Constructs a Yeoh law.
-       * @param c1 First material constant (small-strain: @f$ \mu = 2 c_1 @f$)
+       * @param c1 First material constant (in the small-strain limit, @f$ \mu = 2 c_1 @f$)
        * @param c2 Second material constant (quadratic stiffening)
        * @param c3 Third material constant (cubic stiffening)
        * @param bulkModulus Bulk modulus @f$ \kappa @f$

@@ -21,7 +21,8 @@
 #ifndef RODIN_MMG_H
 #define RODIN_MMG_H
 
-#include "MMG/MMG5.h"
+#include "MMG/Base.h"
+#include "MMG/V5.h"
 
 #include "MMG/Mesh.h"
 #include "MMG/Adapt.h"

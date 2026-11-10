@@ -19,7 +19,7 @@ namespace Rodin::Adaptation
    *
    * Given the displacement gradient @f$H=\nabla u@f$ at a point, this holds the
    * deformation gradient @f$F=I+H@f$ and derives, on demand, the quantities mesh
-   * adaptation needs: the Jacobian @f$j=\det F@f$, the inverse transpose
+   * adaptation needs, including the Jacobian @f$j=\det F@f$, the inverse transpose
    * @f$F^{-\top}@f$, the relative distortion
    * @f[
    *   Q_{\operatorname{rel}}(F)=\frac{\lVert F\rVert_F^2}{d\,j^{2/d}},
@@ -141,7 +141,7 @@ namespace Rodin::Adaptation
        * @brief The inverse transpose @f$F^{-\top}@f$; requires
        * @ref isInvertible.
        *
-       * Defined for inverted cells too: only the cofactor structure is needed,
+       * The operation is also defined for inverted cells because it needs only the cofactor structure,
        * not the sign of @f$j@f$.
        * @returns The inverse transpose.
        */

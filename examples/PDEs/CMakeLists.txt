@@ -5,6 +5,7 @@ target_link_libraries(Poisson
   Rodin::Geometry
   Rodin::Assembly
   Rodin::Variational
+  Rodin::IO
   )
 
 add_executable(Elasticity Elasticity.cpp)
@@ -14,6 +15,7 @@ target_link_libraries(Elasticity
   Rodin::Geometry
   Rodin::Assembly
   Rodin::Variational
+  Rodin::IO
   )
 
 add_executable(Periodic Periodic.cpp)
@@ -23,6 +25,7 @@ target_link_libraries(Periodic
   Rodin::Geometry
   Rodin::Assembly
   Rodin::Variational
+  Rodin::IO
   )
 
 add_executable(Darcy Darcy.cpp)
@@ -41,4 +44,17 @@ target_link_libraries(Helmholtz
   Rodin::Geometry
   Rodin::Assembly
   Rodin::Variational
+  Rodin::IO
   )
+
+add_executable(SurfaceMesh SurfaceMesh.cpp)
+target_link_libraries(SurfaceMesh PUBLIC Rodin::Solver Rodin::Geometry Rodin::Assembly Rodin::Variational Rodin::IO)
+
+add_executable(Stokes Stokes.cpp)
+target_link_libraries(Stokes PUBLIC Rodin::Solver Rodin::Geometry Rodin::Assembly Rodin::Variational Rodin::IO)
+
+add_executable(NavierStokes NavierStokes.cpp)
+target_link_libraries(NavierStokes PUBLIC Rodin::Solver Rodin::Geometry Rodin::Assembly Rodin::Variational Rodin::IO)
+
+add_executable(MixedBoundary MixedBoundary.cpp)
+target_link_libraries(MixedBoundary PUBLIC Rodin::Solver Rodin::Geometry Rodin::Assembly Rodin::Variational Rodin::IO)

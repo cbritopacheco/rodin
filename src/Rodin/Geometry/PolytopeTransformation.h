@@ -42,15 +42,15 @@ namespace Rodin::Geometry
    *
    * Let @f$ \tau @f$ denote a polytope in a triangulation @f$ \mathcal{T}_h @f$
    * with an associated reference element @f$ K @f$. This class represents the
-   * transformation:
+   * transformation.
    * @f[
    *    x : K \subset \mathbb{R}^k \rightarrow \tau \subset \mathbb{R}^s
    * @f]
-   * that maps a reference point @f$ r \in K @f$ to a physical point @f$ p \in \tau @f$:
+   * that maps a reference point @f$ r \in K @f$ to a physical point @f$ p \in \tau @f$.
    * @f[
    *    p = x(r)
    * @f]
-   * where:
+   * Here,
    * - @f$ k @f$ is the reference dimension (topological dimension of @f$ K @f$)
    * - @f$ s @f$ is the physical dimension (spatial dimension of @f$ \tau @f$)
    * - @f$ K @f$ is the reference element
@@ -198,7 +198,7 @@ namespace Rodin::Geometry
        * @param[out] pc Physical coordinates @f$ p @f$ (resized automatically)
        * @param[in] rc Reference coordinates @f$ r \in K @f$
        *
-       * Computes:
+       * Computes the following quantity.
        * @f[
        *    pc = x(rc)
        * @f]
@@ -212,7 +212,7 @@ namespace Rodin::Geometry
        * @param[out] jacobian Jacobian matrix @f$ \mathbf{J}_x @f$ (resized automatically)
        * @param[in] rc Reference coordinates @f$ r \in K @f$
        *
-       * Computes the Jacobian matrix:
+       * Computes the Jacobian matrix.
        * @f[
        *  \mathbf{J}_x (r) = \begin{bmatrix}
        * \dfrac{\partial x_1}{\partial r_1} & \ldots & \dfrac{\partial x_1}{\partial r_k}\\
@@ -247,7 +247,7 @@ namespace Rodin::Geometry
        * @param[out] rc Reference coordinates @f$ r @f$ (resized automatically)
        * @param[in] pc Physical coordinates @f$ p \in \tau @f$
        *
-       * Computes the inverse transformation:
+       * Computes the inverse transformation.
        * @f[
        *    rc = x^{-1}(pc)
        * @f]

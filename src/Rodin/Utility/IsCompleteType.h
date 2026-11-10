@@ -51,7 +51,7 @@ namespace Rodin::Utility
    * This trait is useful for SFINAE-based conditional compilation when
    * different behavior is needed for complete vs. incomplete types.
    *
-   * Example usage:
+   * The following example illustrates usage.
    * @code{.cpp}
    * struct Complete { int x; };
    * struct Incomplete;

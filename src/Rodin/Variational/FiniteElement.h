@@ -45,6 +45,7 @@
 #define RODIN_VARIATIONAL_FINITEELEMENT_H
 
 #include <initializer_list>
+#include <type_traits>
 
 #include <boost/serialization/access.hpp>
 
@@ -63,7 +64,7 @@ namespace Rodin::Variational
    * @brief Base class for finite elements.
    *
    * This class provides a minimal CRTP interface shared by all finite elements.
-   * Derived classes are expected to implement the following methods:
+   * Derived classes are expected to implement the following methods.
    * - `size_t getCount() const`
    * - `auto getBasis(size_t) const`
    * - `auto getLinearForm(size_t) const`
@@ -203,7 +204,7 @@ namespace Rodin::Variational
       /**
        * @brief Gets the number of degrees of freedom in the finite element.
        *
-       * This forwards to the Derived class via CRTP:
+       * This forwards to the Derived class via CRTP.
        * @code{.cpp}
        * static_cast<const Derived&>(*this).getCount();
        * @endcode
@@ -224,7 +225,7 @@ namespace Rodin::Variational
        *
        * The basis functions @f$ \{\phi_i\} @f$ span the local approximation
        * space on the reference element. For Lagrange elements, they satisfy
-       * the nodal property:
+       * the nodal property.
        * @f[
        *   \phi_i(x_j) = \delta_{ij},
        * @f]
@@ -236,7 +237,7 @@ namespace Rodin::Variational
        * @param i Local basis-function index.
        * @return Basis function object usable as a callable functor.
        *
-       * @note CRTP method: implemented by the Derived class.
+       * @note The Derived class implements this CRTP method.
        */
       constexpr
       decltype(auto) getBasis(size_t i) const
@@ -288,7 +289,7 @@ namespace Rodin::Variational
        * @param i Local DOF index.
        * @return Linear functional object representing the i-th degree of freedom.
        *
-       * @note CRTP method: implemented by the Derived class.
+       * @note The Derived class implements this CRTP method.
        */
       constexpr
       decltype(auto) getLinearForm(size_t i) const
@@ -331,12 +332,15 @@ namespace Rodin::Variational
         }
         if (directions.size() == 0)
           return 0;
-        using Method = Optional<size_t> (Derived::*)(std::initializer_list<size_t>) const;
-        if constexpr (requires { static_cast<Method>(&Derived::getDegree); })
+        // Identify the declaring class without comparing instrumented function
+        // addresses: GCC's UBSan instrumentation can prevent constant evaluation.
+        constexpr auto declaringClass =
+          []<class Owner>(Optional<size_t> (Owner::*)(std::initializer_list<size_t>)
+              const) { return std::type_identity<Owner>{}; };
+        if constexpr (requires { declaringClass(&Derived::getDegree); })
         {
-          constexpr auto selected = static_cast<Method>(&Derived::getDegree);
-          constexpr auto inherited = static_cast<Method>(&FiniteElementBase::getDegree);
-          if constexpr (selected != inherited)
+          using Owner = typename decltype(declaringClass(&Derived::getDegree))::type;
+          if constexpr (!std::is_same_v<Owner, FiniteElementBase>)
             return static_cast<const Derived&>(*this).getDegree(directions);
         }
         return getDegree();

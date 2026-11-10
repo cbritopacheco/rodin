@@ -35,7 +35,7 @@ namespace Rodin::Variational
    * @ingroup FrobeniusSpecializations
    * @brief Frobenius norm of a function.
    *
-   * Computes the Frobenius (Euclidean) norm:
+   * Computes the Frobenius (Euclidean) norm.
    * The scalar field is @f$\mathbb{K}=\mathbb{R}@f$ or @f$\mathbb{C}@f$.
    * - For scalars: @f$ \|\cdot\| : \mathbb{K} \to \mathbb{R}, \quad \|x\| = |x| @f$
    * - For vectors @f$ \mathbf{v} \in \mathbb{K}^n @f$:

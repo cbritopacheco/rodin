@@ -24,7 +24,7 @@ namespace Rodin::Utility
    * For non-reference_wrapper types, the result is T itself.
    * For @c std::reference_wrapper&lt;U&gt;, the result is @c U&.
    *
-   * Example usage:
+   * The following example illustrates usage.
    * @code{.cpp}
    * using Unwrapped1 = UnwrapReference<int>::Type;                         // int
    * using Unwrapped2 = UnwrapReference<std::reference_wrapper<int>>::Type; // int&

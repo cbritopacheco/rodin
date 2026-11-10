@@ -15,7 +15,7 @@
 
 #include "ForwardDecls.h"
 #include "Mesh.h"
-#include "MMG5.h"
+#include "V5.h"
 
 namespace Rodin::MMG
 {
@@ -33,7 +33,7 @@ namespace Rodin::MMG
    * and restored on output when the original indices are still valid after the
    * optimization.
    */
-  class Optimizer : public MMG5
+  class Optimizer : public Base
   {
     public:
       /// @brief Default constructor.
@@ -63,9 +63,9 @@ namespace Rodin::MMG
         const auto requiredEdges = mesh.getRequiredEdges();
         const auto requiredTriangles = mesh.getRequiredTriangles();
         const auto requiredTetrahedra = mesh.getRequiredTetrahedra();
-        MMG5_pMesh mmgMesh = rodinToMesh(mesh);
+        MMG5_pMesh mmgMesh = MMG::V5::Mesh::toV5(mesh);
 
-        MMG5::setParameters(mmgMesh);
+        Base::setParameters(mmgMesh);
 
         bool isSurface = mesh.isSurface();
         int retcode = MMG5_STRONGFAILURE;
@@ -94,7 +94,7 @@ namespace Rodin::MMG
             << Alert::Raise;
         }
 
-        mesh = meshToRodin(mmgMesh);
+        mesh = MMG::V5::Mesh::fromV5(mmgMesh);
         mesh.getRequiredVertices().clear();
         const size_t vertexCount = mesh.getVertexCount();
         for (const auto& idx : requiredVertices)
@@ -125,7 +125,7 @@ namespace Rodin::MMG
           if (idx < tetrahedronCount)
             mesh.setRequiredTetrahedron(idx);
         }
-        destroyMesh(mmgMesh);
+        MMG::V5::Mesh::destroy(mmgMesh);
       }
 
       /**
@@ -135,7 +135,7 @@ namespace Rodin::MMG
        */
       Optimizer& setAngleDetection(bool b = true)
       {
-        MMG5::setAngleDetection(b);
+        Base::setAngleDetection(b);
         return *this;
       }
 
@@ -146,7 +146,7 @@ namespace Rodin::MMG
        */
       Optimizer& setHMin(double hmin)
       {
-        MMG5::setHMin(hmin);
+        Base::setHMin(hmin);
         return *this;
       }
 
@@ -157,7 +157,7 @@ namespace Rodin::MMG
        */
       Optimizer& setHMax(double hmax)
       {
-        MMG5::setHMax(hmax);
+        Base::setHMax(hmax);
         return *this;
       }
 
@@ -168,7 +168,7 @@ namespace Rodin::MMG
        */
       Optimizer& setHausdorff(double hausd)
       {
-        MMG5::setHausdorff(hausd);
+        Base::setHausdorff(hausd);
         return *this;
       }
 
@@ -179,7 +179,7 @@ namespace Rodin::MMG
        */
       Optimizer& setGradation(double hgrad)
       {
-        MMG5::setGradation(hgrad);
+        Base::setGradation(hgrad);
         return *this;
       }
 

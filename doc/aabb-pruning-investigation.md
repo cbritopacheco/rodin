@@ -2,10 +2,10 @@
 
 ## Decision
 
-Projection pruning is opt-in: `locator.setProjectionPruning(true)` enables it.
+Projection pruning is opt-in, and `locator.setProjectionPruning(true)` enables it.
 The default avoids additional index construction and storage. This follows the
 new-capability policy in `doc/agents/testing.md` and is supported by the measured
-tradeoff: large query gains on overlapping cells, but extra storage and setup
+tradeoff between large query gains on overlapping cells and extra storage and setup
 with little benefit on regular tensor grids. Repeated point-location workloads
 on simplex, curved, or sheared meshes are good candidates for explicit enabling.
 
@@ -19,7 +19,7 @@ that unpruned lookup became faster.
 ## Method
 
 Release Clang 19 / MPICH, PETSc off, on the local macOS arm64 host. All eight
-geometries were exercised: Point, Segment, Triangle, Quadrilateral, Tetrahedron,
+geometries were exercised, including Point, Segment, Triangle, Quadrilateral, Tetrahedron,
 Hexahedron, Pyramid, and Wedge. The matrix has 190 mesh configurations and
 30,836 paired query samples (61,672 diagnostic query executions).
 
@@ -31,7 +31,7 @@ orientation and curvature without introducing inverted cells. The K=1 cases
 use the H1 representation, not the mesh's default `RealP1Element` implementation.
 Absolute evaluation costs need not match those of the default element.
 
-Resolution counts vertices per axis: 16/64/256 in 1D, 4/8/16 in 2D, and 3/5/8 in
+Resolution counts vertices per axis, with 16/64/256 in 1D, 4/8/16 in 2D, and 3/5/8 in
 3D. At most 64 deterministic spatially distributed queries per class are used:
 
 - Interior: a reference point between the centroid and vertex zero, excluding
@@ -56,7 +56,7 @@ at least three times, with their median reported. The initial configurations use
 seven construction repetitions; the final harness uses three to bound the cost of
 large P4 pyramid builds. Existing `FirstP4` benchmarks cover cold conversion caches.
 
-An initial elapsed-time pass was discarded: regular quadrilateral queries showed
+An initial elapsed-time pass was discarded because regular quadrilateral queries showed
 large apparent differences despite identical operation counts. A CPU-time repeat
 reduced that case to approximately 268 ns off and 257 ns on. Scheduling pauses
 can contaminate short elapsed-time comparisons. Small percentage changes in the
@@ -105,7 +105,7 @@ operation counts are shown below. Transforms and Jacobians count query work only
 
 Shared faces can be more expensive than interior hits without pruning because
 several overlapping boxes are inverted before finding a containing cell. Nearby
-misses remain expensive even with pruning: surviving candidates may exhaust all
+misses remain expensive even with pruning because surviving candidates may exhaust all
 seeds. Physical distance to the mesh is therefore a poor predictor of cost.
 
 The slow tail matters. In the tetrahedral interior case, the 95th-percentile
@@ -118,7 +118,7 @@ counts and index storage match. Regular tensor interior queries typically reach
 one candidate already; pruning cannot remove that inversion. Regular tetrahedral
 interior queries on the largest mesh fall from 3.70 candidates to 1.00.
 Three additional 0.03-second repetitions of the regular H1 P1 hexahedral case
-show no material query benefit: median interior costs are approximately 596 ns
+show no material query benefit. Median interior costs are approximately 596 ns
 off and 598 ns on, and shared-face costs are 610 ns off and 615 ns on.
 
 ## Construction and memory
@@ -128,7 +128,7 @@ On the largest regular H1 P1 tetrahedral fixture, construction rises from
 That is approximately 764 interior queries to amortize construction in this
 particular fixture. On the strongly sheared P4 tetrahedral fixture, construction
 rises from 200.596 ms to 291.008 ms while interior queries fall from 9.209 ms to
-1.398 ms: approximately 12 such queries amortize construction. Neither count is
+1.398 ms. Approximately 12 such queries amortize construction. Neither count is
 an application-wide threshold.
 
 The P4 tetrahedral index grows from 181,296 to 738,512 bytes (4.07 times). The P4
@@ -233,7 +233,7 @@ ordinary nonembedded cases have fewer physical components to share. P1 and P2
 also improved for every nonpoint geometry in the initial three-repetition pass.
 The initial chronological pass showed a systematic 1--4% increase even in
 unchanged transform evaluations. Alternating executables removed that apparent
-regression: P4 transform median ratios after/before ranged from 0.996 to 1.004.
+regression. P4 transform median ratios after/before ranged from 0.996 to 1.004.
 This control demonstrates drift between the earlier measurement blocks.
 
 Point has no reference axes or derivative work. Its isolated P4 zero-column
@@ -270,7 +270,7 @@ blocks. Each query class contains 64 samples.
 | Nearby miss | 6049.06 / 2533.12 | 955.66 / 404.52 |
 
 The diagnostic executables produced 384 identical per-query records across
-both pruning settings: candidates, transforms, Jacobians, Newton loop entries,
+both pruning settings, including candidates, transforms, Jacobians, Newton loop entries,
 seed retries, box candidates, projection rejections and retained index bytes
 all matched. The seven transformation tests and 51 AABB tests pass. New exact
 scalar-baseline comparisons cover P1/P2/P3/P4 on every geometry, at the centroid
@@ -337,7 +337,7 @@ original dependency-call behavior without changing the returned point.
 
 To reproduce the isolated evaluation comparison, save the baseline benchmark
 executable before changing production evaluation, then alternate it with the
-current executable:
+current executable.
 
 ```sh
 build/tests/benchmarks/RodinBenchmarks \
@@ -368,7 +368,7 @@ workload completed with matching pruning-on/off membership and references.
 ### Assertion-enabled CI fixture correction
 
 The Debug CI matrix exposed an invalid reference input in the scalar-baseline
-test: `Traits(Point).getVertex(0)` stores one coordinate, while a point
+test. `Traits(Point).getVertex(0)` stores one coordinate, while a point
 transformation's reference domain has dimension zero. Release assertions were
 disabled and did not reject that fixture. The test now uses the point centroid
 as its sole zero-dimensional reference input and checks the reference dimension

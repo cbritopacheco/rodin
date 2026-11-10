@@ -242,7 +242,7 @@ namespace Rodin::Assembly
    * It manages the layout and offsets for assembling block matrices.
    *
    * For a mixed problem with spaces @f$ V_h = V_{h,1} \times V_{h,2} @f$ and
-   * @f$ W_h = W_{h,1} \times W_{h,2} @f$, this assembles the block matrix:
+   * @f$ W_h = W_{h,1} \times W_{h,2} @f$, this assembles the block matrix.
    * @f[
    *   A = \begin{bmatrix}
    *     A_{11} & A_{12} \\
@@ -327,7 +327,7 @@ namespace Rodin::Assembly
    * and offsets for assembling block vectors.
    *
    * For a mixed problem with test space @f$ W_h = W_{h,1} \times W_{h,2} @f$,
-   * this assembles the block vector:
+   * this assembles the block vector.
    * @f[
    *   b = \begin{bmatrix} b_1 \\ b_2 \end{bmatrix}
    * @f]

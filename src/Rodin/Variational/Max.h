@@ -33,7 +33,7 @@ namespace Rodin::Variational
    * @ingroup MaxSpecializations
    * @brief Represents the maximum operation between two functions.
    *
-   * This class represents the pointwise maximum of two functions:
+   * This class represents the pointwise maximum of two functions.
    * @f[
    *    \text{Max}(f, g)(x) = \max(f(x), g(x))
    * @f]

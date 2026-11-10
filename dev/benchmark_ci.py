@@ -331,7 +331,9 @@ def run_lane(source, lane_id, destination):
             if writer is None:
                 writer = csv.DictWriter(buffer, fieldnames=reader.fieldnames);writer.writeheader()
             writer.writerows(reader)
-        report.write_text(buffer.getvalue())
+            # Preserve completed cases if a later invocation fails. The receipt
+            # is still written only after the complete lane validates.
+            report.write_text(buffer.getvalue())
         values = csv_results(report.read_text(), lane['cases'])
     dump(destination / 'receipt.json', {'schema': 1, 'commit': archive.commit(), 'lane': lane,
                                        'report': report.name, 'sha256': archive.digest(report), 'results': values})

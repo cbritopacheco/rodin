@@ -8,7 +8,7 @@
  * @file Fields/GreenLagrangeStrain.h
  * @brief Green-Lagrange strain tensor computation.
  *
- * Computes the Green-Lagrange strain tensor:
+ * Computes the Green-Lagrange strain tensor.
  * @f[
  *   \mathbf{E} = \frac{1}{2}(\mathbf{F}^T \mathbf{F} - \mathbf{I})
  *              = \frac{1}{2}(\mathbf{C} - \mathbf{I})

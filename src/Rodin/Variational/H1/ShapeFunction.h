@@ -638,7 +638,7 @@ namespace Rodin::Variational
        *
        * A certified reference sample may borrow an already prepared scalar
        * table during this call. A missing or evicted table retains direct
-       * pointwise evaluation: requesting one matrix value must not construct
+       * pointwise evaluation. Requesting one matrix value must not construct
        * values and derivatives for an entire formula. No table borrow is
        * retained after the owned component basis has been filled.
        *

@@ -37,8 +37,27 @@ COMPONENTS = {
 NATIVE_RESTRICTION = r"^RodinMPIH1SubMeshRestrictionTest_.*_np(1|2|3|4|8)$"
 UNIT_SLOW_GEOMETRY = (
     r"^RodinMPIAssemblyGeometrySlowTest_np(1|2|3|4|8)_"
-    r"(Segment|Triangle|Quadrilateral|Tetrahedron|Pyramid|Hexahedron|Wedge)$"
+    r"(Segment|Triangle|Quadrilateral|Tetrahedron|Pyramid|Hexahedron|Wedge)"
+    r"(?:_Halo(?:P1|H1Degree[1-6]))?$"
 )
+
+
+ELASTICITY3D_GROUP = "manufactured/Rodin/P1/LinearElasticity3D"
+ELASTICITY3D_PARTITIONS = ("Tetrahedron", "Hexahedron", "Pyramid", "Wedge")
+
+
+def partition_tests(tests, group, partition):
+    """Retain whole registered invocations; reject unaccounted geometry names."""
+    if not partition:
+        return tests
+    if group != ELASTICITY3D_GROUP or partition not in ELASTICITY3D_PARTITIONS:
+        raise ValueError("Unknown execution partition: " + group + "/" + partition)
+    if any(test["name"].rsplit("/", 1)[-1] not in ELASTICITY3D_PARTITIONS for test in tests):
+        raise ValueError("Elasticity registration has an unaccounted geometry")
+    chosen = [test for test in tests if test["name"].endswith("/" + partition)]
+    if not chosen:
+        raise ValueError("Empty elasticity execution partition: " + partition)
+    return chosen
 
 
 def group_for(target):
@@ -393,12 +412,13 @@ def selected(profile, test):
     raise ValueError("Unknown execution profile: " + profile)
 
 
-def run_group(build, group, profile, backend=None):
+def run_group(build, group, profile, backend=None, partition=""):
     stage, report = prepare(build, group, profile)
     chosen = [test for test in report["tests"] if selected(profile, test) and
               not (backend == "baseline" and profile == "unit" and
                    "slow" in properties(test).get("LABELS", []))]
-    inventory = {"group": group, "profile": profile, "registered": len(report["tests"]),
+    chosen = partition_tests(chosen, group, partition)
+    inventory = {"group": group, "profile": profile, "partition": partition, "registered": len(report["tests"]),
                  "selected": chosen, "targets": selected_targets(build, group, profile=profile)}
     (build / "ci-selection.json").write_text(json.dumps(inventory, indent=2))
     if not chosen:
@@ -486,6 +506,7 @@ def main():
     parser.add_argument("--parallel", type=int, default=2)
     parser.add_argument("--exclude-target", default="")
     parser.add_argument("--baseline", action="store_true")
+    parser.add_argument("--partition", default="")
     args = parser.parse_args()
     build = args.build.resolve()
     if args.operation == "configure":
@@ -508,7 +529,7 @@ def main():
         _, report = prepare(build, args.group, args.profile)
         print(json.dumps(report, indent=2))
         return 0
-    return run_group(build, args.group, args.profile, args.backend)
+    return run_group(build, args.group, args.profile, args.backend, args.partition)
 
 
 if __name__ == "__main__":

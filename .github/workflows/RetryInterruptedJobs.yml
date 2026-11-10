@@ -1,0 +1,41 @@
+name: CI reports and recovery
+run-name: CI report · ${{ github.event.workflow_run.name }} · ${{ github.event.workflow_run.head_branch }} · ${{ github.event.workflow_run.head_sha }} · attempt ${{ github.event.workflow_run.run_attempt }}
+on:
+  workflow_run:
+    workflows: [Tests, Benchmarks]
+    types: [completed]
+    branches: [develop, master]
+permissions:
+  contents: read
+  checks: read
+  actions: write
+concurrency:
+  group: recover-ci-${{ github.event.workflow_run.id }}
+  cancel-in-progress: false
+jobs:
+  Recover:
+    if: ${{ github.event.workflow_run.event == 'push' }}
+    name: Inspect interruptions and request one bounded retry
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      # workflow_run executes trusted default-branch code, never the target's
+      # checkout or artifacts. The helper independently validates origin/SHA.
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+          lfs: false
+      - name: Install pinned workflow parser
+        run: python3 dev/ci_environment.py python
+      - name: Test recovery policy serially
+        run: python3 -m unittest discover -s dev -p test_ci_retry.py -v
+      - name: Summarize completed workflow
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 dev/ci_workflow_summary.py
+      - name: Inspect completed run
+        if: ${{ always() && github.event.workflow_run.conclusion == 'failure' && (github.event.workflow_run.name == 'Tests' || github.event.workflow_run.name == 'Benchmarks') }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 dev/ci_retry.py

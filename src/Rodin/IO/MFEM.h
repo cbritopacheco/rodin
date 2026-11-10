@@ -260,10 +260,10 @@ namespace Rodin::IO::MFEM
    */
   enum Ordering
   {
-    /// Node-major ordering: XXX..., YYY..., ZZZ... (all x-components, then all y-components, etc.)
+    /// Node-major ordering groups components as XXX..., YYY..., ZZZ... (all x-components, then all y-components, etc.)
     Nodes = 0,
 
-    /// Vector dimension-major ordering: XYZ, XYZ, ... (interleaved components)
+    /// Vector dimension-major ordering interleaves components as XYZ, XYZ, ... (interleaved components)
     VectorDimension = 1
   };
 
@@ -1183,7 +1183,7 @@ namespace Rodin::IO::MFEM
    * @internal
    *
    * Parses the mesh header line which contains format identifier and version.
-   * Expected format: "MFEM mesh v1.0" or similar.
+   * The expected header is "MFEM mesh v1.0" or a compatible version.
    */
   class ParseMeshHeader
   {
@@ -1235,7 +1235,7 @@ namespace Rodin::IO::MFEM
    *  - edge nodes: placed along each edge with cp[i]
    *  - interior: barycentric from cp[i]/w, cp[j]/w, cp[p-i-j]/w
    *
-   * The ordering matches MFEM's construction: vertices, edges, interior.
+   * The ordering matches MFEM's construction through vertices, edges and interiors in sequence.
    */
   template <size_t K>
   class TriangleNodes
@@ -1636,7 +1636,7 @@ namespace Rodin::IO::MFEM
   /**
    * @brief MFEM-style nodal set on the reference wedge / prism.
    *
-   * This reproduces the local node ordering used by mfem::H1_WedgeElement:
+   * This reproduces the local node ordering used by mfem::H1_WedgeElement, starting with
    * vertices, edge interiors, triangular face interiors, quadrilateral face
    * interiors, then cell interiors. The triangular factor uses MFEM's closed
    * H1 triangle nodes and the segment factor uses MFEM's H1 segment ordering.
@@ -2161,7 +2161,7 @@ namespace Rodin::IO
    * - Ordering: data layout (Nodes=0 or VectorDimension=1)
    * - Coefficient data values (ordered by MFEM convention)
    *
-   * MFEM DOF ordering: vertices -> edge interiors -> face interiors -> element interiors
+   * MFEM orders DOFs from vertices through edge and face interiors to element interiors.
    *
    * # Usage Example
    * ```cpp
@@ -3406,7 +3406,7 @@ namespace Rodin::IO
    * @brief Specialization for printing H1 grid functions with vector data in MFEM format.
    *
    * Handles DOF reordering between Rodin's internal ordering and MFEM's expected ordering.
-   * MFEM orders DOFs as: vertices -> edge interiors -> face interiors -> element interiors
+   * MFEM orders DOFs from vertices through edge and face interiors to element interiors.
    *
    * @tparam K Polynomial degree
    * @tparam Range Range type for the finite element space

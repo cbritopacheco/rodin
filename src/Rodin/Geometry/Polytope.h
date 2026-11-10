@@ -55,7 +55,7 @@ namespace Rodin::Geometry
    *
    * # Usage
    *
-   * Polytopes are typically obtained through iterators:
+   * Polytopes are typically obtained through iterators.
    * @code{.cpp}
    * for (auto it = mesh.getCell(); it; ++it)
    * {

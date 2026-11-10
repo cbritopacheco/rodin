@@ -40,7 +40,7 @@ namespace Rodin::Variational
    * @tparam Scalar Scalar type (e.g., Real, Complex)
    * @ingroup ZeroSpecializations
    *
-   * Represents the constant zero scalar function:
+   * Represents the constant zero scalar function.
    * @f[
    *   f(x) = 0 \quad \forall x \in \Omega
    * @f]
@@ -120,7 +120,7 @@ namespace Rodin::Variational
    * @tparam Scalar Scalar type for vector components
    * @ingroup ZeroSpecializations
    *
-   * Represents the constant zero vector function:
+   * Represents the constant zero vector function.
    * @f[
    *   \mathbf{f}(x) = \mathbf{0} \quad \forall x \in \Omega
    * @f]

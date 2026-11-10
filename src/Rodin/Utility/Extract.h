@@ -49,7 +49,7 @@ namespace Rodin::Utility
    * This specialization enables the extraction and transformation of types
    * from a Rodin::Tuple by applying an Extractor metafunction to each element type.
    *
-   * Example usage:
+   * The following example illustrates usage.
    * @code{.cpp}
    * template<typename T>
    * struct AddConst { using Type = const T; };

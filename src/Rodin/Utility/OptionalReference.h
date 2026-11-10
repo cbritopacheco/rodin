@@ -31,7 +31,7 @@ namespace Rodin::Utility
    * The class inherits from Optional<std::reference_wrapper<T>> and provides
    * convenient pointer-like and reference access operators.
    *
-   * Example usage:
+   * The following example illustrates usage.
    * @code{.cpp}
    * int value = 42;
    * OptionalReference<int> optRef;  // Empty optional reference

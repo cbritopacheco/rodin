@@ -39,7 +39,7 @@ namespace Rodin::Variational
    * @tparam Args Additional arguments
    *
    * Represents the finite element space composed of continuous, piecewise
-   * linear functions:
+   * linear functions.
    * @f[
    *  \mathbb{P}_1 (\mathcal{T}_h)^d = \{ v \in C^0(\mathcal{T}_h)^d \mid v|_{\tau} \in \mathbb{P}_1(\tau), \ \tau \in \mathcal{T}_h \} \ ,
    * @f]

@@ -36,7 +36,7 @@ namespace Rodin::Variational
   class FeketeTriangle
   {
     public:
-      /// Total number of nodes: (K+1)(K+2)/2.
+      /// The total number of nodes is @f$(K+1)(K+2)/2@f$.
       static constexpr size_t Count = (K + 1) * (K + 2) / 2;
 
       /**
@@ -91,7 +91,7 @@ namespace Rodin::Variational
   /**
    * @brief Cached Fekete-type nodes on the reference tetrahedron for degree K.
    *
-   * Reference tetrahedron:
+   * Reference tetrahedron.
    *   (0,0,0), (1,0,0), (0,1,0), (0,0,1).
    *
    * Construction:
@@ -111,7 +111,7 @@ namespace Rodin::Variational
   class FeketeTetrahedron
   {
     public:
-      /// Total number of nodes: (K+1)(K+2)(K+3)/6.
+      /// The total number of nodes is @f$(K+1)(K+2)(K+3)/6@f$.
       static constexpr size_t Count = (K + 1) * (K + 2) * (K + 3) / 6;
 
       /**

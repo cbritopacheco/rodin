@@ -25,6 +25,82 @@ using namespace Rodin::Variational;
 
 namespace
 {
+  struct ExposedTotalDegreeElement;
+  struct HiddenTotalDegreeElement;
+  struct InheritedDirectionalDegreeElement;
+}
+
+namespace Rodin::FormLanguage
+{
+  template <>
+  struct Traits<ExposedTotalDegreeElement>
+  {
+    using ScalarType = Real;
+  };
+
+  template <>
+  struct Traits<HiddenTotalDegreeElement>
+  {
+    using ScalarType = Real;
+  };
+
+  template <>
+  struct Traits<InheritedDirectionalDegreeElement>
+  {
+    using ScalarType = Real;
+  };
+}
+
+namespace
+{
+  /// @brief Degree-only metadata exposing the inherited directional fallback.
+  struct ExposedTotalDegreeElement : FiniteElementBase<ExposedTotalDegreeElement>
+  {
+    using Parent = FiniteElementBase<ExposedTotalDegreeElement>;
+    using Parent::getDegree;
+    using Parent::Parent;
+
+    Optional<size_t> getDegree() const
+    {
+      return 7;
+    }
+  };
+
+  /// @brief A total-degree query may also hide the base overload set.
+  struct HiddenTotalDegreeElement : FiniteElementBase<HiddenTotalDegreeElement>
+  {
+    using Parent = FiniteElementBase<HiddenTotalDegreeElement>;
+    using Parent::Parent;
+
+    Optional<size_t> getDegree() const
+    {
+      return std::nullopt;
+    }
+  };
+
+  /// @brief A directional query may be supplied by an intermediate family base.
+  struct DirectionalDegreeFamily : FiniteElementBase<InheritedDirectionalDegreeElement>
+  {
+    using Parent = FiniteElementBase<InheritedDirectionalDegreeElement>;
+    using Parent::Parent;
+
+    Optional<size_t> getDegree() const
+    {
+      return 7;
+    }
+
+    Optional<size_t> getDegree(std::initializer_list<size_t> directions) const noexcept
+    {
+      return directions.size();
+    }
+  };
+
+  /// @brief Inherit the directional query without redeclaring it on the leaf.
+  struct InheritedDirectionalDegreeElement : DirectionalDegreeFamily
+  {
+    using DirectionalDegreeFamily::DirectionalDegreeFamily;
+  };
+
   template <class Element>
   concept HasLagrangeDegree =
     requires(const Element& element) { element.getLagrangeDegree(size_t(1), {0}); };
@@ -97,6 +173,31 @@ namespace
     EXPECT_EQ(enclosure->getSupport(Math::SpatialVector<Real>{0, 0, 0}), 0);
     EXPECT_THROW(enclosure->getSupport(Math::SpatialVector<Real>{1}), Alert::Exception);
   }
+}
+
+TEST(Rodin_Variational_Degree, BaseDispatchPreservesOptionalAndInheritedQueries)
+{
+  const ExposedTotalDegreeElement exposed(Polytope::Type::Quadrilateral);
+  const FiniteElementBase<ExposedTotalDegreeElement>& exposedBase = exposed;
+  EXPECT_EQ(exposedBase.getDegree({0}), 7);
+  EXPECT_EQ(exposedBase.getDegree({0, 1}), 7);
+  EXPECT_EQ(exposedBase.getDegree({}), 0);
+  EXPECT_FALSE(exposedBase.getDegree({2}));
+
+  const HiddenTotalDegreeElement hidden(Polytope::Type::Quadrilateral);
+  const FiniteElementBase<HiddenTotalDegreeElement>& hiddenBase = hidden;
+  EXPECT_FALSE(hiddenBase.getDegree({0}));
+  EXPECT_EQ(hiddenBase.getDegree({}), 0);
+  EXPECT_FALSE(hiddenBase.getDegree({2}));
+
+  const InheritedDirectionalDegreeElement directional(Polytope::Type::Quadrilateral);
+  const FiniteElementBase<InheritedDirectionalDegreeElement>& directionalBase =
+    directional;
+  EXPECT_EQ(directionalBase.getDegree(), 7);
+  EXPECT_EQ(directionalBase.getDegree({0}), 1);
+  EXPECT_EQ(directionalBase.getDegree({0, 1}), 2);
+  EXPECT_EQ(directionalBase.getDegree({}), 0);
+  EXPECT_FALSE(directionalBase.getDegree({2}));
 }
 
 TEST(Rodin_Geometry_Bounds, PolynomialAndRationalImages)

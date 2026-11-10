@@ -6,44 +6,51 @@
  */
 /**
  * @file P1.h
- * @brief Piecewise linear (P1) finite element space.
+ * @brief Vertex-based continuous finite element spaces and their form operators.
  *
- * This header aggregates all functionality related to the P1 finite element
- * space, which consists of continuous piecewise linear functions over mesh
- * elements. P1 is the most commonly used conforming finite element space.
+ * The scalar family has one degree of freedom at each mesh vertex. Shared
+ * vertex coefficients identify compatible traces across neighboring cells.
+ * Vector and matrix ranges repeat the scalar construction componentwise.
  *
- * # Mathematical Foundation
- * The P1 space is defined as:
- * @f[
- *   P_1(\mathcal{T}_h) = \{u \in C^0(\Omega) : u|_K \in \mathbb{P}_1(K) \, \forall K \in \mathcal{T}_h\}
- * @f]
- * where @f$ \mathbb{P}_1(K) @f$ denotes linear polynomials on element @f$ K @f$.
+ * ## Reference and physical shape functions
  *
- * # Features
- * - One degree of freedom per mesh vertex (nodal values)
- * - Continuous across element boundaries (@f$ C^0 @f$ conforming)
- * - Gradient is constant within each element
- * - Optimal convergence: @f$ O(h^2) @f$ in @f$ L^2 @f$ norm for smooth solutions
- * - Basis functions: Lagrange nodal basis @f$ \phi_i(x_j) = \delta_{ij} @f$
+ * On a simplex the reference space is affine.
+ * @f$\widehat P=\mathbb P_1(\widehat K)@f$. Product cells use their
+ * vertex-based product spaces that are bilinear on quadrilaterals, trilinear on
+ * hexahedra and triangle-by-segment on wedges. The pyramid uses its rational
+ * reference construction. The physical functions are
+ * @f$\phi_i=\widehat\phi_i\circ F_K^{-1}@f$.
  *
- * # Usage Example
+ * The physical gradient is constant on affine simplices. Non-affine maps
+ * and the other cell families generally produce varying gradients.
+ * Approximation estimates require the corresponding mesh regularity,
+ * mapping and solution assumptions.
  *
- * ```cpp
- * P1 Vh(mesh);           // Define P1 space
- * TrialFunction u(Vh);   // P1 trial function
- * TestFunction v(Vh);    // P1 test function
- * 
- * // Poisson problem: -Δu = f
- * Problem problem(u, v);
- * problem = Integral(Grad(u), Grad(v)) - Integral(f, v);
- * ```
+ * ## Usage
  *
- * # Supported Operations
- * - Gradient (Grad)
- * - Divergence (Div) for vector-valued functions
- * - Jacobian transformations
- * - Potential recovery
- * - Linear elasticity specializations
+ * Given a mesh with boundary connectivity and a source coefficient @c f,
+ * the following code constructs the scalar Poisson form.
+ * @code{.cpp}
+ * P1 space(mesh);
+ * TrialFunction u(space);
+ * TestFunction v(space);
+ * Problem poisson(u, v);
+ * poisson = Integral(Grad(u), Grad(v)) - Integral(f, v)
+ *         + DirichletBC(u, Zero());
+ * @endcode
+ *
+ * Include @c Rodin/Variational.h for the complete form vocabulary and
+ * @c Rodin/Solver.h for solvers. The runnable
+ * @ref examples-pdes-poisson "Poisson tutorial" includes the mesh, solve and output.
+ *
+ * ## Operators
+ *
+ * This aggregate provides P1 derivatives, gradients, divergence, Jacobians,
+ * shape-function operators, potential forms, quadrature dispatch and linear
+ * elasticity integrators. Range and geometry restrictions are documented on
+ * the corresponding specializations.
+ *
+ * @see @ref fem-ciarlet, @ref fem-spaces, @ref guides-polytopes
  */
 #ifndef RODIN_VARIATIONAL_P1_H
 #define RODIN_VARIATIONAL_P1_H

@@ -15,7 +15,7 @@
  *
  * # Mathematical Foundation
  * For a domain @f$ \Omega \subset \mathbb{R}^d @f$ with boundary @f$ \partial\Omega @f$,
- * the outward unit normal @f$ \mathbf{n} @f$ satisfies:
+ * the outward unit normal @f$ \mathbf{n} @f$ satisfies
  * @f[
  *   \|\mathbf{n}\| = 1, \quad \mathbf{n} \cdot \mathbf{t} = 0
  * @f]

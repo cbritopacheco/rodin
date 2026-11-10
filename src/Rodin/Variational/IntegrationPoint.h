@@ -22,7 +22,7 @@ namespace Rodin::Variational
    * An IntegrationPoint borrows a geometric point and optionally records the
    * formula/index of its originating integration loop. This sampling metadata
    * does not certify that the point still has that formula's reference
-   * coordinates: mapping a face sample into a cell changes the chart.
+   * coordinates because mapping a face sample into a cell changes the chart.
    *
    * # Reference association
    *

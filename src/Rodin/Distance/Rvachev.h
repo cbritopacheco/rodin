@@ -26,7 +26,7 @@ namespace Rodin::Distance
    *
    * This class implements the Rvachev normalization method, which transforms
    * an arbitrary level set function into an approximate signed distance function.
-   * The transformation is given by:
+   * The transformation is given by
    * @f[
    *   d(x) = \frac{u(x)}{\sqrt{u(x)^2 + |\nabla u(x)|^2}}
    * @f]

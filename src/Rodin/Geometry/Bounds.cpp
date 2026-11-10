@@ -297,7 +297,7 @@ namespace Rodin::Geometry
    *
    * The transformation of a polytope of per-factor degree @f$ k @f$ lies
    * in the span of a basis @f$ \psi_n @f$ that is non-negative and sums
-   * to one on the reference domain: Bernstein polynomials on simplices,
+   * to one on the reference domain, using Bernstein polynomials on simplices,
    * their tensor products on quadrilaterals, hexahedra and wedges, and
    * the collapsed-coordinate product basis on pyramids. Writing
    * @f[
@@ -309,7 +309,7 @@ namespace Rodin::Geometry
    * roundoff allowance; ill-conditioned conversions cannot certify a box.
    *
    * The control points are recovered from values sampled on a unisolvent
-   * lattice: @f$ F_m = T(r_m) = \sum_n C_n \psi_n(r_m) @f$ reads
+   * lattice. The relation @f$ F_m = T(r_m) = \sum_n C_n \psi_n(r_m) @f$ reads
    * @f$ F = C V^\top @f$ with @f$ V_{mn} = \psi_n(r_m) @f$, so
    * @f$ C = F (V^{-1})^\top @f$. Only the conversion depends on the
    * geometry and the degree, so it is built once and shared by every

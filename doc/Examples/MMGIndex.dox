@@ -1,11 +1,22 @@
 /**
   @page examples-mmg-index Working with MMG
-  @brief Showcases the usage of the Rodin::MMG module
+  @brief Choose a mesh-processing workflow and understand its guarantees.
 
-  - @subpage examples-mmg-simple_io
-  - @subpage examples-mmg-mesh_optimization
-  - @subpage examples-mmg-mesh_adaptation
-  - @subpage examples-mmg-behavior
-  - @subpage examples-mmg-casting
+  MMG operations produce a new mesh topology. Optimization improves element
+  shape, while adaptation uses a prescribed size field. The examples separate
+  these tasks from mesh conversion and metadata handling.
 
-  */
+  - @subpage examples-mmg-simple_io — Read and write MMG mesh data.
+  - @subpage examples-mmg-casting — Work with MMG and Geometry mesh interfaces.
+  - @subpage examples-mmg-mesh_optimization — Improve element quality.
+  - @subpage examples-mmg-mesh_adaptation — Adapt to a field or metric.
+  - @subpage examples-swift-background — Adapt a background, classify an
+    implicit circle and fit its interface with SWIFT.
+  - @subpage examples-mmg-behavior — Required entities, level-set cuts, and
+    preservation guarantees.
+
+  Read the behavior guide before relying on entity indices or feature metadata
+  across a remeshing operation.
+
+  @m_footernavigation
+*/

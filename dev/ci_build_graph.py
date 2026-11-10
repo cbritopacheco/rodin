@@ -43,7 +43,7 @@ def specification(job, matrix):
     if job == 'Ordinary':
         flags = tests.configuration(matrix['group'], matrix['profile'], matrix['build_type'],
                                     matrix['multithreaded'], matrix['asan'], matrix['ubsan'], matrix['backend'])
-        return {'mode': matrix['backend'], 'runner': 'ubuntu-latest', 'compiler': 'gcc-14',
+        return {'mode': matrix['backend'], 'runner': 'ubuntu-24.04', 'compiler': 'gcc-14',
                 'cmake': flags, 'targets': []}
     if job == 'ConvergenceBaseline':
         return archive.definition('Convergence', dict(multithreaded=matrix['multithreaded'],
@@ -51,7 +51,7 @@ def specification(job, matrix):
     if job == 'PETScMatrixRanges':
         spec = archive.definition('PETScComplexConvergence', dict(multithreaded=matrix['multithreaded'], suite='bulk'))
         spec['mode'] = 'ranges_' + matrix['scalar']
-        spec['runner'] = 'ubuntu-latest'
+        spec['runner'] = 'ubuntu-24.04'
         spec['cmake']['RODIN_BUILD_CONVERGENCE_TESTS'] = 'OFF'
         # These are the original explicit build targets; execution regex/ranks
         # stay in the workflow and are independently guarded by the inventory.
@@ -142,11 +142,8 @@ def directory(target):
 
 
 def split_variational_build(spec, group):
-    """Bound the observed oversized optional Release sanitizer producer."""
-    flags = spec['cmake']
-    return (group == 'unit/Rodin/Variational' and spec['mode'] == 'optional' and
-            flags['CMAKE_BUILD_TYPE'] == 'Release' and flags['RODIN_USE_ASAN'] == 'ON' and
-            flags['RODIN_USE_UBSAN'] == 'ON')
+    """Bound optional Variational artifacts, including unsanitized Debug builds."""
+    return group == 'unit/Rodin/Variational' and spec['mode'] == 'optional'
 
 
 def directory_plan(entry, records):

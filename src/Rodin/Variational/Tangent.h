@@ -28,7 +28,7 @@ namespace Rodin::Variational
   /**
    * @brief Tangent function operator for real-valued scalar functions.
    *
-   * Applies the tangent function pointwise to a given function:
+   * Applies the tangent function pointwise to a given function.
    * @f[
    *    \text{Tan}(f)(x) = \tan(f(x)) = \frac{\sin(f(x))}{\cos(f(x))}
    * @f]

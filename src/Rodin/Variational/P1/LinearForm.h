@@ -14,7 +14,7 @@
  *
  * # Mathematical Background
  * A linear form @f$ L(v) @f$ for test functions @f$ v \in \mathbb{P}_1 @f$
- * is typically of the form:
+ * is typically of the form
  * @f[
  *   L(v) = \int_\Omega f \cdot v \, dx + \int_{\partial\Omega} g \cdot v \, ds
  * @f]

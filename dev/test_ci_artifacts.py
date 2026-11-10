@@ -94,14 +94,89 @@ class ArtifactPlanTest(unittest.TestCase):
             groups = [job.get('steps', []) for job in jobs.values()] + [document.get('runs', {}).get('steps', [])]
             for steps in groups:
                 for step in steps:
-                    if step.get('uses', '').startswith('actions/download-artifact@'):
-                        self.assertIn('name', step['with'], str(path))
-                        self.assertNotIn('pattern', step['with'], str(path))
+                    self.assertFalse(step.get('uses', '').startswith('actions/download-artifact@'), str(path))
         finalize = yaml.safe_load((root / '.github/workflows/Tests.yml').read_text())['jobs']['CoverageFinalize']
         commands = [step.get('run', '') for step in finalize['steps']]
         self.assertIn('python3 dev/ci_coverage.py finalize', commands)
         self.assertIn('python3 dev/ci_coverage.py threshold', commands)
         self.assertIn('python3 dev/ci_artifacts.py final --output ci-final-inputs.json', commands)
+
+    def test_single_artifact_metadata_restores_keep_their_existing_layout(self):
+        root = tests.ROOT
+        expected = {
+            '.github/workflows/TestCommon.yml': [('ci-test-plan', '.')],
+            '.github/workflows/CoveragePublish.yml': [('ci-test-plan', '.')],
+            '.github/workflows/Tests.yml': [('ci-test-plan', '.')],
+            '.github/workflows/TestDirectoryBuild.yml': [
+                ('ci-build-index-${{ inputs.common }}', '.'),
+                ('ci-common-${{ inputs.common }}', 'ci-runtime-inputs/ci-common-${{ inputs.common }}')],
+            '.github/actions/test-build/action.yml': [('ci-build-index-${{ steps.configuration.outputs.common }}', '.')]
+        }
+        for path, contract in expected.items():
+            document = yaml.safe_load((root / path).read_text())
+            groups = [j.get('steps', []) for j in document.get('jobs', {}).values()]
+            groups += [document.get('runs', {}).get('steps', [])]
+            actual = [(json.loads(s['with']['names'])[0], s['with']['path'])
+                      for steps in groups for s in steps
+                      if s.get('uses') == './.github/actions/download-artifacts' and s['with'].get('merge-single')]
+            self.assertEqual(actual, contract, path)
+
+    def test_benchmark_restore_uses_retrying_exact_names_and_preserves_uploads(self):
+        workflow = yaml.safe_load((tests.ROOT / '.github/workflows/BenchmarkGroup.yml').read_text())
+        for job, artifact, output in [('Build', 'benchmark-common-${{ inputs.configuration }}', 'benchmark-group'),
+                                      ('Run', 'benchmark-group-${{ inputs.group }}', 'benchmark-result')]:
+            steps = workflow['jobs'][job]['steps']
+            self.assertFalse(any(s.get('uses', '').startswith('actions/download-artifact@') for s in steps))
+            restore = next(s for s in steps if s.get('uses') == './.github/actions/download-artifacts')
+            self.assertEqual(json.loads(restore['with']['names']), [artifact])
+            self.assertEqual(restore['with']['path'], 'benchmark-inputs')
+            execute = next(s for s in steps if '--source "$SOURCE"' in s.get('run', ''))
+            self.assertEqual(execute['env']['SOURCE'], 'benchmark-inputs/' + artifact)
+            upload = next(s for s in steps if s.get('uses') == './.github/actions/upload-artifacts')
+            self.assertEqual(upload['with']['path'], output)
+            self.assertIn('name', upload['with'])
+
+    def test_github_script_bodies_compile_with_injected_action_parameters(self):
+        scripts = []
+        def inspect(value):
+            if isinstance(value, dict):
+                if value.get('uses', '').startswith('actions/github-script@'):
+                    scripts.append(value['with']['script'])
+                for child in value.values():
+                    inspect(child)
+            elif isinstance(value, list):
+                for child in value:
+                    inspect(child)
+        paths = [*(tests.ROOT / '.github/workflows').glob('*.yml'),
+                 *(tests.ROOT / '.github/actions').glob('*/action.yml')]
+        for path in paths:
+            inspect(yaml.safe_load(path.read_text()))
+        self.assertGreater(len(scripts), 0)
+        subprocess.run(['node', '-e',
+                        'const fs = require("node:fs");'
+                        'const AsyncFunction = Object.getPrototypeOf(async () => {}).constructor;'
+                        'for (const source of JSON.parse(fs.readFileSync(0, "utf8"))) '
+                        'new AsyncFunction("require", "__original_require__", "github", "octokit", '
+                        '"context", "core", "exec", "glob", "io", source);'],
+                       input=json.dumps(scripts), text=True, check=True, cwd=tests.ROOT)
+
+    def test_runtime_upload_retries_and_workflow_wiring(self):
+        subprocess.run(['node', '--test', '--test-concurrency=1', 'dev/test_ci_artifact_uploads.js'],
+                       cwd=tests.ROOT, check=True)
+        # A producer must finish its upload before consumers can rely on it.
+        # Preserve mandatory missing-file policies and every action input.
+        action = yaml.safe_load((tests.ROOT / '.github/actions/upload-artifacts/action.yml').read_text())
+        self.assertEqual(set(action['outputs']), {'artifact-id', 'artifact-url', 'artifact-digest'})
+        for workflow in (tests.ROOT / '.github/workflows').glob('*.yml'):
+            self.assertNotIn('uses: actions/upload-artifact@', workflow.read_text(), str(workflow))
+        build = yaml.safe_load((tests.ROOT / '.github/workflows/TestDirectoryBuild.yml').read_text())
+        uploads = [s for s in build['jobs']['Build']['steps']
+                   if s.get('uses') == './.github/actions/upload-artifacts']
+        self.assertEqual(len(uploads), 2)
+        for step in uploads:
+            self.assertEqual(step['with']['if-no-files-found'], 'error')
+            self.assertTrue(step['with']['overwrite'])
+            self.assertNotIn('continue-on-error', step)
 
     def test_runtime_downloads_and_retries(self):
         subprocess.run(['node', '--test', '--test-concurrency=1', 'dev/test_ci_artifact_downloads.js'],

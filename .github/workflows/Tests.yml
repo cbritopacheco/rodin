@@ -6,9 +6,8 @@ name: Tests
     - master
     - develop
   pull_request:
-    branches:
-    - master
-    - develop
+    branches: [master, develop]
+    types: [opened, synchronize, reopened, ready_for_review, converted_to_draft]
 permissions:
   contents: read
   actions: read
@@ -17,8 +16,9 @@ concurrency:
   cancel-in-progress: true
 jobs:
   Plan:
+    if: ${{ !github.event.pull_request.draft }}
     name: CMake / CI
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     outputs:
       configurations_baseline: ${{ steps.common.outputs.configurations_baseline }}
       configurations_complex: ${{ steps.common.outputs.configurations_complex }}
@@ -42,8 +42,8 @@ jobs:
         node-version: '24'
     - name: Verify pinned artifact client handles interrupted streams
       run: |
-        npm ci --prefix .github/actions/download-artifacts --ignore-scripts --no-audit --no-fund
-        node --test --test-concurrency=1 dev/test_ci_artifact_stream.js
+        python3 dev/ci_artifact_client.py --action .github/actions/download-artifacts --client .github/actions/download-artifacts
+        node --test --test-concurrency=1 dev/test_ci_artifact_stream.js dev/test_ci_artifact_upload_stream.js
     - name: Verify dependency graph and publish graph navigation
       run: python3 dev/ci_schedule.py --summary
     - name: Verify scoped discovery and incremental coverage guards
@@ -54,7 +54,7 @@ jobs:
     - name: Plan common compilation configurations
       id: common
       run: python3 dev/ci_build_graph.py prepare
-    - uses: actions/upload-artifact@v4
+    - uses: ./.github/actions/upload-artifacts
       with:
         overwrite: true
         name: ci-test-plan
@@ -74,7 +74,7 @@ jobs:
     name: Baseline / ${{ matrix.definition.cmake.CMAKE_BUILD_TYPE }} / MT-${{ matrix.definition.cmake.RODIN_MULTITHREADED
       }} / ASan-${{ matrix.definition.cmake.RODIN_USE_ASAN }} / UBSan-${{ matrix.definition.cmake.RODIN_USE_UBSAN }}
     needs: Plan
-    if: ${{ !cancelled() }}
+    if: ${{ (!cancelled()) && !github.event.pull_request.draft }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Plan.outputs.configurations_baseline) }}
@@ -87,7 +87,7 @@ jobs:
     name: Complex / ${{ matrix.definition.cmake.CMAKE_BUILD_TYPE }} / MT-${{ matrix.definition.cmake.RODIN_MULTITHREADED
       }} / ASan-${{ matrix.definition.cmake.RODIN_USE_ASAN }} / UBSan-${{ matrix.definition.cmake.RODIN_USE_UBSAN }}
     needs: Plan
-    if: ${{ !cancelled() }}
+    if: ${{ (!cancelled()) && !github.event.pull_request.draft }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Plan.outputs.configurations_complex) }}
@@ -100,7 +100,7 @@ jobs:
     name: Default / ${{ matrix.definition.cmake.CMAKE_BUILD_TYPE }} / MT-${{ matrix.definition.cmake.RODIN_MULTITHREADED
       }} / ASan-${{ matrix.definition.cmake.RODIN_USE_ASAN }} / UBSan-${{ matrix.definition.cmake.RODIN_USE_UBSAN }}
     needs: Plan
-    if: ${{ !cancelled() }}
+    if: ${{ (!cancelled()) && !github.event.pull_request.draft }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Plan.outputs.configurations_default_coverage) }}
@@ -113,7 +113,7 @@ jobs:
     name: Default / ${{ matrix.definition.cmake.CMAKE_BUILD_TYPE }} / MT-${{ matrix.definition.cmake.RODIN_MULTITHREADED
       }} / ASan-${{ matrix.definition.cmake.RODIN_USE_ASAN }} / UBSan-${{ matrix.definition.cmake.RODIN_USE_UBSAN }}
     needs: Plan
-    if: ${{ !cancelled() }}
+    if: ${{ (!cancelled()) && !github.event.pull_request.draft }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Plan.outputs.configurations_default_sanitized) }}
@@ -126,7 +126,7 @@ jobs:
     name: MPI / ${{ matrix.definition.cmake.CMAKE_BUILD_TYPE }} / MT-${{ matrix.definition.cmake.RODIN_MULTITHREADED
       }} / ASan-${{ matrix.definition.cmake.RODIN_USE_ASAN }} / UBSan-${{ matrix.definition.cmake.RODIN_USE_UBSAN }}
     needs: Plan
-    if: ${{ !cancelled() }}
+    if: ${{ (!cancelled()) && !github.event.pull_request.draft }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Plan.outputs.configurations_mpi) }}
@@ -139,7 +139,7 @@ jobs:
     name: Native / ${{ matrix.definition.cmake.CMAKE_BUILD_TYPE }} / MT-${{ matrix.definition.cmake.RODIN_MULTITHREADED
       }} / ASan-${{ matrix.definition.cmake.RODIN_USE_ASAN }} / UBSan-${{ matrix.definition.cmake.RODIN_USE_UBSAN }}
     needs: Plan
-    if: ${{ !cancelled() }}
+    if: ${{ (!cancelled()) && !github.event.pull_request.draft }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Plan.outputs.configurations_native) }}
@@ -152,7 +152,7 @@ jobs:
     name: Optional / ${{ matrix.definition.cmake.CMAKE_BUILD_TYPE }} / MT-${{ matrix.definition.cmake.RODIN_MULTITHREADED
       }} / ASan-${{ matrix.definition.cmake.RODIN_USE_ASAN }} / UBSan-${{ matrix.definition.cmake.RODIN_USE_UBSAN }}
     needs: Plan
-    if: ${{ !cancelled() }}
+    if: ${{ (!cancelled()) && !github.event.pull_request.draft }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Plan.outputs.configurations_optional_coverage) }}
@@ -165,7 +165,7 @@ jobs:
     name: Optional / ${{ matrix.definition.cmake.CMAKE_BUILD_TYPE }} / MT-${{ matrix.definition.cmake.RODIN_MULTITHREADED
       }} / ASan-${{ matrix.definition.cmake.RODIN_USE_ASAN }} / UBSan-${{ matrix.definition.cmake.RODIN_USE_UBSAN }}
     needs: Plan
-    if: ${{ !cancelled() }}
+    if: ${{ (!cancelled()) && !github.event.pull_request.draft }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Plan.outputs.configurations_optional_sanitized) }}
@@ -178,7 +178,7 @@ jobs:
     name: PETSc / ${{ matrix.definition.cmake.CMAKE_BUILD_TYPE }} / MT-${{ matrix.definition.cmake.RODIN_MULTITHREADED
       }} / ASan-${{ matrix.definition.cmake.RODIN_USE_ASAN }} / UBSan-${{ matrix.definition.cmake.RODIN_USE_UBSAN }}
     needs: Plan
-    if: ${{ !cancelled() }}
+    if: ${{ (!cancelled()) && !github.event.pull_request.draft }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Plan.outputs.configurations_petsc) }}
@@ -191,7 +191,7 @@ jobs:
     name: PETSc / MatrixRanges / Complex / ${{ matrix.definition.cmake.CMAKE_BUILD_TYPE }} / MT-${{ matrix.definition.cmake.RODIN_MULTITHREADED
       }} / ASan-${{ matrix.definition.cmake.RODIN_USE_ASAN }} / UBSan-${{ matrix.definition.cmake.RODIN_USE_UBSAN }}
     needs: Plan
-    if: ${{ !cancelled() }}
+    if: ${{ (!cancelled()) && !github.event.pull_request.draft }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Plan.outputs.configurations_ranges_complex) }}
@@ -204,7 +204,7 @@ jobs:
     name: PETSc / MatrixRanges / Real / ${{ matrix.definition.cmake.CMAKE_BUILD_TYPE }} / MT-${{ matrix.definition.cmake.RODIN_MULTITHREADED
       }} / ASan-${{ matrix.definition.cmake.RODIN_USE_ASAN }} / UBSan-${{ matrix.definition.cmake.RODIN_USE_UBSAN }}
     needs: Plan
-    if: ${{ !cancelled() }}
+    if: ${{ (!cancelled()) && !github.event.pull_request.draft }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.Plan.outputs.configurations_ranges_real) }}
@@ -216,12 +216,12 @@ jobs:
   InstallationUbuntu:
     needs:
     - Plan
-    if: ${{ !cancelled() }}
+    if: ${{ (!cancelled()) && !github.event.pull_request.draft }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os:
-        - ubuntu-latest
+        - ubuntu-24.04
         compiler:
         - gcc-12
         - gcc-13
@@ -260,7 +260,7 @@ jobs:
         RODIN_INSTALL_RESOURCES: ${{ env.RODIN_INSTALL_RESOURCES }}
     - name: Archive installation artifacts on failure
       if: failure()
-      uses: actions/upload-artifact@v4
+      uses: ./.github/actions/upload-artifacts
       with:
         overwrite: true
         name: installation-test-failure-${{ matrix.compiler }}-mpi${{ matrix.mpi }}-petsc${{ matrix.petsc }}
@@ -275,7 +275,7 @@ jobs:
   InstallationMacOS:
     needs:
     - Plan
-    if: ${{ !cancelled() }}
+    if: ${{ (!cancelled()) && !github.event.pull_request.draft }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -325,7 +325,7 @@ jobs:
         RODIN_INSTALL_RESOURCES: ${{ env.RODIN_INSTALL_RESOURCES }}
     - name: Archive installation artifacts on failure
       if: failure()
-      uses: actions/upload-artifact@v4
+      uses: ./.github/actions/upload-artifacts
       with:
         overwrite: true
         name: installation-test-failure-macos-mpi${{ matrix.mpi }}-petsc${{ matrix.petsc }}
@@ -338,7 +338,7 @@ jobs:
     name: Installation / macOS (OS=${{ matrix.os }}, MPI=${{ matrix.mpi }}, PETSc=${{ matrix.petsc }})
   CoverageFinalize:
     name: Coverage / Finalize
-    if: always()
+    if: ${{ (always()) && !github.event.pull_request.draft }}
     needs:
     - Plan
     - Configurations_baseline
@@ -354,16 +354,17 @@ jobs:
     - Configurations_ranges_real
     - InstallationUbuntu
     - InstallationMacOS
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
     - uses: actions/checkout@v4
       with:
         lfs: false
     - name: Download expected plan
-      uses: actions/download-artifact@v4
+      uses: ./.github/actions/download-artifacts
       with:
-        name: ci-test-plan
+        names: '["ci-test-plan"]'
         path: .
+        merge-single: true
     - name: Plan exact shared-build indices
       run: python3 dev/ci_artifacts.py indices --output ci-index-inputs.json
     - name: Download every shared-build index
@@ -383,7 +384,7 @@ jobs:
         CI_JOB_RESULTS: ${{ toJSON(needs.*.result) }}
       run: python3 dev/ci_coverage.py finalize
     - name: Publish complete coverage summary
-      uses: actions/upload-artifact@v4
+      uses: ./.github/actions/upload-artifacts
       with:
         overwrite: true
         name: coverage-final-summary

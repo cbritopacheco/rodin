@@ -1,5 +1,5 @@
 /**
-  @page guides-io-meshformats Mesh File Formats
+  @page guides-io-meshformats Mesh file formats
   @brief MFEM and MEDIT mesh file formats
 
   @tableofcontents
@@ -11,7 +11,7 @@
   Rodin supports several mesh file formats for reading and writing meshes.
   Each format has its own strengths and is suited to different workflows.
 
-  @section guides-io-meshformats-mfem MFEM Format
+  @section guides-io-meshformats-mfem MFEM format
 
   The MFEM format is a text-based mesh format used by the
   [MFEM](https://mfem.org/) finite element library.
@@ -31,7 +31,7 @@
   mesh.load("input.mesh", IO::FileFormat::MFEM);
   @endcode
 
-  @section guides-io-meshformats-medit MEDIT Format
+  @section guides-io-meshformats-medit MEDIT format
 
   The MEDIT format (also known as `.mesh` format from INRIA) is commonly used
   with the [MMG](https://www.mmgtools.org/) remeshing platform and other INRIA
@@ -54,10 +54,10 @@
 
   When working with the MMG remeshing tools through Rodin's
   @ref Rodin::MMG module, the MEDIT format is used for mesh
-  exchange:
+  exchange.
 
   @code{.cpp}
-  #include <RodinExternal/MMG.h>
+  #include <Rodin/MMG.h>
 
   // Load mesh in MEDIT format
   MMG::Mesh mesh;
@@ -69,16 +69,12 @@
   mesh.save("remeshed.mesh", IO::FileFormat::MEDIT);
   @endcode
 
-  @section guides-io-meshformats-conversion Format Conversion
+  @section guides-io-meshformats-conversion Format conversion
 
-  Converting between formats is straightforward — simply load in one format
-  and save in another:
+  The checked conversion program writes a MEDIT mesh, loads it, saves MFEM
+  output and reloads that output.
 
-  @code{.cpp}
-  Mesh mesh;
-  mesh.load("input.mesh", IO::FileFormat::MEDIT);
-  mesh.save("output.mesh", IO::FileFormat::MFEM);
-  @endcode
+  @snippet IO/MEDIT.cpp medit-convert
 
   @section guides-io-meshformats-comparison Comparison
 
@@ -94,7 +90,7 @@
   | Region markers | Attributes | References | Attributes | Attributes |
   | Best for | MFEM workflows | MMG, INRIA tools | Persistence/checkpointing | ParaView visualization |
 
-  @section guides-io-meshformats-coverage Geometry Coverage
+  @section guides-io-meshformats-coverage Geometry coverage
 
   Mesh I/O tests cover every local polytope geometry used by Rodin:
 
@@ -103,7 +99,7 @@
   | 0D | Point |
   | 1D | Segment |
   | 2D | Triangle, Quadrilateral |
-  | 3D | Tetrahedron, Hexahedron, Wedge |
+  | 3D | Tetrahedron, Pyramid, Hexahedron, Wedge |
 
   MEDIT and MFEM are tested with string round trips for all of these
   geometries. HDF5 persistence and XDMF visualization output are tested over
@@ -111,7 +107,7 @@
   coordinate space so that formats with coordinate arrays can still store the
   vertex position.
 
-  @section guides-io-meshformats-see-also See Also
+  @section guides-io-meshformats-see-also See also
 
   - @ref guides-io "I/O in Rodin overview"
   - @ref guides-meshes-io "Mesh I/O operations"

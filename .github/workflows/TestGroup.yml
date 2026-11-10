@@ -33,6 +33,9 @@ name: Tests / Group
       name:
         type: string
         required: true
+      partition:
+        type: string
+        default: ''
       baseline:
         type: boolean
         required: true
@@ -45,7 +48,7 @@ permissions:
 jobs:
   Run:
     name: GCC-14, ${{ inputs.backend == 'optional' && 'Optional' || inputs.backend == 'default' && 'Default' || 'Baseline' }}, ${{ inputs.build_type }}, MT-${{ inputs.multithreaded }}, ASan-${{ inputs.asan }}, UBSan-${{ inputs.ubsan }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 360
     env:
       MAKEFLAGS: ${{ inputs.backend == 'optional' && inputs.profile == 'unit' && inputs.build_type == 'Release' && inputs.asan == 'OFF' && inputs.ubsan == 'OFF' && '-j1' || '-j2'
@@ -61,8 +64,10 @@ jobs:
         with:
           submodules: recursive
           lfs: false
+      # These manufactured partitions construct every mesh with UniformGrid.
       - name: Hydrate test resources
-        run: git lfs pull --include="resources/medit/Square.medit.mesh,resources/mfem/Square.mfem.mesh,resources/mfem/SquareWithHole.mfem.mesh,resources/mfem/StarSquare.mfem.mesh,resources/examples/ShapeOptimization/LevelSetCantilever2D.mfem.mesh,resources/tests/mfem/h1/**"
+        if: inputs.group != 'manufactured/Rodin/P1/LinearElasticity3D'
+        run: python3 dev/ci_lfs.py --include="resources/medit/Square.medit.mesh,resources/mfem/Square.mfem.mesh,resources/mfem/SquareWithHole.mfem.mesh,resources/mfem/StarSquare.mfem.mesh,resources/examples/ShapeOptimization/LevelSetCantilever2D.mfem.mesh,resources/tests/mfem/h1/**"
       - name: Check execution disk headroom
         run: python3 dev/ci_environment.py disk
       - name: Preserve slow-lane execution environment
@@ -99,7 +104,8 @@ jobs:
           GROUP: ${{ inputs.group }}
           PROFILE: ${{ inputs.profile }}
           BACKEND: ${{ inputs.backend }}
-        run: python3 dev/ci_tests.py run --group "$GROUP" --profile "$PROFILE" --backend "$BACKEND"
+          PARTITION: ${{ inputs.partition }}
+        run: python3 dev/ci_tests.py run --group "$GROUP" --profile "$PROFILE" --backend "$BACKEND" --partition "$PARTITION"
       - name: Capture production coverage
         id: capture
         if: ${{ !cancelled() && steps.build.outcome == 'success' && steps.selection.outputs.has_targets == 'true' && env.RODIN_COVERAGE == 'ON' }}
@@ -123,9 +129,19 @@ jobs:
         run: python3 dev/ci_coverage.py record --output ci-result
       - name: Save invocation and coverage records
         if: ${{ !cancelled() && steps.build.outcome == 'success' }}
-        uses: actions/upload-artifact@v4
+        uses: ./.github/actions/upload-artifacts
         with:
           overwrite: true
           name: ci-result-${{ inputs.family }}-${{ steps.selection.outputs.common }}-${{ inputs.id }}
           path: ci-result/
           if-no-files-found: error
+      - name: Report execution disk usage
+        if: always()
+        shell: bash
+        run: |
+          df -h . "$RUNNER_TEMP" || echo "::warning::Filesystem usage could not be reported."
+          for path in build ci-runtime-inputs "$RUNNER_TEMP/rodin-apt-archives"; do
+            if [ -e "$path" ] && ! du -sh "$path"; then
+              echo "::warning::Disk usage for $path is incomplete; some entries could not be read."
+            fi
+          done

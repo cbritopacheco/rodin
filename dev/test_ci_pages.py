@@ -32,6 +32,16 @@ class PagesTest(unittest.TestCase):
             self.assertEqual(deploy_pages.prepare('owner/repo', checkout), marker)
             self.assertEqual(json.loads((checkout / deploy_pages.MARKER).read_text()), marker)
 
+    def test_preparation_exports_snapshot_version_for_deployment(self):
+        checkout, _ = self.marker()
+        output = checkout / 'outputs'
+        with patch.dict('os.environ', GITHUB_OUTPUT=str(output)), \
+                patch('deploy_pages.api', side_effect=[dict(SITE, build_type='workflow'),
+                      {'object': {'sha': COMMIT}}]), \
+                patch('deploy_pages.subprocess.check_output', return_value=COMMIT + '\n'):
+            deploy_pages.prepare('owner/repo', checkout)
+        self.assertEqual(output.read_text(), f'commit={COMMIT}\n')
+
     def test_waits_through_stale_content_and_verifies_exact_commit(self):
         checkout, marker = self.marker()
         with patch('deploy_pages.fetch_marker', side_effect=[dict(marker, commit='old'), marker]) as fetch, \
@@ -70,9 +80,8 @@ class PagesTest(unittest.TestCase):
                 deploy_pages.prepare('owner/repo', Path('checkout'))
 
     def test_every_pages_writer_deploys_its_artifact_under_same_lock(self):
-        for filename, job in [('Benchmarks.yml', 'PublishDocumentation'),
-                              ('Benchmarks.yml', 'Publish'),
-                              ('PublishDocumentation.yml', 'PublishDocumentation')]:
+        for filename, job in [('Documentation.yml', 'PublishDocumentation'),
+                              ('Benchmarks.yml', 'Publish')]:
             workflow = yaml.safe_load((ROOT / '.github/workflows' / filename).read_text())
             definition = workflow['jobs'][job]
             self.assertEqual(definition['concurrency']['group'], 'rodin-gh-pages-publication')
@@ -85,9 +94,48 @@ class PagesTest(unittest.TestCase):
         action = yaml.safe_load((ROOT / '.github/actions/publish-pages/action.yml').read_text())
         steps = action['runs']['steps']
         self.assertEqual(steps[1]['uses'], 'actions/upload-pages-artifact@v4')
-        self.assertEqual(steps[2]['uses'], 'actions/deploy-pages@v4')
+        self.assertEqual(steps[2]['uses'], 'actions/github-script@v8')
+        self.assertEqual(steps[2]['env']['SNAPSHOT'], '${{ steps.snapshot.outputs.commit }}')
+        self.assertEqual(steps[2]['env']['ARTIFACT_ID'], '${{ steps.artifact.outputs.artifact_id }}')
         self.assertIn(' prepare ', steps[0]['run'])
         self.assertIn(' verify ', steps[3]['run'])
+
+    def test_snapshot_deployment_request_and_failure_handling(self):
+        import subprocess
+        subprocess.run(['node', '--test', '--test-concurrency=1', 'dev/test_ci_pages_deploy.js'],
+                       cwd=ROOT, check=True)
+
+    def test_documentation_is_independent_and_pull_requests_do_not_deploy(self):
+        docs = yaml.safe_load((ROOT / '.github/workflows/Documentation.yml').read_text())
+        benchmarks = yaml.safe_load((ROOT / '.github/workflows/Benchmarks.yml').read_text())
+        events = docs.get('on', docs.get(True))
+        self.assertEqual(events['push']['branches'], ['master', 'develop'])
+        self.assertIn('pull_request', events)
+        publication = docs['jobs']['PublishDocumentation']
+        self.assertEqual(publication['needs'], 'Build-And-Deploy')
+        self.assertEqual(publication['if'], "github.event_name == 'push'")
+        self.assertNotIn('Documentation', benchmarks['jobs'])
+        self.assertNotIn('PublishDocumentation', benchmarks['jobs'])
+        self.assertEqual(benchmarks['jobs']['Publish']['needs'], 'Pool')
+
+    def test_documentation_badges_use_existing_runners_and_skip_pull_requests(self):
+        docs = yaml.safe_load((ROOT / '.github/workflows/Documentation.yml').read_text())
+        self.assertEqual(set(docs['jobs']), {'Build-And-Deploy', 'PublishDocumentation'})
+        for name, job in docs['jobs'].items():
+            steps = [step for step in job['steps'] if 'dev/ci_badges.py --documentation-only' in step.get('run', '')]
+            self.assertEqual(len(steps), 2)
+            for step in steps:
+                self.assertTrue(step['continue-on-error'])
+                self.assertEqual(step['timeout-minutes'], 2)
+                self.assertIn('--source-attempt', step['run'])
+                self.assertIn('github.run_attempt', step['env']['ATTEMPT'])
+                self.assertNotIn('gh workflow run', step['run'])
+                if name == 'Build-And-Deploy':
+                    self.assertIn("github.event_name == 'push'", step['if'])
+            self.assertEqual(job['permissions']['contents'], 'write')
+            self.assertEqual(job['permissions']['actions'], 'read')
+        checkout = docs['jobs']['Build-And-Deploy']['steps'][0]
+        self.assertFalse(checkout['with']['persist-credentials'])
 
     def test_shared_apt_guard_precedes_version_resolution(self):
         action = yaml.safe_load((ROOT / '.github/actions/apt-dependencies/action.yml').read_text())

@@ -20,16 +20,17 @@ permissions:
 jobs:
   Publish:
     name: Validate and publish every contribution
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4
         with:
           lfs: false
-      - uses: actions/download-artifact@v4
+      - uses: ./.github/actions/download-artifacts
         with:
-          name: ci-test-plan
+          names: '["ci-test-plan"]'
           path: .
+          merge-single: true
       - name: Plan exact independent lane reports and receipts
         env:
           KIND: ${{ inputs.kind }}
@@ -64,7 +65,7 @@ jobs:
         env:
           COVERAGE_UPLOADED: ${{ steps.upload.outcome }}
         run: python3 dev/ci_coverage_publish.py record
-      - uses: actions/upload-artifact@v4
+      - uses: ./.github/actions/upload-artifacts
         with:
           overwrite: true
           name: ci-publication-${{ inputs.family }}-${{ inputs.common }}

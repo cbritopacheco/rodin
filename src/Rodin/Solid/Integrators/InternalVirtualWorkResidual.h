@@ -10,7 +10,7 @@
  * formulations (pure displacement and mixed displacement-pressure), written
  * in terms of the first Piola-Kirchhoff stress.
  *
- * Pure displacement:
+ * The pure-displacement formulation has the following residual.
  * @f[
  *   \delta W^{\text{int}}(\mathbf{v}) = \int_{\Omega_0} \mathbf{P}(\mathbf{u}) : \nabla_0 \mathbf{v} \, dX
  * @f]

@@ -25,7 +25,7 @@ namespace Rodin::Utility
    * This is useful for template metaprogramming operations like
    * tuple indexing and parameter pack expansion.
    *
-   * Example usage:
+   * The following example illustrates usage.
    * @code{.cpp}
    * using Seq = IntegerSequence<int, 0, 1, 2, 3, 4>;
    * @endcode

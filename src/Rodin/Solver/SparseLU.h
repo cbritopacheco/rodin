@@ -13,7 +13,7 @@
  * Eigen's SparseLU solver.
  *
  * # Algorithm
- * The solver performs LU decomposition:
+ * The solver performs LU decomposition.
  * @f[
  *   PA = LU
  * @f]
@@ -98,7 +98,7 @@ namespace Rodin::Solver
    *
    * @par Architecture
    * The operator is factorized once and the right-hand side is solved with
-   * those factors. Optional iterative refinement reuses the same factors:
+   * those factors. Optional iterative refinement reuses the same factors.
    * @f[
    * r_k=b-Ax_k,\qquad A\delta x_k=r_k,\qquad x_{k+1}=x_k+\delta x_k.
    * @f]

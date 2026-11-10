@@ -14,11 +14,11 @@
  *
  * # Mathematical foundation
  *
- * A quadrature rule approximates an integral by a weighted sum:
+ * A quadrature rule approximates an integral by a weighted sum.
  * @f[
  *   \int_K f(x)\,dx \approx \sum_{q=1}^{n_q} w_q\,f(x_q),
  * @f]
- * where:
+ * Here,
  * - @f$ x_q @f$ are quadrature points,
  * - @f$ w_q @f$ are quadrature weights,
  * - @f$ n_q @f$ is the number of quadrature points.
@@ -32,7 +32,7 @@
  *
  * # Usage
  *
- * Typical usage is:
+ * The following code constructs and evaluates a quadrature rule.
  * @code{.cpp}
  * auto qr = QuadratureRule(integrand);
  * qr.setPolytope(cell);
@@ -456,7 +456,7 @@ namespace Rodin::Variational
    * @brief Local bilinear-form quadrature for the dot product of a trial and a
    * test shape function.
    *
-   * This specialization assembles the local matrix associated with:
+   * This specialization assembles the local matrix associated with
    * @f[
    *   \int_K \phi^{\mathrm{tr}} \cdot \phi^{\mathrm{te}} \, dx
    * @f]
@@ -747,7 +747,7 @@ namespace Rodin::Variational
    * @ingroup QuadratureRuleSpecializations
    * @brief Local linear-form quadrature for a test shape function expression.
    *
-   * This specialization assembles the local vector associated with:
+   * This specialization assembles the local vector associated with
    * @f[
    *   \int_K \phi^{\mathrm{te}} \, dx
    * @f]

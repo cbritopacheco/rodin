@@ -31,10 +31,12 @@ async function fixture(t, interrupted) {
   archive.append(payload, {name: 'payload.bin'});
   await archive.finalize();
   const zip = await finished;
+  let requests = 0;
   const server = http.createServer((request, response) => {
     response.writeHead(200, {'Content-Type': 'application/zip', 'Content-Length': zip.length});
     // Close a valid ZIP stream before its advertised payload has arrived.
-    response.end(interrupted ? zip.subarray(0, 1024) : zip);
+    const partial = typeof interrupted === 'function' ? interrupted(++requests) : interrupted;
+    response.end(partial ? zip.subarray(0, 1024) : zip);
   });
   t.after(async () => {
     server.closeAllConnections();
@@ -79,4 +81,86 @@ test('interrupted ZIP rejects instead of exiting successfully with an unresolved
   assert.equal(result.error && result.error.code, 1, result.stderr);
   assert.match(result.stdout, /settled=true/);
   assert.match(result.stderr, /Blob storage chunk did not respond/);
+});
+
+
+test('mandatory download recovers a real interrupted ZIP with clean staging', async t => {
+  const {downloadArtifacts} = require('../.github/actions/download-artifacts/download.js');
+  const {folder, payload, zip, url} = await fixture(t, request => request === 1);
+  let attempts = 0;
+  const digest = 'sha256:' + crypto.createHash('sha256').update(zip).digest('hex');
+  const client = {
+    async getArtifact(name) { return {artifact: {name, id: 17, digest}}; },
+    async downloadArtifact(id, options) {
+      assert.equal(id, 17);
+      assert.equal(options.expectedHash, digest);
+      assert.deepEqual(await fs.readdir(options.path), []);
+      ++attempts;
+      const result = await streamExtractExternal(url, options.path, {timeout: 50});
+      return {digestMismatch: result.sha256Digest !== digest};
+    }
+  };
+  await downloadArtifacts(client, ['benchmark-group-a'], folder,
+    {info() {}, warning() {}}, async () => {});
+  assert.equal(attempts, 2);
+  assert.deepEqual(await fs.readFile(path.join(folder, 'benchmark-group-a/payload.bin')), payload);
+  assert.deepEqual(await fs.readdir(folder), ['benchmark-group-a']);
+});
+
+test('composite download retries real lookup reset and merges the verified artifact', {timeout: 30000}, async t => {
+  const {folder, payload, zip, url} = await fixture(t, false);
+  const runner = await fs.mkdtemp(path.join(os.tmpdir(), 'rodin-download-action-'));
+  await fs.symlink(clientRoot, path.join(runner, 'rodin-artifact-client'), 'dir');
+  await fs.writeFile(path.join(folder, 'source.cpp'), 'keep');
+  const digest = 'sha256:' + crypto.createHash('sha256').update(zip).digest('hex');
+  let lookups = 0, signed = 0;
+  const server = http.createServer(async (request, response) => {
+    const chunks = [];
+    for await (const chunk of request) chunks.push(chunk);
+    const data = JSON.parse(Buffer.concat(chunks));
+    const method = request.url.split('/').pop();
+    let result;
+    if (method === 'ListArtifacts') {
+      ++lookups;
+      if (lookups === 1) {request.socket.destroy();return;}
+      assert(data.name_filter === 'ci-build-index-fixture' || data.id_filter === '17');
+      result = {artifacts: [{databaseId: '17', name: 'ci-build-index-fixture', size: String(zip.length),
+        workflowRunBackendId: 'run', workflowJobRunBackendId: 'job', digest}]};
+    } else if (method === 'GetSignedArtifactURL') {
+      ++signed;
+      assert.equal(data.name, 'ci-build-index-fixture');
+      result = {signedUrl: url};
+    } else throw new Error('Unexpected RPC: ' + method);
+    response.writeHead(200, {'Content-Type': 'application/json'});
+    response.end(JSON.stringify(result));
+  });
+  await new Promise((resolve, reject) => {server.once('error', reject);server.listen(0, '127.0.0.1', resolve);});
+  const values = {RUNNER_TEMP: runner, GITHUB_WORKSPACE: folder,
+    ACTIONS_RESULTS_URL: `http://127.0.0.1:${server.address().port}`,
+    ACTIONS_RUNTIME_TOKEN: 'e30.' + Buffer.from(JSON.stringify({scp: 'Actions.Results:run:job'})).toString('base64url') + '.fixture',
+    ARTIFACT_ACTION_PATH: path.resolve('.github/actions/download-artifacts'),
+    ARTIFACT_NAMES: '["ci-build-index-fixture"]', ARTIFACT_NAMES_FILE: '',
+    ARTIFACT_DESTINATION: folder, ARTIFACT_MERGE_SINGLE: 'true'};
+  const previous = Object.fromEntries(Object.keys(values).map(key => [key, process.env[key]]));
+  Object.assign(process.env, values);
+  t.after(async () => {
+    for (const [key, value] of Object.entries(previous)) {
+      if (value === undefined) delete process.env[key];else process.env[key] = value;
+    }
+    server.closeAllConnections();await new Promise(resolve => server.close(resolve));
+    await fs.rm(runner, {recursive: true, force: true});
+  });
+  const action = await fs.readFile('.github/actions/download-artifacts/action.yml', 'utf8');
+  const script = action.split('script: |\n')[1].split('\n').map(line => line.replace(/^          /, '')).join('\n');
+  const AsyncFunction = Object.getPrototypeOf(async () => {}).constructor;
+  const execute = new AsyncFunction('require', '__original_require__', 'github', 'octokit',
+    'context', 'core', 'exec', 'glob', 'io', script);
+  const warnings = [];
+  await execute(require, require, {}, {}, {}, {info() {}, warning: message => warnings.push(message)}, {}, {}, {});
+  assert.equal(lookups, 3);
+  assert.equal(signed, 1);
+  assert.equal(warnings.length, 1);
+  assert.deepEqual(await fs.readFile(path.join(folder, 'payload.bin')), payload);
+  assert.equal(await fs.readFile(path.join(folder, 'source.cpp'), 'utf8'), 'keep');
+  assert.deepEqual((await fs.readdir(folder)).sort(), ['payload.bin', 'source.cpp']);
 });

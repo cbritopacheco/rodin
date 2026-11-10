@@ -32,7 +32,7 @@
 namespace Rodin::FormLanguage
 {
   /**
-   * @brief Type traits for @c P0g: exposes the mesh type, the scalar type, the range
+   * @brief Type traits for @c P0g, exposing the mesh type, the scalar type, the range
    * type, the execution context and the finite element type.
    */
   template <class Number, class Mesh>
@@ -55,7 +55,7 @@ namespace Rodin::FormLanguage
   };
 
   /**
-   * @brief Type traits for @c P0g: exposes the mesh type, the scalar type, the range
+   * @brief Type traits for @c P0g, exposing the mesh type, the scalar type, the range
    * type, the execution context and the finite element type.
    */
   template <class Number, class Mesh>

@@ -28,7 +28,7 @@ namespace Rodin::MMG
    * - required tetrahedra (`MG_REQ` on tetrahedra).
    *
    * These sets are preserved when converting to/from native MMG structures via
-   * @ref MMG5::rodinToMesh and @ref MMG5::meshToRodin. The optimizer and
+   * @ref Rodin::MMG::V5::Mesh::toV5 and @ref Rodin::MMG::V5::Mesh::fromV5. The optimizer and
    * level-set wrappers also restore the required index sets when the original
    * indices are still valid in the remeshed output.
    * In MMG3D, required triangles refer to boundary triangles exported to MMG's

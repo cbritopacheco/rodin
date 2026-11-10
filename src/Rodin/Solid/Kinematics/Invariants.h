@@ -9,14 +9,14 @@
  * @brief Strain invariants for isotropic and anisotropic hyperelasticity.
  *
  * Provides isotropic invariants @f$ I_1, I_2, I_3 @f$ of the right
- * Cauchy-Green tensor @f$ \mathbf{C} @f$:
+ * Cauchy-Green tensor @f$ \mathbf{C} @f$.
  * @f[
  *   I_1 = \operatorname{tr}(\mathbf{C}), \quad
  *   I_2 = \tfrac{1}{2}[\operatorname{tr}(\mathbf{C})^2 - \operatorname{tr}(\mathbf{C}^2)], \quad
  *   I_3 = \det(\mathbf{C}) = J^2
  * @f]
  *
- * and fiber invariants @f$ I_4, I_5 @f$ for structural tensors:
+ * and fiber invariants @f$ I_4, I_5 @f$ for structural tensors.
  * @f[
  *   I_4 = \mathbf{a}_0 \cdot \mathbf{C} \, \mathbf{a}_0, \quad
  *   I_5 = \mathbf{a}_0 \cdot \mathbf{C}^2 \, \mathbf{a}_0
@@ -37,7 +37,7 @@ namespace Rodin::Solid
   /**
    * @brief Isotropic invariants of the right Cauchy-Green tensor.
    *
-   * Computes the three principal invariants:
+   * Computes the three principal invariants.
    * - @f$ I_1 = \operatorname{tr}(\mathbf{C}) @f$
    * - @f$ I_2 = \tfrac{1}{2}[\operatorname{tr}(\mathbf{C})^2 - \operatorname{tr}(\mathbf{C}^2)] @f$
    * - @f$ I_3 = \det(\mathbf{C}) = J^2 @f$
@@ -99,7 +99,7 @@ namespace Rodin::Solid
    * @brief Fiber invariants for anisotropic hyperelasticity.
    *
    * Computes invariants associated with a preferred fiber direction
-   * @f$ \mathbf{a}_0 @f$:
+   * @f$ \mathbf{a}_0 @f$.
    * - @f$ I_4 = \mathbf{a}_0 \cdot \mathbf{C} \, \mathbf{a}_0 @f$
    * - @f$ I_5 = \mathbf{a}_0 \cdot \mathbf{C}^2 \, \mathbf{a}_0 @f$
    *

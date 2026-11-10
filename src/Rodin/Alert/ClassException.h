@@ -22,12 +22,12 @@ namespace Rodin::Alert
    * error message. Uses Boost.TypeIndex to automatically extract and
    * format the class name with proper coloring and emphasis.
    *
-   * Example usage:
+   * The following example illustrates usage.
    * @code{.cpp}
    * ClassException(*this) << "Invalid state detected" << Raise;
    * @endcode
    *
-   * This produces output like:
+   * This produces output of the following form.
    * "Error: In class MyClass. Invalid state detected"
    */
   template <class T>

@@ -9,7 +9,7 @@
  * @brief First Piola-Kirchhoff stress tensor computation.
  *
  * Computes the first Piola-Kirchhoff stress @f$ \mathbf{P} @f$ from a
- * hyperelastic constitutive law:
+ * hyperelastic constitutive law.
  * @f[
  *   \mathbf{P} = \frac{\partial W}{\partial \mathbf{F}}
  * @f]

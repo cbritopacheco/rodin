@@ -16,7 +16,7 @@
  * - Function × shape function (left or right multiplication)
  * - Number × integrator (scaling)
  *
- * For functions @f$ f @f$ and @f$ g @f$:
+ * For functions @f$ f @f$ and @f$ g @f$.
  * @f[
  *   (f \cdot g)(x) = f(x) \cdot g(x)
  * @f]
@@ -47,7 +47,7 @@
 namespace Rodin::FormLanguage
 {
   /**
-   * @brief Type traits for @c Mult over a function expression: exposes the finite
+   * @brief Type traits for @c Mult over a function expression, exposing the finite
    * element space, the shape function space, the scalar type, the left-hand side
    * operand, the right-hand side operand and the range type.
    */
@@ -139,7 +139,7 @@ namespace Rodin::FormLanguage
   };
 
   /**
-   * @brief Type traits for @c Mult over a shape function: exposes the finite element
+   * @brief Type traits for @c Mult over a shape function, exposing the finite element
    * space and the shape function space.
    */
   template <class LHSDerived, class RHSDerived, class FES,
@@ -173,7 +173,7 @@ namespace Rodin::Variational
    * @ingroup MultSpecializations
    * @brief Multiplication of two FunctionBase instances.
    *
-   * Computes the pointwise product:
+   * Computes the pointwise product.
    * @f[
    *   (f \cdot g)(x) = f(x) \cdot g(x)
    * @f]
@@ -405,7 +405,7 @@ namespace Rodin::Variational
    * @ingroup MultSpecializations
    * @brief Left Multiplication of a ShapeFunctionBase by a FunctionBase
    *
-   * Represents the following expression:
+   * Represents the following expression.
    * @f[
    *   f A(u)
    * @f]
@@ -673,7 +673,7 @@ namespace Rodin::Variational
    * @ingroup MultSpecializations
    * @brief Right multiplication of a ShapeFunctionBase by a FunctionBase
    *
-   * Represents the following expression:
+   * Represents the following expression.
    * @f[
    *    A(u) f
    * @f]

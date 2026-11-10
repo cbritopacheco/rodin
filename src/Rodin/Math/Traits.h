@@ -131,7 +131,7 @@ namespace Rodin::FormLanguage
     Unknown
   };
 
-  /// @brief Type trait: whether @c T is a Math::SpatialVector.
+  /// @brief Indicates whether @c T is a Math::SpatialVector.
   template <class T>
   struct IsSpatialVector : std::false_type
   {
@@ -147,7 +147,7 @@ namespace Rodin::FormLanguage
       static constexpr bool Value = true;
   };
 
-  /// @brief Type trait: whether @c T is a Math::SpatialMatrix.
+  /// @brief Indicates whether @c T is a Math::SpatialMatrix.
   template <class T>
   struct IsSpatialMatrix : std::false_type
   {
@@ -164,7 +164,7 @@ namespace Rodin::FormLanguage
   };
 
   /**
-   * @brief Type trait: whether @c T has vector range (a spatial vector or a
+   * @brief Indicates whether @c T has vector range (a spatial vector or a
    * single-column Eigen object).
    */
   template <class T>
@@ -195,7 +195,7 @@ namespace Rodin::FormLanguage
   };
 
   /**
-   * @brief Type trait: whether @c T has matrix range (a spatial matrix or a
+   * @brief Indicates whether @c T has matrix range (a spatial matrix or a
    * multi-column Eigen object).
    */
   template <class T>

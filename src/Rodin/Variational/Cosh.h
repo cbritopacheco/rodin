@@ -29,7 +29,7 @@ namespace Rodin::Variational
   /**
    * @brief Hyperbolic cosine function operator for real-valued scalar functions.
    *
-   * Applies the hyperbolic cosine function pointwise to a given function:
+   * Applies the hyperbolic cosine function pointwise to a given function.
    * @f[
    *    \text{Cosh}(f)(x) = \cosh(f(x)) = \frac{e^{f(x)} + e^{-f(x)}}{2}
    * @f]
@@ -41,7 +41,7 @@ namespace Rodin::Variational
    * - Exact solutions with exponential behavior
    *
    * @note Always returns a real-valued function for real input.
-   * @note Always positive: @f$ \cosh(x) \geq 1 @f$ for all real @f$ x @f$.
+   * @note Positivity follows from @f$ \cosh(x) \geq 1 @f$ for all real @f$ x @f$.
    * @see Sinh, Cos
    */
 

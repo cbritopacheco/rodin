@@ -11,7 +11,7 @@
  * @file
  * @brief Gradient operator specialization for P0g (global constant) functions.
  *
- * For P0g functions (globally constant), the gradient is identically zero:
+ * For P0g functions (globally constant), the gradient is identically zero.
  *   ∇u = 0.
  *
  * This holds for all element types and at all points (cells/faces/boundary).
@@ -244,7 +244,7 @@ namespace Rodin::Variational
       /**
        * @brief Number of local basis functions in the gradient object.
        *
-       * Same as the operand basis count: scalar P0g has 1 basis, vector P0g has vdim bases.
+       * Matches the operand basis count. Scalar P0g has 1 basis, vector P0g has vdim bases.
        * @param element Finite element used by the operation.
        * @returns Number of local basis functions on the selected entity.
        */

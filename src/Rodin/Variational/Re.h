@@ -21,7 +21,7 @@ namespace Rodin::Variational
    * @brief Extracts the real part of a complex-valued function.
    *
    * For a complex function @f$ f: \Omega \to \mathbb{C} @f$ with
-   * @f$ f(x) = u(x) + iv(x) @f$, this operator extracts the real part:
+   * @f$ f(x) = u(x) + iv(x) @f$, this operator extracts the real part.
    * @f[
    *    \text{Re}(f)(x) = u(x) \in \mathbb{R}
    * @f]

@@ -1,412 +1,170 @@
 /**
-  @page guides-weak-formulations Weak Formulations
-  @brief Understanding and implementing weak formulations in Rodin
+  @page guides-weak-formulations Weak formulations
+  @brief Derive a variational equation before translating it into finite element code.
+
+  A weak formulation specifies the spaces in which an equation is tested, the
+  derivatives that must exist, and the way boundary data enter. The purpose of
+  this guide is the derivation. The @ref guides-variational "variational formulations guide" then explains how those objects are represented in Rodin.
 
   @tableofcontents
-
   @m_footernavigation
 
-  @section guides-weak-intro Introduction
+  @section guides-weak-poisson Begin with scalar diffusion
 
-  The **weak formulation** (also called variational formulation) is the
-  foundation of the finite element method. Instead of solving a PDE in its
-  classical (strong) form, we reformulate it in a weaker sense that is more
-  amenable to numerical approximation.
-
-  The general idea is to multiply the PDE by a test function, integrate over
-  the domain, and apply integration by parts. This process:
-  - Reduces the regularity requirements on the solution
-  - Naturally incorporates certain boundary conditions
-  - Leads to a well-posed problem suitable for discretization
-
-  Rodin writes assembled `Problem` objects as residual equations with all terms
-  moved to the left-hand side. See
-  @ref guides-numerical-contracts "Numerical contracts" for the sign convention,
-  structural constraints, quadrature exactness, and nonlinear tangent checks.
-
-  @section guides-weak-procedure Derivation Procedure
-
-  Consider a general second-order PDE on a domain @f$ \Omega @f$:
-
+  Let @f$\Omega\subset\mathbb R^d@f$ be a bounded Lipschitz domain. Split its
+  boundary into a Dirichlet part @f$\Gamma_D@f$ and a Neumann part
+  @f$\Gamma_N@f$, ignoring their measure-zero interface. Consider
   @f[
-    \mathcal{L} u = f \quad \text{in } \Omega
+    -\Delta u=f\quad\text{in }\Omega,\qquad
+    u=g_D\quad\text{on }\Gamma_D,\qquad
+    \nabla u\cdot n=g_N\quad\text{on }\Gamma_N.
   @f]
-
-  To derive the weak formulation:
-
-  1. **Multiply** by a test function @f$ v @f$ from an appropriate space
-  2. **Integrate** over @f$ \Omega @f$:
-     @f$ \int_\Omega (\mathcal{L} u) \, v \, dx = \int_\Omega f \, v \, dx @f$
-  3. **Integrate by parts** to transfer derivatives from @f$ u @f$ to @f$ v @f$
-  4. **Apply boundary conditions** (essential or natural)
-
-  @section guides-weak-poisson Example: The Poisson Equation
-
-  @subsection guides-weak-poisson-strong Strong Form
-
-  The Poisson equation with homogeneous Dirichlet boundary conditions:
-
+  For nonzero prescribed values, the admissible fields and test functions belong
+  to different sets.
   @f[
-    \left\{
-    \begin{aligned}
-      -\Delta u &= f && \text{in } \Omega \\
-      u &= 0 && \text{on } \partial\Omega
-    \end{aligned}
-    \right.
+    U=\{w\in H^1(\Omega):w|_{\Gamma_D}=g_D\},\qquad
+    V=\{v\in H^1(\Omega):v|_{\Gamma_D}=0\}.
   @f]
+  Traces are understood in the Sobolev sense. The data must admit the required
+  trace and load functionals. In particular, a lifting of @f$g_D@f$ is assumed
+  to exist in @f$H^1(\Omega)@f$.
 
-  @subsection guides-weak-poisson-deriv Derivation
+  @subsection guides-weak-poisson-deriv Integrate by parts
 
-  Multiply by @f$ v \in H^1_0(\Omega) @f$ and integrate:
-
+  Multiplying by @f$v\in V@f$ and integrating by parts gives
   @f[
-    -\int_\Omega \Delta u \, v \, dx = \int_\Omega f \, v \, dx
+    \int_\Omega\nabla u\cdot\nabla v\,dx
+       -\int_{\partial\Omega}(\nabla u\cdot n)v\,ds
+       =\int_\Omega fv\,dx.
   @f]
-
-  Apply Green's formula (integration by parts):
-
+  The test function vanishes on @f$\Gamma_D@f$, while the normal derivative is
+  prescribed on @f$\Gamma_N@f$. Thus the weak problem seeks @f$u\in U@f$
+  such that
   @f[
-    \int_\Omega \nabla u \cdot \nabla v \, dx
-    - \underbrace{\int_{\partial\Omega} \frac{\partial u}{\partial n} v \, ds}_{= 0 \text{ (since } v = 0 \text{ on } \partial\Omega)}
-    = \int_\Omega f \, v \, dx
+    a(u,v)=\ell(v)\quad\text{for every }v\in V,
   @f]
-
-  @subsection guides-weak-poisson-result Weak Formulation
-
-  Find @f$ u \in H^1_0(\Omega) @f$ such that for all
-  @f$ v \in H^1_0(\Omega) @f$:
-
+  with
   @f[
-    \int_\Omega \nabla u \cdot \nabla v \, dx = \int_\Omega f \, v \, dx
+    a(u,v)=\int_\Omega\nabla u\cdot\nabla v\,dx,\qquad
+    \ell(v)=\int_\Omega fv\,dx+\int_{\Gamma_N}g_Nv\,ds.
   @f]
+  The second derivative in the strong equation has become first derivatives
+  in the weak equation. This permits continuous piecewise affine functions,
+  whose gradients may jump between cells, to be used as conforming approximations.
 
-  @subsection guides-weak-poisson-rodin Implementation in Rodin
+  @subsection guides-weak-poisson-result Check uniqueness
 
-  The implementation in Rodin closely mirrors the mathematical notation:
+  On a connected domain with a Dirichlet part of positive boundary measure,
+  the Poincaré inequality supplies coercivity of the diffusion form on @f$V@f$.
+  With a bounded load functional, the standard Lax–Milgram argument gives a
+  unique weak solution after lifting the prescribed values.
 
-  @code{.cpp}
-  #include <Rodin/Solver.h>
-  #include <Rodin/Geometry.h>
-  #include <Rodin/Variational.h>
-
-  using namespace Rodin;
-  using namespace Rodin::Geometry;
-  using namespace Rodin::Variational;
-
-  int main()
-  {
-    Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {16, 16});
-    mesh.getConnectivity().compute(1, 2);
-
-    P1 Vh(mesh);
-    TrialFunction u(Vh);
-    TestFunction  v(Vh);
-
-    RealFunction f = 1;
-
-    Problem poisson(u, v);
-    poisson = Integral(Grad(u), Grad(v))   // \int \nabla u \cdot \nabla v dx
-            - Integral(f, v)               // \int f v dx
-            + DirichletBC(u, Zero());      // u = 0 on \partial\Omega
-
-    Solver::CG(poisson).solve();
-
-    return 0;
-  }
-  @endcode
-
-  @section guides-weak-elasticity Example: Linearized Elasticity
-
-  @subsection guides-weak-elasticity-strong Strong Form
-
-  The linearized elasticity system governs the displacement @f$ \mathbf{u}
-  : \Omega \to \mathbb{R}^d @f$ of an elastic body:
-
+  For a pure-Neumann problem, constants remain in the kernel. Compatibility
+  requires
   @f[
-    \left\{
-    \begin{aligned}
-      -\nabla \cdot \boldsymbol{\sigma}(\mathbf{u}) &= \mathbf{f} && \text{in } \Omega \\
-      \mathbf{u} &= \mathbf{0} && \text{on } \Gamma_D \\
-      \boldsymbol{\sigma}(\mathbf{u}) \, \mathbf{n} &= \mathbf{g} && \text{on } \Gamma_N
-    \end{aligned}
-    \right.
+    \int_\Omega f\,dx+\int_{\partial\Omega}g_N\,ds=0.
   @f]
+  A mean constraint or another valid normalization is then needed. A solver
+  cannot compensate for incompatible data or an unresolved nullspace.
 
-  where @f$ \boldsymbol{\sigma}(\mathbf{u}) = 2\mu \, \boldsymbol{\varepsilon}(\mathbf{u})
-  + \lambda \, \mathrm{tr}(\boldsymbol{\varepsilon}(\mathbf{u})) \, \mathbf{I} @f$
-  is the Cauchy stress tensor (Hooke's law) and
-  @f$ \boldsymbol{\varepsilon}(\mathbf{u}) = \frac{1}{2}(\nabla \mathbf{u}
-  + \nabla \mathbf{u}^T) @f$ is the linearized (infinitesimal) strain tensor.
+  @subsection guides-weak-poisson-rodin Connect the terms to code
 
-  @subsection guides-weak-elasticity-lame Lamé Parameters
+  The @ref guides-boundary-conditions "mixed-boundary example" takes
+  @f$f=0@f$, fixes the left side of the unit square, and prescribes a unit
+  normal derivative on the right.
 
-  The Lamé parameters @f$ \lambda @f$ and @f$ \mu @f$ characterize the material.
-  They are related to the more common Young's modulus @f$ E @f$ and Poisson's
-  ratio @f$ \nu @f$ by:
+  @snippet PDEs/MixedBoundary.cpp mixed-boundary-form
+
+  The minus sign on the load expresses @f$a(u,v)-\ell(v)=0@f$.
+  Boundary selection and the complete runnable program are explained in that
+  guide. For zero values on the entire boundary and a nonzero source, see the
+  @ref examples-pdes-poisson "Poisson tutorial".
+
+  @section guides-weak-elasticity Extend to elasticity
+
+  The unknown displacement is @f$u:\Omega\to\mathbb R^d@f$. Define
   @f[
-    \lambda = \frac{E\nu}{(1+\nu)(1-2\nu)}, \quad
-    \mu = \frac{E}{2(1+\nu)}
+    \varepsilon(u)=\tfrac12(\nabla u+\nabla u^T),\qquad
+    \sigma(u)=\lambda\operatorname{div}(u)I+2\mu\varepsilon(u).
   @f]
-
-  For example, with @f$ E = 1 @f$ and @f$ \nu = 0.3 @f$:
-
-  @code{.cpp}
-  const Real E = 1.0, nu = 0.3;
-  const Real lambda = E * nu / ((1.0 + nu) * (1.0 - 2.0 * nu));  // ≈ 0.5769
-  const Real mu     = E / (2.0 * (1.0 + nu));                     // ≈ 0.3846
-  @endcode
-
-  @subsection guides-weak-elasticity-deriv Derivation
-
-  Multiply by @f$ \mathbf{v} \in [H^1_0(\Omega)]^d @f$, integrate, and
-  use the divergence theorem. The boundary integral on @f$ \Gamma_N @f$
-  produces the traction term:
-
+  Equilibrium is @f$-\operatorname{div}\sigma(u)=b@f$, with prescribed
+  displacement on @f$\Gamma_D@f$ and traction @f$\sigma(u)n=t@f$ on
+  @f$\Gamma_N@f$. Testing against a vector field that vanishes on the fixed
+  boundary gives
   @f[
-    \int_\Omega \boldsymbol{\sigma}(\mathbf{u}) : \boldsymbol{\varepsilon}(\mathbf{v}) \, dx
-    = \int_\Omega \mathbf{f} \cdot \mathbf{v} \, dx
-    + \int_{\Gamma_N} \mathbf{g} \cdot \mathbf{v} \, ds
+    \int_\Omega\sigma(u):\varepsilon(v)\,dx
+       =\int_\Omega b\cdot v\,dx+\int_{\Gamma_N}t\cdot v\,ds.
   @f]
-
-  Expanding Hooke's law, the bilinear form becomes:
+  Symmetry of the stress removes its contraction with the skew part of
+  @f$\nabla v@f$. Expanding the constitutive law gives
   @f[
-    a(\mathbf{u}, \mathbf{v}) = \int_\Omega \bigl[
-    \lambda (\nabla \cdot \mathbf{u})(\nabla \cdot \mathbf{v})
-    + 2\mu \, \boldsymbol{\varepsilon}(\mathbf{u}) : \boldsymbol{\varepsilon}(\mathbf{v})
-    \bigr] \, dx
+    a(u,v)=\int_\Omega
+      \left[\lambda\operatorname{div}(u)\operatorname{div}(v)
+           +2\mu\varepsilon(u):\varepsilon(v)\right]dx.
   @f]
+  The factor @f$2\mu@f$ is essential with this definition of strain.
 
-  @subsection guides-weak-elasticity-rodin Implementation
+  @subsection guides-weak-elasticity-lame Interpret the material model
 
-  Rodin provides `LinearElasticityIntegral` (in `<Rodin/Solid.h>`) which
-  assembles the bilinear form for the Hooke tensor. The helper class
-  `LinearElasticityIntegral(u, v)` returns a callable that accepts the Lamé
-  parameters — either as constants or spatially-varying functions:
+  Positive elastic energy requires @f$\mu>0@f$ and
+  @f$\lambda+2\mu/d>0@f$. The displacement constraints must also remove rigid
+  motions; Korn's inequality then supplies the relevant coercivity statement.
 
-  @code{.cpp}
-  #include <Rodin/Solver.h>
-  #include <Rodin/Geometry.h>
-  #include <Rodin/Variational.h>
-  #include <Rodin/Solid.h>
-
-  using namespace Rodin;
-  using namespace Rodin::Geometry;
-  using namespace Rodin::Variational;
-
-  int main()
-  {
-    Mesh mesh;
-    mesh.load("beam.mesh", IO::FileFormat::MFEM);
-    mesh.getConnectivity().compute(1, 2);
-
-    const size_t d = mesh.getSpaceDimension();
-    const Real E = 1.0, nu = 0.3;
-    const Real lambda = E * nu / ((1.0 + nu) * (1.0 - 2.0 * nu));
-    const Real mu     = E / (2.0 * (1.0 + nu));
-
-    P1 Vh(mesh, d);  // Vector-valued P1 space
-    TrialFunction u(Vh);
-    TestFunction  v(Vh);
-
-    VectorFunction traction{0, -1};  // Traction force (stress vector) on Neumann boundary
-
-    Problem elasticity(u, v);
-    elasticity = LinearElasticityIntegral(u, v)(lambda, mu)
-               - BoundaryIntegral(traction, v).over(GammaN)
-               + DirichletBC(u, VectorFunction{0, 0}).on(GammaD);
-
-    Solver::CG(elasticity).solve();
-
-    return 0;
-  }
-  @endcode
-
-  @note `LinearElasticityIntegral` includes a P1-optimized specialization
-  that uses centroid quadrature (exact for piecewise-constant Lamé parameters
-  with linear basis functions). For higher-order elements, the quadrature order
-  is auto-computed as `max(lambdaOrder, muOrder) + trialOrder + testOrder`.
-
-  @subsection guides-weak-elasticity-hyperelastic Beyond Small Deformations
-
-  For large deformations (finite strain), use the `Solid` module's
-  hyperelastic framework with `MaterialTangent` and `InternalForce` integrators
-  coupled with a `NewtonSolver`. Available constitutive laws include
-  `NeoHookean`, `SaintVenantKirchhoff`, and `MooneyRivlin`.
-
-  The Newton linearization at each iterate @f$ \mathbf{u}^k @f$ solves:
+  For three-dimensional isotropic elasticity, Young's modulus @f$E@f$ and
+  Poisson's ratio @f$\nu@f$ give
   @f[
-    K(\mathbf{u}^k) \, \delta\mathbf{u}^k = -F_{\mathrm{int}}(\mathbf{u}^k) + F_{\mathrm{ext}}
+    \mu=\frac{E}{2(1+\nu)},\qquad
+    \lambda=\frac{E\nu}{(1+\nu)(1-2\nu)}.
   @f]
-  where @f$ K @f$ is the material tangent and @f$ F_{\mathrm{int}} @f$ is the
-  internal force vector.
+  A two-dimensional reduction must state whether plane strain or plane stress
+  is intended. The @ref examples-pdes-elasticity "beam tutorial" uses plane
+  strain and shows the corresponding vector-valued finite element problem.
 
-  @code{.cpp}
-  #include <Rodin/Solid.h>
-  #include <Rodin/Solver/NewtonSolver.h>
-  #include <Rodin/Solver/SparseLU.h>
+  @subsection guides-weak-elasticity-hyperelastic Finite-strain models
 
-  Solid::NeoHookean law(lambda, mu);
+  Linearized strain assumes small deformation. Finite-strain mechanics
+  uses the deformation gradient and a constitutive energy, from which an
+  internal virtual-work residual and consistent tangent are obtained. The
+  @ref guides-solid-mechanics "solid mechanics guide" explains that construction;
+  the residual and its consistent tangent must represent the chosen nonlinear model.
 
-  GridFunction u(Vh);  // accumulated displacement
+  @section guides-weak-complex Complex and mixed formulations
 
-  Solid::MaterialTangent tangent(law, du, v);
-  tangent.setDisplacement(u);
-
-  Solid::InternalForce residual(law, v);
-  residual.setDisplacement(u);
-
-  Problem newton(du, v);
-  newton = tangent + residual
-         - Integral(bodyForce, v)
-         + DirichletBC(du, VectorFunction{Zero(), Zero()}).on(fixedBC);
-
-  SparseLU linearSolver(newton);
-  NewtonSolver solver(linearSolver);
-  solver.solve(u);  // updates u in place
-  @endcode
-
-  See @ref Rodin::Solid "Solid module" for the full API, and
-  @ref guides-numerical-contracts "Numerical contracts" for residual/tangent
-  consistency checks.
-
-  @section guides-weak-general General Structure
-
-  Most weak formulations in Rodin follow this pattern:
-
+  Over complex fields, the usual finite element convention is trial-linear
+  and test-conjugate-linear. For Helmholtz, this gives
   @f[
-    \text{Find } u \in V \text{ s.t. } \forall v \in V: \quad
-    a(u, v) = \ell(v)
+    a(u,v)=\int_\Omega\nabla u\cdot\overline{\nabla v}\,dx
+               -k^2\int_\Omega u\overline v\,dx.
   @f]
+  Positive definiteness is checked from the coefficients, boundary conditions and
+  spectrum of the form. The
+  @ref examples-pdes-helmholtz "Helmholtz tutorial" uses an indefinite system
+  and checks a manufactured solution.
 
-  where:
-  - @f$ a(u, v) @f$ is a **bilinear form** (depends on both @f$ u @f$ and @f$ v @f$)
-  - @f$ \ell(v) @f$ is a **linear form** (depends only on @f$ v @f$)
+  Mixed equations introduce coupled unknowns and constraints. In @ref examples-pdes-stokes "Stokes flow", velocity and
+  pressure form a saddle-point system; compatible spaces and a pressure gauge
+  are needed. In @ref examples-pdes-navierstokes "Navier–Stokes", convection
+  adds a nonlinear dependence that must be discretized in time and linearized
+  explicitly.
 
-  In Rodin, the problem is defined by moving everything to one side:
+  @section guides-weak-galerkin Discretize the weak problem
 
-  @code{.cpp}
-  Problem problem(u, v);
-  problem = [bilinear terms] - [linear terms] + [boundary conditions];
-  @endcode
+  Choose a finite-dimensional test space @f$V_h\subset V@f$ and a discrete
+  representation of the prescribed trace. For homogeneous essential data,
+  trial and test spaces can coincide. With trial basis functions @f$\phi_j@f$ and test basis functions @f$\psi_i@f$,
+  the Galerkin equations have entries
+  @f[
+    A_{ij}=a(\phi_j,\psi_i),\qquad b_i=\ell(\psi_i).
+  @f]
+  For a nonzero discrete lifting @f$g_h@f$, the unknown homogeneous part instead
+  has load entries @f$\ell(\psi_i)-a(g_h,\psi_i)@f$. If the prescribed trace
+  is not exactly representable, its approximation introduces a boundary-data
+  error. Periodic identifications or multiplier equations add their corresponding
+  algebraic constraints. Numerical quadrature and approximated geometry can
+  introduce additional errors beyond the field approximation.
 
-  @section guides-weak-bilinear Bilinear Forms
-
-  A **bilinear form** @f$ a(u, v) @f$ is a mapping that is linear in both
-  arguments. It involves both the trial function @f$ u @f$ and the test
-  function @f$ v @f$, and is assembled into the **system matrix** @f$ A @f$.
-
-  Common examples:
-
-  | Mathematical expression | Rodin code | Name |
-  |-------------------------|------------|------|
-  | @f$ \int_\Omega \nabla u \cdot \nabla v \, dx @f$ | `Integral(Grad(u), Grad(v))` | Stiffness |
-  | @f$ \int_\Omega u \, v \, dx @f$ | `Integral(u, v)` | Mass |
-  | @f$ \int_\Omega \lambda \nabla u \cdot \nabla v \, dx @f$ | `Integral(lambda * Grad(u), Grad(v))` | Weighted stiffness |
-  | @f$ \int_\Omega \lambda (\nabla \cdot \mathbf{u})(\nabla \cdot \mathbf{v}) \, dx @f$ | `Integral(lambda * Div(u), Div(v))` | Divergence penalization |
-
-  @section guides-weak-linear Linear Forms
-
-  A **linear form** @f$ \ell(v) @f$ is a mapping that is linear in @f$ v @f$
-  only (it does not depend on the unknown @f$ u @f$). It is assembled into the
-  right-hand side vector @f$ \mathbf{b} @f$.
-
-  Common examples:
-
-  | Mathematical expression | Rodin code | Name |
-  |-------------------------|------------|------|
-  | @f$ \int_\Omega f \, v \, dx @f$ | `Integral(f, v)` | Volume source |
-  | @f$ \int_{\Gamma_N} g \, v \, ds @f$ | `BoundaryIntegral(g, v).over(GammaN)` | Neumann load |
-  | @f$ \int_\Omega \mathbf{f} \cdot \mathbf{v} \, dx @f$ | `Integral(f, v)` | Vector body force |
-
-  @section guides-weak-bc Boundary Conditions in Weak Form
-
-  @subsection guides-weak-bc-dirichlet Dirichlet (Essential) Conditions
-
-  Dirichlet conditions are imposed directly on the function space:
-
-  @code{.cpp}
-  // u = 0 on entire boundary
-  DirichletBC(u, Zero())
-
-  // u = g on specific boundary
-  DirichletBC(u, g).on(boundaryAttribute)
-  @endcode
-
-  @subsection guides-weak-bc-neumann Neumann (Natural) Conditions
-
-  Neumann conditions appear as boundary integrals in the weak formulation:
-
-  @code{.cpp}
-  // \partialu/\partialn = g on boundary with attribute 2
-  BoundaryIntegral(g, v).over(2)
-  @endcode
-
-  @subsection guides-weak-bc-periodic Periodic Boundary Conditions
-
-  Periodic conditions tie DOFs on opposite boundary segments using an
-  `IndexMap`. See the @ref examples-pdes-periodic "periodic Poisson example"
-  for a complete walkthrough.
-
-  @code{.cpp}
-  // Build a DOF correspondence map: left edge ↔ right edge
-  IndexMap<IndexSet> dofs;
-  for (Index i = 0; i < Vh.getSize(); i += n)
-    dofs[i].insert(i + n - 1);
-
-  Problem problem(u, v);
-  problem = Integral(Grad(u), Grad(v))
-          - Integral(f, v)
-          + PeriodicBC(u, dofs);
-  @endcode
-
-  @section guides-weak-mixed Mixed Formulations
-
-  Some PDEs involve multiple unknowns from different spaces. The
-  @ref examples-pdes-navierstokes "Navier–Stokes example" uses
-  Taylor–Hood elements with separate trial and test functions for
-  velocity and pressure:
-
-  @code{.cpp}
-  H1 Vh(std::integral_constant<size_t, 2>{}, mesh, d);  // Velocity: vector H1, order 2
-  H1 Qh(std::integral_constant<size_t, 1>{}, mesh);     // Pressure: scalar H1, order 1
-
-  TrialFunction u(Vh);  TestFunction v(Vh);   // Velocity pair
-  TrialFunction p(Qh);  TestFunction q(Qh);   // Pressure pair
-
-  Problem stokes(u, p, v, q);
-  stokes = Integral(Grad(u), Grad(v))     // viscous term
-         - Integral(p, Div(v))            // pressure–velocity coupling
-         + Integral(Div(u), q)            // incompressibility constraint
-         - Integral(f, v)                 // body force
-         + DirichletBC(u, uD);           // velocity BC
-  @endcode
-
-  @section guides-weak-well-posedness Well-Posedness
-
-  The **Lax-Milgram theorem** guarantees existence and uniqueness of the
-  solution when:
-  - The bilinear form @f$ a(\cdot, \cdot) @f$ is **continuous** and
-    coercive on the function space @f$ V @f$
-  - The linear form @f$ \ell(\cdot) @f$ is **continuous** on @f$ V @f$
-
-  For the Poisson equation, the bilinear form @f$ a(u, v) = \int_\Omega
-  \nabla u \cdot \nabla v \, dx @f$ is coercive on @f$ H^1_0(\Omega) @f$
-  by the Poincaré inequality.
-
-  For mixed formulations (saddle-point problems), the Brezzi conditions
-  (inf-sup stability) replace coercivity. Taylor–Hood elements satisfy
-  the inf-sup condition, making them a standard choice for Stokes-type
-  problems.
-
-  @section guides-weak-see-also See Also
-
-  - @ref notation-index "Notation reference"
-  - @ref guides-getting-started-first-problem "Your first problem"
-  - @ref guides-boundary-conditions "Boundary conditions in detail"
-  - @ref guides-solvers "Solvers"
-  - @ref examples-pdes-poisson "Poisson example"
-  - @ref examples-pdes-elasticity "Elasticity example"
-  - @ref examples-pdes-navierstokes "Navier–Stokes example"
-
-  */
+  A small algebraic residual establishes that the assembled system was solved
+  accurately. Model accuracy and spatial discretization error are assessed separately. See the @ref guides-variational "form-language guide" for
+  assembly, @ref guides-solvers "solvers" for algebraic checks, and
+  @ref guides-numerical-contracts "numerical contracts" for implementation rules.
+*/

@@ -1,5 +1,5 @@
 /**
-  @page guides-petsc PETSc: Parallel Solvers and Distributed Linear Algebra
+  @page guides-petsc Parallel solvers and distributed linear algebra with PETSc
   @brief Guide to using PETSc-backed variational forms, solvers, and distributed assembly
 
   @tableofcontents
@@ -19,7 +19,7 @@
   - Seamless support for both `Context::Local` (single-process) and
     `Context::MPI` (distributed) mesh contexts.
 
-  Include the module via:
+  Include the PETSc module header.
   @code{.cpp}
   #include <Rodin/PETSc.h>
   @endcode
@@ -30,24 +30,29 @@
   core Rodin assembly are summarized in
   @ref guides-numerical-contracts "Numerical contracts".
 
-  @note PETSc must be initialized before use and finalized after:
+  Initialize PETSc before constructing its objects. Destroy matrices, vectors,
+  grid functions and solver contexts before finalization.
   @code{.cpp}
-  PetscInitialize(&argc, &argv, PETSC_NULLPTR, PETSC_NULLPTR);
-  // ... Rodin + PETSc code ...
-  PetscFinalize();
+  PetscErrorCode ierr = PetscInitialize(&argc, &argv, PETSC_NULLPTR, PETSC_NULLPTR);
+  assert(ierr == PETSC_SUCCESS);
+  {
+    // Construct and use Rodin/PETSc objects in this scope.
+  }
+  ierr = PetscFinalize();
+  assert(ierr == PETSC_SUCCESS);
   @endcode
 
-  @section guides-petsc-variational PETSc Variational Components
+  @section guides-petsc-variational PETSc variational components
 
   The PETSc variational wrappers live in the `Rodin::PETSc::Variational`
   namespace.  They are thin CTAD wrappers around the core Rodin classes that
   trigger PETSc-specific template deduction.
 
-  @subsection guides-petsc-trialtest Trial and Test Functions
+  @subsection guides-petsc-trialtest Trial and test functions
 
   Use `PETSc::Variational::TrialFunction` and
   `PETSc::Variational::TestFunction` instead of the standard versions to
-  activate PETSc storage:
+  activate PETSc storage.
 
   @code{.cpp}
   P1 Vh(mesh);
@@ -60,7 +65,7 @@
   `PETSc::Variational::GridFunction` as its solution type, ensuring that the
   discrete solution is stored in a PETSc @c Vec.
 
-  @subsection guides-petsc-gridfunction Grid Functions
+  @subsection guides-petsc-gridfunction Grid functions
 
   `PETSc::Variational::GridFunction`
   stores DOF coefficients in a PETSc @c Vec.  It supports:
@@ -83,10 +88,10 @@
   | owner → ghost | `VecGhostUpdateBegin/End(INSERT, FORWARD)` | Read remote DOFs before evaluation |
   | ghost → owner | `VecGhostUpdateBegin/End(INSERT, REVERSE)` | Scatter modified ghosts back to owners |
 
-  @subsection guides-petsc-forms Bilinear and Linear Forms
+  @subsection guides-petsc-forms Bilinear and linear forms
 
   When PETSc trial/test functions are used, `BilinearForm` assembles into a
-  PETSc @c Mat and `LinearForm` assembles into a PETSc @c Vec:
+  PETSc @c Mat and `LinearForm` assembles into a PETSc @c Vec.
 
   @code{.cpp}
   // Automatically selected via CTAD
@@ -106,7 +111,7 @@
   The PETSc `Problem` assembles into a
   `PETSc::Math::LinearSystem` containing
   the system matrix @f$ A @f$, right-hand side @f$ \mathbf{b} @f$, and
-  solution @f$ \mathbf{x} @f$:
+  solution @f$ \mathbf{x} @f$.
 
   @code{.cpp}
   Problem poisson(u, v);
@@ -120,9 +125,9 @@
   // The solution is automatically scattered to u.getSolution()
   @endcode
 
-  @section guides-petsc-solvers PETSc Solvers
+  @section guides-petsc-solvers PETSc solvers
 
-  @subsection guides-petsc-solvers-ksp KSP: Krylov Subspace Solvers
+  @subsection guides-petsc-solvers-ksp Krylov subspace solvers with KSP
 
   @ref Rodin::Solver::KSP "KSP" is the base PETSc linear solver.  It wraps
   the PETSc @c KSP context and supports programmatic configuration as well
@@ -145,16 +150,16 @@
   ksp.solve();
   @endcode
 
-  PETSc command-line options override programmatic settings:
+  PETSc command-line options override programmatic settings.
   @code
   ./myprogram -ksp_type cg -pc_type jacobi -ksp_rtol 1e-8 -ksp_monitor
   @endcode
 
-  @subsection guides-petsc-solvers-cg CG (Conjugate Gradient)
+  @subsection guides-petsc-solvers-cg CG (conjugate gradient)
 
   @ref Rodin::Solver::CG<PETSc::Math::LinearSystem> "CG" is a convenience
   specialization that sets the KSP type to `KSPCG`.  Use for symmetric
-  positive-definite (SPD) systems:
+  positive-definite (SPD) systems.
 
   @code{.cpp}
   Solver::CG(poisson).solve();
@@ -163,16 +168,16 @@
   @subsection guides-petsc-solvers-gmres GMRES
 
   @ref Rodin::Solver::GMRES<PETSc::Math::LinearSystem> "GMRES" sets the
-  KSP type to `KSPGMRES`.  Use for non-symmetric or indefinite systems:
+  KSP type to `KSPGMRES`.  Use for non-symmetric or indefinite systems.
 
   @code{.cpp}
   Solver::GMRES(stokes).solve();
   @endcode
 
-  @subsection guides-petsc-solvers-snes SNES: Nonlinear Solvers
+  @subsection guides-petsc-solvers-snes Nonlinear solvers with SNES
 
   @ref Rodin::Solver::SNES "SNES" wraps PETSc's nonlinear solver framework.
-  It uses a KSP solver for the inner linear system at each Newton step:
+  It uses a KSP solver for the inner linear system at each Newton step.
 
   @code{.cpp}
   Solver::KSP ksp(problem);
@@ -188,10 +193,10 @@
   snes.solve(x);
   @endcode
 
-  @section guides-petsc-linearsystem Linear System
+  @section guides-petsc-linearsystem Linear system
 
   `PETSc::Math::LinearSystem` couples
-  the PETSc matrix, RHS vector, and solution vector:
+  the PETSc matrix, RHS vector, and solution vector.
 
   @code{.cpp}
   auto& axb = problem.getLinearSystem();
@@ -200,34 +205,34 @@
   auto& x = axb.getSolution();   // ::Vec (solution)
   @endcode
 
-  @subsection guides-petsc-dirichlet Dirichlet Elimination
+  @subsection guides-petsc-dirichlet Dirichlet elimination
 
-  Dirichlet boundary conditions are enforced by the `eliminate()` template
-  method, which zeros constrained rows in @f$ A @f$ and adjusts
-  @f$ \mathbf{b} @f$ and @f$ \mathbf{x} @f$:
-
+  Canonical variational assembly performs row-and-column elimination with
+  right-hand-side lifting. With prescribed indices @f$C@f$, free indices
+  @f$F@f$ and values @f$g_C@f$, the remaining equations are
   @f[
-    A_{ii} \leftarrow 1, \quad A_{ij} \leftarrow 0 \; (j \ne i), \quad
-    b_i \leftarrow u_i, \quad x_i \leftarrow u_i
+    A_{FF}x_F=b_F-A_{FC}g_C.
   @f]
+  This preserves symmetry when the unconstrained operator is symmetric.
+  The separate low-level `PETSc::Math::LinearSystem::eliminate()` operation
+  uses row-only `MatZeroRows` semantics. See the API contract before applying
+  that operation directly to a caller-supplied matrix.
 
-  This is handled automatically by `DirichletBC(u, g)` during assembly.
-
-  @subsection guides-petsc-fieldsplit Field-Split Preconditioning
+  @subsection guides-petsc-fieldsplit Field-split preconditioning
 
   For multi-field problems (e.g.\ Stokes), the linear system supports named
-  field splits that can be passed to PETSc's `PCFIELDSPLIT` preconditioner:
+  field splits that can be passed to PETSc's `PCFIELDSPLIT` preconditioner.
 
   @code{.cpp}
   // The Problem class automatically sets up field splits for multi-field
   // problems. Configure via command line:
   //   -pc_type fieldsplit
-  //   -pc_fieldsplit_type schur
-  //   -fieldsplit_velocity_ksp_type cg
-  //   -fieldsplit_pressure_ksp_type preonly
+  //   -pc_fieldsplit_type additive
+  //   -fieldsplit_u_ksp_type preonly
+  //   -fieldsplit_p_ksp_type preonly
   @endcode
 
-  @section guides-petsc-assembly Assembly Strategies
+  @section guides-petsc-assembly Assembly strategies
 
   The PETSc module provides three assembly strategies:
 
@@ -239,9 +244,9 @@
 
   The assembly strategy is selected automatically via the
   `Assembly::Default<TrialContext, TestContext>` trait based on the mesh
-  context.  Users do not normally need to select it explicitly.
+  context.  The context selects it automatically.
 
-  @section guides-petsc-multifield Multi-Field Problems
+  @section guides-petsc-multifield Multi-field problems
 
   PETSc problems support an arbitrary number of coupled trial/test function
   pairs.  This is essential for saddle-point systems like Stokes, which
@@ -269,8 +274,6 @@
          + Integral(Div(u), q)
          + Integral(l, q)
          + Integral(p, m)
-         + 1e-12 * Integral(p, q)
-         + 1e-12 * Integral(l, m)
          - Integral(f, v)
          + DirichletBC(u, u_exact);
 
@@ -278,11 +281,13 @@
   Solver::KSP(stokes).solve();
   @endcode
 
-  @section guides-petsc-sequential-example Sequential PETSc Example
+  @section guides-petsc-sequential-example Sequential PETSc example
 
-  This example solves a 3D Poisson equation on hexahedra using PETSc CG:
+  This example solves a 3D Poisson equation on hexahedra using PETSc CG.
 
   @code{.cpp}
+  #include <cassert>
+  #include <cstdlib>
   #include <Rodin/PETSc.h>
   #include <Rodin/Geometry.h>
   #include <Rodin/Variational.h>
@@ -293,35 +298,31 @@
 
   int main(int argc, char** argv)
   {
-    PetscInitialize(&argc, &argv, PETSC_NULLPTR, PETSC_NULLPTR);
-
-    Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Hexahedron, {16, 16, 16});
-    mesh.scale(1.0 / 15);
-    mesh.getConnectivity().compute(2, 3);
-    mesh.getConnectivity().compute(3, 2);
-
-    RealFunction f = 1;
-    P1 Vh(mesh);
-
-    PETSc::Variational::TrialFunction u(Vh);
-    PETSc::Variational::TestFunction  v(Vh);
-
-    Problem poisson(u, v);
-    poisson = Integral(Grad(u), Grad(v))
-            - Integral(f, v)
-            + DirichletBC(u, Zero());
-
-    Solver::CG(poisson).solve();
-
-    u.getSolution().save("Poisson.gf", IO::FileFormat::MFEM);
-    mesh.save("Poisson.mesh", IO::FileFormat::MFEM);
-
-    PetscFinalize();
+    PetscErrorCode ierr = PetscInitialize(&argc, &argv, PETSC_NULLPTR, PETSC_NULLPTR);
+    assert(ierr == PETSC_SUCCESS);
+    bool solved = false;
+    {
+      Mesh mesh = Mesh().UniformGrid(Polytope::Type::Hexahedron, {8, 8, 8});
+      mesh.scale(1.0 / 7.0);
+      mesh.getConnectivity().compute(2, 3);
+      P1 vh(mesh);
+      PETSc::Variational::TrialFunction u(vh);
+      PETSc::Variational::TestFunction v(vh);
+      RealFunction f = 1;
+      Problem poisson(u, v);
+      poisson = Integral(Grad(u), Grad(v)) - Integral(f, v)
+              + DirichletBC(u, Zero());
+      Solver::CG solver(poisson);
+      solver.solve();
+      solved = solver.success();
+    }
+    ierr = PetscFinalize();
+    assert(ierr == PETSC_SUCCESS);
+    return solved ? EXIT_SUCCESS : EXIT_FAILURE;
   }
   @endcode
 
-  @section guides-petsc-mpi-example MPI + PETSc Example
+  @section guides-petsc-mpi-example MPI + PETSc example
 
   See the @ref guides-mpi "MPI guide" for the full distributed workflow.
   The key difference from sequential usage is:
@@ -331,11 +332,10 @@
   4. Use `PETSc::Variational::TrialFunction` / `TestFunction` as usual.
   5. The assembly and solve are automatically distributed.
 
-  @section guides-petsc-cmdline Command-Line Configuration
+  @section guides-petsc-cmdline Command-line configuration
 
-  All PETSc solvers support command-line configuration via PETSc's options
-  database.  This is especially powerful for experimenting with
-  preconditioners and solver parameters without recompiling:
+  PETSc's options database configures solver methods, preconditioners and
+  diagnostics at program startup:
 
   | Option | Description | Example |
   |--------|-------------|---------|
@@ -348,7 +348,7 @@
   | `-snes_monitor` | Print nonlinear residual | |
   | `-pc_type fieldsplit` | Block preconditioner | |
 
-  @section guides-petsc-see-also See Also
+  @section guides-petsc-see-also See also
 
   - @ref Rodin::PETSc "PETSc namespace reference"
   - @ref Rodin::Solver::KSP "KSP solver"

@@ -23,7 +23,7 @@
  * @f$ and produces a scalar. It is linear over the reals and conjugate-linear
  * over the complex numbers. After
  * discretisation the action of @f$ L @f$ on the basis functions
- * yields a load vector:
+ * yields a load vector.
  * @f[
  *   b_i = L(\phi_i), \quad i = 1,\ldots,N
  * @f]

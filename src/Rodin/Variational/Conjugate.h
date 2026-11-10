@@ -24,7 +24,7 @@
 namespace Rodin::FormLanguage
 {
   /**
-   * @brief Type traits for @c Conjugate over a shape function: exposes the finite
+   * @brief Type traits for @c Conjugate over a shape function, exposing the finite
    * element space and the shape function space.
    */
   template <class NestedDerived, class FES, Variational::ShapeFunctionSpaceType Space>
@@ -57,7 +57,7 @@ namespace Rodin::Variational
    * @brief Complex conjugate of a function.
    *
    * For a complex-valued function @f$ f: \Omega \to \mathbb{C} @f$ with
-   * @f$ f(x) = u(x) + iv(x) @f$, the conjugate is:
+   * @f$ f(x) = u(x) + iv(x) @f$, the conjugate is
    * @f[
    *    \overline{f}(x) = u(x) - iv(x)
    * @f]

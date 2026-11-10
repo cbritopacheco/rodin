@@ -29,7 +29,7 @@ namespace Rodin::Solver
    *
    * Newton solver class for solving nonlinear systems through a
    * <a href="_variational_2_problem_8h.html">Variational::ProblemBase</a>
-   * that assembles the tangent system at each iterate:
+   * that assembles the tangent system at each iterate.
    * @f[
    * J(u^k)\,\delta u^k = -F(u^k), \qquad
    * u^{k + 1} = u^k + \delta u^k.
@@ -91,7 +91,7 @@ namespace Rodin::Solver
 
       /**
        * @brief Solve a nonlinear system starting from the initial guess stored in @p x.
-       * @param[in,out] x On entry: initial guess. On exit: final Newton iterate.
+       * @param[in,out] x Initial guess on entry and final Newton iterate on exit.
        */
       virtual void solve(SolutionType& x) = 0;
 
@@ -166,8 +166,8 @@ namespace Rodin::Solver
    * where @f$ \alpha > 0 @f$ is a constant damping factor.
    *
    * @par Globalization
-   * The damping factor is @e constant: this solver performs no line search
-   * and no step-acceptance test, so convergence is only guaranteed close to
+   * The damping factor is @e constant. This solver performs no line search
+   * and no step-acceptance test. Convergence is only guaranteed close to
    * a solution (the classical local quadratic convergence of Newton's
    * method). Practical consequences:
    * - For problems solved far from equilibrium (large loads, strong
@@ -176,7 +176,7 @@ namespace Rodin::Solver
    *   attraction (see @c examples/Solid/BlockGravity.cpp).
    * - Merit functions with barriers (e.g. terms that blow up as an element
    *   Jacobian determinant approaches zero) cannot be minimized reliably
-   *   with a constant step: they require a backtracking line search with a
+   *   with a constant step because they require a backtracking line search with a
    *   validity test, which callers must currently implement around this
    *   solver.
    * - A damping factor @f$ \alpha < 1 @f$ trades convergence speed for
@@ -199,7 +199,7 @@ namespace Rodin::Solver
    *
    * @par Contract
    * This solver assumes that the associated problem is already assembled in
-   * Newton form:
+   * Newton form.
    * @f[
    *   J(x)\,\delta x = -F(x).
    * @f]
@@ -250,7 +250,7 @@ namespace Rodin::Solver
    * @par Usage
    * A typical nonlinear solve pairs a Newton problem in the increment
    * @f$ \delta u @f$ with a linear solver and iterates into the state
-   * @f$ u @f$:
+   * @f$ u @f$.
    * @code{.cpp}
    * auto ivw = Solid::InternalVirtualWork(law, u);  // residual + tangent
    *
@@ -450,7 +450,7 @@ namespace Rodin::Solver
       /**
        * @brief Gets the absolute residual tolerance.
        *
-       * Default value: 1e-12.
+       * The default is 1e-12.
        *
        * @returns Current absolute tolerance.
        */
@@ -482,7 +482,7 @@ namespace Rodin::Solver
       /**
        * @brief Gets the relative residual tolerance.
        *
-       * Default value: 1e-8.
+       * The default is 1e-8.
        *
        * @returns Current relative tolerance.
        */
@@ -515,7 +515,7 @@ namespace Rodin::Solver
       /**
        * @brief Gets the step tolerance.
        *
-       * Default value: 0.0, which disables the step criterion.
+       * The default is 0.0, which disables the step criterion.
        *
        * @returns Current step tolerance.
        */
@@ -548,7 +548,7 @@ namespace Rodin::Solver
       /**
        * @brief Gets the damping factor.
        *
-       * Default value: 1.0.
+       * The default is 1.0.
        *
        * @returns Current damping factor.
        */
@@ -580,7 +580,7 @@ namespace Rodin::Solver
       /**
        * @brief Gets the maximum number of Newton iterations.
        *
-       * Default value: 100.
+       * The default is 100.
        *
        * @returns Maximum number of iterations.
        */
@@ -595,7 +595,7 @@ namespace Rodin::Solver
        * Passing a callable installs a monitor invoked once per Newton
        * iteration. Passing @c std::nullopt disables monitoring.
        *
-       * Default value: none.
+       * The default is none.
        *
        * @param monitor Optional monitor callback.
        * @returns Reference to this solver.
@@ -814,42 +814,42 @@ namespace Rodin::Solver
       /**
        * @brief Maximum number of Newton iterations.
        *
-       * Default value: 100.
+       * The default is 100.
        */
       size_t m_maxIt;
 
       /**
        * @brief Absolute residual tolerance.
        *
-       * Default value: 1e-12.
+       * The default is 1e-12.
        */
       Real m_atol;
 
       /**
        * @brief Relative residual tolerance.
        *
-       * Default value: 1e-8.
+       * The default is 1e-8.
        */
       Real m_rtol;
 
       /**
        * @brief Step tolerance.
        *
-       * Default value: 0.0. A zero value disables the step criterion.
+       * The default is 0.0. A zero value disables the step criterion.
        */
       Real m_stol;
 
       /**
        * @brief Constant damping factor.
        *
-       * Default value: 1.0.
+       * The default is 1.0.
        */
       Real m_alpha;
 
       /**
        * @brief Optional iteration monitor.
        *
-       * Default value: none.
+       * The default is none.
        */
       Optional<Monitor> m_monitor;
 
@@ -864,7 +864,7 @@ namespace Rodin::Solver
    * @ingroup RodinCTAD
    * @brief CTAD (Class Template Argument Deduction) guide for NewtonSolver.
    *
-   * Allows writing:
+   * Supports the following construction.
    * @code{.cpp}
    * SparseLU solver(tangent);
    * NewtonSolver newton(solver);

@@ -42,7 +42,7 @@ namespace Rodin::QF
    *
    * The 1D Gauss-Lobatto rule with @f$ n @f$ points is exact for polynomials
    * of degree up to @f$ 2n-3 @f$. The weights @f$ w_i @f$ and points
-   * @f$ x_i @f$ satisfy:
+   * @f$ x_i @f$ satisfy.
    * @f[
    *   \int_0^1 f(x) \, dx \approx \sum_{i=1}^n w_i f(x_i)
    * @f]
@@ -297,8 +297,8 @@ namespace Rodin::QF
        * @param n Number of quadrature points (must be at least 2)
        * @param x01 Output vector for quadrature point coordinates
        * @param w01 Output vector for quadrature weights
-       * @param maxIt Maximum Newton iterations for finding interior nodes (default: 100)
-       * @param tol Convergence tolerance for Newton iteration (default: 1e-14)
+       * @param maxIt Maximum Newton iterations for finding interior nodes (default 100)
+       * @param tol Convergence tolerance for Newton iteration (default 1e-14)
        *
        * Computes the @f$ n @f$ Gauss-Lobatto quadrature nodes and weights
        * on the unit interval @f$ [0,1] @f$. The endpoints @f$ x_1 = 0 @f$
@@ -306,7 +306,7 @@ namespace Rodin::QF
        * @f$ i = 2, \ldots, n-1 @f$ are found as zeros of the derivative
        * @f$ P'_{n-1}(x) @f$ of the Legendre polynomial using Newton's method.
        *
-       * The weights are computed using:
+       * The weights are computed using
        * @f[
        *   w_i = \frac{2}{n(n-1) [P_{n-1}(x_i)]^2}
        * @f]
@@ -516,7 +516,7 @@ namespace Rodin::QF
        *
        * Constructs a tensor-product quadrature rule on the reference
        * quadrilateral @f$ [0,1] \times [0,1] @f$ using 1D Gauss-Lobatto
-       * rules in each direction. Total number of points: @f$ nx \times ny @f$.
+       * rules in each direction. The total number of points is @f$ nx \times ny @f$.
        */
       void buildQuad(size_t nx, size_t ny)
       {
@@ -548,7 +548,7 @@ namespace Rodin::QF
        * @param nv Number of points in second parametric direction
        *
        * Uses the Duffy transformation to map tensor-product Gauss-Lobatto
-       * points to the reference triangle. The transformation is:
+       * points to the reference triangle. The transformation is
        * @f[
        *   (r,s) = (u, (1-u)v)
        * @f]
@@ -589,7 +589,7 @@ namespace Rodin::QF
        * @param nw Number of points in third parametric direction
        *
        * Uses the 3D Duffy transformation to map tensor-product Gauss-Lobatto
-       * points to the reference tetrahedron. The transformation is:
+       * points to the reference tetrahedron. The transformation is
        * @f[
        *   (r,s,t) = (u, (1-u)v, (1-u)(1-v)w)
        * @f]
@@ -720,7 +720,7 @@ namespace Rodin::QF
        * @param nz Number of points in z-direction
        *
        * Constructs a tensor-product Gauss-Lobatto rule on the reference
-       * hexahedron @f$ [0,1]^3 @f$. Total number of points:
+       * hexahedron @f$ [0,1]^3 @f$. Total number of points.
        * @f$ nx \times ny \times nz @f$.
        */
       void buildHex(size_t nx, size_t ny, size_t nz)

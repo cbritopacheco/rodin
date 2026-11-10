@@ -42,6 +42,11 @@ YAML_VERSION = '6.0.2'
 PYTHON_INSTALL_TIMEOUT = 180
 PYTHON_INSTALL_ATTEMPTS = 3
 PYTHON_RETRY_DELAY = 2
+# The read-only version probe stalled once on a hosted runner. Retry timeouts
+# within a 96-second total budget; unsuccessful CMake exits remain fatal.
+CMAKE_PROBE_TIMEOUT = 30
+CMAKE_PROBE_ATTEMPTS = 3
+CMAKE_PROBE_RETRY_DELAY = 2
 
 
 def install_python():
@@ -77,7 +82,16 @@ def select_compiler(compiler):
                                       text=True, timeout=30).strip() for tool in [compiler, cxx]]
     if any(version.split('.')[0] != match[1] for version in versions) or versions[0] != versions[1]:
         raise RuntimeError('Requested GCC and G++ versions do not match: ' + repr(versions))
-    subprocess.run(['cmake', '--version'], check=True, timeout=30)
+    for attempt in range(1, CMAKE_PROBE_ATTEMPTS + 1):
+        try:
+            subprocess.run(['cmake', '--version'], check=True, timeout=CMAKE_PROBE_TIMEOUT)
+            break
+        except subprocess.TimeoutExpired as error:
+            print(f'CMake version probe timed out (attempt {attempt}/{CMAKE_PROBE_ATTEMPTS}).', flush=True)
+            if attempt == CMAKE_PROBE_ATTEMPTS:
+                raise RuntimeError('CMake version probe exhausted its bounded timeout retries') from error
+            time.sleep(CMAKE_PROBE_RETRY_DELAY * attempt)
+
     output = os.environ.get('GITHUB_ENV')
     if not output:
         raise RuntimeError('Compiler selection requires GITHUB_ENV')
@@ -238,7 +252,9 @@ def installed_dependencies(requested, source_options):
     the minimum constraint. Hosted-image rollouts can therefore produce different
     runtime bytes from identical top-level requests. Traverse only installed
     Depends/PreDepends edges; do not install unused alternatives or recommendations.
-    New dependencies remain the responsibility of APT's pinned simulation below.
+    Seed this traversal with every package selected by APT, including packages
+    not installed yet: otherwise an uninstalled intermediate package hides its
+    preinstalled runtime dependencies.
     """
     output = subprocess.check_output(
         ['apt-cache', *source_options, 'depends', '--recurse', '--installed',
@@ -267,14 +283,28 @@ def prepare(requested, archives, state):
             print('APT index attempt failed:', mirror or 'runner sources', flush=True)
     else:
         raise RuntimeError('All signed APT index sources failed') from last_error
-    versions = candidates(requested + installed_dependencies(requested, options), options)
-    pinned = [name + '=' + version for name, version in sorted(versions.items())]
-    simulation = apt(['--simulate', '--no-remove', 'install', *pinned], options,
-                     archives, INDEX_TIMEOUT, capture=True)
-    for name, version in re.findall(r'^Inst (\S+)(?: \[[^\]]+\])? \((\S+)', simulation, re.M):
-        if name in versions and versions[name] != version:
-            raise ValueError('Conflicting resolved version for ' + name)
-        versions[name] = version
+    versions = candidates(requested, options)
+    # APT omits satisfied installed dependencies from its Inst records, while
+    # --installed traversal omits new intermediate dependencies. Combine both
+    # views until the explicit plan stops growing; never remove pins or accept
+    # a solver version that conflicts with an earlier signed candidate.
+    while True:
+        pinned = [name + '=' + version for name, version in sorted(versions.items())]
+        simulation = apt(['--simulate', '--no-remove', 'install', *pinned], options,
+                         archives, INDEX_TIMEOUT, capture=True)
+        resolved = dict(versions)
+        for name, version in re.findall(r'^Inst (\S+)(?: \[[^\]]+\])? \((\S+)', simulation, re.M):
+            if name in resolved and resolved[name] != version:
+                raise ValueError('Conflicting resolved version for ' + name)
+            resolved[name] = version
+        roots = [name + '=' + version for name, version in sorted(resolved.items())]
+        missing = sorted(set(installed_dependencies(roots, options)) - resolved.keys())
+        if missing:
+            resolved.update(candidates(missing, options))
+        if resolved == versions:
+            break
+        versions = resolved
+    print('Pinned APT package plan:', json.dumps(versions, sort_keys=True), flush=True)
     plan = {'requested': requested, 'versions': versions, 'source_index': index}
     (state / 'plan.json').write_text(json.dumps(plan, sort_keys=True) + '\n')
     system = Path('/etc/os-release').read_text()
@@ -282,7 +312,7 @@ def prepare(requested, archives, state):
     # Image identity covers the preinstalled package baseline. Compiler flags,
     # MPI rank counts and test selections do not fragment dependency caches.
     baseline = [system, architecture, os.environ.get('ImageOS'), os.environ.get('ImageVersion'), requested]
-    prefix = 'rodin-apt-v2-' + hashlib.sha256(json.dumps(baseline, sort_keys=True).encode()).hexdigest()[:24] + '-'
+    prefix = 'rodin-apt-v3-' + hashlib.sha256(json.dumps(baseline, sort_keys=True).encode()).hexdigest()[:24] + '-'
     key = prefix + hashlib.sha256(json.dumps(versions, sort_keys=True).encode()).hexdigest()[:24]
     if os.environ.get('GITHUB_OUTPUT'):
         with open(os.environ['GITHUB_OUTPUT'], 'a') as output:

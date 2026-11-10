@@ -12,7 +12,7 @@
  * method for solving linear systems with symmetric positive definite matrices.
  *
  * # Algorithm
- * The conjugate gradient method solves:
+ * The conjugate gradient method solves the linear system
  * @f[
  *   Ax = b
  * @f]
@@ -21,7 +21,7 @@
  *
  * # Convergence
  * CG converges in at most @f$ n @f$ iterations in exact arithmetic. The error
- * decreases as:
+ * decreases as
  * @f[
  *   \|x_k - x^*\|_A \leq 2 \left( \frac{\sqrt{\kappa} - 1}{\sqrt{\kappa} + 1} \right)^k \|x_0 - x^*\|_A
  * @f]

@@ -12,7 +12,7 @@
  * Cholesky decomposition with pivoting for numerical stability.
  *
  * # Algorithm
- * The solver computes:
+ * The solver computes the following quantity.
  * @f[
  *   PAP^T = LDL^T
  * @f]

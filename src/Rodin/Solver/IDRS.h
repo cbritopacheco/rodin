@@ -9,7 +9,7 @@
  * @brief IDRS(s) solver for (generally) non-symmetric linear systems.
  *
  * This header provides the IDRS(s) (Induced Dimension Reduction) solver class,
- * an iterative method for solving linear systems:
+ * an iterative method for solving linear systems.
  * @f[
  *   Ax = b
  * @f]
@@ -169,7 +169,7 @@ namespace Rodin::Solver
       /**
        * @brief Sets the IDR(s) parameter s (dimension of the shadow space).
        *
-       * Typical values: 4, 8, 16. Larger s can improve robustness but increases
+       * Typical values are 4, 8 and 16. Larger s can improve robustness but increases
        * work per iteration.
        */
       /**

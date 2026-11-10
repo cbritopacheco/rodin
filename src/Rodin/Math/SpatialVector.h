@@ -1256,7 +1256,7 @@ namespace Rodin::Math
 
 namespace Rodin::FormLanguage
 {
-  /// @brief Type traits for a Math::SpatialVector: exposes the scalar type.
+  /// @brief Type traits for a Math::SpatialVector, exposing the scalar type.
   template <class Number>
   struct Traits<Math::SpatialVector<Number>>
   {

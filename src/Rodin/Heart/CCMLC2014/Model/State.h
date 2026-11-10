@@ -8,7 +8,7 @@
  * @file State.h
  * @brief State, input and intermediate data structures for the CCMLC2014 0D model.
  *
- * The variable names documented in this file follow the reduced 0D notation from:
+ * The variable names documented in this file follow the reduced 0D notation from
  * M. Caruel et al., Biomechanics and Modeling in Mechanobiology (2014),
  * doi:10.1007/s10237-013-0544-6, HAL: hal-00872746.
  */
@@ -188,7 +188,7 @@ namespace Rodin::Heart::CCMLC2014::Model
     /**
      * @brief Termination reason of the nonlinear solve.
      *
-     * Fully qualified: inside Rodin::Heart::CCMLC2014 the name Solver::
+     * The name is fully qualified because inside Rodin::Heart::CCMLC2014, Solver::
      * resolves to the nested CCMLC2014::Solver namespace, not Rodin::Solver.
      */
     using ConvergenceReason = typename ::Rodin::Solver::NewtonSolver<

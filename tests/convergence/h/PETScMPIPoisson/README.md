@@ -73,3 +73,8 @@ MPI affine evaluation uses the same shard-local functional selection as the
 linear-row assembler; sequential evaluation uses local iterators. Global entity
 counts must not be used as bounds for shard-local indices. The P2 affine solve
 regression exercises this contract across partitions.
+
+CTest registers each of the nine cases independently for every geometry and MPI
+rank, giving 252 entries. Each entry retains the complete case, its refinement
+levels, numerical tolerances and the 300-second watchdog. CI selects the full
+set through its existing rank partitions.
