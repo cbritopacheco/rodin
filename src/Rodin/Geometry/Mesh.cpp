@@ -22,6 +22,7 @@
 #include "Rodin/IO/HDF5.h"
 
 #include "Mesh.h"
+#include "MortonOrdering.h"
 #include "SubMesh.h"
 
 #include "Polytope.h"
@@ -367,47 +368,31 @@ namespace Rodin::Geometry
 
   Mesh<Context::Local> Mesh<Context::Local>::renumber() const
   {
+    return renumber(MortonOrdering{});
+  }
+
+  Mesh<Context::Local> Mesh<Context::Local>::renumber(
+    const IndexVector& vertexOrder) const
+  {
     const size_t sdim = getSpaceDimension();
     const size_t D = getDimension();
     const size_t vertexCount = getVertexCount();
-
-    // Morton code of each vertex: the coordinates are quantized on a grid of
-    // the bounding box and their bits are interleaved, most significant first.
-    const size_t bits = sdim > 0 ? std::min<size_t>(63 / sdim, 52) : 0;
-    const Real cells = std::ldexp(Real(1), static_cast<int>(bits)) - 1;
-    std::vector<Real> lower(sdim, std::numeric_limits<Real>::max());
-    std::vector<Real> upper(sdim, std::numeric_limits<Real>::lowest());
-    for (Index v = 0; v < vertexCount; ++v)
+    if (vertexOrder.size() != vertexCount)
     {
-      for (size_t i = 0; i < sdim; ++i)
-      {
-        lower[i] = std::min(lower[i], m_vertices(i, v));
-        upper[i] = std::max(upper[i], m_vertices(i, v));
-      }
+      Alert::MemberFunctionException(*this, __func__)
+        << "The vertex permutation must contain every mesh vertex." << Alert::Raise;
     }
-    std::vector<std::uint64_t> code(vertexCount, 0);
-    std::vector<std::uint64_t> quantized(sdim);
-    for (Index v = 0; v < vertexCount; ++v)
+    std::vector<bool> seen(vertexCount, false);
+    for (const Index vertex : vertexOrder)
     {
-      for (size_t i = 0; i < sdim; ++i)
+      if (vertex >= vertexCount || seen[vertex])
       {
-        const Real extent = upper[i] - lower[i];
-        const Real scaled = extent > 0 ? (m_vertices(i, v) - lower[i]) / extent : 0;
-        quantized[i] = static_cast<std::uint64_t>(std::floor(scaled * cells));
+        Alert::MemberFunctionException(*this, __func__)
+          << "The vertex permutation must be a bijection of the mesh vertex indices."
+          << Alert::Raise;
       }
-      std::uint64_t key = 0;
-      for (size_t b = bits; b-- > 0;)
-      {
-        for (size_t i = 0; i < sdim; ++i)
-          key = (key << 1) | ((quantized[i] >> b) & 1);
-      }
-      code[v] = key;
+      seen[vertex] = true;
     }
-
-    std::vector<Index> vertexOrder(vertexCount);
-    std::iota(vertexOrder.begin(), vertexOrder.end(), Index(0));
-    std::stable_sort(vertexOrder.begin(), vertexOrder.end(),
-      [&](Index a, Index b) { return code[a] < code[b]; });
     std::vector<Index> newVertex(vertexCount);
     for (Index v = 0; v < vertexCount; ++v)
       newVertex[vertexOrder[v]] = v;

@@ -234,8 +234,10 @@ namespace Rodin::Tests::Unit
 
   namespace
   {
-    /// @brief Rebuilds @p mesh with its vertices and polytopes listed in a
-    /// scrambled order, as a mesher would produce them.
+    /**
+     * @brief Rebuilds @p mesh with its vertices and polytopes listed in a
+     * scrambled order, as a mesher would produce them.
+     */
     Mesh<Context::Local> scramble(const Mesh<Context::Local>& mesh)
     {
       const size_t vertexCount = mesh.getVertexCount();
@@ -270,8 +272,10 @@ namespace Rodin::Tests::Unit
       return build.finalize();
     }
 
-    /// @brief Lists the polytopes of dimension @p d by the coordinates of their
-    /// vertices in stored order, with their attribute, in a canonical order.
+    /**
+     * @brief Lists the polytopes of dimension @p d by the coordinates of their
+     * vertices in stored order, with their attribute, in a canonical order.
+     */
     std::vector<std::vector<Real>> describe(const Mesh<Context::Local>& mesh, size_t d)
     {
       std::vector<std::vector<Real>> res;
@@ -295,9 +299,11 @@ namespace Rodin::Tests::Unit
     }
   }
 
-  /// @brief Renumbering keeps every polytope, its orientation and its
-  /// attribute, numbers the vertices along space and the cells by their
-  /// smallest vertex, independently of the input numbering.
+  /**
+   * @brief Renumbering keeps every polytope, its orientation and its
+   * attribute, numbers the vertices along space and the cells by their
+   * smallest vertex, independently of the input numbering.
+   */
   TEST(Geometry_MeshOps, Renumber_KeepsPolytopesAndOrdersBySpace)
   {
     Mesh<Context::Local> grid =
@@ -359,4 +365,53 @@ namespace Rodin::Tests::Unit
       }
     }
   }
+  TEST(Geometry_MeshOps, Renumber_RejectsInvalidPermutations)
+  {
+    const auto mesh = LocalMesh::UniformGrid(Polytope::Type::Segment, {3});
+    EXPECT_THROW(mesh.renumber(IndexVector{0, 1}), Alert::Exception);
+    EXPECT_THROW(mesh.renumber(IndexVector{0, 1, 1}), Alert::Exception);
+    EXPECT_THROW(mesh.renumber(IndexVector{0, 1, 3}), Alert::Exception);
+  }
+
+  TEST(Geometry_MeshOps, Renumber_PoliciesPreserveGeometryAndAttributes)
+  {
+    auto mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, {3, 3, 3});
+    mesh.getConnectivity().compute(2, 3);
+    for (size_t d = 0; d <= mesh.getDimension(); ++d)
+    {
+      for (Index p = 0; p < mesh.getConnectivity().getCount(d); ++p)
+        mesh.setAttribute({d, p}, Attribute(1 + p % 7));
+    }
+    const std::vector<IndexVector> permutations = {
+      MortonOrdering{}(mesh), HilbertOrdering{}(mesh), RCMOrdering{}(mesh)};
+    const std::vector<LocalMesh> results = {
+      mesh.renumber(), mesh.renumber(HilbertOrdering{}), mesh.renumber(RCMOrdering{})};
+    for (size_t i = 0; i < results.size(); ++i)
+    {
+      const auto direct = mesh.renumber(permutations[i]);
+      for (size_t d = 0; d <= mesh.getDimension(); ++d)
+      {
+        EXPECT_EQ(describe(results[i], d), describe(mesh, d));
+        EXPECT_EQ(describe(direct, d), describe(results[i], d));
+      }
+      for (Index v = 0; v < mesh.getVertexCount(); ++v)
+      {
+        const auto actual = results[i].getVertexCoordinates(v);
+        const auto expected = mesh.getVertexCoordinates(permutations[i][v]);
+        for (size_t d = 0; d < mesh.getSpaceDimension(); ++d)
+          EXPECT_EQ(actual(d), expected(d));
+        EXPECT_EQ(
+          results[i].getAttribute(0, v), mesh.getAttribute(0, permutations[i][v]));
+      }
+    }
+    const auto explicitMorton = mesh.renumber(MortonOrdering{});
+    for (Index v = 0; v < mesh.getVertexCount(); ++v)
+    {
+      const auto actual = results[0].getVertexCoordinates(v);
+      const auto expected = explicitMorton.getVertexCoordinates(v);
+      for (size_t d = 0; d < mesh.getSpaceDimension(); ++d)
+        EXPECT_EQ(actual(d), expected(d));
+    }
+  }
+
 }

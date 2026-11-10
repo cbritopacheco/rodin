@@ -1696,7 +1696,7 @@ namespace Rodin::Geometry
       /**
        * @brief Returns a copy of the mesh whose numbering follows space.
        *
-       * The vertices are ordered along a Morton curve of their coordinates in
+       * The default is MortonOrdering. Vertices follow a Morton curve of their coordinates in
        * the bounding box, so that vertices close in space get close indices.
        * The polytopes of every other dimension held by the connectivity are
        * then ordered by their smallest new vertex index, ties keeping their
@@ -1704,7 +1704,7 @@ namespace Rodin::Geometry
        * are carried over unchanged; only the indices change. Connectivity
        * other than the polytope to vertex lists is not carried and must be
        * computed again, and polytope transformations set on this mesh are not
-       * carried either: the copy has the affine geometry of its vertices.
+       * carried either: the copy has the native geometry of its vertices.
        *
        * Assembly on a device sums the contributions of the cells in index
        * order, so a mesh whose cell and vertex numberings are unrelated, such
@@ -1716,6 +1716,31 @@ namespace Rodin::Geometry
        * @returns Renumbered copy of this mesh.
        */
       Mesh renumber() const;
+
+      /**
+       * @brief Renumbers a copy using a vertex ordering policy.
+       * @tparam Ordering Callable returning an IndexVector for this local mesh.
+       * @param[in] ordering Policy such as MortonOrdering, HilbertOrdering or RCMOrdering.
+       * @returns Renumbered mesh, with the reconstruction semantics of renumber().
+       *
+       * The policy returns newToOld[newIndex] = oldIndex. Apply before building
+       * finite element spaces; existing fields and spaces are not transferred.
+       */
+      template <class Ordering>
+      Mesh renumber(const Ordering& ordering) const
+      {
+        return renumber(ordering(*this));
+      }
+
+      /**
+       * @brief Rebuilds a copy using an explicit vertex permutation.
+       * @param[in] newToOld Old vertex index at each new vertex index.
+       * @returns Renumbered mesh, with the reconstruction semantics of renumber().
+       *
+       * The permutation must contain each old vertex exactly once. Wrong size,
+       * duplicates and out-of-range indices raise an Alert::Exception.
+       */
+      Mesh renumber(const IndexVector& newToOld) const;
 
       SubMeshBase& asSubMesh() override;
 

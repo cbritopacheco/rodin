@@ -27,6 +27,9 @@
 namespace Rodin::Geometry
 {
   class Bounds;
+  class MortonOrdering;
+  class HilbertOrdering;
+  class RCMOrdering;
 
   /**
    * @brief Template container indexed by polytope geometry types.
