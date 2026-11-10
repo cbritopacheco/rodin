@@ -20,8 +20,8 @@
   <img src="Images/OscarRuz.jpeg" alt="Portrait of Oscar Ruz" />
   <h3>Oscar Ruz</h3>
 
-  *Universidad de Santiago de Chile. Member of the
-  [Computational Heat and Fluid Flow Lab](https://cfdusach.cl/).*
+  <em>Universidad de Santiago de Chile. Member of the
+  <a href="https://cfdusach.cl/">Computational Heat and Fluid Flow Lab</a>.</em>
 
   Contributes biomechanical models for finite element simulation.
   @endparblock
@@ -31,7 +31,7 @@
   @parblock
   <h3>Jean-Baptiste Keck</h3>
 
-  *Laboratoire Jean Kuntzmann.*
+  <em>Laboratoire Jean Kuntzmann.</em>
 
   Contributes the Kokkos backend for GPU assembly, distributed execution
   and device-resident solvers.
