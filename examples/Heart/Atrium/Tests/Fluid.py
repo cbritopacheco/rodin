@@ -112,7 +112,9 @@ def main():
         expected = {'Attribute', 'Velocity', 'Pressure', 'WallShearStress',
                     'TimeAveragedWallShearStress', 'OscillatoryShearIndex'}
         if kinetics:
-            expected |= {'Thrombin', 'Fibrinogen', 'Fibrin', 'ThrombosisActivation'}
+            expected |= {'Prothrombin', 'Thrombin', 'Antithrombin', 'Fibrinogen',
+                         'Fibrin', 'ThrombinAntithrombin', 'BrinkmanDrag',
+                         'InvariantDrift', 'ThrombosisActivation', 'ActivationLayer'}
         assert fields == expected, (name, fields)
         assert len(rows) == steps + 1, (name, len(rows))
         assert abs(float(rows[-1]['time_s']) - dt*steps) < 1e-12

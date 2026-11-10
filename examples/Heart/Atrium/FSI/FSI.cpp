@@ -160,28 +160,29 @@ namespace Rodin::Examples::Heart::Atrium
       parameters.solidAbsoluteTolerance <= 0 || !std::isfinite(m_robinCoefficient) ||
       m_robinCoefficient < 0)
       Alert::Exception() << "Invalid FSI parameters" << Alert::Raise;
-    if (fluid.m_cfg.useVentricularModel || fluid.m_cfg.useVMS ||
-      fluid.m_cfg.solveKinetics)
-    {
-      Alert::Exception() << "Atrium FSI currently uses Oseen SUPG/PSPG flow without "
-                            "0D ventricular coupling, orthogonal subscales, or species"
-                         << Alert::Raise;
-    }
     fluid.m_coupled = true;
-    fluid.m_cfg.inletPressureMean = 0;
-    fluid.m_cfg.inletPressureAmplitude = 0;
-    fluid.m_cfg.prescribedOutletPressure = 0;
-    fluid.m_cfg.prescribedOutletResistance = 0;
-    fluid.m_cfg.inletImpedance = 0;
-    fluid.m_cfg.inletTangentialDamping = 0;
+    if (!fluid.m_cfg.useVentricularModel)
+    {
+      // Contraction-driven flow: every opening has zero imposed pressure.
+      // With the lumped ventricle the venous pressure, the opening
+      // impedances, and the mitral diode of the fluid model are retained.
+      fluid.m_cfg.inletPressureMean = 0;
+      fluid.m_cfg.inletPressureAmplitude = 0;
+      fluid.m_cfg.prescribedOutletPressure = 0;
+      fluid.m_cfg.prescribedOutletResistance = 0;
+      fluid.m_cfg.inletImpedance = 0;
+      fluid.m_cfg.inletTangentialDamping = 0;
+    }
     if (m_robinCoefficient == 0)
     {
       // Matrix-based isotropic scale; fiber reinforcement is not isotropic.
       constexpr Real KilopascalsToPascals = 1e3;
       const auto& passive = solid.m_parameters.passive;
       const Real shear = KilopascalsToPascals * passive.matrixScale;
+      // The incompressible mixed wall has E = 3 mu.
       const Real bulk = KilopascalsToPascals * 2 * passive.volumePenalty;
-      const Real young = 9 * bulk * shear / (3 * bulk + shear);
+      const Real young =
+        solid.m_parameters.mixed ? 3 * shear : 9 * bulk * shear / (3 * bulk + shear);
       m_robinCoefficient = std::sqrt(solid.m_parameters.density * young);
       if (!(m_robinCoefficient > 0))
       {
@@ -324,7 +325,7 @@ namespace Rodin::Examples::Heart::Atrium
   void FSI::updateTraction()
   {
     Stage stage("Interface traction exchange", m_fluid.isRoot());
-    if (m_parameters.newton)
+    if (m_parameters.newton || !m_parameters.recoveredTraction)
     {
       transfer(m_solidToFluid, m_fluid.m_u.getSolution(), m_importedVelocity, 1e3,
         SCATTER_REVERSE);
@@ -465,6 +466,8 @@ namespace Rodin::Examples::Heart::Atrium
         m_diagnostics.iterations = iteration;
         m_diagnostics.tractionDataUpdate = 1e3 * std::max(difference, tractionDifference);
         m_importedTraction.setData(m_trialTraction.getData());
+        if (!m_parameters.recoveredTraction)
+          transfer(m_solidToFluid, m_importedTraction, m_fluid.m_wallTraction, 1e3);
         m_diagnostics.converged = iteration > 1 &&
           m_diagnostics.displacementChange < m_parameters.relativeTolerance;
         if (m_fluid.isRoot())
@@ -530,6 +533,10 @@ namespace Rodin::Examples::Heart::Atrium
     m_fluid.m_flux.assemble();
     m_diagnostics.wallFlux = m_fluid.m_flux(m_fluid.m_one);
     }
+    // Robin sweeps recover the velocity gradient during the traction
+    // exchange; the variational Newton exchange does not.
+    if (m_parameters.newton || !m_parameters.recoveredTraction)
+      m_fluid.recoverGradient();
     m_fluid.computeWallShear();
     m_solid.commitStep();
     m_fluid.commitStep();

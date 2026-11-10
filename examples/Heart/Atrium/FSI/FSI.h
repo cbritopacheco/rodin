@@ -16,7 +16,7 @@ namespace Rodin::Examples::Heart::Atrium
    * @brief Partitioned Robin--Robin coupling on a conforming MPI interface.
    *
    * The solid and fluid exchange Robin data and interface velocity. Newton uses
-   * variational reactions; budgeted sweeps retain recovered physical stress. Transmission uses the BDF1 wall rate
+   * variational reactions, as do the budgeted sweeps by default. Transmission uses the BDF1 wall rate
    * @f$ (d_s^{n+1}-d_s^n)/\Delta t @f$ on both sides. Solid dynamics retain
    * Newmark integration. Robin sweeps use relative displacement change and budgeted acceptance.
    * Optional analytic interface Newton enforces an absolute residual tolerance.
@@ -42,6 +42,15 @@ namespace Rodin::Examples::Heart::Atrium
         Real relativeTolerance =
           1e-6; ///< Relative global solid displacement-change tolerance.
         Real robinCoefficient = 0; ///< Pa s/m; zero selects sqrt(rho_s E_matrix).
+
+        /**
+         * @brief Exchanges recovered physical stress in the Robin sweeps.
+         * @details False uses the variational Robin reaction
+         * T <- T + alpha (u_f - v_Gamma), whose fixed point has no interface
+         * slip; one sweep per step is then the loosely coupled Robin--Robin
+         * scheme. Newton always uses the variational reaction.
+         */
+        bool recoveredTraction = false;
       };
 
       struct Diagnostics

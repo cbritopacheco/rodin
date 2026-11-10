@@ -1,7 +1,11 @@
 #!/usr/bin/env python3
 # Copyright Carlos BRITO PACHECO 2026.
 # Distributed under the Boost Software License, Version 1.0.
-"""Check analytic interface Newton, state reuse, and MPI consistency."""
+"""Check analytic interface Newton, state reuse, and MPI consistency.
+
+The mixed incompressible wall is checked in serial and parallel. Guard
+backtracking uses the displacement wall, for which its speed limit is set.
+"""
 import argparse
 import csv
 import math
@@ -29,7 +33,7 @@ def main():
                VECLIB_MAXIMUM_THREADS='1')
     apex = ','.join(map(str, [math.cos(.6)*8, 0, -math.sin(.6)*8]))
 
-    def run(name, ranks, taylor=False, guard_recovery=False):
+    def run(name, ranks, taylor=False, guard_recovery=False, mixed=True):
         folder = output/name
         folder.mkdir()
         cmd = [args.mpiexec, '-n', str(ranks), str(args.executable.resolve()),
@@ -39,6 +43,7 @@ def main():
                '-atrium_fsi_atol', '1e-11', '-atrium_fsi_solid_atol', '1e-11',
                '-atrium_solid_apex', apex, '-atrium_solid_contractility', '100',
                '-atrium_solid_cache_constitutive', '-atrium_output_every', '1',
+               '-atrium_solid_mixed', str(mixed).lower(),
                '-ksp_type', 'preonly', '-pc_type', 'lu',
                '-pc_factor_mat_solver_type', 'mumps', '-mat_mumps_icntl_20', '0',
                '-ksp_diagonal_scale', 'false', '-ksp_diagonal_scale_fix', 'false']
@@ -80,14 +85,19 @@ def main():
             assert abs(float(row['fsi_cavity_volume_difference_ml'])) < 1e-9
         return rows
 
-    serial = run('serial', 1)
-    parallel = run('parallel', 2, taylor=True)
-    recovered = run('guard-recovery', 2, guard_recovery=True)
-    for a,b,c in zip(serial[1:], parallel[1:], recovered[1:]):
-        assert float(c['fluid_max_velocity_m_per_s']) <= .0015
+    def same(a, b):
         for key in ('max_displacement_mm', 'solid_cavity_volume_ml', 'fluid_max_velocity_m_per_s'):
             assert math.isclose(float(a[key]), float(b[key]), rel_tol=1e-8, abs_tol=1e-12), (key,a[key],b[key])
-            assert math.isclose(float(a[key]), float(c[key]), rel_tol=1e-8, abs_tol=1e-12), (key,a[key],c[key])
+
+    serial = run('serial', 1)
+    parallel = run('parallel', 2, taylor=True)
+    for a,b in zip(serial[1:], parallel[1:]):
+        same(a, b)
+    displacement = run('displacement', 1, mixed=False)
+    recovered = run('guard-recovery', 2, guard_recovery=True, mixed=False)
+    for a,c in zip(displacement[1:], recovered[1:]):
+        assert float(c['fluid_max_velocity_m_per_s']) <= .0015
+        same(a, c)
     print('Analytic tangents, state reuse, guard backtracking, shared geometry and MPI consistency: passed')
     print('Output:', output)
 

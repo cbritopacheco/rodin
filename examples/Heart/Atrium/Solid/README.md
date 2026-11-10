@@ -146,6 +146,28 @@ time; with an export interval of one it writes $N+1$ states including
 initialization. Temporal, spatial, and quadrature refinement are needed for
 quantitative dynamics.
 
+## Incompressible displacement–pressure formulation
+
+By default the wall is incompressible. The passive law supplies its isochoric
+part ($\mu_v=0$) and a continuous linear pressure $p$ enforces $J=1$:
+
+$$
+R_u(u,p;w)=\int_{\Omega_0}\rho_0\ddot u\cdot w
+ +\left(P_\mathrm{iso}+pJF^{-T}\right):\nabla_Xw\,dX,
+\qquad
+R_p(u,p;q)=\int_{\Omega_0}(J-1)\,q\,dX
+ -\sum_K\int_K\tau_K\nabla_Xp\cdot\nabla_Xq\,dX.
+$$
+
+Here $P_\mathrm{iso}$ is the stress supplied by the law without its volume
+penalty: the isochoric passive response and the viscous and active stresses. Equal-order displacement and pressure are stabilized with
+$\tau_K=c\,h_K^2/(2a)$, where $h_K$ is the cube root of the reference cell
+volume and $c$ is `-atrium_solid_pressure_stabilization` (default one). The
+pressure joins displacement and the three active fields in the global Newton
+solve. `-atrium_solid_mixed false` selects the displacement formulation with
+the logarithmic volume penalty; its pressure block is the identity. Passive
+initialization uses the compressible law in both cases.
+
 ## Parameters and units
 
 Coordinates are in mm, time in seconds, and stresses in kPa. `-atrium_solid_density`

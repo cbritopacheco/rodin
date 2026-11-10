@@ -308,10 +308,26 @@ namespace Rodin::Examples::Heart::Atrium
       const V gradP = Grad(m_fluid.m_p.getSolution()).getValue(point);
       const Real ratio = m_fluid.m_massRatios.at(point.getPolytope().getIndex());
       const Real b = O.trace() - 2 * W.trace(), db = dO.trace() - 2 * dW.trace();
-      const V F = (rho / dt) * (u - ratio * old) + rho * U * a + (.5 * rho * b) * u;
+      // The Brinkman coefficient is a nodal field carried by the mesh.
+      const Real drag = m_fluid.dragAt(point);
+      const V F =
+        (rho / dt) * (u - ratio * old) + rho * U * a + (.5 * rho * b) * u + drag * u;
       const V dF = (rho / dt) * (ratio * dilation * old) + rho * (dU * a + U * da) +
         (.5 * rho * db) * u;
-      const V rm = F + gradP, drm = dF - G.transpose() * gradP;
+      // Momentum residuals tested by the streamline and pressure
+      // stabilizations. Split orthogonal subscales test convection minus its
+      // lagged projection, and the pressure gradient alone; the projections
+      // are nodal fields of the previous time level.
+      const bool split = cfg.useVMS;
+      V rs = F - drag * u + gradP, drs = dF - G.transpose() * gradP;
+      V rp = rs, drp = drs;
+      if (split)
+      {
+        rs = rho * (U * a - m_fluid.m_convProjection(point) - m_fluid.m_sub(point) / dt);
+        drs = rho * (dU * a + U * da);
+        rp = gradP;
+        drp = -G.transpose() * gradP;
+      }
       const auto& cy = cfg.viscosity;
       const Real gamma = std::sqrt(
         cy.gammaRegularization * cy.gammaRegularization + 2 * oldD.squaredNorm());
@@ -335,26 +351,34 @@ namespace Rodin::Examples::Heart::Atrium
           2 * speed * dh / (h * h));
       const Real denominator = rho / dt + rho / tau1;
       const Real dBase = rho * dTau1 / (tau1 * tau1 * denominator * denominator);
-      const Real ts = m_fluid.vmsTauAt(point), dTs = cfg.vmsScale * dBase;
-      const Real tp = m_fluid.tauPAt(point), dTp = cfg.pspgScale * dBase;
+      const Real ts = m_fluid.vmsTauAt(point);
+      const Real dTs = split && cfg.quasiStaticSubscales ? cfg.vmsScale * dTau1 / rho
+                                                         : cfg.vmsScale * dBase;
+      const Real tp = m_fluid.tauPAt(point);
+      const Real dTp = split ? cfg.pspgScale * dTau1 / rho : cfg.pspgScale * dBase;
       const Real tc = m_fluid.tauCAt(point);
       const Real dTc = cfg.gradDivScale * rho * .25 *
         (2 * h * dh / tau1 - h * h * dTau1 / (tau1 * tau1));
       const M identity = M::Identity(3, 3);
-      const M momentum = 2 * mu * D - pressure * identity + tc * U.trace() * identity;
-      const M dMomentum =
-        2 * dMu * D + 2 * mu * dD + (dTc * U.trace() + tc * dU.trace()) * identity;
+      // Projected divergence of the split subscales: -sqrt(tau_C) pi div(v).
+      const Real rootC = split ? m_fluid.sqrtTauCAt(point) : Real(0);
+      const Real projectedDivergence = rootC > 0 ? m_fluid.m_piTilde(point) : Real(0);
+      const Real dRootC = rootC > 0 ? dTc / (2 * rootC) : Real(0);
+      const M momentum = 2 * mu * D - pressure * identity +
+        (tc * U.trace() - rootC * projectedDivergence) * identity;
+      const M dMomentum = 2 * dMu * D + 2 * mu * dD +
+        (dTc * U.trace() + tc * dU.trace() - dRootC * projectedDivergence) * identity;
       const Real pressureValue = U.trace() + cfg.pressurePenalty * pressure;
-      const V pressureGradient = tp * rm;
+      const V pressureGradient = tp * rp;
       ShapeCoefficients result;
       result.value = dF + dilation * F;
       result.gradient = dMomentum + dilation * momentum - momentum * G.transpose();
-      result.supgResidual = rho * ((dTs + dilation * ts) * rm + ts * drm);
-      result.supgBase = rho * ts * rm;
+      result.supgResidual = rho * ((dTs + dilation * ts) * rs + ts * drs);
+      result.supgBase = rho * ts * rs;
       result.supgTransport = da - G * a;
       result.pressure = dU.trace() + dilation * pressureValue;
       result.pressureGradient =
-        dTp * rm + tp * drm + dilation * pressureGradient - G * pressureGradient;
+        dTp * rp + tp * drp + dilation * pressureGradient - G * pressureGradient;
       samples.push_back({reference, result});
       return result;
     };

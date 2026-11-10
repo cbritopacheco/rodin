@@ -35,10 +35,78 @@ $$
 
 Backward Euler advances time. Boundary labels 1, 2, 3, and 5 are pressure-driven
 inlets, label 6 is the outlet, and the extracted material-4 interface is the
-fixed no-slip wall. Pressure penalties, boundary impedance, and backflow terms
-are retained in the flow problem. The default uses a prescribed outlet pressure.
-Ventricular coupling, species transport, and orthogonal-subscale corrections are
-optional parameters, disabled by default.
+fixed no-slip wall, or the Robin interface in [FSI](../FSI/README.md). Pressure
+penalties, boundary impedance, and backflow terms are retained in the flow
+problem. The default uses a prescribed outlet pressure. Ventricular coupling,
+species transport, and orthogonal subscales are optional parameters, disabled
+by default and available in fluid and FSI modes.
+
+## Split orthogonal subscales
+
+`-atrium_fluid_vms` replaces SUPG/PSPG by term-by-term orthogonal subscales.
+On the moving domain, with $a=u^n-w$ and mesh velocity $w$, the stabilization is
+
+$$
+\sum_K\int_K\tau_s\rho^2\left[(\nabla u^{n+1})a-\xi^n\right]\cdot(\nabla v)a
++\tau_c\,(\nabla\cdot u^{n+1})(\nabla\cdot v)
+-\sqrt{\tau_c}\,\pi^n\,\nabla\cdot v
++\tau_p\nabla p^{n+1}\cdot\nabla q\,dX,
+$$
+
+$$
+\xi^n=\Pi_h\!\left[(\nabla u^n)(u^n-w^n)\right]+\frac{1}{\Delta t}\tilde u^n,
+\qquad
+\pi^n=\Pi_h\!\left[\sqrt{\tau_c}\,\nabla\cdot u^n\right],
+\qquad
+\tau_c=\frac{s_c\rho h_K^2}{4\tau_1},\qquad \tau_p=\frac{s_p\tau_1}{\rho}.
+$$
+
+$\Pi_h$ is the $L^2$ projection onto the P1 space and $\tilde u^n$ the dynamic
+convective subscale; `-atrium_fluid_quasi_static_subscales` omits its history
+and uses $\tau_s=s_s\tau_1/\rho$. The projections are computed once per
+physical step on the previous configuration and are then nodal fields carried
+by the mesh. Convection, divergence, and pressure gradient are stabilized
+separately; the pressure-gradient term has no projection. With the Brinkman
+drag, $\tau_1^{-1}$ includes $\sigma_B/\rho$.
+
+## Lumped ventricle
+
+`-atrium_fluid_lv_model` advances Rodin's lumped left-ventricle model once per
+step and applies its pressure at the outlet through a diode resistance: open
+while the mean outlet pressure of the previous step exceeds the ventricular
+pressure, closed otherwise. The ventricle is driven by its own prescribed
+atrial pressure waveform; the three-dimensional flow does not feed back to it.
+`-atrium_fluid_pressure_ramp` scales the venous and ventricular pressures
+linearly from zero over the given time.
+
+## Coagulation species
+
+`-atrium_fluid_kinetics` transports prothrombin $P$, thrombin $T$, antithrombin
+$A$, and fibrinogen $G$ after `-atrium_fluid_flow_cycles` completed cycles
+(default three). With $\mathcal L c=\partial_tc|_\chi+(u-w)\cdot\nabla c
+-\nabla\cdot(D\nabla c)$,
+
+$$
+\mathcal LP=-R,\qquad \mathcal LT=R-R_I,\qquad
+\mathcal LA=-R_I,\qquad \mathcal LG=-R_F,
+$$
+
+$$
+R=k_a\frac{T^2}{K_A+T}\frac{P}{P_\mathrm{ref}},\qquad
+R_I=k_\mathrm{on}AT,\qquad R_F=k_F\frac{TG}{K_G+G}.
+$$
+
+Nodal concentrations move with the mesh, so the backward-Euler difference is
+the time derivative at fixed mesh coordinate and the convecting velocity is
+$u-w$. Transport uses SUPG and Codina crosswind diffusion with one quadrature
+rule for all terms; it preserves uniform states and therefore the invariant
+$P+T-A$. A nodal production–destruction step follows, positive and
+budget-exact for any time step. Initiation is the volumetric channel
+$(j_0/\delta)\tilde EP/P_\mathrm{ref}$ in an endocardial layer of thickness
+$\delta$, where $\tilde E$ extends the wall activation built from TAWSS and OSI;
+$\delta=0$ selects the wall flux. The fibrin surrogate $F=G_0-G$ adds the drag
+$\sigma_B(F)\,u$ to the momentum equation, implicit in $u$ and lagged in $F$.
+`Coagulation.h` lists the constants.
 
 Open pressure boundaries permit flow reversal. With outward normal $n$ and
 relative advecting velocity $b=u^n-a$, both inlet and outlet residuals include
@@ -80,11 +148,16 @@ belong to `Fluid::Parameters`; common time and output settings are defined by
 
 `Velocity`, `Pressure`, `WallShearStress`, `TimeAveragedWallShearStress`, and
 `OscillatoryShearIndex` are exported in `Fluid.xdmf`. The latter two are updated
-at completed statistics cycles. Optional coagulation transport exports
-`Thrombin`, `Fibrinogen`, `Fibrin`, and `ThrombosisActivation`; it is disabled by
-default and is separate from solid activation. The 0D ventricular driver and
-orthogonal subscales are also disabled by default and available only in fluid
-mode.
+at completed statistics cycles and vanish away from the wall. Optional
+coagulation transport exports `Prothrombin`, `Thrombin`, `Antithrombin`,
+`Fibrinogen`, `Fibrin`, `ThrombinAntithrombin`, `BrinkmanDrag`,
+`InvariantDrift`, `ThrombosisActivation`, and `ActivationLayer`; it is separate
+from solid activation. Species solvers use the `-atrium_ptag_` option prefix
+and default to GMRES with block Jacobi.
+
+The lagged viscosity and the cell size are constant on an affine P1
+tetrahedron. They are evaluated once per cell for each lagged state and
+geometry and shared by all stabilization coefficients and by the viscous term.
 
 ## Run
 

@@ -6,13 +6,15 @@
  */
 /**
  * @file Fluid.h
- * @brief Distributed Oseen P1/P1 atrial flow with SUPG and PSPG stabilization.
+ * @brief Distributed ALE Oseen P1/P1 atrial flow with split-VMS or SUPG/PSPG stabilization.
  *
- * Equal-order P1/P1 Oseen flow uses SUPG, PSPG, and grad-div stabilization.
- * Standalone flow has pressure-driven openings and a fixed no-slip wall.
- * FSI supplies Robin interface data, harmonic ALE motion, and zero-pressure
- * open boundaries. Ventricular coupling, species transport, and orthogonal
- * subscales are optional standalone models and are disabled in FSI.
+ * Equal-order P1/P1 Oseen flow uses either term-by-term orthogonal subscales
+ * (convection along u^n - w, grad-div, and pressure-gradient stabilization) or
+ * residual-based SUPG/PSPG with grad-div. Standalone flow has pressure-driven
+ * openings and a fixed no-slip wall. FSI supplies Robin interface data and
+ * harmonic ALE motion. The lumped ventricle with its mitral diode, the
+ * orthogonal subscales, and the P-T-A-G coagulation transport are available in
+ * both fluid and FSI modes.
  * The fluid submesh retains the common MPI partition and parent identities;
  * its coordinates are converted to SI units with Parameters::meshScale.
  */
@@ -24,6 +26,7 @@
 #include <functional>
 #include <memory>
 #include <string>
+#include <vector>
 
 #include "Rodin/Heart/CCMLC2014.h"
 #include <Rodin/Geometry.h>
@@ -34,9 +37,9 @@
 #include <Rodin/Variational.h>
 
 #include "../../CoronaryArtery/ThrombosisModel.h"
-#include "../../CoronaryArtery/VMSConvectionIntegrator.h"
 
 #include "../RunParameters.h"
+#include "Coagulation.h"
 
 namespace Rodin::Examples::Heart::Atrium
 {
@@ -75,10 +78,6 @@ namespace Rodin::Examples::Heart::Atrium
       using FlowProblemType =
         Rodin::Variational::Problem<LinearSystemType, VectorTrialFunctionType,
           ScalarTrialFunctionType, VectorTestFunctionType, ScalarTestFunctionType>;
-
-      using SpeciesProblemType = Rodin::Variational::Problem<LinearSystemType,
-        ScalarTrialFunctionType, ScalarTrialFunctionType, ScalarTrialFunctionType,
-        ScalarTestFunctionType, ScalarTestFunctionType, ScalarTestFunctionType>;
 
       using VectorProblemType = Rodin::Variational::Problem<LinearSystemType,
         VectorTrialFunctionType, VectorTestFunctionType>;
@@ -267,8 +266,16 @@ namespace Rodin::Examples::Heart::Atrium
 
         Real period = 0.85;
 
-        /// @brief Cycles solved before the species are switched on.
-        int flowCycles = 2;
+        /**
+         * @brief Linear ramp time of the opening pressures, in seconds.
+         * @details Zero applies the full venous and ventricular pressures from
+         * the first step. A positive value avoids an impulsive load on a wall
+         * whose reference configuration is unloaded.
+         */
+        Real pressureRamp = 0.0;
+
+        /// @brief Flow cycles completed before the species are switched on.
+        int flowCycles = 3;
 
         /**
          * @brief Per-term stabilisation scales, so each can be dialled down
@@ -279,15 +286,26 @@ namespace Rodin::Examples::Heart::Atrium
         Real pspgScale = 1.0;
 
         /**
-         * @brief Enable orthogonal-subscale corrections to the Oseen stabilization.
-         * @details SUPG and PSPG remain active when this option is false.
+         * @brief Selects term-by-term orthogonal-subscale stabilization.
+         * @details Convection, divergence, and pressure gradient are each
+         * stabilized separately. The convective and divergence projections use
+         * the previous time level. False selects residual-based SUPG/PSPG.
          */
         bool useVMS = false;
 
-        ThrombosisParameters thrombosis;
+        /// @brief Quasi-static instead of dynamic convective subscales.
+        bool quasiStaticSubscales = false;
+
+        /// @brief Constants of the P-T-A-G coagulation model.
+        ConservingKinetics kinetics;
+
+        /// @brief Fibrin-dependent drag in the momentum equation.
+        BrinkmanDrag brinkman;
 
         /// @brief Codina crosswind constant. 0 disables it.
         Real crosswindC = 0.7;
+
+        /// @brief Transport and react the P-T-A-G species after the flow cycles.
         bool solveKinetics = false;
 
         /**
@@ -422,6 +440,58 @@ namespace Rodin::Examples::Heart::Atrium
       void setupSpecies();
       void setupWallShear();
 
+      /// @brief Refreshes the lagged orthogonal-subscale projections on the previous configuration.
+      void prepareSubscales();
+
+      /**
+       * @brief Assigns the backward-Euler ALE transport of one species.
+       * @param problem Retained transport problem.
+       * @param c Trial concentration.
+       * @param v Test function.
+       * @param cur Current nodal concentration, moving with the mesh.
+       * @param prev Previous nodal concentration for the crosswind residual.
+       * @param diffusivity Molecular diffusivity (m^2/s).
+       * @param inlet Concentration prescribed at the venous openings.
+       * @param robinScale Wall exchange coefficient; zero without wall exchange.
+       * @param load Field supplying the wall load, or null.
+       */
+      void assignTransport(ScalarProblemType& problem, ScalarTrialFunctionType& c,
+        ScalarTestFunctionType& v, ScalarGridFunctionType& cur,
+        ScalarGridFunctionType& prev, Real diffusivity, Real inlet, Real robinScale,
+        const ScalarGridFunctionType* load);
+
+      /// @brief Extends the wall activation into the endocardial layer and fixes its dose.
+      void extendActivation();
+
+      /// @brief Nodal production-destruction step of the four species.
+      void reactionStep();
+
+      /// @brief Updates fibrin, thrombin-antithrombin, drag, and invariant-drift fields.
+      void updateCoagulationDiagnostics();
+
+      /// @brief Returns whether the evaluation point is a wall node.
+      bool onWallNode(const Rodin::Geometry::Point& p) const;
+
+      /// @brief Fibrin surrogate F = G_0 - G at a point, clamped to [0, G_0].
+      Real fibrinAt(const Rodin::Geometry::Point& p) const;
+
+      /// @brief Brinkman coefficient from the lagged fibrinogen; zero before the species start.
+      Real dragAt(const Rodin::Geometry::Point& p) const;
+
+      /// @brief Cellwise viscosity and size shared by all stabilization coefficients.
+      struct CellCoefficients
+      {
+          size_t epoch = 0;
+          Real viscosity = 0, size = 0;
+      };
+
+      /**
+       * @brief Returns the lagged viscosity and size of the cell containing a point.
+       * @details Both are constant on an affine P1 tetrahedron. Entries are
+       * reused until the lagged velocity or the geometry changes.
+       */
+      const CellCoefficients& cellCoefficients(const Rodin::Geometry::Point& p) const;
+
       /// @brief L2 projection of a scalar expression, reusing one mass matrix.
       template <class Expression>
       void project(const Expression& expr, ScalarGridFunctionType& out)
@@ -486,10 +556,9 @@ namespace Rodin::Examples::Heart::Atrium
       /// @brief PSPG parameter.
       Real tauPAt(const Rodin::Geometry::Point& p) const;
 
-      /// @brief Codina crosswind coefficient of one species.
+      /// @brief Codina crosswind coefficient of one species along u - w.
       Real crosswind(const Rodin::Geometry::Point& p, Real cur, Real prev,
-        const Rodin::Math::SpatialVector<Real>& gradient, Real diffusivity,
-        Real reaction) const;
+        const Rodin::Math::SpatialVector<Real>& gradient, Real diffusivity) const;
 
       Parameters m_cfg;
       const RunParameters m_run;
@@ -533,24 +602,40 @@ namespace Rodin::Examples::Heart::Atrium
       ScalarCoefficientType m_tauCFn;
       ScalarCoefficientType m_sqrtTauCFn;
       ScalarCoefficientType m_tauPFn;
+      ScalarCoefficientType m_viscosityFn;
+      ScalarCoefficientType m_dragFn;
+      mutable std::vector<CellCoefficients> m_cellCoefficients;
+      size_t m_coefficientEpoch = 1;
       ScalarGridFunctionType m_piTilde;
       VectorGridFunctionType m_convProjection;
       VectorGridFunctionType m_sub;
       VectorGridFunctionType m_subOld;
 
-      // ---- Species ---------------------------------------------------------
-      ScalarTrialFunctionType m_th;
-      ScalarTrialFunctionType m_fg;
-      ScalarTrialFunctionType m_fn;
-      ScalarTestFunctionType m_vth;
-      ScalarTestFunctionType m_vfg;
-      ScalarTestFunctionType m_vfn;
-      ScalarGridFunctionType m_thCur;
-      ScalarGridFunctionType m_fgCur;
-      ScalarGridFunctionType m_fnCur;
-      ScalarGridFunctionType m_thPrev;
-      ScalarGridFunctionType m_fgPrev;
-      ScalarGridFunctionType m_fnPrev;
+      // ---- Species: P, T, A, G ---------------------------------------------
+      ScalarTrialFunctionType m_pT, m_tT, m_aT, m_gT;
+      ScalarTestFunctionType m_vP, m_vT, m_vA, m_vG;
+      ScalarGridFunctionType m_pCur, m_tCur, m_aCur, m_gCur;
+      ScalarGridFunctionType m_pPrev, m_tPrev, m_aPrev, m_gPrev;
+
+      /// @brief F = G_0 - G, I = A_0 - A, sigma_B, and P + T - A - (P_0 - A_0).
+      ScalarGridFunctionType m_fibrin, m_tat, m_drag, m_drift;
+
+      // ---- Endocardial layer ------------------------------------------------
+      ScalarTrialFunctionType m_eT;
+      ScalarTestFunctionType m_vE;
+
+      /// @brief Activation extended into the lumen; zero for zero layer thickness.
+      ScalarGridFunctionType m_layer;
+
+      /// @brief Dose normalization, delta int_Gw E dA / int_Omega E~ dV.
+      Real m_layerScale = 1.0;
+
+      /// @brief Assembled wall measure; positive exactly at wall nodes on every rank.
+      ScalarGridFunctionType m_wallArea;
+      Real m_wallAreaThreshold = 0.0;
+
+      /// @brief Ghost-consistent copy of the recovered wall traction.
+      VectorGridFunctionType m_wssRec;
 
       // ---- Wall shear indices ----------------------------------------------
       VectorGridFunctionType m_wss;
@@ -572,8 +657,10 @@ namespace Rodin::Examples::Heart::Atrium
       // ---- Problems and solvers --------------------------------------------
       FlowProblemType m_flow;
       Rodin::Solver::KSP m_flowKSP;
-      SpeciesProblemType m_species;
-      Rodin::Solver::KSP m_speciesKSP;
+      ScalarProblemType m_transportP, m_transportT, m_transportA, m_transportG;
+      Rodin::Solver::KSP m_kspP, m_kspT, m_kspA, m_kspG;
+      ScalarProblemType m_extension;
+      Rodin::Solver::KSP m_extensionKSP;
       ScalarProblemType m_scalarProjection;
       Rodin::Solver::KSP m_scalarProjectionKSP;
       VectorProblemType m_vectorProjection;
@@ -595,6 +682,12 @@ namespace Rodin::Examples::Heart::Atrium
       Real m_speed = 0.0;
       bool m_valveOpen = true;
       bool m_flowFieldSplitsSet = false;
+
+      /// @brief Cycle wall-shear indices are available.
+      bool m_indicesReady = false;
+
+      /// @brief Species have started; the Brinkman drag then enters the flow.
+      bool m_speciesActive = false;
 
       /// @brief Step at which the retained flow preconditioner was last refreshed.
       Optional<int> m_lastPreconditionerRefreshStep;

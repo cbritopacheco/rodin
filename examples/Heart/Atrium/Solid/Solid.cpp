@@ -56,6 +56,14 @@ namespace Rodin::Examples::Heart::Atrium
       Rodin::Solid::ActiveFiberLaw(active));
   }
 
+  Solid::Material Solid::makeTransientMaterial(const Parameters& cfg)
+  {
+    Parameters isochoric = cfg;
+    if (cfg.mixed)
+      isochoric.passive.volumePenalty = 0;
+    return makeMaterial(isochoric);
+  }
+
   Solid::Solid(const MeshType& parent, const Parameters& parameters,
     const RunParameters& run, Geometry::Attribute material)
     : m_parameters(validateParameters(parameters)),
@@ -64,6 +72,7 @@ namespace Rodin::Examples::Heart::Atrium
       m_data(m_mesh, m_parameters),
       m_space(m_mesh, 3),
       m_activeSpace(m_mesh),
+      m_pressureSpace(m_mesh),
       m_displacement(m_space),
       m_velocity(m_space),
       m_acceleration(m_space),
@@ -77,25 +86,29 @@ namespace Rodin::Examples::Heart::Atrium
       m_previousExtension(m_activeSpace),
       m_previousGamma(m_activeSpace),
       m_previousBeta(m_activeSpace),
+      m_pressure(m_pressureSpace),
       m_timeStep(m_run.timeStep),
       m_density(m_parameters.density * DensityConversion),
       m_accelerationCoefficient(1 / (NewmarkBeta * m_timeStep * m_timeStep)),
       m_massCoefficient(m_density * m_accelerationCoefficient),
       m_velocityCoefficient(NewmarkGamma / (NewmarkBeta * m_timeStep)),
-      m_law(makeMaterial(m_parameters)),
+      m_law(makeTransientMaterial(m_parameters)),
       m_increment(m_space),
       m_extensionIncrement(m_activeSpace),
       m_gammaIncrement(m_activeSpace),
       m_betaIncrement(m_activeSpace),
+      m_pressureIncrement(m_pressureSpace),
       m_test(m_space),
       m_extensionTest(m_activeSpace),
       m_gammaTest(m_activeSpace),
       m_betaTest(m_activeSpace),
+      m_pressureTest(m_pressureSpace),
       m_work(m_law, m_displacement),
       m_mechanics(m_increment, m_extensionIncrement, m_gammaIncrement, m_betaIncrement,
-        m_test, m_extensionTest, m_gammaTest, m_betaTest),
+        m_pressureIncrement, m_test, m_extensionTest, m_gammaTest, m_betaTest,
+        m_pressureTest),
       m_linearSolver(m_mechanics),
-      m_passiveWork(m_law.getPassiveLaw(), m_displacement),
+      m_passiveWork(makeMaterial(m_parameters).getPassiveLaw(), m_displacement),
       m_equilibrium(m_increment, m_test),
       m_equilibriumSolver(m_equilibrium)
   {
@@ -117,6 +130,8 @@ namespace Rodin::Examples::Heart::Atrium
     m_previousExtension = m_extension;
     m_previousGamma = m_gamma;
     m_previousBeta = m_beta;
+    m_pressure = Real(0);
+    m_pressure.setName("Pressure");
     m_displacement.setName("Displacement");
     m_velocity.setName("Velocity");
     m_acceleration.setName("Acceleration");
@@ -126,12 +141,64 @@ namespace Rodin::Examples::Heart::Atrium
 
     m_work.setInput([this](Rodin::Solid::ConstitutivePoint& point) { setInputs(point); });
     m_work.setQuadratureOrder(QuadratureOrder);
-    m_mechanics = m_work(m_increment, m_test) +
-      m_massCoefficient * Integral(m_increment, m_test) +
-      m_massCoefficient * Integral(m_displacement, m_test) -
-      m_massCoefficient * Integral(m_predictedDisplacement, m_test) +
-      DirichletBC(m_increment, zero)
-        .on(Attribute{1}, Attribute{2}, Attribute{3}, Attribute{5}, Attribute{6});
+    if (m_parameters.mixed)
+    {
+      // Incompressible wall: the law supplies the isochoric stress and the
+      // pressure enforces J = 1,
+      //   R_u = (P_iso + p J F^{-T}) : grad w,   R_p = (J - 1) q - tau grad p . grad q.
+      // Equal-order linear displacement and pressure are stabilized with
+      // tau_K = c h_K^2/(2 a), a being the matrix shear scale.
+      m_cellSizes.resize(m_mesh.getShard().getPolytopeCount(3));
+      for (auto cell = m_mesh.getCell(); cell; ++cell)
+        m_cellSizes[cell->getIndex()] = std::cbrt(cell->getMeasure());
+      const Real factor =
+        m_parameters.pressureStabilization / (2 * m_parameters.passive.matrixScale);
+      const RealFunction tau([this, factor](const Point& point) {
+        const Real h = m_cellSizes[point.getPolytope().getIndex()];
+        return factor * h * h;
+      });
+      const auto input = [this](
+                           Rodin::Solid::ConstitutivePoint& point) { setInputs(point); };
+      Rodin::Solid::InternalVirtualWorkTangent tangent(
+        m_law, m_increment, m_test, m_displacement, m_pressure);
+      Rodin::Solid::InternalVirtualWorkResidual residual(
+        m_law, m_test, m_displacement, m_pressure);
+      Rodin::Solid::InternalVirtualWorkTangentUP pressureCoupling(
+        m_pressureIncrement, m_test, m_displacement);
+      Rodin::Solid::InternalVirtualWorkTangentPU volumeCoupling(
+        m_increment, m_pressureTest, m_displacement);
+      Rodin::Solid::InternalVirtualWorkResidualP volume(m_pressureTest, m_displacement);
+      tangent.setQuadratureOrder(QuadratureOrder).setInput(input);
+      residual.setQuadratureOrder(QuadratureOrder).setInput(input);
+      pressureCoupling.setQuadratureOrder(QuadratureOrder);
+      volumeCoupling.setQuadratureOrder(QuadratureOrder);
+      volume.setQuadratureOrder(QuadratureOrder);
+      auto stabilization =
+        Integral(tau * Grad(m_pressureIncrement), Grad(m_pressureTest));
+      auto stabilizationResidual = Integral(tau * Grad(m_pressure), Grad(m_pressureTest));
+      stabilization.setOrder(QuadratureOrder);
+      stabilizationResidual.setOrder(QuadratureOrder);
+      m_mechanics = tangent + residual + pressureCoupling + volumeCoupling + volume -
+        stabilization - stabilizationResidual +
+        m_massCoefficient * Integral(m_increment, m_test) +
+        m_massCoefficient * Integral(m_displacement, m_test) -
+        m_massCoefficient * Integral(m_predictedDisplacement, m_test) +
+        DirichletBC(m_increment, zero)
+          .on(Attribute{1}, Attribute{2}, Attribute{3}, Attribute{5}, Attribute{6});
+    }
+    else
+    {
+      // Displacement formulation: the pressure block is the identity and the
+      // multiplier remains zero.
+      m_mechanics = m_work(m_increment, m_test) +
+        m_massCoefficient * Integral(m_increment, m_test) +
+        m_massCoefficient * Integral(m_displacement, m_test) -
+        m_massCoefficient * Integral(m_predictedDisplacement, m_test) +
+        Integral(m_pressureIncrement, m_pressureTest) +
+        Integral(m_pressure, m_pressureTest) +
+        DirichletBC(m_increment, zero)
+          .on(Attribute{1}, Attribute{2}, Attribute{3}, Attribute{5}, Attribute{6});
+    }
 
     const auto coupling = [this](bool momentum) {
       return MatrixFunction(3, 3, [this, momentum](const Point& point) {
@@ -280,6 +347,7 @@ namespace Rodin::Examples::Heart::Atrium
     m_extensionIncrement.getSolution() = m_extension;
     m_gammaIncrement.getSolution() = m_gamma;
     m_betaIncrement.getSolution() = m_beta;
+    m_pressureIncrement.getSolution() = m_pressure;
   }
 
   void Solid::scatter(const PETSc::Math::Vector& values)
@@ -290,6 +358,7 @@ namespace Rodin::Examples::Heart::Atrium
     m_extension.setData(values, offsets[1]);
     m_gamma.setData(values, offsets[2]);
     m_beta.setData(values, offsets[3]);
+    m_pressure.setData(values, offsets[4]);
   }
 
   bool Solid::isAdmissible() const
@@ -301,6 +370,8 @@ namespace Rodin::Examples::Heart::Atrium
     const Real gammaNorm = m_gamma.norm(NORM_INFINITY);
     const Real extensionNorm = m_extension.norm(NORM_INFINITY);
     const Real betaNorm = m_beta.norm(NORM_INFINITY);
+    if (!std::isfinite(m_pressure.norm(NORM_INFINITY)))
+      return false;
     if (!std::isfinite(displacementNorm) || !std::isfinite(gammaNorm) ||
       !std::isfinite(extensionNorm) || !std::isfinite(betaNorm) || minimumGamma <= 0 ||
       minimumExtension <= -Real(0.5))
@@ -499,6 +570,10 @@ namespace Rodin::Examples::Heart::Atrium
   const VectorField& Solid::getAcceleration() const noexcept
   {
     return m_acceleration;
+  }
+  const ScalarField& Solid::getPressure() const noexcept
+  {
+    return m_pressure;
   }
   const CellScalarField& Solid::getActiveExtension() const noexcept
   {

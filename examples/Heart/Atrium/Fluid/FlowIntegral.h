@@ -19,6 +19,22 @@ namespace Rodin::Examples::Heart::Atrium
     form.setOrder(4);
     return form;
   }
+
+  /**
+   * @brief Volume quadrature shared by every term of the species transport.
+   *
+   * Order two is exact for the affine-P1 mass, advection, and diffusion terms.
+   * Using the same rule for the history and the unknown makes the pointwise
+   * stabilization terms cancel for a constant state, so the transport
+   * preserves constants and the invariant of the kinetics.
+   */
+  template <class... Terms>
+  auto SpeciesIntegral(Terms&&... terms)
+  {
+    auto form = Variational::Integral(std::forward<Terms>(terms)...);
+    form.setOrder(2);
+    return form;
+  }
 }
 
 #endif

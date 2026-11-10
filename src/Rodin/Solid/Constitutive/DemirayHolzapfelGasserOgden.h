@@ -40,7 +40,14 @@ namespace Rodin::Solid
         Real matrixExponent = 5; ///< Dimensionless exponent @f$b\geq0@f$.
         Real fiberScale = 20; ///< Fiber exponential scale @f$a_f\geq0@f$.
         Real fiberExponent = 10; ///< Dimensionless exponent @f$b_f\geq0@f$.
-        Real volumePenalty = 500; ///< Coefficient @f$\mu_v>0@f$ of squared log volume.
+        /**
+         * @brief Coefficient @f$\mu_v\geq0@f$ of squared log volume.
+         *
+         * Zero leaves the isochoric response alone, as required by mixed
+         * displacement-pressure formulations whose pressure field carries the
+         * volumetric response.
+         */
+        Real volumePenalty = 500;
       };
 
       /**
@@ -63,7 +70,7 @@ namespace Rodin::Solid
           !std::isfinite(p.matrixExponent) || p.matrixExponent < 0 ||
           !std::isfinite(p.fiberScale) || p.fiberScale < 0 ||
           !std::isfinite(p.fiberExponent) || p.fiberExponent < 0 ||
-          !std::isfinite(p.volumePenalty) || p.volumePenalty <= 0)
+          !std::isfinite(p.volumePenalty) || p.volumePenalty < 0)
         {
           Alert::Exception() << "Invalid Demiray–Holzapfel–Gasser–Ogden coefficients"
                              << Alert::Raise;

@@ -34,7 +34,10 @@ namespace Rodin::Examples::Heart::Atrium
       !std::isfinite(cfg.speed) || cfg.speed <= 0 || !std::isfinite(cfg.width) ||
       cfg.width <= 0 || !std::isfinite(cfg.activeStiffness) || cfg.activeStiffness <= 0 ||
       !cfg.appendageApex.allFinite() || !std::isfinite(cfg.apexRadius) ||
-      cfg.apexRadius <= 0 || !std::isfinite(cfg.density) || cfg.density <= 0)
+      cfg.apexRadius <= 0 || !std::isfinite(cfg.density) || cfg.density <= 0 ||
+      !std::isfinite(cfg.pressureStabilization) || cfg.pressureStabilization < 0 ||
+      (cfg.mixed && cfg.pressureStabilization == 0) ||
+      (!cfg.mixed && cfg.passive.volumePenalty <= 0))
     {
       Alert::Exception() << "Invalid material, wave, or time discretization parameters"
                          << Alert::Raise;

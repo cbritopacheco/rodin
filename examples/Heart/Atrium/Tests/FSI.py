@@ -148,6 +148,9 @@ def main():
             for key in ('max_displacement_mm','solid_cavity_volume_ml','fluid_max_velocity_m_per_s'):
                 assert abs(float(a[key])-float(b[key])) < 1e-6*max(abs(float(b[key])),1e-9), (key,a[key],b[key])
     assert all(int(r['fsi_converged']) for r in tight[1:])
+    # The variational exchange has no interface slip at its fixed point.
+    assert all(float(r['fsi_velocity_mismatch_m_per_s']) <
+               1e-2*float(r['fluid_max_velocity_m_per_s']) for r in tight[1:])
     assert all(int(r['fsi_iterations']) <= 2 for r in loose[1:])
     assert max(float(r['fluid_max_velocity_m_per_s']) for r in active[1:]) > 0
     assert abs(float(active[-1]['max_displacement_mm'])-float(solid[-1]['max_displacement_mm'])) > 1e-10

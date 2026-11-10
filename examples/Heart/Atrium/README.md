@@ -13,7 +13,7 @@ with `-atrium_mode`:
 |---|---|
 | `solid` | Active solid mechanics with passive initialization and Newmark integration |
 | `fluid` | Fixed-domain stabilized P1–P1 Oseen flow; the default mode |
-| `fsi` | Solid and fluid with ALE motion and budgeted Robin–Robin transmission |
+| `fsi` | Solid and fluid with ALE motion and Robin–Robin transmission, by budgeted sweeps or interface Newton |
 
 `Atrium` owns the common MPI mesh, selected `Solid` and `Fluid` components,
 the optional `FSI` coupling object, cavity-volume measurements, and one CSV
@@ -208,12 +208,14 @@ The numerical checks require MPI and MUMPS:
 python3 examples/Heart/Atrium/Tests/Fluid.py --mpiexec mpiexec
 python3 examples/Heart/Atrium/Tests/FSI.py --mpiexec mpiexec
 python3 examples/Heart/Atrium/Tests/Newton.py --mpiexec mpiexec
+python3 examples/Heart/Atrium/Tests/Coupled.py --mpiexec mpiexec
 python3 examples/Heart/Atrium/Tests/Parameters.py --mpiexec mpiexec
 ```
 
 The checks cover resting states, pressure reversal, pressure-reference shifts,
-MPI consistency, preconditioner refresh, time refinement, and interface
-convergence on a conforming tube. They do not establish spatial convergence on
+MPI consistency, preconditioner refresh, time refinement, interface
+convergence, and the pressure-driven coupled problem with the lumped
+ventricle, split subscales, and species on a conforming tube. They do not establish spatial convergence on
 the anatomical mesh or periodic physiological flow.
 
 ## Console diagnostics

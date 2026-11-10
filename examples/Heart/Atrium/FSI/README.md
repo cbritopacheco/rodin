@@ -1,10 +1,13 @@
 # Atrium FSI
 
-Active wall contraction drives an initially resting fluid through open boundaries.
 `FSI` couples the Demiray–Holzapfel–Gasser–Ogden solid with Kelvin–Voigt
-dissipation to the ALE Oseen fluid. The fluid uses P1/P1 velocity and pressure
-with SUPG, PSPG and grad-div stabilization. No ventricular driver, imposed flow,
-coagulation transport or orthogonal subscales enter this coupled model.
+dissipation to the ALE Oseen fluid. By default, active wall contraction drives
+an initially resting fluid through openings at zero pressure. With
+`-atrium_fluid_lv_model`, the pulmonary venous pressure and the lumped left
+ventricle behind the mitral diode load the same coupled problem. The fluid uses
+P1/P1 velocity and pressure with either residual-based SUPG/PSPG or
+term-by-term orthogonal subscales, and optionally transports the P–T–A–G
+coagulation species on the moving mesh.
 
 ## Interface model
 
@@ -28,8 +31,12 @@ $$
 Solid bulk dynamics retain Newmark integration. Its endpoint velocity differs
 from the BDF1 interface rate at finite timestep. A harmonic extension moves the
 fluid interior; opening caps and solid opening cut faces remain fixed. No
-additional interface ring is clamped. All fluid openings have zero imposed
-pressure and no prescribed flux.
+additional interface ring is clamped. Without the ventricular model, all fluid
+openings have zero imposed pressure and no prescribed flux. With it, the
+openings retain the venous pressure, impedances, and mitral diode of the
+[fluid model](../Fluid/README.md); the lumped ventricle advances once per
+physical step, before the coupling iterations, and its pressure and valve
+state remain fixed during them.
 
 For reference-area impedance $\alpha_0>0$, a solid/ALE/fluid evaluation solves
 
@@ -68,7 +75,8 @@ E_m=\frac{9K_m\mu_m}{3K_m+\mu_m},\qquad
 \mu_m=a_m,\quad K_m=2\mu_v.
 $$
 
-Material coefficients are converted to Pa. This matrix-based scale omits
+Material coefficients are converted to Pa. The incompressible mixed wall uses
+$E_m=3\mu_m$. This matrix-based scale omits
 fiber reinforcement and is an algorithmic choice. `-atrium_fsi_robin` supplies
 an explicit value in $\mathrm{Pa\,s/m}$.
 
@@ -88,6 +96,15 @@ problem. The fluid derivative includes geometry and surface measure, ALE mass
 ratios, relative convection, Temam terms, Carreau–Yasuda viscosity and
 SUPG/PSPG/grad-div coefficients. Residual and derivative volume forms share
 order-four quadrature. No finite differences construct the solver operator.
+
+With split orthogonal subscales, the differentiated residual contains the
+streamline term on convection minus its projection, the grad-div term minus
+the projected divergence, and the pressure-gradient term. The projections
+belong to the previous time level and are nodal fields carried by the mesh;
+they are evaluated once per physical step on the previous configuration, so
+the tangent contains no derivative of a projection. The Brinkman coefficient
+of the coagulation model enters in the same way. The lumped ventricle and the
+opening terms act on fixed caps and contribute no geometric derivative.
 
 An evaluation retains its input, residual and solved bulk state. Exact equality
 with the most recently evaluated input allows reuse during initial residual
@@ -109,10 +126,21 @@ unrecoverable solver error, or Newton failure rejects the step.
 
 ## Budgeted Robin sweeps
 
-Without `-atrium_fsi_newton`, the legacy Robin sweeps recover the fluid velocity
-gradient and project physical stress to the reference interface with lumped
-trace mass. This exchange differs from Newton's variational reaction map.
-Starting at the second completed sweep, the relative
+Without `-atrium_fsi_newton`, each sweep solves the solid with Robin data
+$g=T+\alpha_0u_f$, moves the mesh, solves the fluid, and updates the traction
+with the same variational reaction as Newton,
+
+$$
+T\leftarrow T+\alpha_0(u_f-v_\Gamma).
+$$
+
+Its fixed point satisfies $u_f=v_\Gamma$ and coincides with the Newton solution.
+One sweep per step (`-atrium_fsi_iterations 1`) is the loosely coupled
+Robin–Robin scheme of Burman, Durst, Fernández, Guzmán and Ruz; further sweeps
+are its correction iterations. `-atrium_fsi_recovered_traction` instead
+recovers the fluid velocity gradient and projects physical stress to the
+reference interface with lumped trace mass; that exchange leaves an interface
+slip at its fixed point. Starting at the second completed sweep, the relative
 solid displacement-change norm determines early termination:
 
 $$
@@ -152,3 +180,26 @@ mpirun -n 6 build/examples/Heart/Atrium/Atrium \
 
 This advances one $0.85\,\mathrm{s}$ cycle. The contraction strength is an
 explicit example parameter; it does not constitute a physiological calibration.
+
+## Pressure-driven coupling, ventricle, and species
+
+```sh
+mpirun -n 6 build/examples/Heart/Atrium/Atrium \
+  -atrium_mode fsi -atrium_fsi_newton \
+  -atrium_mesh resources/examples/Heart/Atrium/AtriumCoarse_FluidSolid_1mm.mesh \
+  -atrium_output output/atrium-fsi-ptag \
+  -atrium_dt 0.001 -atrium_steps 11050 -atrium_output_every 10 \
+  -atrium_solid_contractility 2000 -atrium_solid_cache_constitutive \
+  -atrium_solid_apex 46.39638367,187.44307667,-205.03317767 \
+  -atrium_fluid_vms -atrium_fluid_lv_model -atrium_fluid_pressure_ramp 0.1 \
+  -atrium_fluid_kinetics -atrium_fluid_flow_cycles 3 \
+  -ksp_type preonly -pc_type lu -pc_factor_mat_solver_type mumps \
+  -mat_mumps_icntl_20 0 -ksp_diagonal_scale false -ksp_diagonal_scale_fix false
+```
+
+Three flow cycles precede ten species cycles. The species are advanced after
+each accepted coupled step with the accepted velocity relative to the mesh,
+$u-w$, on the accepted geometry; the fibrin drag acts on the flow of the next
+step. The solid reference configuration is unloaded: the opening pressures are
+ramped linearly over `-atrium_fluid_pressure_ramp` seconds, and no prestress is
+computed.

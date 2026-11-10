@@ -95,22 +95,37 @@ namespace Rodin::Examples::Heart::Atrium
       m_tauCFn([this](const Point& p) { return tauCAt(p); }),
       m_sqrtTauCFn([this](const Point& p) { return sqrtTauCAt(p); }),
       m_tauPFn([this](const Point& p) { return tauPAt(p); }),
+      m_viscosityFn([this](const Point& p) { return viscosityAt(p); }),
+      m_dragFn([this](const Point& p) { return dragAt(p); }),
       m_piTilde(m_sh),
       m_convProjection(m_vh),
       m_sub(m_vh),
       m_subOld(m_vh),
-      m_th(m_sh),
-      m_fg(m_sh),
-      m_fn(m_sh),
-      m_vth(m_sh),
-      m_vfg(m_sh),
-      m_vfn(m_sh),
-      m_thCur(m_sh),
-      m_fgCur(m_sh),
-      m_fnCur(m_sh),
-      m_thPrev(m_sh),
-      m_fgPrev(m_sh),
-      m_fnPrev(m_sh),
+      m_pT(m_sh),
+      m_tT(m_sh),
+      m_aT(m_sh),
+      m_gT(m_sh),
+      m_vP(m_sh),
+      m_vT(m_sh),
+      m_vA(m_sh),
+      m_vG(m_sh),
+      m_pCur(m_sh),
+      m_tCur(m_sh),
+      m_aCur(m_sh),
+      m_gCur(m_sh),
+      m_pPrev(m_sh),
+      m_tPrev(m_sh),
+      m_aPrev(m_sh),
+      m_gPrev(m_sh),
+      m_fibrin(m_sh),
+      m_tat(m_sh),
+      m_drag(m_sh),
+      m_drift(m_sh),
+      m_eT(m_sh),
+      m_vE(m_sh),
+      m_layer(m_sh),
+      m_wallArea(m_sh),
+      m_wssRec(m_vh),
       m_wss(m_vh),
       m_gradRec0(m_vh),
       m_gradRec1(m_vh),
@@ -126,8 +141,16 @@ namespace Rodin::Examples::Heart::Atrium
       m_flux(m_qFlux),
       m_flow(m_u, m_p, m_v, m_q),
       m_flowKSP(m_flow),
-      m_species(m_th, m_fg, m_fn, m_vth, m_vfg, m_vfn),
-      m_speciesKSP(m_species),
+      m_transportP(m_pT, m_vP),
+      m_transportT(m_tT, m_vT),
+      m_transportA(m_aT, m_vA),
+      m_transportG(m_gT, m_vG),
+      m_kspP(m_transportP),
+      m_kspT(m_transportT),
+      m_kspA(m_transportA),
+      m_kspG(m_transportG),
+      m_extension(m_eT, m_vE),
+      m_extensionKSP(m_extension),
       m_scalarProjection(m_sTrial, m_sTest),
       m_scalarProjectionKSP(m_scalarProjection),
       m_vectorProjection(m_wTrial, m_wTest),
@@ -339,37 +362,59 @@ namespace Rodin::Examples::Heart::Atrium
     return std::pow(p.getPolytope().getMeasure(), 1.0 / p.getPolytope().getDimension());
   }
 
-  Fluid::Real Fluid::viscosityAt(const Point& p) const
+  const Fluid::CellCoefficients& Fluid::cellCoefficients(const Point& p) const
   {
+    const auto& cell = p.getPolytope();
+    assert(cell.getDimension() == m_mesh.getDimension());
+    if (m_cellCoefficients.empty())
+      m_cellCoefficients.resize(
+        m_mesh.getShard().getPolytopeCount(m_mesh.getDimension()));
+    auto& entry = m_cellCoefficients[cell.getIndex()];
+    if (entry.epoch == m_coefficientEpoch)
+      return entry;
     const auto& cy = m_cfg.viscosity;
 
-    // Built from the same expression the momentum equation uses, so the two
-    // cannot drift apart.
+    // Lagged Carreau-Yasuda viscosity of the momentum equation; the strain
+    // rate of an affine P1 field is constant on the cell.
     const auto sym = 0.5 * (Jacobian(m_uOld) + Transpose(Jacobian(m_uOld)));
     const Real shear = std::sqrt(
       cy.gammaRegularization * cy.gammaRegularization + 2.0 * Dot(sym, sym).getValue(p));
-
-    return cy.muInf +
+    entry.viscosity = cy.muInf +
       (cy.mu0 - cy.muInf) *
-      std::pow(1.0 + std::pow(cy.lambda * shear, cy.yasuda), (cy.n - 1.0) / cy.yasuda);
+        std::pow(1.0 + std::pow(cy.lambda * shear, cy.yasuda), (cy.n - 1.0) / cy.yasuda);
+    entry.size = cellSize(p);
+    entry.epoch = m_coefficientEpoch;
+    return entry;
   }
 
+  Fluid::Real Fluid::viscosityAt(const Point& p) const
+  {
+    return cellCoefficients(p).viscosity;
+  }
+
+  // tau_1 = [4 nu/h^2 + 2|u^n - w|/h + sigma_B/rho]^-1; the Brinkman drag is
+  // a reaction and enters the stabilization scale as one.
   Fluid::Real Fluid::tau1At(const Point& p) const
   {
     const auto uc = (m_uOld - m_meshVelocity).getValue(p);
-    const Real h = cellSize(p);
-    const Real nu = viscosityAt(p) / m_cfg.rho;
-    return 1.0 / (4.0 * nu / (h * h) + 2.0 * std::sqrt(Math::dot(uc, uc)) / h);
+    const auto& cell = cellCoefficients(p);
+    const Real h = cell.size;
+    const Real nu = cell.viscosity / m_cfg.rho;
+    return 1.0 /
+      (4.0 * nu / (h * h) + 2.0 * std::sqrt(Math::dot(uc, uc)) / h +
+        dragAt(p) / m_cfg.rho);
   }
 
   Fluid::Real Fluid::vmsTauAt(const Point& p) const
   {
+    if (m_cfg.useVMS && m_cfg.quasiStaticSubscales)
+      return m_cfg.vmsScale * tau1At(p) / m_cfg.rho;
     return m_cfg.vmsScale / (m_cfg.rho / m_run.timeStep + m_cfg.rho / tau1At(p));
   }
 
   Fluid::Real Fluid::sqrtTauCAt(const Point& p) const
   {
-    const Real h = cellSize(p);
+    const Real h = cellCoefficients(p).size;
     return std::sqrt(m_cfg.gradDivScale * m_cfg.rho * h * h / (4.0 * tau1At(p)));
   }
 
@@ -381,6 +426,8 @@ namespace Rodin::Examples::Heart::Atrium
 
   Fluid::Real Fluid::tauPAt(const Point& p) const
   {
+    if (m_cfg.useVMS)
+      return m_cfg.pspgScale * tau1At(p) / m_cfg.rho;
     return m_cfg.pspgScale / (m_cfg.rho / m_run.timeStep + m_cfg.rho / tau1At(p));
   }
 
@@ -407,6 +454,7 @@ namespace Rodin::Examples::Heart::Atrium
     if (m_cfg.preconditionerLag < 1 || !std::isfinite(m_run.timeStep) ||
       m_run.timeStep <= 0 || !std::isfinite(m_cfg.period) || m_cfg.period <= 0 ||
       m_cfg.period / m_run.timeStep < 0.5 || m_cfg.flowCycles < 0 ||
+      !std::isfinite(m_cfg.pressureRamp) || m_cfg.pressureRamp < 0 ||
       !std::isfinite(m_cfg.prescribedOutletPressure) ||
       !std::isfinite(m_cfg.prescribedOutletResistance) ||
       m_cfg.prescribedOutletResistance < 0 ||
@@ -474,23 +522,52 @@ namespace Rodin::Examples::Heart::Atrium
     m_activation = Real(0);
     m_one = Real(1);
 
-    const Real fg0 =
-      m_cfg.thrombosis.fibrinogenSinusRhythm / m_cfg.thrombosis.fibrinogenMolarMass;
-    m_thCur = Real(0);
-    m_thPrev = Real(0);
-    m_fnCur = Real(0);
-    m_fnPrev = Real(0);
-    m_fgCur = fg0;
-    m_fgPrev = fg0;
+    const auto& k = m_cfg.kinetics;
+    m_pCur = k.prothrombin0;
+    m_pPrev = k.prothrombin0;
+    m_tCur = k.inletThrombin;
+    m_tPrev = k.inletThrombin;
+    m_aCur = k.antithrombin0;
+    m_aPrev = k.antithrombin0;
+    m_gCur = k.fibrinogen0;
+    m_gPrev = k.fibrinogen0;
+    m_fibrin = Real(0);
+    m_tat = Real(0);
+    m_drag = Real(0);
+    m_drift = Real(0);
+    m_layer = Real(0);
+    m_wssRec = zeroVector;
 
     if (m_cfg.useVMS)
       configureMassSolver(m_scalarProjectionKSP, "atrium_sproj_");
+    if (m_cfg.solveKinetics)
+    {
+      // Mass-dominated nonsymmetric transport and a symmetric positive
+      // definite layer extension: iterative solvers, independent of the
+      // global direct solver used for the flow.
+      for (auto* ksp : {&m_kspP, &m_kspT, &m_kspA, &m_kspG})
+      {
+        setPrefixedDefault("atrium_ptag_", "ksp_type", "gmres");
+        setPrefixedDefault("atrium_ptag_", "pc_type", "bjacobi");
+        setPrefixedDefault("atrium_ptag_", "ksp_rtol", "1e-10");
+        ksp->setPrefix(std::string("atrium_ptag_"));
+      }
+      configureMassSolver(m_extensionKSP, "atrium_ptag_layer_");
+    }
     configureMassSolver(m_vectorProjectionKSP, "atrium_vproj_");
     configureMassSolver(m_wssKSP, "atrium_wss_");
 
     m_output->bind();
 
     m_outletArea = boundaryArea(m_cfg.outlet);
+
+    // Nodal wall indicator from the assembled wall measure: consistent on
+    // every rank, unlike a projection restricted to owned boundary faces.
+    m_flux = BoundaryIntegral(m_one, m_qFlux).over(m_cfg.wall);
+    m_flux.assemble();
+    m_wallArea.setData(m_flux.getVector());
+    m_wallAreaThreshold = 1.0e-6 * m_wallArea.max();
+
     m_pIn = m_cfg.inletPressureMean;
     m_pOut =
       m_cfg.useVentricularModel ? m_model.getState().pv : m_cfg.prescribedOutletPressure;
@@ -517,19 +594,11 @@ namespace Rodin::Examples::Heart::Atrium
   void Fluid::setupFlow()
   {
     const auto normal = BoundaryNormal(m_mesh);
-    const auto& cy = m_cfg.viscosity;
-    const Real deltaMu = cy.mu0 - cy.muInf;
     const Real rho = m_cfg.rho;
     const Real dt = m_run.timeStep;
 
     const auto symU = 0.5 * (Jacobian(m_u) + Transpose(Jacobian(m_u)));
     const auto symV = 0.5 * (Jacobian(m_v) + Transpose(Jacobian(m_v)));
-    const auto symLag = 0.5 * (Jacobian(m_uOld) + Transpose(Jacobian(m_uOld)));
-
-    const auto shearLag =
-      Sqrt(cy.gammaRegularization * cy.gammaRegularization + 2.0 * Dot(symLag, symLag));
-    const auto muLag = cy.muInf +
-      deltaMu * Pow(1.0 + Pow(cy.lambda * shearLag, cy.yasuda), (cy.n - 1.0) / cy.yasuda);
 
     RealFunction massRatio([this](const Point& p) {
       return m_coupled ? m_massRatios.at(p.getPolytope().getIndex()) : Real(1);
@@ -560,28 +629,19 @@ namespace Rodin::Examples::Heart::Atrium
     auto historyMass = FlowIntegral(massRatio * m_uOld, m_v);
     historyMass.setOrder(MassOrder);
 
+    // Galerkin terms shared by both stabilizations. The lagged viscosity is
+    // read from the cellwise coefficients used by the stabilization scales.
     m_flow = (rho / dt) * FlowIntegral(m_u, m_v) - (rho / dt) * historyMass
 
       + rho * FlowIntegral(Dot(convU, m_v)) +
       0.5 * rho * FlowIntegral(temam)
 
-      // SUPG tests the complete affine-P1 momentum residual along the lagged flow.
-      + (rho / dt) * FlowIntegral(m_tauFn * m_u, streamlineTest) -
-      (rho / dt) * FlowIntegral(m_tauFn * massRatio * m_uOld, streamlineTest) +
-      rho * FlowIntegral(m_tauFn * convU, streamlineTest) +
-      (0.5 * rho) * FlowIntegral(m_tauFn * geometricDivergence * m_u, streamlineTest) +
-      FlowIntegral(m_tauFn * Grad(m_p), streamlineTest) +
+      // Streamline and grad-div dissipation along u^n - w.
+      + rho * FlowIntegral(m_tauFn * convU, streamlineTest) +
       FlowIntegral(m_tauCFn * Div(m_u), Div(m_v))
 
-      + 2.0 * FlowIntegral(muLag * symU, symV) - FlowIntegral(m_p, Div(m_v)) +
-      FlowIntegral(Div(m_u), m_q) +
-      m_cfg.pressurePenalty * FlowIntegral(m_p, m_q)
-
-      // PSPG tests that same momentum residual with the pressure gradient.
-      + (rho / dt) * FlowIntegral(m_tauPFn * m_u, Grad(m_q)) -
-      (rho / dt) * FlowIntegral(m_tauPFn * massRatio * m_uOld, Grad(m_q)) +
-      rho * FlowIntegral(m_tauPFn * convU, Grad(m_q)) +
-      (0.5 * rho) * FlowIntegral(m_tauPFn * geometricDivergence * m_u, Grad(m_q)) +
+      + 2.0 * FlowIntegral(m_viscosityFn * symU, symV) - FlowIntegral(m_p, Div(m_v)) +
+      FlowIntegral(Div(m_u), m_q) + m_cfg.pressurePenalty * FlowIntegral(m_p, m_q) +
       FlowIntegral(m_tauPFn * Grad(m_p), Grad(m_q))
 
       + BoundaryIntegral(pInFn * Dot(m_v, normal)).over(m_inletSet) +
@@ -597,6 +657,37 @@ namespace Rodin::Examples::Heart::Atrium
 
       + BoundaryIntegral(inletBackflow * Dot(m_u, m_v)).over(m_inletSet) +
       BoundaryIntegral(outletBackflow * Dot(m_u, m_v)).over(m_cfg.outlet);
+    if (m_cfg.useVMS)
+    {
+      // Term-by-term orthogonal subscales. The convective projection and the
+      // dynamic subscale, and the projected divergence, belong to the
+      // previous time level; they are nodal fields carried by the mesh.
+      m_flow -= rho *
+        FlowIntegral(m_tauFn * (m_convProjection + (1.0 / dt) * m_sub), streamlineTest);
+      m_flow -= FlowIntegral(m_sqrtTauCFn * m_piTilde, Div(m_v));
+    }
+    else
+    {
+      // SUPG tests the remaining affine-P1 momentum residual along the lagged flow.
+      m_flow += (rho / dt) * FlowIntegral(m_tauFn * m_u, streamlineTest);
+      m_flow -= (rho / dt) * FlowIntegral(m_tauFn * massRatio * m_uOld, streamlineTest);
+      m_flow +=
+        (0.5 * rho) * FlowIntegral(m_tauFn * geometricDivergence * m_u, streamlineTest);
+      m_flow += FlowIntegral(m_tauFn * Grad(m_p), streamlineTest);
+
+      // PSPG tests that same momentum residual with the pressure gradient.
+      m_flow += (rho / dt) * FlowIntegral(m_tauPFn * m_u, Grad(m_q));
+      m_flow -= (rho / dt) * FlowIntegral(m_tauPFn * massRatio * m_uOld, Grad(m_q));
+      m_flow += rho * FlowIntegral(m_tauPFn * convU, Grad(m_q));
+      m_flow +=
+        (0.5 * rho) * FlowIntegral(m_tauPFn * geometricDivergence * m_u, Grad(m_q));
+    }
+    if (m_cfg.solveKinetics && m_cfg.brinkman.enabled)
+    {
+      // Fibrin drag, implicit in the velocity and lagged in the fibrin: a
+      // positive semidefinite mass term.
+      m_flow += FlowIntegral(m_dragFn * m_u, m_v);
+    }
     if (m_coupled)
     {
       // Robin data live per reference area; integrate on the moving fluid wall.
@@ -620,127 +711,42 @@ namespace Rodin::Examples::Heart::Atrium
     }
     else
       m_flow += DirichletBC(m_u, m_wallVelocity).on(m_cfg.wall);
-    if (m_cfg.useVMS)
-    {
-      m_flow -= VMSConvectionLinearIntegrator(
-        m_v, m_sub, m_uOld, m_convProjection, m_tauFn, rho, dt);
-      m_flow -= VMSGradDivLinearIntegrator(m_v, m_piTilde, m_sqrtTauCFn);
-    }
   }
 
-  Fluid::Real Fluid::crosswind(const Point& p, Real cur, Real prev,
-    const Math::SpatialVector<Real>& gradient, Real diffusivity, Real reaction) const
+  void Fluid::prepareSubscales()
   {
-    const Real gn = std::sqrt(Math::dot(gradient, gradient));
-    if (gn < 1.0e-14)
-      return 0.0;
-    const auto uc = m_uOld.getValue(p);
-    const Real residual =
-      (cur - prev) / m_run.timeStep + Math::dot(uc, gradient) + reaction;
-    return std::max<Real>(0.0,
-      m_cfg.crosswindC * std::abs(residual) * cellSize(p) / (2.0 * gn) - diffusivity);
-  }
-
-  void Fluid::setupSpecies()
-  {
-    const Real Dth = m_cfg.thrombosis.diffusivityThrombin;
-    const Real Dfg = m_cfg.thrombosis.diffusivityFibrinogen;
-    const Real Dfn = m_cfg.thrombosis.diffusivityFibrin;
-    const Real keff = m_cfg.thrombosis.reactionRate;
-    const Real scale = m_cfg.thrombosis.stabilizationScale;
+    if (!m_cfg.useVMS)
+      return;
+    Stage stage("VMS projections", isRoot());
+    const auto vmsStart = CoronaryClock::now();
+    const Real rho = m_cfg.rho;
     const Real dt = m_run.timeStep;
-    const Real fg0 =
-      m_cfg.thrombosis.fibrinogenSinusRhythm / m_cfg.thrombosis.fibrinogenMolarMass;
 
-    // Cell Peclet is of order 1e6 here: these are essentially pure advection
-    // problems and their tau is set by the advective and transient scales, not
-    // by the flow's tau.
-    RealFunction tauThFn = [this, Dth, scale, dt](const Point& p) {
-      const auto uc = m_uOld.getValue(p);
-      return scale * supgTau(cellSize(p), std::sqrt(Math::dot(uc, uc)), Dth, 0.0, dt);
-    };
-    RealFunction tauFgFn = [this, Dfg, keff, scale, dt](const Point& p) {
-      const auto uc = m_uOld.getValue(p);
-      return scale *
-        supgTau(cellSize(p), std::sqrt(Math::dot(uc, uc)), Dfg,
-          keff * std::abs(m_thCur.getValue(p)), dt);
-    };
-    RealFunction tauFnFn = [this, Dfn, scale, dt](const Point& p) {
-      const auto uc = m_uOld.getValue(p);
-      return scale * supgTau(cellSize(p), std::sqrt(Math::dot(uc, uc)), Dfn, 0.0, dt);
-    };
-
-    // Codina crosswind: SUPG leaves the crosswind direction free, which is what
-    // produces negative concentration bands across shear layers.
-    RealFunction invSpeedSqFn = [this](const Point& p) {
-      const auto uc = m_uOld.getValue(p);
-      const Real u2 = Math::dot(uc, uc);
-      return (u2 > 1.0e-20) ? 1.0 / u2 : 0.0;
-    };
-    RealFunction kdcThFn = [this, Dth](const Point& p) {
-      return crosswind(p, m_thCur.getValue(p), m_thPrev.getValue(p),
-        Grad(m_thCur).getValue(p), Dth, 0.0);
-    };
-    RealFunction kdcFgFn = [this, Dfg, keff](const Point& p) {
-      return crosswind(p, m_fgCur.getValue(p), m_fgPrev.getValue(p),
-        Grad(m_fgCur).getValue(p), Dfg, keff * m_thCur.getValue(p) * m_fgCur.getValue(p));
-    };
-    RealFunction kdcFnFn = [this, Dfn, keff](const Point& p) {
-      return crosswind(p, m_fnCur.getValue(p), m_fnPrev.getValue(p),
-        Grad(m_fnCur).getValue(p), Dfn,
-        -keff * m_thCur.getValue(p) * m_fgCur.getValue(p));
-    };
-
-    const auto pTh = Dot(m_uOld, Grad(m_vth));
-    const auto pFg = Dot(m_uOld, Grad(m_vfg));
-    const auto pFn = Dot(m_uOld, Grad(m_vfn));
-
-    m_species = (1.0 / dt) * Integral(m_th, m_vth) -
-      (1.0 / dt) * Integral(m_thCur, m_vth) + Dth * Integral(Grad(m_th), Grad(m_vth)) +
-      Integral(Dot(m_uOld, Grad(m_th)), m_vth)
-
-      + (1.0 / dt) * Integral(m_fg, m_vfg) - (1.0 / dt) * Integral(m_fgCur, m_vfg) +
-      Dfg * Integral(Grad(m_fg), Grad(m_vfg)) + Integral(Dot(m_uOld, Grad(m_fg)), m_vfg) +
-      keff * Integral(m_thCur * m_fg, m_vfg)
-
-      + (1.0 / dt) * Integral(m_fn, m_vfn) - (1.0 / dt) * Integral(m_fnCur, m_vfn) +
-      Dfn * Integral(Grad(m_fn), Grad(m_vfn)) + Integral(Dot(m_uOld, Grad(m_fn)), m_vfn) -
-      keff * Integral(m_thCur * m_fg, m_vfn)
-
-      // Endothelial thrombin flux: a surface flux, armed by the cycle indices.
-      - m_cfg.thrombosis.thrombinWallFlux *
-        BoundaryIntegral(m_activation * m_vth).over(m_cfg.wall)
-
-      // SUPG. Only fibrinogen has a sink proportional to its own unknown.
-      + (1.0 / dt) * Integral(tauThFn * m_th, pTh) -
-      (1.0 / dt) * Integral(tauThFn * m_thCur, pTh) +
-      Integral(tauThFn * Dot(m_uOld, Grad(m_th)), pTh)
-
-      + (1.0 / dt) * Integral(tauFgFn * m_fg, pFg) -
-      (1.0 / dt) * Integral(tauFgFn * m_fgCur, pFg) +
-      Integral(tauFgFn * Dot(m_uOld, Grad(m_fg)), pFg) +
-      keff * Integral(tauFgFn * m_thCur * m_fg, pFg)
-
-      + (1.0 / dt) * Integral(tauFnFn * m_fn, pFn) -
-      (1.0 / dt) * Integral(tauFnFn * m_fnCur, pFn) +
-      Integral(tauFnFn * Dot(m_uOld, Grad(m_fn)), pFn) -
-      keff * Integral(tauFnFn * m_thCur * m_fg, pFn)
-
-      // Codina crosswind, one pair per species.
-      + Integral(kdcThFn * Grad(m_th), Grad(m_vth)) -
-      Integral(kdcThFn * invSpeedSqFn * Dot(m_uOld, Grad(m_th)), Dot(m_uOld, Grad(m_vth)))
-
-      + Integral(kdcFgFn * Grad(m_fg), Grad(m_vfg)) -
-      Integral(kdcFgFn * invSpeedSqFn * Dot(m_uOld, Grad(m_fg)), Dot(m_uOld, Grad(m_vfg)))
-
-      + Integral(kdcFnFn * Grad(m_fn), Grad(m_vfn)) -
-      Integral(kdcFnFn * invSpeedSqFn * Dot(m_uOld, Grad(m_fn)), Dot(m_uOld, Grad(m_vfn)))
-
-      // Pure advection needs a Dirichlet condition on the inflow boundary;
-      // fresh blood carries plasma fibrinogen and no thrombin or fibrin.
-      + DirichletBC(m_th, RealFunction(Real(0))).on(m_inletSet) +
-      DirichletBC(m_fn, RealFunction(Real(0))).on(m_inletSet) +
-      DirichletBC(m_fg, RealFunction(fg0)).on(m_inletSet);
+    // Projections of the previous time level on its own configuration:
+    // Pi[(grad u^n)(u^n - w^n)] and Pi[sqrt(tau_C) div u^n]. They remain fixed
+    // during the coupling iterations of the step, so the interface tangent
+    // carries no derivative of a projection.
+    const auto conv = Mult(Jacobian(m_uOld), m_uOld - m_meshVelocity);
+    projectVector(conv, m_convProjection);
+    if (!m_cfg.quasiStaticSubscales)
+    {
+      const size_t dim = m_mesh.getSpaceDimension();
+      projectVector(
+        VectorFunction(dim,
+          [this, rho, dt, dim, &conv](const Point& p) -> Math::SpatialVector<Real> {
+            const auto c = conv.getValue(p);
+            const auto proj = m_convProjection.getValue(p);
+            const auto old = m_subOld.getValue(p);
+            const Real tau = vmsTauAt(p);
+            Math::SpatialVector<Real> out(dim);
+            for (Index i = 0; i < static_cast<Index>(dim); ++i)
+              out(i) = tau * rho * (old(i) / dt - (c(i) - proj(i)));
+            return out;
+          }),
+        m_sub);
+    }
+    project(m_sqrtTauCFn * Div(m_uOld), m_piTilde);
+    m_timing.vms = secondsSince(vmsStart);
   }
 
   void Fluid::setupWallShear()
@@ -786,42 +792,8 @@ namespace Rodin::Examples::Heart::Atrium
   bool Fluid::solveFlow()
   {
     Stage stage("Fluid Oseen solve", isRoot());
-    const Real rho = m_cfg.rho;
-    const Real dt = m_run.timeStep;
-
-    const auto vmsStart = CoronaryClock::now();
-
-    // Only the two orthogonal-subscale projections remain: Pi[(grad u)u] and
-    // Pi[sqrt(tau_C) div u]. Those ARE L2 projections -- subtracting the
-    // projection of the residual is what the method does. The taus are not:
-    // they are evaluated pointwise by m_tauFn and friends.
-    if (m_cfg.useVMS)
-    {
-      Stage stage("VMS projections", isRoot());
-      projectVector(Mult(Jacobian(m_uOld), m_uOld), m_convProjection);
-
-      const size_t dim = m_mesh.getSpaceDimension();
-      projectVector(VectorFunction(dim,
-                      [this, rho, dt, dim](const Point& p) -> Math::SpatialVector<Real> {
-                        const auto conv = Mult(Jacobian(m_uOld), m_uOld).getValue(p);
-                        const auto proj = m_convProjection.getValue(p);
-                        const auto old = m_subOld.getValue(p);
-                        const Real tau = vmsTauAt(p);
-                        Math::SpatialVector<Real> out(dim);
-                        for (Index c = 0; c < static_cast<Index>(dim); ++c)
-                          out(c) = tau * rho * (old(c) / dt - (conv(c) - proj(c)));
-                        return out;
-                      }),
-        m_sub);
-
-      // Same sqrt(tau_C) that multiplies div(v) in the linear term and whose
-      // square is the implicit coefficient. Lagging one of the two by a step,
-      // as the reference does, leaves the explicit half larger than the
-      // implicit one on the step where the viscosity drops.
-      project(m_sqrtTauCFn * Div(m_uOld), m_piTilde);
-    }
-
-    m_timing.vms = secondsSince(vmsStart);
+    // The lagged velocity or the geometry may have changed since the last solve.
+    ++m_coefficientEpoch;
 
     const auto assemblyStart = CoronaryClock::now();
     {
@@ -965,7 +937,21 @@ namespace Rodin::Examples::Heart::Atrium
 
     m_wssProjection.assemble();
     m_wssProjection.solve(m_wssKSP);
-    m_wss.setData(m_wssTrial.getSolution().getData());
+
+    // Keep the wall only: away from it the regularized projection carries a
+    // sign-alternating tail that would enter the cycle accumulators. The nodal
+    // indicator makes every rank write every local node consistently.
+    const size_t sdim = m_mesh.getSpaceDimension();
+    m_wssRec.setData(m_wssTrial.getSolution().getData());
+    m_wss.project(
+      VectorFunction(sdim, [this, sdim](const Point& p) -> Math::SpatialVector<Real> {
+        Math::SpatialVector<Real> out(sdim);
+        if (onWallNode(p))
+          out = m_wssRec.getValue(p);
+        else
+          out.setZero();
+        return out;
+      }));
 
     m_timing.shear += secondsSince(shearStart);
   }
@@ -991,22 +977,18 @@ namespace Rodin::Examples::Heart::Atrium
     if (elapsed <= 0.0)
       return;
 
-    // TAWSS = (1/T) int |tau_w| dt. An exact scaling of the accumulator: no
-    // projection, no interpolation, no way to change its sign.
-    PetscErrorCode ierr = VecCopy(m_absShear.getData(), m_tawss.getData());
-    assert(ierr == PETSC_SUCCESS);
-    ierr = VecScale(m_tawss.getData(), 1.0 / elapsed);
-    assert(ierr == PETSC_SUCCESS);
-    ierr = VecGhostUpdateBegin(m_tawss.getData(), INSERT_VALUES, SCATTER_FORWARD);
-    assert(ierr == PETSC_SUCCESS);
-    ierr = VecGhostUpdateEnd(m_tawss.getData(), INSERT_VALUES, SCATTER_FORWARD);
-    assert(ierr == PETSC_SUCCESS);
-    (void)ierr;
+    // TAWSS, OSI, and the activation live on the wall only. They are nodal
+    // and evaluated with the wall indicator, so partition seams carry the
+    // same values on every rank.
+    m_tawss.project(RealFunction([this, elapsed](const Point& p) -> Real {
+      return onWallNode(p) ? m_absShear.getValue(p) / elapsed : 0.0;
+    }));
 
     // OSI = (1/2)[1 - |int tau_w dt| / int |tau_w| dt]. Both accumulators are
-    // built from the same nodal values, so the triangle inequality holds node
-    // by node and OSI lands in [0, 1/2] on its own; the clamp is insurance.
+    // built from the same nodal values, so OSI lies in [0, 1/2].
     m_osi.project(RealFunction([this](const Point& p) -> Real {
+      if (!onWallNode(p))
+        return 0.0;
       const Real abs = m_absShear.getValue(p);
       if (abs <= 0.0)
         return 0.0;
@@ -1015,13 +997,14 @@ namespace Rodin::Examples::Heart::Atrium
       return std::clamp<Real>(0.5 * (1.0 - mag / abs), 0.0, 0.5);
     }));
 
-    // Smooth, bounded activation: a logistic in the measured shear threshold
-    // times the oscillatory index mapped onto [0,1]. Clamped to [0,1] so the
-    // endothelial thrombin flux can never turn into a sink -- a negative
-    // activation is what drives thrombin, and with it fibrin, negative.
-    const Real tauA = m_cfg.thrombosis.activationShearStress;
-    const Real width = std::max<Real>(m_cfg.thrombosis.activationShearWidth, 1e-12);
+    // E = sigma_low(TAWSS) min(2 OSI, 1): a logistic in the endothelial shear
+    // switch times the oscillatory index, bounded in [0, 1] so that wall
+    // initiation never becomes a sink.
+    const Real tauA = m_cfg.kinetics.activationShearStress;
+    const Real width = std::max<Real>(m_cfg.kinetics.activationShearWidth, 1e-12);
     m_activation.project(RealFunction([this, tauA, width](const Point& p) -> Real {
+      if (!onWallNode(p))
+        return 0.0;
       const Real low = 1.0 / (1.0 + std::exp((m_tawss.getValue(p) - tauA) / width));
       const Real osi = std::clamp<Real>(2.0 * m_osi.getValue(p), 0.0, 1.0);
       return std::clamp<Real>(low * osi, 0.0, 1.0);
@@ -1041,33 +1024,10 @@ namespace Rodin::Examples::Heart::Atrium
 
     zeroWithGhosts(m_netShear.getData());
     zeroWithGhosts(m_absShear.getData());
-  }
 
-  void Fluid::solveSpecies()
-  {
-    Stage stage("Species transport", isRoot());
-    const auto speciesStart = CoronaryClock::now();
-
-    if (isRoot() && m_step < 3)
-    {
-      Log("Fluid") << "Assembling and solving the coagulation kinetics ..."
-                   << Alert::Raise;
-      std::cout.flush();
-    }
-
-    m_species.assemble();
-    m_species.solve(m_speciesKSP);
-
-    // History rotates before the current level is overwritten: the crosswind
-    // residual needs both c^n and c^{n-1}.
-    m_thPrev.setData(m_thCur.getData());
-    m_fgPrev.setData(m_fgCur.getData());
-    m_fnPrev.setData(m_fnCur.getData());
-    m_thCur.setData(m_th.getSolution().getData());
-    m_fgCur.setData(m_fg.getSolution().getData());
-    m_fnCur.setData(m_fn.getSolution().getData());
-
-    m_timing.species = secondsSince(speciesStart);
+    if (m_cfg.solveKinetics)
+      extendActivation();
+    m_indicesReady = true;
   }
 
   void Fluid::computeFluxes()
@@ -1155,6 +1115,12 @@ namespace Rodin::Examples::Heart::Atrium
 
     m_pIn = m_cfg.inletPressureMean +
       m_cfg.inletPressureAmplitude * std::sin(2.0 * PI * m_t / m_cfg.period);
+    if (m_t < m_cfg.pressureRamp)
+    {
+      const Real ramp = m_t / m_cfg.pressureRamp;
+      m_pIn *= ramp;
+      m_pOut *= ramp;
+    }
 
     if (m_cfg.useVentricularModel)
     {
@@ -1169,6 +1135,7 @@ namespace Rodin::Examples::Heart::Atrium
       m_valveOpen = true;
       m_mitralZ = m_cfg.prescribedOutletResistance * m_outletArea;
     }
+    prepareSubscales();
   }
 
   void Fluid::commitStep()
@@ -1178,7 +1145,8 @@ namespace Rodin::Examples::Heart::Atrium
     const int cycle = step / m_stepsPerCycle;
     const bool endOfCycle = step % m_stepsPerCycle == m_stepsPerCycle - 1;
     m_uOld.setData(m_u.getSolution().getData());
-    if (m_cfg.useVMS)
+    ++m_coefficientEpoch;
+    if (m_cfg.useVMS && !m_cfg.quasiStaticSubscales)
       m_subOld.setData(m_sub.getData());
     accumulateWallShear();
     m_cycleElapsed += m_run.timeStep;
@@ -1206,7 +1174,9 @@ namespace Rodin::Examples::Heart::Atrium
       }
     }
 
-    if (m_cfg.solveKinetics && cycle >= m_cfg.flowCycles)
+    // Species start once the flow cycles are complete and the first cycle
+    // indices exist; they are advected by the accepted u - w on the accepted mesh.
+    if (m_cfg.solveKinetics && m_indicesReady && cycle >= m_cfg.flowCycles)
       solveSpecies();
 
     m_output->collectDiagnostics(cycle);

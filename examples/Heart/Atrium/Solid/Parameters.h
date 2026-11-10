@@ -43,6 +43,17 @@ namespace Rodin::Examples::Heart::Atrium
     Real contractility = 20; // Cross-bridge stress source, in kPa.
     Real destructionRate = 0.4; // Dimensionless strain-rate destruction factor.
     Real density = 1060; // Reference mass density in kg/m^3.
+
+    /**
+     * @brief Solves the incompressible wall with a stabilized displacement-pressure pair.
+     * @details The passive law then supplies its isochoric part only and the
+     * volume penalty is unused in the transient problem. False restores the
+     * displacement formulation with the logarithmic volume penalty.
+     */
+    bool mixed = true;
+
+    /// @brief Dimensionless factor of the pressure stabilization h_K^2/(2 a).
+    Real pressureStabilization = 1;
   };
 
 }

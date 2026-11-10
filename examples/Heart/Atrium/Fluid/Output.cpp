@@ -42,14 +42,26 @@ namespace Rodin::Examples::Heart::Atrium
     }
     if (m_atrium.m_cfg.solveKinetics)
     {
-      m_atrium.m_thCur.setName("Thrombin");
-      m_atrium.m_fgCur.setName("Fibrinogen");
-      m_atrium.m_fnCur.setName("Fibrin");
+      m_atrium.m_pCur.setName("Prothrombin");
+      m_atrium.m_tCur.setName("Thrombin");
+      m_atrium.m_aCur.setName("Antithrombin");
+      m_atrium.m_gCur.setName("Fibrinogen");
+      m_atrium.m_fibrin.setName("Fibrin");
+      m_atrium.m_tat.setName("ThrombinAntithrombin");
+      m_atrium.m_drag.setName("BrinkmanDrag");
+      m_atrium.m_drift.setName("InvariantDrift");
       m_atrium.m_activation.setName("ThrombosisActivation");
-      m_xdmf.add("Thrombin", m_atrium.m_thCur);
-      m_xdmf.add("Fibrinogen", m_atrium.m_fgCur);
-      m_xdmf.add("Fibrin", m_atrium.m_fnCur);
+      m_atrium.m_layer.setName("ActivationLayer");
+      m_xdmf.add("Prothrombin", m_atrium.m_pCur);
+      m_xdmf.add("Thrombin", m_atrium.m_tCur);
+      m_xdmf.add("Antithrombin", m_atrium.m_aCur);
+      m_xdmf.add("Fibrinogen", m_atrium.m_gCur);
+      m_xdmf.add("Fibrin", m_atrium.m_fibrin);
+      m_xdmf.add("ThrombinAntithrombin", m_atrium.m_tat);
+      m_xdmf.add("BrinkmanDrag", m_atrium.m_drag);
+      m_xdmf.add("InvariantDrift", m_atrium.m_drift);
       m_xdmf.add("ThrombosisActivation", m_atrium.m_activation);
+      m_xdmf.add("ActivationLayer", m_atrium.m_layer);
     }
   }
 
@@ -59,9 +71,9 @@ namespace Rodin::Examples::Heart::Atrium
     const Real tawss = m_atrium.m_tawss.max();
     const Real osi = m_atrium.m_osi.max();
     const Real activation = m_atrium.m_activation.max();
-    const Real th = m_atrium.m_thCur.max();
-    const Real fg = m_atrium.m_fgCur.min();
-    const Real fn = m_atrium.m_fnCur.max();
+    const Real th = m_atrium.m_tCur.max();
+    const Real fg = m_atrium.m_gCur.min();
+    const Real fn = m_atrium.m_fibrin.max();
 
     m_atrium.m_diagnostics = Diagnostics{cycle, m_atrium.m_pIn,
       m_atrium.m_cfg.useVentricularModel ? s.pv : m_atrium.m_pOut,

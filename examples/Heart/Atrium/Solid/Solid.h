@@ -20,6 +20,10 @@ namespace Rodin::Examples::Heart::Atrium
   /**
    * @brief Transient active atrial wall on a Scotch-partitioned MPI wedge mesh.
    *
+   * The incompressible wall is solved by default with continuous linear
+   * displacement and pressure and a pressure-gradient stabilization; the
+   * displacement formulation with a volume penalty remains selectable.
+   *
    * ## Architecture
    *
    * The component retains its reference mesh, reference fibers, active fields, finite-element
@@ -93,6 +97,9 @@ namespace Rodin::Examples::Heart::Atrium
       /// @brief Returns the current acceleration in mm/s².
       const VectorField& getAcceleration() const noexcept;
 
+      /// @brief Returns the wall pressure multiplier in kPa; zero in the displacement formulation.
+      const ScalarField& getPressure() const noexcept;
+
       /// @brief Returns the solved discontinuous active extension.
       const CellScalarField& getActiveExtension() const noexcept;
 
@@ -123,9 +130,12 @@ namespace Rodin::Examples::Heart::Atrium
       using ActiveTrial =
         PETSc::Variational::TrialFunction<CellScalarField, CellScalarSpace>;
       using ActiveTest = PETSc::Variational::TestFunction<CellScalarSpace>;
+      using PressureTrial = PETSc::Variational::TrialFunction<ScalarField, ScalarSpace>;
+      using PressureTest = PETSc::Variational::TestFunction<ScalarSpace>;
       using LinearSystem = PETSc::Math::LinearSystem;
-      using MechanicsProblem = Variational::Problem<LinearSystem, Trial, ActiveTrial,
-        ActiveTrial, ActiveTrial, Test, ActiveTest, ActiveTest, ActiveTest>;
+      using MechanicsProblem =
+        Variational::Problem<LinearSystem, Trial, ActiveTrial, ActiveTrial, ActiveTrial,
+          PressureTrial, Test, ActiveTest, ActiveTest, ActiveTest, PressureTest>;
       using EquilibriumProblem = Variational::Problem<LinearSystem, Trial, Test>;
       using LinearSolver = Solver::KSP;
       using Newton = Solver::SNES;
@@ -162,6 +172,13 @@ namespace Rodin::Examples::Heart::Atrium
        * @returns Configured constitutive law.
        */
       static Material makeMaterial(const Parameters& cfg);
+
+      /**
+       * @brief Constructs the law of the transient problem.
+       * @param cfg Solid material and active coefficients.
+       * @returns The isochoric law in the mixed formulation, the full law otherwise.
+       */
+      static Material makeTransientMaterial(const Parameters& cfg);
 
       /**
        * @brief Populates rate, fiber, and independent active-field inputs.
@@ -235,12 +252,19 @@ namespace Rodin::Examples::Heart::Atrium
       ProblemData m_data;
       VectorSpace m_space;
       CellScalarSpace m_activeSpace;
+      ScalarSpace m_pressureSpace;
       VectorField m_displacement, m_velocity, m_acceleration;
       VectorField m_robinData;
       Real m_robinCoefficient = 0;
       VectorField m_predictedDisplacement, m_predictedVelocity, m_previousDisplacement;
       CellScalarField m_extension, m_gamma, m_beta;
       CellScalarField m_previousExtension, m_previousGamma, m_previousBeta;
+
+      /// @brief Pressure multiplier of the incompressibility constraint, in kPa.
+      ScalarField m_pressure;
+
+      /// @brief Cell sizes of the fixed reference mesh for the pressure stabilization.
+      std::vector<Real> m_cellSizes;
       Real m_timeStep, m_density, m_accelerationCoefficient, m_massCoefficient;
       Real m_velocityCoefficient;
       Real m_time = 0;
@@ -248,8 +272,10 @@ namespace Rodin::Examples::Heart::Atrium
       Material m_law;
       Trial m_increment;
       ActiveTrial m_extensionIncrement, m_gammaIncrement, m_betaIncrement;
+      PressureTrial m_pressureIncrement;
       Test m_test;
       ActiveTest m_extensionTest, m_gammaTest, m_betaTest;
+      PressureTest m_pressureTest;
       InternalWork m_work;
       MechanicsProblem m_mechanics;
       LinearSolver m_linearSolver;

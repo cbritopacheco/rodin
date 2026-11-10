@@ -54,15 +54,19 @@ namespace Rodin::Examples::Heart::Atrium
         out.mode = Mode::FSI;
       else
         Alert::Exception() << "Unknown atrium mode: " << mode << Alert::Raise;
+      // PETSc leaves the buffer untouched when an option is absent.
       char path[PETSC_MAX_PATH_LEN];
+      PetscBool pathSet = PETSC_FALSE;
       ierr = PetscOptionsString("-atrium_mesh", "Combined MEDIT mesh in mm", nullptr,
-        out.meshPath.c_str(), path, sizeof(path), nullptr);
+        out.meshPath.c_str(), path, sizeof(path), &pathSet);
       assert(ierr == PETSC_SUCCESS);
-      out.meshPath = path;
+      if (pathSet)
+        out.meshPath = path;
       ierr = PetscOptionsString("-atrium_output", "Run output directory", nullptr,
-        out.outputDirectory.c_str(), path, sizeof(path), nullptr);
+        out.outputDirectory.c_str(), path, sizeof(path), &pathSet);
       assert(ierr == PETSC_SUCCESS);
-      out.outputDirectory = path;
+      if (pathSet)
+        out.outputDirectory = path;
       integer("-atrium_solid_material", "Solid volume material label", out.solidMaterial);
       integer("-atrium_fluid_material", "Fluid volume material label", out.fluidMaterial);
       real("-atrium_dt", "Common time step (s)", out.timeStep);
@@ -102,6 +106,11 @@ namespace Rodin::Examples::Heart::Atrium
       real("-atrium_solid_apex_radius", "Appendage apex patch radius (mm)",
         out.solid.apexRadius);
       integer("-atrium_solid_base_label", "Basal boundary label", out.solid.baseLabel);
+      boolean("-atrium_solid_mixed",
+        "Stabilized incompressible displacement-pressure wall", out.solid.mixed);
+      real("-atrium_solid_pressure_stabilization",
+        "Factor of the wall pressure stabilization h^2/(2a)",
+        out.solid.pressureStabilization);
       boolean("-atrium_solid_cache_constitutive",
         "Cache constitutive evaluations within a Newton state",
         out.solid.cacheConstitutive);
@@ -130,12 +139,35 @@ namespace Rodin::Examples::Heart::Atrium
         out.fluid.preconditionerLag);
       integer("-atrium_fluid_flow_cycles",
         "Cycles before optional species transport begins", out.fluid.flowCycles);
-      boolean("-atrium_fluid_lv_model", "Enable 0D ventricular driver (fluid mode only)",
+      boolean("-atrium_fluid_lv_model",
+        "Enable the 0D ventricle with its mitral diode and the venous pressure",
         out.fluid.useVentricularModel);
-      boolean("-atrium_fluid_vms", "Enable orthogonal subscales (fluid mode only)",
-        out.fluid.useVMS);
-      boolean("-atrium_fluid_kinetics", "Enable coagulation transport (fluid mode only)",
+      real("-atrium_fluid_pressure_ramp", "Linear ramp time of opening pressures (s)",
+        out.fluid.pressureRamp);
+      boolean(
+        "-atrium_fluid_vms", "Use term-by-term orthogonal subscales", out.fluid.useVMS);
+      boolean("-atrium_fluid_quasi_static_subscales",
+        "Quasi-static instead of dynamic convective subscales",
+        out.fluid.quasiStaticSubscales);
+      boolean("-atrium_fluid_kinetics",
+        "Transport the P-T-A-G coagulation species after the flow cycles",
         out.fluid.solveKinetics);
+      real("-atrium_fluid_crosswind", "Codina crosswind constant of the species",
+        out.fluid.crosswindC);
+      boolean("-atrium_fluid_brinkman", "Fibrin-dependent Brinkman drag in the momentum",
+        out.fluid.brinkman.enabled);
+      real("-atrium_fluid_brinkman_coefficient", "Drag coefficient (kg m^-3 s^-1)",
+        out.fluid.brinkman.coefficient);
+      real("-atrium_fluid_ptag_fibrinogen", "Initial and inflow fibrinogen (mol/m^3)",
+        out.fluid.kinetics.fibrinogen0);
+      real("-atrium_fluid_ptag_wall_flux", "Wall initiation flux j_0 (mol m^-2 s^-1)",
+        out.fluid.kinetics.wallFlux);
+      real("-atrium_fluid_ptag_layer", "Endocardial reaction layer thickness (m)",
+        out.fluid.kinetics.layerThickness);
+      real("-atrium_fluid_ptag_k_a", "Amplification rate k_a (1/s)",
+        out.fluid.kinetics.amplificationRate);
+      real("-atrium_fluid_ptag_inlet_thrombin", "Thrombin at the veins (mol/m^3)",
+        out.fluid.kinetics.inletThrombin);
       boolean("-atrium_fsi_newton", "Use analytic matrix-free interface Newton",
         out.fsi.newton);
       real("-atrium_fsi_atol", "Absolute nodal interface residual tolerance (kPa)",
@@ -150,6 +182,10 @@ namespace Rodin::Examples::Heart::Atrium
       real("-atrium_fsi_robin",
         "Reference-area Robin impedance (Pa s/m); zero selects automatic scale",
         out.fsi.robinCoefficient);
+      boolean("-atrium_fsi_recovered_traction",
+        "Exchange recovered physical stress instead of the variational reaction in "
+        "sweeps",
+        out.fsi.recoveredTraction);
       real("-atrium_fsi_rtol", "Relative solid displacement-change tolerance",
         out.fsi.relativeTolerance);
       PetscReal apex[3] = {out.solid.appendageApex(0), out.solid.appendageApex(1),
@@ -187,7 +223,8 @@ namespace Rodin::Examples::Heart::Atrium
       const bool solver = name.starts_with("-atrium_sproj_") ||
         name.starts_with("-atrium_vproj_") || name.starts_with("-atrium_wss_") ||
         name.starts_with("-atrium_transmural_") || name.starts_with("-atrium_fibers_") ||
-        name.starts_with("-atrium_ale_") || name.starts_with("-atrium_fsi_interface_");
+        name.starts_with("-atrium_ale_") || name.starts_with("-atrium_fsi_interface_") ||
+        name.starts_with("-atrium_ptag_");
       if (name.starts_with("-atrium_") && !solver && !unknown)
         unknown = std::string(name);
     }
