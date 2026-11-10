@@ -85,6 +85,7 @@ def main():
                '-atrium_fluid_pin', str(pressure), '-atrium_fluid_pin_amplitude', str(amplitude),
                '-atrium_fluid_outlet_pressure', str(outlet), '-atrium_fluid_lv_model', 'false',
                '-atrium_fluid_kinetics', str(kinetics).lower(),
+               '-atrium_fluid_vms', 'false',
                '-atrium_fluid_flow_cycles', '0', '-atrium_fluid_lag_preconditioner', str(lag),
                '-ksp_type', 'gmres' if lag > 1 else 'preonly',
                '-ksp_max_it', str(max_it), '-ksp_rtol', '1e-12', '-pc_type', 'lu',
@@ -113,7 +114,7 @@ def main():
                     'TimeAveragedWallShearStress', 'OscillatoryShearIndex'}
         if kinetics:
             expected |= {'Prothrombin', 'Thrombin', 'Antithrombin', 'Fibrinogen',
-                         'Fibrin', 'ThrombinAntithrombin', 'BrinkmanDrag',
+                         'FactorXa', 'Fibrin', 'ThrombinAntithrombin', 'BrinkmanDrag',
                          'InvariantDrift', 'ThrombosisActivation', 'ActivationLayer'}
         assert fields == expected, (name, fields)
         assert len(rows) == steps + 1, (name, len(rows))

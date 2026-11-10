@@ -46,6 +46,7 @@ namespace Rodin::Examples::Heart::Atrium
       m_atrium.m_tCur.setName("Thrombin");
       m_atrium.m_aCur.setName("Antithrombin");
       m_atrium.m_gCur.setName("Fibrinogen");
+      m_atrium.m_xCur.setName("FactorXa");
       m_atrium.m_fibrin.setName("Fibrin");
       m_atrium.m_tat.setName("ThrombinAntithrombin");
       m_atrium.m_drag.setName("BrinkmanDrag");
@@ -56,6 +57,7 @@ namespace Rodin::Examples::Heart::Atrium
       m_xdmf.add("Thrombin", m_atrium.m_tCur);
       m_xdmf.add("Antithrombin", m_atrium.m_aCur);
       m_xdmf.add("Fibrinogen", m_atrium.m_gCur);
+      m_xdmf.add("FactorXa", m_atrium.m_xCur);
       m_xdmf.add("Fibrin", m_atrium.m_fibrin);
       m_xdmf.add("ThrombinAntithrombin", m_atrium.m_tat);
       m_xdmf.add("BrinkmanDrag", m_atrium.m_drag);
@@ -74,13 +76,14 @@ namespace Rodin::Examples::Heart::Atrium
     const Real th = m_atrium.m_tCur.max();
     const Real fg = m_atrium.m_gCur.min();
     const Real fn = m_atrium.m_fibrin.max();
+    const Real xa = m_atrium.m_xCur.max();
 
     m_atrium.m_diagnostics = Diagnostics{cycle, m_atrium.m_pIn,
       m_atrium.m_cfg.useVentricularModel ? s.pv : m_atrium.m_pOut,
       m_atrium.m_cfg.useVentricularModel ? Optional<Real>(s.par) : Optional<Real>{},
       m_atrium.m_cfg.useVentricularModel ? Optional<Real>(s.pd) : Optional<Real>{},
       m_atrium.m_valveOpen, m_atrium.m_qIn, m_atrium.m_qOut, m_atrium.m_speed, tawss, osi,
-      activation, th, fg, fn, m_atrium.m_linearIterations,
+      activation, th, fg, fn, xa, m_atrium.m_linearIterations,
       m_atrium.m_lastPreconditionerRefreshStep
         ? m_atrium.m_step - *m_atrium.m_lastPreconditionerRefreshStep
         : 0,

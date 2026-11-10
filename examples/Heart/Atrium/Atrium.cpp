@@ -318,7 +318,9 @@ namespace Rodin::Examples::Heart::Atrium
           {"fluid_min_fibrinogen",
             fluid ? Optional<Real>(fluid->minimumFibrinogen) : Optional<Real>{}},
           {"fluid_max_fibrin",
-            fluid ? Optional<Real>(fluid->maximumFibrin) : Optional<Real>{}}});
+            fluid ? Optional<Real>(fluid->maximumFibrin) : Optional<Real>{}},
+          {"fluid_max_factor_xa",
+            fluid ? Optional<Real>(fluid->maximumFactorXa) : Optional<Real>{}}});
       if (m_csvOutput.tellp() == 0)
       {
         for (size_t i = 0; i < fields.size(); ++i)

@@ -44,6 +44,7 @@ def main():
                '-atrium_solid_apex', apex, '-atrium_solid_contractility', '100',
                '-atrium_solid_cache_constitutive', '-atrium_output_every', '1',
                '-atrium_solid_mixed', str(mixed).lower(),
+               '-atrium_fluid_vms', 'false',
                '-ksp_type', 'preonly', '-pc_type', 'lu',
                '-pc_factor_mat_solver_type', 'mumps', '-mat_mumps_icntl_20', '0',
                '-ksp_diagonal_scale', 'false', '-ksp_diagonal_scale_fix', 'false']

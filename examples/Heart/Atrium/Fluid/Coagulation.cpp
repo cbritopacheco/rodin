@@ -43,6 +43,8 @@ namespace Rodin::Examples::Heart::Atrium
 
   Fluid::Real Fluid::fibrinAt(const Point& p) const
   {
+    if (m_cfg.kinetics.immobileFibrin)
+      return std::max<Real>(m_fibrin.getValue(p), 0.0);
     const Real G0 = m_cfg.kinetics.fibrinogen0;
     return std::clamp<Real>(G0 - m_gCur.getValue(p), 0.0, G0);
   }
@@ -68,7 +70,8 @@ namespace Rodin::Examples::Heart::Atrium
 
   void Fluid::assignTransport(ScalarProblemType& problem, ScalarTrialFunctionType& c,
     ScalarTestFunctionType& v, ScalarGridFunctionType& cur, ScalarGridFunctionType& prev,
-    Real D, Real inlet, Real robinScale, const ScalarGridFunctionType* load)
+    Real D, Real inlet, Real robinScale, Real loadScale,
+    const ScalarGridFunctionType* load)
   {
     const Real dt = m_run.timeStep;
     const Real scale = m_cfg.kinetics.stabilizationScale;
@@ -94,13 +97,25 @@ namespace Rodin::Examples::Heart::Atrium
       return (u2 > 1.0e-20) ? 1.0 / u2 : 0.0;
     };
 
-    // Wall exchange j = j_0 E P/P_ref without a reaction layer: an implicit
-    // Robin sink on P and the same amount as a load on T.
+    // Wall exchange without a reaction layer: an implicit Robin sink
+    // robinScale E c of the consumed species and a load loadScale E f of the
+    // produced one.
     RealFunction robinFn = [this, robinScale](const Point& p) {
       return robinScale * m_activation.getValue(p);
     };
-    RealFunction loadFn = [this, robinScale, load](const Point& p) {
-      return load ? robinScale * m_activation.getValue(p) * load->getValue(p) : 0.0;
+    RealFunction loadFn = [this, loadScale, load](const Point& p) {
+      return load ? loadScale * m_activation.getValue(p) * load->getValue(p) : 0.0;
+    };
+
+    // Half the discrete divergence of the advecting fluid velocity, for the
+    // skew-symmetric form about the inflow state. On the moving domain the
+    // balance of int c^2 contains div(u - w) from the advection and div w
+    // from the domain, so the factor is div u.
+    RealFunction halfDivFn = [this](const Point& p) -> Real {
+      return 0.5 * Div(m_uOld).getValue(p);
+    };
+    RealFunction halfDivInletFn = [this, inlet](const Point& p) -> Real {
+      return 0.5 * inlet * Div(m_uOld).getValue(p);
     };
 
     const auto streamline = Dot(transport, Grad(v));
@@ -120,11 +135,19 @@ namespace Rodin::Examples::Heart::Atrium
 
       // Inflow composition at the pulmonary veins; the mitral outlet is free.
       + DirichletBC(c, RealFunction(Real(inlet))).on(m_inletSet);
-    if (robinScale > 0)
+    if (m_cfg.skewTransport)
     {
-      problem += BoundaryIntegral(robinFn * c, v).over(m_cfg.wall);
-      problem -= BoundaryIntegral(loadFn * v).over(m_cfg.wall);
+      // (1/2) int div(u_h) (c - c_in) v. The inflow state remains an exact
+      // solution and a deviation from it is advected by an energy-neutral
+      // operator, so the discrete divergence of the equal-order velocity
+      // cannot amplify it.
+      problem += SpeciesIntegral(halfDivFn * c, v);
+      problem -= SpeciesIntegral(halfDivInletFn, v);
     }
+    if (robinScale > 0)
+      problem += BoundaryIntegral(robinFn * c, v).over(m_cfg.wall);
+    if (load && loadScale > 0)
+      problem -= BoundaryIntegral(loadFn * v).over(m_cfg.wall);
   }
 
   void Fluid::setupSpecies()
@@ -133,18 +156,27 @@ namespace Rodin::Examples::Heart::Atrium
       return;
     const auto& k = m_cfg.kinetics;
 
-    // Wall exchange is a Robin flux only without a reaction layer; otherwise
-    // initiation is the volumetric channel of the reaction step.
+    // Wall exchange is a boundary flux only without a reaction layer;
+    // otherwise initiation is the volumetric channel of the reaction step.
+    // The direct channel j = j_0 E P/P_ref is a Robin sink of P and the same
+    // amount as a load of T. With factor Xa it is replaced by the emission of X.
     const bool layer = k.layerThickness > 0.0;
-    const Real robin = layer ? 0.0 : k.wallFlux / k.prothrombinRef;
+    const Real robin = (layer || k.factorXa) ? 0.0 : k.wallFlux / k.prothrombinRef;
     assignTransport(m_transportP, m_pT, m_vP, m_pCur, m_pPrev, k.diffusivityProtein,
-      k.prothrombin0, robin, nullptr);
+      k.prothrombin0, robin, 0.0, nullptr);
     assignTransport(m_transportT, m_tT, m_vT, m_tCur, m_tPrev, k.diffusivityProtein,
-      k.inletThrombin, robin, layer ? nullptr : &m_pCur);
+      k.inletThrombin, 0.0, robin, &m_pCur);
     assignTransport(m_transportA, m_aT, m_vA, m_aCur, m_aPrev, k.diffusivityProtein,
-      k.antithrombin0, 0.0, nullptr);
+      k.antithrombin0, 0.0, 0.0, nullptr);
     assignTransport(m_transportG, m_gT, m_vG, m_gCur, m_gPrev, k.diffusivityFibrinogen,
-      k.fibrinogen0, 0.0, nullptr);
+      k.fibrinogen0, 0.0, 0.0, nullptr);
+    if (k.factorXa)
+    {
+      // The veins carry no factor Xa. Without a layer the endocardium emits
+      // -D d_n X = j_X E; with one, the reaction step emits it in the layer.
+      assignTransport(m_transportX, m_xT, m_vX, m_xCur, m_xPrev, k.diffusivityProtein,
+        0.0, 0.0, layer ? 0.0 : k.resolvedXaFlux(), &m_one);
+    }
     if (layer)
     {
       // Screened Poisson extension of the wall activation into the lumen.
@@ -165,6 +197,12 @@ namespace Rodin::Examples::Heart::Atrium
                             << " 1/s activation_threshold=" << threshold
                             << " mol/m^3 layer_thickness=" << k.layerThickness << " m"
                             << Alert::Raise;
+      Log("Fluid/Kinetics") << "factor_Xa=" << (k.factorXa ? "on" : "off")
+                            << " j_X=" << k.resolvedXaFlux()
+                            << " mol/m^2/s kappa=" << k.xaRate << " 1/s k_dX="
+                            << k.xaDecay << " 1/s fibrin="
+                            << (k.immobileFibrin ? "immobile" : "advected") << " skew="
+                            << (m_cfg.skewTransport ? "on" : "off") << Alert::Raise;
     }
   }
 
@@ -216,6 +254,8 @@ namespace Rodin::Examples::Heart::Atrium
     advance(m_transportT, m_kspT, m_tT, m_tCur, m_tPrev);
     advance(m_transportA, m_kspA, m_aT, m_aCur, m_aPrev);
     advance(m_transportG, m_kspG, m_gT, m_gCur, m_gPrev);
+    if (m_cfg.kinetics.factorXa)
+      advance(m_transportX, m_kspX, m_xT, m_xCur, m_xPrev);
     reactionStep();
     updateCoagulationDiagnostics();
     m_timing.species = secondsSince(speciesStart);
@@ -226,22 +266,29 @@ namespace Rodin::Examples::Heart::Atrium
     const auto& k = m_cfg.kinetics;
     const Real dt = m_run.timeStep;
 
-    // Layer initiation rate s/P = (j_0/delta) scale E~/P_ref: a P -> T channel
-    // inside the same conservative nodal step.
-    const Real layerRate = k.layerThickness > 0.0
+    // Layer initiation inside the same conservative nodal step. The direct
+    // channel is the rate s/P = (j_0/delta) scale E~/P_ref of P -> T; with
+    // factor Xa the layer emits X at (j_X/delta) scale E~ instead.
+    const bool hasLayer = k.layerThickness > 0.0;
+    const Real layerRate = hasLayer && !k.factorXa
       ? k.wallFlux / k.layerThickness * m_layerScale / k.prothrombinRef
       : 0.0;
+    const Real xaRate = hasLayer && k.factorXa
+      ? k.resolvedXaFlux() / k.layerThickness * m_layerScale
+      : 0.0;
 
-    // The four P1 fields share one layout: the owned nodal values are
-    // reacted in place and the ghosts refreshed once.
-    std::array<::Vec, 4> fields{
-      m_pCur.getData(), m_tCur.getData(), m_aCur.getData(), m_gCur.getData()};
-    std::array<PetscScalar*, 4> values{};
+    // The P1 fields share one layout: the owned nodal values are reacted in
+    // place and the ghosts refreshed once. Factor Xa and the immobile fibrin
+    // are written only when enabled.
+    constexpr size_t Count = 6;
+    std::array<::Vec, Count> fields{m_pCur.getData(), m_tCur.getData(), m_aCur.getData(),
+      m_gCur.getData(), m_xCur.getData(), m_fibrin.getData()};
+    std::array<PetscScalar*, Count> values{};
     const PetscScalar* layer = nullptr;
     PetscInt size = 0;
     PetscErrorCode ierr = VecGetLocalSize(fields[0], &size);
     assert(ierr == PETSC_SUCCESS);
-    for (size_t i = 0; i < 4; ++i)
+    for (size_t i = 0; i < Count; ++i)
     {
       ierr = VecGetArray(fields[i], &values[i]);
       assert(ierr == PETSC_SUCCESS);
@@ -250,18 +297,25 @@ namespace Rodin::Examples::Heart::Atrium
     assert(ierr == PETSC_SUCCESS);
     for (PetscInt i = 0; i < size; ++i)
     {
+      const Real extended = std::max<Real>(PetscRealPart(layer[i]), 0.0);
       const auto next =
         k.advance({PetscRealPart(values[0][i]), PetscRealPart(values[1][i]),
-                    PetscRealPart(values[2][i]), PetscRealPart(values[3][i])},
-          dt, layerRate * std::max<Real>(PetscRealPart(layer[i]), 0.0));
+                    PetscRealPart(values[2][i]), PetscRealPart(values[3][i]),
+                    k.factorXa ? PetscRealPart(values[4][i]) : Real(0),
+                    k.immobileFibrin ? PetscRealPart(values[5][i]) : Real(0)},
+          dt, layerRate * extended, xaRate * extended);
       values[0][i] = next.P;
       values[1][i] = next.T;
       values[2][i] = next.A;
       values[3][i] = next.G;
+      if (k.factorXa)
+        values[4][i] = next.X;
+      if (k.immobileFibrin)
+        values[5][i] = next.F;
     }
     ierr = VecRestoreArrayRead(m_layer.getData(), &layer);
     assert(ierr == PETSC_SUCCESS);
-    for (size_t i = 0; i < 4; ++i)
+    for (size_t i = 0; i < Count; ++i)
     {
       ierr = VecRestoreArray(fields[i], &values[i]);
       assert(ierr == PETSC_SUCCESS);
@@ -297,8 +351,11 @@ namespace Rodin::Examples::Heart::Atrium
     assert(ierr == PETSC_SUCCESS);
     for (PetscInt i = 0; i < size; ++i)
     {
-      const Real fibrin =
-        std::clamp<Real>(k.fibrinogen0 - PetscRealPart(G[i]), 0.0, k.fibrinogen0);
+      // The immobile fibrin is a state of the reaction step; otherwise the
+      // fibrin is the consumed fibrinogen.
+      const Real fibrin = k.immobileFibrin
+        ? std::max<Real>(PetscRealPart(F[i]), 0.0)
+        : std::clamp<Real>(k.fibrinogen0 - PetscRealPart(G[i]), 0.0, k.fibrinogen0);
       F[i] = fibrin;
       I[i] = k.antithrombin0 - PetscRealPart(A[i]);
       S[i] = m_cfg.brinkman(fibrin);

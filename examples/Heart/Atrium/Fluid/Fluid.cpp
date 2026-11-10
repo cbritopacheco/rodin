@@ -69,7 +69,7 @@ namespace Rodin::Examples::Heart::Atrium
     const RunParameters& run, Attribute material)
     : m_cfg(cfg),
       m_run(run),
-      m_input(makeInput(m_cfg)),
+      m_input(makeInput(m_cfg, &m_outletPressure)),
       m_model(m_input),
       m_mesh(makeMesh(parent, m_cfg, material)),
       m_output(std::make_unique<Output>(*this, parent.getContext())),
@@ -99,24 +99,27 @@ namespace Rodin::Examples::Heart::Atrium
       m_dragFn([this](const Point& p) { return dragAt(p); }),
       m_piTilde(m_sh),
       m_convProjection(m_vh),
-      m_sub(m_vh),
-      m_subOld(m_vh),
+      m_pressureProjection(m_vh),
       m_pT(m_sh),
       m_tT(m_sh),
       m_aT(m_sh),
       m_gT(m_sh),
+      m_xT(m_sh),
       m_vP(m_sh),
       m_vT(m_sh),
       m_vA(m_sh),
       m_vG(m_sh),
+      m_vX(m_sh),
       m_pCur(m_sh),
       m_tCur(m_sh),
       m_aCur(m_sh),
       m_gCur(m_sh),
+      m_xCur(m_sh),
       m_pPrev(m_sh),
       m_tPrev(m_sh),
       m_aPrev(m_sh),
       m_gPrev(m_sh),
+      m_xPrev(m_sh),
       m_fibrin(m_sh),
       m_tat(m_sh),
       m_drag(m_sh),
@@ -145,10 +148,12 @@ namespace Rodin::Examples::Heart::Atrium
       m_transportT(m_tT, m_vT),
       m_transportA(m_aT, m_vA),
       m_transportG(m_gT, m_vG),
+      m_transportX(m_xT, m_vX),
       m_kspP(m_transportP),
       m_kspT(m_transportT),
       m_kspA(m_transportA),
       m_kspG(m_transportG),
+      m_kspX(m_transportX),
       m_extension(m_eT, m_vE),
       m_extensionKSP(m_extension),
       m_scalarProjection(m_sTrial, m_sTest),
@@ -225,7 +230,7 @@ namespace Rodin::Examples::Heart::Atrium
     return mesh;
   }
 
-  Fluid::Model::Input Fluid::makeInput(const Parameters& cfg)
+  Fluid::Model::Input Fluid::makeInput(const Parameters& cfg, const Real* atrialPressure)
   {
     Model::Input input;
 
@@ -267,7 +272,12 @@ namespace Rodin::Examples::Heart::Atrium
     input.absRegularization = cfg.lv.absRegularization;
 
     input.pSv = [p = cfg.lv.systemicVenousPressure](Real) { return p; };
-    input.pAt = [p = cfg.atrialPressure](Real t) { return atrialWave(p, t); };
+    // With feedback the ventricle reads the mean pressure of the mitral plane
+    // at the last accepted step; otherwise its own atrial waveform.
+    if (cfg.ventricularFeedback)
+      input.pAt = [atrialPressure](Real) { return *atrialPressure; };
+    else
+      input.pAt = [p = cfg.atrialPressure](Real t) { return atrialWave(p, t); };
     input.u = [a = cfg.activation](Real t) { return activationWave(a, t); };
     input.m0 = [low = cfg.lv.relaxationM0Low, high = cfg.lv.relaxationM0High,
                  lowEc = cfg.lv.relaxationM0LowEc,
@@ -383,8 +393,33 @@ namespace Rodin::Examples::Heart::Atrium
       (cy.mu0 - cy.muInf) *
         std::pow(1.0 + std::pow(cy.lambda * shear, cy.yasuda), (cy.n - 1.0) / cy.yasuda);
     entry.size = cellSize(p);
+
+    // tau_1 = [4 nu/h^2 + 2|u^n - w|/h + sigma_B/rho]^-1 with the relative
+    // speed and the drag of the centroid; the Brinkman drag is a reaction and
+    // enters the stabilization scale as one.
+    const Point center = centroid(p);
+    const auto uc = (m_uOld - m_meshVelocity).getValue(center);
+    entry.speed = std::sqrt(Math::dot(uc, uc));
+    entry.drag = dragAt(center);
+    const Real h = entry.size;
+    entry.tau1 = 1.0 /
+      (4.0 * entry.viscosity / (m_cfg.rho * h * h) + 2.0 * entry.speed / h +
+        entry.drag / m_cfg.rho);
     entry.epoch = m_coefficientEpoch;
     return entry;
+  }
+
+  Point Fluid::centroid(const Point& p)
+  {
+    return Point(p.getPolytope(), Math::SpatialPoint{.25, .25, .25});
+  }
+
+  Math::SpatialVector<Fluid::Real> Fluid::subscaleAt(const Point& p) const
+  {
+    if (m_subscale.empty())
+      return Math::SpatialVector<Real>{{0.0, 0.0, 0.0}};
+    const auto& value = m_subscale[p.getPolytope().getIndex()];
+    return Math::SpatialVector<Real>{{value[0], value[1], value[2]}};
   }
 
   Fluid::Real Fluid::viscosityAt(const Point& p) const
@@ -392,17 +427,9 @@ namespace Rodin::Examples::Heart::Atrium
     return cellCoefficients(p).viscosity;
   }
 
-  // tau_1 = [4 nu/h^2 + 2|u^n - w|/h + sigma_B/rho]^-1; the Brinkman drag is
-  // a reaction and enters the stabilization scale as one.
   Fluid::Real Fluid::tau1At(const Point& p) const
   {
-    const auto uc = (m_uOld - m_meshVelocity).getValue(p);
-    const auto& cell = cellCoefficients(p);
-    const Real h = cell.size;
-    const Real nu = cell.viscosity / m_cfg.rho;
-    return 1.0 /
-      (4.0 * nu / (h * h) + 2.0 * std::sqrt(Math::dot(uc, uc)) / h +
-        dragAt(p) / m_cfg.rho);
+    return cellCoefficients(p).tau1;
   }
 
   Fluid::Real Fluid::vmsTauAt(const Point& p) const
@@ -414,8 +441,9 @@ namespace Rodin::Examples::Heart::Atrium
 
   Fluid::Real Fluid::sqrtTauCAt(const Point& p) const
   {
-    const Real h = cellCoefficients(p).size;
-    return std::sqrt(m_cfg.gradDivScale * m_cfg.rho * h * h / (4.0 * tau1At(p)));
+    const auto& cell = cellCoefficients(p);
+    return std::sqrt(
+      m_cfg.gradDivScale * m_cfg.rho * cell.size * cell.size / (4.0 * cell.tau1));
   }
 
   Fluid::Real Fluid::tauCAt(const Point& p) const
@@ -463,6 +491,14 @@ namespace Rodin::Examples::Heart::Atrium
       Alert::Exception() << "Invalid atrium time-step or cycle configuration"
                          << Alert::Raise;
     }
+    if (m_cfg.useVentricularModel && m_cfg.ventricularFeedback &&
+      !(m_cfg.lv.Kat > 0 && m_cfg.lv.Kp > 0 && std::isfinite(1.0 / m_cfg.lv.Kat) &&
+        std::isfinite(1.0 / m_cfg.lv.Kp)))
+    {
+      Alert::Exception() << "The coupled mitral valve requires positive ventricular "
+                            "conductances Kat and Kp"
+                         << Alert::Raise;
+    }
     m_stepsPerCycle = static_cast<int>(m_cfg.period / m_run.timeStep + 0.5);
     m_initialDt = m_run.timeStep;
     m_initialPeriod = m_cfg.period;
@@ -482,6 +518,11 @@ namespace Rodin::Examples::Heart::Atrium
 
   void Fluid::setupSpaces()
   {
+    // The fluid starts at rest: with a pressure ramp the mitral plane is at
+    // zero pressure, which is also the first atrial pressure of the ventricle.
+    m_pIn = m_cfg.inletPressureMean;
+    m_outletPressure = m_cfg.pressureRamp > 0 ? Real(0) : m_pIn;
+
     Model::State s0;
     s0.t = 0.0;
     s0.y = m_cfg.lv.initialY;
@@ -505,9 +546,11 @@ namespace Rodin::Examples::Heart::Atrium
     m_wallTraction = zeroVector;
     m_meshVelocity = zeroVector;
     m_meshDisplacement = zeroVector;
-    m_subOld = zeroVector;
-    m_sub = zeroVector;
     m_convProjection = zeroVector;
+    m_pressureProjection = zeroVector;
+    m_subscale.assign(
+      m_mesh.getShard().getPolytopeCount(m_mesh.getDimension()), {Real(0), Real(0), Real(0)});
+    m_subscaleOld = m_subscale;
     m_wss = zeroVector;
     m_netShear = zeroVector;
     m_gradRec0 = zeroVector;
@@ -531,6 +574,8 @@ namespace Rodin::Examples::Heart::Atrium
     m_aPrev = k.antithrombin0;
     m_gCur = k.fibrinogen0;
     m_gPrev = k.fibrinogen0;
+    m_xCur = Real(0);
+    m_xPrev = Real(0);
     m_fibrin = Real(0);
     m_tat = Real(0);
     m_drag = Real(0);
@@ -545,7 +590,7 @@ namespace Rodin::Examples::Heart::Atrium
       // Mass-dominated nonsymmetric transport and a symmetric positive
       // definite layer extension: iterative solvers, independent of the
       // global direct solver used for the flow.
-      for (auto* ksp : {&m_kspP, &m_kspT, &m_kspA, &m_kspG})
+      for (auto* ksp : {&m_kspP, &m_kspT, &m_kspA, &m_kspG, &m_kspX})
       {
         setPrefixedDefault("atrium_ptag_", "ksp_type", "gmres");
         setPrefixedDefault("atrium_ptag_", "pc_type", "bjacobi");
@@ -568,11 +613,9 @@ namespace Rodin::Examples::Heart::Atrium
     m_wallArea.setData(m_flux.getVector());
     m_wallAreaThreshold = 1.0e-6 * m_wallArea.max();
 
-    m_pIn = m_cfg.inletPressureMean;
     m_pOut =
       m_cfg.useVentricularModel ? m_model.getState().pv : m_cfg.prescribedOutletPressure;
-    m_outletPressure = m_pIn;
-    m_mitralZ = (m_cfg.useVentricularModel ? m_cfg.mitralResistanceOpen
+    m_mitralZ = (m_cfg.useVentricularModel ? mitralResistance(true)
                                            : m_cfg.prescribedOutletResistance) *
       m_outletArea;
 
@@ -625,9 +668,11 @@ namespace Rodin::Examples::Heart::Atrium
     RealFunction pOutFn = [this](const Point&) { return m_pOut; };
     RealFunction mitralFn = [this](const Point&) { return m_mitralZ; };
     // The affine-tetrahedron volume ratio is constant; P1 history times P1 test is quadratic.
-    constexpr size_t MassOrder = 4;
-    auto historyMass = FlowIntegral(massRatio * m_uOld, m_v);
-    historyMass.setOrder(MassOrder);
+    const auto historyMass = FlowIntegral(massRatio * m_uOld, m_v);
+
+    // Tracked velocity subscale of the previous time level, constant on each cell.
+    const VectorFunction subscale(
+      m_mesh.getSpaceDimension(), [this](const Point& p) { return subscaleAt(p); });
 
     // Galerkin terms shared by both stabilizations. The lagged viscosity is
     // read from the cellwise coefficients used by the stabilization scales.
@@ -659,12 +704,16 @@ namespace Rodin::Examples::Heart::Atrium
       BoundaryIntegral(outletBackflow * Dot(m_u, m_v)).over(m_cfg.outlet);
     if (m_cfg.useVMS)
     {
-      // Term-by-term orthogonal subscales. The convective projection and the
-      // dynamic subscale, and the projected divergence, belong to the
-      // previous time level; they are nodal fields carried by the mesh.
-      m_flow -= rho *
-        FlowIntegral(m_tauFn * (m_convProjection + (1.0 / dt) * m_sub), streamlineTest);
+      // Term-by-term orthogonal subscales. The projections of the convection,
+      // the divergence, and the pressure gradient belong to the previous
+      // time level and are nodal fields carried by the mesh; the dynamic
+      // velocity subscale is carried by the cells.
+      m_flow -= rho * FlowIntegral(m_tauFn * m_convProjection, streamlineTest);
+      if (!m_cfg.quasiStaticSubscales)
+        m_flow -= (rho / dt) * FlowIntegral(m_tauFn * subscale, streamlineTest);
       m_flow -= FlowIntegral(m_sqrtTauCFn * m_piTilde, Div(m_v));
+      if (m_cfg.projectPressureGradient)
+        m_flow -= FlowIntegral(m_tauPFn * m_pressureProjection, Grad(m_q));
     }
     else
     {
@@ -687,6 +736,12 @@ namespace Rodin::Examples::Heart::Atrium
       // Fibrin drag, implicit in the velocity and lagged in the fibrin: a
       // positive semidefinite mass term.
       m_flow += FlowIntegral(m_dragFn * m_u, m_v);
+      if (!m_cfg.useVMS)
+      {
+        // The drag belongs to the momentum residual tested by SUPG and PSPG.
+        m_flow += FlowIntegral(m_tauFn * m_dragFn * m_u, streamlineTest);
+        m_flow += FlowIntegral(m_tauPFn * m_dragFn * m_u, Grad(m_q));
+      }
     }
     if (m_coupled)
     {
@@ -723,29 +778,36 @@ namespace Rodin::Examples::Heart::Atrium
     const Real dt = m_run.timeStep;
 
     // Projections of the previous time level on its own configuration:
-    // Pi[(grad u^n)(u^n - w^n)] and Pi[sqrt(tau_C) div u^n]. They remain fixed
-    // during the coupling iterations of the step, so the interface tangent
-    // carries no derivative of a projection.
+    // Pi[(grad u^n)(u^n - w^n)], Pi[sqrt(tau_C) div u^n], and Pi[grad p^n].
+    // They remain fixed during the coupling iterations of the step, so the
+    // interface tangent carries no derivative of a projection.
     const auto conv = Mult(Jacobian(m_uOld), m_uOld - m_meshVelocity);
     projectVector(conv, m_convProjection);
     if (!m_cfg.quasiStaticSubscales)
     {
-      const size_t dim = m_mesh.getSpaceDimension();
-      projectVector(
-        VectorFunction(dim,
-          [this, rho, dt, dim, &conv](const Point& p) -> Math::SpatialVector<Real> {
-            const auto c = conv.getValue(p);
-            const auto proj = m_convProjection.getValue(p);
-            const auto old = m_subOld.getValue(p);
-            const Real tau = vmsTauAt(p);
-            Math::SpatialVector<Real> out(dim);
-            for (Index i = 0; i < static_cast<Index>(dim); ++i)
-              out(i) = tau * rho * (old(i) / dt - (c(i) - proj(i)));
-            return out;
-          }),
-        m_sub);
+      // Dynamic subscale of the convection,
+      //   u~^n = tau_s rho [u~^{n-1}/dt - (c^n - Pi c^n)],
+      // as its cell mean. A subscale is orthogonal to the finite element
+      // space, so it is carried by the cells and never projected onto P1.
+      // The convective residual is affine on a cell and its mean is the
+      // centroid value.
+      for (auto cell = m_mesh.getCell(); cell; ++cell)
+      {
+        const Index i = cell->getIndex();
+        const Point center(*cell, Math::SpatialPoint{.25, .25, .25});
+        const auto c = conv.getValue(center);
+        const auto proj = m_convProjection.getValue(center);
+        const Real tau = vmsTauAt(center);
+        for (size_t d = 0; d < 3; ++d)
+        {
+          m_subscale[i][d] =
+            tau * rho * (m_subscaleOld[i][d] / dt - (c(d) - proj(d)));
+        }
+      }
     }
     project(m_sqrtTauCFn * Div(m_uOld), m_piTilde);
+    if (m_cfg.projectPressureGradient)
+      projectVector(Grad(m_p.getSolution()), m_pressureProjection);
     m_timing.vms = secondsSince(vmsStart);
   }
 
@@ -770,6 +832,15 @@ namespace Rodin::Examples::Heart::Atrium
     m_wssProjection = BoundaryIntegral(Dot(m_wssTrial, m_wssTest)).over(m_cfg.wall) +
       reg * Integral(Dot(m_wssTrial, m_wssTest)) -
       BoundaryIntegral(Dot(wallStress, m_wssTest)).over(m_cfg.wall);
+  }
+
+  Fluid::Real Fluid::mitralResistance(bool open) const
+  {
+    // The coupled valve applies the conductances of the ventricular model,
+    // so both sides exchange the same flow.
+    if (m_cfg.ventricularFeedback)
+      return 1.0 / (open ? m_cfg.lv.Kat : m_cfg.lv.Kp);
+    return open ? m_cfg.mitralResistanceOpen : m_cfg.mitralResistanceClosed;
   }
 
   bool Fluid::advance0D()
@@ -935,7 +1006,14 @@ namespace Rodin::Examples::Heart::Atrium
       std::cout.flush();
     }
 
-    m_wssProjection.assemble();
+    // The operator depends on the geometry only.
+    if (m_wssEpoch == m_geometryEpoch)
+      m_wssProjection.assemble(AssemblyTarget::RHS);
+    else
+    {
+      m_wssProjection.assemble();
+      m_wssEpoch = m_geometryEpoch;
+    }
     m_wssProjection.solve(m_wssKSP);
 
     // Keep the wall only: away from it the regularized projection carries a
@@ -999,14 +1077,17 @@ namespace Rodin::Examples::Heart::Atrium
 
     // E = sigma_low(TAWSS) min(2 OSI, 1): a logistic in the endothelial shear
     // switch times the oscillatory index, bounded in [0, 1] so that wall
-    // initiation never becomes a sink.
+    // initiation never becomes a sink. Without the oscillatory factor,
+    // unidirectional stasis activates the wall as well.
     const Real tauA = m_cfg.kinetics.activationShearStress;
     const Real width = std::max<Real>(m_cfg.kinetics.activationShearWidth, 1e-12);
-    m_activation.project(RealFunction([this, tauA, width](const Point& p) -> Real {
+    const bool useOSI = m_cfg.kinetics.activationUsesOSI;
+    m_activation.project(RealFunction([this, tauA, width, useOSI](const Point& p) -> Real {
       if (!onWallNode(p))
         return 0.0;
       const Real low = 1.0 / (1.0 + std::exp((m_tawss.getValue(p) - tauA) / width));
-      const Real osi = std::clamp<Real>(2.0 * m_osi.getValue(p), 0.0, 1.0);
+      const Real osi =
+        useOSI ? std::clamp<Real>(2.0 * m_osi.getValue(p), 0.0, 1.0) : Real(1);
       return std::clamp<Real>(low * osi, 0.0, 1.0);
     }));
 
@@ -1088,6 +1169,8 @@ namespace Rodin::Examples::Heart::Atrium
     const Real PI = std::numbers::pi_v<Real>;
     // A failed solve can leave partially updated state; it cannot be retried.
     m_failed = true;
+    // The species of the previous step may have changed the drag.
+    ++m_coefficientEpoch;
     m_timing = Timing{};
     m_stepStart = CoronaryClock::now();
     m_linearIterations = 0;
@@ -1117,18 +1200,20 @@ namespace Rodin::Examples::Heart::Atrium
       m_cfg.inletPressureAmplitude * std::sin(2.0 * PI * m_t / m_cfg.period);
     if (m_t < m_cfg.pressureRamp)
     {
+      // A coupled ventricle keeps its own pressure: the valve is closed
+      // while the ramped atrium stays below it.
       const Real ramp = m_t / m_cfg.pressureRamp;
       m_pIn *= ramp;
-      m_pOut *= ramp;
+      if (!(m_cfg.useVentricularModel && m_cfg.ventricularFeedback))
+        m_pOut *= ramp;
     }
 
     if (m_cfg.useVentricularModel)
     {
-      // Mitral diode, switched on the previous step's outlet pressure.
+      // Mitral valve, switched on the mean pressure of the mitral plane at
+      // the previous step: the test of the ventricular model, p_v <= p_at.
       m_valveOpen = (m_outletPressure > m_pOut);
-      m_mitralZ =
-        (m_valveOpen ? m_cfg.mitralResistanceOpen : m_cfg.mitralResistanceClosed) *
-        m_outletArea;
+      m_mitralZ = mitralResistance(m_valveOpen) * m_outletArea;
     }
     else
     {
@@ -1147,7 +1232,7 @@ namespace Rodin::Examples::Heart::Atrium
     m_uOld.setData(m_u.getSolution().getData());
     ++m_coefficientEpoch;
     if (m_cfg.useVMS && !m_cfg.quasiStaticSubscales)
-      m_subOld.setData(m_sub.getData());
+      m_subscaleOld = m_subscale;
     accumulateWallShear();
     m_cycleElapsed += m_run.timeStep;
 

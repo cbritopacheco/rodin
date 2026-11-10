@@ -13,7 +13,7 @@ with `-atrium_mode`:
 |---|---|
 | `solid` | Active solid mechanics with passive initialization and Newmark integration |
 | `fluid` | Fixed-domain stabilized P1–P1 Oseen flow; the default mode |
-| `fsi` | Solid and fluid with ALE motion and Robin–Robin transmission, by budgeted sweeps or interface Newton |
+| `fsi` | Solid and fluid with ALE motion and Robin–Robin transmission, loosely coupled by default, with correction sweeps or interface Newton |
 
 `Atrium` owns the common MPI mesh, selected `Solid` and `Fluid` components,
 the optional `FSI` coupling object, cavity-volume measurements, and one CSV

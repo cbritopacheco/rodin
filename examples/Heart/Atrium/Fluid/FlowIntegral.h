@@ -11,12 +11,20 @@
 
 namespace Rodin::Examples::Heart::Atrium
 {
-  /// @brief Matches Oseen and material-derivative volume quadrature at order four.
+  /**
+   * @brief Volume quadrature shared by the Oseen residual and its material derivative.
+   *
+   * Viscosity, cell size, and stabilization parameters are constant on a
+   * cell, so every polynomial integrand of the affine-P1 Oseen form has
+   * degree at most two and the four-point rule integrates it exactly. The
+   * fibrin drag is the only non-polynomial coefficient; the residual and its
+   * derivative sample it with the same rule.
+   */
   template <class... Terms>
   auto FlowIntegral(Terms&&... terms)
   {
     auto form = Variational::Integral(std::forward<Terms>(terms)...);
-    form.setOrder(4);
+    form.setOrder(2);
     return form;
   }
 

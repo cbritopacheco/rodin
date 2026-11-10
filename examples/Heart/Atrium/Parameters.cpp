@@ -140,8 +140,11 @@ namespace Rodin::Examples::Heart::Atrium
       integer("-atrium_fluid_flow_cycles",
         "Cycles before optional species transport begins", out.fluid.flowCycles);
       boolean("-atrium_fluid_lv_model",
-        "Enable the 0D ventricle with its mitral diode and the venous pressure",
+        "Enable the 0D ventricle with its mitral valve and the venous pressure",
         out.fluid.useVentricularModel);
+      boolean("-atrium_fluid_lv_feedback",
+        "Couple the 0D ventricle to the mitral-plane pressure and valve law",
+        out.fluid.ventricularFeedback);
       real("-atrium_fluid_pressure_ramp", "Linear ramp time of opening pressures (s)",
         out.fluid.pressureRamp);
       boolean(
@@ -149,9 +152,15 @@ namespace Rodin::Examples::Heart::Atrium
       boolean("-atrium_fluid_quasi_static_subscales",
         "Quasi-static instead of dynamic convective subscales",
         out.fluid.quasiStaticSubscales);
+      boolean("-atrium_fluid_pressure_projection",
+        "Subtract the lagged projection of the pressure gradient",
+        out.fluid.projectPressureGradient);
       boolean("-atrium_fluid_kinetics",
-        "Transport the P-T-A-G coagulation species after the flow cycles",
+        "Transport the P-T-A-G-X coagulation species after the flow cycles",
         out.fluid.solveKinetics);
+      boolean("-atrium_fluid_ptag_skew",
+        "Skew-symmetric species advection about the inflow state",
+        out.fluid.skewTransport);
       real("-atrium_fluid_crosswind", "Codina crosswind constant of the species",
         out.fluid.crosswindC);
       boolean("-atrium_fluid_brinkman", "Fibrin-dependent Brinkman drag in the momentum",
@@ -168,6 +177,29 @@ namespace Rodin::Examples::Heart::Atrium
         out.fluid.kinetics.amplificationRate);
       real("-atrium_fluid_ptag_inlet_thrombin", "Thrombin at the veins (mol/m^3)",
         out.fluid.kinetics.inletThrombin);
+      real("-atrium_fluid_ptag_k_on", "Inhibition rate k_on (m^3 mol^-1 s^-1)",
+        out.fluid.kinetics.inhibitionRate);
+      real("-atrium_fluid_ptag_P0", "Initial and inflow prothrombin (mol/m^3)",
+        out.fluid.kinetics.prothrombin0);
+      real("-atrium_fluid_ptag_A0", "Initial and inflow antithrombin (mol/m^3)",
+        out.fluid.kinetics.antithrombin0);
+      real("-atrium_fluid_ptag_tau_a", "Endothelial activation shear stress (Pa)",
+        out.fluid.kinetics.activationShearStress);
+      boolean("-atrium_fluid_ptag_e_osi",
+        "Include the oscillatory factor min(2 OSI, 1) in the wall activation",
+        out.fluid.kinetics.activationUsesOSI);
+      boolean("-atrium_fluid_ptag_xa", "Initiation through transported factor Xa",
+        out.fluid.kinetics.factorXa);
+      real("-atrium_fluid_ptag_j_x",
+        "Factor Xa wall emission j_X (mol m^-2 s^-1); negative selects j_0 k_dX/kappa",
+        out.fluid.kinetics.xaFlux);
+      real("-atrium_fluid_ptag_kappa_x", "Prothrombinase conversion kappa (1/s)",
+        out.fluid.kinetics.xaRate);
+      real("-atrium_fluid_ptag_k_dx", "Plasma inhibition of factor Xa k_dX (1/s)",
+        out.fluid.kinetics.xaDecay);
+      boolean("-atrium_fluid_ptag_immobile_fibrin",
+        "Fibrin as an immobile nodal field instead of the consumed fibrinogen",
+        out.fluid.kinetics.immobileFibrin);
       boolean("-atrium_fsi_newton", "Use analytic matrix-free interface Newton",
         out.fsi.newton);
       real("-atrium_fsi_atol", "Absolute nodal interface residual tolerance (kPa)",

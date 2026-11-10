@@ -273,7 +273,7 @@ namespace Rodin::Examples::Heart::Atrium
     ierr = VecDuplicate(fluidRhs, &fluidDelta);
     assert(ierr == PETSC_SUCCESS);
 
-    // Material shape derivative of the assembled SUPG/PSPG Oseen residual.
+    // Material shape derivative of the assembled stabilized Oseen residual.
     // delta grad(f)=-grad(f)G, delta volume=tr(G) volume, G=grad(theta).
     struct CoefficientSample
     {
@@ -316,16 +316,20 @@ namespace Rodin::Examples::Heart::Atrium
         (.5 * rho * db) * u;
       // Momentum residuals tested by the streamline and pressure
       // stabilizations. Split orthogonal subscales test convection minus its
-      // lagged projection, and the pressure gradient alone; the projections
-      // are nodal fields of the previous time level.
+      // lagged projection and tracked subscale, and the pressure gradient
+      // minus its lagged projection. The projections are nodal fields of the
+      // previous time level and the subscale is carried by the cells.
       const bool split = cfg.useVMS;
-      V rs = F - drag * u + gradP, drs = dF - G.transpose() * gradP;
+      V rs = F + gradP, drs = dF - G.transpose() * gradP;
       V rp = rs, drp = drs;
       if (split)
       {
-        rs = rho * (U * a - m_fluid.m_convProjection(point) - m_fluid.m_sub(point) / dt);
+        rs = rho *
+          (U * a - m_fluid.m_convProjection(point) - m_fluid.subscaleAt(point) / dt);
         drs = rho * (dU * a + U * da);
         rp = gradP;
+        if (cfg.projectPressureGradient)
+          rp = gradP - m_fluid.m_pressureProjection(point);
         drp = -G.transpose() * gradP;
       }
       const auto& cy = cfg.viscosity;
@@ -344,7 +348,11 @@ namespace Rodin::Examples::Heart::Atrium
         std::pow(cy.lambda * gamma, cy.yasuda - 1) *
         std::pow(1 + power, (cy.n - 1) / cy.yasuda - 1) * dGamma;
       const Real h = m_fluid.cellSize(point), dh = h * dilation / 3;
-      const Real speed = a.norm(), dSpeed = speed > 0 ? a.dot(da) / speed : 0;
+      // tau_1 reads the relative speed of the cell centroid.
+      const Point center = Fluid::centroid(point);
+      const V centerA = m_fluid.m_uOld(center) - m_fluid.m_meshVelocity(center);
+      const Real speed = centerA.norm(),
+                 dSpeed = speed > 0 ? centerA.dot(-direction(center) / dt) / speed : 0;
       const Real tau1 = m_fluid.tau1At(point);
       const Real dTau1 = -tau1 * tau1 *
         (4 * dMu / (rho * h * h) - 8 * mu * dh / (rho * h * h * h) + 2 * dSpeed / h -

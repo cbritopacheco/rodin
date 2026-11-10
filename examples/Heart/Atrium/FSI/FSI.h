@@ -37,8 +37,13 @@ namespace Rodin::Examples::Heart::Atrium
         Real solidAbsoluteTolerance = 1e-10; ///< Absolute inner solid SNES tolerance.
         bool checkTangent =
           false; ///< Check analytic actions with residual Taylor tests.
-        size_t maximumIterations =
-          5; ///< Sweep budget; the last completed sweep is accepted.
+        /**
+         * @brief Sweep budget; the last completed sweep is accepted.
+         * @details One sweep is the loosely coupled Robin--Robin scheme, in
+         * which the solid reads the fluid data of the previous step. Further
+         * sweeps are its correction iterations.
+         */
+        size_t maximumIterations = 1;
         Real relativeTolerance =
           1e-6; ///< Relative global solid displacement-change tolerance.
         Real robinCoefficient = 0; ///< Pa s/m; zero selects sqrt(rho_s E_matrix).

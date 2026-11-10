@@ -99,6 +99,7 @@ def main():
                '-atrium_solid_contractility', str(contractility),
                '-atrium_solid_cache_constitutive', '-atrium_output_every', '1',
                '-atrium_fluid_lag_preconditioner', str(lag),
+               '-atrium_fluid_vms', 'false',
                '-ksp_type', 'gmres', '-ksp_rtol', '1e-12', '-ksp_max_it', '500',
                '-pc_type', 'lu', '-pc_factor_mat_solver_type', 'mumps',
                '-mat_mumps_icntl_20', '0', '-ksp_diagonal_scale', 'false',

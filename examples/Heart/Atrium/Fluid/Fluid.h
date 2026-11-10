@@ -8,13 +8,13 @@
  * @file Fluid.h
  * @brief Distributed ALE Oseen P1/P1 atrial flow with split-VMS or SUPG/PSPG stabilization.
  *
- * Equal-order P1/P1 Oseen flow uses either term-by-term orthogonal subscales
- * (convection along u^n - w, grad-div, and pressure-gradient stabilization) or
- * residual-based SUPG/PSPG with grad-div. Standalone flow has pressure-driven
- * openings and a fixed no-slip wall. FSI supplies Robin interface data and
- * harmonic ALE motion. The lumped ventricle with its mitral diode, the
- * orthogonal subscales, and the P-T-A-G coagulation transport are available in
- * both fluid and FSI modes.
+ * Equal-order P1/P1 Oseen flow uses term-by-term orthogonal subscales by
+ * default (convection along u^n - w with a tracked velocity subscale, grad-div,
+ * and the pressure gradient minus its projection), or residual-based SUPG/PSPG
+ * with grad-div. Standalone flow has pressure-driven openings and a fixed
+ * no-slip wall. FSI supplies Robin interface data and harmonic ALE motion. The
+ * lumped ventricle with its mitral valve and the P-T-A-G-X coagulation
+ * transport are available in both fluid and FSI modes.
  * The fluid submesh retains the common MPI partition and parent identities;
  * its coordinates are converted to SI units with Parameters::meshScale.
  */
@@ -203,7 +203,7 @@ namespace Rodin::Examples::Heart::Atrium
         bool valveOpen;
         Real inletFlux, outletFlux, maximumVelocity;
         Real maximumTAWSS, maximumOSI, maximumActivation;
-        Real maximumThrombin, minimumFibrinogen, maximumFibrin;
+        Real maximumThrombin, minimumFibrinogen, maximumFibrin, maximumFactorXa;
         int linearIterations, preconditionerAge, preconditionerRefreshes;
         bool preconditionerRefreshed, preconditionerRetried;
       };
@@ -246,14 +246,29 @@ namespace Rodin::Examples::Heart::Atrium
         Real outletBackflowStabilization = 1.0;
 
         /**
-         * @brief Mitral resistances (Pa s/m^3). The valve is a diode: open
-         * while the atrium is above the ventricle, closed otherwise.
+         * @brief Mitral resistances (Pa s/m^3) of the one-way ventricular driver.
+         *
+         * The valve is a diode, open while the atrium is above the ventricle
+         * and closed otherwise. With ventricularFeedback the resistances are
+         * the inverse conductances 1/Kat and 1/Kp of the ventricular model.
          */
         Real mitralResistanceOpen = 5.0e6;
         Real mitralResistanceClosed = 1.0e12;
 
         /// @brief Advance the lumped ventricle and use its outlet pressure.
         bool useVentricularModel = false;
+
+        /**
+         * @brief Couples the ventricle to the three-dimensional mitral flow.
+         *
+         * The ventricular model reads the mean pressure of the mitral plane
+         * as its atrial pressure, and the mitral plane applies the valve law
+         * of that model, Q = K (p_at - p_v) with K = Kat while p_at > p_v and
+         * K = Kp otherwise. The volume leaving the atrium is then the volume
+         * entering the ventricle. False drives the ventricle with the
+         * prescribed atrial waveform; the flow does not feed back to it.
+         */
+        bool ventricularFeedback = true;
 
         /// @brief Prescribed outlet pressure when the ventricle is disabled, in Pa.
         Real prescribedOutletPressure = 0.0;
@@ -288,15 +303,26 @@ namespace Rodin::Examples::Heart::Atrium
         /**
          * @brief Selects term-by-term orthogonal-subscale stabilization.
          * @details Convection, divergence, and pressure gradient are each
-         * stabilized separately. The convective and divergence projections use
-         * the previous time level. False selects residual-based SUPG/PSPG.
+         * stabilized separately. The projections use the previous time level.
+         * False selects residual-based SUPG/PSPG.
          */
-        bool useVMS = false;
+        bool useVMS = true;
 
-        /// @brief Quasi-static instead of dynamic convective subscales.
+        /**
+         * @brief Quasi-static instead of dynamic convective subscales.
+         * @details The dynamic velocity subscale is tracked in time as one
+         * value per cell. Quasi-static subscales carry no history.
+         */
         bool quasiStaticSubscales = false;
 
-        /// @brief Constants of the P-T-A-G coagulation model.
+        /**
+         * @brief Subtracts the projected pressure gradient of the previous step.
+         * @details True stabilizes the pressure with the orthogonal part of
+         * its gradient. False penalizes the whole pressure gradient.
+         */
+        bool projectPressureGradient = true;
+
+        /// @brief Constants of the P-T-A-G-X coagulation model.
         ConservingKinetics kinetics;
 
         /// @brief Fibrin-dependent drag in the momentum equation.
@@ -305,7 +331,15 @@ namespace Rodin::Examples::Heart::Atrium
         /// @brief Codina crosswind constant. 0 disables it.
         Real crosswindC = 0.7;
 
-        /// @brief Transport and react the P-T-A-G species after the flow cycles.
+        /**
+         * @brief Skew-symmetric species advection about the inflow state.
+         * @details Adds (1/2) int div(u_h) (c - c_in) v. The discrete
+         * divergence of the equal-order velocity then cannot amplify a
+         * deviation from the inflow composition, and constants remain exact.
+         */
+        bool skewTransport = true;
+
+        /// @brief Transport and react the coagulation species after the flow cycles.
         bool solveKinetics = false;
 
         /**
@@ -319,8 +353,6 @@ namespace Rodin::Examples::Heart::Atrium
         AtrialPressure atrialPressure;
         LVModel lv;
       };
-
-      /// @brief Backward-compatible name for the atrium parameters.
 
       /// @brief Wall-clock cost of each phase of one step.
       struct Timing
@@ -429,7 +461,7 @@ namespace Rodin::Examples::Heart::Atrium
 
       static MeshType makeMesh(
         const ParentMeshType& parent, const Parameters& cfg, Attribute material);
-      static Model::Input makeInput(const Parameters& cfg);
+      static Model::Input makeInput(const Parameters& cfg, const Real* atrialPressure);
       static Real activationWave(const Activation& cfg, Real t);
       static Real atrialWave(const AtrialPressure& cfg, Real t);
 
@@ -453,17 +485,18 @@ namespace Rodin::Examples::Heart::Atrium
        * @param diffusivity Molecular diffusivity (m^2/s).
        * @param inlet Concentration prescribed at the venous openings.
        * @param robinScale Wall exchange coefficient; zero without wall exchange.
+       * @param loadScale Coefficient of the wall load.
        * @param load Field supplying the wall load, or null.
        */
       void assignTransport(ScalarProblemType& problem, ScalarTrialFunctionType& c,
         ScalarTestFunctionType& v, ScalarGridFunctionType& cur,
         ScalarGridFunctionType& prev, Real diffusivity, Real inlet, Real robinScale,
-        const ScalarGridFunctionType* load);
+        Real loadScale, const ScalarGridFunctionType* load);
 
       /// @brief Extends the wall activation into the endocardial layer and fixes its dose.
       void extendActivation();
 
-      /// @brief Nodal production-destruction step of the four species.
+      /// @brief Nodal production-destruction step of the species and the fibrin.
       void reactionStep();
 
       /// @brief Updates fibrin, thrombin-antithrombin, drag, and invariant-drift fields.
@@ -472,42 +505,74 @@ namespace Rodin::Examples::Heart::Atrium
       /// @brief Returns whether the evaluation point is a wall node.
       bool onWallNode(const Rodin::Geometry::Point& p) const;
 
-      /// @brief Fibrin surrogate F = G_0 - G at a point, clamped to [0, G_0].
+      /// @brief Fibrin at a point: the immobile field, or G_0 - G clamped to [0, G_0].
       Real fibrinAt(const Rodin::Geometry::Point& p) const;
 
-      /// @brief Brinkman coefficient from the lagged fibrinogen; zero before the species start.
+      /// @brief Brinkman coefficient from the lagged fibrin; zero before the species start.
       Real dragAt(const Rodin::Geometry::Point& p) const;
 
-      /// @brief Cellwise viscosity and size shared by all stabilization coefficients.
+      /// @brief Cellwise coefficients shared by the viscous and stabilization terms.
       struct CellCoefficients
       {
           size_t epoch = 0;
           Real viscosity = 0, size = 0;
+
+          /// @brief |u^n - w| and the Brinkman coefficient at the cell centroid.
+          Real speed = 0, drag = 0;
+
+          /// @brief Codina tau_1 from the values above.
+          Real tau1 = 0;
       };
 
       /**
-       * @brief Returns the lagged viscosity and size of the cell containing a point.
-       * @details Both are constant on an affine P1 tetrahedron. Entries are
-       * reused until the lagged velocity or the geometry changes.
+       * @brief Returns the lagged coefficients of the cell containing a point.
+       * @details The viscosity and the size are constant on an affine P1
+       * tetrahedron; the relative speed and the drag are sampled at the
+       * centroid. Entries are reused until the lagged state or the geometry
+       * changes.
        */
       const CellCoefficients& cellCoefficients(const Rodin::Geometry::Point& p) const;
 
-      /// @brief L2 projection of a scalar expression, reusing one mass matrix.
+      /// @brief Centroid of the cell containing a point.
+      static Rodin::Geometry::Point centroid(const Rodin::Geometry::Point& p);
+
+      /// @brief Tracked velocity subscale of the cell containing a point.
+      Rodin::Math::SpatialVector<Real> subscaleAt(const Rodin::Geometry::Point& p) const;
+
+      /**
+       * @brief L2 projection of a scalar expression.
+       * @details The mass matrix is assembled once per geometry; later
+       * projections on that geometry assemble the right-hand side only.
+       */
       template <class Expression>
       void project(const Expression& expr, ScalarGridFunctionType& out)
       {
         m_scalarProjection = Rodin::Variational::Integral(m_sTrial, m_sTest) -
           Rodin::Variational::Integral(expr, m_sTest);
+        if (m_scalarMassEpoch == m_geometryEpoch)
+          m_scalarProjection.assemble(Rodin::Variational::AssemblyTarget::RHS);
+        else
+        {
+          m_scalarProjection.assemble();
+          m_scalarMassEpoch = m_geometryEpoch;
+        }
         m_scalarProjection.solve(m_scalarProjectionKSP);
         out.setData(m_sTrial.getSolution().getData());
       }
 
-      /// @brief L2 projection of a vector expression, reusing one mass matrix.
+      /// @brief L2 projection of a vector expression; see project().
       template <class Expression>
       void projectVector(const Expression& expr, VectorGridFunctionType& out)
       {
         m_vectorProjection = Rodin::Variational::Integral(m_wTrial, m_wTest) -
           Rodin::Variational::Integral(expr, m_wTest);
+        if (m_vectorMassEpoch == m_geometryEpoch)
+          m_vectorProjection.assemble(Rodin::Variational::AssemblyTarget::RHS);
+        else
+        {
+          m_vectorProjection.assemble();
+          m_vectorMassEpoch = m_geometryEpoch;
+        }
         m_vectorProjection.solve(m_vectorProjectionKSP);
         out.setData(m_wTrial.getSolution().getData());
       }
@@ -516,6 +581,9 @@ namespace Rodin::Examples::Heart::Atrium
       static void axpy(Real a, const ::Vec& x, ::Vec& y);
 
       bool advance0D();
+
+      /// @brief Mitral resistance of the given valve state, in Pa s/m^3.
+      Real mitralResistance(bool open) const;
       bool solveFlow();
       void solveSpecies();
 
@@ -541,7 +609,7 @@ namespace Rodin::Examples::Heart::Atrium
        */
       Real viscosityAt(const Rodin::Geometry::Point& p) const;
 
-      /// @brief Codina tau_1, c1 = 4, c2 = 2, k = 1 (P1), on the local viscosity.
+      /// @brief Codina tau_1, c1 = 4, c2 = 2, k = 1 (P1), constant on each cell.
       Real tau1At(const Rodin::Geometry::Point& p) const;
 
       /// @brief Convective VMS parameter.
@@ -563,6 +631,9 @@ namespace Rodin::Examples::Heart::Atrium
       Parameters m_cfg;
       const RunParameters m_run;
       Optional<Diagnostics> m_diagnostics;
+
+      /// @brief Mean pressure of the mitral plane at the last accepted step, in Pa.
+      Real m_outletPressure = 0.0;
       Model::Input m_input;
       Model m_model;
 
@@ -606,18 +677,31 @@ namespace Rodin::Examples::Heart::Atrium
       ScalarCoefficientType m_dragFn;
       mutable std::vector<CellCoefficients> m_cellCoefficients;
       size_t m_coefficientEpoch = 1;
+
+      /// @brief Incremented by every change of the mesh coordinates.
+      size_t m_geometryEpoch = 1;
+      size_t m_scalarMassEpoch = 0, m_vectorMassEpoch = 0, m_wssEpoch = 0;
       ScalarGridFunctionType m_piTilde;
       VectorGridFunctionType m_convProjection;
-      VectorGridFunctionType m_sub;
-      VectorGridFunctionType m_subOld;
 
-      // ---- Species: P, T, A, G ---------------------------------------------
-      ScalarTrialFunctionType m_pT, m_tT, m_aT, m_gT;
-      ScalarTestFunctionType m_vP, m_vT, m_vA, m_vG;
-      ScalarGridFunctionType m_pCur, m_tCur, m_aCur, m_gCur;
-      ScalarGridFunctionType m_pPrev, m_tPrev, m_aPrev, m_gPrev;
+      /// @brief Projected pressure gradient of the previous time level.
+      VectorGridFunctionType m_pressureProjection;
 
-      /// @brief F = G_0 - G, I = A_0 - A, sigma_B, and P + T - A - (P_0 - A_0).
+      /// @brief Dynamic velocity subscale of the current and previous levels, per cell.
+      std::vector<std::array<Real, 3>> m_subscale, m_subscaleOld;
+
+      // ---- Species: P, T, A, G, X ------------------------------------------
+      ScalarTrialFunctionType m_pT, m_tT, m_aT, m_gT, m_xT;
+      ScalarTestFunctionType m_vP, m_vT, m_vA, m_vG, m_vX;
+      ScalarGridFunctionType m_pCur, m_tCur, m_aCur, m_gCur, m_xCur;
+      ScalarGridFunctionType m_pPrev, m_tPrev, m_aPrev, m_gPrev, m_xPrev;
+
+      /**
+       * @brief F, I = A_0 - A, sigma_B, and P + T - A - (P_0 - A_0).
+       *
+       * With immobile fibrin, F is a state advanced by the nodal reaction and
+       * carried by the mesh nodes; otherwise it is the diagnostic G_0 - G.
+       */
       ScalarGridFunctionType m_fibrin, m_tat, m_drag, m_drift;
 
       // ---- Endocardial layer ------------------------------------------------
@@ -657,8 +741,9 @@ namespace Rodin::Examples::Heart::Atrium
       // ---- Problems and solvers --------------------------------------------
       FlowProblemType m_flow;
       Rodin::Solver::KSP m_flowKSP;
-      ScalarProblemType m_transportP, m_transportT, m_transportA, m_transportG;
-      Rodin::Solver::KSP m_kspP, m_kspT, m_kspA, m_kspG;
+      ScalarProblemType m_transportP, m_transportT, m_transportA, m_transportG,
+        m_transportX;
+      Rodin::Solver::KSP m_kspP, m_kspT, m_kspA, m_kspG, m_kspX;
       ScalarProblemType m_extension;
       Rodin::Solver::KSP m_extensionKSP;
       ScalarProblemType m_scalarProjection;
@@ -676,7 +761,6 @@ namespace Rodin::Examples::Heart::Atrium
       Real m_pOut = 0.0;
       Real m_mitralZ = 0.0;
       Real m_outletArea = 1.0;
-      Real m_outletPressure = 0.0;
       Real m_qIn = 0.0;
       Real m_qOut = 0.0;
       Real m_speed = 0.0;

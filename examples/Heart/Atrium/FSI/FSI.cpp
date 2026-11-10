@@ -295,6 +295,8 @@ namespace Rodin::Examples::Heart::Atrium
     }
     for (Index i = 0; i < moved.size(); ++i)
       m_fluid.m_mesh.setVertexCoordinates(i, moved[i]);
+    // Retained mass operators of the fluid belong to the previous geometry.
+    ++m_fluid.m_geometryEpoch;
     for (auto face = m_fluid.m_mesh.getBoundary(); face; ++face)
     {
       if (face->getAttribute() == m_fluid.m_cfg.wall)
@@ -542,9 +544,13 @@ namespace Rodin::Examples::Heart::Atrium
     m_fluid.commitStep();
     if (m_fluid.isRoot())
     {
+      // A single sweep is the loosely coupled scheme, which has no iteration
+      // to converge.
+      const bool loose = !m_parameters.newton && m_parameters.maximumIterations == 1;
       Log("FSI/State", false,
-        m_diagnostics.converged ? Log::Status::Success : Log::Status::Retry)
+        m_diagnostics.converged || loose ? Log::Status::Success : Log::Status::Retry)
         << (m_diagnostics.converged ? "converged"
+             : loose                ? "loosely coupled step"
                                     : "budget exhausted; last sweep accepted")
         << ": coupling_iterations=" << m_diagnostics.iterations
         << " velocity_mismatch=" << m_diagnostics.velocityMismatch << " m/s"

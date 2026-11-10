@@ -4,10 +4,10 @@
 dissipation to the ALE Oseen fluid. By default, active wall contraction drives
 an initially resting fluid through openings at zero pressure. With
 `-atrium_fluid_lv_model`, the pulmonary venous pressure and the lumped left
-ventricle behind the mitral diode load the same coupled problem. The fluid uses
-P1/P1 velocity and pressure with either residual-based SUPG/PSPG or
-term-by-term orthogonal subscales, and optionally transports the P–T–A–G
-coagulation species on the moving mesh.
+ventricle behind the mitral valve load the same coupled problem. The fluid uses
+P1/P1 velocity and pressure with term-by-term orthogonal subscales, or with
+residual-based SUPG/PSPG, and optionally transports the P–T–A–G–X coagulation
+species on the moving mesh.
 
 ## Interface model
 
@@ -33,10 +33,11 @@ from the BDF1 interface rate at finite timestep. A harmonic extension moves the
 fluid interior; opening caps and solid opening cut faces remain fixed. No
 additional interface ring is clamped. Without the ventricular model, all fluid
 openings have zero imposed pressure and no prescribed flux. With it, the
-openings retain the venous pressure, impedances, and mitral diode of the
+openings retain the venous pressure, impedances, and mitral valve of the
 [fluid model](../Fluid/README.md); the lumped ventricle advances once per
-physical step, before the coupling iterations, and its pressure and valve
-state remain fixed during them.
+physical step, before the coupling iterations, from the mean pressure of the
+mitral plane at the previous step, and its pressure and valve state remain
+fixed during them.
 
 For reference-area impedance $\alpha_0>0$, a solid/ALE/fluid evaluation solves
 
@@ -93,18 +94,22 @@ $$
 operator. Each analytic action solves the solid tangent problem, harmonically
 extends the displacement increment, and solves the differentiated fluid
 problem. The fluid derivative includes geometry and surface measure, ALE mass
-ratios, relative convection, Temam terms, Carreau–Yasuda viscosity and
-SUPG/PSPG/grad-div coefficients. Residual and derivative volume forms share
-order-four quadrature. No finite differences construct the solver operator.
+ratios, relative convection, Temam terms, Carreau–Yasuda viscosity and the
+stabilization coefficients. The coefficient $\tau_1$ reads the relative speed
+at the cell centroid, and its derivative is taken there. Residual and
+derivative volume forms share the order-two rule, which is exact for their
+polynomial integrands. No finite differences construct the solver operator.
 
 With split orthogonal subscales, the differentiated residual contains the
-streamline term on convection minus its projection, the grad-div term minus
-the projected divergence, and the pressure-gradient term. The projections
-belong to the previous time level and are nodal fields carried by the mesh;
-they are evaluated once per physical step on the previous configuration, so
-the tangent contains no derivative of a projection. The Brinkman coefficient
-of the coagulation model enters in the same way. The lumped ventricle and the
-opening terms act on fixed caps and contribute no geometric derivative.
+streamline term on convection minus its projection and the tracked subscale,
+the grad-div term minus the projected divergence, and the pressure gradient
+minus its projection. The projections belong to the previous time level and
+are nodal fields carried by the mesh, and the subscale is carried by the
+cells; they are evaluated once per physical step on the previous
+configuration, so the tangent contains no derivative of them. The Brinkman
+coefficient of the coagulation model enters in the same way. The lumped
+ventricle and the opening terms act on fixed caps and contribute no geometric
+derivative.
 
 An evaluation retains its input, residual and solved bulk state. Exact equality
 with the most recently evaluated input allows reuse during initial residual
@@ -135,9 +140,12 @@ T\leftarrow T+\alpha_0(u_f-v_\Gamma).
 $$
 
 Its fixed point satisfies $u_f=v_\Gamma$ and coincides with the Newton solution.
-One sweep per step (`-atrium_fsi_iterations 1`) is the loosely coupled
-Robin–Robin scheme of Burman, Durst, Fernández, Guzmán and Ruz; further sweeps
-are its correction iterations. `-atrium_fsi_recovered_traction` instead
+One sweep per step, the default, is the loosely coupled Robin–Robin scheme of
+Burman, Durst, Fernández, Guzmán and Ruz: the solid reads the fluid velocity
+and traction of the previous step, the mesh follows the new wall, and the
+fluid reads the new wall velocity, so each physical step costs one solid, one
+mesh, and one fluid solve. Further sweeps (`-atrium_fsi_iterations`) are its
+correction iterations. `-atrium_fsi_recovered_traction` instead
 recovers the fluid velocity gradient and projects physical stress to the
 reference interface with lumped trace mass; that exchange leaves an interface
 slip at its fixed point. Starting at the second completed sweep, the relative
@@ -148,7 +156,7 @@ r_d=\frac{\|d_s^{k+1}-d_s^k\|_2}{\|d_s^{k+1}\|_2}.
 $$
 
 At zero denominator, the absolute increment norm in metres is used. Defaults
-are `-atrium_fsi_rtol 1e-6` and `-atrium_fsi_iterations 5`; zero tolerance uses
+are `-atrium_fsi_rtol 1e-6` and `-atrium_fsi_iterations 1`; zero tolerance uses
 the full budget. Budget exhaustion accepts the last complete sweep and marks
 it unconverged. A small budget does not establish interface continuity.
 
@@ -191,7 +199,7 @@ mpirun -n 6 build/examples/Heart/Atrium/Atrium \
   -atrium_dt 0.001 -atrium_steps 11050 -atrium_output_every 10 \
   -atrium_solid_contractility 2000 -atrium_solid_cache_constitutive \
   -atrium_solid_apex 46.39638367,187.44307667,-205.03317767 \
-  -atrium_fluid_vms -atrium_fluid_lv_model -atrium_fluid_pressure_ramp 0.1 \
+  -atrium_fluid_lv_model -atrium_fluid_pressure_ramp 0.1 \
   -atrium_fluid_kinetics -atrium_fluid_flow_cycles 3 \
   -ksp_type preonly -pc_type lu -pc_factor_mat_solver_type mumps \
   -mat_mumps_icntl_20 0 -ksp_diagonal_scale false -ksp_diagonal_scale_fix false
@@ -200,6 +208,7 @@ mpirun -n 6 build/examples/Heart/Atrium/Atrium \
 Three flow cycles precede ten species cycles. The species are advanced after
 each accepted coupled step with the accepted velocity relative to the mesh,
 $u-w$, on the accepted geometry; the fibrin drag acts on the flow of the next
-step. The solid reference configuration is unloaded: the opening pressures are
+step. The solid reference configuration is unloaded: the venous pressure is
 ramped linearly over `-atrium_fluid_pressure_ramp` seconds, and no prestress is
-computed.
+computed. Without `-atrium_fsi_newton` the same options advance the loosely
+coupled scheme.
