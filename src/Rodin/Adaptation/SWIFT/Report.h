@@ -235,7 +235,7 @@ namespace Rodin::Adaptation::SWIFT
     std::size_t linearIterations = 0; ///< Accumulated linear iterations.
     std::size_t linearSolveCount = 0; ///< Number of linear solves performed.
     std::size_t maxLinearIterations = 0; ///< Largest iteration count of one solve.
-    Real linearError = 0; ///< Last linear solver residual/error estimate.
+    Real linearError = 0; ///< Last CG error estimate; NaN for a direct solve.
   };
 }
 

@@ -35,6 +35,7 @@
 #include "ForwardDecls.h"
 #include "Loss.h"
 #include "Parameters.h"
+#include "QualityCovering.h"
 #include "DirectionalNewton.h"
 #include "Distribution.h"
 #include "HingeForce.h"
@@ -242,7 +243,8 @@ namespace Rodin::Adaptation::SWIFT
    * Native bilinear and linear forms assemble fitting and distribution;
    * native variational problems own the predictor and inner systems.
    * The inner model is solved through @ref Rodin::Solver::NewtonSolver.
-   * The local Eigen backend supports CG, SparseLU and optional MUMPS.
+   * The local Eigen backend defaults to MUMPS when available and otherwise CG.
+   * SparseLU remains available as an explicit backend.
    * Added bilinear forms from getMetric() change @f$M_k@f$, not @f$E@f$ or
    * @f$f_k@f$. Custom additions must preserve the required solve properties;
    * an arbitrary bilinear form need not be positive semidefinite.
@@ -310,10 +312,12 @@ namespace Rodin::Adaptation::SWIFT
    * Directional Newton rescales this physical predictor using
    * @f[
    * a_k=\begin{cases}
-   * \dfrac{f_k[p_k]}{c_k}, & \lambda_{\max}=0,\\
+   * \dfrac{f_k[p_k]}{c_k}, & c_k>0,\ \lambda_{\max}=0,\\
    * \min\left\{\dfrac{f_k[p_k]}{c_k},\,
    * \dfrac{\ell_{\max}}{\|p_k\|_{\infty,\mathrm{samp}}}\right\},
-   * & \lambda_{\max}>0,
+   * & c_k>0,\ \lambda_{\max}>0,\\
+   * \dfrac{\ell_{\max}}{\|p_k\|_{\infty,\mathrm{samp}}},
+   * & c_k\le0,\ \lambda_{\max}>0.
    * \end{cases}
    * \qquad \bar p_k=a_kp_k,\qquad \bar M_k=M_k/a_k.
    * @f]
@@ -321,16 +325,13 @@ namespace Rodin::Adaptation::SWIFT
    * motion bound is @f$\ell_{\max}=h\lambda_{\max}@f$, where
    * @f$\lambda_{\max}>0@f$ is a dimensionless motion limit; the norm is the sampled
    * componentwise maximum of the physical field, not its coefficient vector.
-   * The scalar curvature is selected from
+   * The scalar curvature is
    * @f[
-   * c_k^{\mathrm N}=G^{-2}\int_{\Gamma_0}
-   *   \rho_\sigma''(r_k)(g_k\cdot p_k)^2\,dS_x,
-   * \qquad
-   * c_k^{\mathrm{GN}}=G^{-2}\int_{\Gamma_0}
-   *   e^{-r_k^2/\sigma^2}(g_k\cdot p_k)^2\,dS_x.
+   * c_k=G^{-2}\int_{\Gamma_0}
+   *   \rho_\sigma''(r_k)(g_k\cdot p_k)^2\,dS_x.
    * @f]
-   * The Newton value is used when positive; otherwise the positive weighted
-   * Gauss--Newton value is used.
+   * Nonpositive curvature has no finite minimizing scale without a motion bound
+   * and produces an invalid-scaling exit. Nonfinite curvature is rejected.
    * No level-set Hessian is required. This is a scalar line model, not a full
    * outer Newton iteration. Without directional scaling, @f$a_k=1@f$.
    *
@@ -442,7 +443,7 @@ namespace Rodin::Adaptation::SWIFT
    * | @f$\varepsilon_{\mathrm{geom}}@f$ | `convergence.tolerance.geometric` | Maximum sampled normalized-residual target | @f$h^{p+1}@f$, automatic (`0`) |
    * | @f$\tau_{\mathrm{rel}}@f$ | `convergence.tolerance.innerRelative` | Inner stationarity tolerance relative to the fitting force norm | @f$10^{-3}@f$ |
    * | @f$\tau_{\mathrm{abs}}@f$ | `convergence.tolerance.innerAbsolute` | Absolute allowance in the inner stationarity test | @f$10^{-12}@f$ |
-   * | @f$\tau_{\mathrm{lin}}@f$ | `convergence.tolerance.linearRelative` | Relative linear residual tolerance | @f$10^{-6}@f$ |
+   * | @f$\tau_{\mathrm{lin}}@f$ | `convergence.tolerance.linearRelative` | CG relative residual tolerance | @f$10^{-6}@f$ |
    * | @f$N_{\mathrm{outer}}@f$ | `convergence.iterations.outer` | Maximum outer iterations | @f$30@f$ |
    * | @f$N_{\mathrm{inner}}@f$ | `convergence.iterations.inner` | Maximum Newton corrections per outer iteration | @f$15@f$ |
    * | @f$N_{\mathrm{CG}}@f$ | `convergence.iterations.linear` | Maximum iterations per CG solve; not a direct-solver limit | @f$1000@f$ |
@@ -498,8 +499,9 @@ namespace Rodin::Adaptation::SWIFT
    * distance target; zero selects @f$h^{p+1}@f$.
    * @ref Parameters::Convergence::Tolerance::innerRelative and
    * @ref Parameters::Convergence::Tolerance::innerAbsolute control stationarity of the
-   * direction problem, not geometric accuracy. Linear residual accuracy is
-   * controlled separately by @ref Parameters::Convergence::Tolerance::linearRelative.
+   * direction problem, not geometric accuracy. Linear-solve success is reported
+   * by the selected backend. CG convergence is controlled separately by
+   * @ref Parameters::Convergence::Tolerance::linearRelative.
    * @ref Parameters::Convergence::Iterations::outer and
    * @ref Parameters::Convergence::Iterations::inner are work limits, not convergence
    * certificates. Persistent small accepted motion or small energy changes
@@ -1168,13 +1170,12 @@ namespace Rodin::Adaptation::SWIFT
           rep.predictorScale = Real(1);
           if (p.globalization.directionalNewton)
           {
-            const auto curvatures = getSurfaceDirectionalCurvature(mesh, fes, u,
-              predictor, phi, grad, interfaceFacets, loss, dataNormalization, locator);
+            const Real curvature = getSurfaceDirectionalCurvature(mesh, fes, u, predictor,
+              phi, grad, interfaceFacets, loss, dataNormalization, locator);
             const Real norm = getPhysicalDisplacementNorm(
               mesh, fes, validationCells, predictor, p.quadrature.validation);
-            rep.predictorScale =
-              getDirectionalNewtonStep(predictorAction, curvatures.first,
-                curvatures.second, norm, h * p.globalization.maxStepOverH);
+            rep.predictorScale = getDirectionalNewtonStep(
+              predictorAction, curvature, norm, h * p.globalization.maxStepOverH);
             if (!(rep.predictorScale > Real(0)) || !std::isfinite(rep.predictorScale))
             {
               rep.reason = Report::Reason::InvalidScaling;
@@ -1194,9 +1195,7 @@ namespace Rodin::Adaptation::SWIFT
               const auto precision = std::cout.precision();
               std::cout << std::setprecision(std::numeric_limits<Real>::max_digits10)
                         << "      swift directional: outer=" << rep.iterations
-                        << "  curvature=" << curvatures.first
-                        << "  fitting_curvature=" << curvatures.second
-                        << "  scale=" << rep.predictorScale
+                        << "  curvature=" << curvature << "  scale=" << rep.predictorScale
                         << "  step_over_h=" << norm * rep.predictorScale / h << '\n';
               std::cout.precision(precision);
             }
@@ -1259,7 +1258,8 @@ namespace Rodin::Adaptation::SWIFT
                 .setAbsoluteTolerance(residualTolerance)
                 .setRelativeTolerance(Real(0))
                 .setStepTolerance(Real(0));
-              const auto recordResidual = [&](Real residual, size_t inner) {
+              const auto recordResidual = [&](
+                                            Real residual, size_t inner, bool converged) {
                 const Real assemblySeconds = m_hingeProblem.getAssemblySeconds();
                 rep.tAssembly += assemblySeconds;
                 rep.tInnerAssembly += assemblySeconds;
@@ -1267,7 +1267,7 @@ namespace Rodin::Adaptation::SWIFT
                 rep.innerResidualTolerance = residualTolerance;
                 rep.innerRelativeResidual =
                   residualScale > Real(0) ? residual / residualScale : residual;
-                innerConverged = std::isfinite(residual) && residual <= residualTolerance;
+                innerConverged = converged;
                 if (p.trace)
                 {
                   const auto precision = std::cout.precision();
@@ -1282,11 +1282,16 @@ namespace Rodin::Adaptation::SWIFT
                 }
               };
               newton.setMonitor([&](const typename Newton::Report& report) {
-                if (report.converged || !std::isfinite(report.finalResidual))
-                  recordResidual(report.finalResidual, report.iterations);
+                if (report.converged ||
+                  report.reason == Newton::ConvergedReason::ResidualNormIsNotFinite)
+                {
+                  recordResidual(
+                    report.finalResidual, report.iterations, report.converged);
+                }
               });
               newton.setStepPolicy([&](auto&, auto& system, auto& newtonReport) {
-                recordResidual(newtonReport.finalResidual, newtonReport.iterations);
+                recordResidual(newtonReport.finalResidual, newtonReport.iterations,
+                  newtonReport.converged);
                 const size_t linearIterations = m_linearSolver.getIterations();
                 const Real linearError = m_linearSolver.getError();
                 recordLinearSolve(linearIterations, linearError);
@@ -1419,8 +1424,8 @@ namespace Rodin::Adaptation::SWIFT
                 newton.getReport().reason == Newton::ConvergedReason::MaxIterations)
               {
                 m_hingeProblem.assemble();
-                recordResidual(
-                  m_hingeProblem.getLinearSystem().getVector().norm(), innerIterations);
+                const Real residual = m_hingeProblem.getLinearSystem().getVector().norm();
+                recordResidual(residual, innerIterations, residual <= residualTolerance);
               }
             }
             rep.innerConverged = innerConverged;
@@ -1698,14 +1703,13 @@ namespace Rodin::Adaptation::SWIFT
        * @param loss Fixed-scale robust loss.
        * @param normalization Energy and force normalization factor.
        * @param locator Target-evaluation point locator.
-       * @returns Robust scalar curvature and its nonnegative influence-weighted counterpart.
+       * @returns Robust scalar directional curvature.
        */
       template <class Mesh, class FES, class PhiType, class GradType, class LocatorType>
-      std::pair<Real, Real> getSurfaceDirectionalCurvature(const Mesh& mesh,
-        const FES& fes, const Displacement& current, const Displacement& direction,
-        const PhiType& phi, const GradType& grad,
-        const std::vector<Index>& interfaceFacets, const Loss& loss, Real normalization,
-        const LocatorType& locator) const
+      Real getSurfaceDirectionalCurvature(const Mesh& mesh, const FES& fes,
+        const Displacement& current, const Displacement& direction, const PhiType& phi,
+        const GradType& grad, const std::vector<Index>& interfaceFacets, const Loss& loss,
+        Real normalization, const LocatorType& locator) const
       {
         if constexpr (requires { current.acquire(); })
           current.acquire();
@@ -1715,7 +1719,7 @@ namespace Rodin::Adaptation::SWIFT
           phi.acquire();
         if constexpr (requires { grad.acquire(); })
           grad.acquire();
-        std::vector<std::pair<Real, Real>> facetCurvatures(interfaceFacets.size());
+        std::vector<Real> facetCurvatures(interfaceFacets.size());
 #ifdef RODIN_USE_OPENMP
 #pragma omp parallel
 #endif
@@ -1739,17 +1743,13 @@ namespace Rodin::Adaptation::SWIFT
               const Real action = state.getGradient().dot(value);
               const Real weight =
                 qf.getWeight(q) * point.getDistortion() * normalization * action * action;
-              facetCurvatures[i].first += weight * loss.getCurvature(residual);
-              facetCurvatures[i].second += weight * state.getWeight();
+              facetCurvatures[i] += weight * loss.getCurvature(residual);
             }
           }
         }
-        std::pair<Real, Real> curvature{};
+        Real curvature = Real(0);
         for (const auto& value : facetCurvatures)
-        {
-          curvature.first += value.first;
-          curvature.second += value.second;
-        }
+          curvature += value;
         return curvature;
       }
 
@@ -2198,6 +2198,8 @@ namespace Rodin::Adaptation::SWIFT
        */
       /**
        * @brief Computes geometric discrepancies on the complete fitted interface.
+       * The maximum uses facet covering witnesses selected by sampling.subdivision.
+       * RMS and normal discrepancies retain independent diagnostic quadrature.
        * @param mesh Fixed reference mesh.
        * @param fes Displacement finite element space defining quadrature orders.
        * @param u Displacement whose deformed interface or geometry is evaluated.
@@ -2248,13 +2250,16 @@ namespace Rodin::Adaptation::SWIFT
             const auto& fe = fes.getFiniteElement(face->getDimension(), facetIndex);
             const auto& qf = getGeometricValidationQuadrature(*face, fes);
             const auto& quadrature = face->getQuadrature(qf);
-            // Endpoints/vertices contribute to the maximum, not the surface quadrature integral.
             const Geometry::Polytope::Traits traits(face->getGeometry());
-            for (std::size_t vertex = 0; vertex < traits.getVertexCount(); ++vertex)
+            const auto& witnesses = QualityCovering::get(face->getGeometry(),
+              m_parameters.sampling.getSubdivision(fe.getOrder(),
+                face->getTransformation().getDegree().value_or(2),
+                traits.getVertexCount() == face->getDimension() + 1));
+            const auto& samples = face->getQuadrature(witnesses);
+            for (std::size_t q = 0; q < samples.getSize(); ++q)
             {
-              const Geometry::Point point(*face, traits.getVertex(vertex));
               const auto& moved =
-                deformation.setIntegrationPoint(Variational::IntegrationPoint(point))
+                deformation.setIntegrationPoint(Variational::IntegrationPoint(samples, q))
                   .getPoint();
               const Real norm = grad.getValue(moved).norm();
               const Real distance = std::abs(phi.getValue(moved)) / norm;
@@ -2358,7 +2363,6 @@ namespace Rodin::Adaptation::SWIFT
               const Real weight = qf.getWeight(q) * mappedMeasure;
               state.measure += weight;
               state.squaredDistance += weight * distance * distance;
-              state.maximumDistance = std::max(state.maximumDistance, distance);
               state.squaredNormal += weight * normalErrorSquared;
             }
           }
@@ -2503,7 +2507,7 @@ namespace Rodin::Adaptation::SWIFT
        * @brief Solves the assembled centered metric for the unconstrained predictor.
        * @param out Returned predictor displacement, updated only on success.
        * @param report Destination for linear-solver diagnostics.
-       * @returns Whether the centered physical residual met the linear tolerance.
+       * @returns Whether the selected backend reported a successful solve.
        */
       bool solvePredictor(Displacement& out, Report& report)
       {

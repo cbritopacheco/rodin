@@ -808,7 +808,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR((cg.displacement - lu.displacement).norm(), Real(0), Real(1e-8));
     EXPECT_EQ(lu.report.linearIterations, 0u);
     EXPECT_GT(lu.report.linearSolveCount, 0u);
-    EXPECT_LE(lu.report.linearError, Real(1e-10));
+    EXPECT_TRUE(std::isnan(lu.report.linearError));
   }
 
 #ifdef RODIN_USE_MUMPS
@@ -844,7 +844,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR((lu.displacement - mumps.displacement).norm(), Real(0), Real(1e-8));
     EXPECT_EQ(mumps.report.linearIterations, 0u);
     EXPECT_GT(mumps.report.linearSolveCount, 0u);
-    EXPECT_LE(mumps.report.linearError, Real(1e-10));
+    EXPECT_TRUE(std::isnan(mumps.report.linearError));
     EXPECT_GT(mumps.report.directFactorizations, 0u);
     // Changing geometry may change the sparse support.
     EXPECT_LE(mumps.report.directAnalyses, mumps.report.directFactorizations);
@@ -963,10 +963,98 @@ namespace Rodin::Tests::Unit
         solver.solve(system);
         ASSERT_TRUE(solver.success());
         EXPECT_LT((system.getSolution() - expected / scale).norm(), Real(1e-11));
-        EXPECT_LE(solver.getError(), parameters.convergence.tolerance.linearRelative);
+        if (backend == SWIFT::Parameters::LinearSolver::CG)
+          EXPECT_LE(solver.getError(), parameters.convergence.tolerance.linearRelative);
+        else
+          EXPECT_TRUE(std::isnan(solver.getError()));
         EXPECT_EQ((system.getOperator() - original).norm(), Real(0));
       }
     }
+  }
+
+  TEST(Rodin_Adaptation_SWIFTSolver, DirectSolveUsesBackendStatus)
+  {
+    auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+    P1<Math::SpatialVector<Real>, LocalMesh> space(mesh, 2);
+    TrialFunction trial(space);
+    TestFunction test(space);
+    Problem problem(trial, test);
+    using System = std::remove_reference_t<decltype(problem.getLinearSystem())>;
+    for (const auto backend : {SWIFT::Parameters::LinearSolver::SparseLU
+#ifdef RODIN_USE_MUMPS
+           ,
+           SWIFT::Parameters::LinearSolver::MUMPS
+#endif
+         })
+    {
+      SWIFT::LinearSolver<System> solver(problem);
+      SWIFT::Parameters parameters;
+      parameters.linear.solver = backend;
+      parameters.linear.threads = 1;
+      parameters.convergence.tolerance.linearRelative = Real(1e-30);
+      solver.setParameters(parameters);
+      SWIFT::Report report;
+      solver.setReport(&report);
+      auto& system = problem.getLinearSystem();
+      Math::Matrix<Real> matrix(3, 3), factor(3, 1);
+      matrix << 4.3, 0.2, 0.1, 0.2, 3.7, 0.4, 0.1, 0.4, 2.9;
+      factor << 0.3, 0.2, 0.1;
+      system.getOperator() = matrix.sparseView();
+      system.getVector().resize(3);
+      system.getVector() << 1.1, 2.3, -0.7;
+      solver.setCentering(factor);
+      solver.solve(system);
+      ASSERT_TRUE(solver.success());
+      const SWIFT::LowRankUpdate<Real> op(system.getOperator(), factor);
+      const Real residual = (op * system.getSolution() - system.getVector()).norm();
+      EXPECT_LT(residual, Real(1e-12));
+      EXPECT_GT(residual, parameters.convergence.tolerance.linearRelative);
+      system.getVector() *= Real(2);
+      solver.solve(system);
+      ASSERT_TRUE(solver.success());
+      if (backend == SWIFT::Parameters::LinearSolver::MUMPS)
+      {
+        EXPECT_EQ(report.directAnalyses, 1u);
+        EXPECT_EQ(report.directFactorizations, 1u);
+      }
+    }
+  }
+
+  TEST(Rodin_Adaptation_SWIFTSolver, LowRankRepresentation)
+  {
+    Math::Matrix<Real> core = Math::Matrix<Real>::Identity(4, 4) * Real(4);
+    const Math::SparseMatrix<Real> sparse = core.sparseView();
+    Math::Matrix<Real> factor(4, 2);
+    factor << 0.2, 0.3, 0.4, 0.1, 0.1, 0.5, 0.3, 0.2;
+    const SWIFT::LowRankUpdate<Real> op(sparse, factor);
+    const Math::Matrix<Real> expected = core - factor * factor.transpose();
+    Math::Vector<Real> x(4);
+    x << 1, -2, 3, -4;
+    EXPECT_LT((op * x - expected * x).norm(), Real(1e-12));
+    EXPECT_LT((op.diagonal() - expected.diagonal()).norm(), Real(1e-12));
+    Math::Vector<Real> augmented(6);
+    augmented.head(4) = x;
+    augmented.tail(2) = -factor.transpose() * x;
+    const Math::Vector<Real> image = op.getAugmented() * augmented;
+    EXPECT_LT((image.head(4) - expected * x).norm(), Real(1e-12));
+    EXPECT_LT(image.tail(2).norm(), Real(1e-12));
+
+    const Math::Matrix<Real> empty;
+    const SWIFT::LowRankUpdate<Real> uncentered(sparse, empty);
+    EXPECT_LT((uncentered * x - core * x).norm(), Real(1e-12));
+    EXPECT_EQ((uncentered.getAugmented() - sparse).norm(), Real(0));
+    const Math::Matrix<Real> wrong = Math::Matrix<Real>::Zero(2, 1);
+    EXPECT_ANY_THROW((SWIFT::LowRankUpdate<Real>(sparse, wrong)));
+  }
+
+  TEST(Rodin_Adaptation_SWIFTSolver, CanonicalBackend)
+  {
+    const SWIFT::Parameters parameters;
+#ifdef RODIN_USE_MUMPS
+    EXPECT_EQ(parameters.linear.solver, SWIFT::Parameters::LinearSolver::MUMPS);
+#else
+    EXPECT_EQ(parameters.linear.solver, SWIFT::Parameters::LinearSolver::CG);
+#endif
   }
 
   TEST(Rodin_Adaptation_SWIFTSolver, CommonMetricScalePreservesTheHingeModelP1P2)
@@ -1186,8 +1274,9 @@ namespace Rodin::Tests::Unit
     EXPECT_FALSE(state.report.geometricTargetReached);
   }
 
-  TEST(Rodin_Adaptation_SWIFTSolver, InterfaceVerticesContributeToSupremum)
+  TEST(Rodin_Adaptation_SWIFTSolver, InterfaceCoveringDeterminesSupremum)
   {
+    const auto check = []<size_t Order>() {
     auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {3, 3});
     mesh.scale(Real(0.5));
     mesh.getConnectivity().compute(2, 1);
@@ -1208,7 +1297,12 @@ namespace Rodin::Tests::Unit
         mesh.setAttribute({1, face->getIndex()}, Interface);
       }
     }
-    P1<Math::SpatialVector<Real>, LocalMesh> fes(mesh, 2);
+      auto fes = [&] {
+        if constexpr (Order == 1)
+          return P1<Math::SpatialVector<Real>, LocalMesh>(mesh, 2);
+        else
+          return H1(std::integral_constant<size_t, Order>{}, mesh, 2);
+      }();
     TrialFunction trial(fes);
     TestFunction test(fes);
     SWIFT::Problem solver(trial, test);
@@ -1216,6 +1310,7 @@ namespace Rodin::Tests::Unit
     p.model.h = Real(0.5);
     p.interfaceAttribute = Interface;
     p.convergence.tolerance.geometric = Real(0.1);
+      p.sampling.subdivision = 2;
     solver.setParameters(p);
     RealFunction phi([](const Point& point) {
       const Real y = Real(2) * point.y() - Real(1);
@@ -1227,7 +1322,25 @@ namespace Rodin::Tests::Unit
     });
     const auto report = solver.solve(phi, grad);
     EXPECT_EQ(report.iterations, 0u);
-    EXPECT_NEAR(report.geometricSup, Real(0.05) / std::sqrt(Real(1.04)), Real(1e-12));
+      const Real sampledY = Real(5) / Real(6);
+      const Real expected = Real(0.05) * sampledY * sampledY /
+        std::sqrt(Real(1) + Real(0.04) * sampledY * sampledY);
+      EXPECT_NEAR(report.geometricSup, expected, Real(1e-12));
+      p.quadrature.validation = 4;
+      solver.setParameters(p);
+      const auto lowerOrder = solver.solve(phi, grad);
+      EXPECT_NEAR(lowerOrder.geometricSup, expected, Real(1e-12));
+      p.sampling.subdivision = 4;
+      solver.setParameters(p);
+      const auto refined = solver.solve(phi, grad);
+      const Real refinedY = Real(9) / Real(10);
+      const Real refinedExpected = Real(0.05) * refinedY * refinedY /
+        std::sqrt(Real(1) + Real(0.04) * refinedY * refinedY);
+      EXPECT_NEAR(refined.geometricSup, refinedExpected, Real(1e-12));
+      EXPECT_GT(refined.geometricSup, report.geometricSup);
+    };
+    check.template operator()<1>();
+    check.template operator()<2>();
   }
 
   TEST(Rodin_Adaptation_SWIFTSolver, InvalidGeometryCannotReachAutomaticTarget)
