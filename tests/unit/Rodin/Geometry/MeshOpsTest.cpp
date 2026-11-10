@@ -317,7 +317,7 @@ namespace Rodin::Tests::Unit
         grid.setAttribute({2, f}, Attribute(10 + f % 2));
     }
     const Mesh<Context::Local> mesh = scramble(grid);
-    const Mesh<Context::Local> renumbered = mesh.renumber();
+    const Mesh<Context::Local> renumbered = mesh.renumber(Ordering::Morton{});
 
     ASSERT_EQ(renumbered.getDimension(), mesh.getDimension());
     ASSERT_EQ(renumbered.getSpaceDimension(), mesh.getSpaceDimension());
@@ -342,7 +342,7 @@ namespace Rodin::Tests::Unit
     }
 
     // The vertex numbering depends only on the coordinates.
-    const Mesh<Context::Local> reference = grid.renumber();
+    const Mesh<Context::Local> reference = grid.renumber(Ordering::Morton{});
     for (Index v = 0; v < renumbered.getVertexCount(); ++v)
     {
       const auto x = renumbered.getVertexCoordinates(v);
@@ -352,7 +352,7 @@ namespace Rodin::Tests::Unit
     }
 
     // Renumbering a renumbered mesh changes nothing.
-    const Mesh<Context::Local> again = renumbered.renumber();
+    const Mesh<Context::Local> again = renumbered.renumber(Ordering::Morton{});
     for (size_t d = 1; d <= mesh.getDimension(); ++d)
     {
       for (Index p = 0; p < conn.getCount(d); ++p)
@@ -384,7 +384,7 @@ namespace Rodin::Tests::Unit
     }
     const std::vector<IndexVector> permutations = {
       Ordering::Morton{}(mesh), Ordering::Hilbert{}(mesh), Ordering::RCM{}(mesh)};
-    const std::vector<LocalMesh> results = {mesh.renumber(),
+    const std::vector<LocalMesh> results = {mesh.renumber(Ordering::Morton{}),
       mesh.renumber(Ordering::Hilbert{}), mesh.renumber(Ordering::RCM{})};
     for (size_t i = 0; i < results.size(); ++i)
     {
@@ -403,14 +403,6 @@ namespace Rodin::Tests::Unit
         EXPECT_EQ(
           results[i].getAttribute(0, v), mesh.getAttribute(0, permutations[i][v]));
       }
-    }
-    const auto explicitMorton = mesh.renumber(Ordering::Morton{});
-    for (Index v = 0; v < mesh.getVertexCount(); ++v)
-    {
-      const auto actual = results[0].getVertexCoordinates(v);
-      const auto expected = explicitMorton.getVertexCoordinates(v);
-      for (size_t d = 0; d < mesh.getSpaceDimension(); ++d)
-        EXPECT_EQ(actual(d), expected(d));
     }
   }
 

@@ -408,7 +408,8 @@ namespace Rodin::Examples
       const bool renumber = argc > 3 && std::string(argv[3]) == "renumber";
       const Parameters P;
 
-      const HostMesh host = renumber ? load(source).renumber() : load(source);
+      const HostMesh host =
+        renumber ? load(source).renumber(Geometry::Ordering::Morton{}) : load(source);
       if (host.getPolytopeCount(Geometry::Polytope::Type::Tetrahedron) !=
         host.getCellCount())
       {

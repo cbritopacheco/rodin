@@ -42,7 +42,7 @@ namespace Rodin::Geometry::Internal
        * Explicit precision must be positive and at most 52. Application to a
        * mesh additionally requires at most 63 bits across all coordinates.
        * Automatic precision is the smaller of 52 and 63 divided by the space
-       * dimension, rounded down, preserving Mesh::renumber()'s Morton precision.
+       * dimension, rounded down.
        */
       Derived& setBitsPerCoordinate(Optional<size_t> bits)
       {

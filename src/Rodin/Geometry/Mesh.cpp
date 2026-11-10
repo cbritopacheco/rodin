@@ -366,11 +366,6 @@ namespace Rodin::Geometry
     return *this;
   }
 
-  Mesh<Context::Local> Mesh<Context::Local>::renumber() const
-  {
-    return renumber(Ordering::Morton{});
-  }
-
   Mesh<Context::Local> Mesh<Context::Local>::renumber(
     const Ordering::Morton& ordering) const
   {

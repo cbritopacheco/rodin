@@ -1695,13 +1695,48 @@ namespace Rodin::Geometry
         const Map<Attribute, Attribute>& tmap, const FlatSet<Attribute>& attrs);
 
       /**
-       * @brief Returns a copy of the mesh whose numbering follows space.
+       * @brief Renumbers a copy using the Morton ordering.
+       * @param[in] ordering Configured vertex ordering policy.
+       * @returns Renumbered mesh, with the reconstruction semantics of the permutation overload.
        *
-       * The default is Ordering::Morton. Vertices follow a Morton
-       * curve of their coordinates in the bounding box, so that vertices close
-       * in space get close indices.
-       * The polytopes of every other dimension held by the connectivity are
-       * then ordered by their smallest new vertex index, ties keeping their
+       * Apply before building finite element spaces; existing fields and
+       * spaces are not transferred. The policy can also be called directly
+       * to retain its new-to-old vertex permutation.
+       */
+      Mesh renumber(const Ordering::Morton& ordering) const;
+
+      /**
+       * @brief Renumbers a copy using the Hilbert ordering.
+       * @param[in] ordering Configured vertex ordering policy.
+       * @returns Renumbered mesh, with the reconstruction semantics of the permutation overload.
+       *
+       * Apply before building finite element spaces; existing fields and
+       * spaces are not transferred. The policy can also be called directly
+       * to retain its new-to-old vertex permutation.
+       */
+      Mesh renumber(const Ordering::Hilbert& ordering) const;
+
+      /**
+       * @brief Renumbers a copy using the RCM ordering.
+       * @param[in] ordering Configured vertex ordering policy.
+       * @returns Renumbered mesh, with the reconstruction semantics of the permutation overload.
+       *
+       * Apply before building finite element spaces; existing fields and
+       * spaces are not transferred. The policy can also be called directly
+       * to retain its new-to-old vertex permutation.
+       */
+      Mesh renumber(const Ordering::RCM& ordering) const;
+
+      /**
+       * @brief Rebuilds a copy using an explicit vertex permutation.
+       * @param[in] newToOld Old vertex index at each new vertex index.
+       * @returns Renumbered copy of this mesh.
+       *
+       * The permutation must contain each old vertex exactly once. Wrong size,
+       * duplicates and out-of-range indices raise an Alert::Exception.
+       *
+       * Polytopes of each positive dimension held by the connectivity are
+       * ordered by their smallest new vertex index, ties keeping their
        * original order. Coordinates, vertex lists, orientations and attributes
        * are carried over unchanged; only the indices change. Connectivity
        * other than the polytope to vertex lists is not carried and must be
@@ -1714,51 +1749,6 @@ namespace Rodin::Geometry
        * matrix. Renumbering it once before building the spaces restores the
        * locality. The numbering seen by the user changes, so the method is
        * never applied implicitly.
-       *
-       * @returns Renumbered copy of this mesh.
-       */
-      Mesh renumber() const;
-
-      /**
-       * @brief Renumbers a copy using the Morton ordering.
-       * @param[in] ordering Configured vertex ordering policy.
-       * @returns Renumbered mesh, with the reconstruction semantics of renumber().
-       *
-       * Apply before building finite element spaces; existing fields and
-       * spaces are not transferred. The policy can also be called directly
-       * to retain its new-to-old vertex permutation.
-       */
-      Mesh renumber(const Ordering::Morton& ordering) const;
-
-      /**
-       * @brief Renumbers a copy using the Hilbert ordering.
-       * @param[in] ordering Configured vertex ordering policy.
-       * @returns Renumbered mesh, with the reconstruction semantics of renumber().
-       *
-       * Apply before building finite element spaces; existing fields and
-       * spaces are not transferred. The policy can also be called directly
-       * to retain its new-to-old vertex permutation.
-       */
-      Mesh renumber(const Ordering::Hilbert& ordering) const;
-
-      /**
-       * @brief Renumbers a copy using the RCM ordering.
-       * @param[in] ordering Configured vertex ordering policy.
-       * @returns Renumbered mesh, with the reconstruction semantics of renumber().
-       *
-       * Apply before building finite element spaces; existing fields and
-       * spaces are not transferred. The policy can also be called directly
-       * to retain its new-to-old vertex permutation.
-       */
-      Mesh renumber(const Ordering::RCM& ordering) const;
-
-      /**
-       * @brief Rebuilds a copy using an explicit vertex permutation.
-       * @param[in] newToOld Old vertex index at each new vertex index.
-       * @returns Renumbered mesh, with the reconstruction semantics of renumber().
-       *
-       * The permutation must contain each old vertex exactly once. Wrong size,
-       * duplicates and out-of-range indices raise an Alert::Exception.
        */
       Mesh renumber(const IndexVector& newToOld) const;
 

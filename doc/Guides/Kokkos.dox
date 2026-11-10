@@ -199,16 +199,16 @@
 
   The kernels add the contributions of the cells in index order. A mesh
   whose cell and vertex numberings are unrelated, as produced by most
-  meshers, scatters these contributions across the matrix; `Mesh::renumber()`
+  meshers, scatters these contributions across the matrix; `Mesh::renumber(ordering)`
   returns a copy ordered along space, which is built once before the spaces.
-  The default ordering is Morton. Hilbert and reverse Cuthill-McKee orderings
-  can be selected explicitly on the local mesh before partitioning or upload:
+  The ordering must be selected explicitly on the local mesh before
+  partitioning or upload:
   @code{.cpp}
   Geometry::Ordering::Hilbert ordering;
   ordering.setBitsPerCoordinate(21);
   auto hilbertMesh = mesh.renumber(ordering);
   auto rcmMesh = mesh.renumber(Geometry::Ordering::RCM{});
-  auto mortonMesh = mesh.renumber();
+  auto mortonMesh = mesh.renumber(Geometry::Ordering::Morton{});
   @endcode
   The Morton and Hilbert ordering policies normalize each coordinate
   in the mesh bounding box. Their automatic bit depth is the smaller of 52

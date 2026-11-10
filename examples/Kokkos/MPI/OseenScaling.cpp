@@ -331,7 +331,7 @@ namespace Rodin::Examples
         mesh.getCellCount())
         throw std::runtime_error(source + " has cells other than tetrahedra.");
       if (renumber)
-        mesh = mesh.renumber();
+        mesh = mesh.renumber(Geometry::Ordering::Morton{});
       cells = mesh.getCellCount();
       auto& conn = mesh.getConnectivity();
       conn.compute(3, 3);

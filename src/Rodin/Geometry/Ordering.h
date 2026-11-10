@@ -14,8 +14,8 @@
  * Morton and Hilbert expose bounding-box quantization bit depth. RCM uses
  * deterministic pseudo-peripheral roots and degree/index tie breaking.
  * Each policy is callable and returns a new-to-old vertex permutation.
- * Mesh::renumber() accepts each concrete policy through an explicit overload
- * and defaults to Morton when no policy is supplied.
+ * Mesh::renumber accepts each concrete policy through an explicit overload.
+ * An ordering policy or vertex permutation must be supplied.
  */
 
 /**
@@ -23,7 +23,7 @@
  * @brief Concrete algorithms for ordering local mesh vertices.
  *
  * Each algorithm computes a new-to-old vertex permutation and is accepted
- * by an explicit Mesh::renumber() overload. Morton and Hilbert provide
+ * by an explicit Mesh::renumber overload. Morton and Hilbert provide
  * configurable quantization precision; RCM uses deterministic graph traversal.
  */
 
