@@ -204,21 +204,20 @@
   The default ordering is Morton. Hilbert and reverse Cuthill-McKee orderings
   can be selected explicitly on the local mesh before partitioning or upload:
   @code{.cpp}
-  using Geometry::OrderingType;
-  Geometry::Ordering<OrderingType::Hilbert> ordering;
+  Geometry::Ordering::Hilbert ordering;
   ordering.setBitsPerCoordinate(21);
   auto hilbertMesh = mesh.renumber(ordering);
-  auto rcmMesh = mesh.renumber(Geometry::Ordering<OrderingType::RCM>{});
+  auto rcmMesh = mesh.renumber(Geometry::Ordering::RCM{});
   auto mortonMesh = mesh.renumber();
   @endcode
-  The Morton and Hilbert specializations of Ordering normalize each coordinate
+  The Morton and Hilbert ordering policies normalize each coordinate
   in the mesh bounding box. Their automatic bit depth is the smaller of 52
-  and 63 divided by the space dimension, rounded down. Explicit depths must be positive,
-  at most 52, and fit within 63 total key bits. Passing `std::nullopt` to
+  and 63 divided by the space dimension, rounded down. Explicit depths must
+  be positive, at most 52, and fit within 63 total key bits. Passing `std::nullopt` to
   `setBitsPerCoordinate` restores automatic precision. Equal keys retain
   original vertex order.
 
-  The RCM specialization uses the graph of vertices sharing a cell, with
+  The RCM policy uses the graph of vertices sharing a cell, with
   deterministic pseudo-peripheral roots and degree/index tie breaking. It is
   a bandwidth heuristic for the vertex graph; finite element DOF layouts can differ.
   Each policy is also callable and returns a new-to-old vertex permutation,

@@ -1697,7 +1697,7 @@ namespace Rodin::Geometry
       /**
        * @brief Returns a copy of the mesh whose numbering follows space.
        *
-       * The default is Ordering<OrderingType::Morton>. Vertices follow a Morton
+       * The default is Ordering::Morton. Vertices follow a Morton
        * curve of their coordinates in the bounding box, so that vertices close
        * in space get close indices.
        * The polytopes of every other dimension held by the connectivity are
@@ -1728,7 +1728,7 @@ namespace Rodin::Geometry
        * spaces are not transferred. The policy can also be called directly
        * to retain its new-to-old vertex permutation.
        */
-      Mesh renumber(const Ordering<OrderingType::Morton>& ordering) const;
+      Mesh renumber(const Ordering::Morton& ordering) const;
 
       /**
        * @brief Renumbers a copy using the Hilbert ordering.
@@ -1739,7 +1739,7 @@ namespace Rodin::Geometry
        * spaces are not transferred. The policy can also be called directly
        * to retain its new-to-old vertex permutation.
        */
-      Mesh renumber(const Ordering<OrderingType::Hilbert>& ordering) const;
+      Mesh renumber(const Ordering::Hilbert& ordering) const;
 
       /**
        * @brief Renumbers a copy using the RCM ordering.
@@ -1750,7 +1750,7 @@ namespace Rodin::Geometry
        * spaces are not transferred. The policy can also be called directly
        * to retain its new-to-old vertex permutation.
        */
-      Mesh renumber(const Ordering<OrderingType::RCM>& ordering) const;
+      Mesh renumber(const Ordering::RCM& ordering) const;
 
       /**
        * @brief Rebuilds a copy using an explicit vertex permutation.

@@ -66,8 +66,11 @@ namespace Rodin::Geometry::Internal
         return m_bits;
       }
 
+    protected:
       /**
        * @brief Computes a spatial vertex ordering.
+       * @tparam Transform Callable transforming quantized coordinates before interleaving.
+       * @param[in] transform Concrete ordering's coordinate transformation.
        * @param[in] mesh Local mesh with finite vertex coordinates.
        * @returns Permutation with newToOld[newIndex] equal to the old vertex index.
        *
@@ -75,7 +78,9 @@ namespace Rodin::Geometry::Internal
        * Constant coordinate directions quantize to zero. Equal keys retain
        * the original vertex order, including coincident vertices.
        */
-      IndexVector operator()(const Mesh<Context::Local>& mesh) const
+      template <class Transform>
+      IndexVector compute(
+        const Mesh<Context::Local>& mesh, const Transform& transform) const
       {
         constexpr size_t keyBits = std::numeric_limits<std::uint64_t>::digits - 1;
         constexpr size_t coordinateBits = std::numeric_limits<Real>::digits - 1;
@@ -121,7 +126,7 @@ namespace Rodin::Geometry::Internal
               std::floor(std::clamp(scaled, Real(0), Real(1)) * cells));
           }
           if (dim > 0 && bits > 0)
-            Derived::transform(coordinates, bits);
+            transform(coordinates, bits);
           for (size_t b = bits; b-- > 0;)
           {
             for (size_t i = 0; i < dim; ++i)

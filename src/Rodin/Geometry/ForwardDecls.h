@@ -27,10 +27,12 @@
 namespace Rodin::Geometry
 {
   class Bounds;
-  enum class OrderingType;
-
-  template <OrderingType Type>
-  class Ordering;
+  namespace Ordering
+  {
+    class Morton;
+    class Hilbert;
+    class RCM;
+  }
 
   /**
    * @brief Template container indexed by polytope geometry types.

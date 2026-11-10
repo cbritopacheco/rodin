@@ -7,100 +7,28 @@
 #ifndef RODIN_GEOMETRY_ORDERING_H
 #define RODIN_GEOMETRY_ORDERING_H
 
-#include "SpaceFillingCurveOrdering.h"
+/**
+ * @file
+ * @brief Concrete local mesh vertex ordering policies.
+ *
+ * Morton and Hilbert expose bounding-box quantization bit depth. RCM uses
+ * deterministic pseudo-peripheral roots and degree/index tie breaking.
+ * Each policy is callable and returns a new-to-old vertex permutation.
+ * Mesh::renumber() accepts each concrete policy through an explicit overload
+ * and defaults to Morton when no policy is supplied.
+ */
 
-namespace Rodin::Geometry
-{
-  /**
-   * @brief Vertex ordering policy selected by its algorithm.
-   * @tparam Type Ordering algorithm; Morton is the default.
-   *
-   * Each specialization is callable on a local mesh and returns a new-to-old
-   * vertex permutation, accepted by Mesh::renumber().
-   *
-   * | Specialization | Configuration |
-   * | --- | --- |
-   * | OrderingType::Morton | Bounding-box quantization bit depth |
-   * | OrderingType::Hilbert | Bounding-box quantization bit depth |
-   * | OrderingType::RCM | Deterministic roots and degree/index tie breaking |
-   *
-   * @code{.cpp}
-   * Ordering<OrderingType::Hilbert> ordering;
-   * ordering.setBitsPerCoordinate(21);
-   * auto reordered = mesh.renumber(ordering);
-   * @endcode
-   */
-  template <OrderingType Type = OrderingType::Morton>
-  class Ordering;
+/**
+ * @namespace Rodin::Geometry::Ordering
+ * @brief Concrete algorithms for ordering local mesh vertices.
+ *
+ * Each algorithm computes a new-to-old vertex permutation and is accepted
+ * by an explicit Mesh::renumber() overload. Morton and Hilbert provide
+ * configurable quantization precision; RCM uses deterministic graph traversal.
+ */
 
-  /**
-   * @brief Morton (Z-curve) ordering of local mesh vertices.
-   *
-   * Integer coordinate bits are interleaved, most significant first.
-   * Bounding-box normalization, configurable bit depth and stable tie handling
-   * are provided by Internal::SpaceFillingCurveOrdering. Construction uses
-   * automatic precision. Apply before constructing finite element spaces or
-   * transferring a mesh to a device.
-   */
-  template <>
-  class Ordering<OrderingType::Morton>
-    : public Internal::SpaceFillingCurveOrdering<Ordering<OrderingType::Morton>>
-  {
-    friend class Internal::SpaceFillingCurveOrdering<Ordering<OrderingType::Morton>>;
-
-    private:
-      static void transform(std::vector<std::uint64_t>&, size_t) {}
-  };
-
-  /**
-   * @brief Hilbert ordering of local mesh vertices.
-   *
-   * Integer coordinates are transformed using Skilling's axes-to-transpose
-   * algorithm before their bits are interleaved (doi:10.1063/1.1751381).
-   * Bounding-box normalization, configurable bit depth and stable tie handling
-   * are provided by Internal::SpaceFillingCurveOrdering. Construction uses
-   * automatic precision. Apply before constructing finite element spaces or
-   * transferring a mesh to a device.
-   */
-  template <>
-  class Ordering<OrderingType::Hilbert>
-    : public Internal::SpaceFillingCurveOrdering<Ordering<OrderingType::Hilbert>>
-  {
-    friend class Internal::SpaceFillingCurveOrdering<Ordering<OrderingType::Hilbert>>;
-
-    private:
-      static void transform(std::vector<std::uint64_t>& coordinates, size_t bits);
-  };
-
-  /**
-   * @brief Deterministic reverse Cuthill-McKee ordering of local mesh vertices.
-   *
-   * Vertices sharing a maximal-dimensional cell form a clique in the graph.
-   * Each connected component starts from a pseudo-peripheral vertex. Initial
-   * seeds, last-level candidates and BFS neighbors are selected by increasing
-   * degree, with original vertex index breaking ties. The BFS ordering is
-   * reversed separately in each component; components are visited by their
-   * minimum (degree, original index) seed. Isolated vertices are included.
-   *
-   * This is a bandwidth-reduction heuristic for the vertex graph, not an
-   * ordering of high-order or mixed-space degrees of freedom. No derived
-   * incidence is required or computed, and the input mesh is unchanged.
-   */
-  template <>
-  class Ordering<OrderingType::RCM>
-  {
-    public:
-      /**
-       * @brief Computes the reverse Cuthill-McKee vertex ordering.
-       * @param[in] mesh Local mesh supplying cell-to-vertex lists.
-       * @returns Permutation with newToOld[newIndex] equal to the old vertex index.
-       */
-      IndexVector operator()(const Mesh<Context::Local>& mesh) const;
-  };
-
-  /// @brief Default construction selects the Morton ordering.
-  Ordering() -> Ordering<OrderingType::Morton>;
-
-}
+#include "Ordering/Morton.h"
+#include "Ordering/Hilbert.h"
+#include "Ordering/RCM.h"
 
 #endif

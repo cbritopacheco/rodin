@@ -18,7 +18,7 @@ TEST(Geometry_OrderingMorton, KnownKeysAndStableQuantizationTies)
   builder.vertex({1, 0}).vertex({0, 1}).vertex({0, 0}).vertex({1, 1});
   builder.vertex({0.1, 0.1}).vertex({0, 0});
   const auto mesh = builder.finalize();
-  Ordering ordering;
+  Ordering::Morton ordering;
   EXPECT_FALSE(ordering.getBitsPerCoordinate());
   ordering.setBitsPerCoordinate(1);
   EXPECT_EQ(ordering.getBitsPerCoordinate(), Optional<size_t>(1));
@@ -30,7 +30,7 @@ TEST(Geometry_OrderingMorton, KnownKeysAndStableQuantizationTies)
 
 TEST(Geometry_OrderingMorton, PrecisionValidationAndFiniteCoordinates)
 {
-  Ordering<OrderingType::Morton> ordering;
+  Ordering::Morton ordering;
   EXPECT_THROW(ordering.setBitsPerCoordinate(0), Alert::Exception);
   EXPECT_THROW(ordering.setBitsPerCoordinate(53), Alert::Exception);
   auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
@@ -47,20 +47,19 @@ TEST(Geometry_OrderingMorton, EmptyConstantAndExtremeCoordinates)
 {
   LocalMesh::Builder empty;
   empty.initialize(2).nodes(0);
-  EXPECT_TRUE(Ordering<OrderingType::Morton>{}(empty.finalize()).empty());
+  EXPECT_TRUE(Ordering::Morton{}(empty.finalize()).empty());
   LocalMesh::Builder builder;
   const Real largest = std::numeric_limits<Real>::max();
   builder.initialize(2).nodes(4);
   builder.vertex({largest, 7}).vertex({-largest, 7}).vertex({0, 7}).vertex({0, 7});
-  EXPECT_EQ(
-    Ordering<OrderingType::Morton>{}(builder.finalize()), (IndexVector{1, 2, 3, 0}));
+  EXPECT_EQ(Ordering::Morton{}(builder.finalize()), (IndexVector{1, 2, 3, 0}));
 }
 
 TEST(Geometry_OrderingMorton, MaximumOneDimensionalPrecision)
 {
   LocalMesh::Builder builder;
   builder.initialize(1).nodes(3).vertex({1}).vertex({0}).vertex({0.5});
-  Ordering<OrderingType::Morton> ordering;
+  Ordering::Morton ordering;
   ordering.setBitsPerCoordinate(52);
   EXPECT_EQ(ordering(builder.finalize()), (IndexVector{1, 2, 0}));
 }
@@ -74,7 +73,7 @@ TEST(Geometry_OrderingHilbert, KnownTwoDimensionalCurve)
     for (size_t y = 0; y < 4; ++y)
       builder.vertex({Real(x), Real(y)});
   }
-  Ordering<OrderingType::Hilbert> ordering;
+  Ordering::Hilbert ordering;
   ordering.setBitsPerCoordinate(2);
   EXPECT_EQ(ordering(builder.finalize()),
     (IndexVector{0, 4, 5, 1, 2, 3, 7, 6, 10, 11, 15, 14, 13, 9, 8, 12}));
@@ -95,7 +94,7 @@ TEST(Geometry_OrderingHilbert, CompleteGridsHaveFaceAdjacentSuccessors)
       builder.vertex(point);
     }
     const auto mesh = builder.finalize();
-    Ordering<OrderingType::Hilbert> ordering;
+    Ordering::Hilbert ordering;
     ordering.setBitsPerCoordinate(2);
     const auto order = ordering(mesh);
     auto sorted = order;
@@ -117,7 +116,7 @@ TEST(Geometry_OrderingHilbert, CompleteGridsHaveFaceAdjacentSuccessors)
 
 TEST(Geometry_OrderingHilbert, PrecisionEmptyAndCoincidentVertices)
 {
-  Ordering<OrderingType::Hilbert> ordering;
+  Ordering::Hilbert ordering;
   EXPECT_FALSE(ordering.getBitsPerCoordinate());
   EXPECT_THROW(ordering.setBitsPerCoordinate(0), Alert::Exception);
   EXPECT_THROW(ordering.setBitsPerCoordinate(53), Alert::Exception);
@@ -146,9 +145,9 @@ TEST(Geometry_OrderingRCM, ScrambledPathAndIsolatedVertex)
   builder.polytope(Polytope::Type::Segment, {1, 4});
   builder.polytope(Polytope::Type::Segment, {4, 2});
   const auto mesh = builder.finalize();
-  const auto order = Ordering<OrderingType::RCM>{}(mesh);
+  const auto order = Ordering::RCM{}(mesh);
   EXPECT_EQ(order, (IndexVector{5, 0, 3, 1, 4, 2}));
-  EXPECT_EQ(order, Ordering<OrderingType::RCM>{}(mesh));
+  EXPECT_EQ(order, Ordering::RCM{}(mesh));
   IndexVector inverse(order.size());
   for (size_t i = 0; i < order.size(); ++i)
     inverse[order[i]] = i;
@@ -170,7 +169,7 @@ TEST(Geometry_OrderingRCM, NonSimplexCellsInduceCliques)
   const auto mesh = builder.finalize();
   EXPECT_EQ(mesh.getConnectivity().getCount(1), 0);
   // All degrees are three. An edge-only graph would produce a different order.
-  EXPECT_EQ(Ordering<OrderingType::RCM>{}(mesh), (IndexVector{3, 2, 0, 1}));
+  EXPECT_EQ(Ordering::RCM{}(mesh), (IndexVector{3, 2, 0, 1}));
   EXPECT_EQ(mesh.getConnectivity().getCount(1), 0);
 }
 
@@ -178,12 +177,12 @@ TEST(Geometry_OrderingRCM, DisconnectedComponentsAndEmptyMesh)
 {
   LocalMesh::Builder empty;
   empty.initialize(1).nodes(0);
-  EXPECT_TRUE(Ordering<OrderingType::RCM>{}(empty.finalize()).empty());
+  EXPECT_TRUE(Ordering::RCM{}(empty.finalize()).empty());
   LocalMesh::Builder builder;
   builder.initialize(1).nodes(4);
   for (size_t i = 0; i < 4; ++i)
     builder.vertex({Real(i)});
   builder.polytope(Polytope::Type::Segment, {0, 2});
   builder.polytope(Polytope::Type::Segment, {1, 3});
-  EXPECT_EQ(Ordering<OrderingType::RCM>{}(builder.finalize()), (IndexVector{0, 2, 1, 3}));
+  EXPECT_EQ(Ordering::RCM{}(builder.finalize()), (IndexVector{0, 2, 1, 3}));
 }

@@ -382,11 +382,10 @@ namespace Rodin::Tests::Unit
       for (Index p = 0; p < mesh.getConnectivity().getCount(d); ++p)
         mesh.setAttribute({d, p}, Attribute(1 + p % 7));
     }
-    const std::vector<IndexVector> permutations = {Ordering<OrderingType::Morton>{}(mesh),
-      Ordering<OrderingType::Hilbert>{}(mesh), Ordering<OrderingType::RCM>{}(mesh)};
+    const std::vector<IndexVector> permutations = {
+      Ordering::Morton{}(mesh), Ordering::Hilbert{}(mesh), Ordering::RCM{}(mesh)};
     const std::vector<LocalMesh> results = {mesh.renumber(),
-      mesh.renumber(Ordering<OrderingType::Hilbert>{}),
-      mesh.renumber(Ordering<OrderingType::RCM>{})};
+      mesh.renumber(Ordering::Hilbert{}), mesh.renumber(Ordering::RCM{})};
     for (size_t i = 0; i < results.size(); ++i)
     {
       const auto direct = mesh.renumber(permutations[i]);
@@ -405,7 +404,7 @@ namespace Rodin::Tests::Unit
           results[i].getAttribute(0, v), mesh.getAttribute(0, permutations[i][v]));
       }
     }
-    const auto explicitMorton = mesh.renumber(Ordering<OrderingType::Morton>{});
+    const auto explicitMorton = mesh.renumber(Ordering::Morton{});
     for (Index v = 0; v < mesh.getVertexCount(); ++v)
     {
       const auto actual = results[0].getVertexCoordinates(v);

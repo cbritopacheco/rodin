@@ -9,10 +9,19 @@
 
 #include "Ordering.h"
 
-namespace Rodin::Geometry
+namespace Rodin::Geometry::Ordering
 {
-  void Ordering<OrderingType::Hilbert>::transform(
-    std::vector<std::uint64_t>& coordinates, size_t bits)
+  IndexVector Morton::operator()(const Mesh<Context::Local>& mesh) const
+  {
+    return compute(mesh, [](std::vector<std::uint64_t>&, size_t) {});
+  }
+
+  IndexVector Hilbert::operator()(const Mesh<Context::Local>& mesh) const
+  {
+    return compute(mesh, transform);
+  }
+
+  void Hilbert::transform(std::vector<std::uint64_t>& coordinates, size_t bits)
   {
     // Exchange/invert coordinate blocks to undo the Hilbert orientation.
     const std::uint64_t highest = std::uint64_t(1) << (bits - 1);
@@ -44,8 +53,7 @@ namespace Rodin::Geometry
       coordinate ^= correction;
   }
 
-  IndexVector Ordering<OrderingType::RCM>::operator()(
-    const Mesh<Context::Local>& mesh) const
+  IndexVector RCM::operator()(const Mesh<Context::Local>& mesh) const
   {
     const size_t count = mesh.getVertexCount();
     std::vector<IndexVector> graph(count);
