@@ -20,7 +20,11 @@
 // Eq. (3) is the paper's rho c_p (dT/dt + u.grad T) + rho L (dY/dt + u.grad Y)
 // written in conservative enthalpy form: the time derivative is
 // (H(T^{n+1}) - H(T^n))/dt, so latent heat is never skipped when a node jumps
-// across the mushy interval within one step. Momentum is Boussinesq: rho_l in
+// across the mushy interval within one step. By default only the sensible
+// enthalpy H_s(T) = int rho c_p dT' is advected (-pcm_latent_advection 0): the
+// Carman-Kozeny mush is a fixed solid matrix, the moving liquid carries L
+// whatever Y is, and div(rho L u) = 0. -pcm_latent_advection 1 advects H as in
+// Eq. (3) (u.grad Y); with dt = 30 s Newton then fails once the melt flows. Momentum is Boussinesq: rho_l in
 // inertia and buoyancy (u ~ 0 wherever rho != rho_l, by the Darcy term);
 // mu (grad u + grad u^T) reduces to mu lap u because div u = 0 and every wall
 // is no-slip.
@@ -35,12 +39,16 @@
 // of the current Newton iterate (group finite elements), refreshed by the SNES
 // state update before each assembly.
 //
-// Energy conservation. Advection is in conservative form, div(H u) =
-// H'(T) u.grad T + H(T) div u: the discrete u is only weakly divergence-free
-// (P1/P1 + PSPG) and H carries the latent heat (~1e8 J/m^3), so H'(T) u.grad T
-// alone made int div(H u) != 0 and lost 7-18% of the energy entering during
-// melting with convection (the version of 8 Oct 2026 too). H is referred to
-// its liquid value H(T_high) there.
+// Energy conservation. Advection is in weak conservative form with the
+// velocity that the discrete continuity equation conserves,
+//   -(H_a(T) - H_ref) a . grad w,  a = u - (tau_1/rho_l) (grad p - Pi[grad p]),
+// H_a = H_s (or H). Continuity reads int a . grad q = eps (p, q) for every q,
+// so the term vanishes for w = 1 (energy is conserved) and for H_a constant
+// (no sources where div u_h != 0): a is the resolved velocity plus the VMS
+// pressure subscale of the split OSGS. The discrete u alone is not solenoidal
+// (P1/P1, OSGS): H'(T) u.grad T lost 7-18% of the energy entering during
+// melting with convection, and H'(T) u.grad T + (H - H_ref) div u grows like
+// exp(-div u_h t) (spurious hot spots, then Newton fails).
 //
 // Phase-change truncation. H is convex at T_s and concave at T_l, so a plain
 // Newton step taken from the solid (slope rho c_p, no latent heat) overshoots
@@ -91,10 +99,10 @@
 // the interior facets tagged `interface`; a Darcy wall left 5% of the
 // along-slope buoyancy unbalanced) and the plates add u = 0 through a Darcy
 // term at the solid-PCM value C/eps (with the flow equations also in the plates,
-// their pressure, left without PSPG by tau_1 ~ rho/A, developed spurious
+// their pressure, left without OSGS pressure term by tau_1 ~ rho/A, developed spurious
 // modes that drove the melt at the interface); the OSGS projections are
 // restricted to the PCM too (projected over the whole domain, the meaningless
-// plate pressure entered Pi[grad p] near the interfaces: the PSPG term then
+// plate pressure entered Pi[grad p] near the interfaces: the pressure-subscale term then
 // left 6% of the along-slope buoyancy unbalanced and drove a spurious net flow).
 // The phase-change truncation skips aluminium-only nodes.
 //
@@ -118,7 +126,8 @@
 //     -pcm_angle 15 -snes_converged_reason
 //
 // Options: -pcm_length, -pcm_thickness (m), -pcm_al (m, plates), -pcm_al_n, -pcm_nx, -pcm_ny, -pcm_ygrade (cell
-// height ratio from the top face down, 1: uniform), -pcm_dt, -pcm_tend, -pcm_angle (deg), -pcm_mushy (T_l - T_s, K;
+// height ratio from the top face down, 1: uniform), -pcm_dt, -pcm_tstart (s), -pcm_tend, -pcm_latent_advection (0/1),
+// -pcm_darcy (0/1/2), -pcm_angle (deg), -pcm_mushy (T_l - T_s, K;
 // PETSc option names are case-insensitive, so not -pcm_dT), -pcm_round (K, 0: Eq. 4),
 // -pcm_absorptivity, -pcm_hin, -pcm_tin (C), -pcm_weather, -pcm_output_every,
 // -pcm_print_every, -pcm_attic (1/0), -pcm_uceil, -pcm_attic_ach (1/h),
@@ -259,6 +268,10 @@ namespace Rodin::Examples::Heat
       const Real y = Y(T);
       return rho(T) * cp(T) + L * (rhoS + 2.0 * (rhoL - rhoS) * y) * dY(T);
     }
+
+    /// Sensible part H_s(T) = int_{T_low}^T rho c_p dT' and its derivative.
+    Real Hs(Real T) const { return H(T) - rho(T) * Y(T) * L; }
+    Real dHs(Real T) const { return rho(T) * cp(T); }
 
     /// Y''(T): +-1/(2 d dT) on the two rounding intervals, 0 elsewhere.
     Real d2Y(Real T) const
@@ -451,7 +464,8 @@ namespace Rodin::Examples::Heat
         std::string weatherFile;       ///< empty: Calama, January
 
         Real pressurePenalty = 1.0e-7; ///< 1/(Pa s): eps (p, q) fixes the mean pressure
-        int darcy = 2;                 ///< Carman-Kozeny treatment (see setupProblem)
+        int darcy = 0;                 ///< Carman-Kozeny treatment (see setupProblem)
+        bool latentAdvection = false;  ///< advect H (Eq. 3) instead of the sensible enthalpy
 
         // Time step. With h = 5 mm and RT42: cell diffusion time
         // h^2/alpha = 190 s (Fourier alpha dt/h^2 = 0.16 at 30 s); a cell melts
@@ -460,6 +474,7 @@ namespace Rodin::Examples::Heat
         // (CFL <= 6, implicit + OSGS). dt = 30 s resolves all of these.
         Real dt = 30.0;        ///< s
         Real tEnd = 86400.0;   ///< s, one day
+        Real tStart = 0.0;     ///< s, solar time of the initial condition (T = T_a(tStart))
         int outputEvery = 120; ///< one hour at dt = 30 s
         int printEvery = 30;
       };
@@ -504,11 +519,11 @@ namespace Rodin::Examples::Heat
         m_one = Real(1);
 
         // Eq. (8): T = T_a(0), u = 0, fully solid.
-        const Real Tinit = T0 + m_weather(0.0).Ta;
+        const Real Tinit = T0 + m_weather(m_cfg.tStart).Ta;
         m_TOld = Tinit;
         m_T.getSolution() = Tinit;
         updateCoefficients();
-        updateWeather(0.0);
+        updateWeather(m_cfg.tStart);
 
         const auto& L = m_cfg.labels;
         m_topArea = integral(m_one, L.top);
@@ -558,12 +573,12 @@ namespace Rodin::Examples::Heat
 
       int run()
       {
-        const int steps = static_cast<int>(m_cfg.tEnd / m_cfg.dt + 0.5);
+        const int steps = static_cast<int>((m_cfg.tEnd - m_cfg.tStart) / m_cfg.dt + 0.5);
         m_problem.assemble();  // seeds the SNES iterate from the trial solutions
-        m_xdmf.write(0.0).flush();
+        m_xdmf.write(m_cfg.tStart).flush();
         for (int n = 1; n <= steps; ++n)
         {
-          m_t = n * m_cfg.dt;
+          m_t = m_cfg.tStart + n * m_cfg.dt;
 
           const auto t0 = Clock::now();
           updateWeather(m_t);     // boundary data at t^{n+1}
@@ -956,13 +971,12 @@ namespace Rodin::Examples::Heat
         m_tau2.project(RealFunction([rho, tau1](const Point& p) {
           const Real h = cellSize(p);
           return rho * h * h / (4.0 * tau1(p)); }));
-        // Energy: the advective term is H'(T) u.grad T, so the capacity in
-        // tau_T and in its weight is H'(T^n) (rho c_p outside the mush; inside,
-        // the advection of latent heat, ~100 x rho c_p, was left unstabilised).
+        // Energy: the capacity in tau_T and in its weight is that of the
+        // advected enthalpy at T^n: rho c_p, or H' with -pcm_latent_advection 1.
         m_rhoCpTauT.project(RealFunction([this, &m](const Point& p) {
           const auto u = m_uOld.getValue(p);
           const Real T = m_TOld.getValue(p), h = cellSize(p);
-          const Real C = m.dH(T), alpha = m.kappa(T) / C;
+          const Real C = m_cfg.latentAdvection ? m.dH(T) : m.dHs(T), alpha = m.kappa(T) / C;
           return C / (4.0 * alpha / (h * h) + 2.0 * std::sqrt(Math::dot(u, u)) / h); }));
 
         const auto& U = m_u.getSolution();
@@ -993,10 +1007,10 @@ namespace Rodin::Examples::Heat
           return RealFunction([&m, &Tq, f](const Point& p) { return (m.*f)(Tq.getValue(p)); });
         };
         // Carman-Kozeny, -pcm_darcy:
-        //   0: A(T^{n+1}) with its exact derivative A'(T) dT u in the Jacobian;
+        //   0: A(T^{n+1}) with its exact derivative A'(T) dT u in the Jacobian
+        //      (default);
         //   1: A(T^n) (explicit);
-        //   2: A(T^{n+1}) in the residual, A'(T) dT u dropped from the Jacobian
-        //      (default).
+        //   2: A(T^{n+1}) in the residual, A'(T) dT u dropped from the Jacobian.
         // A'(T) u is ~5x the buoyancy per kelvin in the mush: with mode 0 the
         // linearised coupling sends Newton far off; mode 1 oscillates in time
         // when the top of the layer turns fully liquid (A drops from ~1e5 to 0
@@ -1007,12 +1021,13 @@ namespace Rodin::Examples::Heat
           return m.A(darcy == 1 ? Tn.getValue(p) : Tq.getValue(p)); });
         const auto cdA = RealFunction([&m, &Tq, darcy](const Point& p) {
           return darcy == 0 ? m.dA(Tq.getValue(p)) : 0.0; });
-        const auto cH1 = atT(&PCM::dH), cH2 = atT(&PCM::d2H);
-        // H - H(T_high) in the conservative term: any constant keeps
-        // int div((H - c) u) = 0; referred to the liquid, where u != 0, it is
-        // the sensible part only (u ~ 0 in the mush and solid by Darcy).
-        const Real Href = m.H(m.Thigh());
-        const auto cH0 = RealFunction([&m, &Tq, Href](const Point& p) { return m.H(Tq.getValue(p)) - Href; });
+        // Advected enthalpy H_a (sensible, or H) referred to the liquid at T_high.
+        const bool lat = m_cfg.latentAdvection;
+        const auto cH1 = atT(lat ? &PCM::dH : &PCM::dHs);
+        const Real Href = lat ? m.H(m.Thigh()) : m.Hs(m.Thigh());
+        const auto cH0 = RealFunction([&m, &Tq, Href, lat](const Point& p) {
+          const Real t = Tq.getValue(p);
+          return (lat ? m.H(t) : m.Hs(t)) - Href; });
         const auto cK = atT(&PCM::kappa), cdK = atT(&PCM::dKappa);
         const Real aWall = m.C / m.eps, kAl = m_cfg.alK;  // plates: Darcy of the solid PCM
 
@@ -1035,6 +1050,7 @@ namespace Rodin::Examples::Heat
         const auto advT = Dot(U, Grad(Th));                                     // U.grad T
         const auto dAdvT = Dot(U, Grad(dT));                                    // its derivative,
         const auto dAdvU = Dot(du, Grad(Th));                                   // split by field
+        const auto subW = Dot(m_tau1 * (Grad(P) - m_piGradP.get()), Grad(m_w)); // tau_1 (grad p - Pi).grad w
 
         m_problem =
             // ---- Jacobian: momentum --------------------------------------
@@ -1055,15 +1071,16 @@ namespace Rodin::Examples::Heat
             + epsP * Integral(dp, m_q)
 
             // ---- Jacobian: energy ----------------------------------------
-            + Integral(cH1 * dAdvT, m_w).over(PCM)  // M_L H'(T)/dt: added in jacobian()
-            + Integral(cH2 * advT * dT, m_w).over(PCM)  // H''(T) dT u.grad T
-            + Integral(cH1 * Div(U) * dT, m_w).over(PCM)    // conservative form:
-            + Integral(Div(du), cH0 * m_w).over(PCM)        //   H(T) div u
+            // M_L H'(T)/dt: added in jacobian(). -(H_a - H_ref) a.grad w:
+            - Integral(cH1 * dT, streamW).over(PCM)
+            + (1.0 / rho) * Integral(cH1 * dT, subW).over(PCM)
+            - Integral(cH0 * du, Grad(m_w)).over(PCM)
+            + (1.0 / rho) * Integral(Grad(dp), (cH0 * m_tau1) * Grad(m_w)).over(PCM)
             + Integral(m_rhoCpTauT * dAdvT, streamW).over(PCM)
             + Integral(cK * Grad(dT), Grad(m_w)).over(PCM)
             + kAl * Integral(Grad(dT), Grad(m_w)).over(AL)
             + Integral(cdK * dT, Dot(Grad(Th), Grad(m_w))).over(PCM)
-            + Integral(dAdvU, cH1 * m_w + m_rhoCpTauT * streamW).over(PCM)
+            + Integral(dAdvU, m_rhoCpTauT * streamW).over(PCM)
             + Integral(m_rhoCpTauT * (advT - m_piAdv.get()) * du, Grad(m_w)).over(PCM)
             + BoundaryIntegral((m_ha + 4.0 * sigmaEps * Pow(Th, 3)) * dT, m_w).over(L.top)
             + hB * BoundaryIntegral(dT, m_w).over(L.bottom)
@@ -1083,8 +1100,9 @@ namespace Rodin::Examples::Heat
             + epsP * Integral(P, m_q)
 
             // ---- Residual: energy ----------------------------------------
-            + Integral(cH1 * advT, m_w).over(PCM)   // dH/dt: lumped, added in residual()
-            + Integral(cH0 * Div(U), m_w).over(PCM) // div(H u) = u.grad H + H div u
+            // dH/dt: lumped, added in residual(). div(H_a a), weak:
+            - Integral(cH0 * U, Grad(m_w)).over(PCM)
+            + (1.0 / rho) * Integral((cH0 * m_tau1) * (Grad(P) - m_piGradP.get()), Grad(m_w)).over(PCM)
             + Integral(m_rhoCpTauT * (advT - m_piAdv.get()), streamW).over(PCM)
             + Integral(cK * Grad(Th), Grad(m_w)).over(PCM)
             + kAl * Integral(Dot(Grad(Th), Grad(m_w))).over(AL)
@@ -1282,6 +1300,7 @@ int main(int argc, char** argv)
     cfg.alCells = static_cast<size_t>(alCells);
     PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-pcm_dt", &cfg.dt, PETSC_NULLPTR);
     PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-pcm_tend", &cfg.tEnd, PETSC_NULLPTR);
+    PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-pcm_tstart", &cfg.tStart, PETSC_NULLPTR);
     PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-pcm_angle", &cfg.angle, PETSC_NULLPTR);
     PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-pcm_mushy", &cfg.pcm.dT, PETSC_NULLPTR);
     PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-pcm_round", &cfg.pcm.round, PETSC_NULLPTR);
@@ -1297,6 +1316,9 @@ int main(int argc, char** argv)
     PetscInt darcy = cfg.darcy;
     PetscOptionsGetInt(PETSC_NULLPTR, PETSC_NULLPTR, "-pcm_darcy", &darcy, PETSC_NULLPTR);
     cfg.darcy = static_cast<int>(darcy);
+    PetscBool latent = cfg.latentAdvection ? PETSC_TRUE : PETSC_FALSE;
+    PetscOptionsGetBool(PETSC_NULLPTR, PETSC_NULLPTR, "-pcm_latent_advection", &latent, PETSC_NULLPTR);
+    cfg.latentAdvection = latent == PETSC_TRUE;
     PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-pcm_attic_ach", &cfg.atticAch, PETSC_NULLPTR);
     PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-pcm_attic_height", &cfg.atticHeight, PETSC_NULLPTR);
     PetscInt every = cfg.outputEvery, print = cfg.printEvery;
