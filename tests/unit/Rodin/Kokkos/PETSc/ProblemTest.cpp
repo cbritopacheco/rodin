@@ -536,6 +536,49 @@ namespace Rodin::Tests::Unit
   }
 
   /**
+   * @brief The eliminated entries follow the fixed degrees of freedom when
+   * they move between assemblies while the pattern is kept.
+   */
+  void checkMovedConstraints(const HostMesh& source)
+  {
+    const size_t d = source.getDimension();
+    DeviceMesh mesh(TestContext{}, source);
+    P1 fes(mesh);
+    TrialFunction su(fes);
+    TestFunction sv(fes);
+    PETSc::Variational::TrialFunction pu(fes);
+    PETSc::Variational::TestFunction pv(fes);
+    RealFunction f(
+      KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real { return p.x() + p.y(); });
+    RealFunction g(
+      KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real { return 2 - p.x(); });
+    Problem sp(su, sv);
+    sp = Integral(Grad(su), Grad(sv)) + Integral(su, sv) - Integral(f, sv) +
+      DirichletBC(su, g).on(1);
+    Problem pp(pu, pv);
+    pp = Integral(Grad(pu), Grad(pv)) + Integral(pu, pv) - Integral(f, pv) +
+      DirichletBC(pu, g).on(1);
+    expectSameSystem(sp, pp);
+    expectSameSystem(sp, pp);
+    auto& axb = pp.getLinearSystem();
+    PetscObjectState state = 0;
+    ASSERT_EQ(MatGetNonzeroState(axb.getOperator(), &state), PETSC_SUCCESS);
+
+    // Other faces carry the condition, then the first ones again.
+    const Index faces = mesh.getFaceCount();
+    for (Index i = 0; i < faces; ++i)
+      mesh.setAttribute({d - 1, i}, Geometry::Attribute(1 + (i + 1) % 3));
+    expectSameSystem(sp, pp);
+    expectSameSystem(sp, pp);
+    for (Index i = 0; i < faces; ++i)
+      mesh.setAttribute({d - 1, i}, Geometry::Attribute(1 + i % 3));
+    expectSameSystem(sp, pp);
+    PetscObjectState again = 0;
+    ASSERT_EQ(MatGetNonzeroState(axb.getOperator(), &again), PETSC_SUCCESS);
+    EXPECT_EQ(state, again);
+  }
+
+  /**
    * @brief Unconstrained right-hand sides, summed from the entries of the
    * linear integrators in place, match the sparse device assembly when
    * assembled again and when the linear integrators change.
@@ -733,6 +776,16 @@ namespace Rodin::Tests::Unit
   TEST(Kokkos_PETSc_Problem, MovedAttributesOnMixedMesh)
   {
     checkMovedAttributes(withFaces(makeMixedMesh()));
+  }
+
+  TEST(Kokkos_PETSc_Problem, MovedConstraints)
+  {
+    checkMovedConstraints(withFaces(makeTriangleMesh()));
+  }
+
+  TEST(Kokkos_PETSc_Problem, MovedConstraintsOnMixedMesh)
+  {
+    checkMovedConstraints(withFaces(makeMixedMesh()));
   }
 
   TEST(Kokkos_PETSc_Problem, UnconstrainedOnTriangles)

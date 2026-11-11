@@ -271,6 +271,29 @@ namespace Rodin::Assembly::Internal
      */
     ::Kokkos::View<unsigned char*, MemorySpace> imposed;
 
+    /// @brief Revision of the pattern, increased when the coordinates change.
+    std::uint64_t pattern = 0;
+
+    /// @brief Fixed degrees of freedom of the last assembly, on the host.
+    std::vector<unsigned char> fixedMask;
+
+    /// @brief Revision of fixedMask, increased when it changes.
+    std::uint64_t fixedRevision = 0;
+
+    /// @brief Revisions of the pattern and of the fixed degrees of freedom
+    /// the eliminated entries were listed for.
+    std::pair<std::uint64_t, std::uint64_t> elimination{
+      std::numeric_limits<std::uint64_t>::max(), 0};
+
+    /// @brief Number of entries the eliminated entries were listed in.
+    size_t eliminationCount = 0;
+
+    /// @brief Entries of a free row and a fixed column, by increasing position.
+    ::Kokkos::View<Index*, MemorySpace> movedEntries;
+
+    /// @brief Entries of a fixed row.
+    ::Kokkos::View<Index*, MemorySpace> clearedEntries;
+
     /// @brief Whether the matrix was preallocated with the expanded pattern.
     bool expanded = false;
 
@@ -851,11 +874,13 @@ namespace Rodin::Assembly::Internal
           synchronize(cache, mask, values);
           copy(cache.fixed, mask, "Rodin fixed DOFs");
           copy(cache.fixedValues, values, "Rodin fixed values");
+          keepFixed(cache, mask);
         }
         else if (fixed || expanded)
         {
           copy(cache.fixed, m_constraints.getFixed(), "Rodin fixed DOFs");
           copy(cache.fixedValues, m_constraints.getValues(), "Rodin fixed values");
+          keepFixed(cache, m_constraints.getFixed());
         }
         if (expanded)
           copy(cache.imposed, constraints.imposed, "Rodin imposed DOFs");
@@ -1134,6 +1159,118 @@ namespace Rodin::Assembly::Internal
           Elimination<Indices, Fixed, Values, Scalars>{
             rows, cols, fixed, values, coo, res.rows, res.values, res.offset});
       }
+
+      /**
+       * @brief Lists the entries of a free row and a fixed column, or those of
+       * a fixed row, at their scanned positions.
+       */
+      template <class Indices, class Fixed>
+      struct EntrySelection
+      {
+        Indices rows; ///< Row coordinates.
+        Indices cols; ///< Column coordinates.
+        Fixed fixed; ///< Flags of the fixed degrees of freedom.
+        bool moved; ///< Whether the entries of a free row and a fixed column are listed.
+        ::Kokkos::View<Index*, MemorySpace> res; ///< Receives the entries, empty to count them.
+
+        /**
+         * @brief Lists the entry when it is selected.
+         * @param e Position of the entry in the list.
+         * @param update Number of selected entries before @p e, incremented.
+         * @param final Whether the pass writes the results.
+         */
+        KOKKOS_INLINE_FUNCTION void operator()(
+          const size_t e, size_t& update, const bool final) const
+        {
+          const bool free = !fixed(rows(e));
+          if (moved ? !(free && fixed(cols(e))) : free)
+            return;
+          if (final && res.extent(0) > 0)
+            res(update) = static_cast<Index>(e);
+          ++update;
+        }
+      };
+
+      /**
+       * @brief Lists by increasing position the entries of a free row and a
+       * fixed column, or those of a fixed row.
+       * @param execution Execution space instance of the kernels.
+       * @param count Number of entries in the list.
+       * @param rows Row coordinates.
+       * @param cols Column coordinates.
+       * @param fixed Flags of the fixed degrees of freedom.
+       * @param moved Whether the entries whose value moves to the right-hand
+       * side are listed, rather than those of a fixed row.
+       * @return Positions of the selected entries.
+       */
+      template <class Indices, class Fixed>
+      static ::Kokkos::View<Index*, MemorySpace> selectEntries(
+        const ExecutionSpace& execution, size_t count, const Indices& rows,
+        const Indices& cols, const Fixed& fixed, bool moved)
+      {
+        using Selection = EntrySelection<Indices, Fixed>;
+        size_t selected = 0;
+        ::Kokkos::parallel_scan("Rodin::Assembly::Kokkos::PETSc::countSelected",
+          Range(execution, 0, count), Selection{rows, cols, fixed, moved, {}}, selected);
+        ::Kokkos::View<Index*, MemorySpace> res(
+          ::Kokkos::view_alloc(execution, ::Kokkos::WithoutInitializing,
+            std::string("Rodin eliminated entries")),
+          selected);
+        if (selected > 0)
+        {
+          ::Kokkos::parallel_scan("Rodin::Assembly::Kokkos::PETSc::select",
+            Range(execution, 0, count), Selection{rows, cols, fixed, moved, res});
+        }
+        return res;
+      }
+
+      /**
+       * @brief Moves the value of a listed entry of a free row and a fixed
+       * column to the right-hand side.
+       */
+      template <class Indices, class Values, class Scalars>
+      struct MovedElimination
+      {
+        ::Kokkos::View<Index*, MemorySpace> entries; ///< Entries, by increasing position.
+        Indices rows; ///< Row coordinates.
+        Indices cols; ///< Column coordinates.
+        Values values; ///< Fixed values, per degree of freedom.
+        Scalars coo; ///< Values of the coordinate list.
+
+        /// @brief Receives the rows of the moved values.
+        ::Kokkos::View<Index*, MemorySpace> resRows;
+        ::Kokkos::View<Real*, MemorySpace> resValues; ///< Receives the moved values.
+        size_t offset; ///< Position of the first reserved contribution.
+
+        /**
+         * @brief Moves the value of an entry to the right-hand side.
+         * @param k Rank of the entry among the listed ones.
+         */
+        KOKKOS_INLINE_FUNCTION void operator()(const size_t k) const
+        {
+          const Index e = entries(k);
+          resRows(offset + k) = rows(e);
+          resValues(offset + k) = -(coo(e) * values(cols(e)));
+          coo(e) = 0;
+        }
+      };
+
+      /// @brief Clears a listed entry of a fixed row.
+      template <class Scalars>
+      struct ClearedElimination
+      {
+        ::Kokkos::View<Index*, MemorySpace> entries; ///< Entries of a fixed row.
+        Scalars coo; ///< Values of the coordinate list.
+
+        /**
+         * @brief Clears an entry.
+         * @param k Rank of the entry among the listed ones.
+         */
+        KOKKOS_INLINE_FUNCTION void operator()(const size_t k) const
+        {
+          coo(entries(k)) = 0;
+        }
+      };
 
       /**
        * @brief Number of contributions of an entry of a linear integrator.
@@ -2083,6 +2220,20 @@ namespace Rodin::Assembly::Internal
       }
 
       /**
+       * @brief Keeps the fixed degrees of freedom of the assembly, whose
+       * revision increases when they change.
+       * @param cache Buffers and pattern of the previous assemblies.
+       * @param mask Flags of the fixed degrees of freedom.
+       */
+      static void keepFixed(CacheType& cache, const std::vector<unsigned char>& mask)
+      {
+        if (cache.fixedMask == mask)
+          return;
+        cache.fixedMask = mask;
+        ++cache.fixedRevision;
+      }
+
+      /**
        * @brief Integrates the local integrators into the coordinate list.
        * @param cache Buffers and pattern of the previous assemblies.
        * @param fixed Whether the fixed degrees of freedom are eliminated.
@@ -2200,6 +2351,7 @@ namespace Rodin::Assembly::Internal
               return distinctStarts(m_execution, cache.rows, cache.cols, order);
             });
             cache.matrix = -1;
+            ++cache.pattern;
           }
         }
         else if (index)
@@ -2229,17 +2381,51 @@ namespace Rodin::Assembly::Internal
               return distinctStarts(m_execution, cache.rows, cache.cols, order);
             });
             cache.matrix = -1;
+            ++cache.pattern;
           }
         }
         fillDiagonal(
           m_execution, tail, diagonal, fixed, cache.fixed, m_owned, cache.values);
         if (fixed)
+          eliminateListed(cache, tail);
+      }
+
+      /**
+       * @brief Eliminates the fixed degrees of freedom from the listed
+       * coordinates, as eliminate() does.
+       *
+       * The entries a fixed degree of freedom reaches, a small part of the
+       * list, depend on the pattern and on the fixed degrees of freedom
+       * alone. They are listed again when one of them changes, and only
+       * they are visited at the other assemblies.
+       * @param cache Buffers and pattern of the previous assemblies.
+       * @param count Number of entries eliminated, at the start of the list.
+       */
+      void eliminateListed(CacheType& cache, size_t count) const
+      {
+        const std::pair key{cache.pattern, cache.fixedRevision};
+        if (cache.elimination != key || cache.eliminationCount != count)
         {
-          const size_t moved =
-            countEliminated(m_execution, tail, cache.rows, cache.cols, cache.fixed);
-          eliminate(m_execution, tail, cache.rows, cache.cols, cache.fixed,
-            cache.fixedValues, cache.values, reserve(cache, moved));
+          cache.movedEntries =
+            selectEntries(m_execution, count, cache.rows, cache.cols, cache.fixed, true);
+          cache.clearedEntries =
+            selectEntries(m_execution, count, cache.rows, cache.cols, cache.fixed, false);
+          cache.elimination = key;
+          cache.eliminationCount = count;
         }
+        const size_t moved = cache.movedEntries.extent(0);
+        const Contributions res = reserve(cache, moved);
+        using Indices = decltype(cache.rows);
+        using Values = decltype(cache.fixedValues);
+        using Scalars = decltype(cache.values);
+        ::Kokkos::parallel_for("Rodin::Assembly::Kokkos::PETSc::eliminateMoved",
+          Range(m_execution, 0, moved),
+          MovedElimination<Indices, Values, Scalars>{cache.movedEntries, cache.rows,
+            cache.cols, cache.fixedValues, cache.values, res.rows, res.values,
+            res.offset});
+        ::Kokkos::parallel_for("Rodin::Assembly::Kokkos::PETSc::eliminateCleared",
+          Range(m_execution, 0, cache.clearedEntries.extent(0)),
+          ClearedElimination<Scalars>{cache.clearedEntries, cache.values});
       }
 
       /**
