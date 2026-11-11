@@ -139,6 +139,17 @@ namespace Rodin::Geometry
       }
 
       /**
+       * @brief Gets the resident copies of arrays read by kernels on this
+       * mesh, such as the coefficients of grid functions.
+       * @returns Transfer cache of the shard.
+       */
+      Rodin::Kokkos::Internal::TransferCache<MemorySpace>&
+      getTransferCache() const
+      {
+        return m_shard.getTransferCache();
+      }
+
+      /**
        * @returns Borrowed resident data with the ownership of the entities;
        * kernels must finish before owner replacement.
        */

@@ -13,6 +13,7 @@
  */
 
 #include <algorithm>
+#include <cassert>
 #include <cstdint>
 #include <list>
 #include <mutex>
@@ -152,10 +153,12 @@ namespace Rodin::Kokkos::Internal
    *
    * Keeps the arrays last uploaded together with a host snapshot of their
    * content. Uploading the same content again returns the resident copy
-   * without any transfer. Another content of the same size goes to a copy
-   * nobody references any more, so that neither an allocation nor a
-   * release, both waiting for the device on CUDA, happens between kernel
-   * launches. The copies are read only. A copy of the cache starts empty.
+   * without any transfer. Arrays whose content lives elsewhere, such as in
+   * a PETSc vector, are kept under a key identifying that content instead
+   * of a snapshot. Another content of the same size goes to a copy nobody
+   * references any more, so that neither an allocation nor a release, both
+   * waiting for the device on CUDA, happens between kernel launches. The
+   * copies are read only. A copy of the cache starts empty.
    *
    * @tparam MemorySpace Memory space of the copies.
    */
@@ -165,6 +168,9 @@ namespace Rodin::Kokkos::Internal
     public:
       /// @brief Resident array type.
       using Array = ::Kokkos::View<Real*, MemorySpace>;
+
+      /// @brief Identity of a content kept outside the cache.
+      using Key = std::vector<std::uint64_t>;
 
       /// @brief Largest number of arrays kept.
       static constexpr size_t Capacity = 4;
@@ -209,66 +215,66 @@ namespace Rodin::Kokkos::Internal
         ++m_clock;
         for (auto& entry : m_entries)
         {
-          if (entry.snapshot == values)
+          if (entry.key.empty() && entry.snapshot == values)
           {
             entry.used = m_clock;
             return entry.array;
           }
         }
-        // A free copy of the same size is overwritten in place; otherwise
-        // the least recently used free copy is released.
-        Entry* target = nullptr;
-        Entry* oldest = nullptr;
-        for (auto& entry : m_entries)
-        {
-          if (entry.array.use_count() != 1)
-            continue;
-          if (entry.snapshot.size() == values.size() &&
-            (!target || entry.used < target->used))
-            target = &entry;
-          if (!oldest || entry.used < oldest->used)
-            oldest = &entry;
-        }
+        Entry* target = acquire(execution, values.size(), label);
         if (!target)
         {
-          if (m_entries.size() < Capacity)
+          // Every copy is referenced: this one is not kept.
+          Array array(
+            ::Kokkos::view_alloc(execution, ::Kokkos::WithoutInitializing, label),
+            values.size());
+          ::Kokkos::deep_copy(execution, array, host(values));
+          execution.fence("Rodin transfer");
+          return array;
+        }
+        target->snapshot = std::move(values);
+        ::Kokkos::deep_copy(execution, target->array, host(target->snapshot));
+        return target->array;
+      }
+
+      /**
+       * @brief Gets a resident array identified by a key, filled on the
+       * device when no array is kept under that key.
+       * @param execution Execution instance ordering the fill.
+       * @param key Identity of the content, not empty: equal keys must
+       * stand for equal contents.
+       * @param size Entry count.
+       * @param label Label of a new allocation.
+       * @param fill Writes the entries of the array it is given, ordered on
+       * @p execution.
+       * @returns Resident array, to be read only.
+       */
+      template <class Execution, class Fill>
+      Array upload(const Execution& execution, Key key, size_t size,
+        const std::string& label, Fill&& fill)
+      {
+        assert(!key.empty());
+        std::lock_guard<std::mutex> lock(m_mutex);
+        ++m_clock;
+        for (auto& entry : m_entries)
+        {
+          if (entry.key == key && entry.array.extent(0) == size)
           {
-            target = &m_entries.emplace_back();
-          }
-          else if (oldest)
-          {
-            target = oldest;
-          }
-          else
-          {
-            // Every copy is referenced: this one is not kept.
-            Array array(
-              ::Kokkos::view_alloc(execution, ::Kokkos::WithoutInitializing, label),
-              values.size());
-            ::Kokkos::deep_copy(execution, array,
-              ::Kokkos::View<const Real*, ::Kokkos::HostSpace,
-                ::Kokkos::MemoryTraits<::Kokkos::Unmanaged>>(
-                values.data(), values.size()));
-            execution.fence("Rodin transfer");
-            return array;
-          }
-          if (target->array.extent(0) != values.size())
-          {
-            target->array = Array();
-            target->array =
-              Array(::Kokkos::view_alloc(execution, ::Kokkos::WithoutInitializing, label),
-                values.size());
+            entry.used = m_clock;
+            return entry.array;
           }
         }
-        // A former transfer may still read the snapshot being replaced.
-        if (!target->snapshot.empty())
-          execution.fence("Rodin transfer reuse");
-        target->snapshot = std::move(values);
-        target->used = m_clock;
-        ::Kokkos::deep_copy(execution, target->array,
-          ::Kokkos::View<const Real*, ::Kokkos::HostSpace,
-            ::Kokkos::MemoryTraits<::Kokkos::Unmanaged>>(
-            target->snapshot.data(), target->snapshot.size()));
+        Entry* target = acquire(execution, size, label);
+        if (!target)
+        {
+          // Every copy is referenced: this one is not kept.
+          Array array(
+            ::Kokkos::view_alloc(execution, ::Kokkos::WithoutInitializing, label), size);
+          fill(array);
+          return array;
+        }
+        fill(target->array);
+        target->key = std::move(key);
         return target->array;
       }
 
@@ -276,9 +282,66 @@ namespace Rodin::Kokkos::Internal
       struct Entry
       {
         std::vector<Real> snapshot;
+        Key key;
         Array array;
         std::uint64_t used = 0;
       };
+
+      /// @brief Unmanaged host view of host values.
+      static auto host(const std::vector<Real>& values)
+      {
+        return ::Kokkos::View<const Real*, ::Kokkos::HostSpace,
+          ::Kokkos::MemoryTraits<::Kokkos::Unmanaged>>(values.data(), values.size());
+      }
+
+      /**
+       * @brief Gets the entry receiving a new content, emptied.
+       * @param execution Execution instance ordering the transfers.
+       * @param size Entry count of the content.
+       * @param label Label of a new allocation.
+       * @returns Entry holding an array of the size, or null when every
+       * copy is referenced.
+       *
+       * A free copy of the same size is overwritten in place; otherwise the
+       * least recently used free copy is released.
+       */
+      template <class Execution>
+      Entry* acquire(const Execution& execution, size_t size, const std::string& label)
+      {
+        Entry* target = nullptr;
+        Entry* oldest = nullptr;
+        for (auto& entry : m_entries)
+        {
+          if (entry.array.use_count() != 1)
+            continue;
+          if (entry.array.extent(0) == size && (!target || entry.used < target->used))
+            target = &entry;
+          if (!oldest || entry.used < oldest->used)
+            oldest = &entry;
+        }
+        if (!target)
+        {
+          if (m_entries.size() < Capacity)
+            target = &m_entries.emplace_back();
+          else if (oldest)
+            target = oldest;
+          else
+            return nullptr;
+          if (target->array.extent(0) != size || !target->array.data())
+          {
+            target->array = Array();
+            target->array = Array(
+              ::Kokkos::view_alloc(execution, ::Kokkos::WithoutInitializing, label), size);
+          }
+        }
+        // A former transfer may still read the snapshot being replaced.
+        if (!target->snapshot.empty())
+          execution.fence("Rodin transfer reuse");
+        target->snapshot.clear();
+        target->key.clear();
+        target->used = m_clock;
+        return target;
+      }
 
       std::mutex m_mutex;
       std::list<Entry> m_entries;

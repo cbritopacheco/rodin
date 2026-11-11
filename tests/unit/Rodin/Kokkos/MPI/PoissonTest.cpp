@@ -79,6 +79,23 @@ namespace Rodin::Tests::Unit
     solve(dq);
     expectSameSystem(hq, dq);
     expectSameVector(hw.getSolution().getData(), dw.getSolution().getData());
+
+    // Coefficients written again through PETSc, owned entries then ghosts,
+    // are read again.
+    for (::Vec x : {hs.getData(), ds.getData()})
+    {
+      ASSERT_EQ(VecScale(x, 2), PETSC_SUCCESS);
+      ASSERT_EQ(VecShift(x, 1), PETSC_SUCCESS);
+      ASSERT_EQ(VecGhostUpdateBegin(x, INSERT_VALUES, SCATTER_FORWARD), PETSC_SUCCESS);
+      ASSERT_EQ(VecGhostUpdateEnd(x, INSERT_VALUES, SCATTER_FORWARD), PETSC_SUCCESS);
+    }
+    // An assembled problem is not assembled again by its solver.
+    hq.assemble();
+    dq.assemble();
+    solve(hq);
+    solve(dq);
+    expectSameSystem(hq, dq);
+    expectSameVector(hw.getSolution().getData(), dw.getSolution().getData());
   }
 
   /// @brief A stabilized P1/P1 Stokes problem matches the host.

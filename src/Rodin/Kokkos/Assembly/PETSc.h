@@ -3770,8 +3770,12 @@ namespace Rodin::Kokkos::Variational
     /**
      * @param fes Device space of the grid function.
      * @param data Coefficients of the grid function.
-     * @returns Device coefficients in the local numbering, after transfer
-     * completion.
+     * @returns Device coefficients in the local numbering, to be read only.
+     *
+     * The copy is kept in the transfer cache of the mesh under the PETSc
+     * states of the vector and of its local form, so that the integrators
+     * reading the same grid function share one copy until PETSc writes the
+     * vector again.
      */
     template <class FES>
     static ::Kokkos::View<Real*, typename FES::MeshType::MemorySpace> upload(
@@ -3780,11 +3784,13 @@ namespace Rodin::Kokkos::Variational
       using MemorySpace = typename FES::MeshType::MemorySpace;
       using Unmanaged = ::Kokkos::MemoryTraits<::Kokkos::Unmanaged>;
       using ContextType = typename FES::MeshType::ContextType;
+      using Array = ::Kokkos::View<Real*, MemorySpace>;
+      constexpr bool distributed = ::Rodin::Context::IsMPI<ContextType>::value;
       const auto& execution = fes.getMesh().getContext().getExecutionSpace();
 
       ::Vec form = data;
       PetscErrorCode ierr = PETSC_SUCCESS;
-      if constexpr (::Rodin::Context::IsMPI<ContextType>::value)
+      if constexpr (distributed)
       {
         ierr = VecGhostGetLocalForm(data, &form);
         assert(ierr == PETSC_SUCCESS);
@@ -3798,72 +3804,105 @@ namespace Rodin::Kokkos::Variational
       PetscInt count = 0;
       ierr = VecGetLocalSize(form, &count);
       assert(ierr == PETSC_SUCCESS);
+      size_t size = static_cast<size_t>(count);
+      if constexpr (distributed)
+        size = fes.getLocalSize();
 
-      ::Kokkos::View<Real*, MemorySpace> values(
-        ::Kokkos::view_alloc(execution, ::Kokkos::WithoutInitializing,
-          std::string("Rodin PETSc grid function")),
-        count);
-      const PetscScalar* array = nullptr;
-      PetscMemType type;
-      ierr = VecGetArrayReadAndMemType(form, &array, &type);
+      // Writes through PETSc raise the state of the vector they write,
+      // the global vector for its owned entries and the local form for the
+      // ghost updates.
+      PetscObjectId dataId = 0, formId = 0;
+      PetscObjectState dataState = 0, formState = 0;
+      ierr = PetscObjectGetId(reinterpret_cast<::PetscObject>(data), &dataId);
       assert(ierr == PETSC_SUCCESS);
-      if (PetscMemTypeHost(type))
-      {
-        ::Kokkos::deep_copy(execution, values,
-          ::Kokkos::View<const PetscScalar*, ::Kokkos::HostSpace, Unmanaged>(
+      ierr = PetscObjectStateGet(reinterpret_cast<::PetscObject>(data), &dataState);
+      assert(ierr == PETSC_SUCCESS);
+      ierr = PetscObjectGetId(reinterpret_cast<::PetscObject>(form), &formId);
+      assert(ierr == PETSC_SUCCESS);
+      ierr = PetscObjectStateGet(reinterpret_cast<::PetscObject>(form), &formState);
+      assert(ierr == PETSC_SUCCESS);
+      typename ::Rodin::Kokkos::Internal::TransferCache<MemorySpace>::Key key{
+        static_cast<std::uint64_t>(dataId), static_cast<std::uint64_t>(dataState),
+        static_cast<std::uint64_t>(formId), static_cast<std::uint64_t>(formState),
+        static_cast<std::uint64_t>(reinterpret_cast<std::uintptr_t>(&fes))};
+
+      const auto fill = [&](const Array& res) {
+        const PetscScalar* array = nullptr;
+        PetscMemType type;
+        PetscErrorCode error = VecGetArrayReadAndMemType(form, &array, &type);
+        assert(error == PETSC_SUCCESS);
+        // The local form, resident: read in place when PETSc keeps it in the
+        // memory space of the mesh, copied otherwise.
+        using Device = ::Kokkos::DefaultExecutionSpace::memory_space;
+        ::Kokkos::View<const Real*, MemorySpace> values;
+        const auto read = [&](const auto& source) {
+          if constexpr (!distributed)
+          {
+            ::Kokkos::deep_copy(execution, res, source);
+          }
+          else if constexpr (std::is_same_v<
+                               typename std::decay_t<decltype(source)>::memory_space,
+                               MemorySpace>)
+          {
+            values = source;
+          }
+          else
+          {
+            ::Kokkos::View<Real*, MemorySpace> copy(
+              ::Kokkos::view_alloc(execution, ::Kokkos::WithoutInitializing,
+                std::string("Rodin PETSc grid function")),
+              count);
+            ::Kokkos::deep_copy(execution, copy, source);
+            values = copy;
+          }
+        };
+        if (PetscMemTypeHost(type))
+          read(::Kokkos::View<const PetscScalar*, ::Kokkos::HostSpace, Unmanaged>(
             array, count));
-      }
-      else
-      {
-        ::Kokkos::deep_copy(execution, values,
-          ::Kokkos::View<const PetscScalar*,
-            ::Kokkos::DefaultExecutionSpace::memory_space, Unmanaged>(array, count));
-      }
-      // PETSc may release the array once it is restored.
-      execution.fence("Rodin PETSc grid function transfer");
-      ierr = VecRestoreArrayReadAndMemType(form, &array);
-      assert(ierr == PETSC_SUCCESS);
+        else
+          read(::Kokkos::View<const PetscScalar*, Device, Unmanaged>(array, count));
+        if constexpr (distributed)
+        {
+          Index begin = 0, end = 0;
+          fes.getOwnershipRange(begin, end);
+          const Index owned = end - begin;
+          Index ghosts = 0;
+          auto position = ::Rodin::Kokkos::Internal::upload<Index>(
+            execution, size, "Rodin PETSc grid function positions", [&](Index* out) {
+              for (size_t i = 0; i < size; ++i)
+              {
+                const Index g = fes.getGlobalIndex(static_cast<Index>(i));
+                out[i] = (g >= begin && g < end) ? g - begin : owned + ghosts++;
+              }
+            });
+          if (owned + ghosts != static_cast<Index>(count))
+          {
+            error = VecRestoreArrayReadAndMemType(form, &array);
+            assert(error == PETSC_SUCCESS);
+            Alert::Exception()
+              << "The PETSc vector of a distributed grid function does not have "
+              << "the layout of its space." << Alert::Raise;
+          }
+          ::Kokkos::parallel_for("Rodin PETSc grid function gather",
+            ::Kokkos::RangePolicy<std::decay_t<decltype(execution)>>(execution, 0, size),
+            GhostedCoefficientsGather<MemorySpace>{res, values, position});
+        }
+        // PETSc may release the array once it is restored.
+        execution.fence("Rodin PETSc grid function transfer");
+        error = VecRestoreArrayReadAndMemType(form, &array);
+        assert(error == PETSC_SUCCESS);
+        (void)error;
+      };
+      const Array res = fes.getMesh().getTransferCache().upload(
+        execution, std::move(key), size, "Rodin grid function", fill);
 
-      if constexpr (::Rodin::Context::IsMPI<ContextType>::value)
+      if constexpr (distributed)
       {
         ierr = VecGhostRestoreLocalForm(data, &form);
         assert(ierr == PETSC_SUCCESS);
-
-        Index begin = 0, end = 0;
-        fes.getOwnershipRange(begin, end);
-        const Index owned = end - begin;
-        const size_t size = fes.getLocalSize();
-        Index ghosts = 0;
-        auto position = ::Rodin::Kokkos::Internal::upload<Index>(
-          execution, size, "Rodin PETSc grid function positions", [&](Index* out) {
-            for (size_t i = 0; i < size; ++i)
-            {
-              const Index g = fes.getGlobalIndex(static_cast<Index>(i));
-              out[i] = (g >= begin && g < end) ? g - begin : owned + ghosts++;
-            }
-          });
-        if (owned + ghosts != static_cast<Index>(count))
-        {
-          Alert::Exception()
-            << "The PETSc vector of a distributed grid function does not have "
-            << "the layout of its space." << Alert::Raise;
-        }
-        ::Kokkos::View<Real*, MemorySpace> res(
-          ::Kokkos::view_alloc(execution, ::Kokkos::WithoutInitializing,
-            std::string("Rodin grid function")),
-          size);
-        ::Kokkos::parallel_for("Rodin PETSc grid function gather",
-          ::Kokkos::RangePolicy<std::decay_t<decltype(execution)>>(execution, 0, size),
-          GhostedCoefficientsGather<MemorySpace>{res, values, position});
-        execution.fence("Rodin PETSc grid function gather");
-        (void)ierr;
-        return res;
       }
-      else
-      {
-        (void)ierr;
-        return values;
-      }
+      (void)ierr;
+      return res;
     }
   };
 }

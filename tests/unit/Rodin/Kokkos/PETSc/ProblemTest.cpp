@@ -74,6 +74,18 @@ namespace Rodin::Tests::Unit
     return same == PETSC_TRUE;
   }
 
+  /// @brief Compares the systems of two assembled problems.
+  template <class Reference, class Candidate>
+  void expectSameAssembled(Reference& reference, Candidate& candidate)
+  {
+    const auto& r = reference.getLinearSystem();
+    auto& c = candidate.getLinearSystem();
+    EXPECT_TRUE(hasType(c.getOperator(), MATSEQAIJKOKKOS));
+    EXPECT_TRUE(hasType(c.getVector(), VECSEQKOKKOS));
+    expectSameOperator(r.getOperator(), toSparse(c.getOperator()));
+    expectSameVector(r.getVector(), toVector(c.getVector()));
+  }
+
   /**
    * @brief Compares a PETSc device system with the sparse device system.
    * @param reference Problem assembled into sparse matrices.
@@ -84,12 +96,22 @@ namespace Rodin::Tests::Unit
   {
     reference.assemble();
     candidate.assemble();
-    const auto& r = reference.getLinearSystem();
-    auto& c = candidate.getLinearSystem();
-    EXPECT_TRUE(hasType(c.getOperator(), MATSEQAIJKOKKOS));
-    EXPECT_TRUE(hasType(c.getVector(), VECSEQKOKKOS));
-    expectSameOperator(r.getOperator(), toSparse(c.getOperator()));
-    expectSameVector(r.getVector(), toVector(c.getVector()));
+    expectSameAssembled(reference, candidate);
+  }
+
+  /**
+   * @brief Assembles a device PETSc problem before its reference, and
+   * compares their systems.
+   *
+   * No upload of the reference comes between two assemblies of the
+   * candidate, so that the candidate reads again what it kept, if anything.
+   */
+  template <class Reference, class Candidate>
+  void expectSameSystemAssembledFirst(Reference& reference, Candidate& candidate)
+  {
+    candidate.assemble();
+    reference.assemble();
+    expectSameAssembled(reference, candidate);
   }
 
   /**
@@ -634,6 +656,18 @@ namespace Rodin::Tests::Unit
     pq = Integral(Grad(pu), Grad(pv)) + Integral(gp * pu, pv) - Integral(gp, pv) -
       Integral(Dot(Grad(gp), Grad(pv)));
     expectSameSystem(sq, pq);
+
+    // Coefficients written again through PETSc are read again.
+    ASSERT_EQ(VecScale(gp.getData(), 2), PETSC_SUCCESS);
+    ASSERT_EQ(VecShift(gp.getData(), 1), PETSC_SUCCESS);
+    gs.getData() = (2 * solution).array() + 1;
+    expectSameSystemAssembledFirst(sq, pq);
+    PetscScalar* values = nullptr;
+    ASSERT_EQ(VecGetArray(gp.getData(), &values), PETSC_SUCCESS);
+    values[0] = -3;
+    ASSERT_EQ(VecRestoreArray(gp.getData(), &values), PETSC_SUCCESS);
+    gs.getData()(0) = -3;
+    expectSameSystemAssembledFirst(sq, pq);
   }
 
   TEST(Kokkos_PETSc_Problem, PoissonOnTriangles)
