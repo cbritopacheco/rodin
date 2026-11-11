@@ -15,8 +15,8 @@ namespace Rodin::Tests::Unit
 
   /// @brief System whose matrix stays in the memory of the test backend.
   using DeviceLinearSystem =
-    Math::LinearSystem<Rodin::Kokkos::SparseMatrix<Real, TestBackend>,
-      Math::Vector<Real>>;
+    Math::LinearSystem<Rodin::Kokkos::Math::SparseMatrix<Real, TestBackend>,
+      Rodin::Kokkos::Math::Vector<Real, TestBackend>>;
 
   /// @brief Unit square split into triangles, on the test backend.
   inline DeviceMesh makeSquare(size_t n)
@@ -38,7 +38,7 @@ namespace Rodin::Tests::Unit
     const auto values = system.getOperator().getValues();
     ::Kokkos::parallel_for(
       ::Kokkos::RangePolicy<
-        Rodin::Kokkos::SparseMatrix<Real, TestBackend>::ExecutionSpace>(
+        Rodin::Kokkos::Math::SparseMatrix<Real, TestBackend>::ExecutionSpace>(
         0, values.extent(0)),
       KOKKOS_LAMBDA(const size_t i) { values(i) *= factor; });
     ::Kokkos::fence();
@@ -56,7 +56,8 @@ namespace Rodin::Tests::Unit
     RealFunction f(KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real {
       return 1 + p.x() * p.y();
     });
-    Problem host(u, v);
+    using HostSystem = Math::LinearSystem<Math::SparseMatrix<Real>, Math::Vector<Real>>;
+    Problem<HostSystem, decltype(u), decltype(v)> host(u, v);
     host = Integral(Grad(u), Grad(v)) + Integral(u, v) - Integral(f, v) +
       DirichletBC(u, RealFunction(1));
     Solver::SparseLU(host).solve();

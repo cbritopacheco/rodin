@@ -324,9 +324,8 @@ namespace Rodin::Variational
    * A linear form can be specified by from one or more
    * LinearFormIntegratorBase instances.
    */
-  template <class FES>
-  class LinearForm<FES, Math::Vector<typename FormLanguage::Traits<FES>::ScalarType>> final
-    : public LinearFormBase<Math::Vector<typename FormLanguage::Traits<FES>::ScalarType>>
+  template <class FES, class Vector>
+  class LinearForm final : public LinearFormBase<Vector>
   {
     public:
       /// @brief Finite element space type.
@@ -338,8 +337,7 @@ namespace Rodin::Variational
         typename FormLanguage::Traits<FESType>::ScalarType;
 
       /// @brief Vector type of the linear system.
-      using VectorType =
-        Math::Vector<ScalarType>;
+      using VectorType = Vector;
 
       /// @brief Mesh type of the finite element space.
       using FESMeshType =

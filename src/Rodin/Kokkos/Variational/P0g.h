@@ -193,7 +193,7 @@ namespace Rodin::Variational
       }
 
       /// @brief Gets the device degrees of freedom. @return Single constant basis function.
-      DOFsType getDeviceDOFs() const
+      DOFsType getDOFsView() const
       {
         return {};
       }
@@ -207,7 +207,7 @@ namespace Rodin::Kokkos::Variational
 {
   /// @brief Global constant space on a resident mesh.
   template <class Backend>
-  using DeviceP0g = ::Rodin::Variational::P0g<Real,
+  using KokkosP0g = ::Rodin::Variational::P0g<Real,
     ::Rodin::Geometry::Mesh<::Rodin::Context::Kokkos<::Rodin::Context::Local, Backend>>>;
 }
 

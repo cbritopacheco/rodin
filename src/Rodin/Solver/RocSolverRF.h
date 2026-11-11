@@ -22,7 +22,7 @@
  *
  * rocSOLVER reads the matrix in CSR format, whereas Math::SparseMatrix
  * stores it as CSC. A host matrix is therefore reordered as CSR on the host
- * before every upload. A Kokkos::SparseMatrix is stored as CSR, and
+ * before every upload. A Kokkos::Math::SparseMatrix is stored as CSR, and
  * rocSOLVER reads it in place when it is in device memory.
  *
  * @note This solver requires rocSOLVER, UMFPACK and RODIN_USE_ROCSOLVER.
@@ -322,7 +322,7 @@ namespace Rodin::Solver
    * then a rocSOLVER refactorization on the device, followed by device
    * solves. The matrix, the right-hand side and the solution are copied to
    * the device, and the solution is copied back. A matrix already in device
-   * memory, such as a Kokkos::SparseMatrix on the HIP backend, is read in
+   * memory, such as a Kokkos::Math::SparseMatrix on the HIP backend, is read in
    * place and only copied to the host for the first factorization.
    *
    * The analysis, the pivot order included, is reused across explicit
@@ -374,11 +374,11 @@ namespace Rodin::Solver
    * |----------------|-------------|
    * | @ref RocSolverRF "RocSolverRF<Math::LinearSystem<Matrix, Math::Vector<Real>>>" | Real double-precision sparse systems whose matrix has an Internal::CuDSSOperator. |
    *
-   * @tparam Matrix Math::SparseMatrix<Real> or Kokkos::SparseMatrix<Real, Backend>.
+   * @tparam Matrix Math::SparseMatrix<Real> or Kokkos::Math::SparseMatrix<Real, Backend>.
    */
-  template <class Matrix>
-  class RocSolverRF<Math::LinearSystem<Matrix, Math::Vector<Real>>> final
-    : public LinearSolverBase<Math::LinearSystem<Matrix, Math::Vector<Real>>>
+  template <class Matrix, class VectorType_>
+  class RocSolverRF<Math::LinearSystem<Matrix, VectorType_>> final
+    : public LinearSolverBase<Math::LinearSystem<Matrix, VectorType_>>
   {
     /// @brief Access to the compressed arrays of the matrix.
     using Arrays = Internal::CuDSSOperator<Matrix>;
@@ -390,7 +390,7 @@ namespace Rodin::Solver
 
     public:
       using ScalarType = Real;
-      using VectorType = Math::Vector<ScalarType>;
+      using VectorType = VectorType_;
       using OperatorType = Matrix;
       using LinearSystemType = Math::LinearSystem<OperatorType, VectorType>;
       using ProblemBaseType = Variational::ProblemBase<LinearSystemType>;
@@ -421,13 +421,13 @@ namespace Rodin::Solver
        * @tparam T Element type.
        */
       template <class T>
-      struct DeviceArray
+      struct Array
       {
-        DeviceArray() = default;
-        DeviceArray(const DeviceArray&) = delete;
-        DeviceArray& operator=(const DeviceArray&) = delete;
+        Array() = default;
+        Array(const Array&) = delete;
+        Array& operator=(const Array&) = delete;
 
-        ~DeviceArray()
+        ~Array()
         {
           release();
         }
@@ -483,37 +483,37 @@ namespace Rodin::Solver
         rocsolver_rfinfo rfinfo = nullptr;
 
         /// @brief Row starts of the CSR arrays, copied from a host matrix.
-        DeviceArray<Math::SparseIndex> outer;
+        Array<Math::SparseIndex> outer;
 
         /// @brief Column indices of the CSR arrays, copied from a host matrix.
-        DeviceArray<Math::SparseIndex> inner;
+        Array<Math::SparseIndex> inner;
 
         /// @brief Values, copied from a host matrix.
-        DeviceArray<ScalarType> values;
+        Array<ScalarType> values;
 
         /// @brief Row starts of the bundled factors.
-        DeviceArray<Math::SparseIndex> factorStarts;
+        Array<Math::SparseIndex> factorStarts;
 
         /// @brief Column indices of the bundled factors.
-        DeviceArray<Math::SparseIndex> factorIndices;
+        Array<Math::SparseIndex> factorIndices;
 
         /// @brief Values of the bundled factors.
-        DeviceArray<ScalarType> factorValues;
+        Array<ScalarType> factorValues;
 
         /// @brief Original row of every pivot row.
-        DeviceArray<Math::SparseIndex> rowPivots;
+        Array<Math::SparseIndex> rowPivots;
 
         /// @brief Original column of every pivot column.
-        DeviceArray<Math::SparseIndex> columnPivots;
+        Array<Math::SparseIndex> columnPivots;
 
         /// @brief Right-hand side, overwritten by the solution.
-        DeviceArray<ScalarType> b;
+        Array<ScalarType> b;
 
         /// @brief Position in the bundled factors of every diagonal entry.
-        DeviceArray<Math::SparseIndex> diagonal;
+        Array<Math::SparseIndex> diagonal;
 
         /// @brief Diagonal of the factors, gathered to check the pivots.
-        DeviceArray<ScalarType> pivots;
+        Array<ScalarType> pivots;
 
         /**
          * @brief Position in the arrays of a CSC host matrix of every CSR
@@ -788,7 +788,9 @@ namespace Rodin::Solver
         }
 
         auto& res = m_resources;
-        copy(res.b.data, axb.getVector().data(), res.rows, hipMemcpyHostToDevice);
+        copy(res.b.data, axb.getVector().data(), res.rows,
+          Internal::CuDSSVector<VectorType>::Resident ? hipMemcpyDeviceToDevice
+                                                      : hipMemcpyHostToDevice);
         const rocblas_status status =
           rocsolver_dcsrrf_solve(res.handle, res.rows, 1, res.factorNonzeros,
             res.factorStarts.data, res.factorIndices.data, res.factorValues.data,
@@ -796,7 +798,9 @@ namespace Rodin::Solver
         if (!complete(status, Factorization::Numeric))
           return;
         VectorType x(res.rows);
-        copy(x.data(), res.b.data, res.rows, hipMemcpyDeviceToHost);
+        copy(x.data(), res.b.data, res.rows,
+          Internal::CuDSSVector<VectorType>::Resident ? hipMemcpyDeviceToDevice
+                                                      : hipMemcpyDeviceToHost);
         if (!x.allFinite())
         {
           record(Breakdown, Factorization::Numeric);

@@ -395,7 +395,7 @@ namespace Rodin::Solver
      * | Specialization | Description |
      * |----------------|-------------|
      * | CuDSSOperator<Math::SparseMatrix<Real>> | Host CSC arrays, the CSR arrays of the transpose. |
-     * | CuDSSOperator<Kokkos::SparseMatrix<Real, Backend>> | CSR arrays in the memory of a Kokkos backend. |
+     * | CuDSSOperator<Kokkos::Math::SparseMatrix<Real, Backend>> | CSR arrays in the memory of a Kokkos backend. |
      */
     template <class Matrix>
     struct CuDSSOperator;
@@ -419,6 +419,19 @@ namespace Rodin::Solver
     class SupernodalLLT;
   }
 #endif
+}
+
+namespace Rodin::Solver::Internal
+{
+  /**
+   * @brief Whether coefficient storage can be read directly by GPU solvers.
+   * @tparam Vector Algebraic coefficient container.
+   */
+  template <class Vector>
+  struct CuDSSVector
+  {
+    static constexpr bool Resident = false;
+  };
 }
 
 #endif

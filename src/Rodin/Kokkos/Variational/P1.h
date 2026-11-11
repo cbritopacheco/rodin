@@ -216,7 +216,7 @@ namespace Rodin::Variational
       }
 
       /// @brief Gets the device degrees of freedom. @return One per vertex.
-      DOFsType getDeviceDOFs() const
+      DOFsType getDOFsView() const
       {
         return {static_cast<Index>(getMesh().getVertexCount())};
       }
@@ -238,11 +238,11 @@ namespace Rodin::Variational
    * @tparam Backend Kokkos backend of the mesh context.
    */
   template <class Backend>
-  class P1<Math::SpatialVector<Real>,
+  class P1<::Rodin::Math::SpatialVector<Real>,
     Geometry::Mesh<Context::Kokkos<Context::Local, Backend>>>
     final
     : public FiniteElementSpace<Geometry::Mesh<Context::Kokkos<Context::Local, Backend>>,
-        P1<Math::SpatialVector<Real>,
+        P1<::Rodin::Math::SpatialVector<Real>,
           Geometry::Mesh<Context::Kokkos<Context::Local, Backend>>>>
   {
     public:
@@ -250,7 +250,7 @@ namespace Rodin::Variational
       using ScalarType = Real;
 
       /// @brief Range type of value.
-      using RangeType = Math::SpatialVector<ScalarType>;
+      using RangeType = ::Rodin::Math::SpatialVector<ScalarType>;
 
       /// @brief Context of the mesh.
       using ContextType = Context::Kokkos<Context::Local, Backend>;
@@ -432,7 +432,7 @@ namespace Rodin::Variational
       }
 
       /// @brief Gets the device degrees of freedom. @return One per vertex.
-      DOFsType getDeviceDOFs() const
+      DOFsType getDOFsView() const
       {
         return {static_cast<Index>(getMesh().getVertexCount())};
       }

@@ -93,20 +93,6 @@
 #cmakedefine RODIN_USE_KOKKOS
 
 /**
- * @brief Indicates if Rodin is built with Kokkos-Kernels support, which
- * provides the device Krylov solvers of the Rodin::KokkosKernels target.
- *
- * # Utilization
- *
- * @code{.cpp}
- * #ifdef RODIN_USE_KOKKOSKERNELS
- * // Code depending on Kokkos-Kernels
- * #endif
- * @endcode
- */
-#cmakedefine RODIN_USE_KOKKOSKERNELS
-
-/**
  * @brief Indicates if Rodin is built with OpenMP support.
  *
  * # Utilization

@@ -102,7 +102,7 @@ namespace Rodin::Tests::Unit
   {
     constexpr Index sampleCount = 2;
     constexpr Real tolerance = 2e-12;
-    const auto view = mesh.getDeviceView();
+    const auto view = mesh.getView();
     const size_t embedding = source.getSpaceDimension();
     EXPECT_EQ(view.getDimension(), source.getDimension());
     EXPECT_EQ(view.getSpaceDimension(), embedding);
@@ -289,7 +289,7 @@ namespace Rodin::Tests::Unit
     source.setAttribute({2, 1}, Geometry::Attribute(0));
     const TestContext context;
     DeviceMesh mesh(context, source);
-    const auto view = mesh.getDeviceView();
+    const auto view = mesh.getView();
     for (size_t d = 0; d <= source.getDimension(); ++d)
     {
       const Index count = source.getPolytopeCount(d);
@@ -424,8 +424,8 @@ namespace Rodin::Tests::Unit
     auto source = makeMesh(Polytope::Type::Triangle, 2);
     DeviceMesh mesh(context, source);
     DeviceMesh copied(mesh);
-    EXPECT_NE(mesh.getDeviceView().coordinates, copied.getDeviceView().coordinates);
-    EXPECT_NE(mesh.getDeviceView().vertexIndices, copied.getDeviceView().vertexIndices);
+    EXPECT_NE(mesh.getView().coordinates, copied.getView().coordinates);
+    EXPECT_NE(mesh.getView().vertexIndices, copied.getView().vertexIndices);
     mesh.scale(2);
     checkGeometry(source, copied);
     DeviceMesh assigned(context);
@@ -763,7 +763,7 @@ namespace Rodin::Tests::Unit
     EXPECT_DOUBLE_EQ(mesh.getArea(), 0);
     EXPECT_DOUBLE_EQ(mesh.getVolume(), 0);
     EXPECT_DOUBLE_EQ(mesh.getPerimeter(), 0);
-    const auto view = mesh.getDeviceView();
+    const auto view = mesh.getView();
     ::Kokkos::View<Index*, TestMemorySpace> result("empty count", 1);
     ::Kokkos::parallel_for(
       "empty mesh query", ::Kokkos::RangePolicy<TestExecutionSpace>(0, 1),

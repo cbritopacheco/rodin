@@ -20,7 +20,7 @@
 #include <Rodin/Solid.h>
 #include <Rodin/IO/XDMF.h>
 #include <Rodin/Solver/NewtonSolver.h>
-#include <Rodin/Solver/SparseLU.h>
+#include <Rodin/Kokkos/Solver.h>
 #include <Rodin/Kokkos.h>
 
 #if defined(KOKKOS_ENABLE_CUDA)
@@ -99,7 +99,8 @@ int main(int argc, char** argv)
     newton = ivw(du, v) - Integral(VectorFunction{0, gy}, v) +
       DirichletBC(du, Zero(2)).on(bottomBC);
 
-    Solver::SparseLU linearSolver(newton);
+    Solver::GMRES linearSolver(newton);
+    linearSolver.setTolerance(1e-12).setMaxIterations(1000);
     Solver::NewtonSolver solver(linearSolver);
     solver.setMaxIterations(50).setAbsoluteTolerance(1e-10).setRelativeTolerance(1e-8);
     solver.solve(u);

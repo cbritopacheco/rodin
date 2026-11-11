@@ -25,6 +25,7 @@
 
 #include <Kokkos_Core.hpp>
 #include <Kokkos_Sort.hpp>
+#include <KokkosSparse_CooMatrix.hpp>
 
 #if defined(KOKKOS_ENABLE_SYCL)
 #include <sycl/ext/intel/math.hpp>
@@ -44,7 +45,7 @@
 #include "Rodin/Variational/UnaryMinus.h"
 
 #include "Rodin/Kokkos/ForwardDecls.h"
-#include "Rodin/Kokkos/LinearSystem.h"
+#include "Rodin/Kokkos/Math/LinearSystem.h"
 #include "Rodin/Kokkos/Variational/Integral.h"
 
 namespace Rodin::Assembly::Internal
@@ -57,8 +58,8 @@ namespace Rodin::Assembly::Internal
    * @return Device integrator and the factor of its contributions.
    */
   template <class Backend>
-  std::pair<::Rodin::Kokkos::Variational::DeviceBilinearFormIntegrator<Backend>*, Real>
-  getDeviceIntegrator(
+  std::pair<::Rodin::Kokkos::Variational::BilinearFormIntegrator<Backend>*, Real>
+  getIntegrator(
     Variational::LocalBilinearFormIntegratorBase<Real>& lbfi, Real sign = Real(1))
   {
     using Negated =
@@ -66,12 +67,11 @@ namespace Rodin::Assembly::Internal
     using Scaled =
       Variational::Mult<Real, Variational::LocalBilinearFormIntegratorBase<Real>>;
     if (auto* negated = dynamic_cast<Negated*>(&lbfi))
-      return getDeviceIntegrator<Backend>(negated->getOperand(), -sign);
+      return getIntegrator<Backend>(negated->getOperand(), -sign);
     if (auto* scaled = dynamic_cast<Scaled*>(&lbfi))
-      return getDeviceIntegrator<Backend>(scaled->getRHS(), scaled->getLHS() * sign);
+      return getIntegrator<Backend>(scaled->getRHS(), scaled->getLHS() * sign);
     auto* integrator =
-      dynamic_cast<::Rodin::Kokkos::Variational::DeviceBilinearFormIntegrator<Backend>*>(
-        &lbfi);
+      dynamic_cast<::Rodin::Kokkos::Variational::BilinearFormIntegrator<Backend>*>(&lbfi);
     if (!integrator)
     {
       Alert::Exception() << "Local integrator has no device implementation."
@@ -88,17 +88,16 @@ namespace Rodin::Assembly::Internal
    * @return Device integrator and the factor of its contributions.
    */
   template <class Backend>
-  std::pair<::Rodin::Kokkos::Variational::DeviceBilinearFormIntegrator<Backend>*, Real>
-  getDeviceIntegrator(
+  std::pair<::Rodin::Kokkos::Variational::BilinearFormIntegrator<Backend>*, Real>
+  getIntegrator(
     Variational::GlobalBilinearFormIntegratorBase<Real>& gbfi, Real sign = Real(1))
   {
     using Negated =
       Variational::UnaryMinus<Variational::GlobalBilinearFormIntegratorBase<Real>>;
     if (auto* negated = dynamic_cast<Negated*>(&gbfi))
-      return getDeviceIntegrator<Backend>(negated->getOperand(), -sign);
+      return getIntegrator<Backend>(negated->getOperand(), -sign);
     auto* integrator =
-      dynamic_cast<::Rodin::Kokkos::Variational::DeviceBilinearFormIntegrator<Backend>*>(
-        &gbfi);
+      dynamic_cast<::Rodin::Kokkos::Variational::BilinearFormIntegrator<Backend>*>(&gbfi);
     if (!integrator)
     {
       Alert::Exception() << "Global integrator has no device implementation."
@@ -115,19 +114,17 @@ namespace Rodin::Assembly::Internal
    * @return Device integrator and the factor of its contributions.
    */
   template <class Backend>
-  std::pair<::Rodin::Kokkos::Variational::DeviceLinearFormIntegrator<Backend>*, Real>
-  getDeviceIntegrator(
-    Variational::LinearFormIntegratorBase<Real>& lfi, Real sign = Real(1))
+  std::pair<::Rodin::Kokkos::Variational::LinearFormIntegrator<Backend>*, Real>
+  getIntegrator(Variational::LinearFormIntegratorBase<Real>& lfi, Real sign = Real(1))
   {
     using Negated = Variational::UnaryMinus<Variational::LinearFormIntegratorBase<Real>>;
     using Scaled = Variational::Mult<Real, Variational::LinearFormIntegratorBase<Real>>;
     if (auto* negated = dynamic_cast<Negated*>(&lfi))
-      return getDeviceIntegrator<Backend>(negated->getOperand(), -sign);
+      return getIntegrator<Backend>(negated->getOperand(), -sign);
     if (auto* scaled = dynamic_cast<Scaled*>(&lfi))
-      return getDeviceIntegrator<Backend>(scaled->getRHS(), scaled->getLHS() * sign);
+      return getIntegrator<Backend>(scaled->getRHS(), scaled->getLHS() * sign);
     auto* integrator =
-      dynamic_cast<::Rodin::Kokkos::Variational::DeviceLinearFormIntegrator<Backend>*>(
-        &lfi);
+      dynamic_cast<::Rodin::Kokkos::Variational::LinearFormIntegrator<Backend>*>(&lfi);
     if (!integrator)
       Alert::Exception() << "Integrator has no device implementation." << Alert::Raise;
     return {integrator, sign};
@@ -145,7 +142,7 @@ namespace Rodin::Assembly::Internal
    * @tparam Backend Kokkos backend of the mesh context.
    */
   template <class Backend>
-  class DeviceConstraints
+  class Constraints
   {
     public:
       /// @brief Mesh context.
@@ -230,7 +227,7 @@ namespace Rodin::Assembly::Internal
        * @param size Number of degrees of freedom, the larger of the row
        * and column counts.
        */
-      DeviceConstraints(size_t rows, size_t size)
+      Constraints(size_t rows, size_t size)
         : m_rows(rows),
           m_fixed(size, 0),
           m_values(size, Real(0)),
@@ -658,7 +655,7 @@ namespace Rodin::Assembly::Internal
    * @tparam Backend Kokkos backend of the mesh context.
    */
   template <class Backend>
-  class DeviceSystem
+  class SystemAssembly
   {
     public:
       /// @brief Mesh context.
@@ -684,15 +681,13 @@ namespace Rodin::Assembly::Internal
       using Array = ::Kokkos::View<T*, MemorySpace>;
 
       /// @brief Matrix left on the device.
-      using DeviceMatrix = ::Rodin::Kokkos::SparseMatrix<Real, Backend>;
+      using BackendMatrix = ::Rodin::Kokkos::Math::SparseMatrix<Real, Backend>;
 
       /// @brief Device bilinear integrator.
-      using BilinearType =
-        ::Rodin::Kokkos::Variational::DeviceBilinearFormIntegrator<Backend>;
+      using BilinearType = ::Rodin::Kokkos::Variational::BilinearFormIntegrator<Backend>;
 
       /// @brief Device linear integrator.
-      using LinearType =
-        ::Rodin::Kokkos::Variational::DeviceLinearFormIntegrator<Backend>;
+      using LinearType = ::Rodin::Kokkos::Variational::LinearFormIntegrator<Backend>;
 
       /// @brief Entries written by one source, contiguous in storage.
       struct Segment
@@ -833,20 +828,44 @@ namespace Rodin::Assembly::Internal
       /// @brief Matrix contributions.
       struct Triplets
       {
-        /// @brief Row indices.
-        Array<Index> rows;
+        /// @brief Native coordinate matrix holding the contributions.
+        using Matrix = ::KokkosSparse::CooMatrix<Real, Index,
+          ::Kokkos::Device<ExecutionSpace, MemorySpace>>;
 
-        /// @brief Column indices.
-        Array<Index> cols;
+        /// @brief Coordinate storage; copies borrow its arrays.
+        Matrix matrix;
 
-        /// @brief Contributions.
-        Array<Real> values;
+        /// @brief Values retained after coordinate sorting releases the COO graph.
+        Array<Real> coefficients;
+
+        /// @brief Columns retained only for prescribed-value lifting.
+        Array<Index> eliminatedColumns;
 
         /// @brief Ranks of the entries.
         Ranks ranks;
 
         /// @brief Number of entries.
         size_t size = 0;
+      };
+
+      /// @brief Copies an existing backend matrix into its contribution segment.
+      struct CopyMatrix
+      {
+        typename BackendMatrix::View source;
+        typename Triplets::Matrix target;
+        size_t offset;
+        Index row, col;
+
+        /// @param i Matrix row.
+        KOKKOS_INLINE_FUNCTION void operator()(Index i) const
+        {
+          for (auto k = source.graph.row_map(i); k < source.graph.row_map(i + 1); ++k)
+          {
+            target.row()(offset + k) = row + i;
+            target.col()(offset + k) = col + source.graph.entries(k);
+            target.data()(offset + k) = source.values(k);
+          }
+        }
       };
 
       /// @brief Listed entries.
@@ -938,7 +957,7 @@ namespace Rodin::Assembly::Internal
       };
 
       /// @brief Constraints of the system.
-      using ConstraintsType = DeviceConstraints<Backend>;
+      using ConstraintsType = Constraints<Backend>;
 
       /// @brief Expansions of the degrees of freedom on their masters.
       using Expansions = typename ConstraintsType::Expansions;
@@ -1137,7 +1156,7 @@ namespace Rodin::Assembly::Internal
        * @param rows Number of rows, the size of the test spaces.
        * @param cols Number of columns, the size of the trial spaces.
        */
-      DeviceSystem(const ExecutionSpace& execution, size_t rows, size_t cols)
+      SystemAssembly(const ExecutionSpace& execution, size_t rows, size_t cols)
         : m_execution(execution),
           m_rows(rows),
           m_cols(cols),
@@ -1188,7 +1207,7 @@ namespace Rodin::Assembly::Internal
       void addMatrix(
         Variational::LocalBilinearFormIntegratorBase<Real>& lbfi, Index row, Index col)
       {
-        const auto [integrator, sign] = getDeviceIntegrator<Backend>(lbfi);
+        const auto [integrator, sign] = getIntegrator<Backend>(lbfi);
         m_matrices.push_back({integrator, nullptr, row, col, sign});
       }
 
@@ -1200,7 +1219,7 @@ namespace Rodin::Assembly::Internal
       void addMatrix(
         Variational::GlobalBilinearFormIntegratorBase<Real>& gbfi, Index row, Index col)
       {
-        const auto [integrator, sign] = getDeviceIntegrator<Backend>(gbfi);
+        const auto [integrator, sign] = getIntegrator<Backend>(gbfi);
         m_matrices.push_back({integrator, nullptr, row, col, sign});
       }
 
@@ -1209,9 +1228,21 @@ namespace Rodin::Assembly::Internal
        * @param op Operator, alive until finish() returns.
        * @param row Offset of its test space. @param col Offset of its trial space.
        */
-      void addMatrix(const Math::SparseMatrix<Real>& op, Index row, Index col)
+      void addMatrix(const ::Rodin::Math::SparseMatrix<Real>& op, Index row, Index col)
       {
         m_matrices.push_back({nullptr, &op, row, col, Real(1)});
+      }
+
+      /// @param op Backend operator. @param row Test offset. @param col Trial offset.
+      void addMatrix(const BackendMatrix& op, Index row, Index col)
+      {
+        m_matrices.push_back({nullptr, nullptr, row, col, 1, &op});
+      }
+
+      /// @param vec Backend coefficients. @param row Test offset.
+      void addVector(const ::Rodin::Kokkos::Math::Vector<Real, Backend>& vec, Index row)
+      {
+        m_vectors.push_back({nullptr, nullptr, row, 1, m_matrices.size(), &vec});
       }
 
       /**
@@ -1226,7 +1257,7 @@ namespace Rodin::Assembly::Internal
       void addVector(
         Variational::LinearFormIntegratorBase<Real>& lfi, Index row, Real sign)
       {
-        const auto [integrator, s] = getDeviceIntegrator<Backend>(lfi, sign);
+        const auto [integrator, s] = getIntegrator<Backend>(lfi, sign);
         m_vectors.push_back({integrator, nullptr, row, s, m_matrices.size()});
       }
 
@@ -1235,7 +1266,7 @@ namespace Rodin::Assembly::Internal
        * @param vec Vector, alive until finish() returns.
        * @param row Offset of its test space.
        */
-      void addVector(const Math::Vector<Real>& vec, Index row)
+      void addVector(const ::Rodin::Math::Vector<Real>& vec, Index row)
       {
         m_vectors.push_back({nullptr, &vec, row, Real(1), m_matrices.size()});
       }
@@ -1245,7 +1276,7 @@ namespace Rodin::Assembly::Internal
        * @param A Matrix, built when not null.
        * @param b Right-hand side, built when not null.
        */
-      void finish(Math::SparseMatrix<Real>* A, Math::Vector<Real>* b)
+      void finish(::Rodin::Math::SparseMatrix<Real>* A, ::Rodin::Math::Vector<Real>* b)
       {
         build(A, b);
       }
@@ -1260,9 +1291,36 @@ namespace Rodin::Assembly::Internal
        * The coefficients are summed in the same order as for finish() into a
        * host matrix, so both matrices are equal.
        */
-      void finish(DeviceMatrix& A, Math::Vector<Real>& b)
+      void finish(BackendMatrix& A, ::Rodin::Math::Vector<Real>& b)
       {
         build(&A, &b);
+      }
+
+      /**
+       * @brief Builds an entirely backend-resident system.
+       * @param A Compressed row operator. @param b Backend right-hand side.
+       */
+      void finish(BackendMatrix& A, ::Rodin::Kokkos::Math::Vector<Real, Backend>& b)
+      {
+        build(&A, &b);
+      }
+
+      /// @param A Backend operator, optionally absent. @param b Backend right-hand side, optionally absent.
+      void finish(BackendMatrix* A, ::Rodin::Kokkos::Math::Vector<Real, Backend>* b)
+      {
+        build(A, b);
+      }
+
+      /// @param A Backend operator. @param b Absent host right-hand side for a bilinear form.
+      void finish(BackendMatrix* A, ::Rodin::Math::Vector<Real>* b)
+      {
+        build(A, b);
+      }
+
+      /// @param A Absent operator for a linear form. @param b Backend right-hand side.
+      void finish(std::nullptr_t A, ::Rodin::Kokkos::Math::Vector<Real, Backend>* b)
+      {
+        build(static_cast<BackendMatrix*>(A), b);
       }
 
     private:
@@ -1271,10 +1329,10 @@ namespace Rodin::Assembly::Internal
        * @param A Matrix, host or device, built when not null.
        * @param b Right-hand side, built when not null.
        */
-      template <class Matrix>
-      void build(Matrix* A, Math::Vector<Real>* b)
+      template <class Matrix, class Vector>
+      void build(Matrix* A, Vector* b)
       {
-        constexpr bool rowMajor = std::is_same_v<Matrix, DeviceMatrix>;
+        constexpr bool rowMajor = std::is_same_v<Matrix, BackendMatrix>;
         typename ConstraintsType::Resolved constraints;
         if (m_constraints.isIdentified())
           constraints = m_constraints.resolve(m_execution);
@@ -1309,15 +1367,13 @@ namespace Rodin::Assembly::Internal
             triplets, fixed, coefficientRanks(triplets.ranks),
             triplets.ranks.sorting(m_rows), A != nullptr, eliminate, coefficients,
             eliminated);
-          // The sort keys hold the indices, and the sorts need buffers as
-          // large as the listed entries.
-          triplets.rows = {};
-          lifted.triplets.rows = {};
-          if (!eliminate)
-          {
-            triplets.cols = {};
-            lifted.triplets.cols = {};
-          }
+          // Sort keys now encode the coordinates. Retain only the arrays
+          // still needed by compression and prescribed-value lifting.
+          triplets.coefficients = triplets.matrix.data();
+          if (eliminate)
+            triplets.eliminatedColumns = triplets.matrix.col();
+          triplets.matrix = {};
+          lifted.triplets.matrix = {};
         }
         if (A)
           compress(triplets, coefficientRanks(triplets.ranks), coefficients, *A);
@@ -1350,7 +1406,8 @@ namespace Rodin::Assembly::Internal
             accumulate(m_execution, eliminated.positions,
               group(m_execution, eliminated.keys, eliminated.positions,
                 triplets.ranks.sorting(m_rows)),
-              Eliminated{triplets.values, triplets.cols, fixedValues}, rhs);
+              Eliminated{triplets.coefficients, triplets.eliminatedColumns, fixedValues},
+              rhs);
           }
           if (expanded)
           {
@@ -1360,7 +1417,10 @@ namespace Rodin::Assembly::Internal
           else if (constrained)
             imposeFixed(m_execution, m_rows, fixed, fixedValues, rhs);
           b->resize(m_rows);
-          ::Kokkos::deep_copy(m_execution, host(b->data(), m_rows), rhs);
+          if constexpr (requires { b->getView(); })
+            ::Kokkos::deep_copy(m_execution, b->getView(), rhs);
+          else
+            ::Kokkos::deep_copy(m_execution, host(b->data(), m_rows), rhs);
         }
         m_execution.fence("Rodin linear system");
       }
@@ -1685,9 +1745,9 @@ namespace Rodin::Assembly::Internal
         Listed& coefficients, Listed& eliminated)
       {
         const size_t size = triplets.size;
-        const auto rows = triplets.rows;
-        const auto cols = triplets.cols;
-        const auto values = triplets.values;
+        const auto rows = triplets.matrix.row();
+        const auto cols = triplets.matrix.col();
+        const auto values = triplets.matrix.data();
         const bool constrained = fixed.extent(0) > 0;
         const Classification classify{size, rows, cols, values, fixed, coefficientRanks,
           constrained, listCoefficients, listEliminated};
@@ -1744,7 +1804,7 @@ namespace Rodin::Assembly::Internal
         Array<Real> data;
 
         /// @brief Receives the inner index of every coefficient.
-        Array<Math::SparseIndex> inner;
+        Array<::Rodin::Math::SparseIndex> inner;
 
         /// @brief Sort key of every coefficient, without the polytope.
         Array<Index> keys;
@@ -1768,7 +1828,7 @@ namespace Rodin::Assembly::Internal
           for (Index i = starts(u) + 1; i < starts(u + 1); ++i)
             sum += value(positions(i));
           data(u) = sum;
-          inner(u) = static_cast<Math::SparseIndex>(keys(u) % innerCount);
+          inner(u) = static_cast<::Rodin::Math::SparseIndex>(keys(u) % innerCount);
         }
       };
 
@@ -1797,7 +1857,7 @@ namespace Rodin::Assembly::Internal
         size_t outerCount;
 
         /// @brief Receives the start of every outer index.
-        Array<Math::SparseIndex> outer;
+        Array<::Rodin::Math::SparseIndex> outer;
 
         /**
          * @brief Writes the outer starts ending at a coefficient.
@@ -1809,7 +1869,7 @@ namespace Rodin::Assembly::Internal
           const Index end = u < nnz ? keys(u) / innerCount : outerCount;
           const Index begin = u > 0 ? keys(u - 1) / innerCount + 1 : 0;
           for (Index j = begin; j <= end; ++j)
-            outer(j) = static_cast<Math::SparseIndex>(u);
+            outer(j) = static_cast<::Rodin::Math::SparseIndex>(u);
         }
       };
 
@@ -1832,11 +1892,11 @@ namespace Rodin::Assembly::Internal
        */
       static void sumCoefficients(const ExecutionSpace& execution, size_t innerCount,
         size_t outerCount, const Triplets& triplets, const Array<Index>& positions,
-        const Groups& groups, const Array<Math::SparseIndex>& outer,
-        const Array<Math::SparseIndex>& inner, const Array<Real>& data)
+        const Groups& groups, const Array<::Rodin::Math::SparseIndex>& outer,
+        const Array<::Rodin::Math::SparseIndex>& inner, const Array<Real>& data)
       {
         const size_t size = triplets.size;
-        const auto values = triplets.values;
+        const auto values = triplets.coefficients;
         const auto starts = groups.starts;
         const auto keys = groups.keys;
         const size_t nnz = data.extent(0);
@@ -2235,9 +2295,9 @@ namespace Rodin::Assembly::Internal
         const Expansions& x, size_t extra, Lifted& res)
       {
         const size_t size = triplets.size;
-        const auto rows = triplets.rows;
-        const auto cols = triplets.cols;
-        const auto values = triplets.values;
+        const auto rows = triplets.matrix.row();
+        const auto cols = triplets.matrix.col();
+        const auto values = triplets.matrix.data();
         const auto positions = order(execution, size, triplets.ranks);
         const MatrixExpansionSizes sizes{positions, rows, cols, values, x};
         const auto policy = Range(execution, 0, size);
@@ -2251,15 +2311,19 @@ namespace Rodin::Assembly::Internal
             n);
         };
         res.triplets.size = total.entries + extra;
-        allocate(res.triplets.rows, res.triplets.size, "Rodin expanded rows");
-        allocate(res.triplets.cols, res.triplets.size, "Rodin expanded columns");
-        allocate(res.triplets.values, res.triplets.size, "Rodin expanded values");
+        Array<Index> rowsOut, colsOut;
+        Array<Real> valuesOut;
+        allocate(rowsOut, res.triplets.size, "Rodin expanded rows");
+        allocate(colsOut, res.triplets.size, "Rodin expanded columns");
+        allocate(valuesOut, res.triplets.size, "Rodin expanded values");
+        res.triplets.matrix = typename Triplets::Matrix(triplets.matrix.numRows(),
+          triplets.matrix.numCols(), rowsOut, colsOut, valuesOut);
         allocate(res.rows, total.lifts, "Rodin lifted rows");
         allocate(res.values, total.lifts, "Rodin lifted values");
         allocate(res.starts, size + 1, "Rodin lifted starts");
-        const auto er = res.triplets.rows;
-        const auto ec = res.triplets.cols;
-        const auto ev = res.triplets.values;
+        const auto er = res.triplets.matrix.row();
+        const auto ec = res.triplets.matrix.col();
+        const auto ev = res.triplets.matrix.data();
         const auto lr = res.rows;
         const auto lv = res.values;
         const auto ls = res.starts;
@@ -2416,20 +2480,22 @@ namespace Rodin::Assembly::Internal
       struct Matrix
       {
         BilinearType* integrator;
-        const Math::SparseMatrix<Real>* op;
+        const ::Rodin::Math::SparseMatrix<Real>* op;
         Index row;
         Index col;
         Real sign;
+        const BackendMatrix* backend = nullptr;
       };
 
       struct Vector
       {
         LinearType* integrator;
-        const Math::Vector<Real>* vec;
+        const ::Rodin::Math::Vector<Real>* vec;
         Index row;
         Real sign;
         // Number of matrices added before.
         size_t matrices;
+        const ::Rodin::Kokkos::Math::Vector<Real, Backend>* backend = nullptr;
       };
 
       /**
@@ -2510,8 +2576,9 @@ namespace Rodin::Assembly::Internal
         {
           // Each integrator owns its entries, listed on the diagonals of the
           // component blocks when the others vanish.
-          const size_t count =
-            m.integrator ? m.integrator->prepare(true) : m.op->nonZeros();
+          const size_t count = m.integrator
+            ? m.integrator->prepare(true)
+            : (m.backend ? m.backend->getNonZeroCount() : m.op->nonZeros());
           counts.push_back(count);
           offsets.push_back(total + count);
           if (count > 0)
@@ -2523,9 +2590,10 @@ namespace Rodin::Assembly::Internal
         }
         Triplets triplets;
         triplets.size = total;
-        triplets.rows = allocate<Index>(total, "Rodin matrix rows");
-        triplets.cols = allocate<Index>(total, "Rodin matrix columns");
-        triplets.values = allocate<Real>(total, "Rodin matrix values");
+        triplets.matrix = typename Triplets::Matrix(m_rows, m_cols,
+          allocate<Index>(total, "Rodin matrix rows"),
+          allocate<Index>(total, "Rodin matrix columns"),
+          allocate<Real>(total, "Rodin matrix values"));
         size_t offset = 0;
         ::Rodin::Kokkos::Internal::clearLaunches();
         for (size_t k = 0; k < m_matrices.size(); ++k)
@@ -2534,14 +2602,22 @@ namespace Rodin::Assembly::Internal
           const size_t count = counts[k];
           if (m.integrator)
           {
-            m.integrator->fill(
-              triplets.values, offset, m.sign, false, triplets.rows, triplets.cols);
+            m.integrator->fill(triplets.matrix.data(), offset, m.sign, false,
+              triplets.matrix.row(), triplets.matrix.col());
             ::Rodin::Kokkos::Internal::checkLaunches("A device bilinear integrator");
             if (m.row != 0 || m.col != 0)
             {
-              shift(
-                m_execution, offset, count, m.row, m.col, triplets.rows, triplets.cols);
+              shift(m_execution, offset, count, m.row, m.col, triplets.matrix.row(),
+                triplets.matrix.col());
             }
+            offset += count;
+            continue;
+          }
+          if (m.backend)
+          {
+            ::Kokkos::parallel_for("Rodin preassembled matrix",
+              Range(m_execution, 0, m.backend->getRowCount()),
+              CopyMatrix{m.backend->getView(), triplets.matrix, offset, m.row, m.col});
             offset += count;
             continue;
           }
@@ -2552,7 +2628,8 @@ namespace Rodin::Assembly::Internal
           values.reserve(count);
           for (int j = 0; j < m.op->outerSize(); ++j)
           {
-            for (typename Math::SparseMatrix<Real>::InnerIterator it(*m.op, j); it; ++it)
+            for (typename ::Rodin::Math::SparseMatrix<Real>::InnerIterator it(*m.op, j);
+              it; ++it)
             {
               rows.push_back(m.row + it.row());
               cols.push_back(m.col + it.col());
@@ -2560,11 +2637,14 @@ namespace Rodin::Assembly::Internal
             }
           }
           const auto range = std::make_pair(offset, offset + count);
-          ::Kokkos::deep_copy(m_execution, ::Kokkos::subview(triplets.rows, range),
+          ::Kokkos::deep_copy(m_execution,
+            ::Kokkos::subview(triplets.matrix.row(), range),
             host(rows.data(), rows.size()));
-          ::Kokkos::deep_copy(m_execution, ::Kokkos::subview(triplets.cols, range),
+          ::Kokkos::deep_copy(m_execution,
+            ::Kokkos::subview(triplets.matrix.col(), range),
             host(cols.data(), cols.size()));
-          ::Kokkos::deep_copy(m_execution, ::Kokkos::subview(triplets.values, range),
+          ::Kokkos::deep_copy(m_execution,
+            ::Kokkos::subview(triplets.matrix.data(), range),
             host(values.data(), values.size()));
           m_execution.fence("Rodin preassembled operator");
           offset += count;
@@ -2605,20 +2685,23 @@ namespace Rodin::Assembly::Internal
        * @param A Host matrix, resized and filled in compressed columns.
        */
       void compress(const Triplets& triplets, const Ranks& ranks, const Listed& listed,
-        Math::SparseMatrix<Real>& A) const
+        ::Rodin::Math::SparseMatrix<Real>& A) const
       {
         A.resize(m_rows, m_cols);
         if (m_rows == 0 || m_cols == 0)
           return;
         const auto groups = group(m_execution, listed.keys, listed.positions, ranks);
         const size_t nnz = groups.size();
-        if (nnz > static_cast<size_t>(std::numeric_limits<Math::SparseIndex>::max()))
+        if (nnz >
+          static_cast<size_t>(std::numeric_limits<::Rodin::Math::SparseIndex>::max()))
         {
           Alert::Exception() << "The matrix is too large for the sparse index type."
                              << Alert::Raise;
         }
-        const auto outer = allocate<Math::SparseIndex>(m_cols + 1, "Rodin matrix outer");
-        const auto inner = allocate<Math::SparseIndex>(nnz, "Rodin matrix inner");
+        const auto outer =
+          allocate<::Rodin::Math::SparseIndex>(m_cols + 1, "Rodin matrix outer");
+        const auto inner =
+          allocate<::Rodin::Math::SparseIndex>(nnz, "Rodin matrix inner");
         const auto data = allocate<Real>(nnz, "Rodin matrix data");
         sumCoefficients(m_execution, m_rows, m_cols, triplets, listed.positions, groups,
           outer, inner, data);
@@ -2640,24 +2723,26 @@ namespace Rodin::Assembly::Internal
        * unchanged.
        */
       void compress(const Triplets& triplets, const Ranks& ranks, const Listed& listed,
-        DeviceMatrix& A) const
+        BackendMatrix& A) const
       {
         if (m_rows == 0 || m_cols == 0)
         {
-          A = DeviceMatrix(m_rows, m_cols, {}, {}, {});
+          A = BackendMatrix(m_rows, m_cols, {}, {}, {});
           return;
         }
         const auto groups = group(m_execution, listed.keys, listed.positions, ranks);
         const size_t nnz = groups.size();
-        if (nnz > static_cast<size_t>(std::numeric_limits<Math::SparseIndex>::max()))
+        if (nnz >
+          static_cast<size_t>(std::numeric_limits<::Rodin::Math::SparseIndex>::max()))
         {
           Alert::Exception() << "The matrix is too large for the sparse index type."
                              << Alert::Raise;
         }
         // A sequence of systems with one pattern keeps its arrays.
         const auto reuse = [this](const auto& a, size_t size, const char* label) {
-          using T = typename std::decay_t<decltype(a)>::value_type;
-          return a.extent(0) == size ? a : this->template allocate<T>(size, label);
+          using T = typename std::decay_t<decltype(a)>::non_const_value_type;
+          return a.extent(0) == size ? Array<T>(a)
+                                     : this->template allocate<T>(size, label);
         };
         const auto starts =
           reuse(A.getRowStarts(), m_rows + 1, "Rodin matrix row starts");
@@ -2665,7 +2750,7 @@ namespace Rodin::Assembly::Internal
         const auto values = reuse(A.getValues(), nnz, "Rodin matrix values");
         sumCoefficients(m_execution, m_cols, m_rows, triplets, listed.positions, groups,
           starts, columns, values);
-        A = DeviceMatrix(m_rows, m_cols, starts, columns, values);
+        A = BackendMatrix(m_rows, m_cols, starts, columns, values);
       }
 
       /**
@@ -2684,11 +2769,14 @@ namespace Rodin::Assembly::Internal
         expandMatrix(m_execution, triplets, constraints.expansions, extra, res);
         const size_t count = res.triplets.size - extra;
         const auto range = std::make_pair(count, res.triplets.size);
-        ::Kokkos::deep_copy(m_execution, ::Kokkos::subview(res.triplets.rows, range),
+        ::Kokkos::deep_copy(m_execution,
+          ::Kokkos::subview(res.triplets.matrix.row(), range),
           host(constraints.rows.data(), extra));
-        ::Kokkos::deep_copy(m_execution, ::Kokkos::subview(res.triplets.cols, range),
+        ::Kokkos::deep_copy(m_execution,
+          ::Kokkos::subview(res.triplets.matrix.col(), range),
           host(constraints.cols.data(), extra));
-        ::Kokkos::deep_copy(m_execution, ::Kokkos::subview(res.triplets.values, range),
+        ::Kokkos::deep_copy(m_execution,
+          ::Kokkos::subview(res.triplets.matrix.data(), range),
           host(constraints.values.data(), extra));
         // Every expanded contribution is kept, zero or not, as on the host.
         std::vector<Segment> segments;
@@ -2765,8 +2853,11 @@ namespace Rodin::Assembly::Internal
           if (!m_vectors[begin].integrator)
           {
             const auto& v = m_vectors[begin++];
-            const size_t count = static_cast<size_t>(v.vec->size());
-            const auto values = upload(v.vec->data(), count, "Rodin preassembled vector");
+            const size_t count =
+              v.backend ? v.backend->size() : static_cast<size_t>(v.vec->size());
+            const auto values = v.backend
+              ? v.backend->getView()
+              : upload(v.vec->data(), count, "Rodin preassembled vector");
             if (x)
               addEntries(sequence(m_execution, count, v.row), values, Ranks(), x, rhs);
             else
@@ -2824,7 +2915,7 @@ namespace Rodin::Assembly
    * @brief Device assembly of a sparse bilinear form on a Kokkos mesh.
    *
    * Every local integrator of the form, possibly negated, must implement
-   * Rodin::Kokkos::Variational::DeviceBilinearFormIntegrator. Each one
+   * Rodin::Kokkos::Variational::BilinearFormIntegrator. Each one
    * integrates its cells on the device, and the matrix is summed and
    * compressed on the device before being copied to the host.
    *
@@ -2834,16 +2925,16 @@ namespace Rodin::Assembly
    * @tparam TrialFES Trial space on a resident Kokkos mesh.
    * @tparam TestFES Test space on the same resident Kokkos mesh.
    */
-  template <class Solution, class TrialFES, class TestFES>
-  class Kokkos<Math::SparseMatrix<Real>,
-    Variational::BilinearForm<Solution, TrialFES, TestFES, Math::SparseMatrix<Real>>>
-    final
-    : public AssemblyBase<Math::SparseMatrix<Real>,
-        Variational::BilinearForm<Solution, TrialFES, TestFES, Math::SparseMatrix<Real>>>
+  template <class Matrix, class Solution, class TrialFES, class TestFES>
+    requires(std::is_same_v<Matrix, ::Rodin::Math::SparseMatrix<Real>> ||
+      requires { typename Matrix::BackendType; })
+  class Kokkos<Matrix, Variational::BilinearForm<Solution, TrialFES, TestFES, Matrix>>
+    final : public AssemblyBase<Matrix,
+              Variational::BilinearForm<Solution, TrialFES, TestFES, Matrix>>
   {
     public:
       /// @brief Operator type.
-      using OperatorType = Math::SparseMatrix<Real>;
+      using OperatorType = Matrix;
 
       /// @brief Bilinear form type.
       using BilinearFormType =
@@ -2885,14 +2976,14 @@ namespace Rodin::Assembly
        */
       void execute(OperatorType& res, const InputType& input) override
       {
-        Internal::DeviceSystem<BackendType> system(
+        Internal::SystemAssembly<BackendType> system(
           input.getTrialFES().getMesh().getContext().getExecutionSpace(),
           input.getTestFES().getSize(), input.getTrialFES().getSize());
         for (auto& lbfi : input.getLocalBFIs())
           system.addMatrix(lbfi, 0, 0);
         for (auto& gbfi : input.getGlobalBFIs())
           system.addMatrix(gbfi, 0, 0);
-        system.finish(&res, nullptr);
+        system.finish(&res, static_cast<::Rodin::Math::Vector<Real>*>(nullptr));
       }
 
       /**
@@ -2910,20 +3001,21 @@ namespace Rodin::Assembly
    * @brief Device assembly of a linear form on a Kokkos mesh.
    *
    * Every integrator of the form, possibly negated, must implement
-   * Rodin::Kokkos::Variational::DeviceLinearFormIntegrator. Each one
+   * Rodin::Kokkos::Variational::LinearFormIntegrator. Each one
    * integrates its cells on the device, and the vector is summed on the
    * device before being copied to the host.
    *
    * @tparam FES Test space on a resident Kokkos mesh.
    */
-  template <class FES>
-  class Kokkos<Math::Vector<Real>, Variational::LinearForm<FES, Math::Vector<Real>>> final
-    : public AssemblyBase<Math::Vector<Real>,
-        Variational::LinearForm<FES, Math::Vector<Real>>>
+  template <class Vector, class FES>
+    requires(std::is_same_v<Vector, ::Rodin::Math::Vector<Real>> ||
+      requires { typename Vector::MemorySpace; })
+  class Kokkos<Vector, Variational::LinearForm<FES, Vector>> final
+    : public AssemblyBase<Vector, Variational::LinearForm<FES, Vector>>
   {
     public:
       /// @brief Vector type.
-      using VectorType = Math::Vector<Real>;
+      using VectorType = Vector;
 
       /// @brief Linear form type.
       using LinearFormType = Variational::LinearForm<FES, VectorType>;
@@ -2978,7 +3070,7 @@ namespace Rodin::Assembly
        */
       void execute(VectorType& res, const InputType& input) override
       {
-        Internal::DeviceSystem<BackendType> system(
+        Internal::SystemAssembly<BackendType> system(
           input.getFES().getMesh().getContext().getExecutionSpace(),
           input.getFES().getSize(), 0);
         for (auto& lfi : input.getLFIs())
@@ -2998,34 +3090,36 @@ namespace Rodin::Assembly
 
   namespace Internal
   {
-    /// @brief Whether a matrix is a Rodin::Kokkos::SparseMatrix of reals.
+    /// @brief Whether a matrix is a Rodin::Kokkos::Math::SparseMatrix of reals.
     template <class Matrix>
     struct IsKokkosMatrix : std::false_type
     {};
 
-    /// @brief A Rodin::Kokkos::SparseMatrix of reals.
+    /// @brief A Rodin::Kokkos::Math::SparseMatrix of reals.
     template <class Backend>
-    struct IsKokkosMatrix<::Rodin::Kokkos::SparseMatrix<Real, Backend>> : std::true_type
+    struct IsKokkosMatrix<::Rodin::Kokkos::Math::SparseMatrix<Real, Backend>>
+      : std::true_type
     {};
 
     /// @brief Matrix of a system assembled from a Problem on a Kokkos mesh.
     template <class Matrix>
     concept KokkosProblemMatrix =
-      std::is_same_v<Matrix, Math::SparseMatrix<Real>> || IsKokkosMatrix<Matrix>::value;
+      std::is_same_v<Matrix, ::Rodin::Math::SparseMatrix<Real>> ||
+      IsKokkosMatrix<Matrix>::value;
 
     /**
      * @brief Builds a system on the host or with its matrix on the device.
      * @param system Contributions of the problem.
      * @param axb System receiving the matrix and the right-hand side.
      */
-    template <class Backend, class Matrix>
+    template <class Backend, class Matrix, class Vector>
     void finish(
-      DeviceSystem<Backend>& system, Math::LinearSystem<Matrix, Math::Vector<Real>>& axb)
+      SystemAssembly<Backend>& system, ::Rodin::Math::LinearSystem<Matrix, Vector>& axb)
     {
       if constexpr (IsKokkosMatrix<Matrix>::value)
       {
         static_assert(
-          std::is_same_v<Matrix, typename DeviceSystem<Backend>::DeviceMatrix>,
+          std::is_same_v<Matrix, typename SystemAssembly<Backend>::BackendMatrix>,
           "The matrix of the system must have the backend of the mesh.");
         system.finish(axb.getOperator(), axb.getVector());
       }
@@ -3035,24 +3129,6 @@ namespace Rodin::Assembly
       }
     }
 
-    /**
-     * @brief Rejects the preassembled forms of a problem whose matrix stays
-     * on the device.
-     * @param forms Preassembled bilinear forms.
-     *
-     * No form assembles into a device matrix, so the list is empty unless a
-     * form is added by hand.
-     */
-    template <class Forms>
-    void rejectForms(const Forms& forms)
-    {
-      if (!forms.empty())
-      {
-        Alert::Exception() << "A problem with a device matrix takes no preassembled "
-                              "bilinear form."
-                           << Alert::Raise;
-      }
-    }
   }
 
   /**
@@ -3066,23 +3142,23 @@ namespace Rodin::Assembly
    * assemblies do. The system is then copied to the host, or only its
    * right-hand side when the matrix stays on the device.
    *
-   * @tparam Matrix Math::SparseMatrix<Real>, copied to the host, or
-   * Rodin::Kokkos::SparseMatrix<Real, Backend>, left on the device.
+   * @tparam Matrix ::Rodin::Math::SparseMatrix<Real>, copied to the host, or
+   * Rodin::Kokkos::Math::SparseMatrix<Real, Backend>, left on the device.
    * @tparam TrialFunction Trial function on a resident Kokkos mesh.
    * @tparam TestFunction Test function on the same mesh.
    */
-  template <class Matrix, class TrialFunction, class TestFunction>
+  template <class Matrix, class Vector, class TrialFunction, class TestFunction>
     requires Internal::KokkosProblemMatrix<Matrix>
-  class Kokkos<Math::LinearSystem<Matrix, Math::Vector<Real>>,
-    Variational::Problem<Math::LinearSystem<Matrix, Math::Vector<Real>>, TrialFunction,
+  class Kokkos<::Rodin::Math::LinearSystem<Matrix, Vector>,
+    Variational::Problem<::Rodin::Math::LinearSystem<Matrix, Vector>, TrialFunction,
       TestFunction>>
-    final : public AssemblyBase<Math::LinearSystem<Matrix, Math::Vector<Real>>,
-              Variational::Problem<Math::LinearSystem<Matrix, Math::Vector<Real>>,
+    final : public AssemblyBase<::Rodin::Math::LinearSystem<Matrix, Vector>,
+              Variational::Problem<::Rodin::Math::LinearSystem<Matrix, Vector>,
                 TrialFunction, TestFunction>>
   {
     public:
       /// @brief Linear system type.
-      using LinearSystemType = Math::LinearSystem<Matrix, Math::Vector<Real>>;
+      using LinearSystemType = ::Rodin::Math::LinearSystem<Matrix, Vector>;
 
       /// @brief Problem type.
       using ProblemType =
@@ -3142,7 +3218,7 @@ namespace Rodin::Assembly
         auto& pb = input.getProblemBody();
         const auto& u = input.getTrialFunction();
         const auto& v = input.getTestFunction();
-        Internal::DeviceSystem<BackendType> system(
+        Internal::SystemAssembly<BackendType> system(
           u.getFiniteElementSpace().getMesh().getContext().getExecutionSpace(),
           v.getFiniteElementSpace().getSize(), u.getFiniteElementSpace().getSize());
         for (auto& dbc : pb.getDBCs())
@@ -3159,9 +3235,6 @@ namespace Rodin::Assembly
           system.addMatrix(lbfi, 0, 0);
         for (auto& gbfi : pb.getGlobalBFIs())
           system.addMatrix(gbfi, 0, 0);
-        if constexpr (Internal::IsKokkosMatrix<Matrix>::value)
-          Internal::rejectForms(pb.getBFs());
-        else
         {
           for (const auto& bf : pb.getBFs())
             system.addMatrix(bf.getOperator(), 0, 0);
@@ -3213,18 +3286,17 @@ namespace Rodin::Assembly
    *
    * @tparam Matrix As for the single field assembly.
    */
-  template <class Matrix, class U1, class U2, class U3, class... Us>
+  template <class Matrix, class Vector, class U1, class U2, class U3, class... Us>
     requires Internal::KokkosProblemMatrix<Matrix>
-  class Kokkos<Math::LinearSystem<Matrix, Math::Vector<Real>>,
-    Variational::Problem<Math::LinearSystem<Matrix, Math::Vector<Real>>, U1, U2, U3,
-      Us...>>
-    final : public AssemblyBase<Math::LinearSystem<Matrix, Math::Vector<Real>>,
-              Variational::Problem<Math::LinearSystem<Matrix, Math::Vector<Real>>, U1, U2,
+  class Kokkos<::Rodin::Math::LinearSystem<Matrix, Vector>,
+    Variational::Problem<::Rodin::Math::LinearSystem<Matrix, Vector>, U1, U2, U3, Us...>>
+    final : public AssemblyBase<::Rodin::Math::LinearSystem<Matrix, Vector>,
+              Variational::Problem<::Rodin::Math::LinearSystem<Matrix, Vector>, U1, U2,
                 U3, Us...>>
   {
     public:
       /// @brief Linear system type.
-      using LinearSystemType = Math::LinearSystem<Matrix, Math::Vector<Real>>;
+      using LinearSystemType = ::Rodin::Math::LinearSystem<Matrix, Vector>;
 
       /// @brief Problem type.
       using ProblemType = Variational::Problem<LinearSystemType, U1, U2, U3, Us...>;
@@ -3296,7 +3368,7 @@ namespace Rodin::Assembly
         };
 
         const auto& u1 = input.getTrialFunctions().template get<0>().get();
-        Internal::DeviceSystem<BackendType> system(
+        Internal::SystemAssembly<BackendType> system(
           u1.getFiniteElementSpace().getMesh().getContext().getExecutionSpace(),
           input.getTotalTestSize(), input.getTotalTrialSize());
         for (auto& dbc : pb.getDBCs())
@@ -3322,9 +3394,6 @@ namespace Rodin::Assembly
         // for the values they lift.
         for (auto& lfi : pb.getLFIs())
           system.addVector(lfi, testOffset(lfi.getTestFunction().getUUID()), Real(-1));
-        if constexpr (Internal::IsKokkosMatrix<Matrix>::value)
-          Internal::rejectForms(pb.getBFs());
-        else
         {
           for (const auto& bf : pb.getBFs())
           {
@@ -3381,7 +3450,7 @@ namespace Rodin::Assembly
    * @tparam ValueDerived Value function type.
    */
   template <class Solution, class FES, class ValueDerived>
-    requires ::Rodin::Kokkos::Variational::DeviceSpace<FES>
+    requires ::Rodin::Kokkos::Variational::Space<FES>
   class Kokkos<IndexMap<Real>,
     Variational::DirichletBC<Variational::TrialFunction<Solution, FES>,
       Variational::FunctionBase<ValueDerived>>>
@@ -3456,7 +3525,7 @@ namespace Rodin::Assembly
             << Alert::Raise;
         }
         const auto& execution = mesh.getContext().getExecutionSpace();
-        const DOFsType dofs = fes.getDeviceDOFs();
+        const DOFsType dofs = fes.getDOFsView();
         const Index stride = dofs.getStride();
         const Index vdim = fes.getVectorDimension();
         const auto attributes =
@@ -3467,10 +3536,9 @@ namespace Rodin::Assembly
         ::Kokkos::View<Real*, MemorySpace> values(
           ::Kokkos::view_alloc(execution, std::string("Rodin boundary values")),
           stride * vdim);
-        const ::Rodin::Kokkos::Variational::DeviceView<
-          Variational::FunctionBase<ValueDerived>>
+        const ::Rodin::Kokkos::Variational::View<Variational::FunctionBase<ValueDerived>>
           value(input.getValue());
-        evaluate(execution, mesh.getDeviceView(), attributes, owners, values, value, dofs,
+        evaluate(execution, mesh.getView(), attributes, owners, values, value, dofs,
           mesh.getFaceCount(), vdim);
 
         // Only the constrained degrees of freedom, a fraction of the space,
@@ -3786,17 +3854,18 @@ namespace Rodin::Assembly
    */
   template <class Solution, class FES1, class Derived2, class FES2,
     Variational::ShapeFunctionSpaceType Sp>
-    requires ::Rodin::Kokkos::Variational::DeviceSpace<FES1>
-  class Kokkos<IndexMap<std::pair<IndexArray, Math::Vector<Real>>>,
+    requires ::Rodin::Kokkos::Variational::Space<FES1>
+  class Kokkos<IndexMap<std::pair<IndexArray, ::Rodin::Math::Vector<Real>>>,
     Variational::DirichletBC<Variational::TrialFunction<Solution, FES1>,
       Variational::ShapeFunctionBase<Derived2, FES2, Sp>>>
-    final : public AssemblyBase<IndexMap<std::pair<IndexArray, Math::Vector<Real>>>,
+    final
+    : public AssemblyBase<IndexMap<std::pair<IndexArray, ::Rodin::Math::Vector<Real>>>,
               Variational::DirichletBC<Variational::TrialFunction<Solution, FES1>,
                 Variational::ShapeFunctionBase<Derived2, FES2, Sp>>>
   {
     public:
       /// @brief Slave to master coefficients.
-      using OutputType = IndexMap<std::pair<IndexArray, Math::Vector<Real>>>;
+      using OutputType = IndexMap<std::pair<IndexArray, ::Rodin::Math::Vector<Real>>>;
 
       /// @brief Dirichlet condition type.
       using DirichletBCType =

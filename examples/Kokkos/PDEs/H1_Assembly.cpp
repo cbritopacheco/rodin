@@ -50,9 +50,9 @@ using Backend = ::Kokkos::DefaultHostExecutionSpace;
 using DeviceContext = Rodin::Context::Kokkos<Rodin::Context::Local, Backend>;
 
 /// @brief System whose matrix stays on the device.
-using DeviceSystem =
-  Rodin::Math::LinearSystem<Rodin::Kokkos::SparseMatrix<Rodin::Real, Backend>,
-    Rodin::Math::Vector<Rodin::Real>>;
+using System =
+  Rodin::Math::LinearSystem<Rodin::Kokkos::Math::SparseMatrix<Rodin::Real, Backend>,
+    Rodin::Kokkos::Math::Vector<Rodin::Real, Backend>>;
 
 /**
  * @brief Elapsed milliseconds since a time point.
@@ -101,7 +101,7 @@ static void run(const Mesh& mesh, size_t repetitions)
     Alert::Info() << "Scalar degrees of freedom: " << vh.getSize() << Alert::Raise;
     TrialFunction u(vh);
     TestFunction v(vh);
-    Problem<DeviceSystem, decltype(u), decltype(v)> problem(u, v);
+    Problem<System, decltype(u), decltype(v)> problem(u, v);
     problem = Integral(Grad(u), Grad(v));
     time("Scalar", problem, repetitions);
   }
@@ -110,7 +110,7 @@ static void run(const Mesh& mesh, size_t repetitions)
     Alert::Info() << "Vector degrees of freedom: " << vh.getSize() << Alert::Raise;
     TrialFunction u(vh);
     TestFunction v(vh);
-    Problem<DeviceSystem, decltype(u), decltype(v)> problem(u, v);
+    Problem<System, decltype(u), decltype(v)> problem(u, v);
     problem = Integral(Jacobian(u), Jacobian(v));
     time("Vector", problem, repetitions);
   }
@@ -123,7 +123,7 @@ static void run(const Mesh& mesh, size_t repetitions)
     TrialFunction u(vh);
     TestFunction v(vh);
     const auto work = Solid::InternalVirtualWork(Solid::NeoHookean(1.2, 0.8), w);
-    Problem<DeviceSystem, decltype(u), decltype(v)> problem(u, v);
+    Problem<System, decltype(u), decltype(v)> problem(u, v);
     problem = work.Tangent(u, v);
     time("Hyperelastic", problem, repetitions);
   }

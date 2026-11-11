@@ -5,7 +5,7 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 #include <Rodin/Configure.h>
-#include <Rodin/Kokkos/LinearSystem.h>
+#include <Rodin/Kokkos/Math/LinearSystem.h>
 
 #ifdef RODIN_USE_CUDSS
 #include <Rodin/Solver/CuDSS.h>
@@ -23,11 +23,11 @@ namespace Rodin::Tests::Unit
 
   /// @brief System whose matrix stays in the memory of the test backend.
   using DeviceLinearSystem =
-    Math::LinearSystem<Rodin::Kokkos::SparseMatrix<Real, TestBackend>,
-      Math::Vector<Real>>;
+    Math::LinearSystem<Rodin::Kokkos::Math::SparseMatrix<Real, TestBackend>,
+      Rodin::Kokkos::Math::Vector<Real, TestBackend>>;
 
   static_assert(
-    std::is_same_v<Rodin::Kokkos::SparseMatrix<Real, TestBackend>::MemorySpace,
+    std::is_same_v<Rodin::Kokkos::Math::SparseMatrix<Real, TestBackend>::MemorySpace,
       TestMemorySpace>);
 
   /**
@@ -88,7 +88,8 @@ namespace Rodin::Tests::Unit
     });
     RealFunction g(
       KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real { return 2 * p.x() + 1; });
-    Problem host(u, v);
+    using HostSystem = Math::LinearSystem<Math::SparseMatrix<Real>, Math::Vector<Real>>;
+    Problem<HostSystem, decltype(u), decltype(v)> host(u, v);
     host = Integral(Grad(u), Grad(v)) + Integral(u, v) - Integral(f, v) +
       DirichletBC(u, g).on(1) + DirichletBC(u, RealFunction(3)).on(2);
     Problem<DeviceLinearSystem, decltype(u), decltype(v)> device(u, v);
@@ -110,7 +111,8 @@ namespace Rodin::Tests::Unit
     const auto pairs = makePairs(fes.getSize(), fixedDOFs(hu, 5));
     RealFunction g(
       KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real { return 2 - p.x(); });
-    Problem host(u, v);
+    using HostSystem = Math::LinearSystem<Math::SparseMatrix<Real>, Math::Vector<Real>>;
+    Problem<HostSystem, decltype(u), decltype(v)> host(u, v);
     host = Integral(Grad(u), Grad(v)) + Integral(u, v) - Integral(RealFunction(1), v) +
       DirichletBC(u, g).on(5) + PeriodicBC(u, pairs);
     Problem<DeviceLinearSystem, decltype(u), decltype(v)> device(u, v);
@@ -134,7 +136,9 @@ namespace Rodin::Tests::Unit
     TestFunction v(vh);
     TestFunction q(qh);
     const Real eps = 1e-3;
-    Problem host(u, p, v, q);
+    using HostSystem = Math::LinearSystem<Math::SparseMatrix<Real>, Math::Vector<Real>>;
+    Problem<HostSystem, decltype(u), decltype(p), decltype(v), decltype(q)> host(
+      u, p, v, q);
     host = Integral(Jacobian(u), Jacobian(v)) - Integral(p, Div(v)) +
       Integral(Div(u), q) + Integral(eps * p, q) - Integral(VectorFunction{1, 0}, v) +
       DirichletBC(u, VectorFunction{0, 0}).on(1) + DirichletBC(p, RealFunction(1)).on(2);
@@ -159,7 +163,8 @@ namespace Rodin::Tests::Unit
     RealFunction f(KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real {
       return 1 + p.x() * p.y();
     });
-    Problem host(u, v);
+    using HostSystem = Math::LinearSystem<Math::SparseMatrix<Real>, Math::Vector<Real>>;
+    Problem<HostSystem, decltype(u), decltype(v)> host(u, v);
     host = Integral(Grad(u), Grad(v)) + Integral(u, v) - Integral(f, v) +
       DirichletBC(u, RealFunction(1));
     Problem<DeviceLinearSystem, decltype(u), decltype(v)> device(u, v);
@@ -201,7 +206,8 @@ namespace Rodin::Tests::Unit
     RealFunction f(KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real {
       return 1 + p.x() * p.y();
     });
-    Problem host(u, v);
+    using HostSystem = Math::LinearSystem<Math::SparseMatrix<Real>, Math::Vector<Real>>;
+    Problem<HostSystem, decltype(u), decltype(v)> host(u, v);
     host = Integral(Grad(u), Grad(v)) + Integral(u, v) - Integral(f, v) +
       DirichletBC(u, RealFunction(1));
     Problem<DeviceLinearSystem, decltype(u), decltype(v)> device(u, v);

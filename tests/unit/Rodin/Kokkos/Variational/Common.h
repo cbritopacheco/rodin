@@ -39,6 +39,18 @@ namespace Rodin::Tests::Unit
     EXPECT_LE(difference.norm(), Real(1e-12) * host.norm());
   }
 
+  /// @brief Compares backend operators through independent host snapshots.
+  template <class Left, class Right>
+    requires(
+      requires(const Left& a) { a.toHost(); } || requires(const Right& b) { b.toHost(); })
+  void expectSameOperator(const Left& a, const Right& b)
+  {
+    if constexpr (requires { a.toHost(); })
+      expectSameOperator(a.toHost(), b);
+    else
+      expectSameOperator(a, b.toHost());
+  }
+
   /**
    * @brief Assembles a host and a device form and compares their operators.
    * @param hu Host trial function.

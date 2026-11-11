@@ -14,7 +14,7 @@
  * Specializes Solid::InternalVirtualWorkTangent and
  * Solid::InternalVirtualWorkResidual on vector device spaces for the
  * Neo-Hookean law, with closed form entries, and for the laws of
- * Kokkos::Variational::DeviceLaw, through their elasticity tensors, so that
+ * Kokkos::Variational::LawView, through their elasticity tensors, so that
  * Solid::InternalVirtualWork assembles Newton problems of resident Kokkos
  * meshes on the device.
  */
@@ -126,14 +126,14 @@ namespace Rodin::Solid
    * setQuadratureOrder(). The displacement is copied to the device at
    * every assembly. Constitutive inputs are not available on the device.
    */
-  template <class Solution, Kokkos::Variational::VectorDeviceSpace TrialFES,
-    Kokkos::Variational::VectorDeviceSpace TestFES,
-    Kokkos::Variational::VectorDeviceSpace StateFES, class Data>
+  template <class Solution, Kokkos::Variational::VectorSpace TrialFES,
+    Kokkos::Variational::VectorSpace TestFES, Kokkos::Variational::VectorSpace StateFES,
+    class Data>
   class InternalVirtualWorkTangent<NeoHookean,
     Variational::TrialFunction<Solution, TrialFES>, Variational::TestFunction<TestFES>,
     Variational::GridFunction<StateFES, Data>>
     final : public Variational::LocalBilinearFormIntegratorBase<Real>,
-            public Kokkos::Variational::DeviceBilinearFormIntegrator<
+            public Kokkos::Variational::BilinearFormIntegrator<
               Kokkos::Variational::Internal::BackendOf<TrialFES>>
   {
     public:
@@ -165,7 +165,7 @@ namespace Rodin::Solid
       using Parent = Variational::LocalBilinearFormIntegratorBase<Real>;
 
       /// @brief Device integrator interface.
-      using DeviceParent = Kokkos::Variational::DeviceBilinearFormIntegrator<
+      using ViewParent = Kokkos::Variational::BilinearFormIntegrator<
         Kokkos::Variational::Internal::BackendOf<TrialFES>>;
 
       /// @brief Mesh type.
@@ -181,10 +181,10 @@ namespace Rodin::Solid
       using TestDOFsType = typename TestFESType::DOFsType;
 
       /// @brief Device quadrature tables.
-      using QuadratureType = Kokkos::Variational::Internal::DeviceQuadrature<MeshType>;
+      using QuadratureType = Kokkos::Variational::Internal::Quadrature<MeshType>;
 
       /// @brief Integrated polytopes.
-      using PolytopesType = Kokkos::Variational::Internal::DevicePolytopes<MeshType>;
+      using PolytopesType = Kokkos::Variational::Internal::Polytopes<MeshType>;
 
       /// @brief Device coefficients of the displacement.
       using StateViewType = Kokkos::Variational::GridFunctionView<StateFESType>;
@@ -211,7 +211,7 @@ namespace Rodin::Solid
       /// @brief Copy constructor. @param other Tangent to copy.
       InternalVirtualWorkTangent(const InternalVirtualWorkTangent& other)
         : Parent(other),
-          DeviceParent(other),
+          ViewParent(other),
           m_law(other.m_law),
           m_trial(other.m_trial),
           m_test(other.m_test),
@@ -297,7 +297,7 @@ namespace Rodin::Solid
       }
 
       /// @brief Gets the arrangement of the entries. @return Entry layout.
-      Kokkos::Variational::DeviceLayout getLayout() const override
+      Kokkos::Variational::Layout getLayout() const override
       {
         const auto& trialfes = m_trial.get().getFiniteElementSpace();
         const auto& testfes = m_test.get().getFiniteElementSpace();
@@ -305,7 +305,7 @@ namespace Rodin::Solid
         return {&trialfes.getMesh(), static_cast<Index>(trialfes.getVectorDimension()),
           static_cast<Index>(testfes.getVectorDimension()),
           {attributes.begin(), attributes.end()}, this->getRegion(),
-          trialfes.getDeviceDOFs().getStride(), testfes.getDeviceDOFs().getStride(),
+          trialfes.getDOFsView().getStride(), testfes.getDOFsView().getStride(),
           TrialDOFsType::getCapacity(RODIN_MAXIMUM_POLYTOPE_VERTICES),
           TestDOFsType::getCapacity(RODIN_MAXIMUM_POLYTOPE_VERTICES)};
       }
@@ -321,8 +321,8 @@ namespace Rodin::Solid
         const auto& trialfes = m_trial.get().getFiniteElementSpace();
         const auto& testfes = m_test.get().getFiniteElementSpace();
         return m_polytopes.prepare(trialfes.getMesh(), this->getRegion(),
-          this->getAttributes(), trialfes.getDeviceDOFs(), trialfes.getVectorDimension(),
-          testfes.getDeviceDOFs(), testfes.getVectorDimension(),
+          this->getAttributes(), trialfes.getDOFsView(), trialfes.getVectorDimension(),
+          testfes.getDOFsView(), testfes.getVectorDimension(),
           [&](const Geometry::Polytope& polytope) { return getOrder(polytope); });
       }
 
@@ -361,16 +361,16 @@ namespace Rodin::Solid
           if constexpr (getLocalSize<Vertices>() <= LocalCapacity)
           {
             integratePolytopes<Vertices>(trialfes.getMesh(), m_polytopes,
-              trialfes.getDeviceDOFs(), testfes.getDeviceDOFs(),
-              testfes.getVectorDimension(), state, m_law.getLameFirstParameter(),
-              m_law.getShearModulus(), values, offset, sign, accumulate, rows, cols);
+              trialfes.getDOFsView(), testfes.getDOFsView(), testfes.getVectorDimension(),
+              state, m_law.getLameFirstParameter(), m_law.getShearModulus(), values,
+              offset, sign, accumulate, rows, cols);
           }
           else
           {
             integrateTeams<Vertices>(trialfes.getMesh(), m_polytopes,
-              trialfes.getDeviceDOFs(), testfes.getDeviceDOFs(),
-              testfes.getVectorDimension(), state, m_law.getLameFirstParameter(),
-              m_law.getShearModulus(), values, offset, sign, accumulate, rows, cols);
+              trialfes.getDOFsView(), testfes.getDOFsView(), testfes.getVectorDimension(),
+              state, m_law.getLameFirstParameter(), m_law.getShearModulus(), values,
+              offset, sign, accumulate, rows, cols);
           }
           return true;
         });
@@ -434,11 +434,11 @@ namespace Rodin::Solid
         const ::Kokkos::View<Index*, MemorySpace>& cols)
       {
         const auto& execution = mesh.getContext().getExecutionSpace();
-        const PolytopeKernel<Vertices> kernel{mesh.getDeviceView(),
-          polytopes.getQuadrature(), polytopes.getAttributes(), polytopes.getOffsets(),
-          polytopes.getSpacing(), polytopes.getRegion(), polytopes.getDimension(),
-          trialDOFs, testDOFs, vdim, state, lambda, mu, values, offset, sign, accumulate,
-          rows.extent(0) > 0, rows, cols};
+        const PolytopeKernel<Vertices> kernel{mesh.getView(), polytopes.getQuadrature(),
+          polytopes.getAttributes(), polytopes.getOffsets(), polytopes.getSpacing(),
+          polytopes.getRegion(), polytopes.getDimension(), trialDOFs, testDOFs, vdim,
+          state, lambda, mu, values, offset, sign, accumulate, rows.extent(0) > 0, rows,
+          cols};
         ::Kokkos::parallel_for("Rodin hyperelastic tangent integration",
           QuadratureType::policy(execution, polytopes.getPolytopeCount()), kernel);
       }
@@ -500,7 +500,7 @@ namespace Rodin::Solid
         const auto& execution = mesh.getContext().getExecutionSpace();
         const size_t scratch = Kernel::P * Kernel::PointBytes + 8 * Kernel::Alignment;
         const int level = scratch <= size_t(Policy::scratch_size_max(0)) ? 0 : 1;
-        const Kernel kernel{mesh.getDeviceView(), polytopes.getQuadrature(),
+        const Kernel kernel{mesh.getView(), polytopes.getQuadrature(),
           polytopes.getAttributes(), polytopes.getOffsets(), polytopes.getSpacing(),
           polytopes.getRegion(), polytopes.getDimension(), trialDOFs, testDOFs, vdim,
           state, lambda, mu, values, offset, sign, accumulate, rows.extent(0) > 0, rows,
@@ -1183,12 +1183,12 @@ namespace Rodin::Solid
    * The quadrature order is that of the host, @f$ 2 \max(k_v, k_u) @f$
    * unless set by setQuadratureOrder().
    */
-  template <Kokkos::Variational::VectorDeviceSpace TestFES,
-    Kokkos::Variational::VectorDeviceSpace StateFES, class Data>
+  template <Kokkos::Variational::VectorSpace TestFES,
+    Kokkos::Variational::VectorSpace StateFES, class Data>
   class InternalVirtualWorkResidual<NeoHookean, Variational::TestFunction<TestFES>,
     Variational::GridFunction<StateFES, Data>>
     final : public Variational::LinearFormIntegratorBase<Real>,
-            public Kokkos::Variational::DeviceLinearFormIntegrator<
+            public Kokkos::Variational::LinearFormIntegrator<
               Kokkos::Variational::Internal::BackendOf<TestFES>>
   {
     public:
@@ -1214,7 +1214,7 @@ namespace Rodin::Solid
       using Parent = Variational::LinearFormIntegratorBase<Real>;
 
       /// @brief Device integrator interface.
-      using DeviceParent = Kokkos::Variational::DeviceLinearFormIntegrator<
+      using ViewParent = Kokkos::Variational::LinearFormIntegrator<
         Kokkos::Variational::Internal::BackendOf<TestFES>>;
 
       /// @brief Mesh type.
@@ -1227,10 +1227,10 @@ namespace Rodin::Solid
       using DOFsType = typename TestFESType::DOFsType;
 
       /// @brief Device quadrature tables.
-      using QuadratureType = Kokkos::Variational::Internal::DeviceQuadrature<MeshType>;
+      using QuadratureType = Kokkos::Variational::Internal::Quadrature<MeshType>;
 
       /// @brief Integrated polytopes.
-      using PolytopesType = Kokkos::Variational::Internal::DevicePolytopes<MeshType>;
+      using PolytopesType = Kokkos::Variational::Internal::Polytopes<MeshType>;
 
       /// @brief Device coefficients of the displacement.
       using StateViewType = Kokkos::Variational::GridFunctionView<StateFESType>;
@@ -1255,7 +1255,7 @@ namespace Rodin::Solid
       /// @brief Copy constructor. @param other Residual to copy.
       InternalVirtualWorkResidual(const InternalVirtualWorkResidual& other)
         : Parent(other),
-          DeviceParent(other),
+          ViewParent(other),
           m_law(other.m_law),
           m_test(other.m_test),
           m_displacement(other.m_displacement),
@@ -1339,13 +1339,13 @@ namespace Rodin::Solid
       }
 
       /// @brief Gets the arrangement of the entries. @return Entry layout.
-      Kokkos::Variational::DeviceLayout getLayout() const override
+      Kokkos::Variational::Layout getLayout() const override
       {
         const auto& fes = m_test.get().getFiniteElementSpace();
         const auto& attributes = this->getAttributes();
         return {&fes.getMesh(), 0, static_cast<Index>(fes.getVectorDimension()),
           {attributes.begin(), attributes.end()}, this->getRegion(), 0,
-          fes.getDeviceDOFs().getStride(), 0,
+          fes.getDOFsView().getStride(), 0,
           DOFsType::getCapacity(RODIN_MAXIMUM_POLYTOPE_VERTICES)};
       }
 
@@ -1355,7 +1355,7 @@ namespace Rodin::Solid
         const auto& fes = m_test.get().getFiniteElementSpace();
         return m_polytopes.prepare(fes.getMesh(), this->getRegion(),
           this->getAttributes(), Kokkos::Variational::ConstantDOFs{}, 1,
-          fes.getDeviceDOFs(), fes.getVectorDimension(),
+          fes.getDOFsView(), fes.getVectorDimension(),
           [&](const Geometry::Polytope& polytope) { return getOrder(polytope); });
       }
 
@@ -1387,7 +1387,7 @@ namespace Rodin::Solid
         const Index vertices = m_polytopes.getQuadrature().getMaximumVertexCount();
         Kokkos::Variational::visitVertexCapacity(vertices, [&](auto n) {
           integratePolytopes<decltype(n)::value>(fes.getMesh(), m_polytopes,
-            fes.getDeviceDOFs(), fes.getVectorDimension(), state,
+            fes.getDOFsView(), fes.getVectorDimension(), state,
             m_law.getLameFirstParameter(), m_law.getShearModulus(), values, offset, sign,
             accumulate, indices);
           return true;
@@ -1434,11 +1434,10 @@ namespace Rodin::Solid
         Real sign, bool accumulate, const ::Kokkos::View<Index*, MemorySpace>& indices)
       {
         const auto& execution = mesh.getContext().getExecutionSpace();
-        const PolytopeKernel<Vertices> kernel{mesh.getDeviceView(),
-          polytopes.getQuadrature(), polytopes.getAttributes(), polytopes.getOffsets(),
-          polytopes.getSpacing(), polytopes.getRegion(), polytopes.getDimension(), dofs,
-          vdim, state, lambda, mu, values, offset, sign, accumulate,
-          indices.extent(0) > 0, indices};
+        const PolytopeKernel<Vertices> kernel{mesh.getView(), polytopes.getQuadrature(),
+          polytopes.getAttributes(), polytopes.getOffsets(), polytopes.getSpacing(),
+          polytopes.getRegion(), polytopes.getDimension(), dofs, vdim, state, lambda, mu,
+          values, offset, sign, accumulate, indices.extent(0) > 0, indices};
         ::Kokkos::parallel_for("Rodin hyperelastic residual integration",
           QuadratureType::policy(execution, polytopes.getPolytopeCount()), kernel);
       }
@@ -1617,7 +1616,7 @@ namespace Rodin::Solid
 
   /**
    * @brief Device tangent of the internal virtual work of a hyperelastic
-   * law of Kokkos::Variational::DeviceLaw.
+   * law of Kokkos::Variational::LawView.
    *
    * Represents
    * @f[
@@ -1635,14 +1634,13 @@ namespace Rodin::Solid
    * setQuadratureOrder(). The displacement is copied to the device at
    * every assembly. Constitutive inputs are not available on the device.
    */
-  template <Kokkos::Variational::DeviceHyperElasticLaw Law, class Solution,
-    Kokkos::Variational::VectorDeviceSpace TrialFES,
-    Kokkos::Variational::VectorDeviceSpace TestFES,
-    Kokkos::Variational::VectorDeviceSpace StateFES, class Data>
+  template <Kokkos::Variational::HyperElasticLaw Law, class Solution,
+    Kokkos::Variational::VectorSpace TrialFES, Kokkos::Variational::VectorSpace TestFES,
+    Kokkos::Variational::VectorSpace StateFES, class Data>
   class InternalVirtualWorkTangent<Law, Variational::TrialFunction<Solution, TrialFES>,
     Variational::TestFunction<TestFES>, Variational::GridFunction<StateFES, Data>>
     final : public Variational::LocalBilinearFormIntegratorBase<Real>,
-            public Kokkos::Variational::DeviceBilinearFormIntegrator<
+            public Kokkos::Variational::BilinearFormIntegrator<
               Kokkos::Variational::Internal::BackendOf<TrialFES>>
   {
     public:
@@ -1653,7 +1651,7 @@ namespace Rodin::Solid
       using LawType = Law;
 
       /// @brief Device law type.
-      using DeviceLawType = typename Kokkos::Variational::DeviceLaw<Law>::Type;
+      using LawViewType = typename Kokkos::Variational::LawView<Law>::Type;
 
       /// @brief Trial function type.
       using TrialType = Variational::TrialFunction<Solution, TrialFES>;
@@ -1677,7 +1675,7 @@ namespace Rodin::Solid
       using Parent = Variational::LocalBilinearFormIntegratorBase<Real>;
 
       /// @brief Device integrator interface.
-      using DeviceParent = Kokkos::Variational::DeviceBilinearFormIntegrator<
+      using ViewParent = Kokkos::Variational::BilinearFormIntegrator<
         Kokkos::Variational::Internal::BackendOf<TrialFES>>;
 
       /// @brief Mesh type.
@@ -1693,15 +1691,15 @@ namespace Rodin::Solid
       using TestDOFsType = typename TestFESType::DOFsType;
 
       /// @brief Device quadrature tables.
-      using QuadratureType = Kokkos::Variational::Internal::DeviceQuadrature<MeshType>;
+      using QuadratureType = Kokkos::Variational::Internal::Quadrature<MeshType>;
 
       /// @brief Integrated polytopes.
-      using PolytopesType = Kokkos::Variational::Internal::DevicePolytopes<MeshType>;
+      using PolytopesType = Kokkos::Variational::Internal::Polytopes<MeshType>;
 
       /// @brief Device coefficients of the displacement.
       using StateViewType = Kokkos::Variational::GridFunctionView<StateFESType>;
 
-      static_assert(std::is_trivially_copyable_v<DeviceLawType>);
+      static_assert(std::is_trivially_copyable_v<LawViewType>);
 
       /**
        * @brief Constructs the tangent at a displacement.
@@ -1725,7 +1723,7 @@ namespace Rodin::Solid
       /// @brief Copy constructor. @param other Tangent to copy.
       InternalVirtualWorkTangent(const InternalVirtualWorkTangent& other)
         : Parent(other),
-          DeviceParent(other),
+          ViewParent(other),
           m_law(other.m_law),
           m_trial(other.m_trial),
           m_test(other.m_test),
@@ -1811,7 +1809,7 @@ namespace Rodin::Solid
       }
 
       /// @brief Gets the arrangement of the entries. @return Entry layout.
-      Kokkos::Variational::DeviceLayout getLayout() const override
+      Kokkos::Variational::Layout getLayout() const override
       {
         const auto& trialfes = m_trial.get().getFiniteElementSpace();
         const auto& testfes = m_test.get().getFiniteElementSpace();
@@ -1819,7 +1817,7 @@ namespace Rodin::Solid
         return {&trialfes.getMesh(), static_cast<Index>(trialfes.getVectorDimension()),
           static_cast<Index>(testfes.getVectorDimension()),
           {attributes.begin(), attributes.end()}, this->getRegion(),
-          trialfes.getDeviceDOFs().getStride(), testfes.getDeviceDOFs().getStride(),
+          trialfes.getDOFsView().getStride(), testfes.getDOFsView().getStride(),
           TrialDOFsType::getCapacity(RODIN_MAXIMUM_POLYTOPE_VERTICES),
           TestDOFsType::getCapacity(RODIN_MAXIMUM_POLYTOPE_VERTICES)};
       }
@@ -1835,8 +1833,8 @@ namespace Rodin::Solid
         const auto& trialfes = m_trial.get().getFiniteElementSpace();
         const auto& testfes = m_test.get().getFiniteElementSpace();
         return m_polytopes.prepare(trialfes.getMesh(), this->getRegion(),
-          this->getAttributes(), trialfes.getDeviceDOFs(), trialfes.getVectorDimension(),
-          testfes.getDeviceDOFs(), testfes.getVectorDimension(),
+          this->getAttributes(), trialfes.getDOFsView(), trialfes.getVectorDimension(),
+          testfes.getDOFsView(), testfes.getVectorDimension(),
           [&](const Geometry::Polytope& polytope) { return getOrder(polytope); });
       }
 
@@ -1868,7 +1866,7 @@ namespace Rodin::Solid
         const auto& displacement = m_displacement.get();
         const StateViewType state(
           displacement.getFiniteElementSpace(), displacement.getData());
-        const DeviceLawType law = Kokkos::Variational::DeviceLaw<Law>::get(m_law);
+        const LawViewType law = Kokkos::Variational::LawView<Law>::get(m_law);
         const Index vertices = m_polytopes.getQuadrature().getMaximumVertexCount();
         Kokkos::Variational::visitVertexCapacity(vertices, [&](auto n) {
           constexpr Index Vertices = decltype(n)::value;
@@ -1876,16 +1874,14 @@ namespace Rodin::Solid
           if constexpr (getLocalSize<Vertices>() <= LocalCapacity)
           {
             integratePolytopes<Vertices>(trialfes.getMesh(), m_polytopes,
-              trialfes.getDeviceDOFs(), testfes.getDeviceDOFs(),
-              testfes.getVectorDimension(), state, law, values, offset, sign, accumulate,
-              rows, cols);
+              trialfes.getDOFsView(), testfes.getDOFsView(), testfes.getVectorDimension(),
+              state, law, values, offset, sign, accumulate, rows, cols);
           }
           else
           {
             integrateTeams<Vertices>(trialfes.getMesh(), m_polytopes,
-              trialfes.getDeviceDOFs(), testfes.getDeviceDOFs(),
-              testfes.getVectorDimension(), state, law, values, offset, sign, accumulate,
-              rows, cols);
+              trialfes.getDOFsView(), testfes.getDOFsView(), testfes.getVectorDimension(),
+              state, law, values, offset, sign, accumulate, rows, cols);
           }
           return true;
         });
@@ -1945,17 +1941,16 @@ namespace Rodin::Solid
       template <Index Vertices>
       static void integratePolytopes(const MeshType& mesh, const PolytopesType& polytopes,
         const TrialDOFsType& trialDOFs, const TestDOFsType& testDOFs, Index vdim,
-        const StateViewType& state, const DeviceLawType& law,
+        const StateViewType& state, const LawViewType& law,
         const ::Kokkos::View<Real*, MemorySpace>& values, size_t offset, Real sign,
         bool accumulate, const ::Kokkos::View<Index*, MemorySpace>& rows,
         const ::Kokkos::View<Index*, MemorySpace>& cols)
       {
         const auto& execution = mesh.getContext().getExecutionSpace();
-        const PolytopeKernel<Vertices> kernel{mesh.getDeviceView(),
-          polytopes.getQuadrature(), polytopes.getAttributes(), polytopes.getOffsets(),
-          polytopes.getSpacing(), polytopes.getRegion(), polytopes.getDimension(),
-          trialDOFs, testDOFs, vdim, state, law, values, offset, sign, accumulate,
-          rows.extent(0) > 0, rows, cols};
+        const PolytopeKernel<Vertices> kernel{mesh.getView(), polytopes.getQuadrature(),
+          polytopes.getAttributes(), polytopes.getOffsets(), polytopes.getSpacing(),
+          polytopes.getRegion(), polytopes.getDimension(), trialDOFs, testDOFs, vdim,
+          state, law, values, offset, sign, accumulate, rows.extent(0) > 0, rows, cols};
         ::Kokkos::parallel_for("Rodin hyperelastic law tangent integration",
           QuadratureType::policy(execution, polytopes.getPolytopeCount()), kernel);
       }
@@ -1999,7 +1994,7 @@ namespace Rodin::Solid
       template <Index Vertices>
       static void integrateTeams(const MeshType& mesh, const PolytopesType& polytopes,
         const TrialDOFsType& trialDOFs, const TestDOFsType& testDOFs, Index vdim,
-        const StateViewType& state, const DeviceLawType& law,
+        const StateViewType& state, const LawViewType& law,
         const ::Kokkos::View<Real*, MemorySpace>& values, size_t offset, Real sign,
         bool accumulate, const ::Kokkos::View<Index*, MemorySpace>& rows,
         const ::Kokkos::View<Index*, MemorySpace>& cols)
@@ -2014,7 +2009,7 @@ namespace Rodin::Solid
         const auto& execution = mesh.getContext().getExecutionSpace();
         const size_t scratch = Kernel::P * Kernel::PointBytes + 8 * Kernel::Alignment;
         const int level = scratch <= size_t(Policy::scratch_size_max(0)) ? 0 : 1;
-        const Kernel kernel{mesh.getDeviceView(), polytopes.getQuadrature(),
+        const Kernel kernel{mesh.getView(), polytopes.getQuadrature(),
           polytopes.getAttributes(), polytopes.getOffsets(), polytopes.getSpacing(),
           polytopes.getRegion(), polytopes.getDimension(), trialDOFs, testDOFs, vdim,
           state, law, values, offset, sign, accumulate, rows.extent(0) > 0, rows, cols,
@@ -2169,7 +2164,7 @@ namespace Rodin::Solid
         StateViewType state;
 
         /// @brief Device evaluation of the hyperelastic law.
-        DeviceLawType law;
+        LawViewType law;
 
         /// @brief Entry values.
         ::Kokkos::View<Real*, MemorySpace> values;
@@ -2411,7 +2406,7 @@ namespace Rodin::Solid
         StateViewType state;
 
         /// @brief Device evaluation of the hyperelastic law.
-        DeviceLawType law;
+        LawViewType law;
 
         /// @brief Entry values.
         ::Kokkos::View<Real*, MemorySpace> values;
@@ -2686,7 +2681,7 @@ namespace Rodin::Solid
 
   /**
    * @brief Device residual of the internal virtual work of a hyperelastic
-   * law of Kokkos::Variational::DeviceLaw.
+   * law of Kokkos::Variational::LawView.
    *
    * Represents
    * @f[
@@ -2696,13 +2691,13 @@ namespace Rodin::Solid
    * device law. The quadrature order is that of the host,
    * @f$ 2 \max(k_v, k_u) @f$ unless set by setQuadratureOrder().
    */
-  template <Kokkos::Variational::DeviceHyperElasticLaw Law,
-    Kokkos::Variational::VectorDeviceSpace TestFES,
-    Kokkos::Variational::VectorDeviceSpace StateFES, class Data>
+  template <Kokkos::Variational::HyperElasticLaw Law,
+    Kokkos::Variational::VectorSpace TestFES, Kokkos::Variational::VectorSpace StateFES,
+    class Data>
   class InternalVirtualWorkResidual<Law, Variational::TestFunction<TestFES>,
     Variational::GridFunction<StateFES, Data>>
     final : public Variational::LinearFormIntegratorBase<Real>,
-            public Kokkos::Variational::DeviceLinearFormIntegrator<
+            public Kokkos::Variational::LinearFormIntegrator<
               Kokkos::Variational::Internal::BackendOf<TestFES>>
   {
     public:
@@ -2713,7 +2708,7 @@ namespace Rodin::Solid
       using LawType = Law;
 
       /// @brief Device law type.
-      using DeviceLawType = typename Kokkos::Variational::DeviceLaw<Law>::Type;
+      using LawViewType = typename Kokkos::Variational::LawView<Law>::Type;
 
       /// @brief Test function type.
       using TestType = Variational::TestFunction<TestFES>;
@@ -2731,7 +2726,7 @@ namespace Rodin::Solid
       using Parent = Variational::LinearFormIntegratorBase<Real>;
 
       /// @brief Device integrator interface.
-      using DeviceParent = Kokkos::Variational::DeviceLinearFormIntegrator<
+      using ViewParent = Kokkos::Variational::LinearFormIntegrator<
         Kokkos::Variational::Internal::BackendOf<TestFES>>;
 
       /// @brief Mesh type.
@@ -2744,15 +2739,15 @@ namespace Rodin::Solid
       using DOFsType = typename TestFESType::DOFsType;
 
       /// @brief Device quadrature tables.
-      using QuadratureType = Kokkos::Variational::Internal::DeviceQuadrature<MeshType>;
+      using QuadratureType = Kokkos::Variational::Internal::Quadrature<MeshType>;
 
       /// @brief Integrated polytopes.
-      using PolytopesType = Kokkos::Variational::Internal::DevicePolytopes<MeshType>;
+      using PolytopesType = Kokkos::Variational::Internal::Polytopes<MeshType>;
 
       /// @brief Device coefficients of the displacement.
       using StateViewType = Kokkos::Variational::GridFunctionView<StateFESType>;
 
-      static_assert(std::is_trivially_copyable_v<DeviceLawType>);
+      static_assert(std::is_trivially_copyable_v<LawViewType>);
 
       /**
        * @brief Constructs the residual at a displacement.
@@ -2774,7 +2769,7 @@ namespace Rodin::Solid
       /// @brief Copy constructor. @param other Residual to copy.
       InternalVirtualWorkResidual(const InternalVirtualWorkResidual& other)
         : Parent(other),
-          DeviceParent(other),
+          ViewParent(other),
           m_law(other.m_law),
           m_test(other.m_test),
           m_displacement(other.m_displacement),
@@ -2858,13 +2853,13 @@ namespace Rodin::Solid
       }
 
       /// @brief Gets the arrangement of the entries. @return Entry layout.
-      Kokkos::Variational::DeviceLayout getLayout() const override
+      Kokkos::Variational::Layout getLayout() const override
       {
         const auto& fes = m_test.get().getFiniteElementSpace();
         const auto& attributes = this->getAttributes();
         return {&fes.getMesh(), 0, static_cast<Index>(fes.getVectorDimension()),
           {attributes.begin(), attributes.end()}, this->getRegion(), 0,
-          fes.getDeviceDOFs().getStride(), 0,
+          fes.getDOFsView().getStride(), 0,
           DOFsType::getCapacity(RODIN_MAXIMUM_POLYTOPE_VERTICES)};
       }
 
@@ -2874,7 +2869,7 @@ namespace Rodin::Solid
         const auto& fes = m_test.get().getFiniteElementSpace();
         return m_polytopes.prepare(fes.getMesh(), this->getRegion(),
           this->getAttributes(), Kokkos::Variational::ConstantDOFs{}, 1,
-          fes.getDeviceDOFs(), fes.getVectorDimension(),
+          fes.getDOFsView(), fes.getVectorDimension(),
           [&](const Geometry::Polytope& polytope) { return getOrder(polytope); });
       }
 
@@ -2903,12 +2898,12 @@ namespace Rodin::Solid
         const auto& displacement = m_displacement.get();
         const StateViewType state(
           displacement.getFiniteElementSpace(), displacement.getData());
-        const DeviceLawType law = Kokkos::Variational::DeviceLaw<Law>::get(m_law);
+        const LawViewType law = Kokkos::Variational::LawView<Law>::get(m_law);
         const Index vertices = m_polytopes.getQuadrature().getMaximumVertexCount();
         Kokkos::Variational::visitVertexCapacity(vertices, [&](auto n) {
           integratePolytopes<decltype(n)::value>(fes.getMesh(), m_polytopes,
-            fes.getDeviceDOFs(), fes.getVectorDimension(), state, law, values, offset,
-            sign, accumulate, indices);
+            fes.getDOFsView(), fes.getVectorDimension(), state, law, values, offset, sign,
+            accumulate, indices);
           return true;
         });
       }
@@ -2948,16 +2943,15 @@ namespace Rodin::Solid
       template <Index Vertices>
       static void integratePolytopes(const MeshType& mesh, const PolytopesType& polytopes,
         const DOFsType& dofs, Index vdim, const StateViewType& state,
-        const DeviceLawType& law, const ::Kokkos::View<Real*, MemorySpace>& values,
+        const LawViewType& law, const ::Kokkos::View<Real*, MemorySpace>& values,
         size_t offset, Real sign, bool accumulate,
         const ::Kokkos::View<Index*, MemorySpace>& indices)
       {
         const auto& execution = mesh.getContext().getExecutionSpace();
-        const PolytopeKernel<Vertices> kernel{mesh.getDeviceView(),
-          polytopes.getQuadrature(), polytopes.getAttributes(), polytopes.getOffsets(),
-          polytopes.getSpacing(), polytopes.getRegion(), polytopes.getDimension(), dofs,
-          vdim, state, law, values, offset, sign, accumulate, indices.extent(0) > 0,
-          indices};
+        const PolytopeKernel<Vertices> kernel{mesh.getView(), polytopes.getQuadrature(),
+          polytopes.getAttributes(), polytopes.getOffsets(), polytopes.getSpacing(),
+          polytopes.getRegion(), polytopes.getDimension(), dofs, vdim, state, law, values,
+          offset, sign, accumulate, indices.extent(0) > 0, indices};
         ::Kokkos::parallel_for("Rodin hyperelastic law residual integration",
           QuadratureType::policy(execution, polytopes.getPolytopeCount()), kernel);
       }
@@ -3053,7 +3047,7 @@ namespace Rodin::Solid
         StateViewType state;
 
         /// @brief Device evaluation of the hyperelastic law.
-        DeviceLawType law;
+        LawViewType law;
 
         /// @brief Entry values.
         ::Kokkos::View<Real*, MemorySpace> values;

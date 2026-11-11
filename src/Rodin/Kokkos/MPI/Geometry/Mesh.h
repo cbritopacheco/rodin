@@ -71,7 +71,7 @@ namespace Rodin::Geometry
       using ConnectivityType = typename LocalType::ConnectivityType;
 
       /// @brief Borrowed device view.
-      using DeviceView = Rodin::Kokkos::Geometry::MeshView;
+      using View = Rodin::Kokkos::Geometry::MeshView;
 
       /**
        * @param context Execution association; Kokkos must already be initialized.
@@ -153,9 +153,9 @@ namespace Rodin::Geometry
        * @returns Borrowed resident data with the ownership of the entities;
        * kernels must finish before owner replacement.
        */
-      DeviceView getDeviceView() const
+      View getView() const
       {
-        DeviceView res = m_shard.getDeviceView();
+        View res = m_shard.getView();
         res.owned = m_owned.data();
         return res;
       }
@@ -261,7 +261,7 @@ namespace Rodin::Geometry
       }
 
       /// @param vertex Local vertex index. @returns Coordinates of the vertex.
-      Math::SpatialPoint getVertexCoordinates(Index vertex) const override
+      ::Rodin::Math::SpatialPoint getVertexCoordinates(Index vertex) const override
       {
         return m_shard.getVertexCoordinates(vertex);
       }
@@ -287,7 +287,7 @@ namespace Rodin::Geometry
        * @returns Never returns.
        */
       Mesh& setVertexCoordinates([[maybe_unused]] Index idx,
-        [[maybe_unused]] const Math::SpatialPoint& coords) override
+        [[maybe_unused]] const ::Rodin::Math::SpatialPoint& coords) override
       {
         immutable(__func__);
         return *this;

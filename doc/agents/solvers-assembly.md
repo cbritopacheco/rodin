@@ -62,7 +62,7 @@ from the system type.
 - cuDSS (`RODIN_USE_CUDSS`): `CuDSS`, a direct solver on an NVIDIA GPU for
   real systems. On a `Math::SparseMatrix` it copies the CSC arrays to the
   device as the CSR arrays of the transpose and solves with the transpose,
-  so a general matrix needs no conversion. On a `Kokkos::SparseMatrix` in
+  so a general matrix needs no conversion. On a `Kokkos::Math::SparseMatrix` in
   device memory it reads the CSR arrays in place and only copies the
   right-hand side and the solution; `Internal::CuDSSOperator` describes
   both layouts. Like `MUMPS`, it retains the analysis
@@ -88,11 +88,12 @@ from the system type.
   loses accuracy; `clear(Factorization::Symbolic)` pivots again.
   `Info::status` holds the rocBLAS, rocSPARSE or UMFPACK status, or
   `Breakdown`.
-- Kokkos-Kernels (`RODIN_USE_KOKKOSKERNELS`, target `Rodin::KokkosKernels`,
+- Kokkos-Kernels (`RODIN_USE_KOKKOS`, target `Rodin::KokkosKernels`,
   header `Rodin/Kokkos/Solver.h`): `CG` and `GMRES` specialized for a system
-  whose matrix is a `Kokkos::SparseMatrix`, so a device assembly is solved
+  whose matrix is a `Kokkos::Math::SparseMatrix`, so a device assembly is solved
   without PETSc. Both are Jacobi preconditioned and read the CSR arrays in
-  place; only the right-hand side and the solution cross to the host. `CG`
+  place. Backend vectors are borrowed directly; explicitly selected host
+  vectors use transfer buffers. `CG`
   is written on Kokkos with one SpMV handle per solve and keeps the
   iteration, defaults and stopping test of the sparse Eigen CG. `GMRES` is
   the restarted GMRES of Kokkos-Kernels (`setRestart`, 30 by default), with
@@ -102,9 +103,9 @@ from the system type.
 - hypre (`RODIN_USE_HYPRE`, target `Rodin::KokkosHypre`, header
   `Rodin/Kokkos/Solver/BoomerAMG.h`): `BoomerAMG`, the conjugate gradient of
   hypre preconditioned by one BoomerAMG V-cycle, for an SPD system whose
-  matrix is a `Kokkos::SparseMatrix`. hypre copies the CSR arrays in the
-  memory of the backend (`HYPRE_IJMatrixSetValues2`), so nothing but the
-  right-hand side and the solution crosses to the host. The hierarchy uses
+  matrix is a `Kokkos::Math::SparseMatrix`. hypre copies the CSR arrays in the
+  memory of the backend (`HYPRE_IJMatrixSetValues2`). Backend vectors remain
+  in that memory space; explicitly selected host vectors use transfer buffers. The hierarchy uses
   GPU settings (PMIS, ext+i, l1 Jacobi, Gaussian elimination on the coarsest
   grid); `setStrongThreshold`, `setAggressiveLevels` and
   `setMaxInterpolationElements` tune it and release the retained hierarchy.
@@ -222,3 +223,26 @@ reused, not zeroed, across assemblies.
 When a feature claims backend support, update the expectation in
 [backend-support.md](backend-support.md) and cover every listed assembly path
 that can exercise it.
+
+## Kokkos algebra and execution views
+
+Kokkos-Kernels is required whenever `RODIN_USE_KOKKOS` is enabled. Algebra owners
+live under `Rodin::Kokkos::Math`: `SparseMatrix` owns a native
+`KokkosSparse::CrsMatrix`, and `Vector` owns a `Kokkos::View`. Both deep-copy on
+copy. `Math::LinearSystem` remains the shared specialization point. Kokkos space
+deduction guides select backend coefficient vectors, forms and systems. Explicit
+host algebra containers retain compatibility with host solvers.
+
+`Assembly::Internal::SystemAssembly` is an assembly algorithm, not an algebra
+owner. Its COO contributions use `KokkosSparse::CooMatrix`; constraint handling,
+contribution ordering and duplicate summation retain the existing Assembly
+semantics. `COOAssembly` handles PETSc insertion and MPI ownership separately.
+
+Backend GridFunction coefficients are borrowed by their lowering view, without
+hashing or uploading a host mirror. Projection and solved-field updates write
+backend storage. Kernel-facing mesh and connectivity access uses `getView()`;
+finite element DOF access uses `getDOFsView()`. Views borrow owner allocations
+and must be reacquired after storage replacement. File-format adapters stage
+coefficient vectors only at the IO boundary. Scalar host indexing of a backend
+vector performs an individual transfer; bulk work uses vector operations or
+`getView()` in a kernel.

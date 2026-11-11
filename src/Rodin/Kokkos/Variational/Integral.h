@@ -38,7 +38,7 @@
 
 #include "Rodin/Kokkos/Utility.h"
 
-#include "DeviceView.h"
+#include "View.h"
 
 namespace Rodin::Kokkos::Variational
 {
@@ -50,7 +50,7 @@ namespace Rodin::Kokkos::Variational
    * @tparam MemorySpace Kokkos memory space of the arrays.
    */
   template <class MemorySpace>
-  struct DeviceTriplets
+  struct Triplets
   {
     /// @brief Row indices, test degrees of freedom.
     ::Kokkos::View<Index*, MemorySpace> rows;
@@ -68,7 +68,7 @@ namespace Rodin::Kokkos::Variational
    * Integrators with equal layouts list the same coordinates in the same
    * order, so their values can be summed entry by entry.
    */
-  struct DeviceLayout
+  struct Layout
   {
     /// @brief Integrated mesh.
     const void* mesh = nullptr;
@@ -111,7 +111,7 @@ namespace Rodin::Kokkos::Variational
      * @param other Layout to compare with.
      * @return Whether the layouts are equal.
      */
-    bool operator==(const DeviceLayout& other) const = default;
+    bool operator==(const Layout& other) const = default;
   };
 
   /**
@@ -163,7 +163,7 @@ namespace Rodin::Kokkos::Variational
    * @tparam Backend Kokkos backend of the mesh context.
    */
   template <class Backend>
-  class DeviceBilinearFormIntegrator
+  class BilinearFormIntegrator
   {
     public:
       /// @brief Mesh context.
@@ -173,12 +173,12 @@ namespace Rodin::Kokkos::Variational
       using MemorySpace = typename ContextType::MemorySpaceType;
 
       /// @brief Device triplet type.
-      using TripletsType = DeviceTriplets<MemorySpace>;
+      using TripletsType = Triplets<MemorySpace>;
 
-      virtual ~DeviceBilinearFormIntegrator() = default;
+      virtual ~BilinearFormIntegrator() = default;
 
       /// @brief Gets the arrangement of the entries. @return Entry layout.
-      virtual DeviceLayout getLayout() const = 0;
+      virtual Layout getLayout() const = 0;
 
       /**
        * @brief Tells whether the entries vanish off the diagonal of the
@@ -262,7 +262,7 @@ namespace Rodin::Kokkos::Variational
    * @tparam MemorySpace Kokkos memory space of the arrays.
    */
   template <class MemorySpace>
-  struct DeviceEntries
+  struct Entries
   {
     /// @brief Entry indices, test degrees of freedom.
     ::Kokkos::View<Index*, MemorySpace> indices;
@@ -284,7 +284,7 @@ namespace Rodin::Kokkos::Variational
    * @tparam Backend Kokkos backend of the mesh context.
    */
   template <class Backend>
-  class DeviceLinearFormIntegrator
+  class LinearFormIntegrator
   {
     public:
       /// @brief Mesh context.
@@ -294,12 +294,12 @@ namespace Rodin::Kokkos::Variational
       using MemorySpace = typename ContextType::MemorySpaceType;
 
       /// @brief Device entry type.
-      using EntriesType = DeviceEntries<MemorySpace>;
+      using EntriesType = Entries<MemorySpace>;
 
-      virtual ~DeviceLinearFormIntegrator() = default;
+      virtual ~LinearFormIntegrator() = default;
 
       /// @brief Gets the arrangement of the entries. @return Entry layout.
-      virtual DeviceLayout getLayout() const = 0;
+      virtual Layout getLayout() const = 0;
 
       /**
        * @brief Locates the entries of every selected cell.
@@ -714,7 +714,7 @@ namespace Rodin::Kokkos::Variational::Internal
    * @tparam Mesh Resident Kokkos mesh type.
    */
   template <class Mesh>
-  class DeviceQuadrature
+  class Quadrature
   {
     public:
       /// @brief Kokkos execution space.
@@ -736,7 +736,7 @@ namespace Rodin::Kokkos::Variational::Internal
        * @param order Callable giving the quadrature order on a host polytope.
        */
       template <class Order>
-      DeviceQuadrature(const Mesh& mesh, size_t dimension, const Order& order)
+      Quadrature(const Mesh& mesh, size_t dimension, const Order& order)
       {
         const auto& execution = mesh.getContext().getExecutionSpace();
         m_representatives = getRepresentatives(mesh, dimension);
@@ -939,7 +939,7 @@ namespace Rodin::Kokkos::Variational::Internal
         ::Kokkos::View<Index[GeometryCount], MemorySpace> first(
           ::Kokkos::view_alloc(execution, std::string("Rodin geometry representatives")));
         ::Kokkos::deep_copy(execution, first, None);
-        const auto view = mesh.getDeviceView();
+        const auto view = mesh.getView();
         findRepresentatives(
           execution, view, first, dimension, mesh.getPolytopeCount(dimension));
         auto host = ::Kokkos::create_mirror_view(first);
@@ -1048,7 +1048,7 @@ namespace Rodin::Kokkos::Variational::Internal
    * @tparam Mesh Resident Kokkos mesh type.
    */
   template <class Mesh>
-  class DevicePolytopes
+  class Polytopes
   {
     public:
       /// @brief Kokkos execution space.
@@ -1058,34 +1058,34 @@ namespace Rodin::Kokkos::Variational::Internal
       using MemorySpace = typename Mesh::MemorySpace;
 
       /// @brief Device quadrature tables.
-      using QuadratureType = DeviceQuadrature<Mesh>;
+      using QuadratureType = Quadrature<Mesh>;
 
       /// @brief Device attribute selection.
       using AttributesType = ::Kokkos::View<::Rodin::Geometry::Attribute*, MemorySpace>;
 
-      DevicePolytopes() = default;
+      Polytopes() = default;
 
       /**
        * @brief Starts empty: a copy must not share the offsets it may locate again.
        * @param other Polytopes not copied.
        */
-      DevicePolytopes([[maybe_unused]] const DevicePolytopes& other) {}
+      Polytopes([[maybe_unused]] const Polytopes& other) {}
 
       /**
        * @brief Move constructor, keeping the located offsets.
        * @param other Polytopes to move.
        */
-      DevicePolytopes(DevicePolytopes&& other) = default;
+      Polytopes(Polytopes&& other) = default;
 
       /**
        * @brief Empties this object, see the copy constructor.
        * @param other Polytopes to assign, only compared to this object.
        * @return This object.
        */
-      DevicePolytopes& operator=(const DevicePolytopes& other)
+      Polytopes& operator=(const Polytopes& other)
       {
         if (this != &other)
-          *this = DevicePolytopes();
+          *this = Polytopes();
         return *this;
       }
 
@@ -1094,7 +1094,7 @@ namespace Rodin::Kokkos::Variational::Internal
        * @param other Polytopes to move.
        * @return This object.
        */
-      DevicePolytopes& operator=(DevicePolytopes&& other) = default;
+      Polytopes& operator=(Polytopes&& other) = default;
 
       /**
        * @brief Locates the entries of every selected polytope.
@@ -1157,7 +1157,7 @@ namespace Rodin::Kokkos::Variational::Internal
         if (m_located && *m_located == located)
           return m_count;
         m_region = region;
-        m_count = locate(execution, mesh.getDeviceView(), region, dimension, m_attributes,
+        m_count = locate(execution, mesh.getView(), region, dimension, m_attributes,
           m_offsets, count, trialDOFs, trialVDim, testDOFs, testVDim, m_spacing);
         m_located = located;
         return m_count;
@@ -1416,7 +1416,7 @@ namespace Rodin::Kokkos::Variational
    * mesh, possibly different, such as the velocity and pressure spaces of a
    * Stokes problem. The region @f$ R @f$ is given by getRegion(): the cells,
    * the faces, the boundary or the interface of the mesh. The operators
-   * @f$ A @f$ and @f$ B @f$ are lowered once to DeviceView, then a kernel
+   * @f$ A @f$ and @f$ B @f$ are lowered once to View, then a kernel
    * integrates every polytope of the region with one thread and writes its
    * local matrix as device triplets.
    *
@@ -1425,7 +1425,7 @@ namespace Rodin::Kokkos::Variational
    *
    * The quadrature order is selected on the host as by the QuadratureRule
    * the host would use, once per reference geometry, as described in
-   * Internal::DeviceQuadrature.
+   * Internal::Quadrature.
    *
    * The host evaluation interface (setPolytope(), integrate()) is not
    * available and raises; the form is assembled by Assembly::Kokkos.
@@ -1433,10 +1433,10 @@ namespace Rodin::Kokkos::Variational
    * Rodin::Variational::Integral, BoundaryIntegral, FaceIntegral and
    * InterfaceIntegral specialize this class for device spaces.
    */
-  template <class LHSDerived, class RHSDerived, DeviceSpace TrialFES, DeviceSpace TestFES>
-  class DeviceBilinearIntegral
+  template <class LHSDerived, class RHSDerived, Space TrialFES, Space TestFES>
+  class BilinearIntegral
     : public ::Rodin::Variational::LocalBilinearFormIntegratorBase<Real>,
-      public DeviceBilinearFormIntegrator<Internal::BackendOf<TrialFES>>
+      public BilinearFormIntegrator<Internal::BackendOf<TrialFES>>
   {
     public:
       /// @brief Finite element space of the trial functions.
@@ -1472,10 +1472,10 @@ namespace Rodin::Kokkos::Variational
       using Parent = ::Rodin::Variational::LocalBilinearFormIntegratorBase<Real>;
 
       /// @brief Device integrator interface.
-      using DeviceParent = DeviceBilinearFormIntegrator<Internal::BackendOf<TrialFES>>;
+      using ViewParent = BilinearFormIntegrator<Internal::BackendOf<TrialFES>>;
 
       /// @brief Device triplet type.
-      using TripletsType = typename DeviceParent::TripletsType;
+      using TripletsType = typename ViewParent::TripletsType;
 
       /// @brief Mesh type.
       using MeshType = typename TrialFESType::MeshType;
@@ -1487,16 +1487,16 @@ namespace Rodin::Kokkos::Variational
       using MemorySpace = typename MeshType::MemorySpace;
 
       /// @brief Device quadrature tables.
-      using QuadratureType = Internal::DeviceQuadrature<MeshType>;
+      using QuadratureType = Internal::Quadrature<MeshType>;
 
       /// @brief Integrated polytopes.
-      using PolytopesType = Internal::DevicePolytopes<MeshType>;
+      using PolytopesType = Internal::Polytopes<MeshType>;
 
       /**
        * @brief Constructs the integral of a dot product.
        * @param[in] integrand Dot product of a trial and a test operator.
        */
-      DeviceBilinearIntegral(const IntegrandType& integrand)
+      BilinearIntegral(const IntegrandType& integrand)
         : Parent(integrand.getLHS().getLeaf(), integrand.getRHS().getLeaf()),
           m_integrand(integrand.copy())
       {}
@@ -1505,9 +1505,9 @@ namespace Rodin::Kokkos::Variational
        * @brief Copy constructor.
        * @param[in] other Integral to copy.
        */
-      DeviceBilinearIntegral(const DeviceBilinearIntegral& other)
+      BilinearIntegral(const BilinearIntegral& other)
         : Parent(other),
-          DeviceParent(other),
+          ViewParent(other),
           m_integrand(other.m_integrand->copy())
       {}
 
@@ -1515,9 +1515,9 @@ namespace Rodin::Kokkos::Variational
        * @brief Move constructor.
        * @param[in] other Integral to move from.
        */
-      DeviceBilinearIntegral(DeviceBilinearIntegral&& other)
+      BilinearIntegral(BilinearIntegral&& other)
         : Parent(std::move(other)),
-          DeviceParent(std::move(other)),
+          ViewParent(std::move(other)),
           m_integrand(std::move(other.m_integrand))
       {}
 
@@ -1547,7 +1547,7 @@ namespace Rodin::Kokkos::Variational
        * @return Never returns.
        * @throws Alert::Exception Always.
        */
-      DeviceBilinearIntegral& setPolytope(
+      BilinearIntegral& setPolytope(
         [[maybe_unused]] const ::Rodin::Geometry::Polytope& polytope) override
       {
         Alert::MemberFunctionException(*this, __func__)
@@ -1572,7 +1572,7 @@ namespace Rodin::Kokkos::Variational
       }
 
       /// @brief Gets the arrangement of the entries. @return Entry layout.
-      DeviceLayout getLayout() const override
+      Layout getLayout() const override
       {
         const auto& integrand = getIntegrand();
         const auto& trialfes = integrand.getLHS().getFiniteElementSpace();
@@ -1581,7 +1581,7 @@ namespace Rodin::Kokkos::Variational
         return {&trialfes.getMesh(), static_cast<Index>(trialfes.getVectorDimension()),
           static_cast<Index>(testfes.getVectorDimension()),
           {attributes.begin(), attributes.end()}, this->getRegion(),
-          trialfes.getDeviceDOFs().getStride(), testfes.getDeviceDOFs().getStride(),
+          trialfes.getDOFsView().getStride(), testfes.getDOFsView().getStride(),
           TrialDOFsType::getCapacity(RODIN_MAXIMUM_POLYTOPE_VERTICES),
           TestDOFsType::getCapacity(RODIN_MAXIMUM_POLYTOPE_VERTICES)};
       }
@@ -1594,7 +1594,7 @@ namespace Rodin::Kokkos::Variational
        */
       bool isBlockDiagonal() const override
       {
-        return isComponentDiagonal<DeviceView<LHSType>, DeviceView<RHSType>>();
+        return isComponentDiagonal<View<LHSType>, View<RHSType>>();
       }
 
       /**
@@ -1621,8 +1621,8 @@ namespace Rodin::Kokkos::Variational
         // The diagonals hold one entry per component of each pair of scalar
         // degrees of freedom.
         return m_polytopes.prepare(mesh, this->getRegion(), this->getAttributes(),
-          trialfes.getDeviceDOFs(), m_compact ? 1 : trialfes.getVectorDimension(),
-          testfes.getDeviceDOFs(), testfes.getVectorDimension(),
+          trialfes.getDOFsView(), m_compact ? 1 : trialfes.getVectorDimension(),
+          testfes.getDOFsView(), testfes.getVectorDimension(),
           [&](const ::Rodin::Geometry::Polytope& polytope) {
             return getOrder(integrand, polytope);
           });
@@ -1662,10 +1662,10 @@ namespace Rodin::Kokkos::Variational
         const auto& trialfes = integrand.getLHS().getFiniteElementSpace();
         const auto& testfes = integrand.getRHS().getFiniteElementSpace();
         const MeshType& mesh = trialfes.getMesh();
-        const DeviceView<LHSType> trial(integrand.getLHS());
-        const DeviceView<RHSType> test(integrand.getRHS());
-        const TrialDOFsType trialDOFs = trialfes.getDeviceDOFs();
-        const TestDOFsType testDOFs = testfes.getDeviceDOFs();
+        const View<LHSType> trial(integrand.getLHS());
+        const View<RHSType> test(integrand.getRHS());
+        const TrialDOFsType trialDOFs = trialfes.getDOFsView();
+        const TestDOFsType testDOFs = testfes.getDOFsView();
         const Index trialVDim = trialfes.getVectorDimension();
         const Index testVDim = testfes.getVectorDimension();
         const auto& quadrature = m_polytopes.getQuadrature();
@@ -1909,7 +1909,7 @@ namespace Rodin::Kokkos::Variational
         const auto& execution = mesh.getContext().getExecutionSpace();
         const size_t scratch = Kernel::P * Kernel::PointBytes + 4 * Kernel::Alignment;
         const int level = scratch <= size_t(Policy::scratch_size_max(0)) ? 0 : 1;
-        const Kernel kernel{mesh.getDeviceView(), polytopes.getQuadrature(),
+        const Kernel kernel{mesh.getView(), polytopes.getQuadrature(),
           polytopes.getAttributes(), polytopes.getOffsets(), polytopes.getSpacing(),
           polytopes.getRegion(), polytopes.getDimension(), trial, test, trialDOFs,
           trialVDim, testDOFs, testVDim, values, offset, sign, accumulate, compact,
@@ -1961,11 +1961,11 @@ namespace Rodin::Kokkos::Variational
         const ::Kokkos::View<Index*, MemorySpace>& cols)
       {
         const auto& execution = mesh.getContext().getExecutionSpace();
-        const ThreadKernel<Vertices, Exact, Shape, Trial, Test> kernel{
-          mesh.getDeviceView(), polytopes.getQuadrature(), polytopes.getAttributes(),
-          polytopes.getOffsets(), polytopes.getSpacing(), polytopes.getRegion(),
-          polytopes.getDimension(), trial, test, trialDOFs, trialVDim, testDOFs, testVDim,
-          values, offset, sign, accumulate, compact, rows.extent(0) > 0, rows, cols};
+        const ThreadKernel<Vertices, Exact, Shape, Trial, Test> kernel{mesh.getView(),
+          polytopes.getQuadrature(), polytopes.getAttributes(), polytopes.getOffsets(),
+          polytopes.getSpacing(), polytopes.getRegion(), polytopes.getDimension(), trial,
+          test, trialDOFs, trialVDim, testDOFs, testVDim, values, offset, sign,
+          accumulate, compact, rows.extent(0) > 0, rows, cols};
         ::Kokkos::parallel_for("Rodin bilinear form integration",
           QuadratureType::policy(execution, polytopes.getPolytopeCount()), kernel);
       }
@@ -1974,7 +1974,7 @@ namespace Rodin::Kokkos::Variational
        * @brief Creates a polymorphic copy of this integral.
        * @return Pointer to a new copy.
        */
-      DeviceBilinearIntegral* copy() const noexcept override = 0;
+      BilinearIntegral* copy() const noexcept override = 0;
 
     private:
       /// @brief Maximum number of components of a value of the given range.
@@ -2525,7 +2525,7 @@ namespace Rodin::Kokkos::Variational
    * for a scalar valued operator @f$ A @f$ of a scalar or vector device test
    * function on a resident Kokkos mesh, such as @f$ f \cdot v @f$ or
    * @f$ g \nabla \cdot v @f$. The region @f$ R @f$ is given by
-   * getRegion(). The operator is lowered once to DeviceView, then a kernel
+   * getRegion(). The operator is lowered once to View, then a kernel
    * integrates every polytope of the region with one thread and writes its
    * local vector as device entries.
    *
@@ -2534,7 +2534,7 @@ namespace Rodin::Kokkos::Variational
    *
    * The quadrature order is selected on the host as by the generic
    * QuadratureRule, once per reference geometry, as described in
-   * Internal::DeviceQuadrature.
+   * Internal::Quadrature.
    *
    * The host evaluation interface (setPolytope(), integrate()) is not
    * available and raises; the form is assembled by Assembly::Kokkos.
@@ -2542,10 +2542,9 @@ namespace Rodin::Kokkos::Variational
    * Rodin::Variational::Integral, BoundaryIntegral, FaceIntegral and
    * InterfaceIntegral specialize this class for device spaces.
    */
-  template <class NestedDerived, DeviceSpace FES>
-  class DeviceLinearIntegral
-    : public ::Rodin::Variational::LinearFormIntegratorBase<Real>,
-      public DeviceLinearFormIntegrator<Internal::BackendOf<FES>>
+  template <class NestedDerived, Space FES>
+  class LinearIntegral : public ::Rodin::Variational::LinearFormIntegratorBase<Real>,
+                         public LinearFormIntegrator<Internal::BackendOf<FES>>
   {
     public:
       /// @brief Finite element space of the test functions.
@@ -2565,10 +2564,10 @@ namespace Rodin::Kokkos::Variational
       using Parent = ::Rodin::Variational::LinearFormIntegratorBase<Real>;
 
       /// @brief Device integrator interface.
-      using DeviceParent = DeviceLinearFormIntegrator<Internal::BackendOf<FES>>;
+      using ViewParent = LinearFormIntegrator<Internal::BackendOf<FES>>;
 
       /// @brief Device entry type.
-      using EntriesType = typename DeviceParent::EntriesType;
+      using EntriesType = typename ViewParent::EntriesType;
 
       /// @brief Mesh type.
       using MeshType = typename FESType::MeshType;
@@ -2577,16 +2576,16 @@ namespace Rodin::Kokkos::Variational
       using MemorySpace = typename MeshType::MemorySpace;
 
       /// @brief Device quadrature tables.
-      using QuadratureType = Internal::DeviceQuadrature<MeshType>;
+      using QuadratureType = Internal::Quadrature<MeshType>;
 
       /// @brief Integrated polytopes.
-      using PolytopesType = Internal::DevicePolytopes<MeshType>;
+      using PolytopesType = Internal::Polytopes<MeshType>;
 
       /**
        * @brief Constructs the integral of a test operator.
        * @param[in] integrand Scalar valued test operator.
        */
-      DeviceLinearIntegral(const IntegrandType& integrand)
+      LinearIntegral(const IntegrandType& integrand)
         : Parent(integrand.getLeaf()),
           m_integrand(integrand.copy())
       {}
@@ -2595,9 +2594,9 @@ namespace Rodin::Kokkos::Variational
        * @brief Copy constructor.
        * @param[in] other Integral to copy.
        */
-      DeviceLinearIntegral(const DeviceLinearIntegral& other)
+      LinearIntegral(const LinearIntegral& other)
         : Parent(other),
-          DeviceParent(other),
+          ViewParent(other),
           m_integrand(other.m_integrand->copy())
       {}
 
@@ -2605,9 +2604,9 @@ namespace Rodin::Kokkos::Variational
        * @brief Move constructor.
        * @param[in] other Integral to move from.
        */
-      DeviceLinearIntegral(DeviceLinearIntegral&& other)
+      LinearIntegral(LinearIntegral&& other)
         : Parent(std::move(other)),
-          DeviceParent(std::move(other)),
+          ViewParent(std::move(other)),
           m_integrand(std::move(other.m_integrand))
       {}
 
@@ -2637,7 +2636,7 @@ namespace Rodin::Kokkos::Variational
        * @return Never returns.
        * @throws Alert::Exception Always.
        */
-      DeviceLinearIntegral& setPolytope(
+      LinearIntegral& setPolytope(
         [[maybe_unused]] const ::Rodin::Geometry::Polytope& polytope) override
       {
         Alert::MemberFunctionException(*this, __func__)
@@ -2661,13 +2660,13 @@ namespace Rodin::Kokkos::Variational
       }
 
       /// @brief Gets the arrangement of the entries. @return Entry layout.
-      DeviceLayout getLayout() const override
+      Layout getLayout() const override
       {
         const auto& fes = getIntegrand().getFiniteElementSpace();
         const auto& attributes = this->getAttributes();
         return {&fes.getMesh(), 0, static_cast<Index>(fes.getVectorDimension()),
           {attributes.begin(), attributes.end()}, this->getRegion(), 0,
-          fes.getDeviceDOFs().getStride(), 0,
+          fes.getDOFsView().getStride(), 0,
           DOFsType::getCapacity(RODIN_MAXIMUM_POLYTOPE_VERTICES)};
       }
 
@@ -2681,7 +2680,7 @@ namespace Rodin::Kokkos::Variational
         const auto& integrand = getIntegrand();
         const auto& fes = integrand.getFiniteElementSpace();
         return m_polytopes.prepare(fes.getMesh(), this->getRegion(),
-          this->getAttributes(), ConstantDOFs{}, 1, fes.getDeviceDOFs(),
+          this->getAttributes(), ConstantDOFs{}, 1, fes.getDOFsView(),
           fes.getVectorDimension(), [&](const ::Rodin::Geometry::Polytope& polytope) {
             return getOrder(integrand, polytope);
           });
@@ -2710,8 +2709,8 @@ namespace Rodin::Kokkos::Variational
       {
         const auto& integrand = getIntegrand();
         const auto& fes = integrand.getFiniteElementSpace();
-        const DeviceView<IntegrandType> test(integrand);
-        const DOFsType dofs = fes.getDeviceDOFs();
+        const View<IntegrandType> test(integrand);
+        const DOFsType dofs = fes.getDOFsView();
         const Index vdim = fes.getVectorDimension();
         const auto& quadrature = m_polytopes.getQuadrature();
         const Index vertices = quadrature.getMaximumVertexCount();
@@ -2778,7 +2777,7 @@ namespace Rodin::Kokkos::Variational
         bool accumulate, const ::Kokkos::View<Index*, MemorySpace>& indices)
       {
         const auto& execution = mesh.getContext().getExecutionSpace();
-        const PolytopeKernel<Vertices, Exact, Shape, Test> kernel{mesh.getDeviceView(),
+        const PolytopeKernel<Vertices, Exact, Shape, Test> kernel{mesh.getView(),
           polytopes.getQuadrature(), polytopes.getAttributes(), polytopes.getOffsets(),
           polytopes.getSpacing(), polytopes.getRegion(), polytopes.getDimension(), test,
           dofs, vdim, values, offset, sign, accumulate, indices.extent(0) > 0, indices};
@@ -2790,7 +2789,7 @@ namespace Rodin::Kokkos::Variational
        * @brief Creates a polymorphic copy of this integral.
        * @return Pointer to a new copy.
        */
-      DeviceLinearIntegral* copy() const noexcept override = 0;
+      LinearIntegral* copy() const noexcept override = 0;
 
     private:
       /// @brief Maximum number of components of a value of the range.
@@ -2954,20 +2953,20 @@ namespace Rodin::Variational
    *   \int_{\mathcal{T}_h} A(u) \cdot B(v) \ dx
    * @f]
    * for device trial and test spaces on a resident Kokkos mesh, as described in
-   * Rodin::Kokkos::Variational::DeviceBilinearIntegral.
+   * Rodin::Kokkos::Variational::BilinearIntegral.
    */
   template <class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
-    requires Rodin::Kokkos::Variational::DeviceSpace<TrialFES> &&
-    Rodin::Kokkos::Variational::DeviceSpace<TestFES>
+    requires Rodin::Kokkos::Variational::Space<TrialFES> &&
+    Rodin::Kokkos::Variational::Space<TestFES>
   class Integral<Dot<ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>,
     ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>
-    final : public Rodin::Kokkos::Variational::DeviceBilinearIntegral<LHSDerived,
-              RHSDerived, TrialFES, TestFES>
+    final : public Rodin::Kokkos::Variational::BilinearIntegral<LHSDerived, RHSDerived,
+              TrialFES, TestFES>
   {
     public:
       /// @brief Device integral type.
-      using Parent = Rodin::Kokkos::Variational::DeviceBilinearIntegral<LHSDerived,
-        RHSDerived, TrialFES, TestFES>;
+      using Parent = Rodin::Kokkos::Variational::BilinearIntegral<LHSDerived, RHSDerived,
+        TrialFES, TestFES>;
 
       /// @brief Type of the left operand of the dot product.
       using LHSType = typename Parent::LHSType;
@@ -3050,17 +3049,17 @@ namespace Rodin::Variational
    *   \int_{\mathcal{T}_h} A(v) \ dx
    * @f]
    * for a scalar valued operator of a device test function on a resident Kokkos
-   * mesh, as described in Rodin::Kokkos::Variational::DeviceLinearIntegral.
+   * mesh, as described in Rodin::Kokkos::Variational::LinearIntegral.
    */
   template <class NestedDerived, class FES>
     requires ScalarValuedIntegrand<ShapeFunctionBase<NestedDerived, FES, TestSpace>> &&
-    Rodin::Kokkos::Variational::DeviceSpace<FES>
+    Rodin::Kokkos::Variational::Space<FES>
   class Integral<ShapeFunctionBase<NestedDerived, FES, TestSpace>> final
-    : public Rodin::Kokkos::Variational::DeviceLinearIntegral<NestedDerived, FES>
+    : public Rodin::Kokkos::Variational::LinearIntegral<NestedDerived, FES>
   {
     public:
       /// @brief Device integral type.
-      using Parent = Rodin::Kokkos::Variational::DeviceLinearIntegral<NestedDerived, FES>;
+      using Parent = Rodin::Kokkos::Variational::LinearIntegral<NestedDerived, FES>;
 
       /// @brief Finite element space of the test functions.
       using FESType = typename Parent::FESType;
@@ -3143,20 +3142,20 @@ namespace Rodin::Variational
    *   \int_{\mathcal{B}_h} A(u) \cdot B(v) \ d\sigma(x)
    * @f]
    * for device trial and test spaces on a resident Kokkos mesh, as described in
-   * Rodin::Kokkos::Variational::DeviceBilinearIntegral.
+   * Rodin::Kokkos::Variational::BilinearIntegral.
    */
   template <class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
-    requires Rodin::Kokkos::Variational::DeviceSpace<TrialFES> &&
-    Rodin::Kokkos::Variational::DeviceSpace<TestFES>
+    requires Rodin::Kokkos::Variational::Space<TrialFES> &&
+    Rodin::Kokkos::Variational::Space<TestFES>
   class BoundaryIntegral<Dot<ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>,
     ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>
-    final : public Rodin::Kokkos::Variational::DeviceBilinearIntegral<LHSDerived,
-              RHSDerived, TrialFES, TestFES>
+    final : public Rodin::Kokkos::Variational::BilinearIntegral<LHSDerived, RHSDerived,
+              TrialFES, TestFES>
   {
     public:
       /// @brief Device integral type.
-      using Parent = Rodin::Kokkos::Variational::DeviceBilinearIntegral<LHSDerived,
-        RHSDerived, TrialFES, TestFES>;
+      using Parent = Rodin::Kokkos::Variational::BilinearIntegral<LHSDerived, RHSDerived,
+        TrialFES, TestFES>;
 
       /// @brief Type of the left operand of the dot product.
       using LHSType = typename Parent::LHSType;
@@ -3239,17 +3238,17 @@ namespace Rodin::Variational
    *   \int_{\mathcal{B}_h} A(v) \ d\sigma(x)
    * @f]
    * for a scalar valued operator of a device test function on a resident Kokkos
-   * mesh, as described in Rodin::Kokkos::Variational::DeviceLinearIntegral.
+   * mesh, as described in Rodin::Kokkos::Variational::LinearIntegral.
    */
   template <class NestedDerived, class FES>
     requires ScalarValuedIntegrand<ShapeFunctionBase<NestedDerived, FES, TestSpace>> &&
-    Rodin::Kokkos::Variational::DeviceSpace<FES>
+    Rodin::Kokkos::Variational::Space<FES>
   class BoundaryIntegral<ShapeFunctionBase<NestedDerived, FES, TestSpace>> final
-    : public Rodin::Kokkos::Variational::DeviceLinearIntegral<NestedDerived, FES>
+    : public Rodin::Kokkos::Variational::LinearIntegral<NestedDerived, FES>
   {
     public:
       /// @brief Device integral type.
-      using Parent = Rodin::Kokkos::Variational::DeviceLinearIntegral<NestedDerived, FES>;
+      using Parent = Rodin::Kokkos::Variational::LinearIntegral<NestedDerived, FES>;
 
       /// @brief Finite element space of the test functions.
       using FESType = typename Parent::FESType;
@@ -3332,20 +3331,20 @@ namespace Rodin::Variational
    *   \int_{\mathcal{F}_h} A(u) \cdot B(v) \ d\sigma(x)
    * @f]
    * for device trial and test spaces on a resident Kokkos mesh, as described in
-   * Rodin::Kokkos::Variational::DeviceBilinearIntegral.
+   * Rodin::Kokkos::Variational::BilinearIntegral.
    */
   template <class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
-    requires Rodin::Kokkos::Variational::DeviceSpace<TrialFES> &&
-    Rodin::Kokkos::Variational::DeviceSpace<TestFES>
+    requires Rodin::Kokkos::Variational::Space<TrialFES> &&
+    Rodin::Kokkos::Variational::Space<TestFES>
   class FaceIntegral<Dot<ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>,
     ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>
-    final : public Rodin::Kokkos::Variational::DeviceBilinearIntegral<LHSDerived,
-              RHSDerived, TrialFES, TestFES>
+    final : public Rodin::Kokkos::Variational::BilinearIntegral<LHSDerived, RHSDerived,
+              TrialFES, TestFES>
   {
     public:
       /// @brief Device integral type.
-      using Parent = Rodin::Kokkos::Variational::DeviceBilinearIntegral<LHSDerived,
-        RHSDerived, TrialFES, TestFES>;
+      using Parent = Rodin::Kokkos::Variational::BilinearIntegral<LHSDerived, RHSDerived,
+        TrialFES, TestFES>;
 
       /// @brief Type of the left operand of the dot product.
       using LHSType = typename Parent::LHSType;
@@ -3428,17 +3427,17 @@ namespace Rodin::Variational
    *   \int_{\mathcal{F}_h} A(v) \ d\sigma(x)
    * @f]
    * for a scalar valued operator of a device test function on a resident Kokkos
-   * mesh, as described in Rodin::Kokkos::Variational::DeviceLinearIntegral.
+   * mesh, as described in Rodin::Kokkos::Variational::LinearIntegral.
    */
   template <class NestedDerived, class FES>
     requires ScalarValuedIntegrand<ShapeFunctionBase<NestedDerived, FES, TestSpace>> &&
-    Rodin::Kokkos::Variational::DeviceSpace<FES>
+    Rodin::Kokkos::Variational::Space<FES>
   class FaceIntegral<ShapeFunctionBase<NestedDerived, FES, TestSpace>> final
-    : public Rodin::Kokkos::Variational::DeviceLinearIntegral<NestedDerived, FES>
+    : public Rodin::Kokkos::Variational::LinearIntegral<NestedDerived, FES>
   {
     public:
       /// @brief Device integral type.
-      using Parent = Rodin::Kokkos::Variational::DeviceLinearIntegral<NestedDerived, FES>;
+      using Parent = Rodin::Kokkos::Variational::LinearIntegral<NestedDerived, FES>;
 
       /// @brief Finite element space of the test functions.
       using FESType = typename Parent::FESType;
@@ -3521,20 +3520,20 @@ namespace Rodin::Variational
    *   \int_{\mathcal{I}_h} A(u) \cdot B(v) \ d\sigma(x)
    * @f]
    * for device trial and test spaces on a resident Kokkos mesh, as described in
-   * Rodin::Kokkos::Variational::DeviceBilinearIntegral.
+   * Rodin::Kokkos::Variational::BilinearIntegral.
    */
   template <class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
-    requires Rodin::Kokkos::Variational::DeviceSpace<TrialFES> &&
-    Rodin::Kokkos::Variational::DeviceSpace<TestFES>
+    requires Rodin::Kokkos::Variational::Space<TrialFES> &&
+    Rodin::Kokkos::Variational::Space<TestFES>
   class InterfaceIntegral<Dot<ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>,
     ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>
-    final : public Rodin::Kokkos::Variational::DeviceBilinearIntegral<LHSDerived,
-              RHSDerived, TrialFES, TestFES>
+    final : public Rodin::Kokkos::Variational::BilinearIntegral<LHSDerived, RHSDerived,
+              TrialFES, TestFES>
   {
     public:
       /// @brief Device integral type.
-      using Parent = Rodin::Kokkos::Variational::DeviceBilinearIntegral<LHSDerived,
-        RHSDerived, TrialFES, TestFES>;
+      using Parent = Rodin::Kokkos::Variational::BilinearIntegral<LHSDerived, RHSDerived,
+        TrialFES, TestFES>;
 
       /// @brief Type of the left operand of the dot product.
       using LHSType = typename Parent::LHSType;
@@ -3617,17 +3616,17 @@ namespace Rodin::Variational
    *   \int_{\mathcal{I}_h} A(v) \ d\sigma(x)
    * @f]
    * for a scalar valued operator of a device test function on a resident Kokkos
-   * mesh, as described in Rodin::Kokkos::Variational::DeviceLinearIntegral.
+   * mesh, as described in Rodin::Kokkos::Variational::LinearIntegral.
    */
   template <class NestedDerived, class FES>
     requires ScalarValuedIntegrand<ShapeFunctionBase<NestedDerived, FES, TestSpace>> &&
-    Rodin::Kokkos::Variational::DeviceSpace<FES>
+    Rodin::Kokkos::Variational::Space<FES>
   class InterfaceIntegral<ShapeFunctionBase<NestedDerived, FES, TestSpace>> final
-    : public Rodin::Kokkos::Variational::DeviceLinearIntegral<NestedDerived, FES>
+    : public Rodin::Kokkos::Variational::LinearIntegral<NestedDerived, FES>
   {
     public:
       /// @brief Device integral type.
-      using Parent = Rodin::Kokkos::Variational::DeviceLinearIntegral<NestedDerived, FES>;
+      using Parent = Rodin::Kokkos::Variational::LinearIntegral<NestedDerived, FES>;
 
       /// @brief Finite element space of the test functions.
       using FESType = typename Parent::FESType;

@@ -10,7 +10,7 @@
 /**
  * @file
  * @brief Conjugate gradient of hypre preconditioned by BoomerAMG, for a
- * Kokkos::SparseMatrix.
+ * Kokkos::Math::SparseMatrix.
  */
 
 #include <limits>
@@ -29,7 +29,7 @@
 #include "Rodin/Alert/Raise.h"
 #include "Rodin/Solver/LinearSolver.h"
 
-#include "Rodin/Kokkos/LinearSystem.h"
+#include "Rodin/Kokkos/Math/LinearSystem.h"
 
 namespace Rodin::Solver
 {
@@ -40,7 +40,7 @@ namespace Rodin::Solver
    *
    * | Specialization | Description |
    * |----------------|-------------|
-   * | @ref BoomerAMG "BoomerAMG<Math::LinearSystem<Kokkos::SparseMatrix<Real, Backend>, Math::Vector<Real>>>" | hypre on the arrays of a device matrix. |
+   * | @ref BoomerAMG "BoomerAMG<::Rodin::Math::LinearSystem<Kokkos::Math::SparseMatrix<Real, Backend>, ::Rodin::Math::Vector<Real>>>" | hypre on the arrays of a device matrix. |
    *
    * @see @ref BoomerAMGSpecializations "BoomerAMG Template Specializations"
    */
@@ -64,7 +64,7 @@ namespace Rodin::Solver
   /**
    * @ingroup BoomerAMGSpecializations
    * @brief Conjugate gradient of hypre preconditioned by BoomerAMG, for a
-   * system whose matrix is a Kokkos::SparseMatrix.
+   * system whose matrix is a Kokkos::Math::SparseMatrix.
    *
    * The matrix must be symmetric positive definite. hypre copies the CSR
    * arrays of the device matrix in the memory of the backend, sets up the
@@ -99,15 +99,15 @@ namespace Rodin::Solver
    *
    * @tparam Backend Kokkos backend of the matrix.
    */
-  template <class Backend>
-  class BoomerAMG<
-    Math::LinearSystem<::Rodin::Kokkos::SparseMatrix<Real, Backend>, Math::Vector<Real>>>
-    final : public LinearSolverBase<Math::LinearSystem<
-              ::Rodin::Kokkos::SparseMatrix<Real, Backend>, Math::Vector<Real>>>
+  template <class Backend, class VectorType_>
+  class BoomerAMG<::Rodin::Math::LinearSystem<
+    ::Rodin::Kokkos::Math::SparseMatrix<Real, Backend>, VectorType_>>
+    final : public LinearSolverBase<::Rodin::Math::LinearSystem<
+              ::Rodin::Kokkos::Math::SparseMatrix<Real, Backend>, VectorType_>>
   {
-    static_assert(std::is_same_v<HYPRE_Int, Math::SparseIndex> &&
-        std::is_same_v<HYPRE_BigInt, Math::SparseIndex>,
-      "hypre must be built with indices of the size of Math::SparseIndex.");
+    static_assert(std::is_same_v<HYPRE_Int, ::Rodin::Math::SparseIndex> &&
+        std::is_same_v<HYPRE_BigInt, ::Rodin::Math::SparseIndex>,
+      "hypre must be built with indices of the size of ::Rodin::Math::SparseIndex.");
     static_assert(
       std::is_same_v<HYPRE_Complex, Real>, "hypre must be built in double precision.");
 
@@ -116,13 +116,13 @@ namespace Rodin::Solver
       using ScalarType = Real;
 
       /// @brief Host vector type.
-      using VectorType = Math::Vector<Real>;
+      using VectorType = VectorType_;
 
       /// @brief Device matrix type.
-      using OperatorType = ::Rodin::Kokkos::SparseMatrix<Real, Backend>;
+      using OperatorType = ::Rodin::Kokkos::Math::SparseMatrix<Real, Backend>;
 
       /// @brief Linear system type.
-      using LinearSystemType = Math::LinearSystem<OperatorType, VectorType>;
+      using LinearSystemType = ::Rodin::Math::LinearSystem<OperatorType, VectorType>;
 
       /// @brief Problem type.
       using ProblemBaseType = Variational::ProblemBase<LinearSystemType>;
@@ -316,6 +316,11 @@ namespace Rodin::Solver
         Array<Real> x(::Kokkos::view_alloc(
                         ::Kokkos::WithoutInitializing, "Rodin::Solver::BoomerAMG::x"),
           n);
+        if constexpr (requires { system.getSolution().getView(); })
+        {
+          if (static_cast<size_t>(system.getSolution().size()) != n)
+            system.getSolution().setZero(n);
+        }
         upload(system.getVector(), b);
         if (static_cast<size_t>(system.getSolution().size()) == n)
           upload(system.getSolution(), x);
@@ -722,12 +727,30 @@ namespace Rodin::Solver
         return res;
       }
 
+      /// @param source Backend coefficients. @param destination Borrowed backend view.
+      static void upload(const ::Rodin::Kokkos::Math::Vector<Real, Backend>& source,
+        Array<Real>& destination)
+      {
+        destination = source.getView();
+      }
+
+      /// @param source Backend iterate. @param destination Backend solution owner.
+      static void download(const Array<Real>& source,
+        ::Rodin::Kokkos::Math::Vector<Real, Backend>& destination)
+      {
+        if (source.data() == destination.data())
+          return;
+        destination.resize(source.extent(0));
+        ::Kokkos::deep_copy(destination.getView(), source);
+      }
+
       /**
        * @brief Copies a host vector to the memory of the backend.
        * @param host Host vector.
        * @param device Array of the same size.
        */
-      static void upload(const Math::Vector<Real>& host, const Array<Real>& device)
+      static void upload(
+        const ::Rodin::Math::Vector<Real>& host, const Array<Real>& device)
       {
         const ::Kokkos::View<const Real*, ::Kokkos::HostSpace, ::Kokkos::MemoryUnmanaged>
           h(host.data(), static_cast<size_t>(host.size()));
@@ -739,7 +762,7 @@ namespace Rodin::Solver
        * @param device Array.
        * @param host Host vector, resized.
        */
-      static void download(const Array<Real>& device, Math::Vector<Real>& host)
+      static void download(const Array<Real>& device, ::Rodin::Math::Vector<Real>& host)
       {
         host.resize(static_cast<Eigen::Index>(device.extent(0)));
         const ::Kokkos::View<Real*, ::Kokkos::HostSpace, ::Kokkos::MemoryUnmanaged> h(

@@ -32,10 +32,10 @@ namespace Rodin::Variational
    * space, which numbers them across processes. The host members answer
    * as the distributed host space does: getSize() is the global size, and
    * getDOFs() and getGlobalIndex() return global indices. The device
-   * members, getDeviceDOFs() and getLocalSize(), refer to the local
+   * members, getDOFsView() and getLocalSize(), refer to the local
    * numbering, which is the one of the shard of the host space.
    *
-   * @tparam Range Real for a scalar space, Math::SpatialVector<Real> for a
+   * @tparam Range Real for a scalar space, ::Rodin::Math::SpatialVector<Real> for a
    * vector space.
    * @tparam Backend Kokkos backend of the mesh context.
    */
@@ -218,9 +218,9 @@ namespace Rodin::Variational
       }
 
       /// @brief Gets the device degrees of freedom. @return One per local vertex.
-      DOFsType getDeviceDOFs() const
+      DOFsType getDOFsView() const
       {
-        return m_local.getDeviceDOFs();
+        return m_local.getDOFsView();
       }
 
     private:

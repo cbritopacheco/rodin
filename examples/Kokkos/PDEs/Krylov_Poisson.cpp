@@ -43,9 +43,9 @@ using Backend = ::Kokkos::DefaultHostExecutionSpace;
 using DeviceContext = Rodin::Context::Kokkos<Rodin::Context::Local, Backend>;
 
 /// @brief System whose matrix stays on the device.
-using DeviceSystem =
-  Rodin::Math::LinearSystem<Rodin::Kokkos::SparseMatrix<Rodin::Real, Backend>,
-    Rodin::Math::Vector<Rodin::Real>>;
+using System =
+  Rodin::Math::LinearSystem<Rodin::Kokkos::Math::SparseMatrix<Rodin::Real, Backend>,
+    Rodin::Kokkos::Math::Vector<Rodin::Real, Backend>>;
 
 /**
  * @brief Elapsed milliseconds since a time point.
@@ -83,7 +83,7 @@ int main(int argc, char** argv)
     TrialFunction u(vh);
     TestFunction v(vh);
 
-    Problem<DeviceSystem, decltype(u), decltype(v)> poisson(u, v);
+    Problem<System, decltype(u), decltype(v)> poisson(u, v);
     poisson = Integral(Grad(u), Grad(v)) - Integral(f, v) + DirichletBC(u, Zero());
 
     auto t0 = std::chrono::high_resolution_clock::now();

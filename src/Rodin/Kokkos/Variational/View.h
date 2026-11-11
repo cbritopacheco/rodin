@@ -4,8 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_KOKKOS_VARIATIONAL_DEVICEVIEW_H
-#define RODIN_KOKKOS_VARIATIONAL_DEVICEVIEW_H
+#ifndef RODIN_KOKKOS_VARIATIONAL_VIEW_H
+#define RODIN_KOKKOS_VARIATIONAL_VIEW_H
 
 /**
  * @file
@@ -70,26 +70,25 @@ namespace Rodin::Kokkos::Variational
 {
   /// @brief P1 space of the given range on a resident mesh with the given backend.
   template <class Range, class Backend>
-  using DeviceP1Space = ::Rodin::Variational::P1<Range,
+  using KokkosP1Space = ::Rodin::Variational::P1<Range,
     ::Rodin::Geometry::Mesh<::Rodin::Context::Kokkos<::Rodin::Context::Local, Backend>>>;
 
   /// @brief Scalar P1 space on a resident mesh with the given backend.
   template <class Backend>
-  using DeviceP1 = DeviceP1Space<Real, Backend>;
+  using KokkosP1 = KokkosP1Space<Real, Backend>;
 
   /// @brief Vector P1 space on a resident mesh with the given backend.
   template <class Backend>
-  using DeviceVectorP1 = DeviceP1Space<Math::SpatialVector<Real>, Backend>;
+  using KokkosVectorP1 = KokkosP1Space<::Rodin::Math::SpatialVector<Real>, Backend>;
 
   /// @brief Tells whether a space is a real valued device space.
   template <class FES>
-  concept ScalarDeviceSpace =
-    DeviceSpace<FES> && std::is_same_v<typename FES::RangeType, Real>;
+  concept ScalarSpace = Space<FES> && std::is_same_v<typename FES::RangeType, Real>;
 
   /// @brief Tells whether a space is a vector valued device space.
   template <class FES>
-  concept VectorDeviceSpace = DeviceSpace<FES> &&
-    std::is_same_v<typename FES::RangeType, Math::SpatialVector<Real>>;
+  concept VectorSpace = Space<FES> &&
+    std::is_same_v<typename FES::RangeType, ::Rodin::Math::SpatialVector<Real>>;
 
   /**
    * @brief Multiplies two scalar values.
@@ -861,47 +860,47 @@ namespace Rodin::Kokkos::Variational
    *
    * | Specialization | Description |
    * |----------------|-------------|
-   * | `DeviceView<FunctionBase<Derived>>` | Forwards to the derived function. |
-   * | `DeviceView<ScalarFunctionBase<Scalar, Derived>>` | Forwards to the derived function. |
-   * | `DeviceView<RealFunctionBase<Derived>>` | Forwards to the derived function. |
-   * | `DeviceView<RealFunction<F>>` | Callable taking a device point. |
-   * | `DeviceView<RealFunction<Real>>` | Real constant. |
-   * | `DeviceView<Sum<FunctionBase<L>, FunctionBase<R>>>` | Sum of functions. |
-   * | `DeviceView<Mult<FunctionBase<L>, FunctionBase<R>>>` | Product of functions. |
-   * | `DeviceView<Dot<FunctionBase<L>, FunctionBase<R>>>` | Dot product of functions. |
-   * | `DeviceView<UnaryMinus<FunctionBase<N>>>` | Negated function. |
-   * | `DeviceView<RealFunction<Integer>>` | Integer constant. |
-   * | `DeviceView<VectorFunctionBase<Scalar, Derived>>` | Forwards to the derived function. |
-   * | `DeviceView<MatrixFunctionBase<Scalar, Derived>>` | Forwards to the derived function. |
-   * | `DeviceView<MatrixFunction<Matrix>>` | Constant matrix. |
-   * | `DeviceView<GradBase<Operand, Derived>>` | Forwards to the derived function. |
-   * | `DeviceView<JacobianBase<Operand, Derived>>` | Forwards to the derived function. |
-   * | `DeviceView<DivBase<Operand, Derived>>` | Forwards to the derived function. |
-   * | `DeviceView<VectorFunction<V, Values...>>` | Vector function given component-wise. |
-   * | `DeviceView<Zero<Real>>` | Scalar zero. |
-   * | `DeviceView<Zero<SpatialVector<Real>>>` | Vector zero. |
-   * | `DeviceView<BoundaryNormal>` | Outward unit normal of the boundary faces. |
-   * | `DeviceView<GridFunctionBaseReference<GridFunction<FES, Data>>>` | Referenced grid function of a device space. |
-   * | `DeviceView<GridFunction<FES, Data>>` | Grid function of a device space. |
-   * | `DeviceView<Grad<GridFunction<FES, Data>>>` | Physical gradient of a scalar grid function. |
-   * | `DeviceView<Jacobian<GridFunction<FES, Data>>>` | Physical Jacobian of a vector grid function. |
-   * | `DeviceView<Div<GridFunction<FES, Data>>>` | Divergence of a vector grid function. |
-   * | `DeviceView<ShapeFunctionBase<Derived, FES, Space>>` | Forwards to the derived shape function. |
-   * | `DeviceView<ShapeFunction<Derived, FES, Space>>` | Scalar or vector basis value of a device space. |
-   * | `DeviceView<Grad<ShapeFunction<Derived, FES, Space>>>` | Physical gradient of a scalar basis. |
-   * | `DeviceView<Jacobian<ShapeFunction<Derived, FES, Space>>>` | Physical Jacobian of a vector basis. |
-   * | `DeviceView<Div<ShapeFunction<Derived, FES, Space>>>` | Divergence of a vector basis. |
-   * | `DeviceView<Sum<ShapeFunctionBase<L, FES, Space>, ShapeFunctionBase<R, FES, Space>>>` | Sum of shape functions. |
-   * | `DeviceView<UnaryMinus<ShapeFunctionBase<N, FES, Space>>>` | Negated shape function. |
-   * | `DeviceView<Transpose<ShapeFunctionBase<N, FES, Space>>>` | Transposed shape function. |
-   * | `DeviceView<Mult<FunctionBase<L>, ShapeFunctionBase<R, FES, Space>>>` | Function times shape function. |
-   * | `DeviceView<Mult<ShapeFunctionBase<L, FES, Space>, FunctionBase<R>>>` | Shape function times function. |
-   * | `DeviceView<Dot<FunctionBase<L>, ShapeFunctionBase<R, FES, Space>>>` | Dot product of a function and a shape function. |
+   * | `View<FunctionBase<Derived>>` | Forwards to the derived function. |
+   * | `View<ScalarFunctionBase<Scalar, Derived>>` | Forwards to the derived function. |
+   * | `View<RealFunctionBase<Derived>>` | Forwards to the derived function. |
+   * | `View<RealFunction<F>>` | Callable taking a device point. |
+   * | `View<RealFunction<Real>>` | Real constant. |
+   * | `View<Sum<FunctionBase<L>, FunctionBase<R>>>` | Sum of functions. |
+   * | `View<Mult<FunctionBase<L>, FunctionBase<R>>>` | Product of functions. |
+   * | `View<Dot<FunctionBase<L>, FunctionBase<R>>>` | Dot product of functions. |
+   * | `View<UnaryMinus<FunctionBase<N>>>` | Negated function. |
+   * | `View<RealFunction<Integer>>` | Integer constant. |
+   * | `View<VectorFunctionBase<Scalar, Derived>>` | Forwards to the derived function. |
+   * | `View<MatrixFunctionBase<Scalar, Derived>>` | Forwards to the derived function. |
+   * | `View<MatrixFunction<Matrix>>` | Constant matrix. |
+   * | `View<GradBase<Operand, Derived>>` | Forwards to the derived function. |
+   * | `View<JacobianBase<Operand, Derived>>` | Forwards to the derived function. |
+   * | `View<DivBase<Operand, Derived>>` | Forwards to the derived function. |
+   * | `View<VectorFunction<V, Values...>>` | Vector function given component-wise. |
+   * | `View<Zero<Real>>` | Scalar zero. |
+   * | `View<Zero<SpatialVector<Real>>>` | Vector zero. |
+   * | `View<BoundaryNormal>` | Outward unit normal of the boundary faces. |
+   * | `View<GridFunctionBaseReference<GridFunction<FES, Data>>>` | Referenced grid function of a device space. |
+   * | `View<GridFunction<FES, Data>>` | Grid function of a device space. |
+   * | `View<Grad<GridFunction<FES, Data>>>` | Physical gradient of a scalar grid function. |
+   * | `View<Jacobian<GridFunction<FES, Data>>>` | Physical Jacobian of a vector grid function. |
+   * | `View<Div<GridFunction<FES, Data>>>` | Divergence of a vector grid function. |
+   * | `View<ShapeFunctionBase<Derived, FES, Space>>` | Forwards to the derived shape function. |
+   * | `View<ShapeFunction<Derived, FES, Space>>` | Scalar or vector basis value of a device space. |
+   * | `View<Grad<ShapeFunction<Derived, FES, Space>>>` | Physical gradient of a scalar basis. |
+   * | `View<Jacobian<ShapeFunction<Derived, FES, Space>>>` | Physical Jacobian of a vector basis. |
+   * | `View<Div<ShapeFunction<Derived, FES, Space>>>` | Divergence of a vector basis. |
+   * | `View<Sum<ShapeFunctionBase<L, FES, Space>, ShapeFunctionBase<R, FES, Space>>>` | Sum of shape functions. |
+   * | `View<UnaryMinus<ShapeFunctionBase<N, FES, Space>>>` | Negated shape function. |
+   * | `View<Transpose<ShapeFunctionBase<N, FES, Space>>>` | Transposed shape function. |
+   * | `View<Mult<FunctionBase<L>, ShapeFunctionBase<R, FES, Space>>>` | Function times shape function. |
+   * | `View<Mult<ShapeFunctionBase<L, FES, Space>, FunctionBase<R>>>` | Shape function times function. |
+   * | `View<Dot<FunctionBase<L>, ShapeFunctionBase<R, FES, Space>>>` | Dot product of a function and a shape function. |
    *
    * @tparam Node Form language expression type.
    */
   template <class Node>
-  struct DeviceView;
+  struct View;
 
   /**
    * @brief Evaluates a function view at a point.
@@ -1092,45 +1091,44 @@ namespace Rodin::Kokkos::Variational
 
   /// @brief Forwards a function to its derived type.
   template <class Derived>
-  struct DeviceView<::Rodin::Variational::FunctionBase<Derived>> : DeviceView<Derived>
+  struct View<::Rodin::Variational::FunctionBase<Derived>> : View<Derived>
   {
     /// @param node Function expression.
-    DeviceView(const ::Rodin::Variational::FunctionBase<Derived>& node)
-      : DeviceView<Derived>(static_cast<const Derived&>(node))
+    View(const ::Rodin::Variational::FunctionBase<Derived>& node)
+      : View<Derived>(static_cast<const Derived&>(node))
     {}
   };
 
   /// @brief Forwards a scalar function to its derived type.
   template <class Scalar, class Derived>
-  struct DeviceView<::Rodin::Variational::ScalarFunctionBase<Scalar, Derived>>
-    : DeviceView<Derived>
+  struct View<::Rodin::Variational::ScalarFunctionBase<Scalar, Derived>> : View<Derived>
   {
     /// @param node Function expression.
-    DeviceView(const ::Rodin::Variational::ScalarFunctionBase<Scalar, Derived>& node)
-      : DeviceView<Derived>(static_cast<const Derived&>(node))
+    View(const ::Rodin::Variational::ScalarFunctionBase<Scalar, Derived>& node)
+      : View<Derived>(static_cast<const Derived&>(node))
     {}
   };
 
   /// @brief Forwards a real function to its derived type.
   template <class Derived>
-  struct DeviceView<::Rodin::Variational::RealFunctionBase<Derived>> : DeviceView<Derived>
+  struct View<::Rodin::Variational::RealFunctionBase<Derived>> : View<Derived>
   {
     /// @param node Function expression.
-    DeviceView(const ::Rodin::Variational::RealFunctionBase<Derived>& node)
-      : DeviceView<Derived>(static_cast<const Derived&>(node))
+    View(const ::Rodin::Variational::RealFunctionBase<Derived>& node)
+      : View<Derived>(static_cast<const Derived&>(node))
     {}
   };
 
   /// @brief Real function given by a callable taking a device point.
   template <class F>
-  struct DeviceView<::Rodin::Variational::RealFunction<F>>
+  struct View<::Rodin::Variational::RealFunction<F>>
   {
     static_assert(std::is_invocable_r_v<Real, const F&, const Geometry::PointView&>,
       "A function evaluated on a Kokkos mesh must be a KOKKOS_LAMBDA taking a "
       "const Rodin::Kokkos::Geometry::PointView&.");
 
     /// @param node Function expression.
-    DeviceView(const ::Rodin::Variational::RealFunction<F>& node)
+    View(const ::Rodin::Variational::RealFunction<F>& node)
       : f(node.getFunction())
     {}
 
@@ -1147,24 +1145,23 @@ namespace Rodin::Kokkos::Variational
 
   /// @brief Real function wrapping a real function, as a vector component.
   template <class F>
-  struct DeviceView<
-    ::Rodin::Variational::RealFunction<::Rodin::Variational::RealFunction<F>>>
-    : DeviceView<::Rodin::Variational::RealFunction<F>>
+  struct View<::Rodin::Variational::RealFunction<::Rodin::Variational::RealFunction<F>>>
+    : View<::Rodin::Variational::RealFunction<F>>
   {
     /// @param node Function expression.
-    DeviceView(
+    View(
       const ::Rodin::Variational::RealFunction<::Rodin::Variational::RealFunction<F>>&
         node)
-      : DeviceView<::Rodin::Variational::RealFunction<F>>(node.getFunction())
+      : View<::Rodin::Variational::RealFunction<F>>(node.getFunction())
     {}
   };
 
   /// @brief Real constant.
   template <>
-  struct DeviceView<::Rodin::Variational::RealFunction<Real>>
+  struct View<::Rodin::Variational::RealFunction<Real>>
   {
     /// @param node Function expression.
-    DeviceView(const ::Rodin::Variational::RealFunction<Real>& node)
+    View(const ::Rodin::Variational::RealFunction<Real>& node)
       : value(node.getValue())
     {}
 
@@ -1181,14 +1178,12 @@ namespace Rodin::Kokkos::Variational
 
   /// @brief Sum of two functions.
   template <class LHSDerived, class RHSDerived>
-  struct DeviceView<
-    ::Rodin::Variational::Sum<::Rodin::Variational::FunctionBase<LHSDerived>,
-      ::Rodin::Variational::FunctionBase<RHSDerived>>>
+  struct View<::Rodin::Variational::Sum<::Rodin::Variational::FunctionBase<LHSDerived>,
+    ::Rodin::Variational::FunctionBase<RHSDerived>>>
   {
     /// @param node Function expression.
-    DeviceView(
-      const ::Rodin::Variational::Sum<::Rodin::Variational::FunctionBase<LHSDerived>,
-        ::Rodin::Variational::FunctionBase<RHSDerived>>& node)
+    View(const ::Rodin::Variational::Sum<::Rodin::Variational::FunctionBase<LHSDerived>,
+      ::Rodin::Variational::FunctionBase<RHSDerived>>& node)
       : lhs(node.getLHS()),
         rhs(node.getRHS())
     {}
@@ -1201,20 +1196,19 @@ namespace Rodin::Kokkos::Variational
     }
 
     /// @brief Left operand.
-    DeviceView<::Rodin::Variational::FunctionBase<LHSDerived>> lhs;
+    View<::Rodin::Variational::FunctionBase<LHSDerived>> lhs;
 
     /// @brief Right operand.
-    DeviceView<::Rodin::Variational::FunctionBase<RHSDerived>> rhs;
+    View<::Rodin::Variational::FunctionBase<RHSDerived>> rhs;
   };
 
   /// @brief Product of two functions.
   template <class LHSDerived, class RHSDerived>
-  struct DeviceView<
-    ::Rodin::Variational::Mult<::Rodin::Variational::FunctionBase<LHSDerived>,
-      ::Rodin::Variational::FunctionBase<RHSDerived>>>
+  struct View<::Rodin::Variational::Mult<::Rodin::Variational::FunctionBase<LHSDerived>,
+    ::Rodin::Variational::FunctionBase<RHSDerived>>>
   {
     /// @param node Function expression.
-    DeviceView(
+    View(
       const ::Rodin::Variational::Mult<::Rodin::Variational::FunctionBase<LHSDerived>,
         ::Rodin::Variational::FunctionBase<RHSDerived>>& node)
       : lhs(node.getLHS()),
@@ -1229,22 +1223,20 @@ namespace Rodin::Kokkos::Variational
     }
 
     /// @brief Left operand.
-    DeviceView<::Rodin::Variational::FunctionBase<LHSDerived>> lhs;
+    View<::Rodin::Variational::FunctionBase<LHSDerived>> lhs;
 
     /// @brief Right operand.
-    DeviceView<::Rodin::Variational::FunctionBase<RHSDerived>> rhs;
+    View<::Rodin::Variational::FunctionBase<RHSDerived>> rhs;
   };
 
   /// @brief Dot product of two functions.
   template <class LHSDerived, class RHSDerived>
-  struct DeviceView<
-    ::Rodin::Variational::Dot<::Rodin::Variational::FunctionBase<LHSDerived>,
-      ::Rodin::Variational::FunctionBase<RHSDerived>>>
+  struct View<::Rodin::Variational::Dot<::Rodin::Variational::FunctionBase<LHSDerived>,
+    ::Rodin::Variational::FunctionBase<RHSDerived>>>
   {
     /// @param node Function expression.
-    DeviceView(
-      const ::Rodin::Variational::Dot<::Rodin::Variational::FunctionBase<LHSDerived>,
-        ::Rodin::Variational::FunctionBase<RHSDerived>>& node)
+    View(const ::Rodin::Variational::Dot<::Rodin::Variational::FunctionBase<LHSDerived>,
+      ::Rodin::Variational::FunctionBase<RHSDerived>>& node)
       : lhs(node.getLHS()),
         rhs(node.getRHS())
     {}
@@ -1257,19 +1249,19 @@ namespace Rodin::Kokkos::Variational
     }
 
     /// @brief Left operand.
-    DeviceView<::Rodin::Variational::FunctionBase<LHSDerived>> lhs;
+    View<::Rodin::Variational::FunctionBase<LHSDerived>> lhs;
 
     /// @brief Right operand.
-    DeviceView<::Rodin::Variational::FunctionBase<RHSDerived>> rhs;
+    View<::Rodin::Variational::FunctionBase<RHSDerived>> rhs;
   };
 
   /// @brief Negated function.
   template <class NestedDerived>
-  struct DeviceView<
+  struct View<
     ::Rodin::Variational::UnaryMinus<::Rodin::Variational::FunctionBase<NestedDerived>>>
   {
     /// @param node Function expression.
-    DeviceView(const ::Rodin::Variational::UnaryMinus<
+    View(const ::Rodin::Variational::UnaryMinus<
       ::Rodin::Variational::FunctionBase<NestedDerived>>& node)
       : operand(node.getOperand())
     {}
@@ -1282,15 +1274,15 @@ namespace Rodin::Kokkos::Variational
     }
 
     /// @brief Operand.
-    DeviceView<::Rodin::Variational::FunctionBase<NestedDerived>> operand;
+    View<::Rodin::Variational::FunctionBase<NestedDerived>> operand;
   };
 
   /// @brief Integer constant.
   template <>
-  struct DeviceView<::Rodin::Variational::RealFunction<Integer>>
+  struct View<::Rodin::Variational::RealFunction<Integer>>
   {
     /// @param node Function expression.
-    DeviceView(const ::Rodin::Variational::RealFunction<Integer>& node)
+    View(const ::Rodin::Variational::RealFunction<Integer>& node)
       : value(node.getValue())
     {}
 
@@ -1307,34 +1299,32 @@ namespace Rodin::Kokkos::Variational
 
   /// @brief Forwards a vector function to its derived type.
   template <class Scalar, class Derived>
-  struct DeviceView<::Rodin::Variational::VectorFunctionBase<Scalar, Derived>>
-    : DeviceView<Derived>
+  struct View<::Rodin::Variational::VectorFunctionBase<Scalar, Derived>> : View<Derived>
   {
     /// @param node Function expression.
-    DeviceView(const ::Rodin::Variational::VectorFunctionBase<Scalar, Derived>& node)
-      : DeviceView<Derived>(static_cast<const Derived&>(node))
+    View(const ::Rodin::Variational::VectorFunctionBase<Scalar, Derived>& node)
+      : View<Derived>(static_cast<const Derived&>(node))
     {}
   };
 
   /// @brief Forwards a matrix function to its derived type.
   template <class Scalar, class Derived>
-  struct DeviceView<::Rodin::Variational::MatrixFunctionBase<Scalar, Derived>>
-    : DeviceView<Derived>
+  struct View<::Rodin::Variational::MatrixFunctionBase<Scalar, Derived>> : View<Derived>
   {
     /// @param node Function expression.
-    DeviceView(const ::Rodin::Variational::MatrixFunctionBase<Scalar, Derived>& node)
-      : DeviceView<Derived>(static_cast<const Derived&>(node))
+    View(const ::Rodin::Variational::MatrixFunctionBase<Scalar, Derived>& node)
+      : View<Derived>(static_cast<const Derived&>(node))
     {}
   };
 
   /// @brief Constant matrix of at most three rows and three columns.
   template <class Matrix>
-    requires std::is_same_v<Matrix, Math::Matrix<Real>> ||
-    std::is_same_v<Matrix, Math::SpatialMatrix<Real>>
-  struct DeviceView<::Rodin::Variational::MatrixFunction<Matrix>>
+    requires std::is_same_v<Matrix, ::Rodin::Math::Matrix<Real>> ||
+    std::is_same_v<Matrix, ::Rodin::Math::SpatialMatrix<Real>>
+  struct View<::Rodin::Variational::MatrixFunction<Matrix>>
   {
     /// @param node Function expression.
-    DeviceView(const ::Rodin::Variational::MatrixFunction<Matrix>& node)
+    View(const ::Rodin::Variational::MatrixFunction<Matrix>& node)
     {
       const auto& matrix = node.getValue();
       if (matrix.rows() > 3 || matrix.cols() > 3)
@@ -1366,42 +1356,40 @@ namespace Rodin::Kokkos::Variational
 
   /// @brief Forwards a gradient of a function to its derived type.
   template <class Operand, class Derived>
-  struct DeviceView<::Rodin::Variational::GradBase<Operand, Derived>>
-    : DeviceView<Derived>
+  struct View<::Rodin::Variational::GradBase<Operand, Derived>> : View<Derived>
   {
     /// @param node Function expression.
-    DeviceView(const ::Rodin::Variational::GradBase<Operand, Derived>& node)
-      : DeviceView<Derived>(static_cast<const Derived&>(node))
+    View(const ::Rodin::Variational::GradBase<Operand, Derived>& node)
+      : View<Derived>(static_cast<const Derived&>(node))
     {}
   };
 
   /// @brief Forwards a Jacobian of a function to its derived type.
   template <class Operand, class Derived>
-  struct DeviceView<::Rodin::Variational::JacobianBase<Operand, Derived>>
-    : DeviceView<Derived>
+  struct View<::Rodin::Variational::JacobianBase<Operand, Derived>> : View<Derived>
   {
     /// @param node Function expression.
-    DeviceView(const ::Rodin::Variational::JacobianBase<Operand, Derived>& node)
-      : DeviceView<Derived>(static_cast<const Derived&>(node))
+    View(const ::Rodin::Variational::JacobianBase<Operand, Derived>& node)
+      : View<Derived>(static_cast<const Derived&>(node))
     {}
   };
 
   /// @brief Forwards a divergence of a function to its derived type.
   template <class Operand, class Derived>
-  struct DeviceView<::Rodin::Variational::DivBase<Operand, Derived>> : DeviceView<Derived>
+  struct View<::Rodin::Variational::DivBase<Operand, Derived>> : View<Derived>
   {
     /// @param node Function expression.
-    DeviceView(const ::Rodin::Variational::DivBase<Operand, Derived>& node)
-      : DeviceView<Derived>(static_cast<const Derived&>(node))
+    View(const ::Rodin::Variational::DivBase<Operand, Derived>& node)
+      : View<Derived>(static_cast<const Derived&>(node))
     {}
   };
 
   /// @brief Scalar zero.
   template <>
-  struct DeviceView<::Rodin::Variational::Zero<Real>>
+  struct View<::Rodin::Variational::Zero<Real>>
   {
     /// @param node Function expression, unused.
-    DeviceView([[maybe_unused]] const ::Rodin::Variational::Zero<Real>& node) {}
+    View([[maybe_unused]] const ::Rodin::Variational::Zero<Real>& node) {}
 
     /// @param p Device point, unused. @return Zero.
     KOKKOS_INLINE_FUNCTION
@@ -1413,10 +1401,10 @@ namespace Rodin::Kokkos::Variational
 
   /// @brief Vector zero.
   template <>
-  struct DeviceView<::Rodin::Variational::Zero<Math::SpatialVector<Real>>>
+  struct View<::Rodin::Variational::Zero<::Rodin::Math::SpatialVector<Real>>>
   {
     /// @param node Function expression.
-    DeviceView(const ::Rodin::Variational::Zero<Math::SpatialVector<Real>>& node)
+    View(const ::Rodin::Variational::Zero<::Rodin::Math::SpatialVector<Real>>& node)
       : dimension(node.getDimension())
     {}
 
@@ -1444,10 +1432,10 @@ namespace Rodin::Kokkos::Variational
    * supported.
    */
   template <>
-  struct DeviceView<::Rodin::Variational::BoundaryNormal>
+  struct View<::Rodin::Variational::BoundaryNormal>
   {
     /// @param node Function expression.
-    DeviceView([[maybe_unused]] const ::Rodin::Variational::BoundaryNormal& node) {}
+    View([[maybe_unused]] const ::Rodin::Variational::BoundaryNormal& node) {}
 
     /// @param p Point on a boundary face. @return Outward unit normal.
     KOKKOS_INLINE_FUNCTION
@@ -1501,7 +1489,7 @@ namespace Rodin::Kokkos::Variational::Internal
    * @tparam Nodes Component expression types.
    */
   template <class... Nodes>
-  struct DeviceViewPack
+  struct ViewPack
   {
     /**
      * @brief Evaluates no component.
@@ -1517,10 +1505,10 @@ namespace Rodin::Kokkos::Variational::Internal
 
   /// @brief Device views of a first component and of the remaining ones.
   template <class Head, class... Tail>
-  struct DeviceViewPack<Head, Tail...>
+  struct ViewPack<Head, Tail...>
   {
     /// @param head First component. @param tail Remaining components.
-    DeviceViewPack(const Head& head, const Tail&... tail)
+    ViewPack(const Head& head, const Tail&... tail)
       : first(head),
         rest(tail...)
     {}
@@ -1540,10 +1528,10 @@ namespace Rodin::Kokkos::Variational::Internal
     }
 
     /// @brief First component.
-    DeviceView<Head> first;
+    View<Head> first;
 
     /// @brief Remaining components.
-    DeviceViewPack<Tail...> rest;
+    ViewPack<Tail...> rest;
   };
 }
 
@@ -1555,17 +1543,17 @@ namespace Rodin::Kokkos::Variational
    * Each component is a real constant or a callable taking a device point.
    */
   template <class V, class... Values>
-  struct DeviceView<::Rodin::Variational::VectorFunction<V, Values...>>
+  struct View<::Rodin::Variational::VectorFunction<V, Values...>>
   {
     static_assert(1 + sizeof...(Values) <= 3,
       "Vector functions on Kokkos meshes have at most three components.");
 
     /// @brief Component views.
-    using PackType = Internal::DeviceViewPack<::Rodin::Variational::RealFunction<V>,
+    using PackType = Internal::ViewPack<::Rodin::Variational::RealFunction<V>,
       ::Rodin::Variational::RealFunction<Values>...>;
 
     /// @param node Function expression.
-    DeviceView(const ::Rodin::Variational::VectorFunction<V, Values...>& node)
+    View(const ::Rodin::Variational::VectorFunction<V, Values...>& node)
       : components(std::make_from_tuple<PackType>(node.getFunctions()))
     {}
 
@@ -1668,7 +1656,7 @@ namespace Rodin::Kokkos::Variational
    * of its mesh, in the local numbering of the device degrees of freedom.
    *
    * This primary template reads containers indexed by coeff(), such as
-   * Math::Vector. Modules whose grid functions keep their coefficients in
+   * ::Rodin::Math::Vector. Modules whose grid functions keep their coefficients in
    * another container specialize it, as Rodin/Kokkos/Assembly/PETSc.h does
    * for PETSc vectors.
    *
@@ -1683,7 +1671,7 @@ namespace Rodin::Kokkos::Variational
      * @returns Device coefficients, after transfer completion.
      */
     template <class FES>
-    static ::Kokkos::View<Real*, typename FES::MeshType::MemorySpace> upload(
+    static ::Kokkos::View<Real*, typename FES::MeshType::MemorySpace> getView(
       const FES& fes, const Data& data)
     {
       const auto& mesh = fes.getMesh();
@@ -1717,16 +1705,15 @@ namespace Rodin::Kokkos::Variational
    * @brief Coefficients of a grid function of a device space in device
    * memory.
    *
-   * The coefficients are copied to the mesh memory space when the view is
-   * built, so the view reflects the grid function at lowering time. The
-   * copy comes from the transfer cache of the mesh, which keeps it
-   * resident while the coefficients do not change. Values and
+   * Backend coefficient vectors are borrowed directly. Explicit host coefficient
+   * vectors are transferred through the mesh transfer cache when the view is
+   * built, and PETSc vectors use their backend state-aware adapter. Values and
    * derivatives are interpolated from the degrees of freedom of the polytope
    * holding the point, as on the host.
    *
    * @tparam FES Device space of the grid function.
    */
-  template <DeviceSpace FES>
+  template <Space FES>
   class GridFunctionView
   {
     public:
@@ -1747,8 +1734,8 @@ namespace Rodin::Kokkos::Variational
       template <class Data>
       GridFunctionView(const FESType& fes, const Data& data)
         : m_vdim(fes.getVectorDimension()),
-          m_dofs(fes.getDeviceDOFs()),
-          m_data(GridFunctionCoefficients<std::decay_t<Data>>::upload(fes, data))
+          m_dofs(fes.getDOFsView()),
+          m_data(GridFunctionCoefficients<std::decay_t<Data>>::getView(fes, data))
       {}
 
       /// @brief Gets the device degrees of freedom. @return Degrees of freedom.
@@ -2123,16 +2110,16 @@ namespace Rodin::Kokkos::Variational
   };
 
   /// @brief Grid function of a device space.
-  template <DeviceSpace FES, class Data>
-  struct DeviceView<::Rodin::Variational::GridFunction<FES, Data>>
+  template <Space FES, class Data>
+  struct View<::Rodin::Variational::GridFunction<FES, Data>>
   {
     /// @param node Grid function.
-    DeviceView(const ::Rodin::Variational::GridFunction<FES, Data>& node)
+    View(const ::Rodin::Variational::GridFunction<FES, Data>& node)
       : u(node.getFiniteElementSpace(), node.getData())
     {}
 
     /// @param fes Space of the grid function. @param data Coefficients.
-    DeviceView(const FES& fes, const Data& data)
+    View(const FES& fes, const Data& data)
       : u(fes, data)
     {}
 
@@ -2155,26 +2142,25 @@ namespace Rodin::Kokkos::Variational
   };
 
   /// @brief Grid function referenced by an expression.
-  template <DeviceSpace FES, class Data>
-  struct DeviceView<::Rodin::Variational::GridFunctionBaseReference<
+  template <Space FES, class Data>
+  struct View<::Rodin::Variational::GridFunctionBaseReference<
     ::Rodin::Variational::GridFunction<FES, Data>>>
-    : DeviceView<::Rodin::Variational::GridFunction<FES, Data>>
+    : View<::Rodin::Variational::GridFunction<FES, Data>>
   {
     /// @param node Reference to a grid function.
-    DeviceView(const ::Rodin::Variational::GridFunctionBaseReference<
+    View(const ::Rodin::Variational::GridFunctionBaseReference<
       ::Rodin::Variational::GridFunction<FES, Data>>& node)
-      : DeviceView<::Rodin::Variational::GridFunction<FES, Data>>(
+      : View<::Rodin::Variational::GridFunction<FES, Data>>(
           node.getFiniteElementSpace(), node.getData())
     {}
   };
 
   /// @brief Physical gradient of a scalar grid function.
-  template <ScalarDeviceSpace FES, class Data>
-  struct DeviceView<
-    ::Rodin::Variational::Grad<::Rodin::Variational::GridFunction<FES, Data>>>
+  template <ScalarSpace FES, class Data>
+  struct View<::Rodin::Variational::Grad<::Rodin::Variational::GridFunction<FES, Data>>>
   {
     /// @param node Gradient expression.
-    DeviceView(
+    View(
       const ::Rodin::Variational::Grad<::Rodin::Variational::GridFunction<FES, Data>>&
         node)
       : u(node.getOperand().getFiniteElementSpace(), node.getOperand().getData()),
@@ -2200,12 +2186,12 @@ namespace Rodin::Kokkos::Variational
   };
 
   /// @brief Physical Jacobian of a vector grid function.
-  template <VectorDeviceSpace FES, class Data>
-  struct DeviceView<
+  template <VectorSpace FES, class Data>
+  struct View<
     ::Rodin::Variational::Jacobian<::Rodin::Variational::GridFunction<FES, Data>>>
   {
     /// @param node Jacobian expression.
-    DeviceView(const ::Rodin::Variational::Jacobian<
+    View(const ::Rodin::Variational::Jacobian<
       ::Rodin::Variational::GridFunction<FES, Data>>& node)
       : u(node.getOperand().getFiniteElementSpace(), node.getOperand().getData()),
         trace(node.getTraceDomain())
@@ -2226,13 +2212,11 @@ namespace Rodin::Kokkos::Variational
   };
 
   /// @brief Divergence of a vector grid function.
-  template <VectorDeviceSpace FES, class Data>
-  struct DeviceView<
-    ::Rodin::Variational::Div<::Rodin::Variational::GridFunction<FES, Data>>>
+  template <VectorSpace FES, class Data>
+  struct View<::Rodin::Variational::Div<::Rodin::Variational::GridFunction<FES, Data>>>
   {
     /// @param node Divergence expression.
-    DeviceView(
-      const ::Rodin::Variational::Div<::Rodin::Variational::GridFunction<FES, Data>>&
+    View(const ::Rodin::Variational::Div<::Rodin::Variational::GridFunction<FES, Data>>&
         node)
       : u(node.getOperand().getFiniteElementSpace(), node.getOperand().getData()),
         trace(node.getTraceDomain())
@@ -2254,23 +2238,23 @@ namespace Rodin::Kokkos::Variational
 
   /// @brief Forwards a shape function to its derived type.
   template <class Derived, class FES, ::Rodin::Variational::ShapeFunctionSpaceType Space>
-  struct DeviceView<::Rodin::Variational::ShapeFunctionBase<Derived, FES, Space>>
-    : DeviceView<Derived>
+  struct View<::Rodin::Variational::ShapeFunctionBase<Derived, FES, Space>>
+    : View<Derived>
   {
     /// @param node Shape function expression.
-    DeviceView(const ::Rodin::Variational::ShapeFunctionBase<Derived, FES, Space>& node)
-      : DeviceView<Derived>(static_cast<const Derived&>(node))
+    View(const ::Rodin::Variational::ShapeFunctionBase<Derived, FES, Space>& node)
+      : View<Derived>(static_cast<const Derived&>(node))
     {}
   };
 
   /// @brief Scalar basis of a device space.
-  template <class Derived, ScalarDeviceSpace FES,
+  template <class Derived, ScalarSpace FES,
     ::Rodin::Variational::ShapeFunctionSpaceType Space>
-  struct DeviceView<::Rodin::Variational::ShapeFunction<Derived, FES, Space>>
+  struct View<::Rodin::Variational::ShapeFunction<Derived, FES, Space>>
   {
     /// @param node Shape function expression.
-    DeviceView(const ::Rodin::Variational::ShapeFunction<Derived, FES, Space>& node)
-      : dofs(node.getFiniteElementSpace().getDeviceDOFs())
+    View(const ::Rodin::Variational::ShapeFunction<Derived, FES, Space>& node)
+      : dofs(node.getFiniteElementSpace().getDOFsView())
     {}
 
     /**
@@ -2289,15 +2273,15 @@ namespace Rodin::Kokkos::Variational
   };
 
   /// @brief Physical gradient of the scalar basis of a device space.
-  template <class Derived, ScalarDeviceSpace FES,
+  template <class Derived, ScalarSpace FES,
     ::Rodin::Variational::ShapeFunctionSpaceType Space>
-  struct DeviceView<
+  struct View<
     ::Rodin::Variational::Grad<::Rodin::Variational::ShapeFunction<Derived, FES, Space>>>
   {
     /// @param node Shape function expression.
-    DeviceView(const ::Rodin::Variational::Grad<
+    View(const ::Rodin::Variational::Grad<
       ::Rodin::Variational::ShapeFunction<Derived, FES, Space>>& node)
-      : dofs(node.getOperand().getFiniteElementSpace().getDeviceDOFs())
+      : dofs(node.getOperand().getFiniteElementSpace().getDOFsView())
     {}
 
     /**
@@ -2319,12 +2303,11 @@ namespace Rodin::Kokkos::Variational
   /// @brief Function multiplying a shape function on the left.
   template <class LHSDerived, class RHSDerived, class FES,
     ::Rodin::Variational::ShapeFunctionSpaceType Space>
-  struct DeviceView<
-    ::Rodin::Variational::Mult<::Rodin::Variational::FunctionBase<LHSDerived>,
-      ::Rodin::Variational::ShapeFunctionBase<RHSDerived, FES, Space>>>
+  struct View<::Rodin::Variational::Mult<::Rodin::Variational::FunctionBase<LHSDerived>,
+    ::Rodin::Variational::ShapeFunctionBase<RHSDerived, FES, Space>>>
   {
     /// @param node Shape function expression.
-    DeviceView(
+    View(
       const ::Rodin::Variational::Mult<::Rodin::Variational::FunctionBase<LHSDerived>,
         ::Rodin::Variational::ShapeFunctionBase<RHSDerived, FES, Space>>& node)
       : lhs(node.getLHS()),
@@ -2352,21 +2335,21 @@ namespace Rodin::Kokkos::Variational
     }
 
     /// @brief Function factor.
-    DeviceView<::Rodin::Variational::FunctionBase<LHSDerived>> lhs;
+    View<::Rodin::Variational::FunctionBase<LHSDerived>> lhs;
 
     /// @brief Shape function factor.
-    DeviceView<::Rodin::Variational::ShapeFunctionBase<RHSDerived, FES, Space>> rhs;
+    View<::Rodin::Variational::ShapeFunctionBase<RHSDerived, FES, Space>> rhs;
   };
 
   /// @brief Function multiplying a shape function on the right.
   template <class LHSDerived, class RHSDerived, class FES,
     ::Rodin::Variational::ShapeFunctionSpaceType Space>
-  struct DeviceView<::Rodin::Variational::Mult<
+  struct View<::Rodin::Variational::Mult<
     ::Rodin::Variational::ShapeFunctionBase<LHSDerived, FES, Space>,
     ::Rodin::Variational::FunctionBase<RHSDerived>>>
   {
     /// @param node Shape function expression.
-    DeviceView(const ::Rodin::Variational::Mult<
+    View(const ::Rodin::Variational::Mult<
       ::Rodin::Variational::ShapeFunctionBase<LHSDerived, FES, Space>,
       ::Rodin::Variational::FunctionBase<RHSDerived>>& node)
       : lhs(node.getLHS()),
@@ -2394,23 +2377,21 @@ namespace Rodin::Kokkos::Variational
     }
 
     /// @brief Shape function factor.
-    DeviceView<::Rodin::Variational::ShapeFunctionBase<LHSDerived, FES, Space>> lhs;
+    View<::Rodin::Variational::ShapeFunctionBase<LHSDerived, FES, Space>> lhs;
 
     /// @brief Function factor.
-    DeviceView<::Rodin::Variational::FunctionBase<RHSDerived>> rhs;
+    View<::Rodin::Variational::FunctionBase<RHSDerived>> rhs;
   };
 
   /// @brief Dot product of a function and a shape function.
   template <class LHSDerived, class RHSDerived, class FES,
     ::Rodin::Variational::ShapeFunctionSpaceType Space>
-  struct DeviceView<
-    ::Rodin::Variational::Dot<::Rodin::Variational::FunctionBase<LHSDerived>,
-      ::Rodin::Variational::ShapeFunctionBase<RHSDerived, FES, Space>>>
+  struct View<::Rodin::Variational::Dot<::Rodin::Variational::FunctionBase<LHSDerived>,
+    ::Rodin::Variational::ShapeFunctionBase<RHSDerived, FES, Space>>>
   {
     /// @param node Shape function expression.
-    DeviceView(
-      const ::Rodin::Variational::Dot<::Rodin::Variational::FunctionBase<LHSDerived>,
-        ::Rodin::Variational::ShapeFunctionBase<RHSDerived, FES, Space>>& node)
+    View(const ::Rodin::Variational::Dot<::Rodin::Variational::FunctionBase<LHSDerived>,
+      ::Rodin::Variational::ShapeFunctionBase<RHSDerived, FES, Space>>& node)
       : lhs(node.getLHS()),
         rhs(node.getRHS())
     {}
@@ -2436,10 +2417,10 @@ namespace Rodin::Kokkos::Variational
     }
 
     /// @brief Function factor.
-    DeviceView<::Rodin::Variational::FunctionBase<LHSDerived>> lhs;
+    View<::Rodin::Variational::FunctionBase<LHSDerived>> lhs;
 
     /// @brief Shape function factor.
-    DeviceView<::Rodin::Variational::ShapeFunctionBase<RHSDerived, FES, Space>> rhs;
+    View<::Rodin::Variational::ShapeFunctionBase<RHSDerived, FES, Space>> rhs;
   };
 
   /**
@@ -2448,14 +2429,14 @@ namespace Rodin::Kokkos::Variational
    * Local index @f$ a\,d + r @f$ is the basis function
    * @f$ \phi_a e_r @f$, as on the host.
    */
-  template <class Derived, VectorDeviceSpace FES,
+  template <class Derived, VectorSpace FES,
     ::Rodin::Variational::ShapeFunctionSpaceType Space>
-  struct DeviceView<::Rodin::Variational::ShapeFunction<Derived, FES, Space>>
+  struct View<::Rodin::Variational::ShapeFunction<Derived, FES, Space>>
   {
     /// @param node Shape function expression.
-    DeviceView(const ::Rodin::Variational::ShapeFunction<Derived, FES, Space>& node)
+    View(const ::Rodin::Variational::ShapeFunction<Derived, FES, Space>& node)
       : vdim(node.getFiniteElementSpace().getVectorDimension()),
-        dofs(node.getFiniteElementSpace().getDeviceDOFs())
+        dofs(node.getFiniteElementSpace().getDOFsView())
     {}
 
     /**
@@ -2483,16 +2464,16 @@ namespace Rodin::Kokkos::Variational
    * Row @f$ r @f$ of the Jacobian of @f$ \phi_a e_r @f$ is
    * @f$ \nabla \phi_a @f$, the other rows vanish.
    */
-  template <class Derived, VectorDeviceSpace FES,
+  template <class Derived, VectorSpace FES,
     ::Rodin::Variational::ShapeFunctionSpaceType Space>
-  struct DeviceView<::Rodin::Variational::Jacobian<
+  struct View<::Rodin::Variational::Jacobian<
     ::Rodin::Variational::ShapeFunction<Derived, FES, Space>>>
   {
     /// @param node Shape function expression.
-    DeviceView(const ::Rodin::Variational::Jacobian<
+    View(const ::Rodin::Variational::Jacobian<
       ::Rodin::Variational::ShapeFunction<Derived, FES, Space>>& node)
       : vdim(node.getFiniteElementSpace().getVectorDimension()),
-        dofs(node.getFiniteElementSpace().getDeviceDOFs())
+        dofs(node.getFiniteElementSpace().getDOFsView())
     {}
 
     /**
@@ -2518,16 +2499,16 @@ namespace Rodin::Kokkos::Variational
    *
    * The divergence of @f$ \phi_a e_r @f$ is @f$ \partial_r \phi_a @f$.
    */
-  template <class Derived, VectorDeviceSpace FES,
+  template <class Derived, VectorSpace FES,
     ::Rodin::Variational::ShapeFunctionSpaceType Space>
-  struct DeviceView<
+  struct View<
     ::Rodin::Variational::Div<::Rodin::Variational::ShapeFunction<Derived, FES, Space>>>
   {
     /// @param node Shape function expression.
-    DeviceView(const ::Rodin::Variational::Div<
+    View(const ::Rodin::Variational::Div<
       ::Rodin::Variational::ShapeFunction<Derived, FES, Space>>& node)
       : vdim(node.getFiniteElementSpace().getVectorDimension()),
-        dofs(node.getFiniteElementSpace().getDeviceDOFs())
+        dofs(node.getFiniteElementSpace().getDOFsView())
     {}
 
     /**
@@ -2551,12 +2532,12 @@ namespace Rodin::Kokkos::Variational
   /// @brief Sum of two shape functions.
   template <class LHSDerived, class RHSDerived, class FES,
     ::Rodin::Variational::ShapeFunctionSpaceType Space>
-  struct DeviceView<::Rodin::Variational::Sum<
+  struct View<::Rodin::Variational::Sum<
     ::Rodin::Variational::ShapeFunctionBase<LHSDerived, FES, Space>,
     ::Rodin::Variational::ShapeFunctionBase<RHSDerived, FES, Space>>>
   {
     /// @param node Shape function expression.
-    DeviceView(const ::Rodin::Variational::Sum<
+    View(const ::Rodin::Variational::Sum<
       ::Rodin::Variational::ShapeFunctionBase<LHSDerived, FES, Space>,
       ::Rodin::Variational::ShapeFunctionBase<RHSDerived, FES, Space>>& node)
       : lhs(node.getLHS()),
@@ -2584,20 +2565,20 @@ namespace Rodin::Kokkos::Variational
     }
 
     /// @brief Left operand.
-    DeviceView<::Rodin::Variational::ShapeFunctionBase<LHSDerived, FES, Space>> lhs;
+    View<::Rodin::Variational::ShapeFunctionBase<LHSDerived, FES, Space>> lhs;
 
     /// @brief Right operand.
-    DeviceView<::Rodin::Variational::ShapeFunctionBase<RHSDerived, FES, Space>> rhs;
+    View<::Rodin::Variational::ShapeFunctionBase<RHSDerived, FES, Space>> rhs;
   };
 
   /// @brief Negated shape function.
   template <class NestedDerived, class FES,
     ::Rodin::Variational::ShapeFunctionSpaceType Space>
-  struct DeviceView<::Rodin::Variational::UnaryMinus<
+  struct View<::Rodin::Variational::UnaryMinus<
     ::Rodin::Variational::ShapeFunctionBase<NestedDerived, FES, Space>>>
   {
     /// @param node Shape function expression.
-    DeviceView(const ::Rodin::Variational::UnaryMinus<
+    View(const ::Rodin::Variational::UnaryMinus<
       ::Rodin::Variational::ShapeFunctionBase<NestedDerived, FES, Space>>& node)
       : operand(node.getOperand())
     {}
@@ -2621,18 +2602,17 @@ namespace Rodin::Kokkos::Variational
     }
 
     /// @brief Operand.
-    DeviceView<::Rodin::Variational::ShapeFunctionBase<NestedDerived, FES, Space>>
-      operand;
+    View<::Rodin::Variational::ShapeFunctionBase<NestedDerived, FES, Space>> operand;
   };
 
   /// @brief Transposed matrix valued shape function.
   template <class NestedDerived, class FES,
     ::Rodin::Variational::ShapeFunctionSpaceType Space>
-  struct DeviceView<::Rodin::Variational::Transpose<
+  struct View<::Rodin::Variational::Transpose<
     ::Rodin::Variational::ShapeFunctionBase<NestedDerived, FES, Space>>>
   {
     /// @param node Shape function expression.
-    DeviceView(const ::Rodin::Variational::Transpose<
+    View(const ::Rodin::Variational::Transpose<
       ::Rodin::Variational::ShapeFunctionBase<NestedDerived, FES, Space>>& node)
       : operand(node.getOperand())
     {}
@@ -2657,8 +2637,7 @@ namespace Rodin::Kokkos::Variational
     }
 
     /// @brief Operand.
-    DeviceView<::Rodin::Variational::ShapeFunctionBase<NestedDerived, FES, Space>>
-      operand;
+    View<::Rodin::Variational::ShapeFunctionBase<NestedDerived, FES, Space>> operand;
   };
 }
 

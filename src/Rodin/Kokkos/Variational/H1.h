@@ -881,21 +881,21 @@ namespace Rodin::Kokkos::Variational::Internal
   {
     public:
       /// @brief Resident mesh type.
-      using DeviceMeshType = ::Rodin::Geometry::Mesh<
+      using MeshType = ::Rodin::Geometry::Mesh<
         ::Rodin::Context::Kokkos<::Rodin::Context::Local, Backend>>;
 
       /// @brief Host mesh type.
       using HostMeshType = ::Rodin::Geometry::Mesh<::Rodin::Context::Local>;
 
       /// @brief Memory space of the device tables.
-      using MemorySpace = typename DeviceMeshType::MemorySpace;
+      using MemorySpace = typename MeshType::MemorySpace;
 
       /// @brief Scalar host space.
       using ScalarSpace = ::Rodin::Variational::H1<K, Real, HostMeshType>;
 
       /// @brief Vector host space.
       using VectorSpace =
-        ::Rodin::Variational::H1<K, Math::SpatialVector<Real>, HostMeshType>;
+        ::Rodin::Variational::H1<K, ::Rodin::Math::SpatialVector<Real>, HostMeshType>;
 
       /**
        * @brief Builds the host spaces and copies the numbering to the device.
@@ -903,7 +903,7 @@ namespace Rodin::Kokkos::Variational::Internal
        * @f$ d \to d - 1 @f$ it lacks are computed on the host copy.
        * @param vdim Vector dimension, zero for a scalar space only.
        */
-      LagrangeMirror(const DeviceMeshType& mesh, size_t vdim)
+      LagrangeMirror(const MeshType& mesh, size_t vdim)
         : m_mesh(supported(mesh)),
           m_scalar(std::integral_constant<size_t, K>{}, m_mesh),
           m_dofs(m_scalar, mesh.getContext().getExecutionSpace())
@@ -950,7 +950,7 @@ namespace Rodin::Kokkos::Variational::Internal
        * @param mesh Resident mesh.
        * @return Host copy of @p mesh, with the incidences @f$ d \to d - 1 @f$.
        */
-      static HostMeshType supported(const DeviceMeshType& mesh)
+      static HostMeshType supported(const MeshType& mesh)
       {
         using Type = ::Rodin::Geometry::Polytope::Type;
         if (mesh.getPolytopeCount(Type::Pyramid) > 0)
@@ -1164,7 +1164,7 @@ namespace Rodin::Variational
       }
 
       /// @brief Gets the device degrees of freedom. @return Device numbering and basis.
-      const DOFsType& getDeviceDOFs() const
+      const DOFsType& getDOFsView() const
       {
         return m_mirror->getDOFs();
       }
@@ -1190,11 +1190,11 @@ namespace Rodin::Variational
    * @tparam Backend Kokkos backend of the mesh context.
    */
   template <size_t K, class Backend>
-  class H1<K, Math::SpatialVector<Real>,
+  class H1<K, ::Rodin::Math::SpatialVector<Real>,
     Geometry::Mesh<Context::Kokkos<Context::Local, Backend>>>
     final
     : public FiniteElementSpace<Geometry::Mesh<Context::Kokkos<Context::Local, Backend>>,
-        H1<K, Math::SpatialVector<Real>,
+        H1<K, ::Rodin::Math::SpatialVector<Real>,
           Geometry::Mesh<Context::Kokkos<Context::Local, Backend>>>>
   {
     public:
@@ -1202,7 +1202,7 @@ namespace Rodin::Variational
       using ScalarType = Real;
 
       /// @brief Range type of value.
-      using RangeType = Math::SpatialVector<ScalarType>;
+      using RangeType = ::Rodin::Math::SpatialVector<ScalarType>;
 
       /// @brief Context of the mesh.
       using ContextType = Context::Kokkos<Context::Local, Backend>;
@@ -1372,7 +1372,7 @@ namespace Rodin::Variational
       }
 
       /// @brief Gets the device degrees of freedom. @return Scalar device numbering and basis.
-      const DOFsType& getDeviceDOFs() const
+      const DOFsType& getDOFsView() const
       {
         return m_mirror->getDOFs();
       }
@@ -1390,16 +1390,16 @@ namespace Rodin::Kokkos::Variational
 {
   /// @brief Quadratic H1 space on a resident mesh.
   template <class Range, class Backend>
-  using DeviceH1Space = ::Rodin::Variational::H1<2, Range,
+  using KokkosH1Space = ::Rodin::Variational::H1<2, Range,
     ::Rodin::Geometry::Mesh<::Rodin::Context::Kokkos<::Rodin::Context::Local, Backend>>>;
 
   /// @brief Real valued quadratic H1 space on a resident mesh.
   template <class Backend>
-  using DeviceH1 = DeviceH1Space<Real, Backend>;
+  using KokkosH1 = KokkosH1Space<Real, Backend>;
 
   /// @brief Vector valued quadratic H1 space on a resident mesh.
   template <class Backend>
-  using DeviceVectorH1 = DeviceH1Space<Math::SpatialVector<Real>, Backend>;
+  using KokkosVectorH1 = KokkosH1Space<::Rodin::Math::SpatialVector<Real>, Backend>;
 }
 
 #endif

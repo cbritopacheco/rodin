@@ -191,9 +191,9 @@ namespace Rodin::Variational
       }
 
       /// @brief Gets the device degrees of freedom. @return Single constant basis function.
-      DOFsType getDeviceDOFs() const
+      DOFsType getDOFsView() const
       {
-        return m_local.getDeviceDOFs();
+        return m_local.getDOFsView();
       }
 
     private:

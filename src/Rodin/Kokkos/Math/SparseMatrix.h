@@ -4,8 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_KOKKOS_SPARSEMATRIX_H
-#define RODIN_KOKKOS_SPARSEMATRIX_H
+#ifndef RODIN_KOKKOS_MATH_SPARSEMATRIX_H
+#define RODIN_KOKKOS_MATH_SPARSEMATRIX_H
 
 /**
  * @file
@@ -18,24 +18,32 @@
 #include <vector>
 
 #include <Kokkos_Core.hpp>
+#include <KokkosSparse_CrsMatrix.hpp>
+#include <KokkosSparse_spmv.hpp>
+#include <KokkosBlas1_scal.hpp>
+#include "Vector.h"
 
 #include "Rodin/Types.h"
 #include "Rodin/Math/SparseMatrix.h"
 #include "Rodin/FormLanguage/Traits.h"
 #include "Rodin/Solver/ForwardDecls.h"
 
-#include "Context/Kokkos.h"
+#include "Rodin/Kokkos/Context/Kokkos.h"
 
-namespace Rodin::Kokkos
+namespace Rodin::Kokkos::Math
 {
   /**
    * @brief Sparse matrix in compressed row storage, resident in the memory
    * space of a Kokkos backend.
    *
+   * ## Architecture
+   * The owner holds a native KokkosSparse::CrsMatrix and a writable handle to
+   * its row offsets for reassembly. Both handles refer to the same allocation.
+   * getView() exposes the native matrix without copying it.
    * The device assembly of a Problem builds it without copying the matrix to
    * the host, so that a solver running on the device reads it in place. The
    * columns of a row are sorted and unique. Copies are deep, as for
-   * Math::SparseMatrix; moves keep the storage.
+   * ::Rodin::Math::SparseMatrix; moves keep the storage.
    *
    * @tparam Scalar Coefficient type.
    * @tparam Backend Kokkos backend, as for Context::Kokkos.
@@ -60,11 +68,73 @@ namespace Rodin::Kokkos
       using MemorySpace = typename ContextType::MemorySpaceType;
 
       /// @brief Index type of the compressed arrays.
-      using IndexType = Math::SparseIndex;
+      using IndexType = ::Rodin::Math::SparseIndex;
 
       /// @brief Array in the memory space.
       template <class T>
       using Array = ::Kokkos::View<T*, MemorySpace>;
+
+      /// @brief Native Kokkos-Kernels compressed row matrix.
+      using View = ::KokkosSparse::CrsMatrix<Scalar, IndexType,
+        ::Kokkos::Device<ExecutionSpace, MemorySpace>, void, IndexType>;
+
+      /**
+       * @brief Borrows the native compressed row matrix.
+       * @return Native matrix sharing this owner's arrays.
+       */
+      const View& getView() const
+      {
+        return m_matrix;
+      }
+
+      /// @return Number of rows, for the shared algebra API.
+      size_t rows() const
+      {
+        return getRowCount();
+      }
+
+      /// @return Number of columns, for the shared algebra API.
+      size_t cols() const
+      {
+        return getColumnCount();
+      }
+
+      /// @return Number of stored coefficients.
+      size_t nonZeros() const
+      {
+        return getNonZeroCount();
+      }
+
+      /// @return Frobenius norm of the stored coefficients.
+      auto norm() const
+      {
+        return ::KokkosBlas::nrm2(m_matrix.values);
+      }
+
+      /// @param rhs Scalar multiplier. @return This matrix.
+      SparseMatrix& operator*=(Scalar rhs)
+      {
+        ::KokkosBlas::scal(m_matrix.values, rhs, m_matrix.values);
+        return *this;
+      }
+
+      /// @param rhs Scalar multiplier. @return Independent scaled matrix.
+      SparseMatrix operator*(Scalar rhs) const
+      {
+        SparseMatrix result(*this);
+        result *= rhs;
+        return result;
+      }
+
+      /// @param rhs Backend vector. @return Backend matrix-vector product.
+      Vector<Scalar, Backend> operator*(const Vector<Scalar, Backend>& rhs) const
+      {
+        assert(rhs.size() == getColumnCount());
+        Vector<Scalar, Backend> result(getRowCount());
+        ::KokkosSparse::spmv(
+          "N", Scalar(1), m_matrix, rhs.getView(), Scalar(0), result.getView());
+        return result;
+      }
 
       /// @brief Empty matrix.
       SparseMatrix() = default;
@@ -82,9 +152,8 @@ namespace Rodin::Kokkos
         Array<IndexType> columns, Array<Scalar> values)
         : m_rows(rows),
           m_cols(cols),
-          m_starts(std::move(starts)),
-          m_columns(std::move(columns)),
-          m_values(std::move(values))
+          m_starts(starts),
+          m_matrix("Rodin matrix", rows, cols, values.extent(0), values, starts, columns)
       {}
 
       /**
@@ -92,11 +161,8 @@ namespace Rodin::Kokkos
        * @param other Matrix to copy.
        */
       SparseMatrix(const SparseMatrix& other)
-        : m_rows(other.m_rows),
-          m_cols(other.m_cols),
-          m_starts(clone(other.m_starts)),
-          m_columns(clone(other.m_columns)),
-          m_values(clone(other.m_values))
+        : SparseMatrix(other.m_rows, other.m_cols, clone(other.getRowStarts()),
+            clone(other.getColumns()), clone(other.getValues()))
       {}
 
       /**
@@ -107,8 +173,7 @@ namespace Rodin::Kokkos
         : m_rows(std::exchange(other.m_rows, 0)),
           m_cols(std::exchange(other.m_cols, 0)),
           m_starts(std::move(other.m_starts)),
-          m_columns(std::move(other.m_columns)),
-          m_values(std::move(other.m_values))
+          m_matrix(std::move(other.m_matrix))
       {}
 
       /**
@@ -133,8 +198,7 @@ namespace Rodin::Kokkos
         m_rows = std::exchange(other.m_rows, 0);
         m_cols = std::exchange(other.m_cols, 0);
         m_starts = std::move(other.m_starts);
-        m_columns = std::move(other.m_columns);
-        m_values = std::move(other.m_values);
+        m_matrix = std::move(other.m_matrix);
         return *this;
       }
 
@@ -162,7 +226,7 @@ namespace Rodin::Kokkos
        */
       size_t getNonZeroCount() const
       {
-        return m_values.extent(0);
+        return m_matrix.values.extent(0);
       }
 
       /**
@@ -179,45 +243,45 @@ namespace Rodin::Kokkos
        * @brief Column of every coefficient.
        * @return Resident CSR column indices.
        */
-      const Array<IndexType>& getColumns() const
+      const typename View::index_type& getColumns() const
       {
-        return m_columns;
+        return m_matrix.graph.entries;
       }
 
       /**
        * @brief Value of every coefficient.
        * @return Resident CSR values, read-only.
        */
-      const Array<Scalar>& getValues() const
+      const typename View::values_type& getValues() const
       {
-        return m_values;
+        return m_matrix.values;
       }
 
       /**
        * @brief Value of every coefficient, for an update in place.
        * @return Resident CSR values, writable.
        */
-      Array<Scalar>& getValues()
+      typename View::values_type& getValues()
       {
-        return m_values;
+        return m_matrix.values;
       }
 
       /**
        * @brief Copies the matrix to the host.
        * @returns Matrix in compressed column storage.
        */
-      Math::SparseMatrix<Scalar> toHost() const
+      ::Rodin::Math::SparseMatrix<Scalar> toHost() const
       {
-        Math::SparseMatrix<Scalar> res(m_rows, m_cols);
-        if (m_starts.extent(0) == 0)
+        ::Rodin::Math::SparseMatrix<Scalar> res(m_rows, m_cols);
+        if (m_matrix.graph.row_map.extent(0) == 0)
           return res;
-        const auto starts =
-          ::Kokkos::create_mirror_view_and_copy(::Kokkos::HostSpace(), m_starts);
-        const auto columns =
-          ::Kokkos::create_mirror_view_and_copy(::Kokkos::HostSpace(), m_columns);
+        const auto starts = ::Kokkos::create_mirror_view_and_copy(
+          ::Kokkos::HostSpace(), m_matrix.graph.row_map);
+        const auto columns = ::Kokkos::create_mirror_view_and_copy(
+          ::Kokkos::HostSpace(), m_matrix.graph.entries);
         const auto values =
-          ::Kokkos::create_mirror_view_and_copy(::Kokkos::HostSpace(), m_values);
-        std::vector<Math::SparseTriplet<Scalar>> triplets;
+          ::Kokkos::create_mirror_view_and_copy(::Kokkos::HostSpace(), m_matrix.values);
+        std::vector<::Rodin::Math::SparseTriplet<Scalar>> triplets;
         triplets.reserve(getNonZeroCount());
         for (size_t i = 0; i < m_rows; ++i)
         {
@@ -234,9 +298,10 @@ namespace Rodin::Kokkos
        * @param a Array to copy.
        * @return New array holding a copy of @p a, empty when @p a is empty.
        */
-      template <class T>
-      static Array<T> clone(const Array<T>& a)
+      template <class V>
+      static Array<typename V::non_const_value_type> clone(const V& a)
       {
+        using T = typename V::non_const_value_type;
         if (a.extent(0) == 0)
           return Array<T>();
         Array<T> res(
@@ -248,16 +313,15 @@ namespace Rodin::Kokkos
       size_t m_rows = 0;
       size_t m_cols = 0;
       Array<IndexType> m_starts;
-      Array<IndexType> m_columns;
-      Array<Scalar> m_values;
+      View m_matrix;
   };
 }
 
 namespace Rodin::FormLanguage
 {
-  /// @brief Type traits for a Kokkos::SparseMatrix, exposing the scalar type.
+  /// @brief Type traits for a Kokkos::Math::SparseMatrix, exposing the scalar type.
   template <class Scalar, class Backend>
-  struct Traits<::Rodin::Kokkos::SparseMatrix<Scalar, Backend>>
+  struct Traits<::Rodin::Kokkos::Math::SparseMatrix<Scalar, Backend>>
   {
     /// @brief Scalar value type.
     using ScalarType = Scalar;
@@ -267,15 +331,15 @@ namespace Rodin::FormLanguage
 namespace Rodin::Solver::Internal
 {
   /**
-   * @brief CSR arrays of a Kokkos::SparseMatrix, read in place by the GPU
+   * @brief CSR arrays of a Kokkos::Math::SparseMatrix, read in place by the GPU
    * direct solvers when they are in device memory and copied to the device
    * otherwise.
    */
   template <class Backend>
-  struct CuDSSOperator<::Rodin::Kokkos::SparseMatrix<Real, Backend>>
+  struct CuDSSOperator<::Rodin::Kokkos::Math::SparseMatrix<Real, Backend>>
   {
     /// @brief Matrix type.
-    using MatrixType = ::Rodin::Kokkos::SparseMatrix<Real, Backend>;
+    using MatrixType = ::Rodin::Kokkos::Math::SparseMatrix<Real, Backend>;
 
     /// @brief Whether the arrays are those of the transpose.
     static constexpr bool Transposed = false;
@@ -325,7 +389,7 @@ namespace Rodin::Solver::Internal
      * @param matrix Compressed device matrix.
      * @return Pointer to the CSR row offsets of @p matrix.
      */
-    static const Math::SparseIndex* getStarts(const MatrixType& matrix)
+    static const ::Rodin::Math::SparseIndex* getStarts(const MatrixType& matrix)
     {
       return matrix.getRowStarts().data();
     }
@@ -335,7 +399,7 @@ namespace Rodin::Solver::Internal
      * @param matrix Compressed device matrix.
      * @return Pointer to the CSR column indices of @p matrix.
      */
-    static const Math::SparseIndex* getIndices(const MatrixType& matrix)
+    static const ::Rodin::Math::SparseIndex* getIndices(const MatrixType& matrix)
     {
       return matrix.getColumns().data();
     }

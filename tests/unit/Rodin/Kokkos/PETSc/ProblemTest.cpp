@@ -663,7 +663,8 @@ namespace Rodin::Tests::Unit
       return 1 + p.x() * p.y();
     });
 
-    Problem sp(su, sv);
+    using HostSystem = Math::LinearSystem<Math::SparseMatrix<Real>, Math::Vector<Real>>;
+    Problem<HostSystem, decltype(su), decltype(sv)> sp(su, sv);
     sp =
       Integral(Grad(su), Grad(sv)) - Integral(f, sv) + DirichletBC(su, RealFunction(0));
     Solver::SparseLU(sp).solve();

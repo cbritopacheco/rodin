@@ -52,10 +52,10 @@ namespace Rodin::Kokkos::Variational
    * @tparam LambdaDerived Type of the first Lamé parameter.
    * @tparam MuDerived Type of the second Lamé parameter.
    */
-  template <class Solution, VectorDeviceSpace FES, class LambdaDerived, class MuDerived>
+  template <class Solution, VectorSpace FES, class LambdaDerived, class MuDerived>
   class LinearElasticityIntegratorBase
     : public ::Rodin::Variational::LocalBilinearFormIntegratorBase<Real>,
-      public DeviceBilinearFormIntegrator<Internal::BackendOf<FES>>
+      public BilinearFormIntegrator<Internal::BackendOf<FES>>
   {
     public:
       /// @brief Scalar type of the entries.
@@ -86,10 +86,10 @@ namespace Rodin::Kokkos::Variational
       using Parent = ::Rodin::Variational::LocalBilinearFormIntegratorBase<Real>;
 
       /// @brief Device integrator interface.
-      using DeviceParent = DeviceBilinearFormIntegrator<Internal::BackendOf<FES>>;
+      using ViewParent = BilinearFormIntegrator<Internal::BackendOf<FES>>;
 
       /// @brief Kokkos memory space.
-      using MemorySpace = typename DeviceParent::MemorySpace;
+      using MemorySpace = typename ViewParent::MemorySpace;
 
       /// @brief Device integral of the dilatation term.
       using DilatationType =
@@ -215,7 +215,7 @@ namespace Rodin::Kokkos::Variational
       }
 
       /// @brief Gets the arrangement of the entries. @return Entry layout.
-      DeviceLayout getLayout() const override
+      Layout getLayout() const override
       {
         auto layout = m_dilatation.getLayout();
         const auto& attributes = this->getAttributes();
@@ -304,15 +304,15 @@ namespace Rodin::Variational
    */
   template <class Solution, class Backend, class LambdaDerived, class MuDerived>
   class LinearElasticityIntegrator<Solution,
-    Rodin::Kokkos::Variational::DeviceVectorP1<Backend>, LambdaDerived, MuDerived>
+    Rodin::Kokkos::Variational::KokkosVectorP1<Backend>, LambdaDerived, MuDerived>
     final
     : public Rodin::Kokkos::Variational::LinearElasticityIntegratorBase<Solution,
-        Rodin::Kokkos::Variational::DeviceVectorP1<Backend>, LambdaDerived, MuDerived>
+        Rodin::Kokkos::Variational::KokkosVectorP1<Backend>, LambdaDerived, MuDerived>
   {
     public:
       /// @brief Device integrator.
       using Parent = Rodin::Kokkos::Variational::LinearElasticityIntegratorBase<Solution,
-        Rodin::Kokkos::Variational::DeviceVectorP1<Backend>, LambdaDerived, MuDerived>;
+        Rodin::Kokkos::Variational::KokkosVectorP1<Backend>, LambdaDerived, MuDerived>;
 
       using Parent::Parent;
 
@@ -345,18 +345,18 @@ namespace Rodin::Variational
    */
   template <class Solution, size_t K, class Backend, class LambdaDerived, class MuDerived>
   class LinearElasticityIntegrator<Solution,
-    H1<K, Math::SpatialVector<Real>,
+    H1<K, ::Rodin::Math::SpatialVector<Real>,
       Geometry::Mesh<Context::Kokkos<Context::Local, Backend>>>,
     LambdaDerived, MuDerived>
     final : public Rodin::Kokkos::Variational::LinearElasticityIntegratorBase<Solution,
-              H1<K, Math::SpatialVector<Real>,
+              H1<K, ::Rodin::Math::SpatialVector<Real>,
                 Geometry::Mesh<Context::Kokkos<Context::Local, Backend>>>,
               LambdaDerived, MuDerived>
   {
     public:
       /// @brief Device integrator.
       using Parent = Rodin::Kokkos::Variational::LinearElasticityIntegratorBase<Solution,
-        H1<K, Math::SpatialVector<Real>,
+        H1<K, ::Rodin::Math::SpatialVector<Real>,
           Geometry::Mesh<Context::Kokkos<Context::Local, Backend>>>,
         LambdaDerived, MuDerived>;
 

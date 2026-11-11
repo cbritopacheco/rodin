@@ -9,7 +9,7 @@
 
 /**
  * @file
- * @brief Restarted GMRES on the device for a Kokkos::SparseMatrix.
+ * @brief Restarted GMRES on the device for a Kokkos::Math::SparseMatrix.
  */
 
 #include <limits>
@@ -22,7 +22,7 @@
 #include "Rodin/Alert/Raise.h"
 #include "Rodin/Solver/GMRES.h"
 
-#include "Rodin/Kokkos/LinearSystem.h"
+#include "Rodin/Kokkos/Math/LinearSystem.h"
 
 #include "Krylov.h"
 
@@ -114,42 +114,43 @@ namespace Rodin::Solver
    * @ingroup GMRESSpecializations
    * @brief Restarted GMRES of Kokkos-Kernels on the device, right
    * preconditioned by Jacobi, for a system whose matrix is a
-   * Kokkos::SparseMatrix.
+   * Kokkos::Math::SparseMatrix.
    *
    * The defaults are those of the sparse Eigen GMRES: the machine epsilon as
    * tolerance on @f$ \|b - Ax\| / \|b\| @f$, twice the size as iteration
    * limit and a restart of 30. The iteration limit is rounded up to a whole
    * number of restart cycles. The matrix is read in place; the right-hand
-   * side and the solution are copied between the host and the device at
-   * every solve, and the solution is used as the initial guess when its size
-   * matches.
+   * side and solution are borrowed directly for backend vectors, while
+   * explicit host vectors are staged. The solution supplies the initial guess
+   * when its size matches.
    *
    * @tparam Backend Kokkos backend of the matrix.
    */
-  template <class Backend>
-  class GMRES<
-    Math::LinearSystem<::Rodin::Kokkos::SparseMatrix<Real, Backend>, Math::Vector<Real>>>
-    final : public LinearSolverBase<Math::LinearSystem<
-              ::Rodin::Kokkos::SparseMatrix<Real, Backend>, Math::Vector<Real>>>
+  template <class Backend, class VectorType_>
+  class GMRES<::Rodin::Math::LinearSystem<
+    ::Rodin::Kokkos::Math::SparseMatrix<Real, Backend>, VectorType_>>
+    final : public LinearSolverBase<::Rodin::Math::LinearSystem<
+              ::Rodin::Kokkos::Math::SparseMatrix<Real, Backend>, VectorType_>>
   {
     using Krylov = Internal::KokkosKrylov<Backend>;
 
-    using Handle = ::KokkosKernels::Experimental::KokkosKernelsHandle<Math::SparseIndex,
-      Math::SparseIndex, Real, typename Krylov::ExecutionSpace,
+    using Handle =
+      ::KokkosKernels::Experimental::KokkosKernelsHandle<::Rodin::Math::SparseIndex,
+        ::Rodin::Math::SparseIndex, Real, typename Krylov::ExecutionSpace,
       typename Krylov::MemorySpace, typename Krylov::MemorySpace>;
 
     public:
       /// @brief Scalar type.
       using ScalarType = Real;
 
-      /// @brief Host vector type.
-      using VectorType = Math::Vector<Real>;
+      /// @brief System coefficient vector type.
+      using VectorType = VectorType_;
 
       /// @brief Device matrix type.
-      using OperatorType = ::Rodin::Kokkos::SparseMatrix<Real, Backend>;
+      using OperatorType = ::Rodin::Kokkos::Math::SparseMatrix<Real, Backend>;
 
       /// @brief Linear system type.
-      using LinearSystemType = Math::LinearSystem<OperatorType, VectorType>;
+      using LinearSystemType = ::Rodin::Math::LinearSystem<OperatorType, VectorType>;
 
       /// @brief Problem type.
       using ProblemBaseType = Variational::ProblemBase<LinearSystemType>;
@@ -251,10 +252,17 @@ namespace Rodin::Solver
           system.getSolution().resize(0);
           return;
         }
+        if constexpr (requires { system.getSolution().getView(); })
+        {
+          if (static_cast<size_t>(system.getSolution().size()) != n)
+            system.getSolution().setZero(n);
+        }
         const typename Krylov::ExecutionSpace execution;
         Krylov::reserve(m_inverse, n, "Rodin::Solver::GMRES::inverse");
-        Krylov::reserve(m_b, n, "Rodin::Solver::GMRES::b");
-        Krylov::reserve(m_x, n, "Rodin::Solver::GMRES::x");
+        if constexpr (!requires { system.getVector().getView(); })
+          Krylov::reserve(m_b, n, "Rodin::Solver::GMRES::b");
+        if constexpr (!requires { system.getSolution().getView(); })
+          Krylov::reserve(m_x, n, "Rodin::Solver::GMRES::x");
         Krylov::upload(system.getVector(), m_b);
         if (static_cast<size_t>(system.getSolution().size()) == n)
           Krylov::upload(system.getSolution(), m_x);
@@ -267,8 +275,8 @@ namespace Rodin::Solver
         const size_t limit = m_maxIterations ? *m_maxIterations : 2 * n;
         const size_t cycles = std::max<size_t>(1, (limit + restart - 1) / restart);
         Handle handle;
-        handle.create_gmres_handle(static_cast<Math::SparseIndex>(restart), m_tolerance,
-          static_cast<Math::SparseIndex>(cycles));
+        handle.create_gmres_handle(static_cast<::Rodin::Math::SparseIndex>(restart),
+          m_tolerance, static_cast<::Rodin::Math::SparseIndex>(cycles));
         Internal::KokkosJacobi<Backend> jacobi(m_inverse);
         ::KokkosSparse::Experimental::gmres(&handle, A, m_b, m_x, &jacobi);
         execution.fence();

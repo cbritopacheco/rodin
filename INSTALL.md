@@ -236,7 +236,6 @@ cmake .. -DCMAKE_PREFIX_PATH=/path/to/rodin/install
 | Option | Description | Default |
 |--------|-------------|---------|
 | `RODIN_USE_KOKKOS` | Build the Rodin::Kokkos module for CUDA, HIP or SYCL GPUs | `OFF` |
-| `RODIN_USE_KOKKOSKERNELS` | Enable the Kokkos-Kernels GPU solvers | `OFF` |
 | `RODIN_USE_CUDSS` | Enable the NVIDIA cuDSS direct solver | `OFF` |
 | `RODIN_USE_ROCSOLVER` | Enable the AMD rocSOLVER direct solver, which requires `RODIN_USE_UMFPACK` | `OFF` |
 
@@ -286,7 +285,7 @@ When you `find_package(Rodin)`, the following targets become available:
 - `Rodin::Kokkos` - GPU meshes, assembly and solvers (requires `RODIN_USE_KOKKOS=ON`)
 - `Rodin::KokkosPETSc` - PETSc systems on the GPU (requires `RODIN_USE_KOKKOS=ON` and `RODIN_USE_PETSC=ON`)
 - `Rodin::KokkosMPI` - Distributed GPU meshes and spaces (requires `RODIN_USE_KOKKOS=ON`, `RODIN_USE_PETSC=ON` and `RODIN_USE_MPI=ON`)
-- `Rodin::KokkosKernels` - Kokkos-Kernels GPU solvers (requires `RODIN_USE_KOKKOS=ON` and `RODIN_USE_KOKKOSKERNELS=ON`)
+- `Rodin::KokkosKernels` - Kokkos-Kernels solvers, always available with the Kokkos module (requires `RODIN_USE_KOKKOS=ON`)
 - `Rodin::KokkosHypre` - hypre on the GPU (requires `RODIN_USE_KOKKOS=ON` and `RODIN_USE_HYPRE=ON`)
 
 ## Troubleshooting

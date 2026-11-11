@@ -493,7 +493,6 @@ manager.
 | RODIN_USE_MPI           | Build with MPI support                          |
 | RODIN_USE_PETSC         | Build with PETSc support (ON by default)       |
 | RODIN_USE_KOKKOS        | Build the Rodin::Kokkos GPU module             |
-| RODIN_USE_KOKKOSKERNELS | Build with the Kokkos-Kernels GPU solvers      |
 | RODIN_USE_HYPRE         | Build with hypre support (BoomerAMG)           |
 | RODIN_USE_CUDSS         | Build with the NVIDIA cuDSS direct solver      |
 | RODIN_USE_ROCSOLVER     | Build with the AMD rocSOLVER direct solver     |

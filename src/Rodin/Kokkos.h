@@ -17,7 +17,10 @@
 #include "Kokkos/ForwardDecls.h"
 #include "Kokkos/Context.h"
 #include "Kokkos/Geometry.h"
+#include "Kokkos/Math.h"
 #include "Kokkos/Variational.h"
 #include "Kokkos/Assembly.h"
+#include "Kokkos/IO/GridFunctionPrinter.h"
+#include "Kokkos/IO/GridFunctionLoader.h"
 
 #endif

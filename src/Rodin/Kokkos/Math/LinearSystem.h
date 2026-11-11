@@ -4,8 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_KOKKOS_LINEARSYSTEM_H
-#define RODIN_KOKKOS_LINEARSYSTEM_H
+#ifndef RODIN_KOKKOS_MATH_LINEARSYSTEM_H
+#define RODIN_KOKKOS_MATH_LINEARSYSTEM_H
 
 /**
  * @file
@@ -15,45 +15,46 @@
 #include "Rodin/Math/LinearSystem.h"
 
 #include "SparseMatrix.h"
+#include "Vector.h"
 
 namespace Rodin::Math
 {
   /**
-   * @brief Linear system with a Kokkos::SparseMatrix operator and host
-   * vectors.
+   * @brief Linear system with a Kokkos sparse operator and selected vector storage.
    *
-   * The device assembly of a Problem fills the matrix in the memory of the
-   * backend, and a solver running on the device reads it there. The
-   * right-hand side and the solution stay on the host, where the grid
-   * functions keep their data. The constraints are eliminated during the
-   * assembly, so the system offers no elimination of its own.
+   * ## Architecture
+   * Assembly fills the operator in the backend memory space. Backend vectors
+   * keep the right-hand side and solution in that space as well; explicitly
+   * selected host vectors retain compatibility with host coefficient clients.
+   * Constraints are eliminated by Assembly, rather than by the algebra owner.
    *
    * A Problem assembles into this system when it is named in its template
    * arguments:
    * @code{.cpp}
-   * using System = Math::LinearSystem<
-   *   Rodin::Kokkos::SparseMatrix<Real, Backend>, Math::Vector<Real>>;
+   * using System = ::Rodin::Math::LinearSystem<
+   *   Rodin::Kokkos::Math::SparseMatrix<Real, Backend>,
+   *   Rodin::Kokkos::Math::Vector<Real, Backend>>;
    * Problem<System, decltype(u), decltype(v)> poisson(u, v);
    * @endcode
    *
    * @tparam MatrixScalar Coefficient type of the matrix.
    * @tparam Backend Kokkos backend of the matrix.
-   * @tparam VectorScalar Coefficient type of the vectors.
+   * @tparam VectorType_ Coefficient vector container.
    */
-  template <class MatrixScalar, class Backend, class VectorScalar>
-  class LinearSystem<::Rodin::Kokkos::SparseMatrix<MatrixScalar, Backend>,
-    Math::Vector<VectorScalar>>
-    : public LinearSystemBase<::Rodin::Kokkos::SparseMatrix<MatrixScalar, Backend>,
-        Math::Vector<VectorScalar>,
-        LinearSystem<::Rodin::Kokkos::SparseMatrix<MatrixScalar, Backend>,
-          Math::Vector<VectorScalar>>>
+  template <class MatrixScalar, class Backend, class VectorType_>
+  class LinearSystem<::Rodin::Kokkos::Math::SparseMatrix<MatrixScalar, Backend>,
+    VectorType_>
+    : public LinearSystemBase<::Rodin::Kokkos::Math::SparseMatrix<MatrixScalar, Backend>,
+        VectorType_,
+        LinearSystem<::Rodin::Kokkos::Math::SparseMatrix<MatrixScalar, Backend>,
+          VectorType_>>
   {
     public:
       /// @brief Device matrix type of the operator.
-      using MatrixType = ::Rodin::Kokkos::SparseMatrix<MatrixScalar, Backend>;
+      using MatrixType = ::Rodin::Kokkos::Math::SparseMatrix<MatrixScalar, Backend>;
 
-      /// @brief Host vector type of the right-hand side and the solution.
-      using VectorType = Math::Vector<VectorScalar>;
+      /// @brief Storage type of the right-hand side and the solution.
+      using VectorType = VectorType_;
 
       /// @brief Parent class type.
       using Parent =

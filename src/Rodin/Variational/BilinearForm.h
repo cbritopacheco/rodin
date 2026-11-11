@@ -441,16 +441,15 @@ namespace Rodin::Variational
 
   /**
    * @ingroup BilinearFormSpecializations
-   * @brief Speciallization of BilinearForm for a matrix type.
+   * @brief Bilinear form owning its operator in the selected matrix container.
    *
    * This specialization aids in the construction of a @f$ m \times n @f$
    * matrix @f$ A @f$, which is associated to the bilinear form. Here, @f$ n
    * @f$ represents the size (total number of degrees-of-freedom) of the trial
    * space, and @f$ m @f$ represents the size of the test space.
    */
-  template <class Solution, class TrialFES, class TestFES, class Scalar>
-  class BilinearForm<Solution, TrialFES, TestFES, Math::SparseMatrix<Scalar>> final
-    : public BilinearFormBase<Math::SparseMatrix<Scalar>>
+  template <class Solution, class TrialFES, class TestFES, class Operator>
+  class BilinearForm final : public BilinearFormBase<Operator>
   {
     using TrialFESMeshType =
       typename FormLanguage::Traits<TrialFES>::MeshType;
@@ -470,12 +469,10 @@ namespace Rodin::Variational
         Solution;
 
       /// @brief Scalar value type.
-      using ScalarType =
-        Scalar;
+      using ScalarType = typename FormLanguage::Traits<Operator>::ScalarType;
 
       /// @brief Type of operator associated to the bilinear form.
-      using OperatorType =
-        Math::SparseMatrix<ScalarType>;
+      using OperatorType = Operator;
 
       /// @brief Default assembly backend selected from the trial/test contexts.
       using DefaultAssemblyType =

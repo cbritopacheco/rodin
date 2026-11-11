@@ -18,6 +18,7 @@ target_link_libraries(RodinKokkos
     Rodin::Variational
     Rodin::Assembly
     Kokkos::kokkos
+    Kokkos::kokkoskernels
 )
 
 # IGC gives a thread 128 registers by default on the Arc Pro B70, and the
@@ -48,8 +49,13 @@ target_sources(RodinKokkos INTERFACE
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Context/SYCL.h>
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Context/Kokkos.h>
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Geometry.h>
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/LinearSystem.h>
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/SparseMatrix.h>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/IO/GridFunctionPrinter.h>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/IO/GridFunctionLoader.h>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Math.h>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Math/Vector.h>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Variational/GridFunction.h>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Math/LinearSystem.h>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Math/SparseMatrix.h>
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Assembly.h>
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Assembly/Kokkos.h>
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Assembly/KokkosIteration.h>
@@ -59,7 +65,7 @@ target_sources(RodinKokkos INTERFACE
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Geometry/MeshView.h>
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Variational.h>
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Variational/DOFs.h>
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Variational/DeviceView.h>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Variational/View.h>
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Variational/H1.h>
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Variational/HyperElasticLaw.h>
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Variational/Integral.h>
@@ -114,7 +120,7 @@ if (RODIN_USE_PETSC)
   endif()
 endif()
 
-if (RODIN_USE_KOKKOSKERNELS)
+if (RODIN_USE_KOKKOS)
   add_library(RodinKokkosKernels INTERFACE)
   add_library(Rodin::KokkosKernels ALIAS RodinKokkosKernels)
   set_target_properties(RodinKokkosKernels PROPERTIES EXPORT_NAME KokkosKernels)

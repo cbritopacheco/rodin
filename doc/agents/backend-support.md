@@ -72,7 +72,7 @@ cell respectively. Launching kernels remains the assembly backend's concern.
 Device kernels assemble variational problems on this mesh (P1, H1<K> and P0g
 spaces, integrals, constraints, linear elasticity and the Neo-Hookean, Saint
 Venant-Kirchhoff, Mooney-Rivlin and Yeoh hyperelastic laws) into Eigen or PETSc systems solved by Rodin solvers. A
-Problem named with a `Math::LinearSystem<Kokkos::SparseMatrix<Real, Backend>,
+Problem named with a `Math::LinearSystem<Kokkos::Math::SparseMatrix<Real, Backend>,
 Math::Vector<Real>>` keeps its matrix in device memory as a CSR, equal
 coefficient by coefficient to the host matrix of the same assembly, and copies
 only the right-hand side to the host; `CuDSS`, `RocSolverRF` and the Kokkos-Kernels `CG`
@@ -153,7 +153,7 @@ imposes constraints that host Kokkos backends do not detect:
   the compiler: `EIGEN_MAX_ALIGN_BYTES` is 16 under both.
 - The NVCC 12 front end checks a requires clause of a member template when
   its class is instantiated, so a clause naming a member of an incomplete
-  specialization (such as `DeviceProjection<Context::Local>`) fails on
+  specialization (such as `ContextProjection<Context::Local>`) fails on
   host spaces; such a clause goes through a named concept. It also finds a
   braced hinted `insert` of a Boost 1.74 `flat_map` ambiguous;
   `emplace_hint` is used instead.

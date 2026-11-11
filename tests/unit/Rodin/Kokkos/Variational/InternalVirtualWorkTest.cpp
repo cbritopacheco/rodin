@@ -7,6 +7,7 @@
 #include <Rodin/Solid.h>
 #include <Rodin/Solver/NewtonSolver.h>
 #include <Rodin/Solver/SparseLU.h>
+#include <Rodin/Kokkos/Solver.h>
 
 #include "Common.h"
 
@@ -116,7 +117,8 @@ namespace Rodin::Tests::Unit
     Solver::NewtonSolver hn(hs);
     hn.setMaxIterations(20).setAbsoluteTolerance(1e-12).setRelativeTolerance(1e-10);
     hn.solve(hw);
-    Solver::SparseLU ds(dp);
+    Solver::GMRES ds(dp);
+    ds.setTolerance(1e-13).setMaxIterations(1000);
     Solver::NewtonSolver dn(ds);
     dn.setMaxIterations(20).setAbsoluteTolerance(1e-12).setRelativeTolerance(1e-10);
     dn.solve(dw);
@@ -125,7 +127,8 @@ namespace Rodin::Tests::Unit
     ASSERT_TRUE(dn.converged());
     EXPECT_EQ(hn.getReport().iterations, dn.getReport().iterations);
     ASSERT_GT(hw.getData().norm(), Real(0));
-    EXPECT_LE((hw.getData() - dw.getData()).norm(), Real(1e-10) * hw.getData().norm());
+    EXPECT_LE(
+      (hw.getData() - dw.getData().toHost()).norm(), Real(1e-10) * hw.getData().norm());
   }
 
   TEST(Kokkos_Variational_InternalVirtualWork, FormsOnTriangles)

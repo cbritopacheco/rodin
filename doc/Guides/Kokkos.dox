@@ -230,21 +230,31 @@
   Oseen assembly 1.3 to 2 times faster and the bilinear form alone 3 to 4
   times faster, depending on the GPU.
 
-  The matrix can also stay on the device. A problem named with a linear
-  system whose operator is a `Rodin::Kokkos::SparseMatrix` receives the
-  compressed rows built by the kernels, and only the right-hand side is
-  copied to the host:
+  Kokkos-Kernels is required by the Kokkos module. Grid functions, trial
+  functions and problems on Kokkos spaces select backend coefficient storage
+  by default. The operator, right-hand side and solution remain in the context's
+  memory space:
   @code{.cpp}
-  using System =
-    Math::LinearSystem<Rodin::Kokkos::SparseMatrix<Real, Backend>, Math::Vector<Real>>;
-  Problem<System, decltype(u), decltype(v)> poisson(u, v);
+  using Vector = Rodin::Kokkos::Math::Vector<Real, Backend>;
+  using Matrix = Rodin::Kokkos::Math::SparseMatrix<Real, Backend>;
+  using System = Math::LinearSystem<Matrix, Vector>;
+  Problem poisson(u, v); // deduces this backend system
   poisson = Integral(Grad(u), Grad(v)) - Integral(f, v) + DirichletBC(u, Zero());
-  Solver::CuDSS solver(poisson); // reads the device arrays in place
+  Solver::CG solver(poisson);
   solver.solve();
   @endcode
-  The coefficients equal those of the host matrix of the same assembly, and
-  a reassembly with the same sizes reuses the device arrays. Such a problem
-  takes no preassembled bilinear form; mixed problems are supported.
+  Assembly collects coordinate contributions in a KokkosSparse::CooMatrix,
+  applies Rodin's existing constraint and reduction semantics, and builds a
+  KokkosSparse::CrsMatrix. SparseMatrix owns that native matrix with deep-copy
+  semantics and exposes it through getView(). Mixed problems and preassembled
+  forms are supported. Reassembly with unchanged sizes reuses the output arrays.
+
+  Vector owns its coefficients independently. getView() borrows their Kokkos
+  view for kernels; toHost() creates an independent host snapshot. Scalar host
+  indexing transfers the accessed entry, so bulk changes should use vector
+  arithmetic, projection or a kernel. File-format adapters stage coefficients
+  on the host only for the duration of input or output. Explicitly requested
+  host matrix and vector types remain available for host solver paths.
 
   On an AMD GPU, `Solver::RocSolverRF` (`RODIN_USE_ROCSOLVER`) reads the
   same arrays. rocSOLVER only refactorizes: the first factorization fixes
@@ -260,7 +270,7 @@
   checks the diagonal of the factors for the former, and a matrix declared
   positive definite must be so, otherwise the solution is wrong.
 
-  With `RODIN_USE_KOKKOSKERNELS`, `Rodin/Kokkos/Solver.h` specializes
+  `Rodin/Kokkos/Solver.h` specializes
   `Solver::CG` and `Solver::GMRES` for such a system. Both iterate on the
   device with a Jacobi preconditioner and link `Rodin::KokkosKernels`:
   @code{.cpp}
@@ -315,7 +325,7 @@
 
   The `P1` space on this mesh answers its host members, getSize(),
   getDOFs() and getGlobalIndex(), as the distributed host space does, while
-  the device members, getLocalSize() and getDeviceDOFs(), refer to the local
+  the device members, getLocalSize() and getDOFsView(), refer to the local
   numbering of the kernels. Single field PETSc problems are assembled on the
   device into `MATMPIAIJKOKKOS` and `VECMPIKOKKOS` objects: each process
   hands its entries in global indices to PETSc, which sums them on their
@@ -352,7 +362,7 @@
   | System | Assembled into | Solvers | Where the solve runs |
   | --- | --- | --- | --- |
   | `Math::LinearSystem<Math::SparseMatrix<Real>, ...>` (default) | host matrix, copied from the device | every Rodin solver | host, or GPU for `CuDSS` and `RocSolverRF`, which copy the matrix to the device |
-  | `Math::LinearSystem<Kokkos::SparseMatrix<Real, Backend>, ...>` | device CSR | `CuDSS`, `RocSolverRF`, Kokkos-Kernels `CG` and `GMRES`, `BoomerAMG` | device, on one process |
+  | `Math::LinearSystem<Kokkos::Math::SparseMatrix<Real, Backend>, ...>` | device CSR | `CuDSS`, `RocSolverRF`, Kokkos-Kernels `CG` and `GMRES`, `BoomerAMG` | device, on one process |
   | PETSc system on a Kokkos mesh | `MATAIJKOKKOS` or `MATMPIAIJKOKKOS` | PETSc KSP and SNES | device for the Krylov iteration and the PETSc preconditioners implemented on Kokkos matrices, one or several processes |
 
   A distributed device system is solved by PETSc only; the other device

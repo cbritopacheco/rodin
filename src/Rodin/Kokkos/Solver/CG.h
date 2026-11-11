@@ -9,7 +9,7 @@
 
 /**
  * @file
- * @brief Conjugate gradient on the device for a Kokkos::SparseMatrix.
+ * @brief Conjugate gradient on the device for a Kokkos::Math::SparseMatrix.
  */
 
 #include <cmath>
@@ -19,7 +19,7 @@
 #include "Rodin/Alert/Raise.h"
 #include "Rodin/Solver/CG.h"
 
-#include "Rodin/Kokkos/LinearSystem.h"
+#include "Rodin/Kokkos/Math/LinearSystem.h"
 
 #include "Krylov.h"
 
@@ -216,23 +216,23 @@ namespace Rodin::Solver
   /**
    * @ingroup CGSpecializations
    * @brief Jacobi preconditioned conjugate gradient on the device, for a
-   * system whose matrix is a Kokkos::SparseMatrix.
+   * system whose matrix is a Kokkos::Math::SparseMatrix.
    *
    * The iteration, the defaults and the stopping test are those of the
    * sparse Eigen CG: the solve stops when @f$ \|b - Ax\| < \text{tol}
    * \|b\| @f$, the default tolerance is the machine epsilon and the default
    * iteration limit is twice the size. The matrix is read in place by
-   * Kokkos-Kernels; the right-hand side and the solution are copied between
-   * the host and the device at every solve, and the solution is used as the
+   * Kokkos-Kernels. Backend right-hand sides and solutions are borrowed
+   * directly; explicit host vectors are staged. The solution supplies the
    * initial guess when its size matches.
    *
    * @tparam Backend Kokkos backend of the matrix.
    */
-  template <class Backend>
-  class CG<
-    Math::LinearSystem<::Rodin::Kokkos::SparseMatrix<Real, Backend>, Math::Vector<Real>>>
-    final : public LinearSolverBase<Math::LinearSystem<
-              ::Rodin::Kokkos::SparseMatrix<Real, Backend>, Math::Vector<Real>>>
+  template <class Backend, class VectorType_>
+  class CG<::Rodin::Math::LinearSystem<::Rodin::Kokkos::Math::SparseMatrix<Real, Backend>,
+    VectorType_>>
+    final : public LinearSolverBase<::Rodin::Math::LinearSystem<
+              ::Rodin::Kokkos::Math::SparseMatrix<Real, Backend>, VectorType_>>
   {
     using Krylov = Internal::KokkosKrylov<Backend>;
 
@@ -240,14 +240,14 @@ namespace Rodin::Solver
       /// @brief Scalar type.
       using ScalarType = Real;
 
-      /// @brief Host vector type.
-      using VectorType = Math::Vector<Real>;
+      /// @brief System coefficient vector type.
+      using VectorType = VectorType_;
 
       /// @brief Device matrix type.
-      using OperatorType = ::Rodin::Kokkos::SparseMatrix<Real, Backend>;
+      using OperatorType = ::Rodin::Kokkos::Math::SparseMatrix<Real, Backend>;
 
       /// @brief Linear system type.
-      using LinearSystemType = Math::LinearSystem<OperatorType, VectorType>;
+      using LinearSystemType = ::Rodin::Math::LinearSystem<OperatorType, VectorType>;
 
       /// @brief Problem type.
       using ProblemBaseType = Variational::ProblemBase<LinearSystemType>;
@@ -326,10 +326,17 @@ namespace Rodin::Solver
           Alert::MemberFunctionException(*this, __func__)
             << "The right-hand side size does not match the matrix." << Alert::Raise;
         }
+        if constexpr (requires { axb.getSolution().getView(); })
+        {
+          if (static_cast<size_t>(axb.getSolution().size()) != n)
+            axb.getSolution().setZero(n);
+        }
         const typename Krylov::ExecutionSpace execution;
         Krylov::reserve(m_inverse, n, "Rodin::Solver::CG::inverse");
-        Krylov::reserve(m_b, n, "Rodin::Solver::CG::b");
-        Krylov::reserve(m_x, n, "Rodin::Solver::CG::x");
+        if constexpr (!requires { axb.getVector().getView(); })
+          Krylov::reserve(m_b, n, "Rodin::Solver::CG::b");
+        if constexpr (!requires { axb.getSolution().getView(); })
+          Krylov::reserve(m_x, n, "Rodin::Solver::CG::x");
         Krylov::reserve(m_r, n, "Rodin::Solver::CG::r");
         Krylov::reserve(m_z, n, "Rodin::Solver::CG::z");
         Krylov::reserve(m_p, n, "Rodin::Solver::CG::p");

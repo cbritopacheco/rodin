@@ -157,15 +157,11 @@
 
   @section guides-solvers-device Solvers on the GPU
 
-  A problem assembled on a Kokkos mesh is solved where its system lives. The
-  default host matrix accepts every solver above. A device CSR
-  (`Kokkos::SparseMatrix`) stays on the GPU for the Kokkos-Kernels `CG` and
-  `GMRES`, hypre `BoomerAMG`, and the direct solvers `CuDSS` on NVIDIA GPUs
-  and `RocSolverRF` on AMD GPUs, the latter after a first factorization on
-  the host. A PETSc system on a Kokkos mesh runs the Krylov iteration and the
-  preconditioners implemented on Kokkos matrices on the GPU, on one process
-  or several. No direct solver runs on an Intel GPU, where a saddle point
-  system goes to PETSc with a Schur field split or to a host factorization.
+  A problem on a Kokkos mesh selects backend matrix and vector storage by
+  default. The operator wraps KokkosSparse::CrsMatrix, and the right-hand side
+  and solution use Kokkos::View storage. Kokkos-Kernels CG and GMRES operate on
+  these arrays directly. cuDSS and rocSOLVER adapters also accept backend
+  vectors. Explicit host algebra types retain the Eigen solver path.
 
   | Problem | One GPU | Several GPUs |
   | :--- | :--- | :--- |

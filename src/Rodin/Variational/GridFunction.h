@@ -118,14 +118,14 @@ namespace Rodin::Variational
    * @tparam Context Mesh context of the space.
    */
   template <class Context>
-  struct DeviceProjection;
+  struct ContextProjection;
 
   /**
    * @brief Tells whether a callable is a predicate of the device projection
    * of a mesh context.
    *
    * A named concept defers the lookup of the projection to the satisfaction
-   * check: a requires clause naming `DeviceProjection<Context>` directly is
+   * check: a requires clause naming `ContextProjection<Context>` directly is
    * rejected by NVCC 12 for host contexts, whose projection is incomplete.
    *
    * @tparam Context Mesh context, whose projection must be complete.
@@ -133,7 +133,7 @@ namespace Rodin::Variational
    */
   template <class Context, class Pred>
   concept IsDeviceProjectionPredicate =
-    DeviceProjection<Context>::template IsPredicate<Pred>;
+    ContextProjection<Context>::template IsPredicate<Pred>;
 
   /**
    * @defgroup GridFunctionSpecializations GridFunction Template Specializations
@@ -1124,7 +1124,7 @@ namespace Rodin::Variational
           typename FormLanguage::Traits<typename FESType::MeshType>::ContextType, Pred>
       Derived& project(const Geometry::Region& region, const T& fn, const Pred& pred)
       {
-        DeviceProjection<typename FormLanguage::Traits<
+        ContextProjection<typename FormLanguage::Traits<
           typename FESType::MeshType>::ContextType>::project(static_cast<Derived&>(*this),
           region, fn, {}, pred);
         return static_cast<Derived&>(*this);
@@ -1250,7 +1250,7 @@ namespace Rodin::Variational
        * @returns Mutable reference to the coefficient
        * @note CRTP function to be overriden in Derived class.
        */
-      ScalarType& operator[](Index global)
+      decltype(auto) operator[](Index global)
       {
         return static_cast<Derived&>(*this).operator[](global);
       }
@@ -1261,7 +1261,7 @@ namespace Rodin::Variational
        * @returns Const reference to the coefficient
        * @note CRTP function to be overriden in Derived class.
        */
-      const ScalarType& operator[](Index global) const
+      decltype(auto) operator[](Index global) const
       {
         return static_cast<const Derived&>(*this).operator[](global);
       }
@@ -1402,7 +1402,7 @@ namespace Rodin::Variational
       Derived& projectOnDevice(const Geometry::Region& region, const T& fn,
         const FlatSet<Geometry::Attribute>& attrs)
       {
-        DeviceProjection<typename FormLanguage::Traits<
+        ContextProjection<typename FormLanguage::Traits<
           typename FESType::MeshType>::ContextType>::project(static_cast<Derived&>(*this),
           region, fn, attrs);
         return static_cast<Derived&>(*this);
@@ -1532,15 +1532,12 @@ namespace Rodin::Variational
 
   /**
    * @ingroup GridFunctionSpecializations
-   * @brief Grid function storing its degrees of freedom in a dense
-   * Math::Vector over the space's scalar type (the standard local
-   * backend).
+   * @brief Grid function owning its coefficients in the selected data container.
+   * @tparam FES Finite element space.
+   * @tparam Data Coefficient owner, selected by the algebra backend.
    */
-  template <class FES>
-  class GridFunction<FES, Math::Vector<typename FormLanguage::Traits<FES>::ScalarType>>
-    final
-    : public GridFunctionBase<
-        GridFunction<FES, Math::Vector<typename FormLanguage::Traits<FES>::ScalarType>>>
+  template <class FES, class Data>
+  class GridFunction final : public GridFunctionBase<GridFunction<FES, Data>>
   {
     public:
       /// @brief Finite element space type.
@@ -1553,7 +1550,7 @@ namespace Rodin::Variational
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
       /// @brief Coefficient data storage type.
-      using DataType = Math::Vector<ScalarType>;
+      using DataType = Data;
 
       /// @brief Parent class type.
       using Parent = GridFunctionBase<GridFunction<FESType, DataType>>;
@@ -1657,7 +1654,7 @@ namespace Rodin::Variational
        * @param[in] global Global DOF index
        * @returns Mutable reference to the coefficient
        */
-      ScalarType& operator[](Index global)
+      decltype(auto) operator[](Index global)
       {
         return this->getData()[global];
       }
@@ -1667,7 +1664,7 @@ namespace Rodin::Variational
        * @param[in] global Global DOF index
        * @returns Const reference to the coefficient
        */
-      const ScalarType& operator[](Index global) const
+      decltype(auto) operator[](Index global) const
       {
         return this->getData()[global];
       }
@@ -1828,7 +1825,10 @@ namespace Rodin::Variational
       {
         const auto sz = this->getFiniteElementSpace().getSize();
         assert(offset + static_cast<size_t>(sz) <= static_cast<size_t>(data.size()));
-        this->getData() = data.segment(offset, sz);
+        if constexpr (requires { this->getData().assign(data, offset, sz); })
+          this->getData().assign(data, offset, sz);
+        else
+          this->getData() = data.segment(offset, sz);
         return *this;
       }
 

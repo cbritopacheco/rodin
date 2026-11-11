@@ -39,7 +39,7 @@ namespace Rodin::Geometry
    * memory space. Host meshes are temporary construction and file-format
    * adapters only; no LocalMesh is retained. There is no upload lifecycle.
    * Mutators execute on the selected execution instance and finish before
-   * returning. Device kernels borrow getDeviceView(), which contains no host
+   * returning. Device kernels borrow getView(), which contains no host
    * objects. Coordinate changes invalidate host evaluation caches using the
    * same flush semantics as the local mesh. Copies deep-copy resident arrays.
    *
@@ -78,7 +78,7 @@ namespace Rodin::Geometry
       using ConnectivityType = Connectivity<ContextType>;
 
       /// Borrowed device mesh handle.
-      using DeviceView = Rodin::Kokkos::Geometry::MeshView;
+      using View = Rodin::Kokkos::Geometry::MeshView;
 
       /**
        * @brief Constructs resident meshes with the existing local builder vocabulary.
@@ -123,7 +123,7 @@ namespace Rodin::Geometry
           }
 
           /// @param point Vertex coordinates. @returns This builder.
-          Builder& vertex(const Math::SpatialPoint& point)
+          Builder& vertex(const ::Rodin::Math::SpatialPoint& point)
           {
             m_builder.vertex(point);
             return *this;
@@ -408,10 +408,10 @@ namespace Rodin::Geometry
       }
 
       /// @returns Borrowed resident data; kernels must finish before owner replacement.
-      DeviceView getDeviceView() const
+      View getView() const
       {
         synchronizeEntities();
-        const auto topology = m_connectivity.getDeviceView();
+        const auto topology = m_connectivity.getView();
         return {getDimension(), m_sdim, topology.entityOffsets, topology.geometries,
           topology.vertexOffsets, topology.vertexIndices, m_coordinates.data(),
           m_attributes.data(), m_attributePresent.data(), m_geometryKinds.data(),
@@ -481,19 +481,19 @@ namespace Rodin::Geometry
           m_context.getExecutionSpace(), m_geometryKinds, GeometryKind::VertexP1);
         ::Kokkos::deep_copy(m_context.getExecutionSpace(), m_controlOffsets, Index(0));
         m_context.getExecutionSpace().fence("Rodin geometry update");
-        m_controls = DeviceArray<Real>();
+        m_controls = Array<Real>();
         m_transformations.clear();
         m_quadratures.clear();
       }
 
       /// @param vertex Vertex index. @returns Coordinates copied from resident memory.
-      Math::SpatialPoint getVertexCoordinates(Index vertex) const override
+      ::Rodin::Math::SpatialPoint getVertexCoordinates(Index vertex) const override
       {
         assert(vertex < getVertexCount());
         const auto host = ::Kokkos::create_mirror_view_and_copy(::Kokkos::HostSpace{},
           ::Kokkos::subview(
             m_coordinates, std::make_pair(vertex * m_sdim, (vertex + 1) * m_sdim)));
-        Math::SpatialPoint point(m_sdim);
+        ::Rodin::Math::SpatialPoint point(m_sdim);
         for (size_t s = 0; s < m_sdim; ++s)
           point(s) = host(s);
         return point;
@@ -511,7 +511,8 @@ namespace Rodin::Geometry
       }
 
       /// @param vertex Vertex index. @param point New coordinates. @returns This mesh.
-      Mesh& setVertexCoordinates(Index vertex, const Math::SpatialPoint& point) override
+      Mesh& setVertexCoordinates(
+        Index vertex, const ::Rodin::Math::SpatialPoint& point) override
       {
         assert(vertex < getVertexCount() && point.size() == m_sdim);
         for (size_t s = 0; s < m_sdim; ++s)
@@ -601,10 +602,10 @@ namespace Rodin::Geometry
           execution, m_controlOffsets, m_controlOffsets.extent(0) - 1);
         const auto temporary = upload(values, "new P1 controls");
         // The compact table stores independent maps only. Default maps borrow vertices.
-        DeviceArray<Index> offsets(
+        Array<Index> offsets(
           ::Kokkos::view_alloc(execution, std::string("mesh control offsets")),
           m_controlOffsets.extent(0));
-        DeviceArray<Real> controls(
+        Array<Real> controls(
           ::Kokkos::view_alloc(execution, std::string("mesh controls")),
           (total - oldCount + count) * m_sdim);
         const auto previous = m_controlOffsets;
@@ -723,7 +724,7 @@ namespace Rodin::Geometry
         builder.initialize(sdim).nodes(getVertexCount());
         for (Index v = 0; v < getVertexCount(); ++v)
         {
-          Math::SpatialPoint point(sdim);
+          ::Rodin::Math::SpatialPoint point(sdim);
           for (size_t s = 0; s < sdim; ++s)
             point(s) = coordinates(v * sdim + s);
           builder.vertex(point);
@@ -1054,7 +1055,7 @@ namespace Rodin::Geometry
        * @tparam T Entry type.
        */
       template <class T>
-      using DeviceArray = ::Kokkos::View<T*, MemorySpace>;
+      using Array = ::Kokkos::View<T*, MemorySpace>;
 
       /**
        * @brief One resident quadrature reduction over entities of a reference family.
@@ -1062,11 +1063,11 @@ namespace Rodin::Geometry
        */
       struct Measure
       {
-        DeviceView view; ///< Resident mesh data.
+        View view; ///< Resident mesh data.
         Polytope::Type geometry; ///< Selected reference family.
-        DeviceArray<Attribute> labels; ///< Selected labels, possibly empty.
-        DeviceArray<Real> references; ///< Packed reference samples.
-        DeviceArray<Real> quadratureWeights; ///< Reference weights.
+        Array<Attribute> labels; ///< Selected labels, possibly empty.
+        Array<Real> references; ///< Packed reference samples.
+        Array<Real> quadratureWeights; ///< Reference weights.
         size_t dimension; ///< Entity dimension.
         bool filter; ///< Whether a label selection was requested.
         bool boundary; ///< Whether only boundary entities contribute.
@@ -1121,11 +1122,11 @@ namespace Rodin::Geometry
          */
         ::Kokkos::Array<Index, 5> oldOffsets,
           newOffsets; ///< Dimension offsets before and after discovery.
-        DeviceArray<Attribute> oldAttributes,
+        Array<Attribute> oldAttributes,
           attributes; ///< Existing and replacement labels.
-        DeviceArray<unsigned char> oldPresent, present; ///< Explicit label presence.
-        DeviceArray<GeometryKind> oldKinds, kinds; ///< Existing and replacement maps.
-        DeviceArray<Index> oldControls,
+        Array<unsigned char> oldPresent, present; ///< Explicit label presence.
+        Array<GeometryKind> oldKinds, kinds; ///< Existing and replacement maps.
+        Array<Index> oldControls,
           controls; ///< Existing and replacement control-point offsets.
         size_t dimension; ///< Topological dimension.
 
@@ -1163,7 +1164,7 @@ namespace Rodin::Geometry
       /// @brief Scales the resident coordinates.
       struct ScaleCoordinates
       {
-        DeviceArray<Real> coordinates; ///< Packed vertex coordinates.
+        Array<Real> coordinates; ///< Packed vertex coordinates.
         Real factor; ///< Coordinate scale.
 
         /// @param i Flattened coordinate index.
@@ -1176,7 +1177,7 @@ namespace Rodin::Geometry
       /// @brief Writes the resident coordinates of one vertex.
       struct SetVertexCoordinates
       {
-        DeviceArray<Real> coordinates; ///< Packed vertex coordinates.
+        Array<Real> coordinates; ///< Packed vertex coordinates.
         Index vertex; ///< Updated vertex.
         size_t sdim; ///< Embedding dimension.
         Rodin::Kokkos::Geometry::Vector value; ///< New coordinates.
@@ -1194,8 +1195,8 @@ namespace Rodin::Geometry
        */
       struct ShiftControlOffsets
       {
-        DeviceArray<Index> offsets; ///< Replacement control-point offsets.
-        DeviceArray<Index> previous; ///< Existing control-point offsets.
+        Array<Index> offsets; ///< Replacement control-point offsets.
+        Array<Index> previous; ///< Existing control-point offsets.
         Index index; ///< Flattened index of the updated entity.
         Index oldCount; ///< Previous control-point count of the entity.
         Index count; ///< New control-point count of the entity.
@@ -1257,13 +1258,13 @@ namespace Rodin::Geometry
         work.oldKinds = m_geometryKinds;
         work.oldControls = m_controlOffsets;
         work.dimension = getDimension();
-        work.attributes = DeviceArray<Attribute>(
+        work.attributes = Array<Attribute>(
           ::Kokkos::view_alloc(execution, std::string("mesh attributes")), total);
-        work.present = DeviceArray<unsigned char>(
+        work.present = Array<unsigned char>(
           ::Kokkos::view_alloc(execution, std::string("mesh attribute presence")), total);
-        work.kinds = DeviceArray<GeometryKind>(
+        work.kinds = Array<GeometryKind>(
           ::Kokkos::view_alloc(execution, std::string("mesh geometry kinds")), total);
-        work.controls = DeviceArray<Index>(
+        work.controls = Array<Index>(
           ::Kokkos::view_alloc(execution, std::string("mesh control offsets")),
           total + 1);
         ::Kokkos::parallel_for("Rodin discovered entity slots", policy(total + 1), work);
@@ -1395,7 +1396,7 @@ namespace Rodin::Geometry
               << Alert::Raise;
           }
         }
-        const auto view = getDeviceView();
+        const auto view = getView();
         const auto labels = upload(attributes
             ? std::vector<Attribute>(attributes->begin(), attributes->end())
             : std::vector<Attribute>{},
@@ -1442,11 +1443,11 @@ namespace Rodin::Geometry
       ContextType m_context;
       ConnectivityType m_connectivity;
       size_t m_sdim = 0;
-      DeviceArray<Real> m_coordinates, m_controls;
-      mutable DeviceArray<Attribute> m_attributes;
-      mutable DeviceArray<unsigned char> m_attributePresent;
-      mutable DeviceArray<GeometryKind> m_geometryKinds;
-      mutable DeviceArray<Index> m_controlOffsets;
+      Array<Real> m_coordinates, m_controls;
+      mutable Array<Attribute> m_attributes;
+      mutable Array<unsigned char> m_attributePresent;
+      mutable Array<GeometryKind> m_geometryKinds;
+      mutable Array<Index> m_controlOffsets;
       mutable ::Kokkos::Array<Index, 5> m_layoutOffsets{};
       mutable std::mutex m_entityMutex;
       mutable std::uint64_t m_revision = 0;

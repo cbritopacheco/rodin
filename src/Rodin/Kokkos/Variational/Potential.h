@@ -61,11 +61,11 @@ namespace Rodin::Kokkos::Variational
    * The host evaluation interface (setPolytope(), integrate()) is not
    * available and raises; the form is assembled by Assembly::Kokkos.
    */
-  template <class Kernel, class LHSDerived, class RHSDerived, DeviceSpace TrialFES,
-    DeviceSpace TestFES>
-  class DevicePotentialIntegral
+  template <class Kernel, class LHSDerived, class RHSDerived, Space TrialFES,
+    Space TestFES>
+  class PotentialIntegral
     : public ::Rodin::Variational::GlobalBilinearFormIntegratorBase<Real>,
-      public DeviceBilinearFormIntegrator<Internal::BackendOf<TrialFES>>
+      public BilinearFormIntegrator<Internal::BackendOf<TrialFES>>
   {
     public:
       /// @brief Finite element space of the trial functions.
@@ -105,7 +105,7 @@ namespace Rodin::Kokkos::Variational
       using Parent = ::Rodin::Variational::GlobalBilinearFormIntegratorBase<Real>;
 
       /// @brief Device integrator interface.
-      using DeviceParent = DeviceBilinearFormIntegrator<Internal::BackendOf<TrialFES>>;
+      using ViewParent = BilinearFormIntegrator<Internal::BackendOf<TrialFES>>;
 
       /// @brief Mesh type.
       using MeshType = typename TrialFESType::MeshType;
@@ -178,7 +178,7 @@ namespace Rodin::Kokkos::Variational
        * @brief Constructs the integral of a dot product.
        * @param[in] integrand Dot product of a potential and a test operator.
        */
-      DevicePotentialIntegral(const IntegrandType& integrand)
+      PotentialIntegral(const IntegrandType& integrand)
         : Parent(integrand.getLHS().getOperand().getLeaf(), integrand.getRHS().getLeaf()),
           m_integrand(integrand.copy())
       {}
@@ -187,9 +187,9 @@ namespace Rodin::Kokkos::Variational
        * @brief Copy constructor.
        * @param[in] other Integral to copy.
        */
-      DevicePotentialIntegral(const DevicePotentialIntegral& other)
+      PotentialIntegral(const PotentialIntegral& other)
         : Parent(other),
-          DeviceParent(other),
+          ViewParent(other),
           m_integrand(other.m_integrand->copy())
       {}
 
@@ -197,9 +197,9 @@ namespace Rodin::Kokkos::Variational
        * @brief Move constructor.
        * @param[in] other Integral to move from.
        */
-      DevicePotentialIntegral(DevicePotentialIntegral&& other)
+      PotentialIntegral(PotentialIntegral&& other)
         : Parent(std::move(other)),
-          DeviceParent(std::move(other)),
+          ViewParent(std::move(other)),
           m_integrand(std::move(other.m_integrand))
       {}
 
@@ -217,7 +217,7 @@ namespace Rodin::Kokkos::Variational
        * @returns Never returns.
        * @throws Alert::Exception Always.
        */
-      DevicePotentialIntegral& setPolytope(
+      PotentialIntegral& setPolytope(
         [[maybe_unused]] const ::Rodin::Geometry::Polytope& tau,
         [[maybe_unused]] const ::Rodin::Geometry::Polytope& t) override
       {
@@ -249,18 +249,18 @@ namespace Rodin::Kokkos::Variational
       }
 
       /// @brief Gets the arrangement of the entries. @return Entry layout.
-      DeviceLayout getLayout() const override
+      Layout getLayout() const override
       {
         const auto& integrand = getIntegrand();
         const auto& trialfes = integrand.getLHS().getOperand().getFiniteElementSpace();
         const auto& testfes = integrand.getRHS().getFiniteElementSpace();
         const auto& testAttributes = this->getTestAttributes();
         const auto& trialAttributes = this->getTrialAttributes();
-        DeviceLayout layout{&trialfes.getMesh(),
+        Layout layout{&trialfes.getMesh(),
           static_cast<Index>(trialfes.getVectorDimension()),
           static_cast<Index>(testfes.getVectorDimension()),
           {testAttributes.begin(), testAttributes.end()}, this->getTestRegion(),
-          trialfes.getDeviceDOFs().getStride(), testfes.getDeviceDOFs().getStride(),
+          trialfes.getDOFsView().getStride(), testfes.getDOFsView().getStride(),
           TrialDOFsType::getCapacity(RODIN_MAXIMUM_POLYTOPE_VERTICES),
           TestDOFsType::getCapacity(RODIN_MAXIMUM_POLYTOPE_VERTICES)};
         layout.global = true;
@@ -309,11 +309,11 @@ namespace Rodin::Kokkos::Variational
             Internal::uploadAttributes(execution, this->getTrialAttributes());
           m_trialSelection = this->getTrialAttributes();
         }
-        const auto view = mesh.getDeviceView();
-        select(execution, view, dimension, count, m_testAttributes,
-          testfes.getDeviceDOFs(), testfes.getVectorDimension(), m_test);
+        const auto view = mesh.getView();
+        select(execution, view, dimension, count, m_testAttributes, testfes.getDOFsView(),
+          testfes.getVectorDimension(), m_test);
         select(execution, view, dimension, count, m_trialAttributes,
-          trialfes.getDeviceDOFs(), trialfes.getVectorDimension(), m_trial);
+          trialfes.getDOFsView(), trialfes.getVectorDimension(), m_trial);
         const size_t pairs = size_t(m_test.count) * m_trial.count;
         m_uniform = pairs > 1 && m_test.smallest == m_test.largest &&
           m_trial.smallest == m_trial.largest;
@@ -354,8 +354,8 @@ namespace Rodin::Kokkos::Variational
         const auto& testfes = integrand.getRHS().getFiniteElementSpace();
         integratePairs(trialfes.getMesh(), integrand.getLHS().getKernel(), m_test,
           m_trial, m_uniform, m_spacing, m_nodes, m_weights, m_centroids,
-          m_centroidWeights, trialfes.getDeviceDOFs(), trialfes.getVectorDimension(),
-          testfes.getDeviceDOFs(), testfes.getVectorDimension(), values, offset, sign,
+          m_centroidWeights, trialfes.getDOFsView(), trialfes.getVectorDimension(),
+          testfes.getDOFsView(), testfes.getVectorDimension(), values, offset, sign,
           accumulate, rows, cols);
       }
 
@@ -491,7 +491,7 @@ namespace Rodin::Kokkos::Variational
         Index dimension, Index count, const AttributesType& attributes, const DOFs& dofs,
         Index vdim, Selection& selection)
       {
-        const auto policy = Internal::DeviceQuadrature<MeshType>::policy;
+        const auto policy = Internal::Quadrature<MeshType>::policy;
         const ::Rodin::Geometry::Region region = ::Rodin::Geometry::Region::Cells;
         Index selected = 0;
         Index smallest = 0;
@@ -566,7 +566,7 @@ namespace Rodin::Kokkos::Variational
         ::Kokkos::parallel_for("Rodin potential integration",
           ::Kokkos::RangePolicy<ExecutionSpace, ::Kokkos::IndexType<size_t>>(
             execution, 0, pairs),
-          PairKernel{kernel, mesh.getDeviceView(), mesh.getDimension(), test.cells,
+          PairKernel{kernel, mesh.getView(), mesh.getDimension(), test.cells,
             test.offsets, trial.cells, trial.offsets, trial.count, trial.total, uniform,
             spacing, nodes, weights, centroids, centroidWeights, nodes.extent(0),
             trialDOFs, trialVDim, testDOFs, testVDim, values, offset, sign, accumulate,
@@ -577,7 +577,7 @@ namespace Rodin::Kokkos::Variational
        * @brief Creates a copy of the integral.
        * @returns Pointer to a new instance of the derived integral.
        */
-      DevicePotentialIntegral* copy() const noexcept override = 0;
+      PotentialIntegral* copy() const noexcept override = 0;
 
     private:
       /**
@@ -589,7 +589,7 @@ namespace Rodin::Kokkos::Variational
       {
         const auto& execution = mesh.getContext().getExecutionSpace();
         const auto representatives =
-          Internal::DeviceQuadrature<MeshType>::getRepresentatives(mesh, dimension);
+          Internal::Quadrature<MeshType>::getRepresentatives(mesh, dimension);
         size_t order = 7;
         const auto& triangle = representatives[static_cast<size_t>(
           ::Rodin::Geometry::Polytope::Type::Triangle)];
@@ -917,22 +917,22 @@ namespace Rodin::Variational
    *   \int_{\mathcal{T}_h} (K u)(y) \cdot v(y) \ dy
    * @f]
    * for P1 device trial and test spaces on a resident Kokkos mesh, as
-   * described in Rodin::Kokkos::Variational::DevicePotentialIntegral.
+   * described in Rodin::Kokkos::Variational::PotentialIntegral.
    */
   template <class Kernel, class LHSDerived, class TrialFES, class RHSDerived,
     class TestFES>
-    requires Rodin::Kokkos::Variational::DeviceSpace<TrialFES> &&
-    Rodin::Kokkos::Variational::DeviceSpace<TestFES>
+    requires Rodin::Kokkos::Variational::Space<TrialFES> &&
+    Rodin::Kokkos::Variational::Space<TestFES>
   class Integral<
     Dot<Potential<Kernel, ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>>,
       ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>
-    final : public Rodin::Kokkos::Variational::DevicePotentialIntegral<Kernel, LHSDerived,
+    final : public Rodin::Kokkos::Variational::PotentialIntegral<Kernel, LHSDerived,
               RHSDerived, TrialFES, TestFES>
   {
     public:
       /// @brief Device integral type.
-      using Parent = Rodin::Kokkos::Variational::DevicePotentialIntegral<Kernel,
-        LHSDerived, RHSDerived, TrialFES, TestFES>;
+      using Parent = Rodin::Kokkos::Variational::PotentialIntegral<Kernel, LHSDerived,
+        RHSDerived, TrialFES, TestFES>;
 
       /// @brief Type of the left operand of the dot product.
       using LHSType = typename Parent::LHSType;

@@ -22,17 +22,17 @@
 #include "Rodin/Types.h"
 #include "Rodin/Math/Vector.h"
 
-#include "Rodin/Kokkos/SparseMatrix.h"
+#include "Rodin/Kokkos/Math/SparseMatrix.h"
 
 namespace Rodin::Solver::Internal
 {
   /**
    * @brief Device vectors and kernels of a Jacobi preconditioned Krylov
-   * solver on a Kokkos::SparseMatrix.
+   * solver on a Kokkos::Math::SparseMatrix.
    *
-   * The matrix is wrapped without copy. The right-hand side and the solution
-   * are copied between the host vectors of the system and device vectors,
-   * which are kept from one solve to the next while the size is unchanged.
+   * The matrix exposes its native CRS representation. Backend right-hand sides
+   * and solutions are borrowed directly. Explicit host vectors use retained
+   * transfer buffers. Krylov work vectors remain in backend memory.
    *
    * @tparam Backend Kokkos backend of the matrix.
    */
@@ -40,7 +40,7 @@ namespace Rodin::Solver::Internal
   struct KokkosKrylov
   {
     /// @brief Matrix type.
-    using MatrixType = ::Rodin::Kokkos::SparseMatrix<Real, Backend>;
+    using MatrixType = ::Rodin::Kokkos::Math::SparseMatrix<Real, Backend>;
 
     /// @brief Execution space of the kernels.
     using ExecutionSpace = typename MatrixType::ExecutionSpace;
@@ -55,8 +55,8 @@ namespace Rodin::Solver::Internal
     using Vector = ::Kokkos::View<Real*, Device>;
 
     /// @brief Kokkos-Kernels view of the matrix.
-    using CrsMatrix = ::KokkosSparse::CrsMatrix<Real, Math::SparseIndex, Device, void,
-      Math::SparseIndex>;
+    using CrsMatrix = ::KokkosSparse::CrsMatrix<Real, ::Rodin::Math::SparseIndex,
+      Device, void, ::Rodin::Math::SparseIndex>;
 
     /**
      * @brief Kokkos-Kernels SpMV handle, which keeps the cuSPARSE descriptors
@@ -71,10 +71,7 @@ namespace Rodin::Solver::Internal
      */
     static CrsMatrix wrap(const MatrixType& matrix)
     {
-      const auto n = static_cast<Math::SparseIndex>(matrix.getRowCount());
-      return CrsMatrix("Rodin::Solver::Krylov::A", n, n,
-        static_cast<Math::SparseIndex>(matrix.getNonZeroCount()), matrix.getValues(),
-        matrix.getRowStarts(), matrix.getColumns());
+      return matrix.getView();
     }
 
     /**
@@ -97,7 +94,7 @@ namespace Rodin::Solver::Internal
      * @param host Host vector.
      * @param device Device vector of the same size.
      */
-    static void upload(const Math::Vector<Real>& host, const Vector& device)
+    static void upload(const ::Rodin::Math::Vector<Real>& host, const Vector& device)
     {
       const ::Kokkos::View<const Real*, ::Kokkos::HostSpace, ::Kokkos::MemoryUnmanaged>
         h(host.data(), static_cast<size_t>(host.size()));
@@ -109,7 +106,7 @@ namespace Rodin::Solver::Internal
      * @param device Device vector.
      * @param host Host vector, resized.
      */
-    static void download(const Vector& device, Math::Vector<Real>& host)
+    static void download(const Vector& device, ::Rodin::Math::Vector<Real>& host)
     {
       host.resize(static_cast<Eigen::Index>(device.extent(0)));
       const ::Kokkos::View<Real*, ::Kokkos::HostSpace, ::Kokkos::MemoryUnmanaged> h(
@@ -117,14 +114,37 @@ namespace Rodin::Solver::Internal
       ::Kokkos::deep_copy(h, device);
     }
 
+    /**
+     * @brief Borrows a backend vector without staging through host memory.
+     * @param source Backend coefficients. @param destination Receives their view.
+     */
+    static void upload(
+      const ::Rodin::Kokkos::Math::Vector<Real, Backend>& source, Vector& destination)
+    {
+      destination = source.getView();
+    }
+
+    /**
+     * @brief Copies an iterate into backend solution storage when not already shared.
+     * @param source Backend iterate. @param destination Backend solution owner.
+     */
+    static void download(
+      const Vector& source, ::Rodin::Kokkos::Math::Vector<Real, Backend>& destination)
+    {
+      if (source.data() == destination.data())
+        return;
+      destination.resize(source.extent(0));
+      ::Kokkos::deep_copy(destination.getView(), source);
+    }
+
     /// @brief Writes the inverse of the diagonal coefficient of each row.
     struct InvertDiagonal
     {
       /// @brief CSR row offsets of the matrix.
-      ::Kokkos::View<Math::SparseIndex*, MemorySpace> starts;
+      typename CrsMatrix::row_map_type starts;
 
       /// @brief CSR column indices of the matrix.
-      ::Kokkos::View<Math::SparseIndex*, MemorySpace> columns;
+      ::Kokkos::View<::Rodin::Math::SparseIndex*, MemorySpace> columns;
 
       /// @brief CSR values of the matrix.
       ::Kokkos::View<Real*, MemorySpace> values;

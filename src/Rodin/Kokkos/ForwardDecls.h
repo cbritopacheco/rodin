@@ -34,9 +34,9 @@ namespace Rodin::Assembly
    *
    * | Specialization | Description |
    * |----------------|-------------|
-   * | @ref Kokkos "Kokkos<Math::SparseMatrix<Real>, BilinearForm<...>>" | Sparse bilinear form into a host matrix. |
-   * | @ref Kokkos "Kokkos<Math::Vector<Real>, LinearForm<...>>" | Linear form into a host vector. |
-   * | @ref Kokkos "Kokkos<Math::LinearSystem<Matrix, Math::Vector<Real>>, Problem<...>>" | Single field or mixed problem into a host or device CSR system. |
+   * | @ref Kokkos "Kokkos<::Rodin::Math::SparseMatrix<Real>, BilinearForm<...>>" | Sparse bilinear form into a host matrix. |
+   * | @ref Kokkos "Kokkos<::Rodin::Math::Vector<Real>, LinearForm<...>>" | Linear form into a host vector. |
+   * | @ref Kokkos "Kokkos<::Rodin::Math::LinearSystem<Matrix, ::Rodin::Math::Vector<Real>>, Problem<...>>" | Single field or mixed problem into a host or device CSR system. |
    * | @ref Kokkos "Kokkos<IndexMap<...>, DirichletBC<...>>" | Value and identification Dirichlet conditions. |
    * | @ref Kokkos "Kokkos<::Mat, BilinearForm<...>>" | Bilinear form into a PETSc Kokkos matrix. |
    * | @ref Kokkos "Kokkos<::Vec, LinearForm<...>>" | Linear form into a PETSc Kokkos vector. |
@@ -52,6 +52,17 @@ namespace Rodin::Assembly
    */
   template <class LinearAlgebraType, class Object>
   class Kokkos;
+}
+
+namespace Rodin::Kokkos::Math
+{
+  /// @brief Owning backend coefficient vector.
+  template <class Scalar, class Backend>
+  class Vector;
+
+  /// @brief Owning backend compressed row matrix.
+  template <class Scalar, class Backend>
+  class SparseMatrix;
 }
 
 namespace Rodin::Kokkos::Geometry

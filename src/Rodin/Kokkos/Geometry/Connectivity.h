@@ -61,7 +61,7 @@ namespace Rodin::Geometry
       using MemorySpace = typename ContextType::MemorySpaceType;
 
       /// Borrowed device incidence complex.
-      using DeviceView = Rodin::Kokkos::Geometry::ConnectivityView;
+      using View = Rodin::Kokkos::Geometry::ConnectivityView;
 
       /// The existing discovery/restriction vocabulary.
       using Mode = Connectivity<Rodin::Context::Local>::Mode;
@@ -257,7 +257,7 @@ namespace Rodin::Geometry
       }
 
       /// @returns Borrowed resident tables, invalidated by mutation.
-      DeviceView getDeviceView() const
+      View getView() const
       {
         return {m_dimension, m_entityOffsets.data(), m_geometries.data(),
           m_vertexOffsets.data(), m_vertices.data(), m_descriptors.data()};
@@ -515,7 +515,7 @@ namespace Rodin::Geometry
        * @tparam T Entry type.
        */
       template <class T>
-      using DeviceArray = ::Kokkos::View<T*, MemorySpace>;
+      using Array = ::Kokkos::View<T*, MemorySpace>;
 
       /// @brief Independently owned dimension-pair relation.
       struct Relation
@@ -524,7 +524,7 @@ namespace Rodin::Geometry
          * @var offsets
          * Row offsets of the resident CSR relation, including the terminal offset.
          */
-        DeviceArray<Index> offsets, indices; ///< Resident CSR arrays.
+        Array<Index> offsets, indices; ///< Resident CSR arrays.
         bool present = false; ///< Whether arrays are materialized.
         bool dirty = true; ///< Whether compute must rebuild the relation.
       };
@@ -606,7 +606,7 @@ namespace Rodin::Geometry
          * @var counts
          * Row counts to be scanned.
          */
-        DeviceArray<Index> counts, offsets; ///< Counts and prefix output.
+        Array<Index> counts, offsets; ///< Counts and prefix output.
 
         /// @param i Prefix index. @param sum Running total. @param final Whether output may be written.
         KOKKOS_INLINE_FUNCTION void operator()(Index i, Index& sum, bool final) const
@@ -625,7 +625,7 @@ namespace Rodin::Geometry
         {}; ///< Mark first occurrences.
         struct Fill
         {}; ///< Fill compact indices and count rows.
-        DeviceArray<Entry> entries; ///< Sorted candidate incidences.
+        Array<Entry> entries; ///< Sorted candidate incidences.
 
         /**
          * @var flags
@@ -635,7 +635,7 @@ namespace Rodin::Geometry
          * @var indices
          * Compacted target indices of the output relation.
          */
-        DeviceArray<Index> flags, positions, indices, counts; ///< Compaction arrays.
+        Array<Index> flags, positions, indices, counts; ///< Compaction arrays.
         bool ordered; ///< Whether to retain original traversal order.
 
         /// @param i Sorted candidate index. @returns Whether it is the first incidence of its pair.
@@ -667,7 +667,7 @@ namespace Rodin::Geometry
       struct TransposeEntries
       {
         IncidenceView source; ///< Original CSR relation.
-        DeviceArray<Entry> entries; ///< Transposed pairs.
+        Array<Entry> entries; ///< Transposed pairs.
 
         /// @param j Original source index.
         KOKKOS_INLINE_FUNCTION void operator()(Index j) const
@@ -680,7 +680,7 @@ namespace Rodin::Geometry
       /// @brief Counts or emits Rodin's ordered, subset-filtered composition paths.
       struct ComposeEntries
       {
-        DeviceView topology; ///< Resident ordered vertex lists.
+        View topology; ///< Resident ordered vertex lists.
 
         /**
          * @var left
@@ -692,8 +692,8 @@ namespace Rodin::Geometry
          * @var counts
          * Candidate row lengths, written by the counting pass.
          */
-        DeviceArray<Index> counts, offsets; ///< Candidate row lengths and offsets.
-        DeviceArray<Entry> entries; ///< Emitted pairs.
+        Array<Index> counts, offsets; ///< Candidate row lengths and offsets.
+        Array<Entry> entries; ///< Emitted pairs.
 
         /**
          * @var dimension
@@ -764,21 +764,21 @@ namespace Rodin::Geometry
         {}; ///< Count retained cell-local incidences.
         struct FillRows
         {}; ///< Fill cell-local incidence in reference order.
-        DeviceView topology; ///< Input resident topology.
-        DeviceArray<Reference> reference; ///< Rodin reference-cell constants.
+        View topology; ///< Input resident topology.
+        Array<Reference> reference; ///< Rodin reference-cell constants.
 
         /**
          * @var counts
          * Number of candidates emitted by each cell, then retained row lengths.
          */
-        DeviceArray<Index> counts, offsets; ///< Emission row lengths and offsets.
+        Array<Index> counts, offsets; ///< Emission row lengths and offsets.
 
         /**
          * @var records
          * Oriented candidate entities, existing entities first.
          */
-        DeviceArray<Entity> records, added; ///< Oriented candidates and new entities.
-        DeviceArray<Candidate> candidates; ///< Canonical identity keys.
+        Array<Entity> records, added; ///< Oriented candidates and new entities.
+        Array<Candidate> candidates; ///< Canonical identity keys.
 
         /**
          * @var flags
@@ -796,15 +796,15 @@ namespace Rodin::Geometry
          * @var assigned
          * Stable entity index assigned to each leader.
          */
-        DeviceArray<Index> flags, groupOffsets, groups, leaders, leaderFlags,
-          leaderOffsets, assigned, ids; ///< Grouping and numbering workspace.
-        DeviceArray<unsigned char> matched; ///< Explicit membership of each occurrence.
+        Array<Index> flags, groupOffsets, groups, leaders, leaderFlags, leaderOffsets,
+          assigned, ids; ///< Grouping and numbering workspace.
+        Array<unsigned char> matched; ///< Explicit membership of each occurrence.
 
         /**
          * @var rowOffsets
          * Row offsets of the output cell-to-entity relation.
          */
-        DeviceArray<Index> rowOffsets, rowIndices; ///< Output cell-to-entity relation.
+        Array<Index> rowOffsets, rowIndices; ///< Output cell-to-entity relation.
         size_t dimension; ///< Intermediate entity dimension.
         Index oldCount; ///< Existing entities, which retain their indices.
         bool discover; ///< Whether absent keys create new entities.
@@ -959,9 +959,9 @@ namespace Rodin::Geometry
       /// @brief Resident entity-table insertion while preserving all existing local IDs.
       struct PackEntities
       {
-        DeviceView source; ///< Old dimension-major tables.
-        DeviceArray<Entity> added; ///< Newly discovered entities.
-        DeviceArray<Polytope::Type> geometries; ///< New geometry table.
+        View source; ///< Old dimension-major tables.
+        Array<Entity> added; ///< Newly discovered entities.
+        Array<Polytope::Type> geometries; ///< New geometry table.
 
         /**
          * @var counts
@@ -969,7 +969,7 @@ namespace Rodin::Geometry
          * @var offsets
          * Vertex offsets of each entity in the new table.
          */
-        DeviceArray<Index> counts, offsets, vertices; ///< New vertex lists.
+        Array<Index> counts, offsets, vertices; ///< New vertex lists.
         Index insertion; ///< Old end of the growing dimension.
         bool fill; ///< Whether vertex storage is allocated.
 
@@ -1001,7 +1001,7 @@ namespace Rodin::Geometry
       /// @brief Counts the geometry families in newly discovered entities.
       struct CountGeometry
       {
-        DeviceArray<Entity> entities; ///< New entities.
+        Array<Entity> entities; ///< New entities.
         Polytope::Type geometry; ///< Selected family.
 
         /// @param i Entity index. @param count Geometry count.
@@ -1014,7 +1014,7 @@ namespace Rodin::Geometry
       /// @brief Counts and copies ordered entity vertex lists into an independent CSR relation.
       struct VertexEntries
       {
-        DeviceView topology; ///< Ordered keys.
+        View topology; ///< Ordered keys.
         size_t dimension; ///< Source dimension.
 
         /**
@@ -1023,7 +1023,7 @@ namespace Rodin::Geometry
          * @var offsets
          * Row offsets of the relation.
          */
-        DeviceArray<Index> counts, offsets, indices; ///< Relation arrays.
+        Array<Index> counts, offsets, indices; ///< Relation arrays.
         bool fill; ///< Whether offsets have been computed.
 
         /// @param i Entity index.
@@ -1050,15 +1050,15 @@ namespace Rodin::Geometry
 
       /// @param count Number of entries. @param label Allocation label. @returns Resident array.
       template <class T>
-      DeviceArray<T> allocate(Index count, const char* label) const
+      Array<T> allocate(Index count, const char* label) const
       {
-        return DeviceArray<T>(
+        return Array<T>(
           ::Kokkos::view_alloc(m_context.getExecutionSpace(), std::string(label)), count);
       }
 
       /// @tparam T Entry type. @param values Construction values. @param label Allocation label. @returns Resident array.
       template <class T>
-      DeviceArray<T> upload(const std::vector<T>& values, const char* label) const
+      Array<T> upload(const std::vector<T>& values, const char* label) const
       {
         return Rodin::Kokkos::Internal::upload(
           m_context.getExecutionSpace(), values, label);
@@ -1066,7 +1066,7 @@ namespace Rodin::Geometry
 
       /// @tparam T Entry type. @param count Entry count. @param label Allocation label. @param fill Writes the entries through a host pointer. @returns Resident array.
       template <class T, class Fill>
-      DeviceArray<T> upload(size_t count, const char* label, Fill&& fill) const
+      Array<T> upload(size_t count, const char* label, Fill&& fill) const
       {
         return Rodin::Kokkos::Internal::upload<T>(
           m_context.getExecutionSpace(), count, label, std::forward<Fill>(fill));
@@ -1108,17 +1108,16 @@ namespace Rodin::Geometry
       }
 
       /// @param counts Resident row counts. @param offsets Output offsets including the terminal entry. @returns Total entry count.
-      Index scan(const DeviceArray<Index>& counts, DeviceArray<Index>& offsets) const;
+      Index scan(const Array<Index>& counts, Array<Index>& offsets) const;
 
       /// @param d Source dimension. @param dp Target dimension. @param entries Candidate incidences. @param ordered Preserve original traversal order, rather than sorted target order.
-      void finishRelation(
-        size_t d, size_t dp, const DeviceArray<Entry>& entries, bool ordered);
+      void finishRelation(size_t d, size_t dp, const Array<Entry>& entries, bool ordered);
 
       /// @brief Initializes reference-cell constants without examining resident mesh data.
       void initializeReference();
 
       /// @param d Growing dimension. @param entities New entities in discovery order.
-      void appendEntities(size_t d, const DeviceArray<Entity>& entities);
+      void appendEntities(size_t d, const Array<Entity>& entities);
 
       /// @param d Entity dimension. @brief Materializes ordered entity-to-vertex incidence.
       void vertexRelation(size_t d);
@@ -1127,11 +1126,11 @@ namespace Rodin::Geometry
       size_t m_dimension = 0;
       std::array<Index, 5> m_offsets{};
       std::array<size_t, 8> m_geometryCounts{};
-      DeviceArray<Index> m_entityOffsets, m_vertexOffsets, m_vertices;
-      DeviceArray<Polytope::Type> m_geometries;
-      DeviceArray<Descriptor> m_descriptors;
+      Array<Index> m_entityOffsets, m_vertexOffsets, m_vertices;
+      Array<Polytope::Type> m_geometries;
+      Array<Descriptor> m_descriptors;
       std::array<std::array<Relation, 4>, 4> m_incidence;
-      DeviceArray<Reference> m_reference;
+      Array<Reference> m_reference;
       mutable std::mutex m_mutex;
       mutable std::map<Index, Polytope::Key> m_keys;
       mutable std::map<Index, Polytope::Type> m_types;
@@ -1140,7 +1139,7 @@ namespace Rodin::Geometry
 
   template <class Backend>
   Index Connectivity<Rodin::Context::Kokkos<Rodin::Context::Local, Backend>>::scan(
-    const DeviceArray<Index>& counts, DeviceArray<Index>& offsets) const
+    const Array<Index>& counts, Array<Index>& offsets) const
   {
     offsets = allocate<Index>(counts.extent(0) + 1, "CSR offsets");
     Index total = 0;
@@ -1153,7 +1152,7 @@ namespace Rodin::Geometry
   template <class Backend>
   void
   Connectivity<Rodin::Context::Kokkos<Rodin::Context::Local, Backend>>::finishRelation(
-    size_t d, size_t dp, const DeviceArray<Entry>& entries, bool ordered)
+    size_t d, size_t dp, const Array<Entry>& entries, bool ordered)
   {
     const auto& execution = m_context.getExecutionSpace();
     ::Kokkos::sort(execution, entries, EntryLess{});
@@ -1200,7 +1199,7 @@ namespace Rodin::Geometry
     checkDimensions(d, dp);
     checkDimensions(d, pivot);
     assert(d >= dp);
-    ComposeEntries work{getDeviceView(), relation(d, pivot), relation(pivot, dp),
+    ComposeEntries work{getView(), relation(d, pivot), relation(pivot, dp),
       allocate<Index>(getCount(d), "composition counts"), {}, {}, d, dp, false};
     ::Kokkos::parallel_for("Rodin composition count", policy(getCount(d)), work);
     const Index total = scan(work.counts, work.offsets);
@@ -1265,7 +1264,7 @@ namespace Rodin::Geometry
     initializeReference();
     const auto& execution = m_context.getExecutionSpace();
     Discovery work;
-    work.topology = getDeviceView();
+    work.topology = getView();
     work.reference = m_reference;
     work.dimension = d;
     work.oldCount = getCount(d);
@@ -1344,11 +1343,11 @@ namespace Rodin::Geometry
   template <class Backend>
   void
   Connectivity<Rodin::Context::Kokkos<Rodin::Context::Local, Backend>>::appendEntities(
-    size_t d, const DeviceArray<Entity>& entities)
+    size_t d, const Array<Entity>& entities)
   {
     const auto& execution = m_context.getExecutionSpace();
     const Index count = m_offsets[m_dimension + 1] + entities.extent(0);
-    PackEntities work{getDeviceView(), entities,
+    PackEntities work{getView(), entities,
       allocate<Polytope::Type>(count, "entity geometries"),
       allocate<Index>(count, "entity vertex counts"), {}, {}, m_offsets[d + 1], false};
     ::Kokkos::parallel_for("Rodin entity table insertion", policy(count), work);
@@ -1390,7 +1389,7 @@ namespace Rodin::Geometry
   Connectivity<Rodin::Context::Kokkos<Rodin::Context::Local, Backend>>::vertexRelation(
     size_t d)
   {
-    VertexEntries work{getDeviceView(), d,
+    VertexEntries work{getView(), d,
       allocate<Index>(getCount(d), "vertex incidence counts"), {}, {}, false};
     ::Kokkos::parallel_for("Rodin vertex incidence count", policy(getCount(d)), work);
     const Index total = scan(work.counts, work.offsets);

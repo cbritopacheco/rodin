@@ -91,8 +91,8 @@ int main(int argc, char** argv)
   // of the backend, where the solver reads it in place.
 #if defined(RODIN_USE_CUDSS) || defined(RODIN_USE_ROCSOLVER)
 #define DEVICE_SOLVER
-  using System =
-    Math::LinearSystem<Rodin::Kokkos::SparseMatrix<Real, Backend>, Math::Vector<Real>>;
+  using System = Math::LinearSystem<Rodin::Kokkos::Math::SparseMatrix<Real, Backend>,
+    Rodin::Kokkos::Math::Vector<Real, Backend>>;
   Problem<System, decltype(u), decltype(p), decltype(multiplier), decltype(v),
     decltype(q), decltype(meanTest)>
     flow(u, p, multiplier, v, q, meanTest);

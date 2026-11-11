@@ -11,7 +11,7 @@
  * @file
  * @brief Degrees of freedom of the device spaces.
  *
- * A device space exposes its degrees of freedom by `getDeviceDOFs()`, an
+ * A device space exposes its degrees of freedom by `getDOFsView()`, an
  * object copied by value into kernels that provides:
  *
  * | Member | Description |
@@ -42,7 +42,7 @@ namespace Rodin::Kokkos::Variational
    * Device spaces provide the degrees of freedom read by the kernels.
    */
   template <class FES>
-  concept DeviceSpace = requires(const FES& fes) { fes.getDeviceDOFs(); };
+  concept Space = requires(const FES& fes) { fes.getDOFsView(); };
 
   /**
    * @brief Reference coordinates of a vertex of a polytope.

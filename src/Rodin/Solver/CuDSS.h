@@ -15,7 +15,7 @@
  * it as CSC. The CSC arrays of @f$ A @f$ are the CSR arrays of @f$ A^T @f$,
  * so they are copied to the device unchanged and cuDSS is asked to solve
  * with the transpose of the matrix it holds. A symmetric matrix needs no
- * transpose. A Kokkos::SparseMatrix is stored as CSR, and cuDSS reads it in
+ * transpose. A Kokkos::Math::SparseMatrix is stored as CSR, and cuDSS reads it in
  * place when it is in device memory.
  *
  * @note This solver requires cuDSS and RODIN_USE_CUDSS.
@@ -76,7 +76,7 @@ namespace Rodin::Solver
    *
    * The matrix, the right-hand side and the solution are copied to the
    * device, factorized and solved there, and the solution is copied back. A
-   * matrix already in device memory, such as a Kokkos::SparseMatrix on the
+   * matrix already in device memory, such as a Kokkos::Math::SparseMatrix on the
    * CUDA backend, is read in place and only the vectors are copied.
    * Symbolic analysis (reordering and symbolic factorization) is reused
    * across explicit @ref factorize calls while the sparsity pattern is
@@ -117,18 +117,18 @@ namespace Rodin::Solver
    * |----------------|-------------|
    * | @ref CuDSS "CuDSS<Math::LinearSystem<Matrix, Math::Vector<Real>>>" | Real double-precision sparse systems whose matrix has an Internal::CuDSSOperator. |
    *
-   * @tparam Matrix Math::SparseMatrix<Real> or Kokkos::SparseMatrix<Real, Backend>.
+   * @tparam Matrix Math::SparseMatrix<Real> or Kokkos::Math::SparseMatrix<Real, Backend>.
    */
-  template <class Matrix>
-  class CuDSS<Math::LinearSystem<Matrix, Math::Vector<Real>>> final
-    : public LinearSolverBase<Math::LinearSystem<Matrix, Math::Vector<Real>>>
+  template <class Matrix, class VectorType_>
+  class CuDSS<Math::LinearSystem<Matrix, VectorType_>> final
+    : public LinearSolverBase<Math::LinearSystem<Matrix, VectorType_>>
   {
     /// @brief Access to the compressed arrays of the matrix.
     using Arrays = Internal::CuDSSOperator<Matrix>;
 
     public:
       using ScalarType = Real;
-      using VectorType = Math::Vector<ScalarType>;
+      using VectorType = VectorType_;
       using OperatorType = Matrix;
       using LinearSystemType = Math::LinearSystem<OperatorType, VectorType>;
       using ProblemBaseType = Variational::ProblemBase<LinearSystemType>;
@@ -155,13 +155,13 @@ namespace Rodin::Solver
        * @tparam T Element type.
        */
       template <class T>
-      struct DeviceArray
+      struct Array
       {
-        DeviceArray() = default;
-        DeviceArray(const DeviceArray&) = delete;
-        DeviceArray& operator=(const DeviceArray&) = delete;
+        Array() = default;
+        Array(const Array&) = delete;
+        Array& operator=(const Array&) = delete;
 
-        ~DeviceArray()
+        ~Array()
         {
           release();
         }
@@ -226,19 +226,19 @@ namespace Rodin::Solver
         cudssMatrix_t solution = nullptr;
 
         /// @brief Row starts of the CSR arrays, copied from a host matrix.
-        DeviceArray<Math::SparseIndex> outer;
+        Array<Math::SparseIndex> outer;
 
         /// @brief Column indices of the CSR arrays, copied from a host matrix.
-        DeviceArray<Math::SparseIndex> inner;
+        Array<Math::SparseIndex> inner;
 
         /// @brief Values, copied from a host matrix.
-        DeviceArray<ScalarType> values;
+        Array<ScalarType> values;
 
         /// @brief Right-hand side on the device.
-        DeviceArray<ScalarType> b;
+        Array<ScalarType> b;
 
         /// @brief Solution on the device.
-        DeviceArray<ScalarType> x;
+        Array<ScalarType> x;
 
         /// @brief Whether reusable symbolic analysis is retained.
         bool symbolic = false;
@@ -542,14 +542,22 @@ namespace Rodin::Solver
 
         auto& res = m_resources;
         configure();
-        upload(res.b.data, axb.getVector().data(), res.rows);
+        if constexpr (Internal::CuDSSVector<VectorType>::Resident)
+        {
+          check(cudaMemcpy(res.b.data, axb.getVector().data(),
+                  res.rows * sizeof(ScalarType), cudaMemcpyDeviceToDevice),
+            "copy the backend right-hand side");
+        }
+        else
+          upload(res.b.data, axb.getVector().data(), res.rows);
         if (!execute(CUDSS_PHASE_SOLVE, Factorization::Numeric))
           return;
         VectorType& x = axb.getSolution();
         x.resize(res.rows);
         check(cudaMemcpy(x.data(), res.x.data, res.rows * sizeof(ScalarType),
-                cudaMemcpyDeviceToHost),
-          "copy the solution to the host");
+                Internal::CuDSSVector<VectorType>::Resident ? cudaMemcpyDeviceToDevice
+                                                            : cudaMemcpyDeviceToHost),
+          "copy the solution");
         record(0, Factorization::Numeric);
       }
 

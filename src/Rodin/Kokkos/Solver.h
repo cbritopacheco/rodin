@@ -10,7 +10,7 @@
 /**
  * @file
  * @brief Krylov solvers of Kokkos-Kernels for systems whose matrix is a
- * Kokkos::SparseMatrix (`Rodin::KokkosKernels`).
+ * Kokkos::Math::SparseMatrix (`Rodin::KokkosKernels`).
  */
 
 #include "Solver/CG.h"

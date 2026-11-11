@@ -57,7 +57,7 @@ namespace Rodin::Assembly::Internal
   struct COOSegment
   {
     /// @brief Arrangement of the entries.
-    ::Rodin::Kokkos::Variational::DeviceLayout layout;
+    ::Rodin::Kokkos::Variational::Layout layout;
 
     /// @brief Offset of the test space in the system.
     Index row = 0;
@@ -345,7 +345,7 @@ namespace Rodin::Assembly::Internal
    * @brief PETSc linear system assembled in device memory, with value
    * constraints eliminated.
    *
-   * The elimination is the one of DeviceSystem: rows of fixed degrees
+   * The elimination is the one of SystemAssembly: rows of fixed degrees
    * of freedom become identity rows holding the fixed value, and the
    * columns of fixed degrees of freedom move to the right-hand side.
    * Eliminated entries keep their coordinates with a zero value, and every
@@ -358,7 +358,7 @@ namespace Rodin::Assembly::Internal
    * local matrix entry once.
    *
    * Identification constraints are resolved on the host, see
-   * DeviceConstraints. The coordinate list is then expanded on the masters
+   * Constraints. The coordinate list is then expanded on the masters
    * of the rows and columns, the identified columns lifting their affine
    * values to the right-hand side, and the identified rows become the rows
    * of their constraints. The expanded pattern is kept as the plain one.
@@ -611,7 +611,7 @@ namespace Rodin::Assembly::Internal
    * @tparam Backend Kokkos backend of the mesh context.
    */
   template <class Backend>
-  class DeviceCOOSystem
+  class COOAssembly
   {
     public:
       /// @brief Mesh context.
@@ -636,13 +636,13 @@ namespace Rodin::Assembly::Internal
       using CacheType = COOCache<MemorySpace>;
 
       /// @brief Constraints of the system.
-      using ConstraintsType = DeviceConstraints<Backend>;
+      using ConstraintsType = Constraints<Backend>;
 
       /// @brief Expansions of the degrees of freedom on their masters.
       using Expansions = typename ConstraintsType::Expansions;
 
       /// @brief Device system whose grouping sums the right-hand side.
-      using ReferenceType = DeviceSystem<Backend>;
+      using ReferenceType = SystemAssembly<Backend>;
 
       /// @brief Numbers of expanded contributions.
       using Sizes = typename ReferenceType::Sizes;
@@ -661,12 +661,10 @@ namespace Rodin::Assembly::Internal
       };
 
       /// @brief Device bilinear integrator.
-      using BilinearType =
-        ::Rodin::Kokkos::Variational::DeviceBilinearFormIntegrator<Backend>;
+      using BilinearType = ::Rodin::Kokkos::Variational::BilinearFormIntegrator<Backend>;
 
       /// @brief Device linear integrator.
-      using LinearType =
-        ::Rodin::Kokkos::Variational::DeviceLinearFormIntegrator<Backend>;
+      using LinearType = ::Rodin::Kokkos::Variational::LinearFormIntegrator<Backend>;
 
       static_assert(std::is_same_v<PetscScalar, Real>,
         "Device assembly of PETSc problems requires real PETSc scalars.");
@@ -677,7 +675,7 @@ namespace Rodin::Assembly::Internal
        * @param rows Number of rows, the size of the test spaces.
        * @param cols Number of columns, the size of the trial spaces.
        */
-      DeviceCOOSystem(const ExecutionSpace& execution, size_t rows, size_t cols)
+      COOAssembly(const ExecutionSpace& execution, size_t rows, size_t cols)
         : m_execution(execution),
           m_rows(rows),
           m_cols(cols),
@@ -797,7 +795,7 @@ namespace Rodin::Assembly::Internal
       void addMatrix(
         Variational::LocalBilinearFormIntegratorBase<Real>& lbfi, Index row, Index col)
       {
-        const auto [integrator, sign] = getDeviceIntegrator<Backend>(lbfi);
+        const auto [integrator, sign] = getIntegrator<Backend>(lbfi);
         m_matrices.push_back({integrator, row, col, sign});
       }
 
@@ -809,7 +807,7 @@ namespace Rodin::Assembly::Internal
       void addMatrix(
         Variational::GlobalBilinearFormIntegratorBase<Real>& gbfi, Index row, Index col)
       {
-        const auto [integrator, sign] = getDeviceIntegrator<Backend>(gbfi);
+        const auto [integrator, sign] = getIntegrator<Backend>(gbfi);
         m_matrices.push_back({integrator, row, col, sign});
       }
 
@@ -822,7 +820,7 @@ namespace Rodin::Assembly::Internal
       void addVector(
         Variational::LinearFormIntegratorBase<Real>& lfi, Index row, Real sign)
       {
-        const auto [integrator, s] = getDeviceIntegrator<Backend>(lfi, sign);
+        const auto [integrator, s] = getIntegrator<Backend>(lfi, sign);
         m_vectors.push_back({integrator, row, s});
       }
 
@@ -3183,7 +3181,7 @@ namespace Rodin::Assembly::Internal
    * @param cols Number of owned columns. @param globalCols Global number of columns.
    * @param doVector Whether the right-hand side is assembled.
    */
-  inline void prepareDeviceSystem(PETSc::Math::LinearSystem& axb, size_t rows,
+  inline void prepareSystem(PETSc::Math::LinearSystem& axb, size_t rows,
     size_t globalRows, size_t cols, size_t globalCols, bool doVector)
   {
     [[maybe_unused]] PetscErrorCode ierr;
@@ -3209,10 +3207,10 @@ namespace Rodin::Assembly::Internal
    * @param rows Number of rows. @param cols Number of columns.
    * @param doVector Whether the right-hand side is assembled.
    */
-  inline void prepareDeviceSystem(
+  inline void prepareSystem(
     PETSc::Math::LinearSystem& axb, size_t rows, size_t cols, bool doVector)
   {
-    prepareDeviceSystem(axb, rows, rows, cols, cols, doVector);
+    prepareSystem(axb, rows, rows, cols, cols, doVector);
   }
 }
 
@@ -3254,7 +3252,7 @@ namespace Rodin::Assembly
         typename FormLanguage::Traits<TrialFES>::MeshType>::ContextType::BackendType;
 
       /// @brief Device system type.
-      using SystemType = Internal::DeviceCOOSystem<BackendType>;
+      using SystemType = Internal::COOAssembly<BackendType>;
 
       /// @brief Default constructor.
       Kokkos() = default;
@@ -3375,7 +3373,7 @@ namespace Rodin::Assembly
         typename FormLanguage::Traits<FES>::MeshType>::ContextType::BackendType;
 
       /// @brief Device system type.
-      using SystemType = Internal::DeviceCOOSystem<BackendType>;
+      using SystemType = Internal::COOAssembly<BackendType>;
 
       /// @brief Default constructor.
       Kokkos() = default;
@@ -3501,7 +3499,7 @@ namespace Rodin::Assembly
         typename FormLanguage::Traits<U>::FESType>::MeshType>::ContextType::BackendType;
 
       /// @brief Device system type.
-      using SystemType = Internal::DeviceCOOSystem<BackendType>;
+      using SystemType = Internal::COOAssembly<BackendType>;
 
       /// @brief Default constructor.
       Kokkos() = default;
@@ -3653,12 +3651,12 @@ namespace Rodin::Assembly
           Index begin = 0, end = 0;
           trial.getOwnershipRange(begin, end);
           const size_t owned = end - begin;
-          Internal::prepareDeviceSystem(
+          Internal::prepareSystem(
             axb, owned, test.getSize(), owned, trial.getSize(), doVector);
         }
         else
         {
-          Internal::prepareDeviceSystem(axb, rows, cols, doVector);
+          Internal::prepareSystem(axb, rows, cols, doVector);
         }
         system.finish(m_cache, doMatrix ? axb.getOperator() : nullptr,
           doVector ? axb.getVector() : nullptr);
@@ -3698,7 +3696,7 @@ namespace Rodin::Assembly
         typename FormLanguage::Traits<U1>::FESType>::MeshType>::ContextType::BackendType;
 
       /// @brief Device system type.
-      using SystemType = Internal::DeviceCOOSystem<BackendType>;
+      using SystemType = Internal::COOAssembly<BackendType>;
 
       /// @brief Default constructor.
       Kokkos() = default;
@@ -3897,13 +3895,13 @@ namespace Rodin::Assembly
         if constexpr (IsDistributed)
         {
           const size_t owned = system.getDistribution().getOwnedSize();
-          Internal::prepareDeviceSystem(axb, owned, input.getTotalTestSize(), owned,
+          Internal::prepareSystem(axb, owned, input.getTotalTestSize(), owned,
             input.getTotalTrialSize(), doVector);
           axb.setFieldStarts(system.getDistribution().getFieldStarts());
         }
         else
         {
-          Internal::prepareDeviceSystem(axb, rows, cols, doVector);
+          Internal::prepareSystem(axb, rows, cols, doVector);
         }
         system.finish(m_cache, doMatrix ? axb.getOperator() : nullptr,
           doVector ? axb.getVector() : nullptr);
@@ -3964,7 +3962,7 @@ namespace Rodin::Kokkos::Variational
      * vector again.
      */
     template <class FES>
-    static ::Kokkos::View<Real*, typename FES::MeshType::MemorySpace> upload(
+    static ::Kokkos::View<Real*, typename FES::MeshType::MemorySpace> getView(
       const FES& fes, ::Vec data)
     {
       using MemorySpace = typename FES::MeshType::MemorySpace;

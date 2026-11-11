@@ -1,4 +1,4 @@
-if (RODIN_USE_KOKKOSKERNELS)
+if (RODIN_USE_KOKKOS)
   add_executable(RodinKokkosSolverKrylovTest KrylovTest.cpp ../Main.cpp)
   target_link_libraries(RodinKokkosSolverKrylovTest PRIVATE
     GTest::gtest Rodin::KokkosKernels Rodin::Solver)

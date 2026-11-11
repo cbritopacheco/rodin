@@ -101,7 +101,7 @@ namespace Rodin::Assembly
                "to traverse this region."
             << Alert::Raise;
         }
-        m_mesh = mesh.getDeviceView();
+        m_mesh = mesh.getView();
       }
 
       /**

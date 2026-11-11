@@ -21,7 +21,7 @@
 #include "Rodin/Alert/MemberFunctionException.h"
 #include "Rodin/Variational/GridFunction.h"
 
-#include "DeviceView.h"
+#include "View.h"
 #include "Integral.h"
 
 namespace Rodin::Kokkos::Variational
@@ -94,7 +94,7 @@ namespace Rodin::Variational
    * @tparam Backend Kokkos backend of the mesh context.
    */
   template <class Backend>
-  struct DeviceProjection<Context::Kokkos<Context::Local, Backend>>
+  struct ContextProjection<Context::Kokkos<Context::Local, Backend>>
   {
     /// @brief Mesh context.
     using ContextType = Context::Kokkos<Context::Local, Backend>;
@@ -142,7 +142,7 @@ namespace Rodin::Variational
       const size_t d =
         ::Rodin::Kokkos::Variational::Internal::getRegionDimension(dimension, region);
       const auto& execution = mesh.getContext().getExecutionSpace();
-      const auto dofs = fes.getDeviceDOFs();
+      const auto dofs = fes.getDOFsView();
       const Index stride = dofs.getStride();
       const Index vdim = fes.getVectorDimension();
       const auto attributes =
@@ -154,9 +154,20 @@ namespace Rodin::Variational
       ::Kokkos::View<Real*, MemorySpace> values(
         ::Kokkos::view_alloc(execution, std::string("Rodin projection values")),
         stride * vdim);
-      evaluate(execution, mesh.getDeviceView(), region, d, attributes, select, owners,
-        values, lower(fn, vdim), dofs, mesh.getPolytopeCount(d), vdim);
+      evaluate(execution, mesh.getView(), region, d, attributes, select, owners, values,
+        lower(fn, vdim), dofs, mesh.getPolytopeCount(d), vdim);
 
+      if constexpr (requires { gf.getData().getView(); })
+      {
+        const auto target = gf.getData().getView();
+        ::Kokkos::parallel_for("Rodin projection copy",
+          ::Kokkos::RangePolicy<ExecutionSpace, ::Kokkos::IndexType<Index>>(
+            execution, 0, stride * vdim),
+          CopyCoefficients{owners, values, target, stride});
+        execution.fence("Rodin projection coefficients");
+      }
+      else
+      {
       const auto hostOwners = ::Kokkos::create_mirror_view(owners);
       const auto hostValues = ::Kokkos::create_mirror_view(values);
       ::Kokkos::deep_copy(execution, hostOwners, owners);
@@ -174,7 +185,24 @@ namespace Rodin::Variational
       }
       if constexpr (requires { gf.flush(); })
         gf.flush();
+      }
     }
+
+    /// @brief Updates only coefficients selected by the projection.
+    struct CopyCoefficients
+    {
+      ::Kokkos::View<Index*, MemorySpace> owners;
+      ::Kokkos::View<Real*, MemorySpace> values;
+      ::Kokkos::View<Real*, MemorySpace> target;
+      Index stride;
+
+      /// @param i Coefficient index.
+      KOKKOS_INLINE_FUNCTION void operator()(Index i) const
+      {
+        if (owners(i % stride))
+          target(i) = values(i);
+      }
+    };
 
     /**
      * @brief Lowers a source to a device view.
@@ -219,7 +247,7 @@ namespace Rodin::Variational
     template <class Derived>
     static auto lowerFunction(const FunctionBase<Derived>& fn)
     {
-      return ::Rodin::Kokkos::Variational::DeviceView<FunctionBase<Derived>>(fn);
+      return ::Rodin::Kokkos::Variational::View<FunctionBase<Derived>>(fn);
     }
 
     /**

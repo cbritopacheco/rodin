@@ -19,7 +19,7 @@
  * @f]
  * whose action on @f$ dF @f$ is the host
  * HyperElasticLaw::getMaterialTangent(). The device law of a host law is
- * given by DeviceLaw.
+ * given by LawView.
  */
 
 #include <concepts>
@@ -170,7 +170,7 @@ namespace Rodin::Kokkos::Variational
    * @f]
    * as Solid::SaintVenantKirchhoff.
    */
-  struct DeviceSaintVenantKirchhoff
+  struct SaintVenantKirchhoffView
   {
     /// @brief Kinematics at a quadrature point.
     struct Point
@@ -287,7 +287,7 @@ namespace Rodin::Kokkos::Variational
    * @f$ P = W_1 \partial \bar I_1 / \partial F + \kappa (J - 1) J F^{-T} @f$,
    * @f$ W_1 = c_1 + 2 c_2 x + 3 c_3 x^2 @f$, as Solid::Yeoh.
    */
-  struct DeviceYeoh
+  struct YeohView
   {
     /// @brief Kinematics at a quadrature point.
     using Point = IsochoricPoint;
@@ -377,7 +377,7 @@ namespace Rodin::Kokkos::Variational
    * @f]
    * as Solid::MooneyRivlin.
    */
-  struct DeviceMooneyRivlin
+  struct MooneyRivlinView
   {
     /// @brief Kinematics at a quadrature point.
     struct Point : IsochoricPoint
@@ -550,15 +550,15 @@ namespace Rodin::Kokkos::Variational
    * Solid::NeoHookean has its own device integrators.
    */
   template <class Law>
-  struct DeviceLaw
+  struct LawView
   {};
 
   /// @brief Device law of Solid::SaintVenantKirchhoff.
   template <>
-  struct DeviceLaw<Solid::SaintVenantKirchhoff>
+  struct LawView<Solid::SaintVenantKirchhoff>
   {
     /// @brief Device law type.
-    using Type = DeviceSaintVenantKirchhoff;
+    using Type = SaintVenantKirchhoffView;
 
     /// @param law Host law. @return Device law.
     static Type get(const Solid::SaintVenantKirchhoff& law)
@@ -569,10 +569,10 @@ namespace Rodin::Kokkos::Variational
 
   /// @brief Device law of Solid::Yeoh.
   template <>
-  struct DeviceLaw<Solid::Yeoh>
+  struct LawView<Solid::Yeoh>
   {
     /// @brief Device law type.
-    using Type = DeviceYeoh;
+    using Type = YeohView;
 
     /// @param law Host law. @return Device law.
     static Type get(const Solid::Yeoh& law)
@@ -584,10 +584,10 @@ namespace Rodin::Kokkos::Variational
 
   /// @brief Device law of Solid::MooneyRivlin.
   template <>
-  struct DeviceLaw<Solid::MooneyRivlin>
+  struct LawView<Solid::MooneyRivlin>
   {
     /// @brief Device law type.
-    using Type = DeviceMooneyRivlin;
+    using Type = MooneyRivlinView;
 
     /// @param law Host law. @return Device law.
     static Type get(const Solid::MooneyRivlin& law)
@@ -597,10 +597,10 @@ namespace Rodin::Kokkos::Variational
     }
   };
 
-  /// @brief Host hyperelastic laws with a device law in DeviceLaw.
+  /// @brief Host hyperelastic laws with a device law in LawView.
   template <class Law>
-  concept DeviceHyperElasticLaw = requires(const Law& law) {
-    { DeviceLaw<Law>::get(law) } -> std::same_as<typename DeviceLaw<Law>::Type>;
+  concept HyperElasticLaw = requires(const Law& law) {
+    { LawView<Law>::get(law) } -> std::same_as<typename LawView<Law>::Type>;
   };
 }
 

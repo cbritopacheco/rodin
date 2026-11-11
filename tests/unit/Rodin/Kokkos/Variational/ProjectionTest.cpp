@@ -24,9 +24,9 @@ namespace Rodin::Tests::Unit
    * Both grid functions start from the same coefficients, so that the
    * degrees of freedom outside the selection are compared too.
    */
-  template <class HostFES, class DeviceFES, class HostProjection, class DeviceProjection>
+  template <class HostFES, class DeviceFES, class HostProjection, class ContextProjection>
   void expectSameProjection(const HostFES& hfes, const DeviceFES& dfes,
-    const HostProjection& host, const DeviceProjection& device)
+    const HostProjection& host, const ContextProjection& device)
   {
     GridFunction hg(hfes);
     fillCoefficients(hg.getData());

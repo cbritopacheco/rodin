@@ -57,7 +57,7 @@ namespace Rodin::Tests::Unit
   void checkDeviceIncidence(
     const HostConnectivity& host, const ResidentConnectivity& resident)
   {
-    const auto view = resident.getDeviceView();
+    const auto view = resident.getView();
     for (size_t d = 0; d <= host.getDimension(); ++d)
     {
       for (size_t dp = 0; dp <= host.getDimension(); ++dp)
