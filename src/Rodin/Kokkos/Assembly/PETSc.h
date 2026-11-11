@@ -21,7 +21,9 @@
 #include <algorithm>
 #include <cstdint>
 #include <limits>
+#include <memory>
 #include <optional>
+#include <type_traits>
 #include <string>
 #include <unordered_map>
 #include <utility>
@@ -112,6 +114,8 @@ namespace Rodin::Assembly::Internal
       return function(narrow);
     }
   };
+
+  struct COODistribution;
 
   /**
    * @brief Device buffers and sparsity pattern kept between the assemblies
@@ -289,6 +293,28 @@ namespace Rodin::Assembly::Internal
 
     /// @brief Start of each distinct expanded coordinate, and the list size.
     ::Kokkos::View<Index*, MemorySpace> expandedStarts;
+
+    /**
+     * @brief Ghosted vector of two entries per row summing the fixed degrees
+     * of freedom over the processes, kept while the distribution keeps its
+     * layout.
+     */
+    std::shared_ptr<std::remove_pointer_t<::Vec>> exchange;
+
+    /// @brief Distribution the exchange was created for.
+    std::shared_ptr<const COODistribution> exchangeLayout;
+
+    /**
+     * @brief Local degrees of freedom held by several processes, the only
+     * ones the exchange changes.
+     */
+    std::vector<Index> exchangeShared;
+
+    /**
+     * @brief Block of each degree of freedom of exchangeShared in the local
+     * form of the exchange.
+     */
+    std::vector<PetscInt> exchangeBlocks;
   };
 
   /**
@@ -377,6 +403,20 @@ namespace Rodin::Assembly::Internal
      * indexed by field then rank.
      */
     std::vector<std::vector<PetscInt>> rows;
+
+    /**
+     * @brief Whether the local degrees of freedom have the same rows in the
+     * PETSc layout as those of another distribution.
+     * @param other Distribution compared.
+     * @return Whether the communicators, the global and local degrees of
+     * freedom and the layouts of the fields are the same.
+     */
+    bool hasLayout(const COODistribution& other) const
+    {
+      return comm == other.comm && begin == other.begin && end == other.end &&
+        size == other.size && globals == other.globals && offsets == other.offsets &&
+        firsts == other.firsts && rows == other.rows;
+    }
 
     /// @brief Gets the number of owned degrees of freedom. @return Owned count.
     PetscInt getOwnedSize() const
@@ -793,7 +833,7 @@ namespace Rodin::Assembly::Internal
       {
         typename ConstraintsType::Resolved constraints;
         if (m_distribution && isFixed(m_constraints.isIdentified()))
-          constraints = resolveDistributed();
+          constraints = resolveDistributed(cache);
         else if (m_constraints.isIdentified())
           constraints = m_constraints.resolve(m_execution);
         const size_t n = std::max(m_rows, m_cols);
@@ -807,7 +847,7 @@ namespace Rodin::Assembly::Internal
           auto values = m_constraints.getValues();
           mask.resize(m_rows, 0);
           values.resize(m_rows, Real(0));
-          synchronize(mask, values);
+          synchronize(cache, mask, values);
           copy(cache.fixed, mask, "Rodin fixed DOFs");
           copy(cache.fixedValues, values, "Rodin fixed values");
         }
@@ -2653,43 +2693,123 @@ namespace Rodin::Assembly::Internal
       }
 
       /**
-       * @brief Sums a value per local degree of freedom over the processes
-       * holding it; collective.
-       * @param[in,out] local Value per local degree of freedom, replaced by
-       * the sum over the processes.
+       * @brief Gets the ghosted vector of two entries per row summing the
+       * fixed degrees of freedom over the processes; collective.
+       *
+       * The vector is kept in the cache, and created again when the layout
+       * of the distribution changes on a process, together with the local
+       * degrees of freedom held by several processes: the ghosts and the
+       * owned degrees of freedom ghosted by another process.
+       * @param cache Cache keeping the vector, the shared degrees of freedom
+       * and their blocks in the local form.
+       * @return Ghosted vector.
        */
-      void sum(std::vector<PetscScalar>& local) const
+      ::Vec getExchange(CacheType& cache) const
       {
         const auto& dist = *m_distribution;
-        const PetscInt owned = dist.getOwnedSize();
-        const auto rows = dist.getPETScIndices();
-        std::vector<PetscInt> ghosts;
-        std::vector<PetscInt> position(m_rows);
-        for (size_t i = 0; i < m_rows; ++i)
+        const int stale = !cache.exchange || !cache.exchangeLayout->hasLayout(dist);
+        int any = 0;
+        MPI_Allreduce(&stale, &any, 1, MPI_INT, MPI_LOR, dist.comm);
+        if (any)
         {
-          const PetscInt g = rows[i];
-          if (g >= dist.begin && g < dist.end)
+          const PetscInt owned = dist.getOwnedSize();
+          const auto rows = dist.getPETScIndices();
+          std::vector<PetscInt> ghosts;
+          std::vector<PetscInt> blocks(m_rows);
+          for (size_t i = 0; i < m_rows; ++i)
           {
-            position[i] = g - dist.begin;
+            const PetscInt g = rows[i];
+            if (g >= dist.begin && g < dist.end)
+            {
+              blocks[i] = g - dist.begin;
+            }
+            else
+            {
+              blocks[i] = owned + static_cast<PetscInt>(ghosts.size());
+              ghosts.push_back(g);
+            }
           }
-          else
+          PetscErrorCode ierr;
+          ::Vec v;
+          ierr = VecCreateGhostBlock(dist.comm, 2, 2 * owned, 2 * dist.size,
+            static_cast<PetscInt>(ghosts.size()), ghosts.data(), &v);
+          assert(ierr == PETSC_SUCCESS);
+          cache.exchange.reset(v, [](::Vec x) { VecDestroy(&x); });
+          cache.exchangeLayout = std::make_shared<const COODistribution>(dist);
+
+          // The ghosts count on their owners, which finds the owned degrees
+          // of freedom ghosted by another process.
+          ::Vec form;
+          ierr = VecGhostGetLocalForm(v, &form);
+          assert(ierr == PETSC_SUCCESS);
+          ierr = VecSet(form, PetscScalar(0));
+          assert(ierr == PETSC_SUCCESS);
+          PetscScalar* array = nullptr;
+          ierr = VecGetArray(form, &array);
+          assert(ierr == PETSC_SUCCESS);
+          for (size_t k = 0; k < ghosts.size(); ++k)
+            array[2 * (owned + static_cast<PetscInt>(k))] = PetscScalar(1);
+          ierr = VecRestoreArray(form, &array);
+          assert(ierr == PETSC_SUCCESS);
+          ierr = VecGhostUpdateBegin(v, ADD_VALUES, SCATTER_REVERSE);
+          assert(ierr == PETSC_SUCCESS);
+          ierr = VecGhostUpdateEnd(v, ADD_VALUES, SCATTER_REVERSE);
+          assert(ierr == PETSC_SUCCESS);
+          const PetscScalar* counts = nullptr;
+          ierr = VecGetArrayRead(form, &counts);
+          assert(ierr == PETSC_SUCCESS);
+          cache.exchangeShared.clear();
+          cache.exchangeBlocks.clear();
+          for (size_t i = 0; i < m_rows; ++i)
           {
-            position[i] = owned + static_cast<PetscInt>(ghosts.size());
-            ghosts.push_back(g);
+            if (blocks[i] >= owned || PetscRealPart(counts[2 * blocks[i]]) > Real(0.5))
+            {
+              cache.exchangeShared.push_back(static_cast<Index>(i));
+              cache.exchangeBlocks.push_back(blocks[i]);
+            }
           }
+          ierr = VecRestoreArrayRead(form, &counts);
+          assert(ierr == PETSC_SUCCESS);
+          ierr = VecGhostRestoreLocalForm(v, &form);
+          assert(ierr == PETSC_SUCCESS);
+          (void)ierr;
         }
-        ::Vec v;
-        PetscErrorCode ierr = VecCreateGhost(dist.comm, owned, dist.size,
-          static_cast<PetscInt>(ghosts.size()), ghosts.data(), &v);
-        assert(ierr == PETSC_SUCCESS);
+        return cache.exchange.get();
+      }
+
+      /**
+       * @brief Makes the fixed degrees of freedom the same on every process
+       * holding them; collective.
+       *
+       * A degree of freedom is fixed when one process fixes it, to the mean
+       * of the values the processes fixing it impose. The fixed count and
+       * the sum of the values of each degree of freedom are summed in one
+       * exchange, which only changes the degrees of freedom held by several
+       * processes.
+       * @param cache Cache keeping the exchange.
+       * @param[in,out] mask Whether each local degree of freedom is fixed.
+       * @param[in,out] values Fixed value of each local degree of freedom.
+       */
+      void synchronize(CacheType& cache, std::vector<unsigned char>& mask,
+        std::vector<Real>& values) const
+      {
+        ::Vec v = getExchange(cache);
+        const auto& shared = cache.exchangeShared;
+        const auto& blocks = cache.exchangeBlocks;
+        PetscErrorCode ierr;
         ::Vec form;
         ierr = VecGhostGetLocalForm(v, &form);
         assert(ierr == PETSC_SUCCESS);
         PetscScalar* array = nullptr;
         ierr = VecGetArray(form, &array);
         assert(ierr == PETSC_SUCCESS);
-        for (size_t i = 0; i < m_rows; ++i)
-          array[position[i]] = local[i];
+        for (size_t j = 0; j < shared.size(); ++j)
+        {
+          const Index i = shared[j];
+          const PetscInt k = 2 * blocks[j];
+          array[k] = mask[i] ? PetscScalar(1) : PetscScalar(0);
+          array[k + 1] = mask[i] ? PetscScalar(values[i]) : PetscScalar(0);
+        }
         ierr = VecRestoreArray(form, &array);
         assert(ierr == PETSC_SUCCESS);
         ierr = VecGhostUpdateBegin(v, ADD_VALUES, SCATTER_REVERSE);
@@ -2700,44 +2820,22 @@ namespace Rodin::Assembly::Internal
         assert(ierr == PETSC_SUCCESS);
         ierr = VecGhostUpdateEnd(v, INSERT_VALUES, SCATTER_FORWARD);
         assert(ierr == PETSC_SUCCESS);
-        ierr = VecGetArray(form, &array);
+        const PetscScalar* sums = nullptr;
+        ierr = VecGetArrayRead(form, &sums);
         assert(ierr == PETSC_SUCCESS);
-        for (size_t i = 0; i < m_rows; ++i)
-          local[i] = array[position[i]];
-        ierr = VecRestoreArray(form, &array);
+        for (size_t j = 0; j < shared.size(); ++j)
+        {
+          const Index i = shared[j];
+          const PetscInt k = 2 * blocks[j];
+          const Real c = PetscRealPart(sums[k]);
+          mask[i] = c > Real(0.5);
+          values[i] = mask[i] ? PetscRealPart(sums[k + 1]) / c : Real(0);
+        }
+        ierr = VecRestoreArrayRead(form, &sums);
         assert(ierr == PETSC_SUCCESS);
         ierr = VecGhostRestoreLocalForm(v, &form);
         assert(ierr == PETSC_SUCCESS);
-        ierr = VecDestroy(&v);
-        assert(ierr == PETSC_SUCCESS);
         (void)ierr;
-      }
-
-      /**
-       * @brief Makes the fixed degrees of freedom the same on every process
-       * holding them; collective.
-       *
-       * A degree of freedom is fixed when one process fixes it, to the mean
-       * of the values the processes fixing it impose.
-       * @param[in,out] mask Whether each local degree of freedom is fixed.
-       * @param[in,out] values Fixed value of each local degree of freedom.
-       */
-      void synchronize(std::vector<unsigned char>& mask, std::vector<Real>& values) const
-      {
-        std::vector<PetscScalar> count(m_rows), value(m_rows);
-        for (size_t i = 0; i < m_rows; ++i)
-        {
-          count[i] = mask[i] ? PetscScalar(1) : PetscScalar(0);
-          value[i] = mask[i] ? PetscScalar(values[i]) : PetscScalar(0);
-        }
-        sum(count);
-        sum(value);
-        for (size_t i = 0; i < m_rows; ++i)
-        {
-          const Real c = PetscRealPart(count[i]);
-          mask[i] = c > Real(0.5);
-          values[i] = mask[i] ? PetscRealPart(value[i]) / c : Real(0);
-        }
       }
 
       /**
@@ -2749,9 +2847,12 @@ namespace Rodin::Assembly::Internal
        * The masters the process does not hold become local degrees of
        * freedom past the held ones, with their global index, so that the
        * entries the expansion moves to them are sent to their owners.
+       * @param cache Cache keeping the exchange of the fixed degrees of
+       * freedom.
        * @return Resolved identifications, in the local numbering.
        */
-      typename ConstraintsType::Resolved resolveDistributed()
+      typename ConstraintsType::Resolved resolveDistributed(
+        [[maybe_unused]] CacheType& cache)
       {
 #ifndef RODIN_USE_MPI
         Alert::Exception() << "Distributed device systems require MPI." << Alert::Raise;
@@ -2765,7 +2866,7 @@ namespace Rodin::Assembly::Internal
         mask.resize(m_rows, 0);
         values.resize(m_rows, Real(0));
         if (isFixed(m_constraints.isConstrained()))
-          synchronize(mask, values);
+          synchronize(cache, mask, values);
         m_constraints.setFixed(std::move(mask), std::move(values));
         std::vector<Index> globals(dist.globals.begin(), dist.globals.end());
         ConstraintMap map(static_cast<size_t>(dist.size));
