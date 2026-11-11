@@ -3473,20 +3473,99 @@ namespace Rodin::Assembly
         evaluate(execution, mesh.getDeviceView(), attributes, owners, values, value, dofs,
           mesh.getFaceCount(), vdim);
 
-        const auto host = ::Kokkos::create_mirror_view(owners);
-        const auto hostValues = ::Kokkos::create_mirror_view(values);
-        ::Kokkos::deep_copy(execution, host, owners);
-        ::Kokkos::deep_copy(execution, hostValues, values);
+        // Only the constrained degrees of freedom, a fraction of the space,
+        // are brought back to the host.
+        const auto range =
+          ::Kokkos::RangePolicy<ExecutionSpace, ::Kokkos::IndexType<Index>>(
+            execution, 0, stride);
+        Index count = 0;
+        ::Kokkos::parallel_reduce("Rodin boundary count", range,
+          BoundaryCount{owners}, count);
+        ::Kokkos::View<Index*, MemorySpace> indices(
+          ::Kokkos::view_alloc(execution, ::Kokkos::WithoutInitializing,
+            std::string("Rodin boundary indices")),
+          count);
+        ::Kokkos::View<Real*, MemorySpace> compact(
+          ::Kokkos::view_alloc(execution, ::Kokkos::WithoutInitializing,
+            std::string("Rodin boundary compact values")),
+          count * vdim);
+        ::Kokkos::parallel_scan("Rodin boundary compaction", range,
+          BoundaryCompaction{owners, values, indices, compact, stride, vdim});
+        const auto hostIndices =
+          ::Kokkos::create_mirror_view(::Kokkos::WithoutInitializing, indices);
+        const auto hostValues =
+          ::Kokkos::create_mirror_view(::Kokkos::WithoutInitializing, compact);
+        ::Kokkos::deep_copy(execution, hostIndices, indices);
+        ::Kokkos::deep_copy(execution, hostValues, compact);
         execution.fence("Rodin boundary values");
         for (Index r = 0; r < vdim; ++r)
         {
-          for (Index i = 0; i < stride; ++i)
-          {
-            if (host(i) != std::numeric_limits<Index>::max())
-              res.emplace_hint(res.end(), i + r * stride, hostValues(i + r * stride));
-          }
+          for (Index k = 0; k < count; ++k)
+            res.emplace_hint(res.end(), hostIndices(k) + r * stride, hostValues(k * vdim + r));
         }
       }
+
+      /// @brief Counts the constrained scalar degrees of freedom.
+      struct BoundaryCount
+      {
+        /// @brief First constrained face of every scalar degree of freedom.
+        ::Kokkos::View<Index*, MemorySpace> owners;
+
+        /**
+         * @brief Counts a degree of freedom when it is constrained.
+         * @param i Scalar degree of freedom.
+         * @param count Running count.
+         */
+        KOKKOS_INLINE_FUNCTION void operator()(Index i, Index& count) const
+        {
+          if (owners(i) != ::Kokkos::Experimental::finite_max_v<Index>)
+            ++count;
+        }
+      };
+
+      /**
+       * @brief Gathers the constrained scalar degrees of freedom and their
+       * values, by increasing degree of freedom.
+       */
+      struct BoundaryCompaction
+      {
+        /// @brief First constrained face of every scalar degree of freedom.
+        ::Kokkos::View<Index*, MemorySpace> owners;
+
+        /// @brief Component r of the value of the degree of freedom i at i + r * stride.
+        ::Kokkos::View<Real*, MemorySpace> values;
+
+        /// @brief Constrained scalar degrees of freedom.
+        ::Kokkos::View<Index*, MemorySpace> indices;
+
+        /// @brief Component r of the value of the constrained k at k * vdim + r.
+        ::Kokkos::View<Real*, MemorySpace> compact;
+
+        /// @brief Offset between components.
+        Index stride;
+
+        /// @brief Vector dimension of the space.
+        Index vdim;
+
+        /**
+         * @brief Stores a constrained degree of freedom at its rank.
+         * @param i Scalar degree of freedom.
+         * @param position Rank of @p i among the constrained ones.
+         * @param final Whether the ranks are final.
+         */
+        KOKKOS_INLINE_FUNCTION void operator()(Index i, Index& position, bool final) const
+        {
+          if (owners(i) == ::Kokkos::Experimental::finite_max_v<Index>)
+            return;
+          if (final)
+          {
+            indices(position) = i;
+            for (Index r = 0; r < vdim; ++r)
+              compact(position * vdim + r) = values(i + r * stride);
+          }
+          ++position;
+        }
+      };
 
       /**
        * @brief Assigns the degrees of freedom of a constrained face to their
