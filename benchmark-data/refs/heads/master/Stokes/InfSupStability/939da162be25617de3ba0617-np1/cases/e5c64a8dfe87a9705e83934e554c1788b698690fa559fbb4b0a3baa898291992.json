@@ -95,6 +95,97 @@
           }
         }
       ]
+    },
+    {
+      "commit": "028906efd3840770ae6c4baed2742247e80ef39e",
+      "date": "2026-11-11T15:08:47.687671+00:00",
+      "run": "42706847443.1",
+      "results": [
+        {
+          "name": "Stokes/MixedStability/Affine/P4P3/Quadrilateral/4/16/real_time",
+          "value": 8834578.312499452,
+          "unit": "ns",
+          "metric": "real_time",
+          "samples": [
+            8834578.312499452
+          ],
+          "records": [
+            {
+              "name": "Stokes/MixedStability/Affine/P4P3/Quadrilateral/4/16/real_time",
+              "family_index": 0,
+              "per_family_instance_index": 0,
+              "run_name": "Stokes/MixedStability/Affine/P4P3/Quadrilateral/4/16/real_time",
+              "run_type": "iteration",
+              "repetitions": 1,
+              "repetition_index": 0,
+              "threads": 1,
+              "iterations": 32,
+              "real_time": 8834578.312499452,
+              "cpu_time": 8834355.750000002,
+              "time_unit": "ns",
+              "cells": 9.0,
+              "dimension": 2.0,
+              "divergence_nnz": 6728.0,
+              "free_velocity_dofs": 242.0,
+              "geometry_degree": 1.0,
+              "pressure_degree": 3.0,
+              "pressure_dofs": 100.0,
+              "pressure_mass_nnz": 2116.0,
+              "quadrature_order": 16.0,
+              "quadrature_points_per_cell": 81.0,
+              "velocity_degree": 4.0,
+              "velocity_dofs": 338.0,
+              "velocity_nnz": 10658.0,
+              "zero_mean_pressure_dofs": 99.0
+            }
+          ],
+          "context": {
+            "date": "2026-11-10T15:04:12+00:00",
+            "host_name": "runnervm7aw5e",
+            "executable": "/home/runner/work/rodin/rodin/build-benchmarks/tests/benchmarks/RodinMixedStabilityBenchmarks",
+            "num_cpus": 4,
+            "mhz_per_cpu": 3710,
+            "cpu_scaling_enabled": false,
+            "aslr_enabled": true,
+            "caches": [
+              {
+                "type": "Data",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Instruction",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 2,
+                "size": 1048576,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 3,
+                "size": 33554432,
+                "num_sharing": 4
+              }
+            ],
+            "load_avg": [
+              1.38184,
+              0.441406,
+              0.15918
+            ],
+            "library_version": "v1.9.4",
+            "library_build_type": "release",
+            "json_schema_version": 1,
+            "compiler": "14.2.0",
+            "scope": "Mixed-stability spectrum; FE assembly excluded"
+          }
+        }
+      ]
     }
   ],
   "format": "googlecpp",

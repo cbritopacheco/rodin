@@ -82,6 +82,84 @@
           }
         }
       ]
+    },
+    {
+      "commit": "028906efd3840770ae6c4baed2742247e80ef39e",
+      "date": "2026-11-11T15:08:47.687671+00:00",
+      "run": "42706847443.1",
+      "results": [
+        {
+          "name": "Interpolation/P2Vector/ProvenanceFallback/dimension:2/operation:6",
+          "value": 100.31205508630913,
+          "unit": "ns",
+          "metric": "cpu_time",
+          "samples": [
+            100.31205508630913
+          ],
+          "records": [
+            {
+              "name": "Interpolation/P2Vector/ProvenanceFallback/dimension:2/operation:6",
+              "family_index": 27,
+              "per_family_instance_index": 0,
+              "run_name": "Interpolation/P2Vector/ProvenanceFallback/dimension:2/operation:6",
+              "run_type": "iteration",
+              "repetitions": 1,
+              "repetition_index": 0,
+              "threads": 1,
+              "iterations": 2804617,
+              "real_time": 100.31454027412536,
+              "cpu_time": 100.31205508630913,
+              "time_unit": "ns",
+              "absolute_error": 2.482534153247273e-15,
+              "dofs": 98.0,
+              "items_per_second": 9968891.566817107
+            }
+          ],
+          "context": {
+            "date": "2026-11-10T18:26:05+00:00",
+            "host_name": "runnervm7aw5e",
+            "executable": "/home/runner/work/rodin/rodin/build-benchmarks/tests/benchmarks/RodinGridFunctionBenchmarks",
+            "num_cpus": 4,
+            "mhz_per_cpu": 2931,
+            "cpu_scaling_enabled": false,
+            "aslr_enabled": false,
+            "caches": [
+              {
+                "type": "Data",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Instruction",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 2,
+                "size": 524288,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 3,
+                "size": 33554432,
+                "num_sharing": 4
+              }
+            ],
+            "load_avg": [
+              0.819336,
+              0.26123,
+              0.0888672
+            ],
+            "library_version": "v1.9.4",
+            "library_build_type": "release",
+            "json_schema_version": 1
+          }
+        }
+      ]
     }
   ],
   "format": "googlecpp",

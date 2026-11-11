@@ -34,6 +34,36 @@
           ]
         }
       ]
+    },
+    {
+      "commit": "028906efd3840770ae6c4baed2742247e80ef39e",
+      "date": "2026-11-11T15:08:47.687671+00:00",
+      "run": "42706847443.1",
+      "results": [
+        {
+          "name": "Hexahedron/3/5/0/3/interior/1",
+          "value": 11905.0465967,
+          "unit": "ns",
+          "metric": "process_cpu_time",
+          "samples": [
+            11905.0465967
+          ],
+          "records": [
+            {
+              "geometry": "Hexahedron",
+              "degree": "3",
+              "resolution": "5",
+              "cells": "64",
+              "distortion": "0.000000",
+              "warp_degree": "3",
+              "query": "interior",
+              "pruning": "1",
+              "samples": "64",
+              "ns": "11905.0465967"
+            }
+          ]
+        }
+      ]
     }
   ],
   "format": "csv",

@@ -79,6 +79,81 @@
           }
         }
       ]
+    },
+    {
+      "commit": "028906efd3840770ae6c4baed2742247e80ef39e",
+      "date": "2026-11-11T15:08:47.687671+00:00",
+      "run": "42706847443.1",
+      "results": [
+        {
+          "name": "P1Benchmark/UniformTriangular32_Build",
+          "value": 0.24059909693252943,
+          "unit": "ns",
+          "metric": "cpu_time",
+          "samples": [
+            0.24059909693252943
+          ],
+          "records": [
+            {
+              "name": "P1Benchmark/UniformTriangular32_Build",
+              "family_index": 1,
+              "per_family_instance_index": 0,
+              "run_name": "P1Benchmark/UniformTriangular32_Build",
+              "run_type": "iteration",
+              "repetitions": 1,
+              "repetition_index": 0,
+              "threads": 1,
+              "iterations": 1161039495,
+              "real_time": 0.24061253058406115,
+              "cpu_time": 0.24059909693252943,
+              "time_unit": "ns"
+            }
+          ],
+          "context": {
+            "date": "2026-11-10T18:21:59+00:00",
+            "host_name": "runnervm7aw5e",
+            "executable": "/home/runner/work/rodin/rodin/build-benchmarks/tests/benchmarks/RodinVariationalP1Benchmarks",
+            "num_cpus": 4,
+            "mhz_per_cpu": 2600,
+            "cpu_scaling_enabled": true,
+            "aslr_enabled": false,
+            "caches": [
+              {
+                "type": "Data",
+                "level": 1,
+                "size": 49152,
+                "num_sharing": 2
+              },
+              {
+                "type": "Instruction",
+                "level": 1,
+                "size": 65536,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 2,
+                "size": 2097152,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 3,
+                "size": 503316480,
+                "num_sharing": 4
+              }
+            ],
+            "load_avg": [
+              1.23486,
+              0.395508,
+              0.140625
+            ],
+            "library_version": "v1.9.4",
+            "library_build_type": "release",
+            "json_schema_version": 1
+          }
+        }
+      ]
     }
   ],
   "format": "googlecpp",

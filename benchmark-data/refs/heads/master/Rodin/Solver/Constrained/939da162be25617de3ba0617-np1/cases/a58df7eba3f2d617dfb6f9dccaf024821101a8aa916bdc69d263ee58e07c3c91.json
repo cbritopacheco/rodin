@@ -94,6 +94,96 @@
           }
         }
       ]
+    },
+    {
+      "commit": "028906efd3840770ae6c4baed2742247e80ef39e",
+      "date": "2026-11-11T15:08:47.687671+00:00",
+      "run": "42706847443.1",
+      "results": [
+        {
+          "name": "Poisson/Constrained/H1/P1/Real/Pyramid/9/real_time",
+          "value": 370396.85676420876,
+          "unit": "ns",
+          "metric": "real_time",
+          "samples": [
+            370396.85676420876
+          ],
+          "records": [
+            {
+              "name": "Poisson/Constrained/H1/P1/Real/Pyramid/9/real_time",
+              "family_index": 8,
+              "per_family_instance_index": 2,
+              "run_name": "Poisson/Constrained/H1/P1/Real/Pyramid/9/real_time",
+              "run_type": "iteration",
+              "repetitions": 1,
+              "repetition_index": 0,
+              "threads": 1,
+              "iterations": 754,
+              "real_time": 370396.85676420876,
+              "cpu_time": 370482.4748010258,
+              "time_unit": "ns",
+              "cells": 3072.0,
+              "degree": 1.0,
+              "dofs": 1241.0,
+              "initial_relative_residual": 1.0,
+              "local_entries_per_operator_term": 76800.0,
+              "nnz": 11517.0,
+              "quadrature_order": 8.0,
+              "quadrature_points_per_cell": 47.0,
+              "relative_coefficient_error": 1.580145907276571e-13,
+              "relative_residual": 9.621832536883386e-14,
+              "solver_reported_iterations": 37.0,
+              "system_rows": 1241.0
+            }
+          ],
+          "context": {
+            "date": "2026-11-10T15:41:49+00:00",
+            "host_name": "runnervm7aw5e",
+            "executable": "/home/runner/work/rodin/rodin/build-benchmarks/tests/benchmarks/RodinConstrainedSolveBenchmarks",
+            "num_cpus": 4,
+            "mhz_per_cpu": 2937,
+            "cpu_scaling_enabled": false,
+            "aslr_enabled": true,
+            "caches": [
+              {
+                "type": "Data",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Instruction",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 2,
+                "size": 524288,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 3,
+                "size": 33554432,
+                "num_sharing": 4
+              }
+            ],
+            "load_avg": [
+              0.853027,
+              0.255859,
+              0.090332
+            ],
+            "library_version": "v1.9.4",
+            "library_build_type": "release",
+            "json_schema_version": 1,
+            "assembly_backend": "Eigen/Sequential",
+            "compiler": "14.2.0",
+            "timed_operation": "CG setup and solve; zero initial guess"
+          }
+        }
+      ]
     }
   ],
   "format": "googlecpp",

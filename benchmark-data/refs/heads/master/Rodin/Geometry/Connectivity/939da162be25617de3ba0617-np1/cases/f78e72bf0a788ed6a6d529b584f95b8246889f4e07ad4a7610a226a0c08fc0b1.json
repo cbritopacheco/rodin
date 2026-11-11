@@ -85,6 +85,87 @@
           }
         }
       ]
+    },
+    {
+      "commit": "028906efd3840770ae6c4baed2742247e80ef39e",
+      "date": "2026-11-11T15:08:47.687671+00:00",
+      "run": "42706847443.1",
+      "results": [
+        {
+          "name": "ConnectivityBenchmark/Edge_Cold_Compute_0_0",
+          "value": 1090363.629921261,
+          "unit": "ns",
+          "metric": "cpu_time",
+          "samples": [
+            1090363.629921261
+          ],
+          "records": [
+            {
+              "name": "ConnectivityBenchmark/Edge_Cold_Compute_0_0",
+              "family_index": 2,
+              "per_family_instance_index": 0,
+              "run_name": "ConnectivityBenchmark/Edge_Cold_Compute_0_0",
+              "run_type": "iteration",
+              "repetitions": 1,
+              "repetition_index": 0,
+              "threads": 1,
+              "iterations": 254,
+              "real_time": 1091046.799213873,
+              "cpu_time": 1090363.629921261,
+              "time_unit": "ns",
+              "D": 1.0,
+              "cells": 4095.0,
+              "entities_1": 4095.0,
+              "from": 0.0,
+              "to": 0.0,
+              "vertices": 4096.0
+            }
+          ],
+          "context": {
+            "date": "2026-11-10T14:39:28+00:00",
+            "host_name": "runnervm7aw5e",
+            "executable": "/home/runner/work/rodin/rodin/build-benchmarks/tests/benchmarks/RodinGeometryConnectivityBenchmarks",
+            "num_cpus": 4,
+            "mhz_per_cpu": 2656,
+            "cpu_scaling_enabled": false,
+            "aslr_enabled": false,
+            "caches": [
+              {
+                "type": "Data",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Instruction",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 2,
+                "size": 524288,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 3,
+                "size": 33554432,
+                "num_sharing": 4
+              }
+            ],
+            "load_avg": [
+              1.27393,
+              0.516602,
+              0.194824
+            ],
+            "library_version": "v1.9.4",
+            "library_build_type": "release",
+            "json_schema_version": 1
+          }
+        }
+      ]
     }
   ],
   "format": "googlecpp",
