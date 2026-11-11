@@ -128,7 +128,8 @@ namespace Rodin::Assembly::Internal
    * the distinct coordinates sorted by row then column, which it analyses
    * in linear time, and the values summed per coordinate on the device. Integrators
    * restricted to attributes list their coordinates at every assembly,
-   * since the attributes of the cells may change. The buffers are reused
+   * since the attributes of the cells may change, and the pattern is
+   * analysed again only when they moved. The buffers are reused
    * while their size does not change.
    *
    * A copy starts empty, so copies never share buffers.
@@ -1615,15 +1616,19 @@ namespace Rodin::Assembly::Internal
        * @param cols Column coordinates.
        * @param previousRows Row coordinates of the previous pattern.
        * @param previousCols Column coordinates of the previous pattern.
+       * @param begin Position of the first coordinate compared.
+       * @param end Position past the last coordinate compared, the end of
+       * the list by default.
        * @return Number of differing coordinates.
        */
       template <class Indices>
       static size_t countChanges(const ExecutionSpace& execution, const Indices& rows,
-        const Indices& cols, const Indices& previousRows, const Indices& previousCols)
+        const Indices& cols, const Indices& previousRows, const Indices& previousCols,
+        size_t begin = 0, size_t end = std::numeric_limits<size_t>::max())
       {
         size_t changes = 0;
         ::Kokkos::parallel_reduce("Rodin::Assembly::Kokkos::PETSc::pattern",
-          Range(execution, 0, rows.extent(0)),
+          Range(execution, begin, std::min<size_t>(end, rows.extent(0))),
           ChangeCount<Indices>{rows, cols, previousRows, previousCols}, changes);
         return changes;
       }
@@ -2129,8 +2134,21 @@ namespace Rodin::Assembly::Internal
         const size_t diagonal = std::min(m_rows, m_cols);
         const size_t count = tail + diagonal;
 
-        const bool index = !cache.indexed || restricted || !m_operators.empty() ||
-          cache.segments != segments || cache.rows.extent(0) != count;
+        // When only the restricted segments may have moved, they alone are
+        // listed again and compared with the kept pattern.
+        const bool kept = cache.indexed && m_operators.empty() &&
+          cache.segments == segments && cache.rows.extent(0) == count;
+        const bool index = !kept || restricted;
+        const bool partial = kept && restricted;
+        std::vector<bool> listed(segments.size(), index);
+        if (partial)
+        {
+          for (size_t s = 0; s < segments.size(); ++s)
+          {
+            listed[s] = !segments[s].layout.attributes.empty() ||
+              !segments[s].layout.trialAttributes.empty();
+          }
+        }
         resize(cache.values, count, "Rodin COO values");
         if (index)
         {
@@ -2146,15 +2164,45 @@ namespace Rodin::Assembly::Internal
           const size_t s = segment[k];
           const bool first = !filled[s];
           m.integrator->fill(cache.values, offsets[s], m.sign, !first,
-            first && index ? cache.nextRows : none,
-            first && index ? cache.nextCols : none);
+            first && listed[s] ? cache.nextRows : none,
+            first && listed[s] ? cache.nextCols : none);
           ::Rodin::Kokkos::Internal::checkLaunches("A device bilinear integrator");
           filled[s] = true;
         }
         const auto range = std::make_pair(offsets.back(), tail);
         ::Kokkos::deep_copy(
           m_execution, ::Kokkos::subview(cache.values, range), host(entries.values));
-        if (index)
+        if (partial)
+        {
+          // The other segments, the diagonal and the kept pattern stay.
+          bool changed = false;
+          for (size_t s = 0; s < segments.size(); ++s)
+          {
+            if (!listed[s])
+              continue;
+            shift(m_execution, cache.nextRows, cache.nextCols, offsets[s],
+              segments[s].count, segments[s].row, segments[s].col);
+            if (countChanges(m_execution, cache.nextRows, cache.nextCols, cache.rows,
+                  cache.cols, offsets[s], offsets[s + 1]) == 0)
+              continue;
+            const auto moved = std::make_pair(offsets[s], offsets[s + 1]);
+            ::Kokkos::deep_copy(m_execution, ::Kokkos::subview(cache.rows, moved),
+              ::Kokkos::subview(cache.nextRows, moved));
+            ::Kokkos::deep_copy(m_execution, ::Kokkos::subview(cache.cols, moved),
+              ::Kokkos::subview(cache.nextCols, moved));
+            changed = true;
+          }
+          if (changed)
+          {
+            sortPattern(m_execution, m_cols, cache.segments, offsets, cache.rows,
+              cache.cols, cache.order);
+            cache.starts = cache.order.visit([&](const auto& order) {
+              return distinctStarts(m_execution, cache.rows, cache.cols, order);
+            });
+            cache.matrix = -1;
+          }
+        }
+        else if (index)
         {
           for (size_t s = 0; s < segments.size(); ++s)
           {

@@ -460,6 +460,60 @@ namespace Rodin::Tests::Unit
   }
 
   /**
+   * @brief Integrators restricted to attributes follow the attributes of
+   * the cells between assemblies, while the pattern is kept when they do
+   * not move.
+   */
+  void checkMovedAttributes(HostMesh source)
+  {
+    const size_t d = source.getDimension();
+    const Index cells = source.getCellCount();
+    for (Index i = 0; i < cells; ++i)
+      source.setAttribute({d, i}, Geometry::Attribute(1 + i % 2));
+    DeviceMesh mesh(TestContext{}, source);
+    P1 fes(mesh);
+    TrialFunction su(fes);
+    TestFunction sv(fes);
+    PETSc::Variational::TrialFunction pu(fes);
+    PETSc::Variational::TestFunction pv(fes);
+    RealFunction f(
+      KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real { return p.x() + p.y(); });
+    Problem sp(su, sv);
+    sp = Integral(Grad(su), Grad(sv)) + Integral(su, sv).over(1) +
+      BoundaryIntegral(su, sv).over(2) - Integral(f, sv) +
+      DirichletBC(su, RealFunction(1)).on(1);
+    Problem pp(pu, pv);
+    pp = Integral(Grad(pu), Grad(pv)) + Integral(pu, pv).over(1) +
+      BoundaryIntegral(pu, pv).over(2) - Integral(f, pv) +
+      DirichletBC(pu, RealFunction(1)).on(1);
+    expectSameSystem(sp, pp);
+    auto& axb = pp.getLinearSystem();
+    PetscObjectState state = 0;
+    ASSERT_EQ(MatGetNonzeroState(axb.getOperator(), &state), PETSC_SUCCESS);
+    expectSameSystem(sp, pp);
+    PetscObjectState again = 0;
+    ASSERT_EQ(MatGetNonzeroState(axb.getOperator(), &again), PETSC_SUCCESS);
+    EXPECT_EQ(state, again);
+
+    // As many cells keep the attribute 1, so that on a mesh of one cell
+    // type the restricted entries keep their count but not their
+    // coordinates.
+    for (Index i = 0; i < cells; ++i)
+      mesh.setAttribute({d, i}, Geometry::Attribute(2 - i % 2));
+    expectSameSystem(sp, pp);
+    expectSameSystem(sp, pp);
+
+    // Back to the first attributes, then to fewer cells with the attribute 1.
+    for (Index i = 0; i < cells; ++i)
+      mesh.setAttribute({d, i}, Geometry::Attribute(1 + i % 2));
+    expectSameSystem(sp, pp);
+    for (Index i = 0; i < cells; ++i)
+      mesh.setAttribute({d, i}, Geometry::Attribute(i % 4 == 0 ? 1 : 2));
+    expectSameSystem(sp, pp);
+    expectSameSystem(sp, pp);
+  }
+
+  /**
    * @brief Unconstrained right-hand sides, summed from the entries of the
    * linear integrators in place, match the sparse device assembly when
    * assembled again and when the linear integrators change.
@@ -635,6 +689,16 @@ namespace Rodin::Tests::Unit
   TEST(Kokkos_PETSc_Problem, Reassembly)
   {
     checkReassembly(withFaces(makeTriangleMesh()));
+  }
+
+  TEST(Kokkos_PETSc_Problem, MovedAttributes)
+  {
+    checkMovedAttributes(withFaces(makeTriangleMesh()));
+  }
+
+  TEST(Kokkos_PETSc_Problem, MovedAttributesOnMixedMesh)
+  {
+    checkMovedAttributes(withFaces(makeMixedMesh()));
   }
 
   TEST(Kokkos_PETSc_Problem, UnconstrainedOnTriangles)
