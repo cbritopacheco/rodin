@@ -129,7 +129,9 @@
 // height ratio from the top face down, 1: uniform), -pcm_dt, -pcm_tstart (s), -pcm_tend, -pcm_latent_advection (0/1),
 // -pcm_darcy (0/1/2), -pcm_angle (deg), -pcm_mushy (T_l - T_s, K;
 // PETSc option names are case-insensitive, so not -pcm_dT), -pcm_round (K, 0: Eq. 4),
-// -pcm_absorptivity, -pcm_hin, -pcm_tin (C), -pcm_weather, -pcm_output_every,
+// -pcm_absorptivity, -pcm_emissivity, -pcm_hin, -pcm_tin (C), -pcm_weather, -pcm_output_every,
+// PCM properties -pcm_rho_s/_l, -pcm_cp_s/_l, -pcm_k_s/_l, -pcm_latent, -pcm_mu, -pcm_beta, -pcm_tm (C), -pcm_cmushy;
+// validation: -pcm_top_fixed (C, top face held by a Robin penalty -pcm_hpen), -pcm_tinit (C),
 // -pcm_print_every, -pcm_attic (1/0), -pcm_uceil, -pcm_attic_ach (1/h),
 // -pcm_attic_height (m, attic volume per unit roof area); Newton via -snes_*, its linear solver via -ksp_*/-pc_*
 // (MUMPS), projections under -pcm_proj_ (CG).
@@ -462,6 +464,12 @@ namespace Rodin::Examples::Heat
           return (uCeiling * tIn + hVent() * Ta) / (uCeiling + hVent());
         }
         std::string weatherFile;       ///< empty: Calama, January
+        /// Validation (Biwole et al. 2013): top face held at topFixed (K) by a
+        /// Robin penalty h_pen (T - T_top), without sun nor sky radiation; NaN: weather.
+        Real topFixed = std::numeric_limits<Real>::quiet_NaN();
+        Real hPenalty = 1.0e6;         ///< W/(m^2 K)
+        /// Initial temperature (K); NaN: T_a(tStart).
+        Real tInit = std::numeric_limits<Real>::quiet_NaN();
 
         Real pressurePenalty = 1.0e-7; ///< 1/(Pa s): eps (p, q) fixes the mean pressure
         int darcy = 0;                 ///< Carman-Kozeny treatment (see setupProblem)
@@ -519,7 +527,7 @@ namespace Rodin::Examples::Heat
         m_one = Real(1);
 
         // Eq. (8): T = T_a(0), u = 0, fully solid.
-        const Real Tinit = T0 + m_weather(m_cfg.tStart).Ta;
+        const Real Tinit = std::isnan(m_cfg.tInit) ? T0 + m_weather(m_cfg.tStart).Ta : m_cfg.tInit;
         m_TOld = Tinit;
         m_T.getSolution() = Tinit;
         updateCoefficients();
@@ -953,6 +961,15 @@ namespace Rodin::Examples::Heat
         m_Tsky4 = Tsky * Tsky * Tsky * Tsky;
         m_I = m_sample.I;
         m_Tb = m_cfg.tBottom(Ta);
+        if (!std::isnan(m_cfg.topFixed))
+        {
+          m_haValue = m_cfg.hPenalty;
+          m_ha = m_cfg.hPenalty;
+          m_Ta = m_cfg.topFixed;
+          m_I = Real(0);
+          m_sample.I = 0.0;
+          m_sample.Ta = m_cfg.topFixed - T0;
+        }
       }
 
       /// Cellwise tau (P0) and the projections, both at t^n.
@@ -1305,6 +1322,34 @@ int main(int argc, char** argv)
     PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-pcm_mushy", &cfg.pcm.dT, PETSC_NULLPTR);
     PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-pcm_round", &cfg.pcm.round, PETSC_NULLPTR);
     PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-pcm_absorptivity", &cfg.absorptivity, PETSC_NULLPTR);
+    PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-pcm_emissivity", &cfg.emissivity, PETSC_NULLPTR);
+    {
+      // PCM properties (defaults: RT42) and validation switches.
+      auto& m = cfg.pcm;
+      PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-pcm_rho_s", &m.rhoS, PETSC_NULLPTR);
+      PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-pcm_rho_l", &m.rhoL, PETSC_NULLPTR);
+      PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-pcm_cp_s", &m.cpS, PETSC_NULLPTR);
+      PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-pcm_cp_l", &m.cpL, PETSC_NULLPTR);
+      PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-pcm_k_s", &m.kS, PETSC_NULLPTR);
+      PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-pcm_k_l", &m.kL, PETSC_NULLPTR);
+      PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-pcm_latent", &m.L, PETSC_NULLPTR);
+      PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-pcm_mu", &m.mu, PETSC_NULLPTR);
+      PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-pcm_beta", &m.beta, PETSC_NULLPTR);
+      PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-pcm_cmushy", &m.C, PETSC_NULLPTR);
+      PetscReal tm = m.Tm - T0;
+      PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-pcm_tm", &tm, PETSC_NULLPTR);
+      m.Tm = T0 + tm;
+      PetscReal v = 0;
+      PetscBool got = PETSC_FALSE;
+      PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-pcm_top_fixed", &v, &got);
+      if (got)
+        cfg.topFixed = T0 + v;
+      PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-pcm_hpen", &cfg.hPenalty, PETSC_NULLPTR);
+      got = PETSC_FALSE;
+      PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-pcm_tinit", &v, &got);
+      if (got)
+        cfg.tInit = T0 + v;
+    }
     PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-pcm_hin", &cfg.hIn, PETSC_NULLPTR);
     PetscReal tIn = cfg.tIn - T0;
     PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-pcm_tin", &tIn, PETSC_NULLPTR);
