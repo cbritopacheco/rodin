@@ -57,21 +57,21 @@ namespace Rodin::Assembly::Internal
    * @return Device integrator and the factor of its contributions.
    */
   template <class Backend>
-  std::pair<const ::Rodin::Kokkos::Variational::DeviceBilinearFormIntegrator<Backend>*,
-    Real>
+  std::pair<::Rodin::Kokkos::Variational::DeviceBilinearFormIntegrator<Backend>*, Real>
   getDeviceIntegrator(
-    const Variational::LocalBilinearFormIntegratorBase<Real>& lbfi, Real sign = Real(1))
+    Variational::LocalBilinearFormIntegratorBase<Real>& lbfi, Real sign = Real(1))
   {
     using Negated =
       Variational::UnaryMinus<Variational::LocalBilinearFormIntegratorBase<Real>>;
     using Scaled =
       Variational::Mult<Real, Variational::LocalBilinearFormIntegratorBase<Real>>;
-    if (const auto* negated = dynamic_cast<const Negated*>(&lbfi))
+    if (auto* negated = dynamic_cast<Negated*>(&lbfi))
       return getDeviceIntegrator<Backend>(negated->getOperand(), -sign);
-    if (const auto* scaled = dynamic_cast<const Scaled*>(&lbfi))
+    if (auto* scaled = dynamic_cast<Scaled*>(&lbfi))
       return getDeviceIntegrator<Backend>(scaled->getRHS(), scaled->getLHS() * sign);
-    const auto* integrator = dynamic_cast<
-      const ::Rodin::Kokkos::Variational::DeviceBilinearFormIntegrator<Backend>*>(&lbfi);
+    auto* integrator =
+      dynamic_cast<::Rodin::Kokkos::Variational::DeviceBilinearFormIntegrator<Backend>*>(
+        &lbfi);
     if (!integrator)
     {
       Alert::Exception() << "Local integrator has no device implementation."
@@ -88,17 +88,17 @@ namespace Rodin::Assembly::Internal
    * @return Device integrator and the factor of its contributions.
    */
   template <class Backend>
-  std::pair<const ::Rodin::Kokkos::Variational::DeviceBilinearFormIntegrator<Backend>*,
-    Real>
+  std::pair<::Rodin::Kokkos::Variational::DeviceBilinearFormIntegrator<Backend>*, Real>
   getDeviceIntegrator(
-    const Variational::GlobalBilinearFormIntegratorBase<Real>& gbfi, Real sign = Real(1))
+    Variational::GlobalBilinearFormIntegratorBase<Real>& gbfi, Real sign = Real(1))
   {
     using Negated =
       Variational::UnaryMinus<Variational::GlobalBilinearFormIntegratorBase<Real>>;
-    if (const auto* negated = dynamic_cast<const Negated*>(&gbfi))
+    if (auto* negated = dynamic_cast<Negated*>(&gbfi))
       return getDeviceIntegrator<Backend>(negated->getOperand(), -sign);
-    const auto* integrator = dynamic_cast<
-      const ::Rodin::Kokkos::Variational::DeviceBilinearFormIntegrator<Backend>*>(&gbfi);
+    auto* integrator =
+      dynamic_cast<::Rodin::Kokkos::Variational::DeviceBilinearFormIntegrator<Backend>*>(
+        &gbfi);
     if (!integrator)
     {
       Alert::Exception() << "Global integrator has no device implementation."
@@ -115,19 +115,19 @@ namespace Rodin::Assembly::Internal
    * @return Device integrator and the factor of its contributions.
    */
   template <class Backend>
-  std::pair<const ::Rodin::Kokkos::Variational::DeviceLinearFormIntegrator<Backend>*,
-    Real>
+  std::pair<::Rodin::Kokkos::Variational::DeviceLinearFormIntegrator<Backend>*, Real>
   getDeviceIntegrator(
-    const Variational::LinearFormIntegratorBase<Real>& lfi, Real sign = Real(1))
+    Variational::LinearFormIntegratorBase<Real>& lfi, Real sign = Real(1))
   {
     using Negated = Variational::UnaryMinus<Variational::LinearFormIntegratorBase<Real>>;
     using Scaled = Variational::Mult<Real, Variational::LinearFormIntegratorBase<Real>>;
-    if (const auto* negated = dynamic_cast<const Negated*>(&lfi))
+    if (auto* negated = dynamic_cast<Negated*>(&lfi))
       return getDeviceIntegrator<Backend>(negated->getOperand(), -sign);
-    if (const auto* scaled = dynamic_cast<const Scaled*>(&lfi))
+    if (auto* scaled = dynamic_cast<Scaled*>(&lfi))
       return getDeviceIntegrator<Backend>(scaled->getRHS(), scaled->getLHS() * sign);
-    const auto* integrator = dynamic_cast<
-      const ::Rodin::Kokkos::Variational::DeviceLinearFormIntegrator<Backend>*>(&lfi);
+    auto* integrator =
+      dynamic_cast<::Rodin::Kokkos::Variational::DeviceLinearFormIntegrator<Backend>*>(
+        &lfi);
     if (!integrator)
       Alert::Exception() << "Integrator has no device implementation." << Alert::Raise;
     return {integrator, sign};
@@ -1185,8 +1185,8 @@ namespace Rodin::Assembly::Internal
        * @param lbfi Local integrator, possibly negated or scaled by a real.
        * @param row Offset of its test space. @param col Offset of its trial space.
        */
-      void addMatrix(const Variational::LocalBilinearFormIntegratorBase<Real>& lbfi,
-        Index row, Index col)
+      void addMatrix(
+        Variational::LocalBilinearFormIntegratorBase<Real>& lbfi, Index row, Index col)
       {
         const auto [integrator, sign] = getDeviceIntegrator<Backend>(lbfi);
         m_matrices.push_back({integrator, nullptr, row, col, sign});
@@ -1197,8 +1197,8 @@ namespace Rodin::Assembly::Internal
        * @param gbfi Global integrator, possibly negated.
        * @param row Offset of its test space. @param col Offset of its trial space.
        */
-      void addMatrix(const Variational::GlobalBilinearFormIntegratorBase<Real>& gbfi,
-        Index row, Index col)
+      void addMatrix(
+        Variational::GlobalBilinearFormIntegratorBase<Real>& gbfi, Index row, Index col)
       {
         const auto [integrator, sign] = getDeviceIntegrator<Backend>(gbfi);
         m_matrices.push_back({integrator, nullptr, row, col, sign});
@@ -1224,7 +1224,7 @@ namespace Rodin::Assembly::Internal
        * @param sign Factor of the contributions.
        */
       void addVector(
-        const Variational::LinearFormIntegratorBase<Real>& lfi, Index row, Real sign)
+        Variational::LinearFormIntegratorBase<Real>& lfi, Index row, Real sign)
       {
         const auto [integrator, s] = getDeviceIntegrator<Backend>(lfi, sign);
         m_vectors.push_back({integrator, nullptr, row, s, m_matrices.size()});
@@ -2415,7 +2415,7 @@ namespace Rodin::Assembly::Internal
     private:
       struct Matrix
       {
-        const BilinearType* integrator;
+        BilinearType* integrator;
         const Math::SparseMatrix<Real>* op;
         Index row;
         Index col;
@@ -2424,7 +2424,7 @@ namespace Rodin::Assembly::Internal
 
       struct Vector
       {
-        const LinearType* integrator;
+        LinearType* integrator;
         const Math::Vector<Real>* vec;
         Index row;
         Real sign;
@@ -2782,7 +2782,7 @@ namespace Rodin::Assembly::Internal
           size_t total = 0;
           for (size_t k = begin; k < end; ++k)
           {
-            const auto* integrator = m_vectors[k].integrator;
+            auto* integrator = m_vectors[k].integrator;
             const size_t count = integrator->prepare();
             counts.push_back(count);
             if (count > 0)
@@ -2888,9 +2888,9 @@ namespace Rodin::Assembly
         Internal::DeviceSystem<BackendType> system(
           input.getTrialFES().getMesh().getContext().getExecutionSpace(),
           input.getTestFES().getSize(), input.getTrialFES().getSize());
-        for (const auto& lbfi : input.getLocalBFIs())
+        for (auto& lbfi : input.getLocalBFIs())
           system.addMatrix(lbfi, 0, 0);
-        for (const auto& gbfi : input.getGlobalBFIs())
+        for (auto& gbfi : input.getGlobalBFIs())
           system.addMatrix(gbfi, 0, 0);
         system.finish(&res, nullptr);
       }
@@ -2981,7 +2981,7 @@ namespace Rodin::Assembly
         Internal::DeviceSystem<BackendType> system(
           input.getFES().getMesh().getContext().getExecutionSpace(),
           input.getFES().getSize(), 0);
-        for (const auto& lfi : input.getLFIs())
+        for (auto& lfi : input.getLFIs())
           system.addVector(lfi, 0, Real(1));
         system.finish(nullptr, &res);
       }
@@ -3155,9 +3155,9 @@ namespace Rodin::Assembly
           if (pbc.getOperand().getUUID() == u.getUUID())
             system.identify(pbc, 0);
         }
-        for (const auto& lbfi : pb.getLocalBFIs())
+        for (auto& lbfi : pb.getLocalBFIs())
           system.addMatrix(lbfi, 0, 0);
-        for (const auto& gbfi : pb.getGlobalBFIs())
+        for (auto& gbfi : pb.getGlobalBFIs())
           system.addMatrix(gbfi, 0, 0);
         if constexpr (Internal::IsKokkosMatrix<Matrix>::value)
           Internal::rejectForms(pb.getBFs());
@@ -3167,7 +3167,7 @@ namespace Rodin::Assembly
             system.addMatrix(bf.getOperator(), 0, 0);
         }
         // The problem reads a(u, v) + l(v) = 0, so b = -l.
-        for (const auto& lfi : pb.getLFIs())
+        for (auto& lfi : pb.getLFIs())
           system.addVector(lfi, 0, Real(-1));
         for (const auto& lf : pb.getLFs())
           system.addVector(lf.getVector(), 0);
@@ -3307,12 +3307,12 @@ namespace Rodin::Assembly
         }
         for (auto& pbc : pb.getPBCs())
           system.identify(pbc, trialOffset(pbc.getOperand().getUUID()));
-        for (const auto& lbfi : pb.getLocalBFIs())
+        for (auto& lbfi : pb.getLocalBFIs())
         {
           system.addMatrix(lbfi, testOffset(lbfi.getTestFunction().getUUID()),
             trialOffset(lbfi.getTrialFunction().getUUID()));
         }
-        for (const auto& gbfi : pb.getGlobalBFIs())
+        for (auto& gbfi : pb.getGlobalBFIs())
         {
           system.addMatrix(gbfi, testOffset(gbfi.getTestFunction().getUUID()),
             trialOffset(gbfi.getTrialFunction().getUUID()));
@@ -3320,7 +3320,7 @@ namespace Rodin::Assembly
         // The problem reads a(u, v) + l(v) = 0, so b = -l. The host adds the
         // linear integrators before the preassembled forms, which matters
         // for the values they lift.
-        for (const auto& lfi : pb.getLFIs())
+        for (auto& lfi : pb.getLFIs())
           system.addVector(lfi, testOffset(lfi.getTestFunction().getUUID()), Real(-1));
         if constexpr (Internal::IsKokkosMatrix<Matrix>::value)
           Internal::rejectForms(pb.getBFs());

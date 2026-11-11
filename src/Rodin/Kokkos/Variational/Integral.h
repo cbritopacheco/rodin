@@ -156,7 +156,9 @@ namespace Rodin::Kokkos::Variational
    * Assembly::Kokkos discovers this interface on the local integrators of a
    * bilinear form and asks each one for its contributions as device triplets.
    * An integration is a call to prepare(), which locates the entries of the
-   * cells, followed by fill(), which writes them.
+   * cells, followed by fill(), which writes them. Preparation updates owned
+   * selection and layout state through a non-const integrator; fill() reads
+   * that prepared state without changing it.
    *
    * @tparam Backend Kokkos backend of the mesh context.
    */
@@ -196,7 +198,7 @@ namespace Rodin::Kokkos::Variational
        * same coordinates in the same order.
        * @return Number of entries.
        */
-      virtual size_t prepare(bool diagonal) const = 0;
+      virtual size_t prepare(bool diagonal) = 0;
 
       /**
        * @brief Gets the spacing of the entries located by the last call to
@@ -230,7 +232,7 @@ namespace Rodin::Kokkos::Variational
        * indexing trial degrees of freedom, arranged as by fill() at offset
        * zero.
        */
-      TripletsType assemble() const
+      TripletsType assemble()
       {
         const size_t count = prepare(false);
         TripletsType result;
@@ -275,7 +277,9 @@ namespace Rodin::Kokkos::Variational
    * Assembly::Kokkos discovers this interface on the integrators of a
    * linear form and asks each one for its contributions as device entries.
    * An integration is a call to prepare(), which locates the entries of the
-   * cells, followed by fill(), which writes them.
+   * cells, followed by fill(), which writes them. Preparation updates owned
+   * selection and layout state through a non-const integrator; fill() reads
+   * that prepared state without changing it.
    *
    * @tparam Backend Kokkos backend of the mesh context.
    */
@@ -301,7 +305,7 @@ namespace Rodin::Kokkos::Variational
        * @brief Locates the entries of every selected cell.
        * @return Number of entries.
        */
-      virtual size_t prepare() const = 0;
+      virtual size_t prepare() = 0;
 
       /**
        * @brief Gets the spacing of the entries located by the last call to
@@ -332,7 +336,7 @@ namespace Rodin::Kokkos::Variational
        * @return Local contributions, indexed by test degrees of freedom and
        * arranged as by fill() at offset zero.
        */
-      EntriesType assemble() const
+      EntriesType assemble()
       {
         const size_t count = prepare();
         EntriesType result;
@@ -1601,7 +1605,7 @@ namespace Rodin::Kokkos::Variational
        * n test scalar degrees of freedom owning m * trialVDim * n * testVDim
        * entries, or m * n * testVDim for the diagonals only.
        */
-      size_t prepare(bool diagonal) const override
+      size_t prepare(bool diagonal) override
       {
         const auto& integrand = getIntegrand();
         const auto& trialfes = integrand.getLHS().getFiniteElementSpace();
@@ -2094,8 +2098,8 @@ namespace Rodin::Kokkos::Variational
       }
 
       std::unique_ptr<IntegrandType> m_integrand;
-      mutable PolytopesType m_polytopes;
-      mutable bool m_compact = false;
+      PolytopesType m_polytopes;
+      bool m_compact = false;
 
     public:
       /// @brief Kernel of integrateTeams(), one team per polytope.
@@ -2672,7 +2676,7 @@ namespace Rodin::Kokkos::Variational
        * @return Number of entries, each selected polytope with n scalar
        * degrees of freedom owning n * vdim entries.
        */
-      size_t prepare() const override
+      size_t prepare() override
       {
         const auto& integrand = getIntegrand();
         const auto& fes = integrand.getFiniteElementSpace();
@@ -2825,7 +2829,7 @@ namespace Rodin::Kokkos::Variational
       }
 
       std::unique_ptr<IntegrandType> m_integrand;
-      mutable PolytopesType m_polytopes;
+      PolytopesType m_polytopes;
 
     public:
       /// @brief Kernel of integratePolytopes(), one thread per polytope.

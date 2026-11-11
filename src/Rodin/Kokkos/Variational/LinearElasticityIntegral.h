@@ -217,8 +217,10 @@ namespace Rodin::Kokkos::Variational
       /// @brief Gets the arrangement of the entries. @return Entry layout.
       DeviceLayout getLayout() const override
       {
-        restrict();
-        return m_dilatation.getLayout();
+        auto layout = m_dilatation.getLayout();
+        const auto& attributes = this->getAttributes();
+        layout.attributes.assign(attributes.begin(), attributes.end());
+        return layout;
       }
 
       /**
@@ -227,7 +229,7 @@ namespace Rodin::Kokkos::Variational
        * blocks, ignored since both terms couple every pair of components.
        * @return Number of entries, shared by both terms.
        */
-      size_t prepare([[maybe_unused]] bool diagonal) const override
+      size_t prepare([[maybe_unused]] bool diagonal) override
       {
         restrict();
         const size_t count = m_dilatation.prepare(false);
@@ -275,7 +277,7 @@ namespace Rodin::Kokkos::Variational
 
     private:
       /// @brief Restricts both terms to the attributes of the integrator.
-      void restrict() const
+      void restrict()
       {
         const auto& attributes = this->getAttributes();
         if (!attributes.empty())
@@ -287,8 +289,8 @@ namespace Rodin::Kokkos::Variational
 
       std::shared_ptr<const LambdaType> m_lambda;
       std::shared_ptr<const MuType> m_mu;
-      mutable DilatationType m_dilatation;
-      mutable ShearType m_shear;
+      DilatationType m_dilatation;
+      ShearType m_shear;
   };
 }
 

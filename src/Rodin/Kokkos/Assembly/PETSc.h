@@ -794,8 +794,8 @@ namespace Rodin::Assembly::Internal
        * @param lbfi Local integrator, possibly negated or scaled by a real.
        * @param row Offset of its test space. @param col Offset of its trial space.
        */
-      void addMatrix(const Variational::LocalBilinearFormIntegratorBase<Real>& lbfi,
-        Index row, Index col)
+      void addMatrix(
+        Variational::LocalBilinearFormIntegratorBase<Real>& lbfi, Index row, Index col)
       {
         const auto [integrator, sign] = getDeviceIntegrator<Backend>(lbfi);
         m_matrices.push_back({integrator, row, col, sign});
@@ -806,8 +806,8 @@ namespace Rodin::Assembly::Internal
        * @param gbfi Global integrator, possibly negated.
        * @param row Offset of its test space. @param col Offset of its trial space.
        */
-      void addMatrix(const Variational::GlobalBilinearFormIntegratorBase<Real>& gbfi,
-        Index row, Index col)
+      void addMatrix(
+        Variational::GlobalBilinearFormIntegratorBase<Real>& gbfi, Index row, Index col)
       {
         const auto [integrator, sign] = getDeviceIntegrator<Backend>(gbfi);
         m_matrices.push_back({integrator, row, col, sign});
@@ -820,7 +820,7 @@ namespace Rodin::Assembly::Internal
        * @param sign Factor of the contributions.
        */
       void addVector(
-        const Variational::LinearFormIntegratorBase<Real>& lfi, Index row, Real sign)
+        Variational::LinearFormIntegratorBase<Real>& lfi, Index row, Real sign)
       {
         const auto [integrator, s] = getDeviceIntegrator<Backend>(lfi, sign);
         m_vectors.push_back({integrator, row, s});
@@ -2071,7 +2071,7 @@ namespace Rodin::Assembly::Internal
     private:
       struct Matrix
       {
-        const BilinearType* integrator;
+        BilinearType* integrator;
         Index row;
         Index col;
         Real sign;
@@ -2079,7 +2079,7 @@ namespace Rodin::Assembly::Internal
 
       struct Vector
       {
-        const LinearType* integrator;
+        LinearType* integrator;
         Index row;
         Real sign;
       };
@@ -3324,9 +3324,9 @@ namespace Rodin::Assembly
           system.distribute(
             Internal::COODistribution::of(test), Internal::COODistribution::of(trial));
         }
-        for (const auto& lbfi : input.getLocalBFIs())
+        for (auto& lbfi : input.getLocalBFIs())
           system.addMatrix(lbfi, 0, 0);
-        for (const auto& gbfi : input.getGlobalBFIs())
+        for (auto& gbfi : input.getGlobalBFIs())
           system.addMatrix(gbfi, 0, 0);
         system.finish(m_cache, res, nullptr);
       }
@@ -3440,7 +3440,7 @@ namespace Rodin::Assembly
         SystemType system(fes.getMesh().getContext().getExecutionSpace(), size, 0);
         if constexpr (distributed)
           system.distribute(Internal::COODistribution::of(fes));
-        for (const auto& lfi : input.getLFIs())
+        for (auto& lfi : input.getLFIs())
           system.addVector(lfi, 0, Real(1));
         PetscErrorCode ierr =
           PETSc::Assembly::VectorSetup(res).prepare({n, N, VECKOKKOS, false, false});
@@ -3633,9 +3633,9 @@ namespace Rodin::Assembly
         // constrained values.
         if (doMatrix || system.hasConstraints())
         {
-          for (const auto& lbfi : pb.getLocalBFIs())
+          for (auto& lbfi : pb.getLocalBFIs())
             system.addMatrix(lbfi, 0, 0);
-          for (const auto& gbfi : pb.getGlobalBFIs())
+          for (auto& gbfi : pb.getGlobalBFIs())
             system.addMatrix(gbfi, 0, 0);
           for (const auto& bf : pb.getBFs())
             system.addMatrix(bf.getOperator(), 0, 0);
@@ -3643,7 +3643,7 @@ namespace Rodin::Assembly
         // The problem reads a(u, v) + l(v) = 0, so b = -l.
         if (doVector)
         {
-          for (const auto& lfi : pb.getLFIs())
+          for (auto& lfi : pb.getLFIs())
             system.addVector(lfi, 0, Real(-1));
           for (const auto& lf : pb.getLFs())
             system.addVector(lf.getVector(), 0);
@@ -3870,12 +3870,12 @@ namespace Rodin::Assembly
           system.identify(pbc, trialOffset(pbc.getOperand().getUUID()));
         if (doMatrix || system.hasConstraints())
         {
-          for (const auto& lbfi : pb.getLocalBFIs())
+          for (auto& lbfi : pb.getLocalBFIs())
           {
             system.addMatrix(lbfi, testOffset(lbfi.getTestFunction().getUUID()),
               trialOffset(lbfi.getTrialFunction().getUUID()));
           }
-          for (const auto& gbfi : pb.getGlobalBFIs())
+          for (auto& gbfi : pb.getGlobalBFIs())
           {
             system.addMatrix(gbfi, testOffset(gbfi.getTestFunction().getUUID()),
               trialOffset(gbfi.getTrialFunction().getUUID()));
@@ -3889,7 +3889,7 @@ namespace Rodin::Assembly
         // The problem reads a(u, v) + l(v) = 0, so b = -l.
         if (doVector)
         {
-          for (const auto& lfi : pb.getLFIs())
+          for (auto& lfi : pb.getLFIs())
             system.addVector(lfi, testOffset(lfi.getTestFunction().getUUID()), Real(-1));
           for (const auto& lf : pb.getLFs())
             system.addVector(lf.getVector(), testOffset(lf.getTestFunction().getUUID()));

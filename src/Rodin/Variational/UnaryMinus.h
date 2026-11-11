@@ -433,6 +433,16 @@ namespace Rodin::Variational
       {}
 
       /**
+       * @brief Borrows the owned integrator for assembly preparation.
+       * @returns Mutable reference to the owned integrator.
+       */
+      OperandType& getOperand()
+      {
+        assert(m_op);
+        return *m_op;
+      }
+
+      /**
        * @brief Gets the operand function.
        * @returns The operand function.
        */
@@ -628,6 +638,16 @@ namespace Rodin::Variational
         : Parent(std::move(other)),
           m_op(std::move(other.m_op))
       {}
+
+      /**
+       * @brief Borrows the owned integrator for assembly preparation.
+       * @returns Mutable reference to the owned integrator.
+       */
+      OperandType& getOperand()
+      {
+        assert(m_op);
+        return *m_op;
+      }
 
       /**
        * @brief Gets the operand function.
@@ -826,6 +846,16 @@ namespace Rodin::Variational
         : Parent(std::move(other)),
           m_op(std::move(other.m_op))
       {}
+
+      /**
+       * @brief Borrows the owned integrator for assembly preparation.
+       * @returns Mutable reference to the owned integrator.
+       */
+      OperandType& getOperand()
+      {
+        assert(m_op);
+        return *m_op;
+      }
 
       /**
        * @brief Gets the operand function.

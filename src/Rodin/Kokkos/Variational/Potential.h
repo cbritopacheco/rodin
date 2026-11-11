@@ -276,7 +276,7 @@ namespace Rodin::Kokkos::Variational
        * trial cell with m trial local degrees of freedom owning n * m
        * entries.
        */
-      size_t prepare([[maybe_unused]] bool diagonal) const override
+      size_t prepare([[maybe_unused]] bool diagonal) override
       {
         const auto& integrand = getIntegrand();
         const auto& trialfes = integrand.getLHS().getOperand().getFiniteElementSpace();
@@ -585,7 +585,7 @@ namespace Rodin::Kokkos::Variational
        * @param mesh Resident mesh.
        * @param dimension Dimension of the cells.
        */
-      void upload(const MeshType& mesh, Index dimension) const
+      void upload(const MeshType& mesh, Index dimension)
       {
         const auto& execution = mesh.getContext().getExecutionSpace();
         const auto representatives =
@@ -624,21 +624,21 @@ namespace Rodin::Kokkos::Variational
       }
 
       std::unique_ptr<IntegrandType> m_integrand;
-      mutable const MeshType* m_mesh = nullptr;
-      mutable Index m_cellCount = 0;
-      mutable Optional<FlatSet<::Rodin::Geometry::Attribute>> m_testSelection;
-      mutable Optional<FlatSet<::Rodin::Geometry::Attribute>> m_trialSelection;
-      mutable AttributesType m_testAttributes;
-      mutable AttributesType m_trialAttributes;
-      mutable TableType m_nodes;
-      mutable TableType m_weights;
-      mutable TableType m_centroids;
-      mutable TableType m_centroidWeights;
-      mutable Selection m_test;
-      mutable Selection m_trial;
-      mutable bool m_uniform = false;
-      mutable size_t m_spacing = 1;
-      mutable size_t m_count = 0;
+      const MeshType* m_mesh = nullptr;
+      Index m_cellCount = 0;
+      Optional<FlatSet<::Rodin::Geometry::Attribute>> m_testSelection;
+      Optional<FlatSet<::Rodin::Geometry::Attribute>> m_trialSelection;
+      AttributesType m_testAttributes;
+      AttributesType m_trialAttributes;
+      TableType m_nodes;
+      TableType m_weights;
+      TableType m_centroids;
+      TableType m_centroidWeights;
+      Selection m_test;
+      Selection m_trial;
+      bool m_uniform = false;
+      size_t m_spacing = 1;
+      size_t m_count = 0;
 
     public:
       /// @brief Kernel of integratePairs(), one pair of selected cells per thread.

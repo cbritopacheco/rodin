@@ -54,7 +54,7 @@ namespace Rodin::Tests::Unit
     const DeviceTrial& du, const DeviceTest& dv, const DeviceIntegral& d)
   {
     static_assert(
-      requires(const DeviceIntegral& i) { i.assemble().values; },
+      requires(DeviceIntegral& i) { i.assemble().values; },
       "The device expression must lower to a Kokkos integral.");
     Variational::BilinearForm hf(hu, hv);
     hf = h;
@@ -90,7 +90,7 @@ namespace Rodin::Tests::Unit
     const DeviceTest& dv, const DeviceIntegral& d)
   {
     static_assert(
-      requires(const DeviceIntegral& i) { i.assemble().values; },
+      requires(DeviceIntegral& i) { i.assemble().values; },
       "The device expression must lower to a Kokkos integral.");
     Variational::LinearForm hf(hv);
     hf = h;

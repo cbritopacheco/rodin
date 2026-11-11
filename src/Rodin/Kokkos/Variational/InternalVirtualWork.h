@@ -316,7 +316,7 @@ namespace Rodin::Solid
        * blocks, ignored since the tangent couples every pair of components.
        * @return Number of entries, laid out as by the device integrals.
        */
-      size_t prepare([[maybe_unused]] bool diagonal) const override
+      size_t prepare([[maybe_unused]] bool diagonal) override
       {
         const auto& trialfes = m_trial.get().getFiniteElementSpace();
         const auto& testfes = m_test.get().getFiniteElementSpace();
@@ -599,7 +599,7 @@ namespace Rodin::Solid
       std::reference_wrapper<const TestType> m_test;
       std::reference_wrapper<const StateType> m_displacement;
       size_t m_quadOrder;
-      mutable PolytopesType m_polytopes;
+      PolytopesType m_polytopes;
 
     public:
       /**
@@ -1350,7 +1350,7 @@ namespace Rodin::Solid
       }
 
       /// @brief Locates the entries of every cell. @return Number of entries.
-      size_t prepare() const override
+      size_t prepare() override
       {
         const auto& fes = m_test.get().getFiniteElementSpace();
         return m_polytopes.prepare(fes.getMesh(), this->getRegion(),
@@ -1489,7 +1489,7 @@ namespace Rodin::Solid
       std::reference_wrapper<const TestType> m_test;
       std::reference_wrapper<const StateType> m_displacement;
       size_t m_quadOrder;
-      mutable PolytopesType m_polytopes;
+      PolytopesType m_polytopes;
 
     public:
       /**
@@ -1830,7 +1830,7 @@ namespace Rodin::Solid
        * blocks, ignored since the tangent couples every pair of components.
        * @return Number of entries, laid out as by the device integrals.
        */
-      size_t prepare([[maybe_unused]] bool diagonal) const override
+      size_t prepare([[maybe_unused]] bool diagonal) override
       {
         const auto& trialfes = m_trial.get().getFiniteElementSpace();
         const auto& testfes = m_test.get().getFiniteElementSpace();
@@ -2113,7 +2113,7 @@ namespace Rodin::Solid
       std::reference_wrapper<const TestType> m_test;
       std::reference_wrapper<const StateType> m_displacement;
       size_t m_quadOrder;
-      mutable PolytopesType m_polytopes;
+      PolytopesType m_polytopes;
 
     public:
       /**
@@ -2869,7 +2869,7 @@ namespace Rodin::Solid
       }
 
       /// @brief Locates the entries of every cell. @return Number of entries.
-      size_t prepare() const override
+      size_t prepare() override
       {
         const auto& fes = m_test.get().getFiniteElementSpace();
         return m_polytopes.prepare(fes.getMesh(), this->getRegion(),
@@ -3008,7 +3008,7 @@ namespace Rodin::Solid
       std::reference_wrapper<const TestType> m_test;
       std::reference_wrapper<const StateType> m_displacement;
       size_t m_quadOrder;
-      mutable PolytopesType m_polytopes;
+      PolytopesType m_polytopes;
 
     public:
       /**
