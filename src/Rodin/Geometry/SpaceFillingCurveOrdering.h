@@ -16,11 +16,11 @@
 #include "Rodin/Alert/MemberFunctionException.h"
 #include "Mesh.h"
 
-namespace Rodin::Geometry::Internal
+namespace Rodin::Geometry
 {
   /**
    * @brief Bounding-box quantization and sorting for spatial ordering policies.
-   * @tparam Derived Policy transforming integer coordinates before bit interleaving.
+   * @tparam Derived Concrete ordering policy returned by configuration setters.
    *
    * The stages are coordinate validation, bounding-box normalization, integer
    * quantization, policy transformation and stable sorting of interleaved keys.

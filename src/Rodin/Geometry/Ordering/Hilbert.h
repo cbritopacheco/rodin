@@ -17,11 +17,11 @@ namespace Rodin::Geometry::Ordering
    * Integer coordinates are transformed using Skilling's axes-to-transpose
    * algorithm before their bits are interleaved (doi:10.1063/1.1751381).
    * Bounding-box normalization, configurable bit depth and stable tie handling
-   * are provided by Internal::SpaceFillingCurveOrdering. Construction uses
+   * are provided by SpaceFillingCurveOrdering. Construction uses
    * automatic precision. Apply before constructing finite element spaces or
    * transferring a mesh to a device.
    */
-  class Hilbert : public Internal::SpaceFillingCurveOrdering<Hilbert>
+  class Hilbert : public SpaceFillingCurveOrdering<Hilbert>
   {
     public:
       /**

@@ -27,6 +27,10 @@
 namespace Rodin::Geometry
 {
   class Bounds;
+
+  template <class Derived>
+  class SpaceFillingCurveOrdering;
+
   namespace Ordering
   {
     class Morton;

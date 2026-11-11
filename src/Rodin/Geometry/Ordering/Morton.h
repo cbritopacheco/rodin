@@ -16,11 +16,11 @@ namespace Rodin::Geometry::Ordering
    *
    * Integer coordinate bits are interleaved, most significant first.
    * Bounding-box normalization, configurable bit depth and stable tie handling
-   * are provided by Internal::SpaceFillingCurveOrdering. Construction uses
+   * are provided by SpaceFillingCurveOrdering. Construction uses
    * automatic precision. Apply before constructing finite element spaces or
    * transferring a mesh to a device.
    */
-  class Morton : public Internal::SpaceFillingCurveOrdering<Morton>
+  class Morton : public SpaceFillingCurveOrdering<Morton>
   {
     public:
       /**

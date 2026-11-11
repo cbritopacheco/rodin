@@ -16,6 +16,7 @@
 #include "Geometry/Types.h"
 #include "Geometry/ForwardDecls.h"
 #include "Geometry/Mesh.h"
+#include "Geometry/SpaceFillingCurveOrdering.h"
 #include "Geometry/Ordering.h"
 #include "Geometry/SubMesh.h"
 #include "Geometry/Polytope.h"
