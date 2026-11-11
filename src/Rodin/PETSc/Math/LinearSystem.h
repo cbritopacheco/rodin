@@ -33,6 +33,7 @@
 #include <boost/mpi/communicator.hpp>
 #include <petscmat.h>
 #include <petscvec.h>
+#include <string>
 #include <vector>
 
 #include "Rodin/Alert/MemberFunctionException.h"
@@ -272,6 +273,93 @@ namespace Rodin::Math
           bool empty() const noexcept
           {
             return m_splits.empty();
+          }
+
+          /**
+           * @brief Returns the name under which split @p i is installed.
+           * @param[in] i Split index.
+           * @returns The split name, or its index when it has none.
+           */
+          std::string getName(size_t i) const
+          {
+            return m_splits[i].name.empty() ? std::to_string(i) : m_splits[i].name;
+          }
+
+          /**
+           * @brief Installs the splits on a field-split preconditioner.
+           *
+           * PETSc appends every split set in code, even one it already
+           * holds, so a preconditioner that holds these splits is left as
+           * is. One that holds other splits under these names is reset, and
+           * builds its blocks again from these splits at its next setup.
+           * @param[in] pc Preconditioner of type `PCFIELDSPLIT`.
+           * @returns `PETSC_SUCCESS`, or the first PETSc error.
+           */
+          PetscErrorCode install(::PC pc) const
+          {
+            PetscErrorCode ierr;
+            bool installed = true;
+            bool held = false;
+            for (size_t k = 0; k < m_splits.size(); ++k)
+            {
+              ::IS is = PETSC_NULLPTR;
+              ierr = PCFieldSplitGetIS(pc, getName(k).c_str(), &is);
+              if (ierr != PETSC_SUCCESS)
+                return ierr;
+              held = held || is;
+              if (is == m_splits[k].is)
+                continue;
+              PetscBool equal = PETSC_FALSE;
+              if (is)
+              {
+                ierr = ISEqualUnsorted(is, m_splits[k].is, &equal);
+                if (ierr != PETSC_SUCCESS)
+                  return ierr;
+              }
+              installed = installed && equal;
+            }
+            if (installed)
+              return PETSC_SUCCESS;
+            if (held)
+            {
+              // PCReset also releases the operators, which are set again.
+              PetscBool hasOperator = PETSC_FALSE, hasPreconditioner = PETSC_FALSE;
+              ierr = PCGetOperatorsSet(pc, &hasOperator, &hasPreconditioner);
+              if (ierr != PETSC_SUCCESS)
+                return ierr;
+              ::Mat operators[2] = {PETSC_NULLPTR, PETSC_NULLPTR};
+              if (hasOperator || hasPreconditioner)
+              {
+                ierr = PCGetOperators(pc, &operators[0], &operators[1]);
+                if (ierr != PETSC_SUCCESS)
+                  return ierr;
+                for (::Mat m : operators)
+                {
+                  ierr = PetscObjectReference(reinterpret_cast<PetscObject>(m));
+                  if (ierr != PETSC_SUCCESS)
+                    return ierr;
+                }
+              }
+              ierr = PCReset(pc);
+              if (ierr == PETSC_SUCCESS && (hasOperator || hasPreconditioner))
+                ierr = PCSetOperators(pc, operators[0], operators[1]);
+              for (::Mat& m : operators)
+              {
+                const PetscErrorCode destroyed = MatDestroy(&m);
+                if (ierr == PETSC_SUCCESS)
+                  ierr = destroyed;
+              }
+              if (ierr != PETSC_SUCCESS)
+                return ierr;
+            }
+            for (size_t k = 0; k < m_splits.size(); ++k)
+            {
+              assert(m_splits[k].is);
+              ierr = PCFieldSplitSetIS(pc, getName(k).c_str(), m_splits[k].is);
+              if (ierr != PETSC_SUCCESS)
+                return ierr;
+            }
+            return PETSC_SUCCESS;
           }
 
         private:

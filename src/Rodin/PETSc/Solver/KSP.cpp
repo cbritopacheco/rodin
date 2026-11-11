@@ -144,17 +144,9 @@ namespace Rodin::Solver
     // Only activate stored field splits when the runtime PC is actually fieldsplit.
     if (pctype && std::strcmp(pctype, PCFIELDSPLIT) == 0)
     {
-      const auto& splits = axb.getFieldSplits();
-      for (size_t k = 0; k < splits.size(); ++k)
-      {
-        const auto& s = splits[k];
-        assert(s.is);
-
-        const std::string name = !s.name.empty() ? s.name : std::to_string(k);
-
-        ierr = PCFieldSplitSetIS(pc, name.c_str(), s.is);
-        assert(ierr == PETSC_SUCCESS);
-      }
+      ierr = axb.getFieldSplits().install(pc);
+      if (ierr != PETSC_SUCCESS)
+        raise("PCFieldSplitSetIS");
     }
 
     const char* ksptype = nullptr;

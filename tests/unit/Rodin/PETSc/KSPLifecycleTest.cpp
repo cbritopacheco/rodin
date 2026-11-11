@@ -199,7 +199,7 @@ TYPED_TEST(KSPLifecycle, MoveTransfersHandleAndPreservesConfiguration)
   EXPECT_EQ(emptyMove.getHandle(), nullptr);
 }
 
-/// @brief Named and unnamed stored splits are installed when the runtime preconditioner selects field splitting.
+/// @brief Named and unnamed stored splits are installed once when the runtime preconditioner selects field splitting, and replaced when they change.
 TYPED_TEST(KSPLifecycle, StoredFieldSplitsAreInstalledAtSolve)
 {
   auto& system = this->m_problem.getLinearSystem();
@@ -224,7 +224,35 @@ TYPED_TEST(KSPLifecycle, StoredFieldSplitsAreInstalledAtSolve)
     ASSERT_EQ(PetscOptionsSetValue(nullptr, (prefix + "_pc_type").c_str(), "jacobi"),
       PETSC_SUCCESS);
   }
+  const auto expectSplits = [&](PetscInt size) {
+    PetscInt count = 0;
+    ::KSP* subsolvers = nullptr;
+    ASSERT_EQ(PCFieldSplitGetSubKSP(pc, &count, &subsolvers), PETSC_SUCCESS);
+    EXPECT_EQ(count, 2);
+    ASSERT_EQ(PetscFree(subsolvers), PETSC_SUCCESS);
+    ::IS left = nullptr;
+    ASSERT_EQ(PCFieldSplitGetIS(pc, "left", &left), PETSC_SUCCESS);
+    ASSERT_NE(left, nullptr);
+    PetscInt n = 0;
+    ASSERT_EQ(ISGetSize(left, &n), PETSC_SUCCESS);
+    EXPECT_EQ(n, size);
+  };
   this->check(solver);
+  expectSplits(2);
+  // A second solve with the same splits must not append them again.
+  this->check(solver);
+  expectSplits(2);
+  // Equal copies of the installed splits keep the preconditioner.
+  system.setFieldSplits(PETSc::Math::LinearSystem::FieldSplits(system.getFieldSplits()));
+  this->check(solver);
+  expectSplits(2);
+  // Other splits replace the installed ones.
+  ASSERT_EQ(ISCreateStride(system.getCommunicator(), 3, 0, 1, &first), PETSC_SUCCESS);
+  ASSERT_EQ(ISCreateStride(system.getCommunicator(), 1, 3, 1, &second), PETSC_SUCCESS);
+  system.setFieldSplits(
+    PETSc::Math::LinearSystem::FieldSplits({{"left", first}, {"", second}}));
+  this->check(solver);
+  expectSplits(3);
   for (const char* name : {"left", "1"})
   {
     const std::string prefix = std::string("-lifecycle_fieldsplit_") + name;
@@ -233,11 +261,6 @@ TYPED_TEST(KSPLifecycle, StoredFieldSplitsAreInstalledAtSolve)
     ASSERT_EQ(
       PetscOptionsClearValue(nullptr, (prefix + "_pc_type").c_str()), PETSC_SUCCESS);
   }
-  PetscInt count = 0;
-  ::KSP* subsolvers = nullptr;
-  ASSERT_EQ(PCFieldSplitGetSubKSP(pc, &count, &subsolvers), PETSC_SUCCESS);
-  EXPECT_EQ(count, 2);
-  ASSERT_EQ(PetscFree(subsolvers), PETSC_SUCCESS);
 }
 
 /// @brief Reusing a solver clears obsolete prefixes and PREONLY-incompatible guesses.
