@@ -65,13 +65,75 @@ ATTR_INLET, ATTR_OUTLET, ATTR_WALL, ATTR_KNIFE = 1, 2, 3, 4
 #            pressure load; unidirectional valve): the flow runs down the
 #            ramp over the floor and against the downstream wall, nothing is
 #            left behind.
-SEATS = ("cad", "fillet", "chamfer", "upramp")
+#   rampup   A + C: short ramp of RAMP2_DEG on the upstream side (the flow
+#            enters the pocket along it), vertical downstream wall that takes
+#            the pressure load, floor corners rounded (FILLET_MM at the wall,
+#            RAMP2_FR at the floor-ramp junction) and the ramp-bore edge
+#            rounded (RAMP2_FB, tangent to the bore).
+#   rampdn   the same mirrored: ramp on the downstream side, vertical wall
+#            upstream (flow against the ramp).
+SEATS = ("cad", "fillet", "chamfer", "upramp", "rampup", "rampdn")
+RAMP2_DEG = 25.0
+RAMP2_FR = 2.0
+RAMP2_FB = 4.0
 FILLET_MM = 1.5
 CHAMFER_DEG = 30.0
 CHAMFER_MM = 1.2
 UPRAMP_DEG = 15.0
 SEAT_Z = 30.0      # mm, half-length along the pipe of the refined seat zone (--hs)
 SEAT_LAYER = 3.0   # mm, layer of the bore above the seat included in it
+
+
+def _fillet(P, A, B, rho):
+    """Fillet of radius rho at the corner P between the segments P-A and P-B
+    (2D): tangent points on P-A and P-B and the centre."""
+    P, A, B = (np.asarray(x, float) for x in (P, A, B))
+    u = (A - P) / np.linalg.norm(A - P)
+    v = (B - P) / np.linalg.norm(B - P)
+    phi = math.acos(max(-1.0, min(1.0, float(u @ v))))
+    s_ = rho / math.tan(0.5 * phi)
+    w = (u + v) / np.linalg.norm(u + v)
+    return P + s_ * u, P + s_ * v, P + rho / math.sin(0.5 * phi) * w
+
+
+def ramp_profile_solid(R, Rk, t, sign):
+    """Pocket of the "rampup" (sign = -1: ramp upstream, z < 0) or "rampdn"
+    (sign = +1) seat: a profile in the (z, r) half-plane revolved about the
+    pipe axis. Vertical wall at z = -sign t/2, flat floor at r = R_k, ramp of
+    RAMP2_DEG to the bore on the other side; floor corners and the ramp-bore
+    edge rounded, the latter tangent to the bore. The profile closes inside
+    the bore (r = R - 1) so that it fuses with the pipe."""
+    occ = gmsh.model.occ
+    h = 0.5 * t
+    L = (Rk - R) / math.tan(math.radians(RAMP2_DEG))
+    zw = -sign * h  # vertical wall
+    # floor-ramp corner: the floor stays flat 0.6 mm past the knife plane
+    # (|z| = t/2) before the fillet starts, so that it meets the slot of the
+    # upper half (walls at |z| = t/2) at y = 0 without a sliver step.
+    s2 = RAMP2_FR / math.tan(0.5 * math.radians(180.0 - RAMP2_DEG))
+    zf = sign * (h + 0.6 + s2)
+    zb = zf + sign * L
+    Q0 = (zw, R - 1.0)
+    P1, P2, P3 = (zw, Rk), (zf, Rk), (zb, R)
+    Pout = (zb + sign * 20.0, R)
+    a1, b1, c1 = _fillet(P1, Q0, P2, FILLET_MM)
+    a2, b2, c2 = _fillet(P2, P1, P3, RAMP2_FR)
+    a3, b3, c3 = _fillet(P3, P2, Pout, RAMP2_FB)
+    Q5 = (b3[0], R - 1.0)
+
+    def pt(p):  # (z, r) -> (x = r, y = 0, z)
+        return occ.addPoint(float(p[1]), 0.0, float(p[0]))
+
+    pq0, pa1, pb1, pc1 = pt(Q0), pt(a1), pt(b1), pt(c1)
+    pa2, pb2, pc2 = pt(a2), pt(b2), pt(c2)
+    pa3, pb3, pc3 = pt(a3), pt(b3), pt(c3)
+    pq5 = pt(Q5)
+    curves = [occ.addLine(pq0, pa1), occ.addCircleArc(pa1, pc1, pb1), occ.addLine(pb1, pa2),
+              occ.addCircleArc(pa2, pc2, pb2), occ.addLine(pb2, pa3), occ.addCircleArc(pa3, pc3, pb3),
+              occ.addLine(pb3, pq5), occ.addLine(pq5, pq0)]
+    face = occ.addPlaneSurface([occ.addCurveLoop(curves)])
+    out = occ.revolve([(2, face)], 0, 0, 0, 0, 0, 1, 2 * math.pi)
+    return [e for e in out if e[0] == 3]
 
 
 def seat_solid(seat, R, Rk, t):
@@ -95,9 +157,13 @@ def seat_solid(seat, R, Rk, t):
         L = (d + 1.0) / math.tan(math.radians(UPRAMP_DEG))
         parts = [occ.addCylinder(0, 0, -h, 0, 0, t, Rk),
                  occ.addCone(0, 0, -h, 0, 0, -L, Rk, R - 1.0)]
+    elif seat in ("rampup", "rampdn"):
+        parts = None
+        solid = ramp_profile_solid(R, Rk, t, -1.0 if seat == "rampup" else 1.0)
     else:
         raise ValueError(seat)
-    solid = occ.fuse([(3, parts[0])], [(3, x) for x in parts[1:]])[0]
+    if parts is not None:
+        solid = occ.fuse([(3, parts[0])], [(3, x) for x in parts[1:]])[0]
     half = occ.addBox(-2 * Rk, -2 * Rk, -2 * Rk, 4 * Rk, 2 * Rk, 4 * Rk)
     solid, _ = occ.intersect(solid, [(3, half)])
     return solid

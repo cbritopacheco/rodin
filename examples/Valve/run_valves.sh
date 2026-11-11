@@ -78,10 +78,17 @@ DTMAX_CONV="${DTMAX_CONV:-0.015}"     # largest dt, units of D/U (CFL ~ 6 in the
 NBATCH="${NBATCH:-6}"                 # batches for the standard error of the mean
 TEND_CLOSED="${TEND_CLOSED:-2e-3}"    # s, closed gate (hydrostatic, no ramp: a few steps)
 # Openings (space-separated) driven by the line pressure instead of the flow
-# rate: pressure inlet PLINE, outlet POUT, ramp of 1 D/U; the flow rate is
-# then a result. For small openings, where the imposed flow rate would need
-# a pressure drop above the rating of the valve.
+# rate: pressure inlet PLINE, outlet POUT; the flow rate is then a result.
+# For small openings, where the imposed flow rate would need a pressure drop
+# above the rating of the valve. Their times are in units of D/U_jet, with
+# the jet velocity U_jet = sqrt(2 (PLINE - POUT)/rho) (34 m/s at 150 psi in
+# the pulp): the flow under the knife settles in a few jet times, and the
+# time step must follow the jet (CFL), not the mean pipe velocity.
 PRESSURE_OPENINGS="${PRESSURE_OPENINGS:-}"; export PRESSURE_OPENINGS
+T_CONV_P="${T_CONV_P:-40}"            # t_end, units of D/U_jet (0.24 s in the FPC8 at 150 psi)
+T_AVG_CONV_P="${T_AVG_CONV_P:-15}"    # start of the average, units of D/U_jet
+DT_CONV_P="${DT_CONV_P:-0.025}"       # initial dt, units of D/U_jet
+DTMAX_CONV_P="${DTMAX_CONV_P:-0.05}"  # largest dt (0.3 ms: CFL ~ 5 in the jet on 2 mm cells)
 SOLVER="${SOLVER:-direct}"            # direct (MUMPS LU) | iterative (Schur field split + AMG, far less memory)
 EXTRA="${EXTRA:-}"                    # any other -kv_* or PETSc options
 
@@ -170,11 +177,20 @@ for valve in $VALVES; do
       U="$UMEAN"
       inflow=(-kv_umean "$UMEAN")
     fi
-    tc=$(python3 -c "print($D/abs($U))")                     # D/U, s
-    tend=$(python3 -c "print($T_CONV*$tc)")
-    tavg=$(python3 -c "print($T_AVG_CONV*$tc)")
-    dt0=$(python3 -c "print($DT_CONV*$tc)")
-    dtmax=$(python3 -c "print($DTMAX_CONV*$tc)")
+    if [ "$o" -ne 0 ] && [[ " $PRESSURE_OPENINGS " == *" $o "* ]]; then
+      U=$(python3 -c "import math; print(math.sqrt(2.0*($PLINE-$POUT)/$RHO))")   # jet velocity
+      tc=$(python3 -c "print($D/abs($U))")                   # D/U_jet, s
+      tend=$(python3 -c "print($T_CONV_P*$tc)")
+      tavg=$(python3 -c "print($T_AVG_CONV_P*$tc)")
+      dt0=$(python3 -c "print($DT_CONV_P*$tc)")
+      dtmax=$(python3 -c "print($DTMAX_CONV_P*$tc)")
+    else
+      tc=$(python3 -c "print($D/abs($U))")                   # D/U, s
+      tend=$(python3 -c "print($T_CONV*$tc)")
+      tavg=$(python3 -c "print($T_AVG_CONV*$tc)")
+      dt0=$(python3 -c "print($DT_CONV*$tc)")
+      dtmax=$(python3 -c "print($DTMAX_CONV*$tc)")
+    fi
     printf "D=%s\nU=%s\ntc=%s\ntavg=%s\ntend=%s\n" "$D" "$U" "$tc" "$tavg" "$tend" > "$dir/case.env"
 
     if [ "$o" -eq 0 ]; then

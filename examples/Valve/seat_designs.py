@@ -46,6 +46,30 @@ def knife_patch(ax, seat, y_tip):
         ax.add_patch(Rectangle((-0.5 * t, y_tip), t, top - y_tip, fc=KNIFE, ec="k", lw=0.8, alpha=0.9))
 
 
+def ramp_pocket(sign):
+    """Pocket outline of the A + C seats (local coordinates z, y = r_bore - r):
+    the same construction as make_meshes.ramp_profile_solid."""
+    h = 0.5 * t
+    L = d / math.tan(math.radians(mm.RAMP2_DEG))
+    s2 = mm.RAMP2_FR / math.tan(0.5 * math.radians(180.0 - mm.RAMP2_DEG))
+    zw, zf = -sign * h, sign * (h + 0.6 + s2)
+    zb = zf + sign * L
+    # (z, r) with r measured outward from the bore: r = -y
+    Q0, P1, P2, P3 = (zw, -1.0), (zw, d), (zf, d), (zb, 0.0)
+    Pout = (zb + sign * 20.0, 0.0)
+    out = [(zw, 0.0)]
+
+    def arc(P, A, B, rho):
+        a_, b_, c_ = mm._fillet(P, A, B, rho)
+        th0 = math.atan2(a_[1] - c_[1], a_[0] - c_[0]); th1 = math.atan2(b_[1] - c_[1], b_[0] - c_[0])
+        dth = (th1 - th0 + math.pi) % (2 * math.pi) - math.pi
+        return [(c_[0] + rho * math.cos(th0 + k * dth / 20), c_[1] + rho * math.sin(th0 + k * dth / 20)) for k in range(21)]
+    pts = arc(P1, Q0, P2, mm.FILLET_MM) + arc(P2, P1, P3, mm.RAMP2_FR) + arc(P3, P2, Pout, mm.RAMP2_FB)
+    out += pts
+    out = [(z, -r) for z, r in out]
+    return out if sign > 0 else out[::-1]
+
+
 def liner_patch(ax, seat, zmax):
     """Liner below the bore surface with the pocket of the design."""
     depth = 14.0
@@ -62,6 +86,10 @@ def liner_patch(ax, seat, zmax):
         pocket = [(-0.5 * t - Lc, 0), (-0.5 * t, -cm), (-0.5 * t, -d), (0.5 * t, -d), (0.5 * t, -cm), (0.5 * t + Lc, 0)]
     elif seat == "upramp":
         pocket = [(-0.5 * t - Lr, 0), (-0.5 * t, -d), (0.5 * t, -d), (0.5 * t, 0)]
+    elif seat == "rampup":
+        pocket = ramp_pocket(-1.0)
+    elif seat == "rampdn":
+        pocket = ramp_pocket(+1.0)
     pts = [(-zmax, 0)] + pocket + [(zmax, 0), (zmax, -depth), (-zmax, -depth)]
     ax.add_patch(Polygon(pts, closed=True, fc=LINER, ec="k", lw=0.8, hatch="//"))
 
@@ -135,6 +163,8 @@ def main():
     ap.add_argument("-o", "--out", default="seat_designs.pdf")
     ap.add_argument("--meshes", default="", help="folder with FPC8[-seat]_openNNN.mesh (optional)")
     ap.add_argument("--opening", type=int, default=25)
+    ap.add_argument("--designs", default="cad,fillet,chamfer,upramp",
+                    help="comma-separated seats to draw (also rampup, rampdn)")
     a = ap.parse_args()
     designs = [
         ("cad", "CAD (referencia)",
@@ -145,9 +175,17 @@ def main():
          "Ranura %g × %g con chaflán de %g mm de hondo\n(%.1f mm de largo) en ambos bordes; paredes\nverticales en los %.1f mm restantes; bidireccional." % (t, d, cm, Lc, d - cm)),
         ("upramp", "C — Rampa aguas arriba %g°" % mm.UPRAMP_DEG,
          "Pared aguas abajo vertical (toma la presión),\nrampa de %.1f mm aguas arriba hasta el fondo:\nel flujo barre el fondo. Válvula unidireccional." % Lr),
+        ("rampup", "A+C — rampa corta aguas arriba",
+         "Rampa de %g° (%.1f mm) aguas arriba, bordes\nredondeados (R %g en el fondo, R %g en el\ndiámetro); pared aguas abajo vertical (toma la\npresión) con esquina R %g." % (
+             mm.RAMP2_DEG, d / math.tan(math.radians(mm.RAMP2_DEG)), mm.RAMP2_FR, mm.RAMP2_FB, fil)),
+        ("rampdn", "A+C — rampa corta aguas abajo",
+         "La misma, invertida: pared vertical aguas\narriba, rampa aguas abajo (el flujo choca con\nla pared y sale por la rampa). Equivale al\ncaso anterior con el flujo invertido."),
     ]
+    want = a.designs.split(",")
+    designs = [x for x in designs if x[0] in want]
     with_mesh = bool(a.meshes)
-    fig, axs = plt.subplots(2 if with_mesh else 1, 4, figsize=(16, 6.2 if with_mesh else 4.4), squeeze=False,
+    nd = len(designs)
+    fig, axs = plt.subplots(2 if with_mesh else 1, nd, figsize=(4 * nd, 6.2 if with_mesh else 4.4), squeeze=False,
                             gridspec_kw=dict(hspace=0.9))
     for ax, (seat, title, note) in zip(axs[0], designs):
         schematic(ax, seat, title, note)

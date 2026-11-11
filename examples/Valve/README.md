@@ -250,6 +250,25 @@ python3 ~/rodin/examples/Valve/postprocess_valves.py runs_seat -o seat_forces.pd
 python3 ~/rodin/examples/Valve/seat_designs.py -o seat_designs.pdf --meshes ~/rodin/resources/examples/Valve/seat
 ```
 
+**Segunda ronda (A + C), `run_valves_seat2.sh`.** El diseño A (radios) y
+dos combinaciones de A con C: una rampa corta de 25° (7.3 mm) con bordes
+redondeados (R 2 mm en el fondo, R 4 mm tangente al diámetro) a un lado de
+la ranura y la pared vertical con esquina R 1.5 al otro. `rampup`: rampa
+aguas arriba, la pared aguas abajo toma la presión; `rampdn`: la misma
+invertida (equivale a la anterior con el flujo al revés). Aperturas 5, 10 y
+25 % (9 casos; 5 %: luz de 6.8 mm bajo el cuchillo, mallas con
+`--hk 0.01`). 5 y 10 % van con presión impuesta (150 psi → atmosférica; el
+caudal resulta) y tiempos en unidades del chorro, D/U_j con
+U_j = √(2Δp/ρ) = 34 m/s: 40 D/U_j = 0.24 s, promedio desde 15 D/U_j,
+dt ≤ 0.05 D/U_j = 0.3 ms (`T_CONV_P`, `T_AVG_CONV_P`, `DT_CONV_P`,
+`DTMAX_CONV_P` en `run_valves.sh`).
+
+```sh
+NP=45 NJOBS=3 bash ~/rodin-valve/examples/Valve/run_valves_seat2.sh
+python3 ~/rodin-valve/examples/Valve/seat_designs.py --designs fillet,rampup,rampdn \
+    --meshes ~/rodin-valve/resources/examples/Valve/seat --opening 25 -o seat_designs2.pdf
+```
+
 `seat_stats.py` promedia en el tiempo los campos guardados (tras el
 transitorio) en la **zona del sello** (y < 0, |z| ≤ 25 mm, fuera del
 diámetro o a menos de 1 mm de él) y reporta: ū media y percentil 10,
