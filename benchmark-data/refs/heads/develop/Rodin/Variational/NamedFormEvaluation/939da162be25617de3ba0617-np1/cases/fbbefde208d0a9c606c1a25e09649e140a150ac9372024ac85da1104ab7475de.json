@@ -814,6 +814,96 @@
           }
         }
       ]
+    },
+    {
+      "commit": "028906efd3840770ae6c4baed2742247e80ef39e",
+      "date": "2026-11-11T14:54:00.932016+00:00",
+      "run": "42706847341.1",
+      "results": [
+        {
+          "name": "NamedEvaluationColdGeometry/P2/LinearElasticity/Constant/Named/Warm/dimension:3/first:0/integral:0",
+          "value": 20.17364719999364,
+          "unit": "ms",
+          "metric": "cpu_time",
+          "samples": [
+            20.17364719999364
+          ],
+          "records": [
+            {
+              "name": "NamedEvaluationColdGeometry/P2/LinearElasticity/Constant/Named/Warm/dimension:3/first:0/integral:0",
+              "family_index": 97,
+              "per_family_instance_index": 1,
+              "run_name": "NamedEvaluationColdGeometry/P2/LinearElasticity/Constant/Named/Warm/dimension:3/first:0/integral:0",
+              "run_type": "iteration",
+              "repetitions": 1,
+              "repetition_index": 0,
+              "threads": 1,
+              "iterations": 10,
+              "real_time": 20.17553619999717,
+              "cpu_time": 20.17364719999364,
+              "time_unit": "ms",
+              "cells": 384.0,
+              "coefficient_degree": 0.0,
+              "cold_geometry": 1.0,
+              "components": 3.0,
+              "dimension": 3.0,
+              "dofs": 2187.0,
+              "field_degree": 2.0,
+              "gradient_points_per_cell": 11.0,
+              "local_dofs": 30.0,
+              "mass_points_per_cell": 0.0,
+              "named_nonzeros": 153225.0,
+              "nonzeros": 153225.0,
+              "paused_timing": 1.0,
+              "relative_error": 6.668178748328669e-17,
+              "scatter_slots": 345600.0
+            }
+          ],
+          "context": {
+            "date": "2026-11-11T03:23:03+00:00",
+            "host_name": "runnervm7aw5e",
+            "executable": "/home/runner/work/rodin/rodin/build-benchmarks/tests/benchmarks/RodinNamedFormBenchmarks",
+            "num_cpus": 4,
+            "mhz_per_cpu": 4455,
+            "cpu_scaling_enabled": false,
+            "aslr_enabled": true,
+            "caches": [
+              {
+                "type": "Data",
+                "level": 1,
+                "size": 49152,
+                "num_sharing": 2
+              },
+              {
+                "type": "Instruction",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 2,
+                "size": 1048576,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 3,
+                "size": 33554432,
+                "num_sharing": 4
+              }
+            ],
+            "load_avg": [
+              0.993652,
+              0.288574,
+              0.101562
+            ],
+            "library_version": "v1.9.4",
+            "library_build_type": "release",
+            "json_schema_version": 1
+          }
+        }
+      ]
     }
   ],
   "format": "googlecpp",

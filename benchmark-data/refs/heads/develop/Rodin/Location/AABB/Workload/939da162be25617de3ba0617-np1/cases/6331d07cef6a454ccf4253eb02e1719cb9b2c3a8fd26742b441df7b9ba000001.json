@@ -274,6 +274,36 @@
           ]
         }
       ]
+    },
+    {
+      "commit": "028906efd3840770ae6c4baed2742247e80ef39e",
+      "date": "2026-11-11T14:54:00.932016+00:00",
+      "run": "42706847341.1",
+      "results": [
+        {
+          "name": "Segment/2/64/4/2/shared/1",
+          "value": 387.7547673,
+          "unit": "ns",
+          "metric": "process_cpu_time",
+          "samples": [
+            387.7547673
+          ],
+          "records": [
+            {
+              "geometry": "Segment",
+              "degree": "2",
+              "resolution": "64",
+              "cells": "63",
+              "distortion": "4.000000",
+              "warp_degree": "2",
+              "query": "shared",
+              "pruning": "1",
+              "samples": "62",
+              "ns": "387.7547673"
+            }
+          ]
+        }
+      ]
     }
   ],
   "format": "csv",

@@ -886,6 +886,104 @@
           }
         }
       ]
+    },
+    {
+      "commit": "028906efd3840770ae6c4baed2742247e80ef39e",
+      "date": "2026-11-11T14:54:00.932016+00:00",
+      "run": "42706847341.1",
+      "results": [
+        {
+          "name": "H1/MassOperandOrder/ScalarWeighted/Real/Vector/P6/Point/Warm/2/1/4/real_time",
+          "value": 144.53039583713627,
+          "unit": "ns",
+          "metric": "real_time",
+          "samples": [
+            144.53039583713627
+          ],
+          "records": [
+            {
+              "name": "H1/MassOperandOrder/ScalarWeighted/Real/Vector/P6/Point/Warm/2/1/4/real_time",
+              "family_index": 7,
+              "per_family_instance_index": 4,
+              "run_name": "H1/MassOperandOrder/ScalarWeighted/Real/Vector/P6/Point/Warm/2/1/4/real_time",
+              "run_type": "iteration",
+              "repetitions": 1,
+              "repetition_index": 0,
+              "threads": 1,
+              "iterations": 1950777,
+              "real_time": 144.53039583713627,
+              "cpu_time": 144.52900408401456,
+              "time_unit": "ns",
+              "ambient_dimension": 3.0,
+              "cells": 1.0,
+              "component_pair_sample_proxy": 2.0,
+              "components": 2.0,
+              "degree": 6.0,
+              "dense_entry_sample_proxy": 4.0,
+              "dimension": 0.0,
+              "field_columns": 1.0,
+              "field_rows": 2.0,
+              "first_order_geometry": 1.0,
+              "fixture_cells": 1.0,
+              "global_dofs": 2.0,
+              "local_basis": 2.0,
+              "local_entries": 4.0,
+              "quadrature_order": 4.0,
+              "quadrature_points": 1.0,
+              "reference_error": 0.0,
+              "scalar_basis": 1.0,
+              "scalar_pair_sample_proxy": 1.0,
+              "specialized_kernel": 1.0
+            }
+          ],
+          "context": {
+            "date": "2026-11-11T04:24:31+00:00",
+            "host_name": "runnervm7aw5e",
+            "executable": "/home/runner/work/rodin/rodin/build-benchmarks/tests/benchmarks/RodinH1MassOperandOrderBenchmarks",
+            "num_cpus": 4,
+            "mhz_per_cpu": 2445,
+            "cpu_scaling_enabled": false,
+            "aslr_enabled": true,
+            "caches": [
+              {
+                "type": "Data",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Instruction",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 2,
+                "size": 524288,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 3,
+                "size": 33554432,
+                "num_sharing": 4
+              }
+            ],
+            "load_avg": [
+              0.630371,
+              0.212402,
+              0.0742188
+            ],
+            "library_version": "v1.9.4",
+            "library_build_type": "release",
+            "json_schema_version": 1,
+            "compiler": "14.2.0",
+            "dispatch": "Observed specialization, not a mathematical work counter",
+            "scope": "One-cell H1 scalar-weight operand orders; no scatter or solve"
+          }
+        }
+      ]
     }
   ],
   "format": "googlecpp",

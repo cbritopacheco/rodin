@@ -751,6 +751,89 @@
           }
         }
       ]
+    },
+    {
+      "commit": "028906efd3840770ae6c4baed2742247e80ef39e",
+      "date": "2026-11-11T14:54:00.932016+00:00",
+      "run": "42706847341.1",
+      "results": [
+        {
+          "name": "SpatialMatrixProduct/ComplexByReal/rows:2/inner:3/columns:2/count:6",
+          "value": 188.02535314232486,
+          "unit": "ns",
+          "metric": "cpu_time",
+          "samples": [
+            188.02535314232486
+          ],
+          "records": [
+            {
+              "name": "SpatialMatrixProduct/ComplexByReal/rows:2/inner:3/columns:2/count:6",
+              "family_index": 1,
+              "per_family_instance_index": 42,
+              "run_name": "SpatialMatrixProduct/ComplexByReal/rows:2/inner:3/columns:2/count:6",
+              "run_type": "iteration",
+              "repetitions": 1,
+              "repetition_index": 0,
+              "threads": 1,
+              "iterations": 1540243,
+              "real_time": 188.04431054061249,
+              "cpu_time": 188.02535314232486,
+              "time_unit": "ns",
+              "columns": 2.0,
+              "inner_dimension": 3.0,
+              "matrix_count": 6.0,
+              "output_bytes": 960.0,
+              "rows": 2.0,
+              "scalar_products": 72.0
+            }
+          ],
+          "context": {
+            "date": "2026-11-11T02:36:57+00:00",
+            "host_name": "runnervm7aw5e",
+            "executable": "/home/runner/work/rodin/rodin/build-benchmarks/tests/benchmarks/RodinSpatialMatrixProductBenchmarks",
+            "num_cpus": 4,
+            "mhz_per_cpu": 3681,
+            "cpu_scaling_enabled": false,
+            "aslr_enabled": true,
+            "caches": [
+              {
+                "type": "Data",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Instruction",
+                "level": 1,
+                "size": 32768,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 2,
+                "size": 1048576,
+                "num_sharing": 2
+              },
+              {
+                "type": "Unified",
+                "level": 3,
+                "size": 33554432,
+                "num_sharing": 4
+              }
+            ],
+            "load_avg": [
+              1.28027,
+              0.410156,
+              0.147461
+            ],
+            "library_version": "v1.9.4",
+            "library_build_type": "release",
+            "json_schema_version": 1,
+            "compiler": "14.2.0",
+            "scope": "Public matrix product into retained arrays"
+          }
+        }
+      ]
     }
   ],
   "format": "googlecpp",
