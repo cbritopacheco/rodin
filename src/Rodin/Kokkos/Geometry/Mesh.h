@@ -1450,8 +1450,8 @@ namespace Rodin::Geometry
       mutable ::Kokkos::Array<Index, 5> m_layoutOffsets{};
       mutable std::mutex m_entityMutex;
       mutable std::uint64_t m_revision = 0;
-      mutable PolytopeTransformationIndex m_transformations;
-      mutable PolytopeQuadratureIndex m_quadratures;
+      PolytopeTransformationIndex m_transformations;
+      PolytopeQuadratureIndex m_quadratures;
       mutable Rodin::Kokkos::Internal::TransferCache<MemorySpace> m_transfers;
   };
 }
