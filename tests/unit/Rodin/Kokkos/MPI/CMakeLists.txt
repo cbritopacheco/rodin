@@ -1,4 +1,4 @@
-add_executable(RodinKokkosMPITest Main.cpp PoissonTest.cpp ConstraintTest.cpp)
+add_executable(RodinKokkosMPITest Main.cpp PoissonTest.cpp ConstraintTest.cpp FixedDOFTest.cpp)
 target_link_libraries(RodinKokkosMPITest
   PRIVATE GTest::gtest Rodin::KokkosMPI Rodin::IO)
 
