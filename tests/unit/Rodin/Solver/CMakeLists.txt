@@ -114,15 +114,16 @@ if (RODIN_USE_MUMPS)
 endif()
 
 if (RODIN_USE_CUDSS)
-  add_executable(RodinCuDSSTest CuDSSTest.cpp)
+  add_executable(RodinCuDSSTest CuDSSTest.cpp ../Kokkos/Main.cpp)
   target_link_libraries(RodinCuDSSTest
     GTest::gtest
-    GTest::gtest_main
     Rodin::Geometry
     Rodin::Variational
     Rodin::Solver
+    Rodin::Kokkos
   )
   rodin_discover_tests(RodinCuDSSTest
+    DISCOVERY_MODE PRE_TEST
     PROPERTIES
       LABELS unit
   )
@@ -197,3 +198,11 @@ if (RODIN_USE_UMFPACK)
       LABELS unit
   )
 endif()
+
+# GPU feature declarations must not impose GPU headers or compiler flags on
+# ordinary native solvers. This target deliberately does not link Kokkos.
+add_executable(RodinSolverBackendHeadersTest BackendHeadersTest.cpp)
+target_link_libraries(RodinSolverBackendHeadersTest PRIVATE
+  GTest::gtest GTest::gtest_main Rodin::Variational Rodin::Assembly Rodin::Solver)
+rodin_discover_tests(RodinSolverBackendHeadersTest
+  DISCOVERY_MODE PRE_TEST PROPERTIES LABELS unit)

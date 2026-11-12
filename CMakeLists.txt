@@ -347,6 +347,9 @@ if (RODIN_BUILD_SRC)
 
   # ---- cuDSS ----
   if (RODIN_USE_CUDSS)
+    if (NOT RODIN_USE_KOKKOS OR NOT Kokkos_ENABLE_CUDA)
+      message(FATAL_ERROR "RODIN_USE_CUDSS requires RODIN_USE_KOKKOS and a CUDA-enabled Kokkos installation.")
+    endif()
     find_package(CUDAToolkit REQUIRED)
     find_package(cudss CONFIG REQUIRED)
   endif()

@@ -123,11 +123,16 @@ See [the Kokkos guide](../Guides/Kokkos.dox) for lifecycle and build details.
 The following is a source audit, not a measured ranking. Keep the public
 assembly, mesh and solver contracts when reducing transfers:
 
-- `Solver/CuDSS.h` delegates exact graph validation to
+- `Kokkos/Solver/CuDSS.h` delegates exact graph validation to
   `CuDSSOperator::Pattern`. Kokkos snapshots and comparisons stay in the
   matrix memory space and return only a scalar mismatch result. Compare the
   final CSR graph: reusing assembly groups does not certify it, because
   numerical zero filtering can change the stored graph.
+  cuDSS requires CUDA-enabled Kokkos and the `Rodin::Kokkos` target. Include
+  `Rodin/Kokkos/Solver.h` or `Rodin/Kokkos/Solver/CuDSS.h`, and keep Kokkos
+  initialized during use. The former explicit `Rodin/Solver/CuDSS.h` include
+  forwards to it; the core `Rodin/Solver.h` umbrella no longer includes the
+  vendor integration or carries its CUDA dependencies.
 - `Kokkos/Solver/RocSolverRF.h` shares the exact backend graph snapshot with
   cuDSS. Its gathered pivots are checked by a Kokkos reduction on the
   rocSPARSE HIP stream: only a scalar invalid count returns, independently of

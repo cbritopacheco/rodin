@@ -161,7 +161,9 @@
   default. The operator wraps KokkosSparse::CrsMatrix, and the right-hand side
   and solution use Kokkos::View storage. Kokkos-Kernels CG and GMRES operate on
   these arrays directly. cuDSS and rocSOLVER adapters also accept backend
-  vectors. Explicit host algebra types retain the Eigen solver path.
+  vectors. Include `Rodin/Kokkos/Solver.h` and link `Rodin::Kokkos` for the
+  vendor GPU solvers, with CUDA-enabled Kokkos for cuDSS or HIP-enabled
+  Kokkos for rocSOLVER. Explicit host algebra types retain the Eigen solver path.
 
   | Problem | One GPU | Several GPUs |
   | :--- | :--- | :--- |

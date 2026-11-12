@@ -21,8 +21,14 @@ target_link_libraries(RodinKokkos
     Kokkos::kokkoskernels
 )
 
-# rocSOLVER is a Kokkos integration. Keep its dependencies off the core
-# solver target so that ordinary CPU sources remain ordinary C++.
+# Vendor GPU solvers belong to the Kokkos module. Keep their dependencies
+# off the core solver target so ordinary CPU sources remain ordinary C++.
+if (RODIN_USE_CUDSS)
+  target_link_libraries(RodinKokkos INTERFACE cudss CUDA::cudart Rodin::Solver)
+  target_sources(RodinKokkos INTERFACE
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Solver/CuDSS.h>)
+endif()
+
 if (RODIN_USE_ROCSOLVER)
   target_link_libraries(RodinKokkos INTERFACE
     roc::rocsolver roc::rocsparse roc::rocblas hip::host Rodin::Solver)

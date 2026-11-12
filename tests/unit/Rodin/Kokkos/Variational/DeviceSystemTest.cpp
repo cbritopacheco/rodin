@@ -8,7 +8,7 @@
 #include <Rodin/Kokkos/Math/LinearSystem.h>
 
 #ifdef RODIN_USE_CUDSS
-#include <Rodin/Solver/CuDSS.h>
+#include <Rodin/Kokkos/Solver/CuDSS.h>
 #include <Rodin/Solver/SparseLU.h>
 #endif
 
@@ -244,6 +244,27 @@ namespace Rodin::Tests::Unit
       KOKKOS_LAMBDA(int) { currentOffsets(1) = 1; });
     EXPECT_FALSE(ds.getResources().pattern.matches(system.getOperator()));
     check();
+    // A new backend RHS reuses factors without staging vectors on the host.
+    const auto retained = ds.getResources().data;
+    const auto baseline = system.getSolution().toHost();
+    system.getVector() *= Real(2);
+    ds.solve(system);
+    ASSERT_TRUE(ds.success());
+    EXPECT_EQ(ds.getResources().data, retained);
+    EXPECT_LE((system.getSolution().toHost() - Real(2) * baseline).norm(),
+      Real(1e-12) * baseline.norm());
+    system.getVector() = rhs;
+
+    // A clone keeps configuration and owns an independent factorization.
+    Solver::CuDSS cloned(ds);
+    EXPECT_FALSE(cloned.getResources().symbolic);
+    EXPECT_FALSE(cloned.getResources().numeric);
+    cloned.solve(system);
+    ASSERT_TRUE(cloned.success());
+    EXPECT_NE(cloned.getResources().data, ds.getResources().data);
+    EXPECT_LE(
+      (system.getSolution().toHost() - baseline).norm(), Real(1e-12) * baseline.norm());
+    EXPECT_EQ(ds.getResources().data, retained);
     ds.clear(Solver::Factorization::Symbolic);
     EXPECT_FALSE(ds.getResources().pattern.matches(system.getOperator()));
     check();

@@ -8,11 +8,11 @@
 
 #include "Rodin/Assembly.h"
 #include "Rodin/Geometry/Mesh.h"
+// Exercise the compatibility include; backend tests use the Kokkos header.
 #include "Rodin/Solver/CuDSS.h"
 #include "Rodin/Solver/SparseLU.h"
 #include "Rodin/Variational.h"
 
-using namespace Rodin;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 
@@ -142,8 +142,10 @@ namespace Rodin::Tests::Unit::Solver
       u, v};
   };
 
-  /// @brief The device holds the transpose, so an unsymmetric solve checks
-  /// that the transpose is undone.
+  /**
+   * @brief The device holds the transpose, so an unsymmetric solve checks
+   * that the transpose is undone.
+   */
   TEST(Rodin_Solver_CuDSS, SolvesUnsymmetricSystem)
   {
     Fixture f;
@@ -340,6 +342,34 @@ namespace Rodin::Tests::Unit::Solver
 
     // The original still solves with its own factors.
     system.getSolution().setZero();
+    solver.solve(system);
+    ASSERT_TRUE(solver.success());
+    expectSolution(system, oneTwoThree());
+  }
+
+  /// @brief Moving configuration must not alias or steal retained factorization state.
+  TEST(Rodin_Solver_CuDSS, MovesPreserveConfigurationOnly)
+  {
+    Fixture f;
+    CuDSSSolver solver(f.problem);
+    auto system = makePositiveDefiniteSystem();
+    solver.setSymmetric(Symmetry::PositiveDefinite).setRefinementSteps(2).solve(system);
+    ASSERT_TRUE(solver.success());
+    const auto original = solver.getResources().data;
+
+    CuDSSSolver moved(std::move(solver));
+    EXPECT_EQ(moved.getSymmetric(), Symmetry::PositiveDefinite);
+    EXPECT_EQ(moved.getRefinementSteps(), 2u);
+    expectResourceState(moved, false, false, {});
+    EXPECT_EQ(moved.getResources().handle, nullptr);
+    EXPECT_EQ(solver.getResources().data, original);
+    EXPECT_EQ(&moved.getProblem(), &f.problem);
+
+    auto again = makePositiveDefiniteSystem();
+    moved.solve(again);
+    ASSERT_TRUE(moved.success());
+    expectSolution(again, oneTwoThree());
+    EXPECT_NE(moved.getResources().data, original);
     solver.solve(system);
     ASSERT_TRUE(solver.success());
     expectSolution(system, oneTwoThree());

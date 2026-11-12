@@ -15,6 +15,10 @@
 #include "Solver/CG.h"
 #include "Solver/GMRES.h"
 
+#ifdef RODIN_USE_CUDSS
+#include "Solver/CuDSS.h"
+#endif
+
 #ifdef RODIN_USE_ROCSOLVER
 #include "Solver/RocSolverRF.h"
 #endif

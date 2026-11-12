@@ -256,6 +256,15 @@
   on the host only for the duration of input or output. Explicitly requested
   host matrix and vector types remain available for host solver paths.
 
+  On an NVIDIA GPU, `Solver::CuDSS` (`RODIN_USE_CUDSS`, requiring CUDA-enabled
+  Kokkos) reads backend CSR arrays directly. Include `Rodin/Kokkos/Solver.h`
+  or `Rodin/Kokkos/Solver/CuDSS.h` and link `Rodin::Kokkos`. Keep the Kokkos
+  runtime initialized for the solver lifetime. The former explicit
+  `Rodin/Solver/CuDSS.h` include forwards to the Kokkos integration; the core
+  `Rodin/Solver.h` umbrella does not include vendor GPU implementations.
+  The ordinary `Solver::CuDSS solver(problem)` API, factorization reuse,
+  symmetry declarations and explicit host matrix/vector paths are retained.
+
   On an AMD GPU, `Solver::RocSolverRF` (`RODIN_USE_ROCSOLVER`, requiring
   HIP-enabled Kokkos and `RODIN_USE_UMFPACK`) reads the same arrays. Include
   `Rodin/Kokkos/Solver.h`, link `Rodin::Kokkos`, and keep the Kokkos runtime

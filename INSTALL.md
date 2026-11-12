@@ -236,7 +236,7 @@ cmake .. -DCMAKE_PREFIX_PATH=/path/to/rodin/install
 | Option | Description | Default |
 |--------|-------------|---------|
 | `RODIN_USE_KOKKOS` | Build the Rodin::Kokkos module for CUDA, HIP or SYCL GPUs | `OFF` |
-| `RODIN_USE_CUDSS` | Enable the NVIDIA cuDSS direct solver | `OFF` |
+| `RODIN_USE_CUDSS` | Enable NVIDIA cuDSS through CUDA-enabled Kokkos (`RODIN_USE_KOKKOS=ON`) | `OFF` |
 | `RODIN_USE_ROCSOLVER` | Enable the AMD rocSOLVER direct solver, which requires `RODIN_USE_UMFPACK` | `OFF` |
 
 The [Kokkos guide](https://cbritopacheco.github.io/rodin/docs/refs/heads/master/guides-kokkos.html)

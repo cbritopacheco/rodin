@@ -59,8 +59,9 @@ from the system type.
 - SuiteSparse (configure-gated): `UMFPack`, `ParU`, `CHOLMOD`, `SPQR`.
 - MUMPS (configure-gated): `MUMPS`, the only direct solver that exploits a
   symmetric matrix (`setSymmetric`), halving the factor it stores.
-- cuDSS (`RODIN_USE_CUDSS`): `CuDSS`, a direct solver on an NVIDIA GPU for
-  real systems. On a `Math::SparseMatrix` it copies the CSC arrays to the
+- cuDSS (`RODIN_USE_CUDSS`, requires CUDA-enabled Kokkos, target
+  `Rodin::Kokkos`, header `Rodin/Kokkos/Solver/CuDSS.h`): `CuDSS`, a direct
+  solver on an NVIDIA GPU for real systems. Keep Kokkos initialized during use. On a `Math::SparseMatrix` it copies the CSC arrays to the
   device as the CSR arrays of the transpose and solves with the transpose,
   so a general matrix needs no conversion. On a `Kokkos::Math::SparseMatrix` in
   device memory it reads the CSR arrays in place and only copies the
