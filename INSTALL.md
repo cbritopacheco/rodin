@@ -283,10 +283,10 @@ When you `find_package(Rodin)`, the following targets become available:
 - `Rodin::Scotch` - Scotch integration (requires `RODIN_USE_SCOTCH=ON`)
 - `Rodin::MPI` - MPI support (requires `RODIN_USE_MPI=ON`)
 - `Rodin::Kokkos` - GPU meshes, assembly and solvers (requires `RODIN_USE_KOKKOS=ON`)
-- `Rodin::KokkosPETSc` - PETSc systems on the GPU (requires `RODIN_USE_KOKKOS=ON` and `RODIN_USE_PETSC=ON`)
-- `Rodin::KokkosMPI` - Distributed GPU meshes and spaces (requires `RODIN_USE_KOKKOS=ON`, `RODIN_USE_PETSC=ON` and `RODIN_USE_MPI=ON`)
-- `Rodin::KokkosKernels` - Kokkos-Kernels solvers, always available with the Kokkos module (requires `RODIN_USE_KOKKOS=ON`)
-- `Rodin::KokkosHypre` - hypre on the GPU (requires `RODIN_USE_KOKKOS=ON` and `RODIN_USE_HYPRE=ON`)
+- `Rodin::Kokkos::PETSc` - PETSc systems on the GPU (requires `RODIN_USE_KOKKOS=ON` and `RODIN_USE_PETSC=ON`)
+- `Rodin::Kokkos::MPI` - Distributed GPU meshes and spaces (requires `RODIN_USE_KOKKOS=ON`, `RODIN_USE_PETSC=ON` and `RODIN_USE_MPI=ON`)
+- `Rodin::Kokkos::Kernels` - Kokkos-Kernels solvers, always available with the Kokkos module (requires `RODIN_USE_KOKKOS=ON`)
+- `Rodin::Kokkos::Hypre` - hypre on the GPU (requires `RODIN_USE_KOKKOS=ON` and `RODIN_USE_HYPRE=ON`)
 
 ## Troubleshooting
 

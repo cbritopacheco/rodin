@@ -54,11 +54,11 @@ target_link_libraries(KokkosStokes
   Rodin::IO
   )
 
-if (TARGET Rodin::KokkosPETSc)
+if (TARGET Rodin::Kokkos::PETSc)
   add_executable(KokkosSeq_Poisson Seq_Poisson.cpp)
   target_link_libraries(KokkosSeq_Poisson
     PUBLIC
-    Rodin::KokkosPETSc
+    Rodin::Kokkos::PETSc
     Rodin::Solver
     Rodin::Geometry
     Rodin::Assembly
@@ -69,7 +69,7 @@ if (TARGET Rodin::KokkosPETSc)
   add_executable(KokkosSeq_NavierStokes Seq_NavierStokes.cpp)
   target_link_libraries(KokkosSeq_NavierStokes
     PUBLIC
-    Rodin::KokkosPETSc
+    Rodin::Kokkos::PETSc
     Rodin::Solver
     Rodin::Geometry
     Rodin::Assembly
@@ -80,7 +80,7 @@ if (TARGET Rodin::KokkosPETSc)
   add_executable(KokkosSeq_Elasticity Seq_Elasticity.cpp)
   target_link_libraries(KokkosSeq_Elasticity
     PUBLIC
-    Rodin::KokkosPETSc
+    Rodin::Kokkos::PETSc
     Rodin::Solver
     Rodin::Geometry
     Rodin::Assembly
@@ -100,11 +100,11 @@ target_link_libraries(KokkosNavierStokes
   Rodin::IO
   )
 
-if (TARGET Rodin::KokkosKernels)
+if (TARGET Rodin::Kokkos::Kernels)
   add_executable(KokkosKrylov_Poisson Krylov_Poisson.cpp)
   target_link_libraries(KokkosKrylov_Poisson
     PUBLIC
-    Rodin::KokkosKernels
+    Rodin::Kokkos::Kernels
     Rodin::Solver
     Rodin::Geometry
     Rodin::Assembly
@@ -113,11 +113,11 @@ if (TARGET Rodin::KokkosKernels)
     )
 endif()
 
-if (TARGET Rodin::KokkosHypre)
+if (TARGET Rodin::Kokkos::Hypre)
   add_executable(KokkosBoomerAMG_Poisson BoomerAMG_Poisson.cpp)
   target_link_libraries(KokkosBoomerAMG_Poisson
     PUBLIC
-    Rodin::KokkosHypre
+    Rodin::Kokkos::Hypre
     Rodin::Solver
     Rodin::Geometry
     Rodin::Assembly

@@ -1,11 +1,11 @@
-if (TARGET Rodin::KokkosPETSc)
+if (TARGET Rodin::Kokkos::PETSc)
   add_executable(KokkosOseenAssembly OseenAssembly.cpp)
-  target_link_libraries(KokkosOseenAssembly PUBLIC Rodin::KokkosPETSc)
+  target_link_libraries(KokkosOseenAssembly PUBLIC Rodin::Kokkos::PETSc)
 endif()
 
 add_subdirectory(PDEs)
 add_subdirectory(Solid)
 
-if (TARGET Rodin::KokkosMPI)
+if (TARGET Rodin::Kokkos::MPI)
   add_subdirectory(MPI)
 endif()

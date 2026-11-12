@@ -1,6 +1,6 @@
 add_executable(RodinKokkosMPITest Main.cpp PoissonTest.cpp ConstraintTest.cpp FixedDOFTest.cpp)
 target_link_libraries(RodinKokkosMPITest
-  PRIVATE GTest::gtest Rodin::KokkosMPI Rodin::IO)
+  PRIVATE GTest::gtest Rodin::Kokkos::MPI Rodin::IO)
 
 # Detect Open MPI for --oversubscribe flag (not supported by MPICH).
 set(_RODIN_MPI_OVERSUBSCRIBE_FLAG "")

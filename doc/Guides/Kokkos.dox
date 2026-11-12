@@ -285,7 +285,7 @@
   `Rodin/Kokkos/Solver.h` specializes
   `Solver::CG`, `Solver::BiCGSTAB` and `Solver::GMRES` for such a system.
   They iterate on the device with a Jacobi preconditioner and link
-  `Rodin::KokkosKernels`:
+  `Rodin::Kokkos::Kernels`:
   @code{.cpp}
   #include <Rodin/Kokkos/Solver.h>
 
@@ -296,7 +296,7 @@
   With `RODIN_USE_HYPRE`, `Rodin/Kokkos/Solver/BoomerAMG.h` provides
   `Solver::BoomerAMG`, the conjugate gradient of hypre preconditioned by
   BoomerAMG, which builds its hierarchy from the device arrays and links
-  `Rodin::KokkosHypre`. The hierarchy is kept from one solve to the next and
+  `Rodin::Kokkos::Hypre`. The hierarchy is kept from one solve to the next and
   preconditions the conjugate gradient on the current matrix; `setup()`
   builds it again when the matrix has changed too much. It initializes MPI
   and hypre if the application has not; the application finalizes them after
@@ -366,7 +366,7 @@
   process hold its degrees of freedom of each field in turn, and
   `LinearSystem::getFieldStarts()` gives the first row of each field. Eigen
   systems are not distributed. Link the
-  `Rodin::KokkosMPI` target, available when Rodin is configured with both
+  `Rodin::Kokkos::MPI` target, available when Rodin is configured with both
   `RODIN_USE_MPI` and `RODIN_USE_PETSC`. PETSc must be built with Kokkos;
   with a CUDA-aware or ROCm-aware MPI, such as Open MPI configured
   `--with-cuda` or `--with-rocm`, device buffers are exchanged directly,

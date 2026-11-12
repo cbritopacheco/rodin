@@ -87,7 +87,7 @@ with empty plans. PETSc retains its separate COO cache. SubMesh
 is not provided. `Mesh<Context::Kokkos<Context::MPI, Backend>>` makes the
 shard of a `Mesh<Context::MPI>` resident and marks owned entities in its
 device view; `P1` and `P0g` PETSc problems, single or multi-field, are
-assembled on it into distributed Kokkos systems (`Rodin::KokkosMPI`). Each
+assembled on it into distributed Kokkos systems (`Rodin::Kokkos::MPI`). Each
 field keeps its global numbering shifted by its offset, as on the host, for
 the constraints, the preassembled forms and the problem, but the PETSc rows of
 a process hold its owned degrees of freedom of each field in turn, so that the

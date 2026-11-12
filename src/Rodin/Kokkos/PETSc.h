@@ -11,7 +11,7 @@
  * @file
  * @brief PETSc problems assembled on resident Kokkos meshes.
  *
- * Link the optional Rodin::KokkosPETSc CMake target when including this
+ * Link the optional Rodin::Kokkos::PETSc CMake target when including this
  * module.
  */
 

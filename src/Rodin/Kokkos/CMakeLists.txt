@@ -100,9 +100,8 @@ install(TARGETS RodinKokkos EXPORT RodinTargets)
 
 if (RODIN_USE_PETSC)
   add_library(RodinKokkosPETSc INTERFACE)
-  add_library(Rodin::KokkosPETSc ALIAS RodinKokkosPETSc)
   add_library(Rodin::Kokkos::PETSc ALIAS RodinKokkosPETSc)
-  set_target_properties(RodinKokkosPETSc PROPERTIES EXPORT_NAME KokkosPETSc)
+  set_target_properties(RodinKokkosPETSc PROPERTIES EXPORT_NAME Kokkos::PETSc)
 
   target_link_libraries(RodinKokkosPETSc
     INTERFACE
@@ -119,13 +118,12 @@ if (RODIN_USE_PETSC)
 
   if (RODIN_USE_MPI)
     add_library(RodinKokkosMPI INTERFACE)
-    add_library(Rodin::KokkosMPI ALIAS RodinKokkosMPI)
     add_library(Rodin::Kokkos::MPI ALIAS RodinKokkosMPI)
-    set_target_properties(RodinKokkosMPI PROPERTIES EXPORT_NAME KokkosMPI)
+    set_target_properties(RodinKokkosMPI PROPERTIES EXPORT_NAME Kokkos::MPI)
 
     target_link_libraries(RodinKokkosMPI
       INTERFACE
-        Rodin::KokkosPETSc
+        Rodin::Kokkos::PETSc
         Rodin::MPI
     )
 
@@ -143,9 +141,8 @@ endif()
 
 if (RODIN_USE_KOKKOS)
   add_library(RodinKokkosKernels INTERFACE)
-  add_library(Rodin::KokkosKernels ALIAS RodinKokkosKernels)
   add_library(Rodin::Kokkos::Kernels ALIAS RodinKokkosKernels)
-  set_target_properties(RodinKokkosKernels PROPERTIES EXPORT_NAME KokkosKernels)
+  set_target_properties(RodinKokkosKernels PROPERTIES EXPORT_NAME Kokkos::Kernels)
 
   target_link_libraries(RodinKokkosKernels
     INTERFACE
@@ -167,9 +164,8 @@ endif()
 
 if (RODIN_USE_HYPRE)
   add_library(RodinKokkosHypre INTERFACE)
-  add_library(Rodin::KokkosHypre ALIAS RodinKokkosHypre)
   add_library(Rodin::Kokkos::Hypre ALIAS RodinKokkosHypre)
-  set_target_properties(RodinKokkosHypre PROPERTIES EXPORT_NAME KokkosHypre)
+  set_target_properties(RodinKokkosHypre PROPERTIES EXPORT_NAME Kokkos::Hypre)
 
   target_link_libraries(RodinKokkosHypre
     INTERFACE

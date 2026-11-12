@@ -100,7 +100,7 @@ from the system type.
   loses accuracy; `clear(Factorization::Symbolic)` pivots again.
   `Info::status` holds the rocBLAS, rocSPARSE or UMFPACK status, or
   `Breakdown`.
-- Kokkos-Kernels (`RODIN_USE_KOKKOS`, target `Rodin::KokkosKernels`,
+- Kokkos-Kernels (`RODIN_USE_KOKKOS`, target `Rodin::Kokkos::Kernels`,
   header `Rodin/Kokkos/Solver.h`): `CG`, `BiCGSTAB` and `GMRES` specialized for a system
   whose matrix is a `Kokkos::Math::SparseMatrix`, so a device assembly is solved
   without PETSc. All three are Jacobi preconditioned and read the CSR arrays in
@@ -117,7 +117,7 @@ from the system type.
   the iteration limit rounded up to whole cycles. Configure with
   `-DKokkosKernels_DIR=<prefix>/lib/cmake/KokkosKernels`; Kokkos-Kernels must
   be built on the Kokkos Rodin uses, with `int` ordinals and offsets.
-- hypre (`RODIN_USE_HYPRE`, target `Rodin::KokkosHypre`, header
+- hypre (`RODIN_USE_HYPRE`, target `Rodin::Kokkos::Hypre`, header
   `Rodin/Kokkos/Solver/BoomerAMG.h`): `BoomerAMG`, the conjugate gradient of
   hypre preconditioned by one BoomerAMG V-cycle, for an SPD system whose
   matrix is a `Kokkos::Math::SparseMatrix`. hypre copies the CSR arrays in the

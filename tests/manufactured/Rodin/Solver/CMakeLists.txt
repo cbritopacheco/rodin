@@ -16,7 +16,7 @@ if (RODIN_USE_KOKKOS)
   add_executable(RodinKokkosManufacturedBiCGSTABTest KokkosBiCGSTABTest.cpp
     ../../../unit/Rodin/Kokkos/Main.cpp)
   target_link_libraries(RodinKokkosManufacturedBiCGSTABTest PRIVATE
-    GTest::gtest Rodin::KokkosKernels)
+    GTest::gtest Rodin::Kokkos::Kernels)
   rodin_discover_tests(RodinKokkosManufacturedBiCGSTABTest
     DISCOVERY_MODE PRE_TEST PROPERTIES LABELS manufactured TIMEOUT 120)
 endif()

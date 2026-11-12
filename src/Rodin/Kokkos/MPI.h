@@ -11,7 +11,7 @@
  * @file
  * @brief PETSc problems assembled on distributed resident Kokkos meshes.
  *
- * Link the optional Rodin::KokkosMPI CMake target when including this
+ * Link the optional Rodin::Kokkos::MPI CMake target when including this
  * module.
  */
 

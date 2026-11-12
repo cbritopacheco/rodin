@@ -45,11 +45,7 @@ file(WRITE "${_mock}/KokkosKernelsConfig.cmake" [=[
   endif()
   add_library(Kokkos::kokkoskernels INTERFACE IMPORTED)
 ]=])
-file(WRITE "${_mock}/RodinTargets.cmake" [=[
-  foreach(_module MPI PETSc Hypre)
-    add_library(Rodin::Kokkos${_module} INTERFACE IMPORTED)
-  endforeach()
-]=])
+file(WRITE "${_mock}/RodinTargets.cmake" "")
 
 # Configure and consume the actual exported package template, in a CXX-only project.
 file(READ "${RODIN_SOURCE_DIR}/cmake/RodinConfig.cmake.in" _template)
@@ -64,8 +60,3 @@ configure_file("${RODIN_SOURCE_DIR}/cmake/RodinConfig.cmake.in"
   "${_mock}/RodinConfig.cmake" @ONLY)
 list(PREPEND CMAKE_PREFIX_PATH "${_mock}")
 find_package(Rodin REQUIRED CONFIG PATHS "${_mock}" NO_DEFAULT_PATH)
-foreach(_module MPI PETSc Hypre)
-  if(NOT TARGET Rodin::Kokkos::${_module})
-    message(FATAL_ERROR "Missing installed module alias: ${_module}")
-  endif()
-endforeach()
