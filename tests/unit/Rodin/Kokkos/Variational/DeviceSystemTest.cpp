@@ -13,7 +13,7 @@
 #endif
 
 #ifdef RODIN_USE_ROCSOLVER
-#include <Rodin/Solver/RocSolverRF.h>
+#include <Rodin/Kokkos/Solver/RocSolverRF.h>
 #include <Rodin/Solver/SparseLU.h>
 #endif
 

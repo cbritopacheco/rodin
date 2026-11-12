@@ -9,11 +9,14 @@
 
 /**
  * @file
- * @brief Krylov solvers of Kokkos-Kernels for systems whose matrix is a
- * Kokkos::Math::SparseMatrix (`Rodin::KokkosKernels`).
+ * @brief Kokkos Krylov solvers and optional vendor direct solvers.
  */
 
 #include "Solver/CG.h"
 #include "Solver/GMRES.h"
+
+#ifdef RODIN_USE_ROCSOLVER
+#include "Solver/RocSolverRF.h"
+#endif
 
 #endif

@@ -129,15 +129,16 @@ if (RODIN_USE_CUDSS)
 endif()
 
 if (RODIN_USE_ROCSOLVER)
-  add_executable(RodinRocSolverRFTest RocSolverRFTest.cpp)
+  add_executable(RodinRocSolverRFTest RocSolverRFTest.cpp ../Kokkos/Main.cpp)
   target_link_libraries(RodinRocSolverRFTest
     GTest::gtest
-    GTest::gtest_main
     Rodin::Geometry
     Rodin::Variational
     Rodin::Solver
+    Rodin::Kokkos
   )
   rodin_discover_tests(RodinRocSolverRFTest
+    DISCOVERY_MODE PRE_TEST
     PROPERTIES
       LABELS unit
   )

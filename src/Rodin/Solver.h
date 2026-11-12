@@ -47,7 +47,6 @@
 #include "Solver/ParU.h"
 #include "Solver/MUMPS.h"
 #include "Solver/CuDSS.h"
-#include "Solver/RocSolverRF.h"
 #include "Solver/SPQR.h"
 #include "Solver/CHOLMOD.h"
 

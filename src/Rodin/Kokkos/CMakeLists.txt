@@ -21,6 +21,16 @@ target_link_libraries(RodinKokkos
     Kokkos::kokkoskernels
 )
 
+# rocSOLVER is a Kokkos integration. Keep its dependencies off the core
+# solver target so that ordinary CPU sources remain ordinary C++.
+if (RODIN_USE_ROCSOLVER)
+  target_link_libraries(RodinKokkos INTERFACE
+    roc::rocsolver roc::rocsparse roc::rocblas hip::host Rodin::Solver)
+  target_sources(RodinKokkos INTERFACE
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Solver/RocSolverRF.h>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Solver/RocSolverRFPivots.h>)
+endif()
+
 # IGC gives a thread 128 registers by default on the Arc Pro B70, and the
 # bilinear integration kernels spill hundreds of them, which made them four
 # times slower than on an RTX 2080 Ti. The automatic mode gives 256 registers

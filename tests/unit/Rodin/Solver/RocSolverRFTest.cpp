@@ -282,15 +282,13 @@ namespace Rodin::Tests::Unit::Solver
     expectSolution(other, oneTwoThree());
   }
 
-  /// @brief The compiled HIP checker reduces all pivots and resets its retained flag.
+  /// @brief Kokkos borrows the rocSPARSE stream to reduce the gathered pivots.
   TEST(Rodin_Solver_RocSolverRF, ChecksPivotsOnDevice)
   {
     using Pivots = Rodin::Solver::Internal::RocSolverRFPivots;
     constexpr size_t Count = 4097;
     RocSolverRFSolver::Array<Real> values;
-    RocSolverRFSolver::Array<int> flag;
     ASSERT_EQ(values.resize(Count), hipSuccess);
-    ASSERT_EQ(flag.resize(1), hipSuccess);
     struct Stream
     {
       hipStream_t value = nullptr;
@@ -307,14 +305,14 @@ namespace Rodin::Tests::Unit::Solver
     host[2] = -std::numeric_limits<Real>::max();
     host[3] = std::numeric_limits<Real>::denorm_min();
     host[4] = -std::numeric_limits<Real>::denorm_min();
-    bool valid = false;
+    using View = ::Kokkos::View<const Real*, ::Kokkos::HIPSpace,
+      ::Kokkos::MemoryTraits<::Kokkos::Unmanaged>>;
+    const ::Kokkos::HIP execution(stream.value);
     const auto run = [&](bool expected) {
       ASSERT_EQ(hipMemcpyAsync(values.data, host.data(), Count * sizeof(Real),
                   hipMemcpyHostToDevice, stream.value),
         hipSuccess);
-      ASSERT_EQ(
-        Pivots::check(values.data, Count, flag.data, valid, stream.value), hipSuccess);
-      EXPECT_EQ(valid, expected);
+      EXPECT_EQ(Pivots::check(execution, View(values.data, Count)), expected);
     };
     run(true);
     for (const size_t position : {size_t(0), Count / 2, Count - 1})
@@ -329,12 +327,7 @@ namespace Rodin::Tests::Unit::Solver
         run(true);
       }
     }
-    ASSERT_EQ(Pivots::check(nullptr, 0, flag.data, valid, stream.value), hipSuccess);
-    EXPECT_TRUE(valid);
-    valid = true;
-    EXPECT_NE(Pivots::check(nullptr, 0, nullptr, valid, stream.value), hipSuccess);
-    EXPECT_FALSE(valid);
-    static_cast<void>(hipGetLastError());
+    EXPECT_TRUE(Pivots::check(execution, View(nullptr, 0)));
   }
 
   /// @brief A matrix with another pattern is analyzed again.

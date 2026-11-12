@@ -76,7 +76,8 @@ from the system type.
   addresses do not determine equality. `setSymmetric` selects `LDL^T` or `LL^T`,
   `setRefinementSteps` adds iterative refinement. Configure with
   `-Dcudss_DIR=<cudss>/lib/cmake/cudss`.
-- rocSOLVER (`RODIN_USE_ROCSOLVER`, requires `RODIN_USE_UMFPACK`):
+- rocSOLVER (`RODIN_USE_ROCSOLVER`, requires `RODIN_USE_UMFPACK` and HIP-enabled
+  Kokkos, target `Rodin::Kokkos`, header `Rodin/Kokkos/Solver/RocSolverRF.h`):
   `RocSolverRF`, a direct solver on an AMD GPU through the sparse
   refactorization of rocSOLVER, on the same two layouts as `CuDSS`.
   rocSOLVER only refactorizes, so the first `factorize` fixes the pivots on
@@ -89,8 +90,9 @@ from the system type.
   `CuDSSOperator::Pattern` as cuDSS, on the backend for Kokkos matrices.
   Pivot validity is reduced on the GPU with one scalar result, accepting
   every finite nonzero pivot; no host pivot vector or numeric tolerance is
-  used. The compiled HIP kernel is independent of Kokkos and works with host
-  or backend solution vectors. The Cholesky refactorization takes the
+  used. The Kokkos reduction borrows the rocSPARSE HIP stream and works with
+  host or backend solution vectors. Keep Kokkos initialized during use. The
+  Cholesky refactorization takes the
   square root of the absolute value of each pivot: an indefinite matrix
   declared positive definite gives a wrong solution without failing. A
   refactorization whose values call for other pivots than the first ones

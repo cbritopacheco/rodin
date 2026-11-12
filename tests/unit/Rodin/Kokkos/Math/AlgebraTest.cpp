@@ -6,7 +6,7 @@
  */
 #include <Rodin/Kokkos/Solver.h>
 #include <Rodin/Solver/CuDSSOperator.h>
-#include <Rodin/Solver/RocSolverRFPivots.h>
+#include <Rodin/Kokkos/Solver/RocSolverRFPivots.h>
 #include "../Variational/Common.h"
 
 namespace Rodin::Tests::Unit
@@ -32,6 +32,40 @@ namespace Rodin::Tests::Unit
     {
       EXPECT_FALSE(Pivots::valid(value));
     }
+  }
+
+  /// @brief Exercises the actual pivot reduction on the selected backend.
+  TEST(Kokkos_Math, RocSolverPivotReduction)
+  {
+    using Pivots = Solver::Internal::RocSolverRFPivots;
+    constexpr size_t Count = 4097;
+    Matrix::Array<Real> values("test pivots", Count);
+    const auto execution = TestContext{}.getExecutionSpace();
+    const auto host = ::Kokkos::create_mirror_view(values);
+    for (size_t i = 0; i < Count; ++i)
+      host(i) = Real(1);
+    host(1) = std::numeric_limits<Real>::max();
+    host(2) = -std::numeric_limits<Real>::max();
+    host(3) = std::numeric_limits<Real>::denorm_min();
+    host(4) = -std::numeric_limits<Real>::denorm_min();
+    const auto run = [&](bool expected) {
+      ::Kokkos::deep_copy(execution, values, host);
+      EXPECT_EQ(Pivots::check(execution, values), expected);
+    };
+    run(true);
+    for (const size_t position : {size_t(0), Count / 2, Count - 1})
+    {
+      for (const Real invalid :
+        {Real(0), -Real(0), std::numeric_limits<Real>::infinity(),
+          -std::numeric_limits<Real>::infinity(), std::numeric_limits<Real>::quiet_NaN()})
+      {
+        host(position) = invalid;
+        run(false);
+        host(position) = Real(1);
+        run(true);
+      }
+    }
+    EXPECT_TRUE(Pivots::check(execution, Matrix::Array<Real>()));
   }
 
   /// @brief A solver snapshot detects edits even when sizes and pointers stay fixed.

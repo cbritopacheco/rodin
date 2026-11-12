@@ -29,6 +29,7 @@
 #include <Rodin/Solver/NewtonSolver.h>
 #include <Rodin/Solver.h>
 #include <Rodin/Kokkos.h>
+#include <Rodin/Kokkos/Solver.h>
 
 #if defined(KOKKOS_ENABLE_CUDA)
 using Backend = Rodin::Context::CUDA;

@@ -128,14 +128,17 @@ assembly, mesh and solver contracts when reducing transfers:
   matrix memory space and return only a scalar mismatch result. Compare the
   final CSR graph: reusing assembly groups does not certify it, because
   numerical zero filtering can change the stored graph.
-- `Solver/RocSolverRF.h` shares the exact backend graph snapshot with cuDSS.
-  Its gathered pivots are checked by a compiled HIP kernel: only a scalar
-  invalid flag returns, independently of the solution vector storage type.
-  Initial host UMFPACK/AMD analysis still needs its input arrays. Building
-  rocSOLVER requires CMake 3.21 and a HIP compiler; its small pivot kernel
-  compiles separately from the ordinary C++ core. Without a visible GPU,
-  specify `CMAKE_HIP_ARCHITECTURES`; an installed Kokkos HIP architecture
-  supplies the default when available.
+- `Kokkos/Solver/RocSolverRF.h` shares the exact backend graph snapshot with
+  cuDSS. Its gathered pivots are checked by a Kokkos reduction on the
+  rocSPARSE HIP stream: only a scalar invalid count returns, independently of
+  the solution vector storage type. The same reduction runs on host execution
+  spaces in tests. Initial host UMFPACK/AMD analysis still needs its input
+  arrays. rocSOLVER requires a HIP-enabled Kokkos installation, the
+  `Rodin::Kokkos` target and an initialized Kokkos runtime. Its implementation
+  is included by `Rodin/Kokkos/Solver.h`; the former explicit
+  `Rodin/Solver/RocSolverRF.h` include forwards to it. The core
+  `Rodin/Solver.h` umbrella no longer includes this backend integration.
+  No standalone HIP source or CMake HIP language setup is needed.
 - Kokkos boundary assembly compacts prescribed values on the backend, then
   returns them through `IndexMap` on the host. `SystemAssembly::build` uploads
   fixed masks and values again. Keep a backend constraint representation
