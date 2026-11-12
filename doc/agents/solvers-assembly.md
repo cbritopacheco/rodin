@@ -85,7 +85,12 @@ from the system type.
   factorizations of the same pattern run on the device with those pivots.
   rocSOLVER reports no zero pivot and then solves to a wrong but finite
   result, so `factorize` gathers the diagonal of the factors and reports
-  `Breakdown` with the analysis kept. The Cholesky refactorization takes the
+  `Breakdown` with the analysis kept. Exact pattern reuse uses the same
+  `CuDSSOperator::Pattern` as cuDSS, on the backend for Kokkos matrices.
+  Pivot validity is reduced on the GPU with one scalar result, accepting
+  every finite nonzero pivot; no host pivot vector or numeric tolerance is
+  used. The compiled HIP kernel is independent of Kokkos and works with host
+  or backend solution vectors. The Cholesky refactorization takes the
   square root of the absolute value of each pivot: an indefinite matrix
   declared positive definite gives a wrong solution without failing. A
   refactorization whose values call for other pivots than the first ones

@@ -142,8 +142,10 @@ namespace Rodin::Tests::Unit::Solver
       u, v};
   };
 
-  /// @brief The host matrix is stored as CSC, so an unsymmetric solve checks
-  /// that it is reordered as CSR.
+  /**
+   * @brief The host matrix is stored as CSC, so an unsymmetric solve checks
+   * that it is reordered as CSR.
+   */
   TEST(Rodin_Solver_RocSolverRF, SolvesUnsymmetricSystem)
   {
     Fixture f;
@@ -195,8 +197,10 @@ namespace Rodin::Tests::Unit::Solver
     expectSolution(system, oneTwoThree());
   }
 
-  /// @brief A singular matrix fails the host factorization that fixes the
-  /// pivots, and a zero pivot met by a refactorization fails it.
+  /**
+   * @brief A singular matrix fails the host factorization that fixes the
+   * pivots, and a zero pivot met by a refactorization fails it.
+   */
   TEST(Rodin_Solver_RocSolverRF, ReportsSingularMatrices)
   {
     Fixture f;
@@ -276,6 +280,61 @@ namespace Rodin::Tests::Unit::Solver
     solver.solve(other);
     ASSERT_TRUE(solver.success());
     expectSolution(other, oneTwoThree());
+  }
+
+  /// @brief The compiled HIP checker reduces all pivots and resets its retained flag.
+  TEST(Rodin_Solver_RocSolverRF, ChecksPivotsOnDevice)
+  {
+    using Pivots = Rodin::Solver::Internal::RocSolverRFPivots;
+    constexpr size_t Count = 4097;
+    RocSolverRFSolver::Array<Real> values;
+    RocSolverRFSolver::Array<int> flag;
+    ASSERT_EQ(values.resize(Count), hipSuccess);
+    ASSERT_EQ(flag.resize(1), hipSuccess);
+    struct Stream
+    {
+      hipStream_t value = nullptr;
+      ~Stream()
+      {
+        if (value)
+          static_cast<void>(hipStreamDestroy(value));
+      }
+    } stream;
+    ASSERT_EQ(hipStreamCreate(&stream.value), hipSuccess);
+    std::vector<Real> host(Count, Real(1));
+    // The finite extremes ensure the checker does not use a norm or tolerance.
+    host[1] = std::numeric_limits<Real>::max();
+    host[2] = -std::numeric_limits<Real>::max();
+    host[3] = std::numeric_limits<Real>::denorm_min();
+    host[4] = -std::numeric_limits<Real>::denorm_min();
+    bool valid = false;
+    const auto run = [&](bool expected) {
+      ASSERT_EQ(hipMemcpyAsync(values.data, host.data(), Count * sizeof(Real),
+                  hipMemcpyHostToDevice, stream.value),
+        hipSuccess);
+      ASSERT_EQ(
+        Pivots::check(values.data, Count, flag.data, valid, stream.value), hipSuccess);
+      EXPECT_EQ(valid, expected);
+    };
+    run(true);
+    for (const size_t position : {size_t(0), Count / 2, Count - 1})
+    {
+      for (const Real invalid :
+        {Real(0), -Real(0), std::numeric_limits<Real>::infinity(),
+          -std::numeric_limits<Real>::infinity(), std::numeric_limits<Real>::quiet_NaN()})
+      {
+        host[position] = invalid;
+        run(false);
+        host[position] = Real(1);
+        run(true);
+      }
+    }
+    ASSERT_EQ(Pivots::check(nullptr, 0, flag.data, valid, stream.value), hipSuccess);
+    EXPECT_TRUE(valid);
+    valid = true;
+    EXPECT_NE(Pivots::check(nullptr, 0, nullptr, valid, stream.value), hipSuccess);
+    EXPECT_FALSE(valid);
+    static_cast<void>(hipGetLastError());
   }
 
   /// @brief A matrix with another pattern is analyzed again.
@@ -453,8 +512,10 @@ namespace Rodin::Tests::Unit::Solver
     }
   }
 
-  /// @brief The Cholesky factorization matches SparseLU on a variational
-  /// problem, whose factors fill in.
+  /**
+   * @brief The Cholesky factorization matches SparseLU on a variational
+   * problem, whose factors fill in.
+   */
   TEST_P(Rodin_Solver_RocSolverRF_AllGeometries, SolvesPositiveDefiniteProblem)
   {
     auto mesh = makeMesh(GetParam());

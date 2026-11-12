@@ -26,6 +26,7 @@
  * rocSOLVER reads it in place when it is in device memory.
  *
  * @note This solver requires rocSOLVER, UMFPACK and RODIN_USE_ROCSOLVER.
+ * A HIP compiler builds its pivot-check kernel separately from the C++ core.
  */
 #ifndef RODIN_SOLVER_ROCSOLVERRF_H
 #define RODIN_SOLVER_ROCSOLVERRF_H
@@ -59,6 +60,7 @@
 #include "ForwardDecls.h"
 #include "Info.h"
 #include "LinearSolver.h"
+#include "RocSolverRFPivots.h"
 
 namespace Rodin::FormLanguage
 {
@@ -349,7 +351,8 @@ namespace Rodin::Solver
    *    UMFPACK for @f$ LU @f$ and by AMD for @f$ LL^T @f$, and compute the
    *    exact pattern of the factors from it.
    * 3. Refactorize on the device for every numeric factorization of the
-   *    pattern, kept on the host and compared at each factorization.
+   *    pattern. Kokkos graphs are retained and compared exactly on the backend;
+   *    only a scalar mismatch result returns to the host.
    * 4. Retain the numeric factorization for explicit repeated solves.
    *
    * The solver runs on the current HIP device, on the default stream. Every
@@ -358,8 +361,9 @@ namespace Rodin::Solver
    * The refactorization does not pivot, and rocSOLVER neither reports a zero
    * pivot nor fails on one: its triangular solves skip the division and
    * return a wrong solution. The factorization therefore gathers the
-   * diagonal of the factors after every refactorization and fails on a zero
-   * or non-finite pivot, and the solve fails on a non-finite solution. A
+   * diagonal of the factors after every refactorization, checks it on the
+   * device, and fails on a zero or non-finite pivot. The solve fails on a
+   * non-finite solution. A
    * merely small pivot goes unnoticed, and a caller that needs to know
    * checks the residual. The Cholesky refactorization takes the square root
    * of the absolute value of every pivot, so an indefinite matrix declared
@@ -515,6 +519,9 @@ namespace Rodin::Solver
         /// @brief Diagonal of the factors, gathered to check the pivots.
         Array<ScalarType> pivots;
 
+        /// @brief One device flag for the pivot validity reduction.
+        Array<int> pivotStatus;
+
         /**
          * @brief Position in the arrays of a CSC host matrix of every CSR
          * coefficient; empty for CSR arrays.
@@ -537,10 +544,10 @@ namespace Rodin::Solver
         Index nonzeros = 0;
 
         /**
-         * @brief Line starts then indices of the compressed arrays of the
-         * analyzed matrix, on the host.
+         * @brief Owned snapshot of the analyzed graph, in the memory space
+         * of the matrix.
          */
-        std::vector<Math::SparseIndex> pattern;
+        typename Arrays::Pattern pattern;
 
         /// @brief Number of nonzeros of the bundled factors.
         Index factorNonzeros = 0;
@@ -572,13 +579,13 @@ namespace Rodin::Solver
           columnPivots.release();
           diagonal.release();
           pivots.release();
+          pivotStatus.release();
           b.release();
           gather.clear();
           gather.shrink_to_fit();
           staging.clear();
           staging.shrink_to_fit();
           pattern.clear();
-          pattern.shrink_to_fit();
           rows = 0;
           nonzeros = 0;
           factorNonzeros = 0;
@@ -853,9 +860,18 @@ namespace Rodin::Solver
           record(static_cast<Integer>(status), Factorization::Symbolic);
           return false;
         }
-        VectorType pivots(res.rows);
-        copy(pivots.data(), res.pivots.data, res.rows, hipMemcpyDeviceToHost);
-        if (!pivots.allFinite() || (pivots.array() == 0).any())
+        hipStream_t stream = nullptr;
+        const rocsparse_status streamStatus = rocsparse_get_stream(res.sparse, &stream);
+        if (streamStatus != rocsparse_status_success)
+        {
+          record(static_cast<Integer>(streamStatus), Factorization::Symbolic);
+          return false;
+        }
+        bool valid = false;
+        check(Internal::RocSolverRFPivots::check(
+                res.pivots.data, res.rows, res.pivotStatus.data, valid, stream),
+          "check the pivots on the device");
+        if (!valid)
         {
           record(Breakdown, Factorization::Symbolic);
           return false;
@@ -977,6 +993,7 @@ namespace Rodin::Solver
         }
         check(res.diagonal.resize(rows), "allocate the pivots on the device");
         check(res.pivots.resize(rows), "allocate the pivots on the device");
+        check(res.pivotStatus.resize(1), "allocate the pivot status on the device");
         copy(res.diagonal.data, diagonal.data(), rows, hipMemcpyHostToDevice);
 
         Math::SparseIndex* deviceStarts;
@@ -1014,31 +1031,16 @@ namespace Rodin::Solver
         if (!complete(status, Optional<Factorization>{}))
           return false;
         res.symbolic = true;
-        res.pattern.assign(starts, starts + rows + 1);
-        res.pattern.insert(res.pattern.end(), indices, indices + nonzeros);
+        res.pattern.assign(matrix);
         return true;
       }
 
       /// @brief Returns whether the matrix has the analyzed sparsity pattern.
-      bool hasPattern(const OperatorType& matrix, Index rows, Index nonzeros)
+      bool hasPattern(const OperatorType& matrix, Index rows, Index nonzeros) const
       {
-        auto& res = m_resources;
-        if (rows != res.rows || nonzeros != res.nonzeros)
-          return false;
-        const Math::SparseIndex* starts = Arrays::getStarts(matrix);
-        const Math::SparseIndex* indices = Arrays::getIndices(matrix);
-        if constexpr (Arrays::Resident)
-        {
-          std::vector<Math::SparseIndex> pattern(rows + 1 + nonzeros);
-          copy(pattern.data(), starts, rows + 1, hipMemcpyDeviceToHost);
-          copy(pattern.data() + rows + 1, indices, nonzeros, hipMemcpyDeviceToHost);
-          return pattern == res.pattern;
-        }
-        else
-        {
-          return std::equal(starts, starts + rows + 1, res.pattern.begin()) &&
-            std::equal(indices, indices + nonzeros, res.pattern.begin() + rows + 1);
-        }
+        const auto& res = m_resources;
+        return rows == res.rows && nonzeros == res.nonzeros &&
+          res.pattern.matches(matrix);
       }
 
       /**

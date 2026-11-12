@@ -128,13 +128,14 @@ assembly, mesh and solver contracts when reducing transfers:
   matrix memory space and return only a scalar mismatch result. Compare the
   final CSR graph: reusing assembly groups does not certify it, because
   numerical zero filtering can change the stored graph.
-- `Solver/RocSolverRF.h::hasPattern` still downloads the entire graph on
-  repeated factorizations. It can use the same backend snapshot mechanism.
-  `checkPivots` downloads every pivot to check finiteness and zero values;
-  a backend reduction can return one flag. It currently constructs the
-  temporary as `VectorType` but requests `hipMemcpyDeviceToHost`, which is
-  incompatible with a backend vector destination. Initial host UMFPACK/AMD
-  analysis needs its input arrays under the current solver design.
+- `Solver/RocSolverRF.h` shares the exact backend graph snapshot with cuDSS.
+  Its gathered pivots are checked by a compiled HIP kernel: only a scalar
+  invalid flag returns, independently of the solution vector storage type.
+  Initial host UMFPACK/AMD analysis still needs its input arrays. Building
+  rocSOLVER requires CMake 3.21 and a HIP compiler; its small pivot kernel
+  compiles separately from the ordinary C++ core. Without a visible GPU,
+  specify `CMAKE_HIP_ARCHITECTURES`; an installed Kokkos HIP architecture
+  supplies the default when available.
 - Kokkos boundary assembly compacts prescribed values on the backend, then
   returns them through `IndexMap` on the host. `SystemAssembly::build` uploads
   fixed masks and values again. Keep a backend constraint representation

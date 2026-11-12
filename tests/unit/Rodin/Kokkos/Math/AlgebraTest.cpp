@@ -6,6 +6,7 @@
  */
 #include <Rodin/Kokkos/Solver.h>
 #include <Rodin/Solver/CuDSSOperator.h>
+#include <Rodin/Solver/RocSolverRFPivots.h>
 #include "../Variational/Common.h"
 
 namespace Rodin::Tests::Unit
@@ -13,6 +14,25 @@ namespace Rodin::Tests::Unit
   using namespace Rodin::Variational;
   using Coefficients = Rodin::Kokkos::Math::Vector<Real, TestBackend>;
   using Matrix = Rodin::Kokkos::Math::SparseMatrix<Real, TestBackend>;
+
+  /// @brief Pivot certification must not reject small or large finite values.
+  TEST(Kokkos_Math, RocSolverPivotPredicate)
+  {
+    using Pivots = Solver::Internal::RocSolverRFPivots;
+    for (const Real value : {Real(1), Real(-1), std::numeric_limits<Real>::min(),
+           -std::numeric_limits<Real>::min(), std::numeric_limits<Real>::denorm_min(),
+           -std::numeric_limits<Real>::denorm_min(), std::numeric_limits<Real>::max(),
+           -std::numeric_limits<Real>::max()})
+    {
+      EXPECT_TRUE(Pivots::valid(value));
+    }
+    for (const Real value :
+      {Real(0), -Real(0), std::numeric_limits<Real>::infinity(),
+        -std::numeric_limits<Real>::infinity(), std::numeric_limits<Real>::quiet_NaN()})
+    {
+      EXPECT_FALSE(Pivots::valid(value));
+    }
+  }
 
   /// @brief A solver snapshot detects edits even when sizes and pointers stay fixed.
   void checkCuDSSPatternExactComparison()

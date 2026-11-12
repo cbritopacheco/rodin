@@ -56,6 +56,9 @@ endif()
 
 # ---- rocSOLVER -------------------------------------------------------------
 if (RODIN_USE_ROCSOLVER)
+  target_sources(RodinSolver PRIVATE RocSolverRFPivots.cpp)
+  set_source_files_properties(RocSolverRFPivots.cpp PROPERTIES LANGUAGE HIP)
+  set_target_properties(RodinSolver PROPERTIES HIP_STANDARD 17 HIP_STANDARD_REQUIRED YES)
   target_link_libraries(RodinSolver PUBLIC roc::rocsolver roc::rocsparse roc::rocblas hip::host)
 endif()
 
