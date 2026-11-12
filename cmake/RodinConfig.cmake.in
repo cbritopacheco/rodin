@@ -32,9 +32,11 @@ endif()
 
 if(@RODIN_USE_KOKKOS@)
   find_dependency(Kokkos 4.2 CONFIG REQUIRED)
-endif()
-
-if(@RODIN_USE_KOKKOS@)
+  # Match the SYCL dependency setup used when building Rodin itself.
+  if(Kokkos_ENABLE_SYCL AND NOT TARGET MKL::MKL)
+    set(MKL_INTERFACE lp64 CACHE STRING "Integer interface of oneMKL")
+    find_package(MKL CONFIG QUIET)
+  endif()
   find_dependency(KokkosKernels CONFIG REQUIRED)
 endif()
 
@@ -102,3 +104,16 @@ set(CMAKE_MODULE_PATH "${_RODIN_CONFIG_MODULE_PATH_SAVED}")
 unset(_RODIN_CONFIG_MODULE_PATH_SAVED)
 
 include("${CMAKE_CURRENT_LIST_DIR}/RodinTargets.cmake")
+
+# Hierarchical module aliases; retain the original exported names for compatibility.
+foreach(_RODIN_KOKKOS_MODULE MPI PETSc Hypre)
+  if(TARGET Rodin::Kokkos${_RODIN_KOKKOS_MODULE} AND
+      NOT TARGET Rodin::Kokkos::${_RODIN_KOKKOS_MODULE})
+    # CMake 3.16 cannot alias non-global imported targets. A forwarding target
+    # keeps the installed spelling available without promoting package scope.
+    add_library(Rodin::Kokkos::${_RODIN_KOKKOS_MODULE} INTERFACE IMPORTED)
+    set_target_properties(Rodin::Kokkos::${_RODIN_KOKKOS_MODULE} PROPERTIES
+      INTERFACE_LINK_LIBRARIES Rodin::Kokkos${_RODIN_KOKKOS_MODULE})
+  endif()
+endforeach()
+unset(_RODIN_KOKKOS_MODULE)

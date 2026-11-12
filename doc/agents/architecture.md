@@ -117,13 +117,15 @@ Assembly 7, FormLanguage 6, Distance 6, Test 6.
 - **Location/** — AABB bounding-volume-hierarchy point locator.
 - **PETSc/** — mirror of Math/Solver/Assembly/Variational/IO over PETSc
   objects. → petsc.md
-- **Kokkos/** — optional Context, Geometry and Assembly mirrors. Local MeshBase and
-  ConnectivityBase specializations own resident Kokkos arrays with device
-  geometry, mutations, measure reductions and device incidence discovery. Host iterators and reference
-  queries use compatibility adapters. CUDA and native execution spaces are
-  selectable. KokkosIteration retains indexed region traversal with a private
-  device handle. Device spaces, fields, operator assembly, solvers,
-  and MPI distribution are not implemented. → backend-support.md
+- **Kokkos/** — optional Context, Geometry, Variational, Assembly, Math, IO
+  and Solver mirrors for CUDA, HIP, SYCL and native execution. Local meshes
+  and connectivity own Kokkos arrays and compute missing entities on the
+  backend. P1, H1 and P0g spaces, fields, forms and constraints use backend
+  coefficient storage and COO assembly into KokkosSparse CRS matrices.
+  Krylov and vendor direct solvers operate on backend systems. PETSc and
+  MPI integrations support distributed assembly and solves. Host iterators,
+  reference queries and file formats use compatibility adapters.
+  → backend-support.md
 - **MMG/, Scotch/, MPI/, IO/, Serialization/, MFEM/** — integrations and
   persistence. MFEM/ is currently an empty stub (the MFEM *file format*
   lives in IO/). → integrations.md

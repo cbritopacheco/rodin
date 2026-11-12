@@ -209,8 +209,20 @@ namespace Rodin::Solver
       /// @brief Forms the next direction from the previous step.
       struct Direction
       {
-        WorkVector r, p, v;
-        Real beta, omega;
+        /// @brief Current residual.
+        WorkVector r;
+
+        /// @brief Search direction, updated in place.
+        WorkVector p;
+
+        /// @brief Operator applied to the preconditioned direction.
+        WorkVector v;
+
+        /// @brief Direction recurrence coefficient.
+        Real beta;
+
+        /// @brief Previous stabilization coefficient.
+        Real omega;
 
         /// @param i Coefficient index.
         KOKKOS_INLINE_FUNCTION void operator()(size_t i) const
@@ -222,7 +234,16 @@ namespace Rodin::Solver
       /// @brief Forms the intermediate residual and reduces its squared norm.
       struct Intermediate
       {
-        WorkVector r, v, s;
+        /// @brief Current residual.
+        WorkVector r;
+
+        /// @brief Operator applied to the preconditioned direction.
+        WorkVector v;
+
+        /// @brief Intermediate residual output.
+        WorkVector s;
+
+        /// @brief Direction step length.
         Real alpha;
 
         /// @param i Coefficient index. @param norm Squared norm accumulator.
@@ -237,8 +258,29 @@ namespace Rodin::Solver
       /// @brief Updates the iterate and residual and reduces the squared norm.
       struct Update
       {
-        WorkVector x, y, z, s, t, r;
-        Real alpha, omega;
+        /// @brief Solution updated in place.
+        WorkVector x;
+
+        /// @brief Preconditioned search direction.
+        WorkVector y;
+
+        /// @brief Preconditioned intermediate residual.
+        WorkVector z;
+
+        /// @brief Intermediate residual.
+        WorkVector s;
+
+        /// @brief Operator applied to the preconditioned intermediate residual.
+        WorkVector t;
+
+        /// @brief Residual output.
+        WorkVector r;
+
+        /// @brief Direction step length.
+        Real alpha;
+
+        /// @brief Stabilization coefficient.
+        Real omega;
 
         /// @param i Coefficient index. @param norm Squared norm accumulator.
         KOKKOS_INLINE_FUNCTION void operator()(size_t i, Real& norm) const
@@ -253,7 +295,13 @@ namespace Rodin::Solver
       /// @brief Commits the alpha step when the intermediate residual converges.
       struct AlphaUpdate
       {
-        WorkVector x, y;
+        /// @brief Solution updated in place.
+        WorkVector x;
+
+        /// @brief Preconditioned search direction.
+        WorkVector y;
+
+        /// @brief Direction step length.
         Real alpha;
 
         /// @param i Coefficient index.

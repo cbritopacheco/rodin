@@ -215,6 +215,12 @@ the `extern template` lines, and a `.cpp` added to `RodinSolver_SRCS`.
 
 ## Nonlinear: NewtonSolver
 
+`LinearSolverBase::factorize(system)` is a virtual preparation hook, defaulting
+to no work for solvers that consume the current operator on each solve.
+Retained-factor solvers override it. Newton calls it for every updated tangent,
+including when its solver is supplied through a base reference; repeated RHS
+solves outside Newton retain their existing explicit-refactorization contract.
+
 `Solver::NewtonSolver` drives residual/tangent pairs assembled from the
 form language. **It has constant damping only — no line search, no
 validity gating.** Consequences, confirmed by measurement:

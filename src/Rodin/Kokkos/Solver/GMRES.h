@@ -137,7 +137,7 @@ namespace Rodin::Solver
     using Handle =
       ::KokkosKernels::Experimental::KokkosKernelsHandle<::Rodin::Math::SparseIndex,
         ::Rodin::Math::SparseIndex, Real, typename Krylov::ExecutionSpace,
-      typename Krylov::MemorySpace, typename Krylov::MemorySpace>;
+        typename Krylov::MemorySpace, typename Krylov::MemorySpace>;
 
     public:
       /// @brief Scalar type.

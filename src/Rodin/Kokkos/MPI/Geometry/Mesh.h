@@ -143,8 +143,7 @@ namespace Rodin::Geometry
        * mesh, such as the coefficients of grid functions.
        * @returns Transfer cache of the shard.
        */
-      Rodin::Kokkos::Internal::TransferCache<MemorySpace>&
-      getTransferCache() const
+      Rodin::Kokkos::Internal::TransferCache<MemorySpace>& getTransferCache() const
       {
         return m_shard.getTransferCache();
       }

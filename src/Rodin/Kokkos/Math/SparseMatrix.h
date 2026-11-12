@@ -418,10 +418,19 @@ namespace Rodin::Solver::Internal
         /// @brief Reduces exact entry mismatches to a single flag.
         struct Compare
         {
+          /// @brief Current row offsets.
           Array starts;
+
+          /// @brief Current column indices.
           typename MatrixType::View::index_type indices;
+
+          /// @brief Retained row offsets.
           Array previousStarts;
+
+          /// @brief Retained column indices.
           Array previousIndices;
+
+          /// @brief Number of row offsets preceding the column indices.
           size_t offsets;
 
           /**

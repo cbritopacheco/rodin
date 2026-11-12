@@ -287,7 +287,11 @@ namespace Rodin::Kokkos::Internal
         std::uint64_t used = 0;
       };
 
-      /// @brief Unmanaged host view of host values.
+      /**
+       * @brief Unmanaged host view of host values.
+       * @param values Host coefficients, which must outlive the view.
+       * @return Borrowed view of the coefficient storage.
+       */
       static auto host(const std::vector<Real>& values)
       {
         return ::Kokkos::View<const Real*, ::Kokkos::HostSpace,
@@ -330,8 +334,9 @@ namespace Rodin::Kokkos::Internal
           if (target->array.extent(0) != size || !target->array.data())
           {
             target->array = Array();
-            target->array = Array(
-              ::Kokkos::view_alloc(execution, ::Kokkos::WithoutInitializing, label), size);
+            target->array =
+              Array(::Kokkos::view_alloc(execution, ::Kokkos::WithoutInitializing, label),
+                size);
           }
         }
         // A former transfer may still read the snapshot being replaced.

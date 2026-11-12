@@ -164,8 +164,7 @@ int main(int argc, char** argv)
       PetscCallAbort(PETSC_COMM_SELF, MatCreateVecs(A, &constant, PETSC_NULLPTR));
       PetscCallAbort(PETSC_COMM_SELF, VecSet(constant, 0));
       for (PetscInt i = velocitySpace.getSize();
-           i < static_cast<PetscInt>(velocitySpace.getSize() + pressureSpace.getSize());
-           ++i)
+        i < static_cast<PetscInt>(velocitySpace.getSize() + pressureSpace.getSize()); ++i)
         PetscCallAbort(PETSC_COMM_SELF, VecSetValue(constant, i, 1, INSERT_VALUES));
       PetscCallAbort(PETSC_COMM_SELF, VecAssemblyBegin(constant));
       PetscCallAbort(PETSC_COMM_SELF, VecAssemblyEnd(constant));

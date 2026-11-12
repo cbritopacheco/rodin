@@ -650,7 +650,7 @@ namespace Rodin::Solver
        * factorization. A matrix whose sparsity pattern differs from the
        * analyzed one is analyzed again.
        */
-      void factorize(LinearSystemType& axb)
+      void factorize(LinearSystemType& axb) override
       {
         auto& matrix = axb.getOperator();
         if (Arrays::getRowCount(matrix) != Arrays::getColumnCount(matrix))

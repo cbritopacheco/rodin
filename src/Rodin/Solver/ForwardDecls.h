@@ -431,6 +431,7 @@ namespace Rodin::Solver::Internal
   template <class Vector>
   struct CuDSSVector
   {
+    /// @brief Host coefficient storage requires explicit staging.
     static constexpr bool Resident = false;
   };
 }

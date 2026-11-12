@@ -357,6 +357,7 @@ namespace Rodin::Kokkos::Math
       /// @brief Counts invalid coefficients.
       struct Finite
       {
+        /// @brief Coefficients read by the reduction.
         View values;
 
         /// @param i Entry index. @param invalid Invalid coefficient count.
@@ -519,9 +520,16 @@ namespace Rodin::Kokkos::Math
       /// @brief Kernel for coefficient-wise arithmetic.
       struct Transform
       {
+        /// @brief Coefficients updated in place.
         View out;
+
+        /// @brief Optional right-hand-side coefficients.
         View rhs;
+
+        /// @brief Multiplicative scalar.
         Scalar factor;
+
+        /// @brief Coefficient-wise arithmetic operation.
         Operation operation;
 
         /// @param i Coefficient index.
@@ -541,6 +549,7 @@ namespace Rodin::Kokkos::Math
       template <bool Maximum>
       struct Extremum
       {
+        /// @brief Coefficients read by the reduction.
         View values;
 
         /// @param i Coefficient index. @param result Current extremum.
@@ -611,6 +620,7 @@ namespace Rodin::FormLanguage
   template <class Scalar, class Backend>
   struct Traits<::Rodin::Kokkos::Math::Vector<Scalar, Backend>>
   {
+    /// @brief Coefficient scalar type.
     using ScalarType = Scalar;
   };
 }
@@ -621,6 +631,7 @@ namespace Rodin::Solver::Internal
   template <class Scalar, class Backend>
   struct CuDSSVector<::Rodin::Kokkos::Math::Vector<Scalar, Backend>>
   {
+    /// @brief Whether the allocation requires backend access.
     static constexpr bool Resident = !::Kokkos::SpaceAccessibility<::Kokkos::HostSpace,
       typename ::Rodin::Kokkos::Math::Vector<Scalar, Backend>::MemorySpace>::accessible;
   };

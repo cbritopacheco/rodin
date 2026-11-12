@@ -280,8 +280,10 @@ namespace Rodin::Assembly::Internal
     /// @brief Revision of fixedMask, increased when it changes.
     std::uint64_t fixedRevision = 0;
 
-    /// @brief Revisions of the pattern and of the fixed degrees of freedom
-    /// the eliminated entries were listed for.
+    /**
+     * @brief Revisions of the pattern and of the fixed degrees of freedom
+     * the eliminated entries were listed for.
+     */
     std::pair<std::uint64_t, std::uint64_t> elimination{
       std::numeric_limits<std::uint64_t>::max(), 0};
 
@@ -1168,8 +1170,10 @@ namespace Rodin::Assembly::Internal
         Indices rows; ///< Row coordinates.
         Indices cols; ///< Column coordinates.
         Fixed fixed; ///< Flags of the fixed degrees of freedom.
-        bool moved; ///< Whether the entries of a free row and a fixed column are listed.
-        ::Kokkos::View<Index*, MemorySpace> res; ///< Receives the entries, empty to count them.
+        bool
+          moved; ///< Whether the entries of a free row and a fixed column are listed.
+        ::Kokkos::View<Index*, MemorySpace>
+          res; ///< Receives the entries, empty to count them.
 
         /**
          * @brief Lists the entry when it is selected.
@@ -1229,7 +1233,8 @@ namespace Rodin::Assembly::Internal
       template <class Indices, class Values, class Scalars>
       struct MovedElimination
       {
-        ::Kokkos::View<Index*, MemorySpace> entries; ///< Entries, by increasing position.
+        ::Kokkos::View<Index*, MemorySpace>
+          entries; ///< Entries, by increasing position.
         Indices rows; ///< Row coordinates.
         Indices cols; ///< Column coordinates.
         Values values; ///< Fixed values, per degree of freedom.
@@ -4041,8 +4046,10 @@ namespace Rodin::Kokkos::Variational
           }
         };
         if (PetscMemTypeHost(type))
+        {
           read(::Kokkos::View<const PetscScalar*, ::Kokkos::HostSpace, Unmanaged>(
             array, count));
+        }
         else
           read(::Kokkos::View<const PetscScalar*, Device, Unmanaged>(array, count));
         if constexpr (distributed)
@@ -4068,7 +4075,8 @@ namespace Rodin::Kokkos::Variational
               << "the layout of its space." << Alert::Raise;
           }
           ::Kokkos::parallel_for("Rodin PETSc grid function gather",
-            ::Kokkos::RangePolicy<std::decay_t<decltype(execution)>>(execution, 0, size),
+            ::Kokkos::RangePolicy<std::decay_t<decltype(execution)>>(
+              execution, 0, size),
             GhostedCoefficientsGather<MemorySpace>{res, values, position});
         }
         // PETSc may release the array once it is restored.

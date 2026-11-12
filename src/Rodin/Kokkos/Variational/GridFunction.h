@@ -87,7 +87,7 @@ namespace Rodin::Variational
     -> TrialFunction<GridFunction<FES, ::Rodin::Kokkos::Variational::Coefficients<FES>>,
       FES>;
 
-  /// @param u Backend trial function. @param v Test function.
+  /// @param u Backend trial function. @param v Test function. @return Backend problem.
   template <class U, class V>
     requires ::Rodin::Kokkos::Variational::BackendTrial<U>
   Problem(U& u, V& v) -> Problem<::Rodin::Kokkos::Variational::System<U>, U, V>;
@@ -95,6 +95,7 @@ namespace Rodin::Variational
   /**
    * @param u1 First backend trial function. @param u2 Second function.
    * @param u3 Third function. @param us Remaining functions.
+   * @return Backend problem containing the supplied fields.
    */
   template <class U1, class U2, class U3, class... Us>
     requires ::Rodin::Kokkos::Variational::BackendTrial<U1>

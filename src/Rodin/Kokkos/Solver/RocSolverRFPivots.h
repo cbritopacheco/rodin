@@ -67,6 +67,7 @@ namespace Rodin::Solver::Internal
     template <class View>
     struct Check
     {
+      /// @brief Device pivots to inspect.
       View values;
 
       /**

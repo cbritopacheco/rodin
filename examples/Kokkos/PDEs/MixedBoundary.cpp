@@ -11,6 +11,7 @@
 #include <Rodin/Geometry.h>
 #include <Rodin/Variational.h>
 #include <Rodin/Solver.h>
+#include <Rodin/Kokkos/Solver.h>
 #include <Rodin/IO/XDMF.h>
 #include <Rodin/Kokkos.h>
 

@@ -85,6 +85,9 @@ target_sources(RodinKokkos INTERFACE
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Variational/H1.h>
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Variational/HyperElasticLaw.h>
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Variational/Integral.h>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Variational/Integration.h>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Variational/BilinearFormIntegrator.h>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Variational/LinearFormIntegrator.h>
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Variational/InternalVirtualWork.h>
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Variational/LinearElasticityIntegral.h>
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Variational/P0g.h>
@@ -98,6 +101,7 @@ install(TARGETS RodinKokkos EXPORT RodinTargets)
 if (RODIN_USE_PETSC)
   add_library(RodinKokkosPETSc INTERFACE)
   add_library(Rodin::KokkosPETSc ALIAS RodinKokkosPETSc)
+  add_library(Rodin::Kokkos::PETSc ALIAS RodinKokkosPETSc)
   set_target_properties(RodinKokkosPETSc PROPERTIES EXPORT_NAME KokkosPETSc)
 
   target_link_libraries(RodinKokkosPETSc
@@ -116,6 +120,7 @@ if (RODIN_USE_PETSC)
   if (RODIN_USE_MPI)
     add_library(RodinKokkosMPI INTERFACE)
     add_library(Rodin::KokkosMPI ALIAS RodinKokkosMPI)
+    add_library(Rodin::Kokkos::MPI ALIAS RodinKokkosMPI)
     set_target_properties(RodinKokkosMPI PROPERTIES EXPORT_NAME KokkosMPI)
 
     target_link_libraries(RodinKokkosMPI
@@ -162,6 +167,7 @@ endif()
 if (RODIN_USE_HYPRE)
   add_library(RodinKokkosHypre INTERFACE)
   add_library(Rodin::KokkosHypre ALIAS RodinKokkosHypre)
+  add_library(Rodin::Kokkos::Hypre ALIAS RodinKokkosHypre)
   set_target_properties(RodinKokkosHypre PROPERTIES EXPORT_NAME KokkosHypre)
 
   target_link_libraries(RodinKokkosHypre

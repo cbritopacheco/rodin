@@ -21,7 +21,8 @@ namespace Rodin::IO
    * @tparam Scalar Coefficient type. @tparam Backend Kokkos execution backend.
    *
    * ## Architecture
-   * The format implementation operates on a temporary host coefficient vector.
+   * The format implementation operates on a temporary host mesh, space and
+   * coefficient vector, preserving the format ordering and node conversion.
    * The owning field remains backend-resident, and no host mirror is retained.
    */
   template <FileFormat Format, class FES, class Scalar, class Backend>
@@ -35,7 +36,7 @@ namespace Rodin::IO
       using ObjectType =
         Variational::GridFunction<FES, ::Rodin::Kokkos::Math::Vector<Scalar, Backend>>;
 
-      /// @brief Temporary host coefficient field.
+      /// @brief Compatibility field type with host storage on the original space.
       using HostField = Variational::GridFunction<FES, Math::Vector<Scalar>>;
 
       /// @param gf Backend field, which must outlive this adapter.
@@ -46,21 +47,49 @@ namespace Rodin::IO
       /// @param target Format stream.
       void print(std::ostream& target) override
       {
-        HostField host(m_gf.getFiniteElementSpace());
-        host.setData(m_gf.getData().toHost());
-        if (const auto name = m_gf.getName())
-          host.setName(std::string(*name));
-        GridFunctionPrinter<Format, FES, Math::Vector<Scalar>>(host).print(target);
+        const auto& fes = m_gf.getFiniteElementSpace();
+        auto transfer = [&](const auto& space) {
+          using HostFES = std::decay_t<decltype(space)>;
+          using HostField = Variational::GridFunction<HostFES, Math::Vector<Scalar>>;
+          HostField host(space);
+          host.setData(m_gf.getData().toHost());
+          if (const auto name = m_gf.getName())
+            host.setName(std::string(*name));
+          GridFunctionPrinter<Format, HostFES, Math::Vector<Scalar>> printer(host);
+          static_cast<Printer<HostField>&>(printer).print(target);
+        };
+        if constexpr (requires { fes.toHost(fes.getMesh().toHost()); })
+        {
+          const auto mesh = fes.getMesh().toHost();
+          const auto space = fes.toHost(mesh);
+          transfer(space);
+        }
+        else
+          transfer(fes);
       }
 
       /// @param target Format file path.
       void print(const boost::filesystem::path& target) override
       {
-        HostField host(m_gf.getFiniteElementSpace());
-        host.setData(m_gf.getData().toHost());
-        if (const auto name = m_gf.getName())
-          host.setName(std::string(*name));
-        GridFunctionPrinter<Format, FES, Math::Vector<Scalar>>(host).print(target);
+        const auto& fes = m_gf.getFiniteElementSpace();
+        auto transfer = [&](const auto& space) {
+          using HostFES = std::decay_t<decltype(space)>;
+          using HostField = Variational::GridFunction<HostFES, Math::Vector<Scalar>>;
+          HostField host(space);
+          host.setData(m_gf.getData().toHost());
+          if (const auto name = m_gf.getName())
+            host.setName(std::string(*name));
+          GridFunctionPrinter<Format, HostFES, Math::Vector<Scalar>> printer(host);
+          static_cast<Printer<HostField>&>(printer).print(target);
+        };
+        if constexpr (requires { fes.toHost(fes.getMesh().toHost()); })
+        {
+          const auto mesh = fes.getMesh().toHost();
+          const auto space = fes.toHost(mesh);
+          transfer(space);
+        }
+        else
+          transfer(fes);
       }
 
       /// @return Backend field owned by the caller.

@@ -851,10 +851,20 @@ namespace Rodin::Assembly::Internal
       /// @brief Copies an existing backend matrix into its contribution segment.
       struct CopyMatrix
       {
+        /// @brief Compressed source matrix.
         typename BackendMatrix::View source;
+
+        /// @brief Destination coordinate entries.
         typename Triplets::Matrix target;
+
+        /// @brief Start of the contribution segment.
         size_t offset;
-        Index row, col;
+
+        /// @brief Global row offset.
+        Index row;
+
+        /// @brief Global column offset.
+        Index col;
 
         /// @param i Matrix row.
         KOKKOS_INLINE_FUNCTION void operator()(Index i) const
@@ -3777,8 +3787,8 @@ namespace Rodin::Assembly
           ::Kokkos::RangePolicy<ExecutionSpace, ::Kokkos::IndexType<Index>>(
             execution, 0, stride);
         Index count = 0;
-        ::Kokkos::parallel_reduce("Rodin boundary count", range,
-          BoundaryCount{owners}, count);
+        ::Kokkos::parallel_reduce(
+          "Rodin boundary count", range, BoundaryCount{owners}, count);
         ::Kokkos::View<Index*, MemorySpace> indices(
           ::Kokkos::view_alloc(execution, ::Kokkos::WithoutInitializing,
             std::string("Rodin boundary indices")),
@@ -3799,7 +3809,10 @@ namespace Rodin::Assembly
         for (Index r = 0; r < vdim; ++r)
         {
           for (Index k = 0; k < count; ++k)
-            res.emplace_hint(res.end(), hostIndices(k) + r * stride, hostValues(k * vdim + r));
+          {
+            res.emplace_hint(
+              res.end(), hostIndices(k) + r * stride, hostValues(k * vdim + r));
+          }
         }
       }
 
@@ -3851,7 +3864,8 @@ namespace Rodin::Assembly
          * @param position Rank of @p i among the constrained ones.
          * @param final Whether the ranks are final.
          */
-        KOKKOS_INLINE_FUNCTION void operator()(Index i, Index& position, bool final) const
+        KOKKOS_INLINE_FUNCTION void operator()(
+          Index i, Index& position, bool final) const
         {
           if (owners(i) == ::Kokkos::Experimental::finite_max_v<Index>)
             return;
@@ -4090,8 +4104,8 @@ namespace Rodin::Assembly
       Variational::ShapeFunctionBase<Derived2, FES2, Sp>>>
     final
     : public AssemblyBase<IndexMap<std::pair<IndexArray, ::Rodin::Math::Vector<Real>>>,
-              Variational::DirichletBC<Variational::TrialFunction<Solution, FES1>,
-                Variational::ShapeFunctionBase<Derived2, FES2, Sp>>>
+        Variational::DirichletBC<Variational::TrialFunction<Solution, FES1>,
+          Variational::ShapeFunctionBase<Derived2, FES2, Sp>>>
   {
     public:
       /// @brief Slave to master coefficients.

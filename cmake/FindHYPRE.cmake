@@ -69,11 +69,11 @@ if (HYPRE_INCLUDE_DIR AND EXISTS "${HYPRE_INCLUDE_DIR}/HYPRE_config.h")
 endif()
 
 # hypre includes mpi.h in its headers, so MPI is required by the consumer.
-find_package(MPI QUIET COMPONENTS C)
+find_package(MPI QUIET COMPONENTS CXX)
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(HYPRE
-  REQUIRED_VARS HYPRE_LIBRARY HYPRE_INCLUDE_DIR MPI_C_FOUND
+  REQUIRED_VARS HYPRE_LIBRARY HYPRE_INCLUDE_DIR MPI_CXX_FOUND
   VERSION_VAR HYPRE_VERSION
 )
 
@@ -86,7 +86,7 @@ if (HYPRE_FOUND)
     set_target_properties(HYPRE::HYPRE PROPERTIES
       IMPORTED_LOCATION "${HYPRE_LIBRARY}"
       INTERFACE_INCLUDE_DIRECTORIES "${HYPRE_INCLUDE_DIRS}"
-      INTERFACE_LINK_LIBRARIES MPI::MPI_C
+      INTERFACE_LINK_LIBRARIES MPI::MPI_CXX
     )
   endif()
 endif()

@@ -77,6 +77,12 @@ foreach(_cache_mode OFF ON)
     PROPERTIES LABELS unit)
 endforeach()
 
+add_test(NAME CMake.ThirdPartyIsolation.KokkosDependencies
+  COMMAND ${CMAKE_COMMAND}
+    -S ${PROJECT_SOURCE_DIR}/tests/cmake/KokkosDependencies
+    -B ${CMAKE_CURRENT_BINARY_DIR}/KokkosDependencies)
+set_tests_properties(CMake.ThirdPartyIsolation.KokkosDependencies PROPERTIES LABELS unit)
+
 rodin_add_compile_options(
   LANG C CXX
   OPTIONS

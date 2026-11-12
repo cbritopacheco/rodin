@@ -85,7 +85,7 @@ which share the GPU. Logs land in `<build-dir>/test-logs`.
 compiles at -O0 on the host and the device, and does not need the meshes
 of Git LFS.
 The workflow `KokkosBuild.yml` runs it on GitHub hosted runners, with the
-images pulled from `ghcr.io/<owner>/rodin-kokkos-ci`, or from the registry
+images pulled from the public `ghcr.io/keckj/rodin-kokkos-ci`, or from the registry
 named by the repository variable `RODIN_KOKKOS_CI_IMAGES`. To publish them:
 
 ```sh
@@ -97,3 +97,40 @@ The package must be public, or readable by the repository.
 
 The submodules must be checked out (`git submodule update --init
 --recursive`), GoogleTest among them.
+
+## Execution modes and optional solvers
+
+The hosted CI lane always passes `--build-only`. It compiles and links the
+GPU-specialized tests and examples, without starting Kokkos, discovering tests
+at build time, or executing any kernel. There is no runtime fallback to the
+CPU inside a CUDA, HIP or SYCL image. Without `--build-only`, a compatible GPU
+and driver are required; initialization failures fail the run. To validate
+Kokkos functionality on a CPU, configure a separate Serial or OpenMP Kokkos
+installation as described in the Kokkos guide.
+
+`RODIN_KOKKOS_BACKEND` is set by each image and selects `cuda`, `hip` or `sycl`.
+`JOBS` controls compilation concurrency; `OMP_NUM_THREADS` controls host
+OpenMP execution during test runs. CUDA enables cuDSS, HIP enables rocSOLVER
+with UMFPACK for the initial factorization, and SYCL uses portable Krylov and
+PETSc solvers. All images enable hypre, which supplies the optional
+`Solver::BoomerAMG` algebraic multigrid wrapper. Kokkos-Kernels remains required
+independently of hypre. Ordinary Rodin users can disable hypre with
+`RODIN_USE_HYPRE=OFF`.
+
+The CUDA build-only path temporarily exposes the CUDA driver link stub as
+`libcuda.so.1`. This resolves links without a mounted NVIDIA driver; it does
+not emulate a GPU. Build-only mode also disables resource installation and
+uses unoptimized host/device code. These artifacts are compile checks, not
+performance measurements. Runtime mode requires hydrated test resources.
+
+## Dependency patches
+
+These patches apply to dependencies inside the images, not to Rodin's public
+API. Revisit them when upgrading the pinned dependency versions.
+
+| Patch | Purpose and scope |
+|---|---|
+| `kokkos-kernels-rocsparse-u16.patch` | Removes a reference to the removed rocSPARSE unsigned 16-bit index enum in Kokkos-Kernels 5.2.2. Rodin uses signed 32-/64-bit indices; this repairs compilation against ROCm 10.1 and does not add unsigned 16-bit support. |
+| `kokkos-kernels-sycl-nrm2.patch` | Disables the oneMKL SYCL norm specialization so Kokkos-Kernels uses its native norm kernel. The pinned oneMKL GPU implementation reads past the vector end in the reproductions described above. Other BLAS specializations remain enabled. |
+| `kokkos-sycl-bmg.patch` | Adds the Battlemage architecture definition to Kokkos 5.2.2, for the image's ahead-of-time device compilation. It does not provide a CPU fallback. |
+| `petsc-sycl-bmg.patch` | Lets PETSc 3.26 accept Battlemage as `--with-sycl-arch=bmg`, matching the Kokkos target in the image. |

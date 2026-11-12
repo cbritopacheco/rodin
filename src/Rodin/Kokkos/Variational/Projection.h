@@ -168,32 +168,39 @@ namespace Rodin::Variational
       }
       else
       {
-      const auto hostOwners = ::Kokkos::create_mirror_view(owners);
-      const auto hostValues = ::Kokkos::create_mirror_view(values);
-      ::Kokkos::deep_copy(execution, hostOwners, owners);
-      ::Kokkos::deep_copy(execution, hostValues, values);
-      execution.fence("Rodin projection values");
-      if constexpr (requires { gf.flush(); })
-        static_cast<const GridFunction&>(gf).flush();
-      for (Index r = 0; r < vdim; ++r)
-      {
-        for (Index i = 0; i < stride; ++i)
+        const auto hostOwners = ::Kokkos::create_mirror_view(owners);
+        const auto hostValues = ::Kokkos::create_mirror_view(values);
+        ::Kokkos::deep_copy(execution, hostOwners, owners);
+        ::Kokkos::deep_copy(execution, hostValues, values);
+        execution.fence("Rodin projection values");
+        if constexpr (requires { gf.flush(); })
+          static_cast<const GridFunction&>(gf).flush();
+        for (Index r = 0; r < vdim; ++r)
         {
-          if (hostOwners(i) != 0)
-            gf[i + r * stride] = hostValues(i + r * stride);
+          for (Index i = 0; i < stride; ++i)
+          {
+            if (hostOwners(i) != 0)
+              gf[i + r * stride] = hostValues(i + r * stride);
+          }
         }
-      }
-      if constexpr (requires { gf.flush(); })
-        gf.flush();
+        if constexpr (requires { gf.flush(); })
+          gf.flush();
       }
     }
 
     /// @brief Updates only coefficients selected by the projection.
     struct CopyCoefficients
     {
+      /// @brief Selection mask for scalar degrees of freedom.
       ::Kokkos::View<Index*, MemorySpace> owners;
+
+      /// @brief Projected coefficient values.
       ::Kokkos::View<Real*, MemorySpace> values;
+
+      /// @brief Destination coefficients.
       ::Kokkos::View<Real*, MemorySpace> target;
+
+      /// @brief Scalar-space size separating vector components.
       Index stride;
 
       /// @param i Coefficient index.
@@ -291,6 +298,7 @@ namespace Rodin::Variational
        * @brief One plus the index of the polytope owning each scalar degree of
        * freedom, zero when none does.
        */
+      /// @brief Selection mask for scalar degrees of freedom.
       ::Kokkos::View<Index*, MemorySpace> owners;
 
       /// @brief Device degrees of freedom.
@@ -339,12 +347,14 @@ namespace Rodin::Variational
        * @brief One plus the index of the polytope owning each scalar degree of
        * freedom, zero when none does.
        */
+      /// @brief Selection mask for scalar degrees of freedom.
       ::Kokkos::View<Index*, MemorySpace> owners;
 
       /**
        * @brief Projected values, component r of the degree of freedom i at
        * i + r * stride.
        */
+      /// @brief Projected coefficient values.
       ::Kokkos::View<Real*, MemorySpace> values;
 
       /// @brief Device view of the source.

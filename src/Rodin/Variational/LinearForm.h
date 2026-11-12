@@ -447,7 +447,10 @@ namespace Rodin::Variational
       constexpr
       ScalarType operator()(const GridFunction<FES, Data>& u) const
       {
-        return Math::dot(this->getVector(), u.getData());
+        if constexpr (requires { this->getVector().dot(u.getData()); })
+          return this->getVector().dot(u.getData());
+        else
+          return Math::dot(this->getVector(), u.getData());
       }
 
       void assemble() override

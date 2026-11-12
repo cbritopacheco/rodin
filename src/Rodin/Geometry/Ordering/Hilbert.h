@@ -32,6 +32,11 @@ namespace Rodin::Geometry::Ordering
       IndexVector operator()(const Mesh<Context::Local>& mesh) const;
 
     private:
+      /**
+       * @brief Transforms quantized coordinates to Hilbert transpose form.
+       * @param coordinates Quantized coordinates, updated in place.
+       * @param bits Number of bits in each coordinate.
+       */
       static void transform(std::vector<std::uint64_t>& coordinates, size_t bits);
   };
 }

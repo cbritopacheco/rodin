@@ -36,6 +36,15 @@ namespace Rodin::Tests::Unit
       return 2 + p.x() - p.y();
     });
 
+    LinearForm hostForm(hv);
+    hostForm = Integral(hv);
+    hostForm.assemble();
+    LinearForm backendForm(dv);
+    backendForm = Integral(dv);
+    backendForm.assemble();
+    EXPECT_NEAR(
+      backendForm(dg), hostForm(hg), 1e-12 * std::max(Real(1), std::abs(hostForm(hg))));
+
     expectSameLinearForm(hv, Integral(hv), dv, Integral(dv));
     expectSameLinearForm(hv, Integral(hf, hv), dv, Integral(df, dv));
     expectSameLinearForm(hv, Integral(hg, hv), dv, Integral(dg, dv));
