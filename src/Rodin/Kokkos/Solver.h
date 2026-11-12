@@ -13,6 +13,7 @@
  */
 
 #include "Solver/CG.h"
+#include "Solver/BiCGSTAB.h"
 #include "Solver/GMRES.h"
 
 #ifdef RODIN_USE_CUDSS

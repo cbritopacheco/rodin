@@ -283,8 +283,9 @@
   is wrong.
 
   `Rodin/Kokkos/Solver.h` specializes
-  `Solver::CG` and `Solver::GMRES` for such a system. Both iterate on the
-  device with a Jacobi preconditioner and link `Rodin::KokkosKernels`:
+  `Solver::CG`, `Solver::BiCGSTAB` and `Solver::GMRES` for such a system.
+  They iterate on the device with a Jacobi preconditioner and link
+  `Rodin::KokkosKernels`:
   @code{.cpp}
   #include <Rodin/Kokkos/Solver.h>
 
@@ -309,6 +310,20 @@
   solver.solve();
   // Rebuild it from the current matrix.
   solver.setup(poisson.getLinearSystem());
+  @endcode
+
+  BiCGSTAB handles nonsymmetric real systems with a right Jacobi
+  preconditioner. Backend vectors remain in backend memory; explicit host
+  vectors use transfer buffers. A matching-size solution is the initial guess.
+  The default tolerance is machine epsilon and the default iteration limit is
+  twice the row count. The solver verifies the true relative residual before
+  reporting success and reports recurrence breakdown through success().
+  @code{.cpp}
+  Solver::BiCGSTAB solver(problem);
+  solver.setTolerance(1e-10).setMaxIterations(1000).solve();
+  // Diagnostic methods on the Kokkos specialization:
+  const auto iterations = solver.getIterationNumber();
+  const auto residual = solver.getError();
   @endcode
 
   @section guides-kokkos-mpi Distributed Meshes
@@ -374,7 +389,7 @@
   | System | Assembled into | Solvers | Where the solve runs |
   | --- | --- | --- | --- |
   | `Math::LinearSystem<Math::SparseMatrix<Real>, ...>` (default) | host matrix, copied from the device | every Rodin solver | host, or GPU for `CuDSS` and `RocSolverRF`, which copy the matrix to the device |
-  | `Math::LinearSystem<Kokkos::Math::SparseMatrix<Real, Backend>, ...>` | device CSR | `CuDSS`, `RocSolverRF`, Kokkos-Kernels `CG` and `GMRES`, `BoomerAMG` | device, on one process |
+  | `Math::LinearSystem<Kokkos::Math::SparseMatrix<Real, Backend>, ...>` | device CSR | `CuDSS`, `RocSolverRF`, Kokkos `CG`, `BiCGSTAB` and `GMRES`, `BoomerAMG` | device, on one process |
   | PETSc system on a Kokkos mesh | `MATAIJKOKKOS` or `MATMPIAIJKOKKOS` | PETSc KSP and SNES | device for the Krylov iteration and the PETSc preconditioners implemented on Kokkos matrices, one or several processes |
 
   A distributed device system is solved by PETSc only; the other device

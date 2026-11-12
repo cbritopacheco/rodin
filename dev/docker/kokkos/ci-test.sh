@@ -1,6 +1,6 @@
 #!/bin/bash
 # Builds Rodin with Kokkos in a rodin-kokkos-ci container and runs the Kokkos
-# unit tests, plus the cuDSS or RocSolverRF test of the backend if any. The
+# unit and manufactured tests, plus cuDSS or RocSolverRF tests when enabled. The
 # MPI tests run on 1, 2 and 4 processes, all on the one GPU of the container.
 # The Kokkos examples are built, not run.
 #
@@ -21,7 +21,8 @@ LOGS=$BUILD/test-logs
 
 options=(
   -DCMAKE_BUILD_TYPE=Release
-  -DRODIN_BUILD_UNIT_TESTS=ON -DRODIN_BUILD_EXAMPLES=ON
+  -DRODIN_BUILD_UNIT_TESTS=ON -DRODIN_BUILD_MANUFACTURED_TESTS=ON
+  -DRODIN_BUILD_EXAMPLES=ON
   -DRODIN_USE_MPI=ON -DRODIN_USE_OPENMP=ON -DRODIN_USE_PETSC=ON
   -DRODIN_USE_KOKKOS=ON -DRODIN_USE_HYPRE=ON
 )

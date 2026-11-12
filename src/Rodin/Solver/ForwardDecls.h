@@ -203,6 +203,7 @@ namespace Rodin::Solver
    * | Specialization | Description |
    * |----------------|-------------|
    * | @ref BiCGSTAB "BiCGSTAB<Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>>" | Stabilized bi-conjugate gradient solver for sparse non-symmetric systems. |
+   * | @ref BiCGSTAB "BiCGSTAB<Math::LinearSystem<Kokkos::Math::SparseMatrix<Real, Backend>, Vector>>" | Right Jacobi preconditioned BiCGSTAB in backend memory. |
    *
    * @see @ref BiCGSTABSpecializations "BiCGSTAB Template Specializations"
    */

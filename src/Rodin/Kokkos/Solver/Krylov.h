@@ -94,7 +94,7 @@ namespace Rodin::Solver::Internal
      * @param host Host vector.
      * @param device Device vector of the same size.
      */
-    static void upload(const ::Rodin::Math::Vector<Real>& host, const Vector& device)
+    static void upload(const ::Rodin::Math::Vector<Real>& host, Vector& device)
     {
       const ::Kokkos::View<const Real*, ::Kokkos::HostSpace, ::Kokkos::MemoryUnmanaged>
         h(host.data(), static_cast<size_t>(host.size()));

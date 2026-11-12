@@ -75,8 +75,9 @@ Venant-Kirchhoff, Mooney-Rivlin and Yeoh hyperelastic laws) into Eigen or PETSc 
 Problem named with a `Math::LinearSystem<Kokkos::Math::SparseMatrix<Real, Backend>,
 Math::Vector<Real>>` keeps its matrix in device memory as a CSR, equal
 coefficient by coefficient to the host matrix of the same assembly, and copies
-only the right-hand side to the host; `CuDSS`, `RocSolverRF` and the Kokkos-Kernels `CG`
-and `GMRES` (`Rodin/Kokkos/Solver.h`) read it in place, and `BoomerAMG`
+only the right-hand side to the host; `CuDSS`, `RocSolverRF` and the Kokkos
+`CG`, `BiCGSTAB` and `GMRES` (`Rodin/Kokkos/Solver.h`) read it in place, and
+`BoomerAMG`
 (`Rodin/Kokkos/Solver/BoomerAMG.h`) hands it to hypre on the device. Such a
 problem takes no preassembled bilinear form. Ordinary local Kokkos assembly
 policies retain ordered structural groups and validate their coordinates,

@@ -101,14 +101,19 @@ from the system type.
   `Info::status` holds the rocBLAS, rocSPARSE or UMFPACK status, or
   `Breakdown`.
 - Kokkos-Kernels (`RODIN_USE_KOKKOS`, target `Rodin::KokkosKernels`,
-  header `Rodin/Kokkos/Solver.h`): `CG` and `GMRES` specialized for a system
+  header `Rodin/Kokkos/Solver.h`): `CG`, `BiCGSTAB` and `GMRES` specialized for a system
   whose matrix is a `Kokkos::Math::SparseMatrix`, so a device assembly is solved
-  without PETSc. Both are Jacobi preconditioned and read the CSR arrays in
+  without PETSc. All three are Jacobi preconditioned and read the CSR arrays in
   place. Backend vectors are borrowed directly; explicitly selected host
   vectors use transfer buffers. `CG`
   is written on Kokkos with one SpMV handle per solve and keeps the
-  iteration, defaults and stopping test of the sparse Eigen CG. `GMRES` is
-  the restarted GMRES of Kokkos-Kernels (`setRestart`, 30 by default), with
+  iteration, defaults and stopping test of the sparse Eigen CG. `BiCGSTAB`
+  uses a right Jacobi preconditioner, retains its work vectors and verifies the
+  true residual before reporting convergence. Defaults are machine epsilon
+  and twice the number of rows; zero iteration limits disable the recurrence.
+  Zero/non-finite recurrence divisors report failure, and a zero RHS returns
+  the zero solution. Copies retain settings without sharing work storage.
+  `GMRES` is the restarted GMRES of Kokkos-Kernels (`setRestart`, 30 by default), with
   the iteration limit rounded up to whole cycles. Configure with
   `-DKokkosKernels_DIR=<prefix>/lib/cmake/KokkosKernels`; Kokkos-Kernels must
   be built on the Kokkos Rodin uses, with `int` ordinals and offsets.

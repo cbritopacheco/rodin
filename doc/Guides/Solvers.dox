@@ -159,7 +159,7 @@
 
   A problem on a Kokkos mesh selects backend matrix and vector storage by
   default. The operator wraps KokkosSparse::CrsMatrix, and the right-hand side
-  and solution use Kokkos::View storage. Kokkos-Kernels CG and GMRES operate on
+  and solution use Kokkos::View storage. Kokkos CG, BiCGSTAB and GMRES operate on
   these arrays directly. cuDSS and rocSOLVER adapters also accept backend
   vectors. Include `Rodin/Kokkos/Solver.h` and link `Rodin::Kokkos` for the
   vendor GPU solvers, with CUDA-enabled Kokkos for cuDSS or HIP-enabled
@@ -168,7 +168,7 @@
   | Problem | One GPU | Several GPUs |
   | :--- | :--- | :--- |
   | Symmetric positive definite | Kokkos-Kernels `CG`, or `BoomerAMG` | PETSc CG with GAMG or Jacobi |
-  | Nonsymmetric | Kokkos-Kernels `GMRES`, or PETSc BiCGStab | PETSc BiCGStab with Jacobi |
+  | Nonsymmetric | Kokkos `BiCGSTAB` or `GMRES`, or PETSc BiCGStab | PETSc BiCGStab with Jacobi |
   | Saddle point | `CuDSS` or `RocSolverRF` while the factors fit in device memory | PETSc FGMRES with a Schur field split |
 
   The @ref guides-kokkos-solvers "solver section" of the Kokkos guide gives
