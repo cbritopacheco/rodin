@@ -78,7 +78,11 @@ coefficient by coefficient to the host matrix of the same assembly, and copies
 only the right-hand side to the host; `CuDSS`, `RocSolverRF` and the Kokkos-Kernels `CG`
 and `GMRES` (`Rodin/Kokkos/Solver.h`) read it in place, and `BoomerAMG`
 (`Rodin/Kokkos/Solver/BoomerAMG.h`) hands it to hypre on the device. Such a
-problem takes no preassembled bilinear form. SubMesh
+problem takes no preassembled bilinear form. Ordinary local Kokkos assembly
+policies retain ordered structural groups and validate their coordinates,
+source positions and ranks exactly on the backend before reuse. Numerical
+zero filtering, constraint values and lifting are recomputed; copies start
+with empty plans. PETSc retains its separate COO cache. SubMesh
 is not provided. `Mesh<Context::Kokkos<Context::MPI, Backend>>` makes the
 shard of a `Mesh<Context::MPI>` resident and marks owned entities in its
 device view; `P1` and `P0g` PETSc problems, single or multi-field, are

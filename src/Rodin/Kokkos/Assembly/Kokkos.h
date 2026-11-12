@@ -922,6 +922,80 @@ namespace Rodin::Assembly::Internal
         }
       };
 
+      /**
+       * @brief Ordered structural groups retained by an assembly policy.
+       *
+       * Input keys, positions and contribution ranks are owned snapshots. Their
+       * exact equality, including dimensions and key encoding, validates reuse.
+       * Numerical zeros are selected after grouping, so they cannot hide a new
+       * coupling or change the order of the contributions that remain.
+       */
+      struct Pattern
+      {
+        /// @brief Whether a complete plan has been built.
+        bool valid = false;
+
+        /// @brief Test-space dimension.
+        size_t rows = 0;
+
+        /// @brief Trial-space dimension.
+        size_t cols = 0;
+
+        /// @brief Number of rank bits encoded in the keys.
+        unsigned shift = 0;
+
+        /// @brief Unsorted structural keys.
+        Array<Index> keys;
+
+        /// @brief Unsorted source positions.
+        Array<Index> positions;
+
+        /// @brief Contribution rank at each unsorted source position.
+        Array<Index> ranks;
+
+        /// @brief Source positions grouped in deterministic contribution order.
+        Array<Index> ordered;
+
+        /// @brief Starts and keys of the structural groups.
+        Groups groups;
+      };
+
+      /**
+       * @brief Symbolic plans owned by one assembler, in grouping call order.
+       *
+       * ## Architecture
+       *
+       * Each execution regenerates structural coordinates. A plan is reused
+       * only after an exact backend comparison of every coordinate, source
+       * position and rank. Changed layouts rebuild their groups. Values and
+       * constraints are always evaluated again. Copies start empty and never
+       * share writable working storage with another assembler.
+       */
+      struct Symbolic
+      {
+        /// @brief Independent plans, indexed by grouping call order.
+        std::vector<Pattern> patterns;
+
+        Symbolic() = default;
+
+        /// @param other Source whose plans are intentionally not shared.
+        Symbolic([[maybe_unused]] const Symbolic& other) {}
+
+        /// @param other Source whose plans are intentionally not shared. @returns This empty owner.
+        Symbolic& operator=(const Symbolic& other)
+        {
+          if (this != &other)
+            patterns.clear();
+          return *this;
+        }
+
+        /// @param other Source whose plans are transferred.
+        Symbolic(Symbolic&& other) = default;
+
+        /// @param other Source whose plans are transferred. @returns This owner.
+        Symbolic& operator=(Symbolic&& other) = default;
+      };
+
       /// @brief Contribution moved to the right-hand side by a fixed column.
       struct Eliminated
       {
@@ -1041,6 +1115,9 @@ namespace Rodin::Assembly::Internal
         /// @brief Whether the eliminated contributions are listed.
         bool listEliminated;
 
+        /// @brief Whether zero-valued potential contributions are listed.
+        bool structural = false;
+
         /**
          * @brief Lists of the entry stored at a position.
          * @param e Position of the contribution, or size plus the row of
@@ -1056,7 +1133,7 @@ namespace Rodin::Assembly::Internal
             c.coefficients = fixed(e - size) != 0;
             return c;
           }
-          if (!coefficientRanks.kept(values, e))
+          if (!structural && !coefficientRanks.kept(values, e))
             return c;
           const bool row = constrained && fixed(rows(e));
           const bool col = constrained && fixed(cols(e));
@@ -1155,12 +1232,16 @@ namespace Rodin::Assembly::Internal
        * @param execution Execution space instance of the mesh.
        * @param rows Number of rows, the size of the test spaces.
        * @param cols Number of columns, the size of the trial spaces.
+       * @param symbolic Retained plans, or null for a fresh assembly.
        */
-      SystemAssembly(const ExecutionSpace& execution, size_t rows, size_t cols)
+      SystemAssembly(const ExecutionSpace& execution, size_t rows, size_t cols,
+        Symbolic* symbolic = nullptr)
         : m_execution(execution),
           m_rows(rows),
           m_cols(cols),
-          m_constraints(rows, std::max(rows, cols))
+          m_constraints(rows, std::max(rows, cols)),
+          m_symbolic(symbolic),
+          m_group(0)
       {}
 
       /**
@@ -1332,6 +1413,7 @@ namespace Rodin::Assembly::Internal
       template <class Matrix, class Vector>
       void build(Matrix* A, Vector* b)
       {
+        m_group = 0;
         constexpr bool rowMajor = std::is_same_v<Matrix, BackendMatrix>;
         typename ConstraintsType::Resolved constraints;
         if (m_constraints.isIdentified())
@@ -1366,7 +1448,7 @@ namespace Rodin::Assembly::Internal
           listContributions(m_execution, rowMajor ? m_cols : m_rows, rowMajor, diagonal,
             triplets, fixed, coefficientRanks(triplets.ranks),
             triplets.ranks.sorting(m_rows), A != nullptr, eliminate, coefficients,
-            eliminated);
+            eliminated, true);
           // Sort keys now encode the coordinates. Retain only the arrays
           // still needed by compression and prescribed-value lifting.
           triplets.coefficients = triplets.matrix.data();
@@ -1403,9 +1485,9 @@ namespace Rodin::Assembly::Internal
           lift(m_matrices.size());
           if (constrained)
           {
-            accumulate(m_execution, eliminated.positions,
-              group(m_execution, eliminated.keys, eliminated.positions,
-                triplets.ranks.sorting(m_rows)),
+            const auto groups = groupContributions(eliminated,
+              triplets.ranks.sorting(m_rows), triplets.coefficients, triplets.size);
+            accumulate(m_execution, eliminated.positions, groups,
               Eliminated{triplets.coefficients, triplets.eliminatedColumns, fixedValues},
               rhs);
           }
@@ -1423,6 +1505,8 @@ namespace Rodin::Assembly::Internal
             ::Kokkos::deep_copy(m_execution, host(b->data(), m_rows), rhs);
         }
         m_execution.fence("Rodin linear system");
+        if (m_symbolic)
+          m_symbolic->patterns.resize(m_group);
       }
 
     public:
@@ -1624,6 +1708,125 @@ namespace Rodin::Assembly::Internal
         return res;
       }
 
+      /**
+       * @brief Groups structural contributions and selects their current values.
+       * @param listed Structural keys and positions; receives the selected order.
+       * @param ranks Current source ordering and zero-retention rules.
+       * @param values Current numerical contributions.
+       * @param size Positions from this bound on denote identity entries.
+       * @returns Nonempty numerical groups, in the existing summation order.
+       */
+      Groups groupContributions(
+        Listed& listed, const Ranks& ranks, const Array<Real>& values, size_t size)
+      {
+        const size_t count = listed.keys.extent(0);
+        Groups groups;
+        if (m_symbolic)
+        {
+          if (m_group == m_symbolic->patterns.size())
+            m_symbolic->patterns.emplace_back();
+          auto& pattern = m_symbolic->patterns[m_group++];
+          const auto keys = listed.keys;
+          const auto positions = listed.positions;
+          bool same = pattern.valid && pattern.rows == m_rows && pattern.cols == m_cols &&
+            pattern.shift == ranks.shift && pattern.keys.extent(0) == count;
+          if (same)
+          {
+            const auto previousKeys = pattern.keys;
+            const auto previousPositions = pattern.positions;
+            const auto previousRanks = pattern.ranks;
+            size_t changes = 0;
+            ::Kokkos::parallel_reduce(
+              "Rodin::Assembly::Kokkos::validateSymbolic", Range(m_execution, 0, count),
+              KOKKOS_LAMBDA(const Index i, size_t& changed) {
+                changed += keys(i) != previousKeys(i) ||
+                  positions(i) != previousPositions(i) ||
+                  ranks(positions(i)) != previousRanks(i);
+              },
+              changes);
+            same = changes == 0;
+          }
+          if (!same)
+          {
+            pattern = Pattern();
+            pattern.keys = allocate<Index>(count, "Rodin symbolic keys");
+            pattern.positions = allocate<Index>(count, "Rodin symbolic positions");
+            pattern.ranks = allocate<Index>(count, "Rodin symbolic ranks");
+            ::Kokkos::deep_copy(m_execution, pattern.keys, keys);
+            ::Kokkos::deep_copy(m_execution, pattern.positions, positions);
+            const auto savedRanks = pattern.ranks;
+            ::Kokkos::parallel_for(
+              "Rodin::Assembly::Kokkos::symbolicRanks", Range(m_execution, 0, count),
+              KOKKOS_LAMBDA(const Index i) { savedRanks(i) = ranks(positions(i)); });
+            pattern.groups = group(m_execution, keys, positions, ranks);
+            pattern.ordered = positions;
+            pattern.rows = m_rows;
+            pattern.cols = m_cols;
+            pattern.shift = ranks.shift;
+            pattern.valid = true;
+          }
+          listed.positions = pattern.ordered;
+          groups = pattern.groups;
+        }
+        else
+          groups = group(m_execution, listed.keys, listed.positions, ranks);
+
+        // The graph presented to callers retains the existing zero-dropping
+        // semantics. Only the retained symbolic plan contains potential zeros.
+        const auto positions = listed.positions;
+        const auto starts = groups.starts;
+        const auto keys = groups.keys;
+        const auto kept = KOKKOS_LAMBDA(const Index k)
+        {
+          const Index e = positions(k);
+          return e >= size || ranks.kept(values, e);
+        };
+        Counts active;
+        ::Kokkos::parallel_reduce(
+          "Rodin::Assembly::Kokkos::activeGroups", Range(m_execution, 0, groups.size()),
+          KOKKOS_LAMBDA(const Index u, Counts& sum) {
+            size_t entries = 0;
+            for (Index k = starts(u); k < starts(u + 1); ++k)
+              entries += kept(k);
+            sum.coefficients += entries;
+            sum.eliminated += entries != 0;
+          },
+          active);
+        if (active.coefficients == count)
+          return groups;
+        Groups selected;
+        selected.starts = allocate<Index>(active.eliminated + 1, "Rodin active starts");
+        selected.keys = allocate<Index>(active.eliminated, "Rodin active keys");
+        const auto order = allocate<Index>(active.coefficients, "Rodin active positions");
+        const auto selectedStarts = selected.starts;
+        const auto selectedKeys = selected.keys;
+        ::Kokkos::parallel_scan(
+          "Rodin::Assembly::Kokkos::selectGroups", Range(m_execution, 0, groups.size()),
+          KOKKOS_LAMBDA(const Index u, Counts& sum, const bool final) {
+            size_t entries = 0;
+            for (Index k = starts(u); k < starts(u + 1); ++k)
+            {
+              if (kept(k))
+              {
+                if (final)
+                  order(sum.coefficients + entries) = positions(k);
+                ++entries;
+              }
+            }
+            if (entries && final)
+            {
+              selectedStarts(sum.eliminated) = sum.coefficients;
+              selectedKeys(sum.eliminated) = keys(u);
+            }
+            sum.coefficients += entries;
+            sum.eliminated += entries != 0;
+          });
+        ::Kokkos::deep_copy(m_execution,
+          ::Kokkos::subview(selected.starts, active.eliminated), active.coefficients);
+        listed.positions = order;
+        return selected;
+      }
+
       /// @brief Sums the lists of the contributions.
       struct ContributionCount
       {
@@ -1737,12 +1940,13 @@ namespace Rodin::Assembly::Internal
        * major sort keys, the diagonal of the fixed row i being at position size + i.
        * @param eliminated Receives the eliminated contributions, as row sort
        * keys.
+       * @param structural Whether to list potential zero-valued contributions.
        */
       static void listContributions(const ExecutionSpace& execution, size_t innerCount,
         bool rowMajor, size_t diagonal, const Triplets& triplets,
         const Array<unsigned char>& fixed, const Ranks& coefficientRanks,
         const Ranks& eliminatedRanks, bool listCoefficients, bool listEliminated,
-        Listed& coefficients, Listed& eliminated)
+        Listed& coefficients, Listed& eliminated, bool structural = false)
       {
         const size_t size = triplets.size;
         const auto rows = triplets.matrix.row();
@@ -1750,7 +1954,7 @@ namespace Rodin::Assembly::Internal
         const auto values = triplets.matrix.data();
         const bool constrained = fixed.extent(0) > 0;
         const Classification classify{size, rows, cols, values, fixed, coefficientRanks,
-          constrained, listCoefficients, listEliminated};
+          constrained, listCoefficients, listEliminated, structural};
         const auto policy = Range(execution, 0, size + diagonal);
         Counts count;
         ::Kokkos::parallel_reduce("Rodin::Assembly::Kokkos::countContributions", policy,
@@ -2684,13 +2888,14 @@ namespace Rodin::Assembly::Internal
        * coefficients.
        * @param A Host matrix, resized and filled in compressed columns.
        */
-      void compress(const Triplets& triplets, const Ranks& ranks, const Listed& listed,
-        ::Rodin::Math::SparseMatrix<Real>& A) const
+      void compress(const Triplets& triplets, const Ranks& ranks, Listed& listed,
+        ::Rodin::Math::SparseMatrix<Real>& A)
       {
         A.resize(m_rows, m_cols);
         if (m_rows == 0 || m_cols == 0)
           return;
-        const auto groups = group(m_execution, listed.keys, listed.positions, ranks);
+        const auto groups =
+          groupContributions(listed, ranks, triplets.coefficients, triplets.size);
         const size_t nnz = groups.size();
         if (nnz >
           static_cast<size_t>(std::numeric_limits<::Rodin::Math::SparseIndex>::max()))
@@ -2722,15 +2927,16 @@ namespace Rodin::Assembly::Internal
        * @param A Device matrix, whose arrays are reused when their sizes are
        * unchanged.
        */
-      void compress(const Triplets& triplets, const Ranks& ranks, const Listed& listed,
-        BackendMatrix& A) const
+      void compress(
+        const Triplets& triplets, const Ranks& ranks, Listed& listed, BackendMatrix& A)
       {
         if (m_rows == 0 || m_cols == 0)
         {
           A = BackendMatrix(m_rows, m_cols, {}, {}, {});
           return;
         }
-        const auto groups = group(m_execution, listed.keys, listed.positions, ranks);
+        const auto groups =
+          groupContributions(listed, ranks, triplets.coefficients, triplets.size);
         const size_t nnz = groups.size();
         if (nnz >
           static_cast<size_t>(std::numeric_limits<::Rodin::Math::SparseIndex>::max()))
@@ -2820,7 +3026,7 @@ namespace Rodin::Assembly::Internal
        * @param rhs Device right-hand side, incremented.
        */
       void addEntries(const Array<Index>& indices, const Array<Real>& values,
-        const Ranks& ranks, const Expansions* x, const Array<Real>& rhs) const
+        const Ranks& ranks, const Expansions* x, const Array<Real>& rhs)
       {
         if (x)
         {
@@ -2831,10 +3037,19 @@ namespace Rodin::Assembly::Internal
           return;
         }
         const auto sorted = ranks.sorting(m_rows);
-        Array<Index> keys, positions;
-        listEntries(m_execution, indices, values, sorted, keys, positions);
-        accumulate(m_execution, positions, group(m_execution, keys, positions, sorted),
-          values, rhs);
+        const size_t count = indices.extent(0);
+        Listed listed{allocate<Index>(count, "Rodin structural vector keys"),
+          allocate<Index>(count, "Rodin structural vector positions")};
+        const auto keys = listed.keys;
+        const auto positions = listed.positions;
+        ::Kokkos::parallel_for(
+          "Rodin::Assembly::Kokkos::structuralVector", Range(m_execution, 0, count),
+          KOKKOS_LAMBDA(const Index e) {
+            keys(e) = sorted.sortKey(indices(e), e);
+            positions(e) = e;
+          });
+        const auto groups = groupContributions(listed, sorted, values, count);
+        accumulate(m_execution, listed.positions, groups, values, rhs);
       }
 
       /**
@@ -2845,7 +3060,7 @@ namespace Rodin::Assembly::Internal
        * @param lift Sums the values lifted by a number of first matrices.
        */
       template <class Lift>
-      void sumVectors(const Array<Real>& rhs, const Expansions* x, const Lift& lift) const
+      void sumVectors(const Array<Real>& rhs, const Expansions* x, const Lift& lift)
       {
         for (size_t begin = 0; begin < m_vectors.size();)
         {
@@ -2905,6 +3120,8 @@ namespace Rodin::Assembly::Internal
       ConstraintsType m_constraints;
       std::vector<Matrix> m_matrices;
       std::vector<Vector> m_vectors;
+      Symbolic* m_symbolic;
+      size_t m_group;
   };
 }
 
@@ -2978,7 +3195,7 @@ namespace Rodin::Assembly
       {
         Internal::SystemAssembly<BackendType> system(
           input.getTrialFES().getMesh().getContext().getExecutionSpace(),
-          input.getTestFES().getSize(), input.getTrialFES().getSize());
+          input.getTestFES().getSize(), input.getTrialFES().getSize(), &m_symbolic);
         for (auto& lbfi : input.getLocalBFIs())
           system.addMatrix(lbfi, 0, 0);
         for (auto& gbfi : input.getGlobalBFIs())
@@ -2994,6 +3211,9 @@ namespace Rodin::Assembly
       {
         return new Kokkos(*this);
       }
+
+    private:
+      typename Internal::SystemAssembly<BackendType>::Symbolic m_symbolic;
   };
 
   /**
@@ -3072,7 +3292,7 @@ namespace Rodin::Assembly
       {
         Internal::SystemAssembly<BackendType> system(
           input.getFES().getMesh().getContext().getExecutionSpace(),
-          input.getFES().getSize(), 0);
+          input.getFES().getSize(), 0, &m_symbolic);
         for (auto& lfi : input.getLFIs())
           system.addVector(lfi, 0, Real(1));
         system.finish(nullptr, &res);
@@ -3086,6 +3306,9 @@ namespace Rodin::Assembly
       {
         return new Kokkos(*this);
       }
+
+    private:
+      typename Internal::SystemAssembly<BackendType>::Symbolic m_symbolic;
   };
 
   namespace Internal
@@ -3220,7 +3443,8 @@ namespace Rodin::Assembly
         const auto& v = input.getTestFunction();
         Internal::SystemAssembly<BackendType> system(
           u.getFiniteElementSpace().getMesh().getContext().getExecutionSpace(),
-          v.getFiniteElementSpace().getSize(), u.getFiniteElementSpace().getSize());
+          v.getFiniteElementSpace().getSize(), u.getFiniteElementSpace().getSize(),
+          &m_symbolic);
         for (auto& dbc : pb.getDBCs())
         {
           if (dbc.getOperand().getUUID() == u.getUUID())
@@ -3272,6 +3496,9 @@ namespace Rodin::Assembly
       {
         return new Kokkos(*this);
       }
+
+    private:
+      typename Internal::SystemAssembly<BackendType>::Symbolic m_symbolic;
   };
 
   /**
@@ -3370,7 +3597,7 @@ namespace Rodin::Assembly
         const auto& u1 = input.getTrialFunctions().template get<0>().get();
         Internal::SystemAssembly<BackendType> system(
           u1.getFiniteElementSpace().getMesh().getContext().getExecutionSpace(),
-          input.getTotalTestSize(), input.getTotalTrialSize());
+          input.getTotalTestSize(), input.getTotalTrialSize(), &m_symbolic);
         for (auto& dbc : pb.getDBCs())
         {
           const Index offset = trialOffset(dbc.getOperand().getUUID());
@@ -3431,6 +3658,9 @@ namespace Rodin::Assembly
       {
         return new Kokkos(*this);
       }
+
+    private:
+      typename Internal::SystemAssembly<BackendType>::Symbolic m_symbolic;
   };
 
   /**

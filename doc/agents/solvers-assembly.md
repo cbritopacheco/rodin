@@ -238,6 +238,18 @@ owner. Its COO contributions use `KokkosSparse::CooMatrix`; constraint handling,
 contribution ordering and duplicate summation retain the existing Assembly
 semantics. `COOAssembly` handles PETSc insertion and MPI ownership separately.
 
+Ordinary Kokkos bilinear forms, linear forms and single/mixed problems retain
+`SystemAssembly::Symbolic` in their existing assembly policy. Every execution
+regenerates structural keys and source positions. Exact backend comparisons of
+those arrays, contribution ranks, dimensions and key encoding validate each
+retained grouping; changed layouts rebuild it. Numerical zeros are retained in
+the symbolic groups and selected out afterward using the existing zero-retention
+rules, so coefficient zero crossings do not hide couplings or change the
+public sparse-pattern semantics. Values, fixed DOFs, identification expansions
+and affine lifting are recomputed each time. Copies of an assembler start with
+empty plans. Identification expansion can change its structural list when
+values vanish; exact validation conservatively rebuilds those groups.
+
 Backend GridFunction coefficients are borrowed by their lowering view, without
 hashing or uploading a host mirror. Projection and solved-field updates write
 backend storage. Kernel-facing mesh and connectivity access uses `getView()`;
