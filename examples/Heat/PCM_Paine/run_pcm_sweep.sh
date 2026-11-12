@@ -26,6 +26,16 @@
 # had 0.25 mm). At 5 cm the layer cooled from above at night reaches
 # Ra ~ 1e6 (dT 5 K, Pr ~ 240): cells of width ~2e = 10 cm (20 h_x) and thermal
 # boundary layers of ~4 mm. REFINE=2 doubles n_x, n_y (GRADE -> sqrt(GRADE)).
+#
+# GRADING=both (-pcm_ygrade_both): HYTOP at BOTH faces of the PCM, growing
+# geometrically toward the mid-plane by r <= GRADEMAX up to HYMAX: n_y = 2m
+# with the smallest m such that HYTOP (r^m - 1)/(r - 1) = e/2 has
+# r <= GRADEMAX and HYTOP r^(m-1) <= HYMAX. Lesson of the Biwole validation:
+# the melt front, which crosses the whole layer, and the liquid against the
+# second wall (no-slip, thin crust) need fine cells in the interior and at
+# both faces; with one-sided grading (1.25 mm cells at the far wall) T
+# undershot by 10 K and Newton failed down to dt = 0.03 s.
+# NP_MAP="5:25 10:25 ..." gives the MPI ranks of each thickness (others: NP).
 set -euo pipefail
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -38,7 +48,10 @@ MPIRUN="${MPIRUN:-mpirun}"     # may carry options, e.g. "mpirun --oversubscribe
 NP="${NP:-4}"                 # MPI ranks per case
 NJOBS="${NJOBS:-1}"           # cases running at the same time
 THICKNESSES="${THICKNESSES:-5 10 15 20}"   # mm of PCM
-SITE="${SITE:-calama}"        # weather: paine or calama (paine_weather.py --site)
+SITE="${SITE:-calama}"        # weather: paine or calama (paine_weather.py --site), or santiago
+                              # (pvgis_weather.py: PVGIS TMY of Quinta Normal, January)
+TMY_JSON="${TMY_JSON:-}"      # santiago: PVGIS TMY JSON already downloaded (else downloaded)
+DIA="${DIA:-promedio}"        # santiago: promedio | caluroso | despejado | day of the month
 AL="${AL:-0.01}"              # m, aluminium plate below and above the PCM (0: none)
 NAL="${NAL:-4}"               # cells across each plate
 HIN="${HIN:-2}"               # W/m^2K, convection only on the attic side
@@ -54,6 +67,10 @@ HX="${HX:-0.01}"              # m
 HYTOP="${HYTOP:-0.00025}"     # m, cell height at the top face
 GRADE="${GRADE:-1.08}"        # height ratio of consecutive cells, top -> bottom
 NYMIN="${NYMIN:-10}"
+GRADING="${GRADING:-top}"     # top (HYTOP at the top face, GRADE) or both (see above)
+HYMAX="${HYMAX:-0.001}"       # m, largest cell across the PCM (GRADING=both)
+GRADEMAX="${GRADEMAX:-1.06}"  # largest growth ratio (GRADING=both)
+NP_MAP="${NP_MAP:-}"          # per-thickness MPI ranks, "mm:np mm:np ..."
 REFINE="${REFINE:-1}"
 TIN="${TIN:-24}"              # C, room below the ceiling
 UCEIL="${UCEIL:-0.38}"        # W/m^2K, insulated ceiling (OGUC 4.1.10)
@@ -67,7 +84,17 @@ if [ ! -x "$BIN" ]; then
 fi
 mkdir -p "$OUT"
 WEATHER="$OUT/${SITE}_enero_${FACING}_${ANGLE}deg.csv"
-python3 "$HERE/paine_weather.py" --site "$SITE" --tilt "$ANGLE" --facing "$FACING" -o "$WEATHER"
+if [ "$SITE" = santiago ]; then
+  WEATHER="$OUT/santiago_enero_${DIA}_${FACING}_${ANGLE}deg.csv"
+  if [ -n "$TMY_JSON" ]; then
+    python3 "$HERE/pvgis_weather.py" --input "$TMY_JSON" --dia "$DIA" --tilt "$ANGLE" --facing "$FACING" -o "$WEATHER"
+  else
+    python3 "$HERE/pvgis_weather.py" --save "$OUT/tmy_santiago.json" --dia "$DIA" --tilt "$ANGLE" --facing "$FACING" -o "$WEATHER"
+  fi
+else
+  python3 "$HERE/paine_weather.py" --site "$SITE" --tilt "$ANGLE" --facing "$FACING" -o "$WEATHER"
+fi
+[ -s "$WEATHER" ] || { echo "No weather file $WEATHER" >&2; exit 1; }
 
 TEND=$(awk -v d="$NDAYS" 'BEGIN { printf "%d", d * 86400 }')
 EVERY=$(awk -v dt="$DT" 'BEGIN { printf "%d", 3600 / dt + 0.5 }')
@@ -76,19 +103,43 @@ NX=$(awk -v L="$LENGTH" -v h="$HX" -v r="$REFINE" 'BEGIN { printf "%d", r * int(
 {
   echo "date: $(date)"
   echo "git: $(git -C "$REPO" rev-parse --short HEAD 2>/dev/null || echo '?')"
+  echo "WEATHER=$WEATHER ($(head -n 1 "$WEATHER"))"
   echo "THICKNESSES=$THICKNESSES SITE=$SITE AL=$AL NAL=$NAL HIN=$HIN ANGLE=$ANGLE FACING=$FACING NDAYS=$NDAYS DT=$DT"
   echo "LENGTH=$LENGTH HX=$HX HYTOP=$HYTOP GRADE=$GRADE NYMIN=$NYMIN REFINE=$REFINE NP=$NP"
+  echo "GRADING=$GRADING HYMAX=$HYMAX GRADEMAX=$GRADEMAX NP_MAP=$NP_MAP MUSHY=$MUSHY MPIRUN=$MPIRUN"
   echo "TIN=$TIN UCEIL=$UCEIL ACH=$ACH ATTICH=$ATTICH EXTRA=$EXTRA"
 } > "$OUT/sweep.txt"
 
 run_case() {
   local mm="$1"
-  local e ny grade dir
+  local e ny grade dir np both=0
   e=$(awk -v mm="$mm" 'BEGIN { printf "%.6f", mm / 1000 }')
-  ny=$(awk -v e="$e" -v h="$HYTOP" -v g="$GRADE" -v n="$NYMIN" -v r="$REFINE" \
-       'BEGIN { m = (g > 1) ? log(1 + e * (g - 1) / h) / log(g) : e / h;
-                m = (m == int(m)) ? m : int(m) + 1; if (m < n) m = n; printf "%d", r * m }')
-  grade=$(awk -v g="$GRADE" -v r="$REFINE" 'BEGIN { printf "%.8g", g ^ (1 / r) }')
+  np=$(echo "$NP_MAP" | tr ' ' '\n' | awk -F: -v mm="$mm" '$1 == mm { print $2 }' | tail -n 1)
+  np="${np:-$NP}"
+  if [ "$GRADING" = both ]; then
+    both=1
+    # smallest half count m whose ratio r (HYTOP (r^m - 1)/(r - 1) = e/2) keeps
+    # r <= GRADEMAX and the mid-plane cell HYTOP r^(m-1) <= HYMAX
+    read -r ny grade < <(awk -v e="$e" -v h="$HYTOP" -v hm="$HYMAX" -v gm="$GRADEMAX" -v rf="$REFINE" '
+      BEGIN {
+        half = e / 2
+        for (m = 1; m < 10000; ++m) {
+          if (h * m >= half) r = 1
+          else {
+            lo = 1 + 1e-12; hi = 3
+            for (k = 0; k < 200; ++k) { r = (lo + hi) / 2; if (h * (r ^ m - 1) / (r - 1) < half) lo = r; else hi = r }
+            r = (lo + hi) / 2
+          }
+          if (r <= gm && h * r ^ (m - 1) <= hm * (1 + 1e-9)) break
+        }
+        printf "%d %.8g\n", rf * 2 * m, r ^ (1 / rf)
+      }')
+  else
+    ny=$(awk -v e="$e" -v h="$HYTOP" -v g="$GRADE" -v n="$NYMIN" -v r="$REFINE" \
+         'BEGIN { m = (g > 1) ? log(1 + e * (g - 1) / h) / log(g) : e / h;
+                  m = (m == int(m)) ? m : int(m) + 1; if (m < n) m = n; printf "%d", r * m }')
+    grade=$(awk -v g="$GRADE" -v r="$REFINE" 'BEGIN { printf "%.8g", g ^ (1 / r) }')
+  fi
   dir="$OUT/$(printf 'e_%02dmm' "$mm")"
   if [ -f "$dir/DONE" ]; then
     echo "[skip] $dir"
@@ -101,11 +152,11 @@ run_case() {
   # ~3e-4 m/s). With 2 K and 100 iterations, 5-20 mm passed in the tests.
   local dt="$DT" every="$EVERY" mushy="$MUSHY" try=0 retryOpts=""
   while :; do
-    echo "thickness_mm=$mm al_mm=$(awk -v a="$AL" 'BEGIN { printf "%g", a * 1000 }') nx=$NX ny=$ny nal=$NAL grade=$grade angle=$ANGLE dt=$dt mushy=$mushy ndays=$NDAYS" > "$dir/case.txt"
-    echo "[run ] e = $mm mm  mesh $NX x $ny (grade $grade)  dt = $dt s  mushy = $mushy K  ($(date +%H:%M))"
+    echo "thickness_mm=$mm al_mm=$(awk -v a="$AL" 'BEGIN { printf "%g", a * 1000 }') nx=$NX ny=$ny nal=$NAL grade=$grade grading=$GRADING np=$np angle=$ANGLE dt=$dt mushy=$mushy ndays=$NDAYS" > "$dir/case.txt"
+    echo "[run ] e = $mm mm  mesh $NX x $ny (grade $grade, $GRADING)  np = $np  dt = $dt s  mushy = $mushy K  ($(date +%H:%M))"
     # shellcheck disable=SC2086
-    if (cd "$dir" && $MPIRUN -n "$NP" "$BIN" \
-          -pcm_thickness "$e" -pcm_length "$LENGTH" -pcm_nx "$NX" -pcm_ny "$ny" -pcm_ygrade "$grade" \
+    if (cd "$dir" && $MPIRUN -n "$np" "$BIN" \
+          -pcm_thickness "$e" -pcm_length "$LENGTH" -pcm_nx "$NX" -pcm_ny "$ny" -pcm_ygrade "$grade" -pcm_ygrade_both "$both" \
           -pcm_angle "$ANGLE" -pcm_weather "$WEATHER" -pcm_dt "$dt" -pcm_tend "$TEND" -pcm_mushy "$mushy" \
           -pcm_output_every "$every" -pcm_print_every "$every" \
           -pcm_al "$AL" -pcm_al_n "$NAL" -pcm_hin "$HIN" \

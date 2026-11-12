@@ -39,16 +39,27 @@
 // of the current Newton iterate (group finite elements), refreshed by the SNES
 // state update before each assembly.
 //
-// Energy conservation. Advection is in weak conservative form with the
-// velocity that the discrete continuity equation conserves,
-//   -(H_a(T) - H_ref) a . grad w,  a = u - (tau_1/rho_l) (grad p - Pi[grad p]),
-// H_a = H_s (or H). Continuity reads int a . grad q = eps (p, q) for every q,
-// so the term vanishes for w = 1 (energy is conserved) and for H_a constant
-// (no sources where div u_h != 0): a is the resolved velocity plus the VMS
-// pressure subscale of the split OSGS. The discrete u alone is not solenoidal
-// (P1/P1, OSGS): H'(T) u.grad T lost 7-18% of the energy entering during
-// melting with convection, and H'(T) u.grad T + (H - H_ref) div u grows like
-// exp(-div u_h t) (spurious hot spots, then Newton fails).
+// Energy conservation. Advection uses the velocity that the discrete
+// continuity equation conserves,
+//   a = u - (tau_1/rho_l) (grad p - f_b - Pi[grad p - f_b]),
+// the resolved velocity plus the VMS pressure subscale of the split OSGS
+// (f_b: buoyancy, -pcm_well_balanced): continuity reads int a . grad q =
+// eps (p, q) for every q. The discrete u alone is not solenoidal (P1/P1,
+// OSGS): H'(T) u.grad T lost 7-18% of the energy entering during melting with
+// convection. The advected enthalpy H_a = H_s (or H) enters in skew-symmetric
+// form (-pcm_advection 1, default),
+//   1/2 [ -(H_a(T) - H_ref) a . grad w + H_a'(T) a . grad T w ],
+// which is conservative up to the interpolation of H_a, keeps H_a = const
+// free of sources, and does not inject energy where a is only weakly
+// solenoidal. The weak conservative form alone (-pcm_advection 0) has the
+// antisymmetric part 1/2 div a in its energy estimate: in a 40 x 15 mm
+// Biwole-type cavity it grew spurious hot spots (T up to 300 C) and Newton
+// failed at 144 s; the skew form kept T in [20, 40.7] C.
+//
+// Time step. A step whose Newton iteration fails is redone from the saved
+// state with dt/2 (down to -pcm_dt_min); dt doubles back after 4 converged
+// substeps. Outputs stay on the nominal grid; the CSV column `substeps`
+// counts the substeps of each step.
 //
 // Phase-change truncation. H is convex at T_s and concave at T_l, so a plain
 // Newton step taken from the solid (slope rho c_p, no latent heat) overshoots
@@ -126,8 +137,8 @@
 //     -pcm_angle 15 -snes_converged_reason
 //
 // Options: -pcm_length, -pcm_thickness (m), -pcm_al (m, plates), -pcm_al_n, -pcm_nx, -pcm_ny, -pcm_ygrade (cell
-// height ratio from the top face down, 1: uniform), -pcm_dt, -pcm_tstart (s), -pcm_tend, -pcm_latent_advection (0/1),
-// -pcm_darcy (0/1/2), -pcm_angle (deg), -pcm_mushy (T_l - T_s, K;
+// height ratio from the top face down, 1: uniform), -pcm_ygrade_both (0/1: grade from both faces), -pcm_dt, -pcm_tstart (s), -pcm_tend, -pcm_latent_advection (0/1),
+// -pcm_darcy (0/1/2), -pcm_advection (0/1/2), -pcm_well_balanced (0/1), -pcm_dt_min (s), -pcm_angle (deg), -pcm_mushy (T_l - T_s, K;
 // PETSc option names are case-insensitive, so not -pcm_dT), -pcm_round (K, 0: Eq. 4),
 // -pcm_absorptivity, -pcm_emissivity, -pcm_hin, -pcm_tin (C), -pcm_weather, -pcm_output_every,
 // PCM properties -pcm_rho_s/_l, -pcm_cp_s/_l, -pcm_k_s/_l, -pcm_latent, -pcm_mu, -pcm_beta, -pcm_tm (C), -pcm_cmushy;
@@ -274,6 +285,7 @@ namespace Rodin::Examples::Heat
     /// Sensible part H_s(T) = int_{T_low}^T rho c_p dT' and its derivative.
     Real Hs(Real T) const { return H(T) - rho(T) * Y(T) * L; }
     Real dHs(Real T) const { return rho(T) * cp(T); }
+    Real d2Hs(Real T) const { return ((rhoL - rhoS) * cp(T) + rho(T) * (cpL - cpS)) * dY(T); }
 
     /// Y''(T): +-1/(2 d dT) on the two rounding intervals, 0 elsewhere.
     Real d2Y(Real T) const
@@ -428,6 +440,7 @@ namespace Rodin::Examples::Heat
         size_t nx = 400;       ///< h = 5 mm
         size_t ny = 20;
         Real yGrade = 1.0;     ///< height ratio of consecutive cells from the top face down (1: uniform)
+        bool yGradeBoth = false; ///< grade from both faces toward the mid-plane (r^min(k, n-1-k))
 
         PCM pcm;
         Real gravity = 9.81;   ///< m/s^2
@@ -474,6 +487,8 @@ namespace Rodin::Examples::Heat
         Real pressurePenalty = 1.0e-7; ///< 1/(Pa s): eps (p, q) fixes the mean pressure
         int darcy = 0;                 ///< Carman-Kozeny treatment (see setupProblem)
         bool latentAdvection = false;  ///< advect H (Eq. 3) instead of the sensible enthalpy
+        int advection = 1;             ///< 0: weak conservative, 1: skew-symmetric, 2: convective
+        bool wellBalanced = true;      ///< pressure subscale from grad p - buoyancy (false: grad p)
 
         // Time step. With h = 5 mm and RT42: cell diffusion time
         // h^2/alpha = 190 s (Fourier alpha dt/h^2 = 0.16 at 30 s); a cell melts
@@ -481,6 +496,7 @@ namespace Rodin::Examples::Heat
         // varies on the hour; liquid velocities stay below ~1 mm/s
         // (CFL <= 6, implicit + OSGS). dt = 30 s resolves all of these.
         Real dt = 30.0;        ///< s
+        Real dtMin = 0.0;      ///< s, smallest substep of the step halving (0: dt/1024)
         Real tEnd = 86400.0;   ///< s, one day
         Real tStart = 0.0;     ///< s, solar time of the initial condition (T = T_a(tStart))
         int outputEvery = 120; ///< one hour at dt = 30 s
@@ -508,6 +524,9 @@ namespace Rodin::Examples::Heat
           m_problem(m_u, m_p, m_T, m_v, m_q, m_w), m_ksp(m_problem), m_snes(m_ksp),
           m_z(m_sh), m_one(m_sh), m_flux(m_z)
       {
+        m_dt = m_cfg.dt;
+        if (m_cfg.dtMin <= 0.0)
+          m_cfg.dtMin = m_cfg.dt / 1024.0;
         const size_t dim = m_mesh.getSpaceDimension();
         Math::SpatialVector<Real> zero(dim);
         for (size_t i = 0; i < dim; ++i)
@@ -562,13 +581,13 @@ namespace Rodin::Examples::Heat
         {
           m_csv.open(m_cfg.output + ".csv");
           m_csv << "t,hour,newtonIterations,maxU,minT_C,maxT_C,topT_C,bottomT_C,"
-                   "liquidFraction,qBottom,I,Ta_C,ha,qTop,Tb_C,Tattic_C,qCeiling\n";
+                   "liquidFraction,qBottom,I,Ta_C,ha,qTop,Tb_C,Tattic_C,qCeiling,substeps\n";
           const auto& m = m_cfg.pcm;
           Alert::Info() << "[mesh] cells=" << cells << " vertices=" << vertices
                         << "  " << m_cfg.length << " m x " << m_cfg.thickness << " m PCM + 2 x "
                         << m_cfg.alThickness << " m Al"
                         << "  angle=" << m_cfg.angle << " deg  ny=" << m_cfg.ny
-                        << " grade=" << m_cfg.yGrade << Alert::Raise;
+                        << " grade=" << m_cfg.yGrade << (m_cfg.yGradeBoth ? " (both faces)" : "") << Alert::Raise;
           Alert::Info() << "[bottom] " << (m_cfg.attic ? "attic" : "room")
                         << "  h_b=" << m_cfg.hBottom() << " W/m^2K  U_c=" << m_cfg.uCeiling
                         << "  H_v=" << m_cfg.hVent() << " W/m^2K  T_in="
@@ -584,29 +603,77 @@ namespace Rodin::Examples::Heat
         const int steps = static_cast<int>((m_cfg.tEnd - m_cfg.tStart) / m_cfg.dt + 0.5);
         m_problem.assemble();  // seeds the SNES iterate from the trial solutions
         m_xdmf.write(m_cfg.tStart).flush();
+
+        // Step halving. A nominal step [t^n, t^n + dt] whose Newton iteration
+        // fails is redone from the saved state with half the step, as many
+        // times as needed (down to dt_min); the step doubles back to dt after
+        // `growAfter` converged substeps. Outputs stay on the nominal grid.
+        ::Vec x = m_problem.getLinearSystem().getSolution();
+        ::Vec saved = PETSC_NULLPTR;
+        PetscCallAbort(PETSC_COMM_WORLD, VecDuplicate(x, &saved));
+        const size_t nu = m_vh.getSize(), np = m_sh.getSize();
+        const int growAfter = 4;
+        Real dtCur = m_cfg.dt;
+        int streak = 0;
         for (int n = 1; n <= steps; ++n)
         {
-          m_t = m_cfg.tStart + n * m_cfg.dt;
-
+          const Real tBegin = m_cfg.tStart + (n - 1) * m_cfg.dt, tTarget = m_cfg.tStart + n * m_cfg.dt;
           const auto t0 = Clock::now();
-          updateWeather(m_t);     // boundary data at t^{n+1}
-          updateStabilization();  // tau and Pi at (u^n, p^n, T^n)
-          m_jacobianState = -1;   // Rodin reassembles at the start of a solve
-          std::fill(m_truncation.previous.begin(), m_truncation.previous.end(), 0.0);
-          std::fill(m_truncation.factor.begin(), m_truncation.factor.end(), 1.0);
-          m_snes.solve();
+          Real t = tBegin;
+          m_stepIterations = 0;
+          m_stepSubsteps = 0;
+          while (tTarget - t > 1e-9 * m_cfg.dt)
+          {
+            m_dt = std::min(dtCur, tTarget - t);
+            if (tTarget - t - m_dt < 1e-9 * m_cfg.dt)
+              m_dt = tTarget - t;  // no sliver at the end of the nominal step
+            m_t = t + m_dt;
+            PetscCallAbort(PETSC_COMM_WORLD, VecCopy(x, saved));
+            updateWeather(m_t);     // boundary data at the new time level
+            updateStabilization();  // tau and Pi at the previous time level
+            m_jacobianState = -1;   // Rodin reassembles at the start of a solve
+            std::fill(m_truncation.previous.begin(), m_truncation.previous.end(), 0.0);
+            std::fill(m_truncation.factor.begin(), m_truncation.factor.end(), 1.0);
+            m_snes.solve();
+            if (!m_snes.converged())
+            {
+              // Back to the state at t and retry with half the step.
+              PetscCallAbort(PETSC_COMM_WORLD, VecCopy(saved, x));
+              m_u.getSolution().setData(x, 0);
+              m_p.getSolution().setData(x, nu);
+              m_T.getSolution().setData(x, nu + np);
+              updateCoefficients();
+              dtCur = 0.5 * m_dt;
+              streak = 0;
+              ++m_cuts;
+              if (isRoot())
+                Alert::Info() << "[dt] Newton failed at t = " << m_t << " s with dt = " << m_dt
+                              << " s: retrying with dt = " << dtCur << " s" << Alert::Raise;
+              if (dtCur < m_cfg.dtMin)
+                throw std::runtime_error("Newton did not converge at t = " + std::to_string(m_t)
+                                         + " with dt = " + std::to_string(m_dt));
+              continue;
+            }
+            t = m_t;
+            m_stepIterations += static_cast<int>(m_snes.getIterationNumber());
+            ++m_stepSubsteps;
+            updateCoefficients();  // at the converged T
+            m_uOld.setData(m_u.getSolution().getData());
+            m_TOld.setData(m_T.getSolution().getData());
+            if (dtCur < m_cfg.dt && ++streak >= growAfter)
+            {
+              dtCur = std::min(2.0 * dtCur, m_cfg.dt);
+              streak = 0;
+            }
+          }
+          m_t = tTarget;
           const Real elapsed = std::chrono::duration<Real>(Clock::now() - t0).count();
-          if (!m_snes.converged())
-            throw std::runtime_error("Newton did not converge at t = " + std::to_string(m_t));
-
-          updateCoefficients();  // at the converged T^{n+1}
-          m_uOld.setData(m_u.getSolution().getData());
-          m_TOld.setData(m_T.getSolution().getData());
 
           report(n, steps, elapsed);
           if (n % m_cfg.outputEvery == 0 || n == steps)
             m_xdmf.write(m_t).flush();
         }
+        PetscCallAbort(PETSC_COMM_WORLD, VecDestroy(&saved));
         m_xdmf.close();
         return 0;
       }
@@ -632,10 +699,28 @@ namespace Rodin::Examples::Heat
           std::vector<Real> ys;
           for (size_t j = 0; j < na; ++j)
             ys.push_back(ea * static_cast<Real>(j) / static_cast<Real>(na));
-          for (size_t j = 0; j <= cfg.ny; ++j)
+          if (cfg.yGradeBoth && !uniform)
           {
-            const Real jj = static_cast<Real>(j);
-            ys.push_back(ea + (uniform ? jj * hy : e - hy * (std::pow(r, n - jj) - 1.0) / (r - 1.0)));
+            // Cell k from the top face: height proportional to r^min(k, n-1-k),
+            // fine at both faces (boundary layers on both walls).
+            std::vector<Real> w(cfg.ny);
+            Real sum = 0.0;
+            for (size_t k = 0; k < cfg.ny; ++k)
+              sum += (w[k] = std::pow(r, static_cast<Real>(std::min(k, cfg.ny - 1 - k))));
+            Real y = ea + e;
+            std::vector<Real> top{ y };
+            for (size_t k = 0; k < cfg.ny; ++k)
+              top.push_back(y -= e * w[k] / sum);
+            top.back() = ea;
+            ys.insert(ys.end(), top.rbegin(), top.rend());
+          }
+          else
+          {
+            for (size_t j = 0; j <= cfg.ny; ++j)
+            {
+              const Real jj = static_cast<Real>(j);
+              ys.push_back(ea + (uniform ? jj * hy : e - hy * (std::pow(r, n - jj) - 1.0) / (r - 1.0)));
+            }
           }
           for (size_t j = 1; j <= na; ++j)
             ys.push_back(ea + e + ea * static_cast<Real>(j) / static_cast<Real>(na));
@@ -801,7 +886,7 @@ namespace Rodin::Examples::Heat
         auto& self = *static_cast<NaturalConvectionPCM*>(ctx);
         PetscCall(self.m_rodinResidual(snes, x, f, self.m_rodinResidualCtx));  // syncs the state
         const PCM& m = self.m_cfg.pcm;
-        const Real dt = self.m_cfg.dt;
+        const Real dt = self.m_dt;
         std::vector<PetscScalar> values(self.m_lumped.size());
         PetscCall(self.lumped(self.m_T.getSolution(), self.m_TOld, [&](size_t k, Real t, Real t0) {
           values[k] = (self.m_lumped[k] * (m.H(t) - m.H(t0))
@@ -830,7 +915,7 @@ namespace Rodin::Examples::Heat
         self.m_jacobianId = id;
 #endif
         const PCM& m = self.m_cfg.pcm;
-        const Real dt = self.m_cfg.dt;
+        const Real dt = self.m_dt;
         PetscCall(self.lumped(self.m_T.getSolution(), self.m_TOld, [&](size_t k, Real t, Real) {
           const PetscInt row = self.m_rows[k];
           const PetscScalar v = (self.m_lumped[k] * m.dH(t)
@@ -998,7 +1083,13 @@ namespace Rodin::Examples::Heat
 
         const auto& U = m_u.getSolution();
         m_piConv.project(Mult(Jacobian(U), U));
-        m_piGradP.project(Grad(m_p.getSolution()));
+        {
+          // Pressure gradient minus the buoyancy force (see setupProblem).
+          const Real theta = m_cfg.angle * M_PI / 180.0;
+          const VectorFunction g{ -m_cfg.gravity * std::sin(theta), -m_cfg.gravity * std::cos(theta) };
+          const Real fb = m_cfg.wellBalanced ? m.rhoL * m.beta : 0.0;
+          m_piGradP.project(Grad(m_p.getSolution()) + (fb * (m_T.getSolution() - m.Tl())) * g);
+        }
         m_piDiv.project(Div(U));
         m_piAdv.project(Dot(U, Grad(m_T.getSolution())));
       }
@@ -1006,7 +1097,9 @@ namespace Rodin::Examples::Heat
       void setupProblem()
       {
         const PCM& m = m_cfg.pcm;
-        const Real rho = m.rhoL, dt = m_cfg.dt, mu = m.mu;
+        const Real rho = m.rhoL, mu = m.mu;
+        // rho/dt of the current (sub)step: the step is halved when Newton fails.
+        const auto cRhoDt = RealFunction([this, rho](const Point&) { return rho / m_dt; });
         const Real rhoBeta = m.rhoL * m.beta, Tref = m.Tl();
         const Real sigmaEps = Sigma * m_cfg.emissivity, alphaS = m_cfg.absorptivity;
         const Real hB = m_cfg.hBottom(), epsP = m_cfg.pressurePenalty;
@@ -1040,7 +1133,11 @@ namespace Rodin::Examples::Heat
           return darcy == 0 ? m.dA(Tq.getValue(p)) : 0.0; });
         // Advected enthalpy H_a (sensible, or H) referred to the liquid at T_high.
         const bool lat = m_cfg.latentAdvection;
-        const auto cH1 = atT(lat ? &PCM::dH : &PCM::dHs);
+        const auto cH1 = atT(lat ? &PCM::dH : &PCM::dHs), cH2 = atT(lat ? &PCM::d2H : &PCM::d2Hs);
+        // Advection of H_a by a = u - subP/rho, with weights wc on the weak
+        // conservative form -(H_a - H_ref) a.grad w and wn on the convective
+        // form H_a'(T) a.grad T w: 1/2, 1/2 is the skew-symmetric form.
+        const Real wc = m_cfg.advection == 0 ? 1.0 : (m_cfg.advection == 1 ? 0.5 : 0.0), wn = 1.0 - wc;
         const Real Href = lat ? m.H(m.Thigh()) : m.Hs(m.Thigh());
         const auto cH0 = RealFunction([&m, &Tq, Href, lat](const Point& p) {
           const Real t = Tq.getValue(p);
@@ -1067,11 +1164,17 @@ namespace Rodin::Examples::Heat
         const auto advT = Dot(U, Grad(Th));                                     // U.grad T
         const auto dAdvT = Dot(U, Grad(dT));                                    // its derivative,
         const auto dAdvU = Dot(du, Grad(Th));                                   // split by field
-        const auto subW = Dot(m_tau1 * (Grad(P) - m_piGradP.get()), Grad(m_w)); // tau_1 (grad p - Pi).grad w
+        // Pressure subscale: orthogonal projection of grad p - f_b, with the
+        // buoyancy force f_b = -rho_l beta (T - T_ref) g.
+        const Real fb = m_cfg.wellBalanced ? rhoBeta : 0.0;
+        const auto subP = m_tau1 * (Grad(P) + (fb * (Th - Tref)) * g - m_piGradP.get());
+        const auto subW = Dot(subP, Grad(m_w));                                  // subscale . grad w
+        const auto subT = Dot(subP, Grad(Th));                                   // subscale . grad T
 
         m_problem =
             // ---- Jacobian: momentum --------------------------------------
-              Integral(Dot((rho / dt) * du + 0.5 * rho * (Div(du) * U) + 0.5 * rho * (Div(U) * du), m_v)).over(PCM)
+              Integral(cRhoDt * du, m_v).over(PCM)
+            + Integral(Dot(0.5 * rho * (Div(du) * U) + 0.5 * rho * (Div(U) * du), m_v)).over(PCM)
             + Integral(dConvU, rho * m_v + rho * (m_tau1 * streamV)).over(PCM)
             + rho * Integral(du, Mult(Transpose(Jacobian(m_v)), m_tau1 * (convU - m_piConv.get()))).over(PCM)
             + mu * Integral(Jacobian(du), Jacobian(m_v)).over(PCM)
@@ -1085,14 +1188,24 @@ namespace Rodin::Examples::Heat
             // ---- Jacobian: continuity ------------------------------------
             + Integral(Div(du), m_q).over(PCM)
             + (1.0 / rho) * Integral(m_tau1 * Grad(dp), Grad(m_q)).over(PCM)
+            + (fb / rho) * Integral(m_tau1 * dT, Dot(g, Grad(m_q))).over(PCM)
             + epsP * Integral(dp, m_q)
 
             // ---- Jacobian: energy ----------------------------------------
             // M_L H'(T)/dt: added in jacobian(). -(H_a - H_ref) a.grad w:
-            - Integral(cH1 * dT, streamW).over(PCM)
-            + (1.0 / rho) * Integral(cH1 * dT, subW).over(PCM)
-            - Integral(cH0 * du, Grad(m_w)).over(PCM)
-            + (1.0 / rho) * Integral(Grad(dp), (cH0 * m_tau1) * Grad(m_w)).over(PCM)
+            - wc * Integral(cH1 * dT, streamW).over(PCM)
+            + (wc / rho) * Integral(cH1 * dT, subW).over(PCM)
+            - wc * Integral(cH0 * du, Grad(m_w)).over(PCM)
+            + (wc / rho) * Integral(Grad(dp), (cH0 * m_tau1) * Grad(m_w)).over(PCM)
+            + (wc * fb / rho) * Integral((cH0 * m_tau1) * dT, Dot(g, Grad(m_w))).over(PCM)
+            // H_a'(T) a.grad T w:
+            + wn * Integral(cH2 * advT * dT, m_w).over(PCM)
+            - (wn / rho) * Integral(cH2 * subT * dT, m_w).over(PCM)
+            + wn * Integral(cH1 * dAdvT, m_w).over(PCM)
+            - (wn / rho) * Integral(cH1 * Dot(subP, Grad(dT)), m_w).over(PCM)
+            + wn * Integral(dAdvU, cH1 * m_w).over(PCM)
+            - (wn / rho) * Integral(Dot(m_tau1 * Grad(Th), Grad(dp)), cH1 * m_w).over(PCM)
+            - (wn * fb / rho) * Integral(cH1 * (m_tau1 * Dot(g, Grad(Th))) * dT, m_w).over(PCM)
             + Integral(m_rhoCpTauT * dAdvT, streamW).over(PCM)
             + Integral(cK * Grad(dT), Grad(m_w)).over(PCM)
             + kAl * Integral(Grad(dT), Grad(m_w)).over(AL)
@@ -1103,7 +1216,8 @@ namespace Rodin::Examples::Heat
             + hB * BoundaryIntegral(dT, m_w).over(L.bottom)
 
             // ---- Residual: momentum --------------------------------------
-            + Integral(Dot((rho / dt) * (U - m_uOld) + rho * convU + 0.5 * rho * (Div(U) * U), m_v)).over(PCM)
+            + Integral(Dot(cRhoDt * (U - m_uOld), m_v)).over(PCM)
+            + Integral(Dot(rho * convU + 0.5 * rho * (Div(U) * U), m_v)).over(PCM)
             + rho * Integral(m_tau1 * (convU - m_piConv.get()), streamV).over(PCM)
             + mu * Integral(Jacobian(U), Jacobian(m_v)).over(PCM)
             + Integral(m_tau2 * (Div(U) - m_piDiv.get()) - P, Div(m_v)).over(PCM)
@@ -1113,13 +1227,15 @@ namespace Rodin::Examples::Heat
 
             // ---- Residual: continuity ------------------------------------
             + Integral(Div(U), m_q).over(PCM)
-            + (1.0 / rho) * Integral(m_tau1 * (Grad(P) - m_piGradP.get()), Grad(m_q)).over(PCM)
+            + (1.0 / rho) * Integral(subP, Grad(m_q)).over(PCM)
             + epsP * Integral(P, m_q)
 
             // ---- Residual: energy ----------------------------------------
             // dH/dt: lumped, added in residual(). div(H_a a), weak:
-            - Integral(cH0 * U, Grad(m_w)).over(PCM)
-            + (1.0 / rho) * Integral((cH0 * m_tau1) * (Grad(P) - m_piGradP.get()), Grad(m_w)).over(PCM)
+            - wc * Integral(cH0 * U, Grad(m_w)).over(PCM)
+            + (wc / rho) * Integral(cH0 * subP, Grad(m_w)).over(PCM)
+            + wn * Integral(cH1 * advT, m_w).over(PCM)
+            - (wn / rho) * Integral(cH1 * subT, m_w).over(PCM)
             + Integral(m_rhoCpTauT * (advT - m_piAdv.get()), streamW).over(PCM)
             + Integral(cK * Grad(Th), Grad(m_w)).over(PCM)
             + kAl * Integral(Dot(Grad(Th), Grad(m_w))).over(AL)
@@ -1184,19 +1300,20 @@ namespace Rodin::Examples::Heat
         const Real Ybar = integralCells(m_Y, m_cfg.labels.pcm) / m_volume;
         const Real umax = std::max(std::abs(u.max()), std::abs(u.min()));
         const Real Tmax = T.max() - T0, Tmin = T.min() - T0;
-        const int its = static_cast<int>(m_snes.getIterationNumber());
+        const int its = m_stepIterations;
 
         if (!isRoot())
           return;
         m_csv << m_t << ',' << m_sample.hour << ',' << its << ',' << umax << ',' << Tmin << ','
               << Tmax << ',' << topT << ',' << bottomT << ',' << Ybar << ',' << qBottom << ','
               << m_sample.I << ',' << m_sample.Ta << ',' << m_haValue << ',' << qTop << ','
-              << Tb - T0 << ',' << Tatt - T0 << ',' << qCeiling << '\n';
+              << Tb - T0 << ',' << Tatt - T0 << ',' << qCeiling << ',' << m_stepSubsteps << '\n';
         m_csv.flush();
         if (step % m_cfg.printEvery == 0 || step == steps)
         {
           Alert::Info() << "step " << step << "/" << steps << "  t=" << m_t / 3600.0
-                        << " h  newton=" << its << "  max|u|=" << umax << " m/s  T in ["
+                        << " h  newton=" << its << (m_stepSubsteps > 1 ? " (" + std::to_string(m_stepSubsteps) + " substeps)" : std::string())
+                        << "  max|u|=" << umax << " m/s  T in ["
                         << Tmin << ", " << Tmax << "] C  top=" << topT << " C  bottom="
                         << bottomT << " C  Y=" << Ybar << "  q_top=" << qTop << "  q_bottom=" << qBottom
                         << " W/m^2  I=" << m_sample.I << "  [" << elapsed << " s]"
@@ -1257,6 +1374,10 @@ namespace Rodin::Examples::Heat
       PetscObjectId m_jacobianId = 0;         ///< and its object id (states are per object)
 
       Real m_t = 0.0;
+      Real m_dt = 0.0;              ///< current (sub)step
+      int m_stepIterations = 0;     ///< Newton iterations of the nominal step
+      int m_stepSubsteps = 0;       ///< substeps of the nominal step
+      int m_cuts = 0;               ///< step halvings so far
       Weather::Sample m_sample{};
       Real m_haValue = 0.0;
       Real m_topArea = 0.0, m_bottomArea = 0.0, m_volume = 0.0;
@@ -1307,6 +1428,11 @@ int main(int argc, char** argv)
     PetscOptionsGetInt(PETSC_NULLPTR, PETSC_NULLPTR, "-pcm_nx", &nx, PETSC_NULLPTR);
     PetscOptionsGetInt(PETSC_NULLPTR, PETSC_NULLPTR, "-pcm_ny", &ny, PETSC_NULLPTR);
     PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-pcm_ygrade", &cfg.yGrade, PETSC_NULLPTR);
+    {
+      PetscBool both = cfg.yGradeBoth ? PETSC_TRUE : PETSC_FALSE;
+      PetscOptionsGetBool(PETSC_NULLPTR, PETSC_NULLPTR, "-pcm_ygrade_both", &both, PETSC_NULLPTR);
+      cfg.yGradeBoth = both == PETSC_TRUE;
+    }
     cfg.nx = static_cast<size_t>(nx);
     cfg.ny = static_cast<size_t>(ny);
     PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-pcm_length", &cfg.length, PETSC_NULLPTR);
@@ -1318,6 +1444,7 @@ int main(int argc, char** argv)
     PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-pcm_dt", &cfg.dt, PETSC_NULLPTR);
     PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-pcm_tend", &cfg.tEnd, PETSC_NULLPTR);
     PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-pcm_tstart", &cfg.tStart, PETSC_NULLPTR);
+    PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-pcm_dt_min", &cfg.dtMin, PETSC_NULLPTR);
     PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-pcm_angle", &cfg.angle, PETSC_NULLPTR);
     PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-pcm_mushy", &cfg.pcm.dT, PETSC_NULLPTR);
     PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-pcm_round", &cfg.pcm.round, PETSC_NULLPTR);
@@ -1364,6 +1491,12 @@ int main(int argc, char** argv)
     PetscBool latent = cfg.latentAdvection ? PETSC_TRUE : PETSC_FALSE;
     PetscOptionsGetBool(PETSC_NULLPTR, PETSC_NULLPTR, "-pcm_latent_advection", &latent, PETSC_NULLPTR);
     cfg.latentAdvection = latent == PETSC_TRUE;
+    PetscBool wb = cfg.wellBalanced ? PETSC_TRUE : PETSC_FALSE;
+    PetscOptionsGetBool(PETSC_NULLPTR, PETSC_NULLPTR, "-pcm_well_balanced", &wb, PETSC_NULLPTR);
+    cfg.wellBalanced = wb == PETSC_TRUE;
+    PetscInt advection = cfg.advection;
+    PetscOptionsGetInt(PETSC_NULLPTR, PETSC_NULLPTR, "-pcm_advection", &advection, PETSC_NULLPTR);
+    cfg.advection = static_cast<int>(advection);
     PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-pcm_attic_ach", &cfg.atticAch, PETSC_NULLPTR);
     PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-pcm_attic_height", &cfg.atticHeight, PETSC_NULLPTR);
     PetscInt every = cfg.outputEvery, print = cfg.printEvery;
