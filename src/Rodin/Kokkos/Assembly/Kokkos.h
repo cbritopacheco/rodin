@@ -1671,6 +1671,192 @@ namespace Rodin::Assembly::Internal
       };
 
       /**
+       * @brief Counts the entries of a retained symbolic pattern that differ
+       * from the current listing.
+       */
+      struct SymbolicChanges
+      {
+        /// @brief Current sort keys.
+        Array<Index> keys;
+
+        /// @brief Current positions.
+        Array<Index> positions;
+
+        /// @brief Current ranks of the entries.
+        Ranks ranks;
+
+        /// @brief Retained sort keys.
+        Array<Index> previousKeys;
+
+        /// @brief Retained positions.
+        Array<Index> previousPositions;
+
+        /// @brief Retained ranks, in key order.
+        Array<Index> previousRanks;
+
+        /**
+         * @brief Compares an entry.
+         * @param i Index of the entry.
+         * @param changed Number of differing entries, incremented.
+         */
+        KOKKOS_INLINE_FUNCTION void operator()(const size_t i, size_t& changed) const
+        {
+          changed += keys(i) != previousKeys(i) ||
+            positions(i) != previousPositions(i) ||
+            ranks(positions(i)) != previousRanks(i);
+        }
+      };
+
+      /// @brief Retains the ranks of the entries in key order.
+      struct SymbolicRanks
+      {
+        /// @brief Receives the ranks.
+        Array<Index> saved;
+
+        /// @brief Ranks of the entries.
+        Ranks ranks;
+
+        /// @brief Positions of the entries, in key order.
+        Array<Index> positions;
+
+        /**
+         * @brief Retains the rank of an entry.
+         * @param i Index of the entry in key order.
+         */
+        KOKKOS_INLINE_FUNCTION void operator()(const size_t i) const
+        {
+          saved(i) = ranks(positions(i));
+        }
+      };
+
+      /// @brief Tells the entries kept in the graph presented to callers.
+      struct ActiveEntries
+      {
+        /// @brief Positions of the entries, in group order.
+        Array<Index> positions;
+
+        /// @brief Values of the entries, by position.
+        Array<Real> values;
+
+        /// @brief Ranks of the entries.
+        Ranks ranks;
+
+        /// @brief Positions from this bound on denote identity entries.
+        size_t size;
+
+        /**
+         * @brief Tells whether an entry is kept.
+         * @param k Index of the entry in group order.
+         * @return True for an identity entry or a kept value.
+         */
+        KOKKOS_INLINE_FUNCTION bool operator()(const Index k) const
+        {
+          const Index e = positions(k);
+          return static_cast<size_t>(e) >= size || ranks.kept(values, e);
+        }
+      };
+
+      /// @brief Counts the kept entries and the groups holding one.
+      struct ActiveGroups
+      {
+        /// @brief Start of every group, followed by the entry count.
+        Array<Index> starts;
+
+        /// @brief Tells the kept entries.
+        ActiveEntries kept;
+
+        /**
+         * @brief Counts a group.
+         * @param u Index of the group.
+         * @param sum Kept entries in coefficients, and groups in eliminated.
+         */
+        KOKKOS_INLINE_FUNCTION void operator()(const size_t u, Counts& sum) const
+        {
+          size_t entries = 0;
+          for (Index k = starts(u); k < starts(u + 1); ++k)
+            entries += kept(k);
+          sum.coefficients += entries;
+          sum.eliminated += entries != 0;
+        }
+      };
+
+      /// @brief Writes the groups holding kept entries, with these entries.
+      struct GroupSelection
+      {
+        /// @brief Start of every group, followed by the entry count.
+        Array<Index> starts;
+
+        /// @brief Key of every group.
+        Array<Index> keys;
+
+        /// @brief Tells the kept entries.
+        ActiveEntries kept;
+
+        /// @brief Receives the positions of the kept entries.
+        Array<Index> order;
+
+        /// @brief Receives the start of every selected group.
+        Array<Index> selectedStarts;
+
+        /// @brief Receives the key of every selected group.
+        Array<Index> selectedKeys;
+
+        /**
+         * @brief Scans a group.
+         * @param u Index of the group.
+         * @param sum Kept entries and selected groups before @p u.
+         * @param final Whether the pass writes the selection.
+         */
+        KOKKOS_INLINE_FUNCTION void operator()(
+          const size_t u, Counts& sum, const bool final) const
+        {
+          size_t entries = 0;
+          for (Index k = starts(u); k < starts(u + 1); ++k)
+          {
+            if (kept(k))
+            {
+              if (final)
+                order(sum.coefficients + entries) = kept.positions(k);
+              ++entries;
+            }
+          }
+          if (entries && final)
+          {
+            selectedStarts(sum.eliminated) = sum.coefficients;
+            selectedKeys(sum.eliminated) = keys(u);
+          }
+          sum.coefficients += entries;
+          sum.eliminated += entries != 0;
+        }
+      };
+
+      /// @brief Writes the sort key and the position of vector entries.
+      struct VectorKeys
+      {
+        /// @brief Rows of the entries.
+        Array<Index> indices;
+
+        /// @brief Ranks of the entries.
+        Ranks ranks;
+
+        /// @brief Receives the sort keys.
+        Array<Index> keys;
+
+        /// @brief Receives the positions.
+        Array<Index> positions;
+
+        /**
+         * @brief Lists an entry.
+         * @param e Position of the entry.
+         */
+        KOKKOS_INLINE_FUNCTION void operator()(const size_t e) const
+        {
+          keys(e) = ranks.sortKey(indices(e), e);
+          positions(e) = e;
+        }
+      };
+
+      /**
        * @brief Sorts keys with the positions of their entries.
        * @param execution Execution space of the kernels.
        * @param keys Sort keys, sorted on return.
@@ -1742,17 +1928,11 @@ namespace Rodin::Assembly::Internal
             pattern.shift == ranks.shift && pattern.keys.extent(0) == count;
           if (same)
           {
-            const auto previousKeys = pattern.keys;
-            const auto previousPositions = pattern.positions;
-            const auto previousRanks = pattern.ranks;
             size_t changes = 0;
             ::Kokkos::parallel_reduce(
               "Rodin::Assembly::Kokkos::validateSymbolic", Range(m_execution, 0, count),
-              KOKKOS_LAMBDA(const Index i, size_t& changed) {
-                changed += keys(i) != previousKeys(i) ||
-                  positions(i) != previousPositions(i) ||
-                  ranks(positions(i)) != previousRanks(i);
-              },
+              SymbolicChanges{keys, positions, ranks, pattern.keys, pattern.positions,
+                pattern.ranks},
               changes);
             same = changes == 0;
           }
@@ -1764,10 +1944,9 @@ namespace Rodin::Assembly::Internal
             pattern.ranks = allocate<Index>(count, "Rodin symbolic ranks");
             ::Kokkos::deep_copy(m_execution, pattern.keys, keys);
             ::Kokkos::deep_copy(m_execution, pattern.positions, positions);
-            const auto savedRanks = pattern.ranks;
             ::Kokkos::parallel_for(
               "Rodin::Assembly::Kokkos::symbolicRanks", Range(m_execution, 0, count),
-              KOKKOS_LAMBDA(const Index i) { savedRanks(i) = ranks(positions(i)); });
+              SymbolicRanks{pattern.ranks, ranks, positions});
             pattern.groups = group(m_execution, keys, positions, ranks);
             pattern.ordered = positions;
             pattern.rows = m_rows;
@@ -1783,54 +1962,21 @@ namespace Rodin::Assembly::Internal
 
         // The graph presented to callers retains the existing zero-dropping
         // semantics. Only the retained symbolic plan contains potential zeros.
-        const auto positions = listed.positions;
-        const auto starts = groups.starts;
-        const auto keys = groups.keys;
-        const auto kept = KOKKOS_LAMBDA(const Index k)
-        {
-          const Index e = positions(k);
-          return e >= size || ranks.kept(values, e);
-        };
+        const ActiveEntries kept{listed.positions, values, ranks, size};
         Counts active;
         ::Kokkos::parallel_reduce(
           "Rodin::Assembly::Kokkos::activeGroups", Range(m_execution, 0, groups.size()),
-          KOKKOS_LAMBDA(const Index u, Counts& sum) {
-            size_t entries = 0;
-            for (Index k = starts(u); k < starts(u + 1); ++k)
-              entries += kept(k);
-            sum.coefficients += entries;
-            sum.eliminated += entries != 0;
-          },
-          active);
+          ActiveGroups{groups.starts, kept}, active);
         if (active.coefficients == count)
           return groups;
         Groups selected;
         selected.starts = allocate<Index>(active.eliminated + 1, "Rodin active starts");
         selected.keys = allocate<Index>(active.eliminated, "Rodin active keys");
         const auto order = allocate<Index>(active.coefficients, "Rodin active positions");
-        const auto selectedStarts = selected.starts;
-        const auto selectedKeys = selected.keys;
         ::Kokkos::parallel_scan(
           "Rodin::Assembly::Kokkos::selectGroups", Range(m_execution, 0, groups.size()),
-          KOKKOS_LAMBDA(const Index u, Counts& sum, const bool final) {
-            size_t entries = 0;
-            for (Index k = starts(u); k < starts(u + 1); ++k)
-            {
-              if (kept(k))
-              {
-                if (final)
-                  order(sum.coefficients + entries) = positions(k);
-                ++entries;
-              }
-            }
-            if (entries && final)
-            {
-              selectedStarts(sum.eliminated) = sum.coefficients;
-              selectedKeys(sum.eliminated) = keys(u);
-            }
-            sum.coefficients += entries;
-            sum.eliminated += entries != 0;
-          });
+          GroupSelection{groups.starts, groups.keys, kept, order, selected.starts,
+            selected.keys});
         ::Kokkos::deep_copy(m_execution,
           ::Kokkos::subview(selected.starts, active.eliminated), active.coefficients);
         listed.positions = order;
@@ -3050,14 +3196,9 @@ namespace Rodin::Assembly::Internal
         const size_t count = indices.extent(0);
         Listed listed{allocate<Index>(count, "Rodin structural vector keys"),
           allocate<Index>(count, "Rodin structural vector positions")};
-        const auto keys = listed.keys;
-        const auto positions = listed.positions;
         ::Kokkos::parallel_for(
           "Rodin::Assembly::Kokkos::structuralVector", Range(m_execution, 0, count),
-          KOKKOS_LAMBDA(const Index e) {
-            keys(e) = sorted.sortKey(indices(e), e);
-            positions(e) = e;
-          });
+          VectorKeys{indices, sorted, listed.keys, listed.positions});
         const auto groups = groupContributions(listed, sorted, values, count);
         accumulate(m_execution, listed.positions, groups, values, rhs);
       }
