@@ -144,6 +144,7 @@ endif()
 if (RODIN_USE_KOKKOS)
   add_library(RodinKokkosKernels INTERFACE)
   add_library(Rodin::KokkosKernels ALIAS RodinKokkosKernels)
+  add_library(Rodin::Kokkos::Kernels ALIAS RodinKokkosKernels)
   set_target_properties(RodinKokkosKernels PROPERTIES EXPORT_NAME KokkosKernels)
 
   target_link_libraries(RodinKokkosKernels

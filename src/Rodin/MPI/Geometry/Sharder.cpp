@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <cassert>
 #include <cstdint>
+#include <limits>
 #include <sstream>
 #include <string>
 #include <boost/multi_array.hpp>
@@ -33,9 +34,12 @@ namespace
    * @brief Largest message of a shard transfer.
    *
    * MPI counts are int, and boost::mpi packs with int positions, so a shard
-   * goes as a binary archive in chunks of this size.
+   * goes as a binary archive in chunks of this size. 1 GiB is the largest
+   * power of two below INT_MAX bytes, which leaves room for the size header
+   * that boost::mpi packs with each chunk.
    */
   constexpr size_t ChunkBytes = size_t(1) << 30;
+  static_assert(ChunkBytes < size_t(std::numeric_limits<int>::max()));
 }
 
 namespace Rodin::Geometry
