@@ -1813,8 +1813,61 @@ namespace Rodin::Assembly::Internal
       }
 
       /**
-       * @brief Writes the sort key and the index of the coordinate of rank r
-       * in a segment.
+       * @brief Largest number of coordinates that sortPattern() sorts at
+       * once.
+       *
+       * The keys and the scratch of the sort take about 20 bytes per sorted
+       * coordinate, so that the coordinates are sorted by ranges of rows of
+       * at most this many coordinates, which bounds that memory to a few
+       * GiB whatever the size of the list.
+       */
+      static constexpr size_t SortBlockSize = size_t(1) << 27;
+
+      /// @brief Finds the smallest and the largest row coordinates.
+      template <class Indices>
+      struct RowBounds
+      {
+        Indices rows; ///< Row coordinates.
+
+        /**
+         * @brief Folds the row of a coordinate into the bounds.
+         * @param e Index of the coordinate.
+         * @param smallest Smallest row so far.
+         * @param largest Largest row so far.
+         */
+        KOKKOS_INLINE_FUNCTION void operator()(
+          const size_t e, Index& smallest, Index& largest) const
+        {
+          const Index row = rows(e);
+          smallest = row < smallest ? row : smallest;
+          largest = row > largest ? row : largest;
+        }
+      };
+
+      /// @brief Counts the coordinates whose row lies in a range.
+      template <class Indices>
+      struct RowCount
+      {
+        Indices rows; ///< Row coordinates.
+        Index low; ///< First row of the range.
+        Index high; ///< Row past the range.
+
+        /**
+         * @brief Counts the coordinate when its row lies in the range.
+         * @param e Index of the coordinate.
+         * @param count Number of coordinates in the range, incremented.
+         */
+        KOKKOS_INLINE_FUNCTION void operator()(const size_t e, size_t& count) const
+        {
+          const Index row = rows(e);
+          if (row >= low && row < high)
+            ++count;
+        }
+      };
+
+      /**
+       * @brief Lists, in rank order, the sort key and the index of the
+       * coordinates of a segment whose row lies in a range.
        */
       template <class Indices, class Order>
       struct PatternKeys
@@ -1825,24 +1878,39 @@ namespace Rodin::Assembly::Internal
         size_t begin; ///< Position of the first entry of the segment.
         size_t size; ///< Number of entries of the segment.
         size_t spacing; ///< Spacing of the entries of the segment.
+        Index low; ///< First row of the range.
+        Index high; ///< Row past the range.
+        size_t base; ///< Number of coordinates of the range listed before the segment.
 
         /// @brief Receives the keys, the row times the column count plus the column.
         ::Kokkos::View<std::uint64_t*, MemorySpace> keys;
         Indices rows; ///< Row coordinates.
         Indices cols; ///< Column coordinates.
         size_t columns; ///< Column count of the system.
-        Order order; ///< Receives the indices of the coordinates.
+        Order order; ///< Receives the indices of the coordinates of the range.
 
         /**
-         * @brief Writes the key and the index of the coordinate.
+         * @brief Lists the coordinate of rank r when its row lies in the
+         * range.
          * @param r Rank of the coordinate in the segment.
+         * @param listed Number of coordinates of the range listed before it,
+         * incremented.
+         * @param final Whether the pass writes the results.
          */
-        KOKKOS_INLINE_FUNCTION void operator()(const size_t r) const
+        KOKKOS_INLINE_FUNCTION void operator()(
+          const size_t r, size_t& listed, const bool final) const
         {
           const size_t e =
             begin + ::Rodin::Kokkos::Variational::getEntryPosition(r, size, spacing);
-          keys(begin + r) = std::uint64_t(rows(e)) * columns + cols(e);
-          order(begin + r) = static_cast<Position>(e);
+          const Index row = rows(e);
+          if (row < low || row >= high)
+            return;
+          if (final)
+          {
+            keys(base + listed) = std::uint64_t(row) * columns + cols(e);
+            order(base + listed) = static_cast<Position>(e);
+          }
+          ++listed;
         }
       };
 
@@ -1855,6 +1923,11 @@ namespace Rodin::Assembly::Internal
        * @param rows Row coordinates.
        * @param cols Column coordinates.
        * @param order Receives the indices of the sorted coordinates.
+       *
+       * The rows are split in ranges of at most SortBlockSize coordinates,
+       * by halving, and the ranges are sorted one after the other in row
+       * order. The sort being stable, the indices are those of a sort of
+       * the whole list.
        */
       template <class Indices, class Order>
       static void sortPattern(const ExecutionSpace& execution, size_t columns,
@@ -1864,21 +1937,65 @@ namespace Rodin::Assembly::Internal
         const size_t count = rows.extent(0);
         if (count == 0)
           return;
-        const ::Kokkos::View<std::uint64_t*, MemorySpace> keys(
-          ::Kokkos::view_alloc(
-            execution, ::Kokkos::WithoutInitializing, std::string("Rodin COO keys")),
-          count);
-        for (size_t s = 0; s <= segments.size(); ++s)
+        Index smallest = 0;
+        Index largest = 0;
+        ::Kokkos::parallel_reduce("Rodin::Assembly::Kokkos::PETSc::rowBounds",
+          Range(execution, 0, count), RowBounds<Indices>{rows},
+          ::Kokkos::Min<Index>(smallest), ::Kokkos::Max<Index>(largest));
+        struct Rows
         {
-          const size_t begin = offsets[s];
-          const size_t size = (s < segments.size() ? offsets[s + 1] : count) - begin;
-          const size_t spacing = s < segments.size() ? segments[s].spacing : 1;
-          ::Kokkos::parallel_for("Rodin::Assembly::Kokkos::PETSc::keys",
-            Range(execution, 0, size),
-            PatternKeys<Indices, Order>{
-              begin, size, spacing, keys, rows, cols, columns, order});
+          Index low;
+          Index high;
+          size_t count;
+        };
+        std::vector<Rows> pending{{smallest, largest + 1, count}};
+        ::Kokkos::View<std::uint64_t*, MemorySpace> keys;
+        size_t sorted = 0;
+        while (!pending.empty())
+        {
+          const Rows range = pending.back();
+          pending.pop_back();
+          if (range.count == 0)
+            continue;
+          if (range.count > SortBlockSize && range.high - range.low > 1)
+          {
+            const Index middle = range.low + (range.high - range.low) / 2;
+            size_t below = 0;
+            ::Kokkos::parallel_reduce("Rodin::Assembly::Kokkos::PETSc::rowCount",
+              Range(execution, 0, count), RowCount<Indices>{rows, range.low, middle},
+              below);
+            pending.push_back({middle, range.high, range.count - below});
+            pending.push_back({range.low, middle, below});
+            continue;
+          }
+          if (keys.extent(0) < range.count)
+          {
+            keys = {};
+            keys = ::Kokkos::View<std::uint64_t*, MemorySpace>(
+              ::Kokkos::view_alloc(
+                execution, ::Kokkos::WithoutInitializing, std::string("Rodin COO keys")),
+              std::max(range.count, std::min(count, SortBlockSize)));
+          }
+          const auto block =
+            ::Kokkos::subview(order, std::make_pair(sorted, sorted + range.count));
+          size_t listed = 0;
+          for (size_t s = 0; s <= segments.size(); ++s)
+          {
+            const size_t begin = offsets[s];
+            const size_t size = (s < segments.size() ? offsets[s + 1] : count) - begin;
+            const size_t spacing = s < segments.size() ? segments[s].spacing : 1;
+            size_t found = 0;
+            ::Kokkos::parallel_scan("Rodin::Assembly::Kokkos::PETSc::keys",
+              Range(execution, 0, size),
+              PatternKeys<Indices, decltype(block)>{begin, size, spacing, range.low,
+                range.high, listed, keys, rows, cols, columns, block},
+              found);
+            listed += found;
+          }
+          ::Kokkos::Experimental::sort_by_key(execution,
+            ::Kokkos::subview(keys, std::make_pair(size_t(0), range.count)), block);
+          sorted += range.count;
         }
-        ::Kokkos::Experimental::sort_by_key(execution, keys, order);
       }
 
       /// @brief Whether the sorted coordinate i differs from the previous one.
