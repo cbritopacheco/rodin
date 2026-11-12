@@ -9,6 +9,7 @@
 
 #ifdef RODIN_USE_CUDSS
 #include <Rodin/Solver/CuDSS.h>
+#include <Rodin/Solver/SparseLU.h>
 #endif
 
 #ifdef RODIN_USE_ROCSOLVER
@@ -190,6 +191,61 @@ namespace Rodin::Tests::Unit
     ASSERT_TRUE(ds.success());
     const auto& x = device.getLinearSystem().getSolution();
     EXPECT_LE((x - reference).norm(), Real(1e-12) * reference.norm());
+
+    // Exercise cuDSS invalidation against an independent host factorization.
+    // These CSR graphs are all nonsingular, including the in-place edits.
+    using Matrix = typename DeviceLinearSystem::MatrixType;
+    const auto execution = mesh.getContext().getExecutionSpace();
+    const auto offsets = Rodin::Kokkos::Internal::upload(
+      execution, std::vector<Math::SparseIndex>{0, 2, 3, 5}, "cuDSS test offsets");
+    const auto columns = Rodin::Kokkos::Internal::upload(
+      execution, std::vector<Math::SparseIndex>{0, 1, 2, 0, 2}, "cuDSS test columns");
+    const auto values = Rodin::Kokkos::Internal::upload(
+      execution, std::vector<Real>{4, 1, 2, 1, 5}, "cuDSS test values");
+    auto& system = device.getLinearSystem();
+    system.getOperator() = Matrix(3, 3, offsets, columns, values);
+    Math::Vector<Real> rhs(3);
+    rhs << 1, 2, 3;
+    system.getVector() = rhs;
+    Solver::SparseLU referenceSolver(host);
+    const auto check = [&]() {
+      auto& referenceSystem = host.getLinearSystem();
+      referenceSystem.getOperator() = system.getOperator().toHost();
+      referenceSystem.getVector() = rhs;
+      referenceSolver.solve(referenceSystem);
+      ASSERT_TRUE(referenceSolver.success());
+      ds.factorize(system);
+      ASSERT_TRUE(ds.success());
+      ds.solve(system);
+      ASSERT_TRUE(ds.success());
+      EXPECT_LE((system.getSolution().toHost() - referenceSystem.getSolution()).norm(),
+        Real(1e-12) * referenceSystem.getSolution().norm());
+      EXPECT_TRUE(ds.getResources().pattern.matches(system.getOperator()));
+    };
+    check();
+    const auto* snapshot = ds.getResources().data;
+    system.getOperator() *= Real(2);
+    check();
+    EXPECT_EQ(ds.getResources().data, snapshot);
+    Matrix relocated(system.getOperator());
+    system.getOperator() = std::move(relocated);
+    check();
+    EXPECT_EQ(ds.getResources().data, snapshot);
+    const auto currentColumns = system.getOperator().getColumns();
+    ::Kokkos::parallel_for(
+      "cuDSS edit column", ::Kokkos::RangePolicy<typename Matrix::ExecutionSpace>(0, 1),
+      KOKKOS_LAMBDA(int) { currentColumns(3) = 1; });
+    EXPECT_FALSE(ds.getResources().pattern.matches(system.getOperator()));
+    check();
+    const auto currentOffsets = system.getOperator().getRowStarts();
+    ::Kokkos::parallel_for(
+      "cuDSS edit offset", ::Kokkos::RangePolicy<typename Matrix::ExecutionSpace>(0, 1),
+      KOKKOS_LAMBDA(int) { currentOffsets(1) = 1; });
+    EXPECT_FALSE(ds.getResources().pattern.matches(system.getOperator()));
+    check();
+    ds.clear(Solver::Factorization::Symbolic);
+    EXPECT_FALSE(ds.getResources().pattern.matches(system.getOperator()));
+    check();
   }
 #endif
 

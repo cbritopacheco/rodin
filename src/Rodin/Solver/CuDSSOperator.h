@@ -14,6 +14,9 @@
 #ifndef RODIN_SOLVER_CUDSSOPERATOR_H
 #define RODIN_SOLVER_CUDSSOPERATOR_H
 
+#include <algorithm>
+#include <vector>
+
 #include "Rodin/Math/SparseMatrix.h"
 
 #include "ForwardDecls.h"
@@ -32,6 +35,60 @@ namespace Rodin::Solver::Internal
 
     /// @brief Whether the arrays are in device memory.
     static constexpr bool Resident = false;
+
+    /**
+     * @brief Owned compressed pattern, compared exactly in host memory.
+     *
+     * Values and array addresses do not participate in equality. The snapshot
+     * owns its indices so that in-place edits of the matrix are detected.
+     */
+    class Pattern
+    {
+      public:
+        /**
+         * @brief Retains the compressed pattern of a prepared matrix.
+         * @param matrix Compressed host matrix.
+         */
+        void assign(const MatrixType& matrix)
+        {
+          m_rows = getRowCount(matrix);
+          m_columns = getColumnCount(matrix);
+          const size_t nonzeros = getNonZeroCount(matrix);
+          m_indices.resize(m_rows + 1 + nonzeros);
+          std::copy_n(getStarts(matrix), m_rows + 1, m_indices.data());
+          std::copy_n(getIndices(matrix), nonzeros, m_indices.data() + m_rows + 1);
+        }
+
+        /**
+         * @brief Compares all offsets and indices, without comparing values.
+         * @param matrix Compressed host matrix.
+         * @return Whether the matrix has the retained pattern.
+         */
+        bool matches(const MatrixType& matrix) const
+        {
+          const size_t nonzeros = getNonZeroCount(matrix);
+          return m_rows == getRowCount(matrix) && m_columns == getColumnCount(matrix) &&
+            m_indices.size() == m_rows + 1 + nonzeros &&
+            std::equal(
+              getStarts(matrix), getStarts(matrix) + m_rows + 1, m_indices.begin()) &&
+            std::equal(getIndices(matrix), getIndices(matrix) + nonzeros,
+              m_indices.begin() + m_rows + 1);
+        }
+
+        /// @brief Releases the retained pattern.
+        void clear()
+        {
+          m_indices = {};
+          m_indices.shrink_to_fit();
+          m_rows = 0;
+          m_columns = 0;
+        }
+
+      private:
+        size_t m_rows = 0;
+        size_t m_columns = 0;
+        std::vector<Math::SparseIndex> m_indices;
+    };
 
     /**
      * @brief Compresses the matrix.

@@ -27,10 +27,8 @@
 
 #ifdef RODIN_USE_CUDSS
 
-#include <algorithm>
 #include <cstdint>
 #include <limits>
-#include <vector>
 
 #include <cuda_runtime.h>
 #include <cudss.h>
@@ -77,10 +75,11 @@ namespace Rodin::Solver
    * The matrix, the right-hand side and the solution are copied to the
    * device, factorized and solved there, and the solution is copied back. A
    * matrix already in device memory, such as a Kokkos::Math::SparseMatrix on the
-   * CUDA backend, is read in place and only the vectors are copied.
+   * CUDA backend, is read in place. Backend vectors are copied device-to-device;
+   * host vectors are transferred to and from the device.
    * Symbolic analysis (reordering and symbolic factorization) is reused
    * across explicit @ref factorize calls while the sparsity pattern is
-   * unchanged; only the values are copied again. A matrix with another
+   * unchanged; host matrix values are uploaded again. A matrix with another
    * pattern, such as a tangent whose assembly drops other zero
    * contributions, is analyzed again. The numeric factorization is retained
    * after @ref factorize, so several right-hand sides are solved without
@@ -98,8 +97,9 @@ namespace Rodin::Solver
    *    assembly may have moved them.
    * 2. Hand CSC arrays to cuDSS as the CSR arrays of @f$ A^T @f$ and solve
    *    with the transpose, so that no conversion is needed.
-   * 3. Reuse symbolic analysis while the pattern, kept on the host and
-   *    compared at each factorization, is unchanged.
+   * 3. Reuse symbolic analysis while the exact compressed pattern is unchanged.
+   *    Kokkos matrices retain and compare it in their backend memory space;
+   *    only a scalar comparison result returns to the host.
    * 4. Retain the numeric factorization for explicit repeated solves.
    *
    * The solver runs on the current CUDA device, on the default stream. Every
@@ -253,10 +253,10 @@ namespace Rodin::Solver
         Index nonzeros = 0;
 
         /**
-         * @brief Line starts then indices of the compressed arrays of the
-         * analyzed matrix, on the host.
+         * @brief Owned snapshot of the analyzed compressed graph, in the
+         * memory space of the matrix.
          */
-        std::vector<Math::SparseIndex> pattern;
+        typename Arrays::Pattern pattern;
 
         /**
          * @brief Releases a retained factorization stage.
@@ -282,7 +282,6 @@ namespace Rodin::Solver
           b.release();
           x.release();
           pattern.clear();
-          pattern.shrink_to_fit();
           rows = 0;
           nonzeros = 0;
         }
@@ -453,7 +452,7 @@ namespace Rodin::Solver
           res.symbolic = true;
           res.rows = rows;
           res.nonzeros = nonzeros;
-          readPattern(res.pattern, matrix, rows, nonzeros);
+          res.pattern.assign(matrix);
         }
         else if constexpr (Arrays::Resident)
         {
@@ -592,43 +591,12 @@ namespace Rodin::Solver
           "copy to the device");
       }
 
-      /**
-       * @brief Copies the row starts then the column indices of the matrix
-       * to the host.
-       */
-      template <class M>
-      void readPattern(
-        std::vector<Math::SparseIndex>& pattern, M& matrix, Index rows, Index nonzeros)
-      {
-        pattern.resize(rows + 1 + nonzeros);
-        const Math::SparseIndex* starts = Arrays::getStarts(matrix);
-        const Math::SparseIndex* indices = Arrays::getIndices(matrix);
-        if constexpr (Arrays::Resident)
-        {
-          check(cudaMemcpy(pattern.data(), starts, (rows + 1) * sizeof(Math::SparseIndex),
-                  cudaMemcpyDeviceToHost),
-            "copy the matrix pattern to the host");
-          check(cudaMemcpy(pattern.data() + rows + 1, indices,
-                  nonzeros * sizeof(Math::SparseIndex), cudaMemcpyDeviceToHost),
-            "copy the matrix pattern to the host");
-        }
-        else
-        {
-          std::copy_n(starts, rows + 1, pattern.data());
-          std::copy_n(indices, nonzeros, pattern.data() + rows + 1);
-        }
-      }
-
       /// @brief Returns whether the matrix has the analyzed sparsity pattern.
-      template <class M>
-      bool hasPattern(M& matrix, Index rows, Index nonzeros)
+      bool hasPattern(const OperatorType& matrix, Index rows, Index nonzeros) const
       {
-        auto& res = m_resources;
-        if (rows != res.rows || nonzeros != res.nonzeros)
-          return false;
-        std::vector<Math::SparseIndex> pattern;
-        readPattern(pattern, matrix, rows, nonzeros);
-        return pattern == res.pattern;
+        const auto& res = m_resources;
+        return rows == res.rows && nonzeros == res.nonzeros &&
+          res.pattern.matches(matrix);
       }
 
       /// @brief Creates the descriptors over the device arrays.

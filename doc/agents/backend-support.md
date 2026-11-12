@@ -118,6 +118,51 @@ process does not hold become virtual local degrees of freedom. Eigen systems
 are not distributed.
 See [the Kokkos guide](../Guides/Kokkos.dox) for lifecycle and build details.
 
+### Transfer audit
+
+The following is a source audit, not a measured ranking. Keep the public
+assembly, mesh and solver contracts when reducing transfers:
+
+- `Solver/CuDSS.h` delegates exact graph validation to
+  `CuDSSOperator::Pattern`. Kokkos snapshots and comparisons stay in the
+  matrix memory space and return only a scalar mismatch result. Compare the
+  final CSR graph: reusing assembly groups does not certify it, because
+  numerical zero filtering can change the stored graph.
+- `Solver/RocSolverRF.h::hasPattern` still downloads the entire graph on
+  repeated factorizations. It can use the same backend snapshot mechanism.
+  `checkPivots` downloads every pivot to check finiteness and zero values;
+  a backend reduction can return one flag. It currently constructs the
+  temporary as `VectorType` but requests `hipMemcpyDeviceToHost`, which is
+  incompatible with a backend vector destination. Initial host UMFPACK/AMD
+  analysis needs its input arrays under the current solver design.
+- Kokkos boundary assembly compacts prescribed values on the backend, then
+  returns them through `IndexMap` on the host. `SystemAssembly::build` uploads
+  fixed masks and values again. Keep a backend constraint representation
+  internally to avoid this round trip; retain host maps where the public
+  API requires them. Distributed fixed-DOF reconciliation in `Assembly/PETSc.h`
+  also uses host masks and a host-accessed ghost exchange. Any replacement
+  must preserve shared-owner averaging, identification and ghost semantics.
+- PETSc coefficient lowering reads backend arrays through
+  `VecGetArrayReadAndMemType` and caches copied/gathered coefficients by
+  PETSc state. Its distributed fill rebuilds and uploads the local-position
+  map whenever coefficient state changes. Cache the position map by the
+  finite element layout independently of numeric coefficient state.
+- PETSc matrix COO preallocation downloads coordinates only when its cached
+  graph/preallocation is rebuilt. Numeric `MatSetValuesCOO` and
+  `VecSetValuesCOO` already receive device pointers for supported GPU types;
+  host objects deliberately use a host compatibility path.
+- cuDSS RHS/solution staging and ordinary `Problem::solve` field updates
+  include device-to-device copies with backend vectors. Descriptor rebinding
+  or shared storage would require lifetime, reallocation and failure-contract
+  changes; these are distinct from host-transfer removal. A failed cuDSS
+  solve currently leaves the public solution untouched.
+- Explicit `toHost`, file output, host coefficient containers and legacy
+  mesh/connectivity queries intentionally cross to host memory. GPU loops
+  should use views instead of per-entity host queries. Prefer bulk
+  materialization for host algorithms. Geometry counts, allocation sizes,
+  convergence norms and comparison flags are small control results; reducing
+  their synchronization frequency is a separate optimization.
+
 In CUDA builds, Kokkos's launcher compiles targets linked to `Kokkos::kokkos`
 with `nvcc_wrapper`, together with every Rodin header they include. NVCC
 imposes constraints that host Kokkos backends do not detect:

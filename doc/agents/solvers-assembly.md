@@ -67,9 +67,13 @@ from the system type.
   right-hand side and the solution; `Internal::CuDSSOperator` describes
   both layouts. Like `MUMPS`, it retains the analysis
   and the factors: `solve` reuses them, `factorize(axb)` refactorizes after
-  the values change and keeps the analysis, and a changed pattern requires
-  `clear(Factorization::Symbolic)`. Only the row and nonzero counts are
-  checked against the analysis. `setSymmetric` selects `LDL^T` or `LL^T`,
+  the values change and keeps the analysis, and a changed pattern automatically
+  rebuilds the analysis. `CuDSSOperator::Pattern` owns an exact snapshot of
+  the compressed offsets and indices. For Kokkos matrices the snapshot and
+  comparison stay in the backend memory space; only a scalar mismatch result
+  returns to the host. This detects in-place structural edits, including
+  changes with equal dimensions and nonzero counts. Values and pointer
+  addresses do not determine equality. `setSymmetric` selects `LDL^T` or `LL^T`,
   `setRefinementSteps` adds iterative refinement. Configure with
   `-Dcudss_DIR=<cudss>/lib/cmake/cudss`.
 - rocSOLVER (`RODIN_USE_ROCSOLVER`, requires `RODIN_USE_UMFPACK`):

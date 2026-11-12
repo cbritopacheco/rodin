@@ -349,6 +349,103 @@ namespace Rodin::Solver::Internal
       typename MatrixType::MemorySpace>::accessible;
 
     /**
+     * @brief Owned CSR pattern in the matrix memory space.
+     *
+     * ## Architecture
+     * Snapshot the actual compressed graph independently of the matrix arrays.
+     * Compare every row offset and column index on the backend, reducing to
+     * one mismatch flag on the host. Values and allocation addresses are
+     * irrelevant; in-place structural edits are detected without a hash.
+     */
+    class Pattern
+    {
+      using IndexType = typename MatrixType::IndexType;
+      using Array = typename MatrixType::template Array<IndexType>;
+      using ExecutionSpace = typename MatrixType::ExecutionSpace;
+
+      public:
+        /**
+         * @brief Copies a compressed graph into independent backend storage.
+         * @param matrix Matrix whose pattern is retained.
+         */
+        void assign(const MatrixType& matrix)
+        {
+          m_rows = matrix.getRowCount();
+          m_columns = matrix.getColumnCount();
+          m_starts = Array(::Kokkos::view_alloc(::Kokkos::WithoutInitializing,
+                             "Rodin cuDSS pattern offsets"),
+            matrix.getRowStarts().extent(0));
+          m_indices = Array(::Kokkos::view_alloc(::Kokkos::WithoutInitializing,
+                              "Rodin cuDSS pattern indices"),
+            matrix.getColumns().extent(0));
+          ::Kokkos::deep_copy(m_starts, matrix.getRowStarts());
+          ::Kokkos::deep_copy(m_indices, matrix.getColumns());
+        }
+
+        /**
+         * @brief Compares every CSR offset and index on the backend.
+         * @param matrix Matrix whose current pattern is compared.
+         * @return Whether the exact compressed graph is unchanged.
+         */
+        bool matches(const MatrixType& matrix) const
+        {
+          const auto starts = matrix.getRowStarts();
+          const auto indices = matrix.getColumns();
+          if (m_rows != matrix.getRowCount() || m_columns != matrix.getColumnCount() ||
+            m_starts.extent(0) == 0 || m_starts.extent(0) != starts.extent(0) ||
+            m_indices.extent(0) != indices.extent(0))
+          {
+            return false;
+          }
+          int changed = 0;
+          ::Kokkos::parallel_reduce("Rodin cuDSS compare pattern",
+            ::Kokkos::RangePolicy<ExecutionSpace, ::Kokkos::IndexType<size_t>>(
+              0, starts.extent(0) + indices.extent(0)),
+            Compare{starts, indices, m_starts, m_indices, starts.extent(0)},
+            ::Kokkos::Max<int>(changed));
+          return changed == 0;
+        }
+
+        /// @brief Releases the retained backend arrays.
+        void clear()
+        {
+          m_starts = Array{};
+          m_indices = Array{};
+          m_rows = 0;
+          m_columns = 0;
+        }
+
+        /// @brief Reduces exact entry mismatches to a single flag.
+        struct Compare
+        {
+          Array starts;
+          typename MatrixType::View::index_type indices;
+          Array previousStarts;
+          Array previousIndices;
+          size_t offsets;
+
+          /**
+           * @param i Offset or column position in the concatenated graph.
+           * @param mismatch Maximum mismatch flag for the reduction.
+           */
+          KOKKOS_INLINE_FUNCTION void operator()(size_t i, int& mismatch) const
+          {
+            const bool different = i < offsets
+              ? starts(i) != previousStarts(i)
+              : indices(i - offsets) != previousIndices(i - offsets);
+            if (mismatch < static_cast<int>(different))
+              mismatch = static_cast<int>(different);
+          }
+        };
+
+      private:
+        size_t m_rows = 0;
+        size_t m_columns = 0;
+        Array m_starts;
+        Array m_indices;
+    };
+
+    /**
      * @brief Leaves the matrix unchanged, being already compressed.
      * @param matrix Compressed device matrix.
      */
