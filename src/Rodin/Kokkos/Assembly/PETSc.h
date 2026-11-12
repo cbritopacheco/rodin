@@ -193,11 +193,17 @@ namespace Rodin::Assembly::Internal
     /// @brief Column coordinates.
     ::Kokkos::View<Index*, MemorySpace> cols;
 
-    /// @brief Row coordinates being listed.
+    /**
+     * @brief Row coordinates being listed, all of them or only those of the
+     * restricted segments, packed, when they alone are listed again.
+     */
     ::Kokkos::View<Index*, MemorySpace> nextRows;
 
-    /// @brief Column coordinates being listed.
+    /// @brief Column coordinates being listed, as nextRows.
     ::Kokkos::View<Index*, MemorySpace> nextCols;
+
+    /// @brief Values of the restricted segments listed again, as nextRows.
+    ::Kokkos::View<PetscScalar*, MemorySpace> nextValues;
 
     /// @brief Matrix values.
     ::Kokkos::View<PetscScalar*, MemorySpace> values;
@@ -2421,7 +2427,18 @@ namespace Rodin::Assembly::Internal
           }
         }
         resize(cache.values, count, "Rodin COO values");
-        if (index)
+        // The restricted segments listed again are packed, with their
+        // values, so that the listing takes their size only.
+        std::vector<size_t> packed(segments.size() + 1, 0);
+        if (partial)
+        {
+          for (size_t s = 0; s < segments.size(); ++s)
+            packed[s + 1] = packed[s] + (listed[s] ? segments[s].count : 0);
+          resize(cache.nextRows, packed.back(), "Rodin listed COO rows");
+          resize(cache.nextCols, packed.back(), "Rodin listed COO cols");
+          resize(cache.nextValues, packed.back(), "Rodin listed COO values");
+        }
+        else if (index)
         {
           resize(cache.nextRows, count, "Rodin COO rows");
           resize(cache.nextCols, count, "Rodin COO cols");
@@ -2434,7 +2451,9 @@ namespace Rodin::Assembly::Internal
           const auto& m = m_matrices[k];
           const size_t s = segment[k];
           const bool first = !filled[s];
-          m.integrator->fill(cache.values, offsets[s], m.sign, !first,
+          const bool pack = partial && listed[s];
+          m.integrator->fill(pack ? cache.nextValues : cache.values,
+            pack ? packed[s] : offsets[s], m.sign, !first,
             first && listed[s] ? cache.nextRows : none,
             first && listed[s] ? cache.nextCols : none);
           ::Rodin::Kokkos::Internal::checkLaunches("A device bilinear integrator");
@@ -2451,16 +2470,24 @@ namespace Rodin::Assembly::Internal
           {
             if (!listed[s])
               continue;
-            shift(m_execution, cache.nextRows, cache.nextCols, offsets[s],
-              segments[s].count, segments[s].row, segments[s].col);
-            if (countChanges(m_execution, cache.nextRows, cache.nextCols, cache.rows,
-                  cache.cols, offsets[s], offsets[s + 1]) == 0)
-              continue;
             const auto moved = std::make_pair(offsets[s], offsets[s + 1]);
-            ::Kokkos::deep_copy(m_execution, ::Kokkos::subview(cache.rows, moved),
-              ::Kokkos::subview(cache.nextRows, moved));
-            ::Kokkos::deep_copy(m_execution, ::Kokkos::subview(cache.cols, moved),
-              ::Kokkos::subview(cache.nextCols, moved));
+            const auto from = std::make_pair(packed[s], packed[s + 1]);
+            ::Kokkos::deep_copy(m_execution, ::Kokkos::subview(cache.values, moved),
+              ::Kokkos::subview(cache.nextValues, from));
+            shift(m_execution, cache.nextRows, cache.nextCols, packed[s],
+              segments[s].count, segments[s].row, segments[s].col);
+            const ::Kokkos::View<Index*, MemorySpace> nextRows =
+              ::Kokkos::subview(cache.nextRows, from);
+            const ::Kokkos::View<Index*, MemorySpace> nextCols =
+              ::Kokkos::subview(cache.nextCols, from);
+            const ::Kokkos::View<Index*, MemorySpace> rows =
+              ::Kokkos::subview(cache.rows, moved);
+            const ::Kokkos::View<Index*, MemorySpace> cols =
+              ::Kokkos::subview(cache.cols, moved);
+            if (countChanges(m_execution, nextRows, nextCols, rows, cols) == 0)
+              continue;
+            ::Kokkos::deep_copy(m_execution, rows, nextRows);
+            ::Kokkos::deep_copy(m_execution, cols, nextCols);
             changed = true;
           }
           if (changed)
@@ -2489,8 +2516,12 @@ namespace Rodin::Assembly::Internal
           const bool changed = !cache.indexed || cache.rows.extent(0) != count ||
             countChanges(
               m_execution, cache.nextRows, cache.nextCols, cache.rows, cache.cols) > 0;
-          std::swap(cache.rows, cache.nextRows);
-          std::swap(cache.cols, cache.nextCols);
+          // The previous coordinates are released rather than kept for the
+          // next listing, which is partial or rare.
+          cache.rows = std::move(cache.nextRows);
+          cache.cols = std::move(cache.nextCols);
+          cache.nextRows = {};
+          cache.nextCols = {};
           cache.segments = std::move(segments);
           cache.indexed = true;
           if (changed)
