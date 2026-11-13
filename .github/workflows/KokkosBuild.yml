@@ -1,4 +1,4 @@
-name: Kokkos Build
+name: Compile / Kokkos
 # Compiles the Kokkos unit tests and examples for CUDA, HIP and SYCL in the images of
 # dev/docker/kokkos, without running them: hosted runners have no GPU.
 # The images come from the registry named by the repository variable
@@ -22,13 +22,22 @@ concurrency:
 
 jobs:
   Kokkos:
-    name: Kokkos / ${{ matrix.image }}
+    name: Ubuntu 24.04 / Kokkos / ${{ matrix.backend }} / ${{ matrix.target }}
     if: ${{ !github.event.pull_request.draft }}
     runs-on: ubuntu-24.04
     timeout-minutes: 330
     strategy:
       matrix:
-        image: [cuda-sm52, hip-gfx1201, sycl-bmg]
+        include:
+          - image: cuda-sm52
+            backend: CUDA
+            target: Maxwell sm_52
+          - image: hip-gfx1201
+            backend: HIP
+            target: RDNA 4 gfx1201
+          - image: sycl-bmg
+            backend: SYCL
+            target: Battlemage
       fail-fast: false
     env:
       IMAGE: ${{ vars.RODIN_KOKKOS_CI_IMAGES || 'ghcr.io/keckj/rodin-kokkos-ci' }}:${{ matrix.image }}
