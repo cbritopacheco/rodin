@@ -40,6 +40,7 @@
 #   cd ~/runs && NP=4 bash ~/rodin-heat/examples/Heat/PCM_Biwole/run_biwole.sh
 #   python3 ~/rodin-heat/examples/Heat/PCM_Biwole/postprocess_biwole.py biwole_runs
 set -euo pipefail
+export LC_ALL=C   # decimal point in awk/printf (es_CL locales print 1,03)
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO="$(cd "$HERE/../../.." && pwd)"

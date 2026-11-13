@@ -37,6 +37,7 @@
 # undershot by 10 K and Newton failed down to dt = 0.03 s.
 # NP_MAP="5:25 10:25 ..." gives the MPI ranks of each thickness (others: NP).
 set -euo pipefail
+export LC_ALL=C   # decimal point in awk/printf (es_CL locales print 1,03)
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO="$(cd "$HERE/../../.." && pwd)"

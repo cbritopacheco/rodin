@@ -29,6 +29,7 @@
 # CSV, lines [dt] in run.log). Any variable of run_pcm_sweep.sh can be
 # overridden; finished cases (DONE) are skipped on relaunch.
 set -euo pipefail
+export LC_ALL=C   # decimal point in awk/printf (es_CL locales print 1,03)
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO="$(cd "$HERE/../../.." && pwd)"
@@ -90,3 +91,4 @@ for g in "${tandas[@]}"; do
   if [ -z "$TMY_JSON" ] && [ -s "$OUT/tmy_santiago.json" ]; then export TMY_JSON="$OUT/tmy_santiago.json"; fi
 done
 bash "$HERE/postprocess_pcm.sh" "$OUT" --hours 6 9 12 15 18 21 --all-contours
+python3 "$HERE/figures_paper.py" "$OUT"   # paper figures + CSV in $OUT/figures
