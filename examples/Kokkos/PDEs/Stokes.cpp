@@ -14,6 +14,7 @@
 #include <Rodin/Variational.h>
 #include <Rodin/IO/XDMF.h>
 #include <Rodin/Kokkos.h>
+#include <Rodin/Kokkos/Solver.h>
 
 #if defined(KOKKOS_ENABLE_CUDA)
 using Backend = Rodin::Context::CUDA;
@@ -76,7 +77,12 @@ int main(int argc, char** argv)
     Integral(Div(u), q) + Integral(multiplier, q) + Integral(p, meanTest) +
     DirichletBC(u, lidVelocity).on(lid) + DirichletBC(u, Zero(2)).on(walls);
 
-  Solver::SparseLU solver(stokes);
+  Solver::GMRES solver(stokes);
+  // Relative residual target and restart policy for this cavity demonstration.
+  constexpr Real linearTolerance = 1e-10;
+  // Heuristic subspace size for the indefinite pressure coupling on this grid.
+  constexpr size_t restartLength = 300;
+  solver.setTolerance(linearTolerance).setRestart(restartLength);
   solver.solve();
   if (!solver.success())
     return EXIT_FAILURE;

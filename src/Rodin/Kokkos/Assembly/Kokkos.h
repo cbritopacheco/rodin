@@ -1929,10 +1929,10 @@ namespace Rodin::Assembly::Internal
           if (same)
           {
             size_t changes = 0;
-            ::Kokkos::parallel_reduce(
-              "Rodin::Assembly::Kokkos::validateSymbolic", Range(m_execution, 0, count),
-              SymbolicChanges{keys, positions, ranks, pattern.keys, pattern.positions,
-                pattern.ranks},
+            ::Kokkos::parallel_reduce("Rodin::Assembly::Kokkos::validateSymbolic",
+              Range(m_execution, 0, count),
+              SymbolicChanges{
+                keys, positions, ranks, pattern.keys, pattern.positions, pattern.ranks},
               changes);
             same = changes == 0;
           }
@@ -1944,8 +1944,8 @@ namespace Rodin::Assembly::Internal
             pattern.ranks = allocate<Index>(count, "Rodin symbolic ranks");
             ::Kokkos::deep_copy(m_execution, pattern.keys, keys);
             ::Kokkos::deep_copy(m_execution, pattern.positions, positions);
-            ::Kokkos::parallel_for(
-              "Rodin::Assembly::Kokkos::symbolicRanks", Range(m_execution, 0, count),
+            ::Kokkos::parallel_for("Rodin::Assembly::Kokkos::symbolicRanks",
+              Range(m_execution, 0, count),
               SymbolicRanks{pattern.ranks, ranks, positions});
             pattern.groups = group(m_execution, keys, positions, ranks);
             pattern.ordered = positions;
@@ -1964,19 +1964,19 @@ namespace Rodin::Assembly::Internal
         // semantics. Only the retained symbolic plan contains potential zeros.
         const ActiveEntries kept{listed.positions, values, ranks, size};
         Counts active;
-        ::Kokkos::parallel_reduce(
-          "Rodin::Assembly::Kokkos::activeGroups", Range(m_execution, 0, groups.size()),
-          ActiveGroups{groups.starts, kept}, active);
+        ::Kokkos::parallel_reduce("Rodin::Assembly::Kokkos::activeGroups",
+          Range(m_execution, 0, groups.size()), ActiveGroups{groups.starts, kept},
+          active);
         if (active.coefficients == count)
           return groups;
         Groups selected;
         selected.starts = allocate<Index>(active.eliminated + 1, "Rodin active starts");
         selected.keys = allocate<Index>(active.eliminated, "Rodin active keys");
         const auto order = allocate<Index>(active.coefficients, "Rodin active positions");
-        ::Kokkos::parallel_scan(
-          "Rodin::Assembly::Kokkos::selectGroups", Range(m_execution, 0, groups.size()),
-          GroupSelection{groups.starts, groups.keys, kept, order, selected.starts,
-            selected.keys});
+        ::Kokkos::parallel_scan("Rodin::Assembly::Kokkos::selectGroups",
+          Range(m_execution, 0, groups.size()),
+          GroupSelection{
+            groups.starts, groups.keys, kept, order, selected.starts, selected.keys});
         ::Kokkos::deep_copy(m_execution,
           ::Kokkos::subview(selected.starts, active.eliminated), active.coefficients);
         listed.positions = order;
@@ -2989,7 +2989,7 @@ namespace Rodin::Assembly::Internal
           for (int j = 0; j < m.op->outerSize(); ++j)
           {
             for (typename ::Rodin::Math::SparseMatrix<Real>::InnerIterator it(*m.op, j);
-              it; ++it)
+                 it; ++it)
             {
               rows.push_back(m.row + it.row());
               cols.push_back(m.col + it.col());
@@ -3196,8 +3196,8 @@ namespace Rodin::Assembly::Internal
         const size_t count = indices.extent(0);
         Listed listed{allocate<Index>(count, "Rodin structural vector keys"),
           allocate<Index>(count, "Rodin structural vector positions")};
-        ::Kokkos::parallel_for(
-          "Rodin::Assembly::Kokkos::structuralVector", Range(m_execution, 0, count),
+        ::Kokkos::parallel_for("Rodin::Assembly::Kokkos::structuralVector",
+          Range(m_execution, 0, count),
           VectorKeys{indices, sorted, listed.keys, listed.positions});
         const auto groups = groupContributions(listed, sorted, values, count);
         accumulate(m_execution, listed.positions, groups, values, rhs);

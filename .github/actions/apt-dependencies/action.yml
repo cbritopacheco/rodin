@@ -4,6 +4,9 @@ inputs:
   packages:
     description: Whitespace-separated Debian package names or exact package versions.
     required: true
+  snapshot:
+    description: Optional Ubuntu snapshot ID, or shared for the pinned campaign snapshot.
+    default: ''
 runs:
   using: composite
   steps:
@@ -16,6 +19,7 @@ runs:
       shell: bash
       env:
         PACKAGES: ${{ inputs.packages }}
+        RODIN_APT_SNAPSHOT: ${{ inputs.snapshot }}
       run: python3 dev/ci_environment.py prepare --packages "$PACKAGES"
     - name: Restore downloaded package archives
       id: archives
@@ -25,6 +29,8 @@ runs:
         key: ${{ steps.plan.outputs.key }}
         restore-keys: ${{ steps.plan.outputs.restore-prefix }}
     - name: Install resolved dependencies
+      env:
+        RODIN_APT_SNAPSHOT: ${{ inputs.snapshot }}
       shell: bash
       run: python3 dev/ci_environment.py install
     - name: Save validated package archives

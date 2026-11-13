@@ -46,7 +46,7 @@ target_link_libraries(KokkosH1_Assembly
 add_executable(KokkosStokes Stokes.cpp)
 target_link_libraries(KokkosStokes
   PUBLIC
-  Rodin::Kokkos
+  Rodin::Kokkos::Kernels
   Rodin::Solver
   Rodin::Geometry
   Rodin::Assembly
@@ -92,7 +92,7 @@ endif()
 add_executable(KokkosNavierStokes NavierStokes.cpp)
 target_link_libraries(KokkosNavierStokes
   PUBLIC
-  Rodin::Kokkos
+  Rodin::Kokkos::Kernels
   Rodin::Solver
   Rodin::Geometry
   Rodin::Assembly

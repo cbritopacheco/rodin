@@ -203,7 +203,7 @@ namespace Rodin::Solver::Internal
       for (Math::SparseIndex k = lower.starts[row]; k < lower.starts[row + 1]; ++k)
       {
         for (Math::SparseIndex node = lower.indices[k]; node != -1 && mark[node] != r;
-          node = parent[node])
+             node = parent[node])
         {
           mark[node] = r;
           res.indices.push_back(node);

@@ -78,8 +78,8 @@ namespace Rodin::Variational
 
   /// @param fes Kokkos space. @return Grid function with backend coefficients.
   template <::Rodin::Kokkos::Variational::Space FES>
-  GridFunction(const FES& fes)
-    -> GridFunction<FES, ::Rodin::Kokkos::Variational::Coefficients<FES>>;
+  GridFunction(
+    const FES& fes) -> GridFunction<FES, ::Rodin::Kokkos::Variational::Coefficients<FES>>;
 
   /// @param fes Kokkos space. @return Trial function with backend coefficients.
   template <::Rodin::Kokkos::Variational::Space FES>
@@ -99,7 +99,7 @@ namespace Rodin::Variational
    */
   template <class U1, class U2, class U3, class... Us>
     requires ::Rodin::Kokkos::Variational::BackendTrial<U1>
-  Problem(U1& u1, U2& u2, U3& u3, Us&... us)
-    -> Problem<::Rodin::Kokkos::Variational::System<U1>, U1, U2, U3, Us...>;
+  Problem(U1& u1, U2& u2, U3& u3,
+    Us&... us) -> Problem<::Rodin::Kokkos::Variational::System<U1>, U1, U2, U3, Us...>;
 }
 #endif

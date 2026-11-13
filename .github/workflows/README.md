@@ -748,3 +748,27 @@ refinements and numerical requirements. Coverage runs have a 3,600-second
 allowance, matching the existing local P3 pyramid allowance. Its first two
 hosted levels took 25 and 194 seconds before the final level exhausted the
 former 1,800-second limit. MPI cases and non-coverage watchdogs remain unchanged.
+
+### Stable package snapshots for shared builds
+
+Shared test and benchmark environments resolve Ubuntu packages against
+`SHARED_APT_SNAPSHOT` in `dev/ci_environment.py`, through APT's signed
+[snapshot service](https://snapshot.ubuntu.com/). Both build producers and
+execution consumers use the same timestamp. Updating this pin is a dependency
+update and requires a new campaign; retries and archive restores retain it.
+The package preferences select the snapshot versions over newer preinstalled
+runner packages. Exact-version downgrades are permitted only for these
+snapshot installs. Signature checks, bounded downloads, no-removal installs,
+and runtime-library hash validation remain enforced. Mirror fallback retains
+the snapshot timestamp and cannot silently switch to the live archive.
+
+The 2026-11-12 campaign built against glibc `2.39-0ubuntu8.9`; consumers several
+hours later resolved `2.39-0ubuntu8.12`. Identical top-level package requests
+therefore failed the runtime hash check. The snapshot fixes that archive drift
+without weakening compatibility validation.
+
+Explicit CTest fixture producers declared under `examples/` set the
+`RODIN_TEST_OWNER` target property to their owning test directory and declare
+`RODIN_TEST_PROFILES`. They then participate in the same executable manifest,
+build selection, runtime inventory and fixture-preserving CTest execution as
+ordinary test targets.

@@ -561,8 +561,8 @@ namespace Rodin::Variational
                std::is_invocable_r_v<Real, V, const Geometry::Point&> ||
                FormLanguage::IsDevicePointCallable<V>::Value) &&
               ((std::is_convertible_v<Values, Real> ||
-         std::is_invocable_r_v<Real, Values, const Geometry::Point&> ||
-         FormLanguage::IsDevicePointCallable<Values>::Value) &&
+                 std::is_invocable_r_v<Real, Values, const Geometry::Point&> ||
+                 FormLanguage::IsDevicePointCallable<Values>::Value) &&
                 ...))
   VectorFunction(const V& v, const Values&... values) -> VectorFunction<V, Values...>;
 

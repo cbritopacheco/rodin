@@ -35,6 +35,7 @@ runs:
       uses: ./.github/actions/apt-dependencies
       with:
         packages: ${{ steps.packages.outputs.packages }}
+        snapshot: shared
     - name: Select and verify compatible compiler
       shell: bash
       env:

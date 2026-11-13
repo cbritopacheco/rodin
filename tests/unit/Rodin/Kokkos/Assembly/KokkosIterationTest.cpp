@@ -218,16 +218,16 @@ namespace Rodin::Tests::Unit
   TEST(Kokkos_Iteration, EmbeddedMixedMesh)
   {
     checkDiscoveredIteration(IterationHostMesh::Builder()
-        .initialize(3)
-        .nodes(5)
-        .vertex({0, 0, 1})
-        .vertex({1, 0, 1})
-        .vertex({0, 1, 1})
-        .vertex({1, 1, 1})
-        .vertex({2, 0, 1})
-        .polytope(IterationGeometry::Quadrilateral, {0, 1, 3, 2})
-        .polytope(IterationGeometry::Triangle, {1, 4, 3})
-        .finalize());
+                               .initialize(3)
+                               .nodes(5)
+                               .vertex({0, 0, 1})
+                               .vertex({1, 0, 1})
+                               .vertex({0, 1, 1})
+                               .vertex({1, 1, 1})
+                               .vertex({2, 0, 1})
+                               .polytope(IterationGeometry::Quadrilateral, {0, 1, 3, 2})
+                               .polytope(IterationGeometry::Triangle, {1, 4, 3})
+                               .finalize());
   }
 
   /// @brief Interface includes faces shared by more than two cells, as in LocalMesh.

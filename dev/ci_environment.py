@@ -37,6 +37,9 @@ MIRRORS = (None, 'https://archive.ubuntu.com/ubuntu',
            'https://mirrors.edge.kernel.org/ubuntu')
 UBUNTU_URI = re.compile(r'https?://(?:azure\.archive|archive|security)\.ubuntu\.com/ubuntu/?')
 YAML_VERSION = '6.0.2'
+# Shared build campaigns must not cross a live archive security update. Refresh
+# this signed Ubuntu snapshot deliberately for producers and consumers together.
+SHARED_APT_SNAPSHOT = '20261113T000000Z'
 # A wheel install normally takes seconds. Bound network stalls to three minutes
 # per attempt and retry whole pip invocations, including malformed index JSON.
 PYTHON_INSTALL_TIMEOUT = 180
@@ -205,8 +208,23 @@ def sources(directory, mirror, system=Path('/etc/apt')):
         target = directory / 'sources.list' if source == main else parts / source.name
         target.write_text(text)
     (directory / 'sources.list').touch(exist_ok=True)
-    return ['-o', 'Dir::Etc::sourcelist=' + str(directory / 'sources.list'),
-            '-o', 'Dir::Etc::sourceparts=' + str(parts)]
+    options = ['-o', 'Dir::Etc::sourcelist=' + str(directory / 'sources.list'),
+               '-o', 'Dir::Etc::sourceparts=' + str(parts)]
+    snapshot = os.environ.get('RODIN_APT_SNAPSHOT', '')
+    if snapshot:
+        if snapshot == 'shared':
+            snapshot = SHARED_APT_SNAPSHOT
+        if not re.fullmatch(r'[0-9]{8}T[0-9]{6}Z', snapshot):
+            raise ValueError('Invalid Ubuntu package snapshot: ' + snapshot)
+        # APT 2.7+ redirects supported Ubuntu archives to the signed snapshot.
+        # Prefer its versions even over newer preinstalled runner packages.
+        preferences = directory / 'preferences'
+        original = system / 'preferences'
+        text = original.read_text() if original.is_file() else ''
+        preferences.write_text(text + '\nPackage: *\nPin: release o=Ubuntu\nPin-Priority: 1001\n')
+        options += ['-o', 'APT::Snapshot=' + snapshot,
+                    '-o', 'Dir::Etc::preferences=' + str(preferences)]
+    return options
 
 
 def apt(arguments, source_options, archives, timeout, capture=False):
@@ -218,7 +236,11 @@ def apt(arguments, source_options, archives, timeout, capture=False):
                '-o', 'Acquire::http::Timeout=20', '-o', 'Acquire::https::Timeout=20',
                '-o', 'APT::Update::Error-Mode=any',
                '-o', 'APT::Keep-Downloaded-Packages=true',
-               '-o', 'Dir::Cache::archives=' + str(archives), *source_options, *arguments]
+               '-o', 'Dir::Cache::archives=' + str(archives), *source_options]
+    if 'install' in arguments and any(option.startswith('APT::Snapshot=') for option in source_options):
+        # Only disposable CI snapshot environments permit exact-version rollback.
+        command.append('--allow-downgrades')
+    command += arguments
     result = subprocess.run(command, check=True, text=True,
                             stdout=subprocess.PIPE if capture else None,
                             env=dict(os.environ, DEBIAN_FRONTEND='noninteractive', LC_ALL='C'))
@@ -311,7 +333,7 @@ def prepare(requested, archives, state):
     architecture = subprocess.check_output(['dpkg', '--print-architecture'], text=True).strip()
     # Image identity covers the preinstalled package baseline. Compiler flags,
     # MPI rank counts and test selections do not fragment dependency caches.
-    baseline = [system, architecture, os.environ.get('ImageOS'), os.environ.get('ImageVersion'), requested]
+    baseline = [system, architecture, os.environ.get('ImageOS'), os.environ.get('ImageVersion'), requested, os.environ.get('RODIN_APT_SNAPSHOT', '')]
     prefix = 'rodin-apt-v3-' + hashlib.sha256(json.dumps(baseline, sort_keys=True).encode()).hexdigest()[:24] + '-'
     key = prefix + hashlib.sha256(json.dumps(versions, sort_keys=True).encode()).hexdigest()[:24]
     if os.environ.get('GITHUB_OUTPUT'):

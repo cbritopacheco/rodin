@@ -223,6 +223,46 @@ class EnvironmentTest(unittest.TestCase):
             self.assertEqual(run.call_count, len(environment.CLEANUP_PATHS))
             self.assertFalse(any('clean' in c.args[0] for c in run.call_args_list))
 
+    def test_shared_producers_and_consumers_use_the_pinned_snapshot(self):
+        for action in ['test-environment', 'benchmark-environment']:
+            document = yaml.safe_load((ROOT / '.github/actions' / action / 'action.yml').read_text())
+            install = next(step for step in document['runs']['steps']
+                           if step.get('uses') == './.github/actions/apt-dependencies')
+            self.assertEqual(install['with']['snapshot'], 'shared')
+
+    def test_snapshot_sources_select_signed_archive_versions_over_runner_packages(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            system = root / 'etc'
+            system.mkdir()
+            original = 'deb [signed-by=/keys/ubuntu.gpg] https://archive.ubuntu.com/ubuntu noble main\n'
+            (system / 'sources.list').write_text(original)
+            (system / 'preferences').write_text('# Existing host preferences\n')
+            with patch.dict(os.environ, RODIN_APT_SNAPSHOT='shared'):
+                options = environment.sources(root / 'snapshot', None, system)
+            self.assertIn('APT::Snapshot=' + environment.SHARED_APT_SNAPSHOT, options)
+            preferences = root / 'snapshot/preferences'
+            self.assertIn('Dir::Etc::preferences=' + str(preferences), options)
+            self.assertIn('Pin: release o=Ubuntu\nPin-Priority: 1001', preferences.read_text())
+            self.assertIn('# Existing host preferences', preferences.read_text())
+            self.assertEqual((root / 'snapshot/sources.list').read_text(), original)
+            self.assertEqual((system / 'sources.list').read_text(), original)
+            with patch.dict(os.environ, RODIN_APT_SNAPSHOT='latest;invalid'):
+                with self.assertRaisesRegex(ValueError, 'snapshot'):
+                    environment.sources(root / 'invalid', None, system)
+
+    def test_only_snapshot_installs_allow_exact_package_downgrades(self):
+        for options, operation, expected in [([], 'install', False),
+                (['-o', 'APT::Snapshot=' + environment.SHARED_APT_SNAPSHOT], 'install', True),
+                (['-o', 'APT::Snapshot=' + environment.SHARED_APT_SNAPSHOT], 'update', False)]:
+            with self.subTest(operation=operation, options=options), \
+                    patch.object(environment.subprocess, 'run', return_value=SimpleNamespace(stdout='')) as run:
+                environment.apt([operation], options, Path('/cache'), 90)
+                command = run.call_args.args[0]
+                self.assertEqual('--allow-downgrades' in command, expected)
+                self.assertNotIn('--allow-unauthenticated', command)
+                self.assertNotIn('Acquire::AllowInsecureRepositories=true', command)
+
     def test_mirror_copy_preserves_signatures_suites_components_and_third_party_sources(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp); system = root / 'etc'; parts = system / 'sources.list.d'

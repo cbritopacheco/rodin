@@ -16,6 +16,7 @@
 #include <Rodin/IO/XDMF.h>
 #include <Rodin/Kokkos.h>
 #include <Rodin/Kokkos/Solver.h>
+#include <Rodin/Kokkos/Solver.h>
 
 #if defined(KOKKOS_ENABLE_CUDA)
 using Backend = Rodin::Context::CUDA;
@@ -104,7 +105,12 @@ int main(int argc, char** argv)
 #endif
 #else
   Problem flow(u, p, multiplier, v, q, meanTest);
-  Solver::SparseLU solver(flow);
+  Solver::GMRES solver(flow);
+  // Relative residual target and restart policy for this cavity demonstration.
+  constexpr Real linearTolerance = 1e-10;
+  // Heuristic subspace size for the indefinite pressure coupling on this grid.
+  constexpr size_t restartLength = 300;
+  solver.setTolerance(linearTolerance).setRestart(restartLength);
 #endif
   std::chrono::duration<double> assembly{0}, solve{0};
   for (size_t step = 1; step <= steps; ++step)
