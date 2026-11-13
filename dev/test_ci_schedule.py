@@ -17,6 +17,21 @@ import ci_tests as tests
 
 
 class HierarchicalScheduleTest(unittest.TestCase):
+    def test_linux_runner_labels_and_build_identities_are_pinned(self):
+        paths = [*(tests.ROOT / '.github/workflows').glob('*.yml'),
+                 tests.ROOT / '.github/ci/targeted-lanes.yml']
+        labels = set()
+        for path in paths:
+            found = set(re.findall(r'\bubuntu-(?:latest|\d+\.\d+)\b', path.read_text()))
+            self.assertTrue(found <= {'ubuntu-24.04'}, str(path))
+            labels.update(found)
+        self.assertEqual(labels, {'ubuntu-24.04'})
+        ordinary, targeted = schedule.requests()
+        entries = graph.prepare(ordinary, targeted)
+        self.assertTrue(entries)
+        for entry in entries:
+            self.assertEqual(entry['definition']['runner'], 'ubuntu-24.04', entry['definition'])
+
     def test_variants_do_not_declare_unrelated_execution_or_family_branches(self):
         ordinary, targeted = schedule.requests()
         entries = graph.prepare(ordinary, targeted)
@@ -218,7 +233,7 @@ class HierarchicalScheduleTest(unittest.TestCase):
         producer = schedule.key('b', row['group'])
         execution = schedule.execution_key(request, family)
         index = {'builds': {'one': {'definition': {'directory': row['group'],
-                   'targets': ['GeometryFixture'], 'runner': 'ubuntu-latest'}}},
+                   'targets': ['GeometryFixture'], 'runner': 'ubuntu-24.04'}}},
                  'requests': {graph.request_key(**request): {'builds': ['one'], 'selected': ['fixture']}}}
         good = ({producer: {'path': row['group']}}, {execution: {'family': family, 'dependencies': [producer]}})
         with tempfile.TemporaryDirectory() as directory:
@@ -265,7 +280,7 @@ class HierarchicalScheduleTest(unittest.TestCase):
         producer = schedule.key('b', row['group'])
         execution = schedule.execution_key(request, family)
         index = {'builds': {str(i): {'definition': {'directory': row['group'],
-                 'targets': [f'Target{i}'], 'runner': 'ubuntu-latest', 'part': i}}
+                 'targets': [f'Target{i}'], 'runner': 'ubuntu-24.04', 'part': i}}
                  for i in (1, 2)}, 'requests': {graph.request_key(**request):
                  {'builds': ['1', '2'], 'selected': ['fixture']}}}
         layout = ({producer: {'path': row['group']}},

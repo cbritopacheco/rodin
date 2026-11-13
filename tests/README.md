@@ -37,15 +37,15 @@ on 29 October 2026. Workflow labels are declared in
 
 | Runner label | Current use | Architecture | CPU allocation | RAM | 90% RAM budget | SSD | 90% SSD budget |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| `ubuntu-24.04` | Numerical test configurations and benchmarks; selected support jobs | x64 | 4 vCPUs | 16 GB | 14.4 GB | 14 GB | 12.6 GB |
-| `ubuntu-latest` | Linux build matrix, native test configurations, selected convergence and support jobs | x64 | 4 vCPUs | 16 GB | 14.4 GB | 14 GB | 12.6 GB |
+| `ubuntu-24.04` | Linux build and installation matrices, tests, benchmarks and support jobs | x64 | 4 vCPUs | 16 GB | 14.4 GB | 14 GB | 12.6 GB |
 | `macos-latest` | macOS build matrix | arm64 | 3 CPUs | 7 GB | 6.3 GB | 14 GB | 12.6 GB |
 
 These are nominal published capacities, not guaranteed free resources at job
 start. Record the actual runner image, CPU allocation, usable RAM and free disk
-space in investigations; budget against the lower available capacity. The
-`-latest` labels can move to another image, so recheck specifications when they
-change. Swap is not additional RAM budget, particularly for timing benchmarks.
+space in investigations; budget against the lower available capacity. Linux jobs
+pin Ubuntu 24.04 to retain the validated dependency environment. The
+`macos-latest` label can move to another image, so recheck its specifications when
+it changes. Swap is not additional RAM budget, particularly for timing benchmarks.
 
 Measure peak aggregate memory and temporary disk use, not just final storage or
 one process's resident set. Include shared builds, restored artifacts and report
