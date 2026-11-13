@@ -22,6 +22,7 @@ concurrency:
 
 jobs:
   Kokkos:
+    name: Kokkos / ${{ matrix.image }}
     if: ${{ !github.event.pull_request.draft }}
     runs-on: ubuntu-24.04
     timeout-minutes: 330
