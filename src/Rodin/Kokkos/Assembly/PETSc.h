@@ -1886,6 +1886,12 @@ namespace Rodin::Assembly::Internal
       /// @brief Total order, including a deterministic order of duplicates.
       struct PatternLess
       {
+        /**
+         * @brief Orders coordinates, breaking ties by contribution rank.
+         * @param lhs Left key.
+         * @param rhs Right key.
+         * @returns Whether the left key precedes the right key.
+         */
         KOKKOS_INLINE_FUNCTION bool operator()(
           const PatternKey& lhs, const PatternKey& rhs) const
         {
