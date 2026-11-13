@@ -57,6 +57,16 @@ def read_env(d):
     return env
 
 
+def finished(d):
+    """The run of case folder d has ended normally (its log has the final summary)."""
+    log = os.path.join(d, "case.log")
+    if not os.path.isfile(log):
+        return False
+    with open(log, errors="ignore") as fh:
+        txt = fh.read()
+    return any(m in txt for m in ("average over the last", "End of the time interval", "Steady state reached"))
+
+
 def read_history(d, tag):
     """Per-step history: the case CSV, or the log as a fallback."""
     f = os.path.join(d, tag + ".csv")
@@ -280,6 +290,13 @@ def main():
         if h is None:
             print("[%s] no force history, skipped" % tag)
             continue
+        # The last step is shortened to land on t_end exactly; with a tiny
+        # dt the variable-step BDF2 weights blow up and the forces of that
+        # one step jump (e.g. F_z +300 N): drop it.
+        if len(h["dt"]) > 3 and h["dt"][-1] < 0.5 * np.median(h["dt"][-20:-1]):
+            h = {key_: val_[:-1] for key_, val_ in h.items()}
+        running = not finished(d)
+        label = "%s %d %%%s" % (valve, op, " (en curso, t=%.3g s)" % h["t"][-1] if running else "")
         if op == 0:
             t0 = h["t"][-1] - 1e-12  # hydrostatic: the last state
         elif a.skip is not None and tc > 0:
@@ -288,13 +305,14 @@ def main():
             t0 = env.get("tavg", 0.5 * h["t"][-1])
         k = h["t"] > t0 if op else np.arange(len(h["t"])) == len(h["t"]) - 1
         if not k.any():
-            print("[%s] WARNING: the run ended (t_end = %.4g s) before the end of the transient "
-                  "(%.4g s), e.g. stopped by the steady-state test: last half used, rerun it longer"
-                  % (tag, h["t"][-1], t0))
+            print("[%s] WARNING: %s (t = %.4g s) before the end of the transient (%.4g s): last half "
+                  "of the run used, provisional" % (tag, "still running" if running else "the run ended",
+                                                    h["t"][-1], t0))
             t0 = 0.5 * h["t"][-1]
             k = h["t"] > t0
         t, w = h["t"][k], h["dt"][k]
-        row = {"valve": valve, "opening_pct": op, "t_from_s": t0, "t_end_s": float(h["t"][-1]),
+        row = {"valve": valve, "opening_pct": op, "label": label, "running": int(running),
+               "t_from_s": t0, "t_end_s": float(h["t"][-1]),
                "window_D_over_U": (w.sum() / tc) if tc > 0 else float("nan"), "steps": int(k.sum())}
         for key in ["Fx", "Fy", "Fz", "Fx_dyn", "Fy_dyn", "Fz_dyn", "Fx_direct", "Fy_direct", "Fz_direct"]:
             if key in h:
@@ -327,36 +345,65 @@ def main():
     cells = []
     for r in summary:
         g = lambda x, f="%.4g": (f % r[x]) if x in r and np.isfinite(r[x]) else "—"
-        cells.append(["%s %d %%" % (r["valve"], r["opening_pct"]), g("window_D_over_U", "%.3g"),
+        cells.append([r["label"], g("window_D_over_U", "%.3g"),
                       g("Fz_mean"), g("Fz_dyn_mean"), g("Fz_std", "%.3g"), g("Fy_dyn_mean"),
                       g("Fy_std", "%.3g"), g("Fy_dyn_sem", "%.2g"), g("Q_in", "%.4g"),
                       ("%.4g" % (r["dp_Pa"] / 1e3)) if "dp_Pa" in r else "—", g("zeta", "%.3g")])
     ax = fig.add_subplot(111); ax.axis("off")
-    tb = ax.table(cellText=cells, colLabels=cols, loc="upper center", cellLoc="center")
+    tb = ax.table(cellText=cells, colLabels=cols, loc="upper center", cellLoc="center",
+                  colWidths=[0.22] + [0.078] * (len(cols) - 1))
     tb.auto_set_font_size(False); tb.set_fontsize(8); tb.scale(1, 1.6)
+    # green: best case of each opening (among the designs at that opening):
+    # lowest F_z, lowest |F_y,dyn| (actuator), lowest zeta (losses); only
+    # finished runs compete.
+    best = {2: ("Fz_mean", min, abs), 5: ("Fy_dyn_mean", min, abs), 10: ("zeta", min, lambda x: x)}
+    for col, (key, pick, f) in best.items():
+        for op_ in sorted({r["opening_pct"] for r in summary}):
+            idx = [i for i, r in enumerate(summary) if r["opening_pct"] == op_ and not r["running"]
+                   and key in r and np.isfinite(r[key])]
+            if len(idx) < 2:
+                continue
+            ib = pick(idx, key=lambda i: f(summary[i][key]))
+            tb[ib + 1, col].set_facecolor("#b7e4b0")
+    for i, r in enumerate(summary):
+        if r["running"]:
+            tb[i + 1, 0].set_facecolor("#fff1b8")
     ax.text(0.0, 0.02,
             "F = fuerza del fluido sobre el cuchillo (reacción consistente), ejes: x lateral, y carrera (+ abre), "
             "z flujo.\nF_dyn = F − p_out ∫ n dS: sin la presión de línea uniforme. σ: desviación estándar en el tiempo; "
             "e.e.: error estándar del promedio (medias por bloques).\nTransitorio inicial descartado; 0 %: estado "
-            "hidrostático final. Datos: " + os.path.basename(csvout),
+            "hidrostático final. Verde: el mejor diseño de cada apertura (menor F_z, menor |F_y,dyn|, menor ζ; "
+            "sólo corridas terminadas). Amarillo: corrida en curso (valores provisorios). Datos: "
+            + os.path.basename(csvout),
             transform=ax.transAxes, fontsize=7, va="bottom")
     save(fig)
 
     # ---- mean forces vs opening ----------------------------------------------
+    # one series per valve / design; F_z on a log axis (kN at small openings,
+    # tens of N when open), F_y,dyn linear in N; hollow markers: running.
     fig, axs = plt.subplots(1, 3, figsize=(11.69, 4.6))
-    for valve, mk in [("FPC8", "o"), ("FPC16", "s")]:
+    valves = sorted({r["valve"] for r in summary})
+    marks = "osD^vP*Xh"
+    for iv, valve in enumerate(valves):
         rs = sorted([r for r in summary if r["valve"] == valve], key=lambda r: r["opening_pct"])
-        if not rs:
-            continue
-        x = [r["opening_pct"] for r in rs]
-        for ax, key, lab in [(axs[0], "Fz", "F_z [kN]"), (axs[1], "Fz_dyn", "F_z,dyn [kN]"),
-                             (axs[2], "Fy_dyn", "F_y,dyn [kN]")]:
-            y = np.array([r.get(key + "_mean", np.nan) for r in rs]) / 1e3
-            e = np.array([r.get(key.replace("_dyn", "") + "_std", np.nan) for r in rs]) / 1e3
-            ax.errorbar(x, y, yerr=e, marker=mk, capsize=3, label=valve)
-            ax.set_xlabel("apertura [%]"); ax.set_ylabel(lab); ax.grid(alpha=0.3)
-    axs[0].legend()
-    fig.suptitle("Fuerza media sobre la compuerta vs apertura (barras: ±σ temporal)", fontsize=11)
+        x = np.array([r["opening_pct"] for r in rs])
+        run = np.array([r["running"] for r in rs], bool)
+        for ax, key, lab, sc in [(axs[0], "Fz", "F_z [N]", 1.0), (axs[1], "Fy_dyn", "F_y,dyn [N]", 1.0),
+                                 (axs[2], "zeta", "ζ", 1.0)]:
+            mkey = key if key == "zeta" else key + "_mean"
+            y = np.array([r.get(mkey, np.nan) for r in rs]) * sc
+            ln, = ax.plot(x, y, "-", marker=marks[iv % len(marks)], label=valve, lw=1)
+            if run.any():
+                ax.plot(x[run], y[run], ls="none", marker=marks[iv % len(marks)], mfc="white",
+                        mec=ln.get_color(), ms=8)
+            ax.set_xlabel("apertura [%]"); ax.set_ylabel(lab); ax.grid(alpha=0.3, which="both")
+    axs[0].set_yscale("log"); axs[2].set_yscale("log")
+    axs[1].axhline(0, color="k", lw=0.6)
+    axs[0].set_title("fuerza axial (empuje del fluido)", fontsize=9)
+    axs[1].set_title("fuerza en la carrera (+ abre, − cierra)", fontsize=9)
+    axs[2].set_title("coeficiente de pérdida (entrada–salida)", fontsize=9)
+    axs[0].legend(fontsize=7)
+    fig.suptitle("Promedios vs apertura (marcador hueco: corrida en curso)", fontsize=11)
     fig.tight_layout(); save(fig)
 
     # ---- per case ---------------------------------------------------------------
@@ -381,7 +428,8 @@ def main():
         ax.axvline(t0, color="gray", ls=":", lw=1)
         ax.set_title("historia completa (línea punteada: fin del transitorio)", fontsize=9)
         ax.set_xlabel("t [s]"); ax.set_ylabel("Q [L/s]"); ax.grid(alpha=0.3)
-        fig.suptitle("%s — %d %% de apertura: fuerzas" % (valve, op), fontsize=12)
+        fig.suptitle("%s: fuerzas" % next(r["label"] for r in summary if r["valve"] == valve
+                                            and r["opening_pct"] == op), fontsize=12)
         fig.tight_layout(); save(fig)
 
         # velocity slices

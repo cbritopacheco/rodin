@@ -191,20 +191,20 @@ def main():
                     help="comma-separated seats to draw (also rampup, rampdn)")
     a = ap.parse_args()
     designs = [
-        ("cad", "CAD (referencia)",
+        ("cad", "cad — asiento original",
          "Ranura rectangular %g × %g mm; el cuchillo\nasienta en el fondo y las paredes verticales\nlo retienen. Bolsa muerta con el cuchillo abierto." % (t, d)),
-        ("fillet", "A — Fondo con radios R %g" % fil,
+        ("fillet", "fillet — fondo con radios R %g" % fil,
          "Mismo fondo y paredes verticales (%.1f mm);\nesquinas del fondo y de la punta del cuchillo\ncon radio %g mm: sin rincones estancados." % (d - fil, fil)),
-        ("chamfer", "B — Chaflanes de entrada %g°" % cdeg,
+        ("chamfer", "chamfer — chaflanes %g°" % cdeg,
          "Ranura %g × %g con chaflán de %g mm de hondo\n(%.1f mm de largo) en ambos bordes; paredes\nverticales en los %.1f mm restantes; bidireccional." % (t, d, cm, Lc, d - cm)),
-        ("upramp", "C — Rampa aguas arriba %g°" % mm.UPRAMP_DEG,
+        ("upramp", "upramp — rampa larga aguas arriba %g°" % mm.UPRAMP_DEG,
          "Pared aguas abajo vertical (toma la presión),\nrampa de %.1f mm aguas arriba hasta el fondo:\nel flujo barre el fondo. Válvula unidireccional." % Lr),
-        ("rampup", "A+C — rampa corta aguas arriba",
+        ("rampup", "rampup — rampa corta aguas arriba",
          "Rampa de %g° (%.1f mm) aguas arriba, bordes\nredondeados (R %g en el fondo, R %g en el\ndiámetro); pared aguas abajo vertical (toma la\npresión) con esquina R %g." % (
              mm.RAMP2_DEG, d / math.tan(math.radians(mm.RAMP2_DEG)), mm.RAMP2_FR, mm.RAMP2_FB, fil)),
-        ("rampdn", "A+C — rampa corta aguas abajo",
+        ("rampdn", "rampdn — rampa corta aguas abajo",
          "La misma, invertida: pared vertical aguas\narriba, rampa aguas abajo (el flujo choca con\nla pared y sale por la rampa). Equivale al\ncaso anterior con el flujo invertido."),
-        ("lip", "D — doble rampa con labio",
+        ("lip", "lip — doble rampa con labio",
          "Bidireccional: labios verticales de %g mm a ambos\nlados (sello y retención), rampas de %g° y %.1f mm\nde hondo, borde al diámetro R %g, fondo R %g.\nUn chaflán más hondo y sin esquinas en el fondo." % (
              mm.LIP_LAND, mm.LIP_DEG, d - mm.LIP_LAND, mm.LIP_RB, mm.LIP_R)),
     ]

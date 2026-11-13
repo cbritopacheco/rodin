@@ -49,8 +49,10 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import postprocess_valves as pv  # noqa: E402
 
 BORE = {"FPC8": 101.6e-3, "FPC16": 191.0e-3}  # m, radius
-DESIGN = {"": "CAD", "fillet": "A radios", "chamfer": "B chaflanes", "upramp": "C rampa",
-          "rampup": "A+C arriba", "rampdn": "A+C abajo", "lip": "D labio"}
+# The seat designs are named everywhere (meshes, run folders, reports, video)
+# by the key of make_meshes.py --seat; "cad" is the original seat (folder FPC8_openNNN).
+DESIGN = {"": "cad", "cad": "cad", "fillet": "fillet", "chamfer": "chamfer", "upramp": "upramp",
+          "rampup": "rampup", "rampdn": "rampdn", "lip": "lip"}
 
 
 def fluid_params(log):
@@ -78,7 +80,9 @@ def shear_rate(mu, tau_y, mu_p, m):
 def case_fields(d, tag, t0):
     """Time-averaged |u| and viscosity per cell (deduplicated), cell centroids and volumes."""
     base, steps = pv.read_xdmf(os.path.join(d, tag + ".xdmf"))
-    steps = [s for s in steps if s[0] > t0 + 1e-12] or steps[-1:]
+    after = [s for s in steps if s[0] > t0 + 1e-12]
+    # run not yet past the start of the average: its last half, provisional
+    steps = after if len(after) >= 2 else steps[len(steps) // 2:]
     cache = {}
     meshes = pv.load_mesh(base, steps[0][1], cache)
     cen, vol, keyidx = [], [], []
@@ -136,6 +140,8 @@ def main():
         t0 = a.skip * tc if (a.skip is not None and tc > 0) else env.get("tavg", 0.0)
         par = fluid_params(os.path.join(d, "case.log"))
         cen, vol, umag, mu, nsteps, (ta, tb), meshes, steps, base = case_fields(d, tag, t0)
+        running = not pv.finished(d)
+        provisional = ta <= t0 + 1e-12 or running
         r = np.hypot(cen[:, 0], cen[:, 1])
         zone = (cen[:, 1] < 0) & (np.abs(cen[:, 2]) <= a.zone_z * 1e-3) & (r > R - a.layer * 1e-3)
         pocket = zone & (r > R + 0.2e-3)
@@ -144,7 +150,9 @@ def main():
             tau = mu * gd
         else:
             tau = np.full_like(mu, np.nan)
-        row = {"case": tag, "valve": base_valve, "design": design or "cad", "opening_pct": op,
+        row = {"case": tag, "label": "%s %d %%%s" % (design or "cad", op, " (en curso)" if running else ""),
+               "running": int(running), "provisional": int(ta <= t0 + 1e-12),
+               "valve": base_valve, "design": design or "cad", "opening_pct": op,
                "snapshots": nsteps, "t_from_s": ta, "t_to_s": tb,
                "zone_volume_cm3": zone[zone].size and vol[zone].sum() * 1e6,
                "pocket_volume_cm3": vol[pocket].sum() * 1e6}
@@ -211,17 +219,39 @@ def main():
     fig, ax = plt.subplots(figsize=(11.7, 8.3)); ax.axis("off")
     cols = ["caso", "snapshots", "zona [cm³]", "ū [m/s]", "ū p10 [m/s]", "f(ū<0.1)", "f(ū<0.3)",
             "τ p10 [Pa]", "f(τ<τ_y)", "bolsa [cm³]", "bolsa f(ū<0.1)", "bolsa f(τ<τ_y)"]
-    cells = [[r_["case"], r_["snapshots"], "%.1f" % r_["zone_volume_cm3"], "%.3f" % r_["u_mean"],
+    cells = [[r_["label"], r_["snapshots"], "%.1f" % r_["zone_volume_cm3"], "%.3f" % r_["u_mean"],
               "%.3f" % r_["u_p10"], "%.2f" % r_["f_slow_0.1"], "%.2f" % r_["f_slow_0.3"],
               "%.2g" % r_["tau_p10"], "%.2f" % r_["f_unyielded"], "%.1f" % r_["pocket_volume_cm3"],
               "%.2f" % r_["pocket_f_slow_0.1"], "%.2f" % r_["pocket_f_unyielded"]] for r_ in rows]
-    tb_ = ax.table(cellText=cells, colLabels=cols, loc="upper center", cellLoc="center")
+    tb_ = ax.table(cellText=cells, colLabels=cols, loc="upper center", cellLoc="center",
+                   colWidths=[0.16] + [0.076] * (len(cols) - 1))
     tb_.auto_set_font_size(False); tb_.set_fontsize(7.5); tb_.scale(1.0, 1.5)
+    # green: best design of each opening per column (finished runs only):
+    # higher is better for the velocities and the shear stress, lower for the
+    # slow / unyielded fractions.
+    crit = {3: ("u_mean", max), 4: ("u_p10", max), 5: ("f_slow_0.1", min), 6: ("f_slow_0.3", min),
+            7: ("tau_p10", max), 8: ("f_unyielded", min), 10: ("pocket_f_slow_0.1", min),
+            11: ("pocket_f_unyielded", min)}
+    for col, (key, pick) in crit.items():
+        for o in sorted({r_["opening_pct"] for r_ in rows}):
+            idx = [i for i, r_ in enumerate(rows) if r_["opening_pct"] == o and not r_["running"]
+                   and np.isfinite(r_[key])]
+            if len(idx) < 2:
+                continue
+            target = pick(rows[i][key] for i in idx)
+            for i in idx:  # ties (e.g. several 0.00) all green
+                if abs(rows[i][key] - target) <= 0.005 * max(abs(target), 1e-12) + (0.005 if "f_" in key else 0):
+                    tb_[i + 1, col].set_facecolor("#b7e4b0")
+    for i, r_ in enumerate(rows):
+        if r_["running"] or r_["provisional"]:
+            tb_[i + 1, 0].set_facecolor("#fff1b8")
     ax.set_title("Asiento: fracción de la zona del sello barrida por el flujo (promedios tras el transitorio)")
     ax.text(0, 0.02, "Zona del sello: fluido con y < 0, |z| ≤ %.0f mm, fuera del diámetro o a menos de %.1f mm de él.\n"
             "ū: módulo de la velocidad promediado en el tiempo; f(ū<v): fracción del volumen de la zona con ū < v;\n"
             "τ = μ(γ̇) γ̇ (Bingham regularizado); f(τ<τ_y): fracción del volumen que no fluye (tapón). Bolsa: sólo fuera del diámetro.\n"
-            "Datos: %s" % (a.zone_z, a.layer, os.path.basename(csvf)), transform=ax.transAxes, fontsize=8, va="bottom")
+            "Verde: el mejor diseño de cada apertura en esa columna (corridas terminadas). Amarillo: corrida en curso\n"
+            "o aún sin pasar el inicio del promedio (se usa la última mitad guardada: provisorio). Datos: %s"
+            % (a.zone_z, a.layer, os.path.basename(csvf)), transform=ax.transAxes, fontsize=8, va="bottom")
     pdf.savefig(fig); plt.close(fig)
     # ---- metrics against the design ------------------------------------------
     openings = sorted({r_["opening_pct"] for r_ in rows})
@@ -233,7 +263,7 @@ def main():
         for i, o in enumerate(openings):
             vals = [next((r_[key] for r_ in rows if r_["design"] == d_ and r_["opening_pct"] == o), np.nan) for d_ in designs]
             ax.bar(x + (i - 0.5 * (len(openings) - 1)) * wd, vals, wd, label="%d %%" % o)
-        ax.set_xticks(x); ax.set_xticklabels([DESIGN.get(d_ if d_ != "cad" else "", d_) for d_ in designs])
+        ax.set_xticks(x); ax.set_xticklabels([DESIGN.get(d_, d_) for d_ in designs])
         ax.set_title(title, fontsize=10); ax.grid(axis="y", alpha=0.3); ax.legend(fontsize=8)
     fig.suptitle("Diseños del asiento: FPC8, pulpa Bingham", fontsize=11); fig.tight_layout()
     pdf.savefig(fig); plt.close(fig)
@@ -243,7 +273,7 @@ def main():
         for tag, angc, prof in profiles:
             if int(tag.split("_open")[1]) != o:
                 continue
-            ax.plot(angc, prof, marker="o", ms=3, label=tag.split("_open")[0])
+            ax.plot(angc, prof, marker="o", ms=3, label=DESIGN.get(tag.split("_open")[0].partition("-")[2] or "cad"))
         ax.set_xlabel("ángulo alrededor del diámetro [°] (−90: fondo, 0/−180: costados)")
         ax.set_ylabel("ū en la bolsa [m/s]"); ax.set_title("%d %% de apertura" % o, fontsize=10)
         ax.grid(alpha=0.3); ax.legend(fontsize=8)
@@ -273,7 +303,8 @@ def main():
                 ax.set_title(title, fontsize=9)
             ax.set_xlabel("z [m]"); ax.set_ylabel("y [m]")
             fig.colorbar(im, ax=ax, shrink=0.8)
-        fig.suptitle("%s — plano x = 0, zona del sello (fondo del diámetro, cuchillo en z = 0)" % tag, fontsize=11)
+        fig.suptitle("%s — plano x = 0, zona del sello (fondo del diámetro, cuchillo en z = 0)"
+                     % next(r_["label"] for r_ in rows if r_["case"] == tag), fontsize=11)
         fig.tight_layout(); pdf.savefig(fig); plt.close(fig)
     pdf.close()
     print("PDF:", a.out); print("CSV:", csvf)

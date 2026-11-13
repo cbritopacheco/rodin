@@ -283,6 +283,36 @@ condiciones que la segunda ronda.
 NP=45 NJOBS=3 bash ~/rodin-valve/examples/Valve/run_valves_seat3.sh
 ```
 
+**Nombres.** Cada diseño se llama igual en todas partes (mallas, carpetas
+de corridas, reportes, figura, video): la clave de `make_meshes.py --seat`
+— `cad` (asiento original; carpeta `FPC8_openNNN`), `fillet`, `chamfer`,
+`upramp`, `rampup`, `rampdn`, `lip`.
+
+**Reportes de la campaña, `seat_reports.sh`.** Elige diseños y aperturas,
+enlaza esas carpetas (sin copiar) y genera los dos reportes; incluye las
+corridas en curso (amarillo, valores provisorios: si aún no pasan el inicio
+del promedio se usa la última mitad guardada) y marca en verde el mejor
+diseño de cada apertura por columna (sólo corridas terminadas).
+
+```sh
+cd ~/rodin-valve
+DESIGNS="cad fillet rampup rampdn lip" OPENINGS="5 10 25" \
+  bash examples/Valve/seat_reports.sh runs_seat ~/valve_seat/reportes
+```
+
+**Videos, `make_videos.sh` / `valve_video.py`.** Render de volumen de la
+velocidad (evolución temporal interpolada entre instantes guardados, cámara
+en órbita lenta) con la válvula del STEP como sólidos transparentes
+(`resources/examples/Valve/cad/FPC8_{body,liner,knife}.stl`; el cuchillo se
+mueve a la apertura del caso; el revestimiento dibujado es el del CAD en
+todos los diseños). Requiere `pip install pyvista imageio imageio-ffmpeg
+h5py`; funciona sin pantalla.
+
+```sh
+QUALITY=draft EXTRA=--preview bash examples/Valve/make_videos.sh runs_seat ~/valve_seat/videos   # revisar el encuadre
+bash examples/Valve/make_videos.sh runs_seat ~/valve_seat/videos                                 # 1920x1080
+```
+
 `seat_stats.py` promedia en el tiempo los campos guardados (tras el
 transitorio) en la **zona del sello** (y < 0, |z| ≤ 25 mm, fuera del
 diámetro o a menos de 1 mm de él) y reporta: ū media y percentil 10,
