@@ -1876,16 +1876,34 @@ namespace Rodin::Assembly::Internal
         }
       }
 
+      /// @brief Coordinate followed by the original contribution rank.
+      struct PatternKey
+      {
+        std::uint64_t coordinate; ///< Row times column count plus column.
+        size_t rank; ///< Rank in the concatenated integrator listings.
+      };
+
+      /// @brief Total order, including a deterministic order of duplicates.
+      struct PatternLess
+      {
+        KOKKOS_INLINE_FUNCTION bool operator()(
+          const PatternKey& lhs, const PatternKey& rhs) const
+        {
+          return lhs.coordinate < rhs.coordinate ||
+            (lhs.coordinate == rhs.coordinate && lhs.rank < rhs.rank);
+        }
+      };
+
       /**
        * @brief Largest number of coordinates that sortPattern() sorts at
        * once.
        *
-       * The keys and the scratch of the sort take about 20 bytes per sorted
-       * coordinate, so that the coordinates are sorted by ranges of rows of
-       * at most this many coordinates, which bounds that memory to a few
-       * GiB whatever the size of the list.
+       * The key array is limited to the same one-GiB budget as the former
+       * eight-byte keys. Each key now also stores the contribution rank.
+       * Row ranges are halved until they fit this budget; an indivisible
+       * single row may exceed it. Sort scratch is proportional to the range.
        */
-      static constexpr size_t SortBlockSize = size_t(1) << 27;
+      static constexpr size_t SortBlockSize = (size_t(1) << 30) / sizeof(PatternKey);
 
       /// @brief Finds the smallest and the largest row coordinates.
       template <class Indices>
@@ -1947,7 +1965,7 @@ namespace Rodin::Assembly::Internal
         size_t base; ///< Number of coordinates of the range listed before the segment.
 
         /// @brief Receives the keys, the row times the column count plus the column.
-        ::Kokkos::View<std::uint64_t*, MemorySpace> keys;
+        ::Kokkos::View<PatternKey*, MemorySpace> keys;
         Indices rows; ///< Row coordinates.
         Indices cols; ///< Column coordinates.
         size_t columns; ///< Column count of the system.
@@ -1971,7 +1989,7 @@ namespace Rodin::Assembly::Internal
             return;
           if (final)
           {
-            keys(base + listed) = std::uint64_t(row) * columns + cols(e);
+            keys(base + listed) = {std::uint64_t(row) * columns + cols(e), begin + r};
             order(base + listed) = static_cast<Position>(e);
           }
           ++listed;
@@ -1987,16 +2005,18 @@ namespace Rodin::Assembly::Internal
        * @param rows Row coordinates.
        * @param cols Column coordinates.
        * @param order Receives the indices of the sorted coordinates.
+       * @param blockSize Target maximum number of coordinates sorted at once.
        *
        * The rows are split in ranges of at most SortBlockSize coordinates,
        * by halving, and the ranges are sorted one after the other in row
-       * order. The sort being stable, the indices are those of a sort of
-       * the whole list.
+       * order. Contribution rank breaks coordinate ties, so every bucket
+       * size and backend produces the same permutation.
        */
       template <class Indices, class Order>
       static void sortPattern(const ExecutionSpace& execution, size_t columns,
         const std::vector<COOSegment>& segments, const std::vector<size_t>& offsets,
-        const Indices& rows, const Indices& cols, const Order& order)
+        const Indices& rows, const Indices& cols, const Order& order,
+        size_t blockSize = SortBlockSize)
       {
         const size_t count = rows.extent(0);
         if (count == 0)
@@ -2013,7 +2033,7 @@ namespace Rodin::Assembly::Internal
           size_t count;
         };
         std::vector<Rows> pending{{smallest, largest + 1, count}};
-        ::Kokkos::View<std::uint64_t*, MemorySpace> keys;
+        ::Kokkos::View<PatternKey*, MemorySpace> keys;
         size_t sorted = 0;
         while (!pending.empty())
         {
@@ -2021,7 +2041,7 @@ namespace Rodin::Assembly::Internal
           pending.pop_back();
           if (range.count == 0)
             continue;
-          if (range.count > SortBlockSize && range.high - range.low > 1)
+          if (range.count > blockSize && range.high - range.low > 1)
           {
             const Index middle = range.low + (range.high - range.low) / 2;
             size_t below = 0;
@@ -2035,10 +2055,10 @@ namespace Rodin::Assembly::Internal
           if (keys.extent(0) < range.count)
           {
             keys = {};
-            keys = ::Kokkos::View<std::uint64_t*, MemorySpace>(
+            keys = ::Kokkos::View<PatternKey*, MemorySpace>(
               ::Kokkos::view_alloc(
                 execution, ::Kokkos::WithoutInitializing, std::string("Rodin COO keys")),
-              std::max(range.count, std::min(count, SortBlockSize)));
+              std::max(range.count, std::min(count, blockSize)));
           }
           const auto block =
             ::Kokkos::subview(order, std::make_pair(sorted, sorted + range.count));
@@ -2057,7 +2077,8 @@ namespace Rodin::Assembly::Internal
             listed += found;
           }
           ::Kokkos::Experimental::sort_by_key(execution,
-            ::Kokkos::subview(keys, std::make_pair(size_t(0), range.count)), block);
+            ::Kokkos::subview(keys, std::make_pair(size_t(0), range.count)), block,
+            PatternLess{});
           sorted += range.count;
         }
       }

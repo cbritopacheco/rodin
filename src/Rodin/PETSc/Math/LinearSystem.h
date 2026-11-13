@@ -290,37 +290,52 @@ namespace Rodin::Math
            *
            * PETSc appends every split set in code, even one it already
            * holds, so a preconditioner that holds these splits is left as
-           * is. One that holds other splits under these names is reset, and
-           * builds its blocks again from these splits at its next setup.
+           * is. A change of names, order, count or indices resets the blocks
+           * before installing the new configuration. Empty stored splits
+           * leave runtime-defined splits under PETSc control.
            * @param[in] pc Preconditioner of type `PCFIELDSPLIT`.
            * @returns `PETSC_SUCCESS`, or the first PETSc error.
            */
           PetscErrorCode install(::PC pc) const
           {
-            PetscErrorCode ierr;
-            bool installed = true;
-            bool held = false;
-            for (size_t k = 0; k < m_splits.size(); ++k)
+            if (m_splits.empty())
+              return PETSC_SUCCESS;
+            // PETSc has no pre-setup split-count query. The indexed query
+            // reports an out-of-range error when no extra split exists.
+            PetscErrorCode ierr = PetscPushErrorHandler(PetscReturnErrorHandler, nullptr);
+            if (ierr != PETSC_SUCCESS)
+              return ierr;
+            ::IS extra = PETSC_NULLPTR;
+            const PetscErrorCode probe = PCFieldSplitGetISByIndex(
+              pc, static_cast<PetscInt>(m_splits.size()), &extra);
+            ierr = PetscPopErrorHandler();
+            if (ierr != PETSC_SUCCESS)
+              return ierr;
+            if (probe != PETSC_SUCCESS && probe != PETSC_ERR_ARG_OUTOFRANGE)
+              return probe;
+            bool installed = probe == PETSC_ERR_ARG_OUTOFRANGE;
+            for (size_t k = 0; installed && k < m_splits.size(); ++k)
             {
-              ::IS is = PETSC_NULLPTR;
-              ierr = PCFieldSplitGetIS(pc, getName(k).c_str(), &is);
+              ::IS named = PETSC_NULLPTR, indexed = PETSC_NULLPTR;
+              ierr = PCFieldSplitGetIS(pc, getName(k).c_str(), &named);
               if (ierr != PETSC_SUCCESS)
                 return ierr;
-              held = held || is;
-              if (is == m_splits[k].is)
-                continue;
-              PetscBool equal = PETSC_FALSE;
-              if (is)
+              if (!named)
               {
-                ierr = ISEqualUnsorted(is, m_splits[k].is, &equal);
-                if (ierr != PETSC_SUCCESS)
-                  return ierr;
+                installed = false;
+                break;
               }
-              installed = installed && equal;
+              ierr = PCFieldSplitGetISByIndex(pc, static_cast<PetscInt>(k), &indexed);
+              if (ierr != PETSC_SUCCESS)
+                return ierr;
+              PetscBool equal = PETSC_FALSE;
+              ierr = ISEqual(named, m_splits[k].is, &equal);
+              if (ierr != PETSC_SUCCESS)
+                return ierr;
+              installed = named == indexed && equal;
             }
             if (installed)
               return PETSC_SUCCESS;
-            if (held)
             {
               // PCReset also releases the operators, which are set again.
               PetscBool hasOperator = PETSC_FALSE, hasPreconditioner = PETSC_FALSE;

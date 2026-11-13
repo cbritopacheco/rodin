@@ -803,6 +803,106 @@ namespace Rodin::Tests::Unit
   {
     checkSolve(withFaces(makeTriangleMesh()));
   }
+
+  /// @brief COO duplicates follow integrator rank for every row bucket size and permutation width.
+  template <class Position>
+  void checkCOODuplicateOrder()
+  {
+    using Assembler = Assembly::Internal::COOAssembly<TestBackend>;
+    using Segment = Assembly::Internal::COOSegment;
+    using Memory = typename Assembler::MemorySpace;
+    using Indices = ::Kokkos::View<Index*, Memory>;
+    using Order = ::Kokkos::View<Position*, Memory>;
+    const TestExecutionSpace execution;
+    constexpr size_t count = 768;
+    constexpr size_t columns = 11;
+    constexpr size_t smallBucket = 16;
+    constexpr Index coordinatePeriod = 23 * columns;
+    std::vector<Segment> segments(2);
+    segments[0].spacing = 4;
+    segments[1].spacing = 2;
+    const std::vector<size_t> offsets{0, count / 3, 2 * count / 3};
+    const auto rows =
+      Kokkos::Internal::upload<Index>(execution, count, "test rows", [](Index* out) {
+        for (Index i = 0; i < count; ++i)
+          out[i] = (17 * i) % 23;
+      });
+    const auto cols =
+      Kokkos::Internal::upload<Index>(execution, count, "test columns", [](Index* out) {
+        for (Index i = 0; i < count; ++i)
+          out[i] = (7 * i) % columns;
+      });
+    const auto hostRows =
+      ::Kokkos::create_mirror_view_and_copy(::Kokkos::HostSpace{}, rows);
+    const auto hostCols =
+      ::Kokkos::create_mirror_view_and_copy(::Kokkos::HostSpace{}, cols);
+    std::vector<Index> expected;
+    for (size_t s = 0; s <= segments.size(); ++s)
+    {
+      const size_t begin = offsets[s];
+      const size_t size = (s < segments.size() ? offsets[s + 1] : count) - begin;
+      const size_t spacing = s < segments.size() ? segments[s].spacing : 1;
+      for (size_t r = 0; r < size; ++r)
+      {
+        expected.push_back(
+          begin + Kokkos::Variational::getEntryPosition(r, size, spacing));
+      }
+    }
+    std::stable_sort(expected.begin(), expected.end(), [&](Index lhs, Index rhs) {
+      return std::pair{hostRows(lhs), hostCols(lhs)} <
+        std::pair{hostRows(rhs), hostCols(rhs)};
+    });
+    for (const size_t bucket : {count, smallBucket})
+    {
+      SCOPED_TRACE(bucket);
+      const Order order("test COO order", count);
+      Assembler::sortPattern(
+        execution, columns, segments, offsets, rows, cols, order, bucket);
+      const auto hostOrder =
+        ::Kokkos::create_mirror_view_and_copy(::Kokkos::HostSpace{}, order);
+      for (size_t i = 0; i < count; ++i)
+        ASSERT_EQ(hostOrder(i), expected[i]) << "entry " << i;
+      const Indices starts = Assembler::distinctStarts(execution, rows, cols, order);
+      const auto values = Kokkos::Internal::upload<PetscScalar>(
+        execution, count, "test values", [](PetscScalar* out) {
+          // Equal coordinates repeat every 23 * 11 entries. Their values
+          // expose a change of accumulation order through cancellation.
+          for (Index i = 0; i < count; ++i)
+          {
+            out[i] = i / coordinatePeriod == 0 ? 1e16
+              : i / coordinatePeriod == 1      ? 1
+                                               : -1e16;
+          }
+        });
+      const ::Kokkos::View<PetscScalar*, Memory> merged(
+        "test merged", starts.extent(0) - 1);
+      Assembler::merge(execution, order, starts, values, merged);
+      const auto hostValues =
+        ::Kokkos::create_mirror_view_and_copy(::Kokkos::HostSpace{}, values);
+      const auto hostMerged =
+        ::Kokkos::create_mirror_view_and_copy(::Kokkos::HostSpace{}, merged);
+      size_t group = 0;
+      for (size_t begin = 0; begin < count; ++group)
+      {
+        size_t end = begin + 1;
+        const Index first = expected[begin];
+        while (end < count && hostRows(expected[end]) == hostRows(first) &&
+          hostCols(expected[end]) == hostCols(first))
+          ++end;
+        PetscScalar sum = 0;
+        for (size_t i = begin; i < end; ++i)
+          sum += hostValues(expected[i]);
+        EXPECT_EQ(hostMerged(group), sum);
+        begin = end;
+      }
+    }
+  }
+
+  TEST(Kokkos_PETSc_Problem, COODuplicateOrder)
+  {
+    checkCOODuplicateOrder<std::uint32_t>();
+    checkCOODuplicateOrder<Index>();
+  }
 }
 
 /**
