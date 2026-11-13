@@ -51,16 +51,18 @@ namespace Rodin::Tests::Manufactured
     RealFunction force(KOKKOS_LAMBDA(const Rodin::Kokkos::Geometry::PointView& p)->Real {
       return (advective ? 2 : 1) + p.x();
     });
+    // Brace initialization avoids NVCC/GCC parsing deduced expression nodes
+    // as parameter declarations inside the generic lambda.
     const auto solve = [&](const auto& beta) {
       Problem problem(u, v);
       if constexpr (std::is_same_v<std::decay_t<decltype(beta)>, std::nullptr_t>)
       {
-        problem = Integral(Grad(u), Grad(v)) + Integral(u, v) - Integral(force, v) +
+        problem = Integral{Grad{u}, Grad{v}} + Integral(u, v) - Integral(force, v) +
           DirichletBC(u, exact);
       }
       else
       {
-        problem = Integral(Grad(u), Grad(v)) + Integral(Dot(beta, Grad(u)), v) +
+        problem = Integral{Grad{u}, Grad{v}} + Integral{Dot(beta, Grad{u}), v} +
           Integral(u, v) - Integral(force, v) + DirichletBC(u, exact);
       }
       Solver::BiCGSTAB solver(problem);
