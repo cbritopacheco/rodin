@@ -16,8 +16,7 @@ can share compilation without sharing runtime state.
 | Dedicated family workflows (for example [TestConvergence.yml](TestConvergence.yml)) | Generated single-family execution workflows, preserving numerical commands and rank partitions. |
 | [TestDirectoryBuild.yml](TestDirectoryBuild.yml) | Compile module/study-type groups using unchanged common objects. |
 | [CoveragePublish.yml](CoveragePublish.yml) | Validate every expected lane contribution and submit an incremental production line union to Codecov. |
-| [Build.yml](Build.yml) | Independent compilation checks across build types, threading and backend configurations. |
-| [KokkosBuild.yml](KokkosBuild.yml) | Compiles the Kokkos unit tests and examples for CUDA, HIP and SYCL in the images of `dev/docker/kokkos`, without running them. |
+| [Build.yml](Build.yml) | Independent CPU compilation checks across build types, threading and backend configurations, plus CUDA, HIP and SYCL compilation of Kokkos tests and examples in the images of `dev/docker/kokkos`. |
 | [Style.yml](Style.yml) | Formatting, house-style, naming and documentation-warning checks, including their tooling regressions. |
 | [Documentation.yml](Documentation.yml) | Independent documentation build and publication on master/develop pushes; build and checks only on pull requests. |
 | [Benchmarks.yml](Benchmarks.yml) | Validates performance benchmarks on ready PRs and main-branch pushes; publishes complete campaigns from master/develop. |
