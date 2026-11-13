@@ -154,9 +154,9 @@ assembly, mesh and solver contracts when reducing transfers:
   must preserve shared-owner averaging, identification and ghost semantics.
 - PETSc coefficient lowering reads backend arrays through
   `VecGetArrayReadAndMemType` and caches copied/gathered coefficients by
-  PETSc state. Its distributed fill rebuilds and uploads the local-position
-  map whenever coefficient state changes. Cache the position map by the
-  finite element layout independently of numeric coefficient state.
+  PETSc state. Its distributed fill reads the local-position map kept by the
+  distributed device space (`getGhostedPositions()`), computed once from the
+  numbering of the space independently of numeric coefficient state.
 - PETSc matrix COO preallocation downloads coordinates only when its cached
   graph/preallocation is rebuilt. Numeric `MatSetValuesCOO` and
   `VecSetValuesCOO` already receive device pointers for supported GPU types;

@@ -354,6 +354,88 @@ namespace Rodin::Kokkos::Internal
   };
 
   /**
+   * @brief Positions of the local degrees of freedom of a distributed space
+   * in a ghosted local form, kept with the space.
+   *
+   * A ghosted local form holds the owned entries first, numbered from the
+   * first owned global index, then the ghosts in the order of the local
+   * degrees of freedom. The positions depend only on the numbering of the
+   * space, so they are computed and uploaded once, at the first request. A
+   * copy starts empty, and an assignment empties the target.
+   *
+   * @tparam MemorySpace Memory space of the positions.
+   */
+  template <class MemorySpace>
+  class GhostedPositions
+  {
+    public:
+      /// @brief Positions in the local form and size of that form.
+      struct Table
+      {
+        /// @brief Position in the local form of each local degree of freedom.
+        ::Kokkos::View<const Index*, MemorySpace> positions;
+
+        /// @brief Number of owned entries and ghosts of the local form.
+        size_t size;
+      };
+
+      GhostedPositions() = default;
+
+      /**
+       * @brief Starts empty, the positions of the source stay with it.
+       * @param other Object whose positions are not copied.
+       */
+      GhostedPositions([[maybe_unused]] const GhostedPositions& other) {}
+
+      /**
+       * @brief Forgets the positions, which were those of another numbering.
+       * @param other Object whose positions are not copied.
+       * @returns This object.
+       */
+      GhostedPositions& operator=([[maybe_unused]] const GhostedPositions& other)
+      {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_table.reset();
+        return *this;
+      }
+
+      /**
+       * @brief Gets the positions of the local degrees of freedom of a space.
+       * @param execution Execution instance ordering the upload.
+       * @param fes Distributed space owning this object, giving its
+       * ownership range and the global index of each local degree of freedom.
+       * @returns Positions, to be read only, and size of the local form.
+       */
+      template <class Execution, class FES>
+      Table get(const Execution& execution, const FES& fes)
+      {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        if (!m_table)
+        {
+          Index begin = 0, end = 0;
+          fes.getOwnershipRange(begin, end);
+          const Index owned = end - begin;
+          const size_t size = fes.getLocalSize();
+          Index ghosts = 0;
+          const auto positions =
+            upload<Index>(execution, size, "Rodin ghosted positions", [&](Index* out) {
+              for (size_t i = 0; i < size; ++i)
+              {
+                const Index g = fes.getGlobalIndex(static_cast<Index>(i));
+                out[i] = (g >= begin && g < end) ? g - begin : owned + ghosts++;
+              }
+            });
+          m_table = Table{positions, static_cast<size_t>(owned + ghosts)};
+        }
+        return *m_table;
+      }
+
+    private:
+      std::mutex m_mutex;
+      Optional<Table> m_table;
+  };
+
+  /**
    * @brief Clears the pending launch error of the device runtime, so the
    * next checkLaunches() reports only the kernels launched in between.
    */

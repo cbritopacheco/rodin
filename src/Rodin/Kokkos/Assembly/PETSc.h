@@ -4202,19 +4202,10 @@ namespace Rodin::Kokkos::Variational
           read(::Kokkos::View<const PetscScalar*, Device, Unmanaged>(array, count));
         if constexpr (distributed)
         {
-          Index begin = 0, end = 0;
-          fes.getOwnershipRange(begin, end);
-          const Index owned = end - begin;
-          Index ghosts = 0;
-          auto position = ::Rodin::Kokkos::Internal::upload<Index>(
-            execution, size, "Rodin PETSc grid function positions", [&](Index* out) {
-              for (size_t i = 0; i < size; ++i)
-              {
-                const Index g = fes.getGlobalIndex(static_cast<Index>(i));
-                out[i] = (g >= begin && g < end) ? g - begin : owned + ghosts++;
-              }
-            });
-          if (owned + ghosts != static_cast<Index>(count))
+          // The positions follow from the numbering of the space alone, which
+          // keeps them between the writes of the vector.
+          const auto table = fes.getGhostedPositions();
+          if (table.size != static_cast<size_t>(count))
           {
             error = VecRestoreArrayReadAndMemType(form, &array);
             assert(error == PETSC_SUCCESS);
@@ -4225,7 +4216,7 @@ namespace Rodin::Kokkos::Variational
           ::Kokkos::parallel_for("Rodin PETSc grid function gather",
             ::Kokkos::RangePolicy<std::decay_t<decltype(execution)>>(
               execution, 0, size),
-            GhostedCoefficientsGather<MemorySpace>{res, values, position});
+            GhostedCoefficientsGather<MemorySpace>{res, values, table.positions});
         }
         // PETSc may release the array once it is restored.
         execution.fence("Rodin PETSc grid function transfer");

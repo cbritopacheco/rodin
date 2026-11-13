@@ -223,10 +223,24 @@ namespace Rodin::Variational
         return m_local.getDOFsView();
       }
 
+      /**
+       * @brief Gets the positions of the local degrees of freedom in a
+       * ghosted local form: the owned ones from the first owned global
+       * index, then the ghosts in the local order.
+       * @return Device positions, computed at the first call and kept with
+       * the space, and size of the local form.
+       */
+      auto getGhostedPositions() const
+      {
+        return m_positions.get(getMesh().getContext().getExecutionSpace(), *this);
+      }
+
     private:
       std::reference_wrapper<const MeshType> m_mesh;
       HostType m_host;
       LocalType m_local;
+      mutable ::Rodin::Kokkos::Internal::GhostedPositions<typename MeshType::MemorySpace>
+        m_positions;
   };
 }
 
