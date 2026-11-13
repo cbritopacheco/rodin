@@ -3826,6 +3826,10 @@ namespace Rodin::Assembly
    * therefore interpolated from the degrees of freedom of that face, which
    * matches the host for continuous data.
    *
+   * The device arrays of an execution are kept for the next one, which
+   * reuses them when the space and the constrained degrees of freedom have
+   * the same sizes. A copy starts without arrays.
+   *
    * @tparam Solution Solution variable type.
    * @tparam FES Device space, whose degrees of freedom provide their nodes.
    * @tparam ValueDerived Value function type.
@@ -3909,14 +3913,37 @@ namespace Rodin::Assembly
         const DOFsType dofs = fes.getDOFsView();
         const Index stride = dofs.getStride();
         const Index vdim = fes.getVectorDimension();
-        const auto attributes =
-          ::Rodin::Kokkos::Variational::Internal::uploadAttributes(execution, essBdr);
-        ::Kokkos::View<Index*, MemorySpace> owners(
-          ::Kokkos::view_alloc(execution, std::string("Rodin boundary owners")), stride);
+        // The arrays are kept between the executions: a time loop assembles
+        // the same condition at every step, and an allocation or a release
+        // waits for the device.
+        if (!m_boundary || *m_boundary != essBdr)
+        {
+          m_attributes =
+            ::Rodin::Kokkos::Variational::Internal::uploadAttributes(execution, essBdr);
+          m_boundary = essBdr;
+        }
+        const auto attributes = m_attributes;
+        if (m_owners.extent(0) != static_cast<size_t>(stride))
+        {
+          m_owners = ::Kokkos::View<Index*, MemorySpace>();
+          m_owners = ::Kokkos::View<Index*, MemorySpace>(
+            ::Kokkos::view_alloc(execution, ::Kokkos::WithoutInitializing,
+              std::string("Rodin boundary owners")),
+            stride);
+        }
+        // Only the values of the constrained degrees of freedom, written by
+        // the evaluation, are read.
+        if (m_values.extent(0) != static_cast<size_t>(stride * vdim))
+        {
+          m_values = ::Kokkos::View<Real*, MemorySpace>();
+          m_values = ::Kokkos::View<Real*, MemorySpace>(
+            ::Kokkos::view_alloc(execution, ::Kokkos::WithoutInitializing,
+              std::string("Rodin boundary values")),
+            stride * vdim);
+        }
+        const auto owners = m_owners;
+        const auto values = m_values;
         ::Kokkos::deep_copy(execution, owners, std::numeric_limits<Index>::max());
-        ::Kokkos::View<Real*, MemorySpace> values(
-          ::Kokkos::view_alloc(execution, std::string("Rodin boundary values")),
-          stride * vdim);
         const ::Rodin::Kokkos::Variational::View<Variational::FunctionBase<ValueDerived>>
           value(input.getValue());
         evaluate(execution, mesh.getView(), attributes, owners, values, value, dofs,
@@ -3930,20 +3957,30 @@ namespace Rodin::Assembly
         Index count = 0;
         ::Kokkos::parallel_reduce(
           "Rodin boundary count", range, BoundaryCount{owners}, count);
-        ::Kokkos::View<Index*, MemorySpace> indices(
-          ::Kokkos::view_alloc(execution, ::Kokkos::WithoutInitializing,
-            std::string("Rodin boundary indices")),
-          count);
-        ::Kokkos::View<Real*, MemorySpace> compact(
-          ::Kokkos::view_alloc(execution, ::Kokkos::WithoutInitializing,
-            std::string("Rodin boundary compact values")),
-          count * vdim);
+        if (m_indices.extent(0) != static_cast<size_t>(count) ||
+          m_compact.extent(0) != static_cast<size_t>(count * vdim))
+        {
+          m_indices = ::Kokkos::View<Index*, MemorySpace>();
+          m_compact = ::Kokkos::View<Real*, MemorySpace>();
+          m_indices = ::Kokkos::View<Index*, MemorySpace>(
+            ::Kokkos::view_alloc(execution, ::Kokkos::WithoutInitializing,
+              std::string("Rodin boundary indices")),
+            count);
+          m_compact = ::Kokkos::View<Real*, MemorySpace>(
+            ::Kokkos::view_alloc(execution, ::Kokkos::WithoutInitializing,
+              std::string("Rodin boundary compact values")),
+            count * vdim);
+          m_hostIndices =
+            ::Kokkos::create_mirror_view(::Kokkos::WithoutInitializing, m_indices);
+          m_hostValues =
+            ::Kokkos::create_mirror_view(::Kokkos::WithoutInitializing, m_compact);
+        }
+        const auto indices = m_indices;
+        const auto compact = m_compact;
         ::Kokkos::parallel_scan("Rodin boundary compaction", range,
           BoundaryCompaction{owners, values, indices, compact, stride, vdim});
-        const auto hostIndices =
-          ::Kokkos::create_mirror_view(::Kokkos::WithoutInitializing, indices);
-        const auto hostValues =
-          ::Kokkos::create_mirror_view(::Kokkos::WithoutInitializing, compact);
+        const auto hostIndices = m_hostIndices;
+        const auto hostValues = m_hostValues;
         ::Kokkos::deep_copy(execution, hostIndices, indices);
         ::Kokkos::deep_copy(execution, hostValues, compact);
         execution.fence("Rodin boundary values");
@@ -4219,6 +4256,33 @@ namespace Rodin::Assembly
       {
         return new Kokkos(*this);
       }
+
+    private:
+      /// @brief Essential attributes of the resident ones, when uploaded.
+      Optional<FlatSet<::Rodin::Geometry::Attribute>> m_boundary;
+
+      /// @brief Resident essential attributes.
+      ::Kokkos::View<::Rodin::Geometry::Attribute*, MemorySpace> m_attributes;
+
+      /// @brief First constrained face of every scalar degree of freedom.
+      ::Kokkos::View<Index*, MemorySpace> m_owners;
+
+      /// @brief Component r of the value of the degree of freedom i at i + r * stride.
+      ::Kokkos::View<Real*, MemorySpace> m_values;
+
+      /// @brief Constrained scalar degrees of freedom.
+      ::Kokkos::View<Index*, MemorySpace> m_indices;
+
+      /// @brief Component r of the value of the constrained k at k * vdim + r.
+      ::Kokkos::View<Real*, MemorySpace> m_compact;
+
+      /// @brief Host copy of the constrained scalar degrees of freedom.
+      decltype(::Kokkos::create_mirror_view(::Kokkos::WithoutInitializing,
+        std::declval<const ::Kokkos::View<Index*, MemorySpace>&>())) m_hostIndices;
+
+      /// @brief Host copy of the values of the constrained degrees of freedom.
+      decltype(::Kokkos::create_mirror_view(::Kokkos::WithoutInitializing,
+        std::declval<const ::Kokkos::View<Real*, MemorySpace>&>())) m_hostValues;
   };
 
   /**
