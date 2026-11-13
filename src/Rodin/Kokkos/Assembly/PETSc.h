@@ -187,11 +187,16 @@ namespace Rodin::Assembly::Internal
     /// @brief Segments of the pattern.
     std::vector<COOSegment> segments;
 
-    /// @brief Row coordinates, empty while they are released.
-    ::Kokkos::View<Index*, MemorySpace> rows;
+    /**
+     * @brief Row coordinates, empty while they are released.
+     *
+     * They are kept in the PETSc index type, which receives them and takes
+     * half of the listed indices when it is 32 bits wide.
+     */
+    ::Kokkos::View<PetscInt*, MemorySpace> rows;
 
     /// @brief Column coordinates, empty while they are released.
-    ::Kokkos::View<Index*, MemorySpace> cols;
+    ::Kokkos::View<PetscInt*, MemorySpace> cols;
 
     /// @brief Number of coordinates of the pattern.
     size_t listed = 0;
@@ -1301,14 +1306,14 @@ namespace Rodin::Assembly::Internal
       };
 
       /// @brief Copies the coordinates of a listed entry.
-      template <class Indices>
+      template <class Indices, class Results>
       struct EntryCoordinates
       {
         ::Kokkos::View<Index*, MemorySpace> entries; ///< Listed entries.
         Indices rows; ///< Row coordinates.
         Indices cols; ///< Column coordinates.
-        Indices resRows; ///< Receives the row of each listed entry.
-        Indices resCols; ///< Receives the column of each listed entry.
+        Results resRows; ///< Receives the row of each listed entry.
+        Results resCols; ///< Receives the column of each listed entry.
 
         /**
          * @brief Copies the coordinates of an entry.
@@ -1317,8 +1322,8 @@ namespace Rodin::Assembly::Internal
         KOKKOS_INLINE_FUNCTION void operator()(const size_t k) const
         {
           const Index e = entries(k);
-          resRows(k) = rows(e);
-          resCols(k) = cols(e);
+          resRows(k) = static_cast<typename Results::value_type>(rows(e));
+          resCols(k) = static_cast<typename Results::value_type>(cols(e));
         }
       };
 
@@ -1666,15 +1671,15 @@ namespace Rodin::Assembly::Internal
        * @brief Expands entry e on the masters and lists the affine values it
        * lifts, at the scanned positions.
        */
-      template <class Indices, class Scalars>
+      template <class Indices, class Results, class Scalars>
       struct Expansion
       {
         Indices rows; ///< Row coordinates.
         Indices cols; ///< Column coordinates.
         Scalars values; ///< Values of the coordinate list.
         Expansions x; ///< Expansions on the masters.
-        Indices resRows; ///< Receives the rows of the expanded contributions.
-        Indices resCols; ///< Receives the columns of the expanded contributions.
+        Results resRows; ///< Receives the rows of the expanded contributions.
+        Results resCols; ///< Receives the columns of the expanded contributions.
         Scalars resValues; ///< Receives the expanded contributions.
 
         /// @brief Receives the rows of the lifted values.
@@ -1745,16 +1750,16 @@ namespace Rodin::Assembly::Internal
        * to row @f$ r @f$ when @f$ j @f$ has a nonzero affine value
        * @f$ d_j @f$, as the host assemblies do.
        */
-      template <class Indices, class Scalars>
+      template <class Indices, class Results, class Scalars>
       static void expand(const ExecutionSpace& execution, size_t count,
         const Indices& rows, const Indices& cols, const Scalars& values,
-        const Expansions& x, const Indices& resRows, const Indices& resCols,
+        const Expansions& x, const Results& resRows, const Results& resCols,
         const Scalars& resValues, const Contributions& lifts)
       {
         ::Kokkos::parallel_scan("Rodin::Assembly::Kokkos::PETSc::expand",
           Range(execution, 0, count),
-          Expansion<Indices, Scalars>{rows, cols, values, x, resRows, resCols, resValues,
-            lifts.rows, lifts.values, lifts.offset});
+          Expansion<Indices, Results, Scalars>{rows, cols, values, x, resRows, resCols,
+            resValues, lifts.rows, lifts.values, lifts.offset});
       }
 
       /// @brief Counts position i when two index lists differ there.
@@ -1793,14 +1798,48 @@ namespace Rodin::Assembly::Internal
         return differences;
       }
 
+      /// @brief Copies coordinate i into another index type.
+      template <class From, class To>
+      struct CoordinateCopy
+      {
+        From from; ///< Coordinates copied.
+        To to; ///< Receives the coordinates.
+        size_t offset; ///< Position of the first coordinate received.
+
+        /**
+         * @brief Copies the coordinate.
+         * @param i Position of the coordinate copied.
+         */
+        KOKKOS_INLINE_FUNCTION void operator()(const size_t i) const
+        {
+          to(offset + i) = static_cast<typename To::value_type>(from(i));
+        }
+      };
+
+      /**
+       * @brief Copies coordinates into another index type.
+       * @param execution Execution space instance of the kernel.
+       * @param from Coordinates copied.
+       * @param to Receives the coordinates.
+       * @param offset Position of the first coordinate received.
+       */
+      template <class From, class To>
+      static void copyCoordinates(const ExecutionSpace& execution, const From& from,
+        const To& to, size_t offset = 0)
+      {
+        ::Kokkos::parallel_for("Rodin::Assembly::Kokkos::PETSc::copyCoordinates",
+          Range(execution, 0, from.extent(0)),
+          CoordinateCopy<From, To>{from, to, offset});
+      }
+
       /// @brief Counts coordinate e when it differs between two patterns.
-      template <class Indices>
+      template <class Indices, class Previous>
       struct ChangeCount
       {
         Indices rows; ///< Row coordinates.
         Indices cols; ///< Column coordinates.
-        Indices previousRows; ///< Row coordinates of the previous pattern.
-        Indices previousCols; ///< Column coordinates of the previous pattern.
+        Previous previousRows; ///< Row coordinates of the previous pattern.
+        Previous previousCols; ///< Column coordinates of the previous pattern.
 
         /**
          * @brief Counts the coordinate when it differs between the patterns.
@@ -1809,7 +1848,8 @@ namespace Rodin::Assembly::Internal
          */
         KOKKOS_INLINE_FUNCTION void operator()(const size_t e, size_t& sum) const
         {
-          sum += rows(e) != previousRows(e) || cols(e) != previousCols(e);
+          sum += static_cast<Index>(rows(e)) != static_cast<Index>(previousRows(e)) ||
+            static_cast<Index>(cols(e)) != static_cast<Index>(previousCols(e));
         }
       };
 
@@ -1825,15 +1865,16 @@ namespace Rodin::Assembly::Internal
        * the list by default.
        * @return Number of differing coordinates.
        */
-      template <class Indices>
+      template <class Indices, class Previous>
       static size_t countChanges(const ExecutionSpace& execution, const Indices& rows,
-        const Indices& cols, const Indices& previousRows, const Indices& previousCols,
+        const Indices& cols, const Previous& previousRows, const Previous& previousCols,
         size_t begin = 0, size_t end = std::numeric_limits<size_t>::max())
       {
         size_t changes = 0;
         ::Kokkos::parallel_reduce("Rodin::Assembly::Kokkos::PETSc::pattern",
           Range(execution, begin, std::min<size_t>(end, rows.extent(0))),
-          ChangeCount<Indices>{rows, cols, previousRows, previousCols}, changes);
+          ChangeCount<Indices, Previous>{rows, cols, previousRows, previousCols},
+          changes);
         return changes;
       }
 
@@ -2140,7 +2181,9 @@ namespace Rodin::Assembly::Internal
       {
         /// @brief Test of the starts of the distinct coordinates.
         DistinctHead<Indices, Order> head;
-        Indices starts; ///< Receives the start of each distinct coordinate.
+
+        /// @brief Receives the start of each distinct coordinate.
+        ::Kokkos::View<Index*, MemorySpace> starts;
 
         /**
          * @brief Writes the position of the sorted coordinate when it starts a
@@ -2171,16 +2214,18 @@ namespace Rodin::Assembly::Internal
        * @returns Starts of the distinct coordinates, followed by the list size.
        */
       template <class Indices, class Order>
-      static Indices distinctStarts(const ExecutionSpace& execution, const Indices& rows,
-        const Indices& cols, const Order& order)
+      static ::Kokkos::View<Index*, MemorySpace> distinctStarts(
+        const ExecutionSpace& execution, const Indices& rows, const Indices& cols,
+        const Order& order)
       {
         const size_t count = order.extent(0);
         const DistinctHead<Indices, Order> head{rows, cols, order};
         size_t distinct = 0;
         ::Kokkos::parallel_reduce("Rodin::Assembly::Kokkos::PETSc::distinct",
           Range(execution, 0, count), DistinctCount<Indices, Order>{head}, distinct);
-        Indices starts(::Kokkos::view_alloc(execution, ::Kokkos::WithoutInitializing,
-                         std::string("Rodin COO starts")),
+        ::Kokkos::View<Index*, MemorySpace> starts(
+          ::Kokkos::view_alloc(
+            execution, ::Kokkos::WithoutInitializing, std::string("Rodin COO starts")),
           distinct + 1);
         ::Kokkos::parallel_scan("Rodin::Assembly::Kokkos::PETSc::starts",
           Range(execution, 0, count), DistinctStartList<Indices, Order>{head, starts});
@@ -2195,8 +2240,9 @@ namespace Rodin::Assembly::Internal
         Indices rows; ///< Row coordinates.
         Indices cols; ///< Column coordinates.
         Order order; ///< Indices of the sorted coordinates.
-        Indices
-          starts; ///< Start of each distinct coordinate in the sorted coordinates.
+
+        /// @brief Start of each distinct coordinate in the sorted coordinates.
+        ::Kokkos::View<Index*, MemorySpace> starts;
         Coordinates distinctRows; ///< Receives the rows of the distinct coordinates.
         Coordinates distinctCols; ///< Receives the columns of the distinct coordinates.
 
@@ -2225,7 +2271,8 @@ namespace Rodin::Assembly::Internal
        */
       template <class Indices, class Order, class Coordinates>
       static void listDistinct(const ExecutionSpace& execution, const Indices& rows,
-        const Indices& cols, const Order& order, const Indices& starts,
+        const Indices& cols, const Order& order,
+        const ::Kokkos::View<Index*, MemorySpace>& starts,
         const Coordinates& distinctRows, const Coordinates& distinctCols)
       {
         ::Kokkos::parallel_for("Rodin::Assembly::Kokkos::PETSc::distinctCoordinates",
@@ -2239,8 +2286,9 @@ namespace Rodin::Assembly::Internal
       struct Restoration
       {
         Order order; ///< Indices of the sorted coordinates.
-        Indices
-          starts; ///< Start of each distinct coordinate in the sorted coordinates.
+
+        /// @brief Start of each distinct coordinate in the sorted coordinates.
+        ::Kokkos::View<Index*, MemorySpace> starts;
         Coordinates distinctRows; ///< Rows of the distinct coordinates.
         Coordinates distinctCols; ///< Columns of the distinct coordinates.
         Indices rows; ///< Receives the row coordinates.
@@ -2252,8 +2300,8 @@ namespace Rodin::Assembly::Internal
          */
         KOKKOS_INLINE_FUNCTION void operator()(const size_t u) const
         {
-          const Index row = static_cast<Index>(distinctRows(u));
-          const Index col = static_cast<Index>(distinctCols(u));
+          const auto row = static_cast<typename Indices::value_type>(distinctRows(u));
+          const auto col = static_cast<typename Indices::value_type>(distinctCols(u));
           for (Index i = starts(u); i < starts(u + 1); ++i)
           {
             const Index e = order(i);
@@ -2277,8 +2325,9 @@ namespace Rodin::Assembly::Internal
        */
       template <class Indices, class Order, class Coordinates>
       static void restore(const ExecutionSpace& execution, const Order& order,
-        const Indices& starts, const Coordinates& distinctRows,
-        const Coordinates& distinctCols, const Indices& rows, const Indices& cols)
+        const ::Kokkos::View<Index*, MemorySpace>& starts,
+        const Coordinates& distinctRows, const Coordinates& distinctCols,
+        const Indices& rows, const Indices& cols)
       {
         ::Kokkos::parallel_for("Rodin::Assembly::Kokkos::PETSc::restoreCoordinates",
           Range(execution, 0, distinctRows.extent(0)),
@@ -2631,8 +2680,8 @@ namespace Rodin::Assembly::Internal
         }
         else if (index)
         {
-          resize(cache.nextRows, count, "Rodin COO rows");
-          resize(cache.nextCols, count, "Rodin COO cols");
+          resize(cache.nextRows, count, "Rodin listed COO rows");
+          resize(cache.nextCols, count, "Rodin listed COO cols");
         }
         const ::Kokkos::View<Index*, MemorySpace> none;
         std::vector<bool> filled(segments.size(), false);
@@ -2681,10 +2730,8 @@ namespace Rodin::Assembly::Internal
             ::Kokkos::deep_copy(m_execution, cols, nextCols);
             // The pattern is sorted again from all its coordinates.
             restoreCoordinates(cache);
-            ::Kokkos::deep_copy(
-              m_execution, ::Kokkos::subview(cache.rows, moved), nextRows);
-            ::Kokkos::deep_copy(
-              m_execution, ::Kokkos::subview(cache.cols, moved), nextCols);
+            copyCoordinates(m_execution, nextRows, cache.rows, offsets[s]);
+            copyCoordinates(m_execution, nextCols, cache.cols, offsets[s]);
             changed = true;
           }
           if (changed)
@@ -2717,16 +2764,6 @@ namespace Rodin::Assembly::Internal
             changed = countChanges(m_execution, cache.nextRows, cache.nextCols,
                         cache.rows, cache.cols) > 0;
           }
-          // The previous coordinates are released rather than kept for the
-          // next listing, which is partial or rare.
-          cache.rows = std::move(cache.nextRows);
-          cache.cols = std::move(cache.nextCols);
-          cache.nextRows = {};
-          cache.nextCols = {};
-          cache.distinctRows = {};
-          cache.distinctCols = {};
-          cache.released = false;
-          cache.listed = count;
           resize(cache.restrictedRows, packed.back(), "Rodin restricted COO rows");
           resize(cache.restrictedCols, packed.back(), "Rodin restricted COO cols");
           for (size_t s = 0; s < segments.size(); ++s)
@@ -2736,10 +2773,33 @@ namespace Rodin::Assembly::Internal
             const auto from = std::make_pair(offsets[s], offsets[s + 1]);
             const auto to = std::make_pair(packed[s], packed[s + 1]);
             ::Kokkos::deep_copy(m_execution, ::Kokkos::subview(cache.restrictedRows, to),
-              ::Kokkos::subview(cache.rows, from));
+              ::Kokkos::subview(cache.nextRows, from));
             ::Kokkos::deep_copy(m_execution, ::Kokkos::subview(cache.restrictedCols, to),
-              ::Kokkos::subview(cache.cols, from));
+              ::Kokkos::subview(cache.nextCols, from));
           }
+          // The previous coordinates are released rather than kept for the
+          // next listing, which is partial or rare, and the listed ones are
+          // kept in the PETSc index type, one array after the other.
+          assert(std::max(m_rows, m_cols) <=
+            static_cast<size_t>(std::numeric_limits<PetscInt>::max()));
+          cache.rows = {};
+          cache.cols = {};
+          cache.rows = decltype(cache.rows)(
+            ::Kokkos::view_alloc(
+              m_execution, ::Kokkos::WithoutInitializing, std::string("Rodin COO rows")),
+            count);
+          copyCoordinates(m_execution, cache.nextRows, cache.rows);
+          cache.nextRows = {};
+          cache.cols = decltype(cache.cols)(
+            ::Kokkos::view_alloc(
+              m_execution, ::Kokkos::WithoutInitializing, std::string("Rodin COO cols")),
+            count);
+          copyCoordinates(m_execution, cache.nextCols, cache.cols);
+          cache.nextCols = {};
+          cache.distinctRows = {};
+          cache.distinctCols = {};
+          cache.released = false;
+          cache.listed = count;
           cache.segments = std::move(segments);
           cache.indexed = true;
           if (changed)
@@ -2773,7 +2833,7 @@ namespace Rodin::Assembly::Internal
       void eliminateListed(CacheType& cache, size_t count) const
       {
         const std::pair key{cache.pattern, cache.fixedRevision};
-        using Indices = decltype(cache.rows);
+        using Indices = decltype(cache.movedRows);
         if (cache.elimination != key || cache.eliminationCount != count)
         {
           restoreCoordinates(cache);
@@ -2786,8 +2846,8 @@ namespace Rodin::Assembly::Internal
           resize(cache.movedCols, cache.movedEntries.extent(0), "Rodin eliminated cols");
           ::Kokkos::parallel_for("Rodin::Assembly::Kokkos::PETSc::eliminatedCoordinates",
             Range(m_execution, 0, cache.movedEntries.extent(0)),
-            EntryCoordinates<Indices>{cache.movedEntries, cache.rows, cache.cols,
-              cache.movedRows, cache.movedCols});
+            EntryCoordinates<decltype(cache.rows), Indices>{cache.movedEntries,
+              cache.rows, cache.cols, cache.movedRows, cache.movedCols});
           cache.elimination = key;
           cache.eliminationCount = count;
         }
@@ -3157,7 +3217,7 @@ namespace Rodin::Assembly::Internal
       template <class Indices, class Scalars>
       void setMatrix(CacheType& cache, ::Mat A, bool expanded, const Indices& coordRows,
         const Indices& coordCols, const COOOrder<MemorySpace>& order,
-        const Indices& starts, const Scalars& values) const
+        const ::Kokkos::View<Index*, MemorySpace>& starts, const Scalars& values) const
       {
         PetscErrorCode ierr;
         PetscInt64 id = -1;
