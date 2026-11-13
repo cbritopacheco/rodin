@@ -466,7 +466,7 @@ namespace Rodin::Tests::Unit::Solver
     // The advection term makes the operator unsymmetric.
     const auto check = [&](const auto& beta) {
       Problem problem(u, v);
-      problem = Integral(Grad(u), Grad(v)) + Integral(Dot(beta, Grad(u)), v) -
+      problem = Integral{Grad{u}, Grad{v}} + Integral{Dot(beta, Grad{u}), v} -
         Integral(f, v) + DirichletBC(u, Zero());
 
       Rodin::Solver::RocSolverRF solver(problem);
