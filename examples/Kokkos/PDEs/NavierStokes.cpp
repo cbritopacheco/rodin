@@ -16,7 +16,6 @@
 #include <Rodin/IO/XDMF.h>
 #include <Rodin/Kokkos.h>
 #include <Rodin/Kokkos/Solver.h>
-#include <Rodin/Kokkos/Solver.h>
 
 #if defined(KOKKOS_ENABLE_CUDA)
 using Backend = Rodin::Context::CUDA;

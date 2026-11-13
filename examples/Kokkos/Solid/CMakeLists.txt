@@ -1,7 +1,7 @@
 add_executable(KokkosBlockGravity BlockGravity.cpp)
 target_link_libraries(KokkosBlockGravity
   PUBLIC
-  Rodin::Kokkos
+  Rodin::Kokkos::Kernels
   Rodin::Solid
   Rodin::Solver
   Rodin::Variational
@@ -11,7 +11,7 @@ target_link_libraries(KokkosBlockGravity
 add_executable(KokkosCantileverBeam CantileverBeam.cpp)
 target_link_libraries(KokkosCantileverBeam
   PUBLIC
-  Rodin::Kokkos
+  Rodin::Kokkos::Kernels
   Rodin::Solid
   Rodin::Solver
   Rodin::Variational

@@ -161,4 +161,29 @@ namespace Rodin::Tests::Unit
     const auto source = withClosure(makeTriangleMesh());
     visitLaws([&](const auto& law) { checkNewton(law, source); });
   }
+
+  /// @brief An unloaded dynamic body converges without a Krylov solve.
+  TEST(Kokkos_Variational_InternalVirtualWork, NewtonAtRest)
+  {
+    const auto source = withClosure(makeTriangleMesh());
+    const DeviceMesh mesh(TestContext{}, source);
+    P1 space(mesh, 2);
+    GridFunction state(space);
+    state = Zero(2);
+    TrialFunction du(space);
+    TestFunction v(space);
+    const Solid::NeoHookean law(Real(1.2), Real(0.8));
+    const auto work = Solid::InternalVirtualWork(law, state);
+    Problem problem(du, v);
+    problem =
+      work(du, v) + Integral(du, v) + Integral(state, v) + DirichletBC(du, Zero(2));
+    Solver::GMRES linear(problem);
+    Solver::NewtonSolver newton(linear);
+    newton.setAbsoluteTolerance(1e-10).solve(state);
+    EXPECT_TRUE(newton.converged());
+    EXPECT_EQ(newton.getReport().iterations, 0u);
+    EXPECT_EQ(linear.getIterationNumber(), 0u);
+    EXPECT_EQ(state.getData().norm(), Real(0));
+  }
+
 }

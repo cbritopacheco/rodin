@@ -12,7 +12,8 @@
  * Device port of examples/Solid/CantileverBeam.cpp. The Newmark predictors
  * and correctors act on the coefficient vectors, and the Neo-Hookean tangent
  * and residual are assembled by a device kernel at each Newton iteration,
- * and solved on the device by cuDSS or RocSolverRF when Rodin has them.
+ * and solved on the device by cuDSS or RocSolverRF when available, with
+ * Kokkos GMRES as the portable fallback.
  * The discrete derivative check of the host example is kept.
  */
 #include <array>
@@ -155,6 +156,28 @@ namespace
     VectorType eta = makeDeterministicPerturbation(x);
     applyHomogeneousDirichletToVector(eta, dbc);
 
+    // On P1 triangles the gradients are constant on each cell. Bound
+    // ||F^{-1} Grad(eta)|| by one, so every epsilon below one preserves
+    // the positive determinant of the base deformation gradient.
+    GridFunctionType direction(u.getFiniteElementSpace());
+    direction.setData(eta);
+    const Rodin::Variational::Jacobian directionGradient(direction);
+    const Rodin::Variational::Jacobian baseGradient(u);
+    const auto& mesh = u.getFiniteElementSpace().getMesh();
+    Real relativeGradient = 0;
+    for (auto cell = mesh.getCell(); !cell.end(); ++cell)
+    {
+      const Rodin::Geometry::Point point(
+        *cell, Rodin::Math::SpatialPoint::Zero(mesh.getDimension()));
+      auto F = baseGradient(point);
+      for (Index i = 0; i < static_cast<Index>(F.rows()); ++i)
+        F(i, i) += 1;
+      relativeGradient =
+        std::max(relativeGradient, (F.inverse() * directionGradient(point)).norm());
+    }
+    if (relativeGradient > 1)
+      eta /= relativeGradient;
+
     const VectorType Jeta = A * eta;
 
     std::cout << "\n============================================================\n";
@@ -285,12 +308,10 @@ int main(int argc, char** argv)
   TestFunction w(vh);
   auto ivw = Solid::InternalVirtualWork(law, u);
 
-  // The problem and the solvers outlive the time loop: the sparsity pattern
-  // is the same at every Newton iteration of every step, so cuDSS and
-  // RocSolverRF keep their symbolic analysis and SparseLU its ordering, and
-  // each iteration only refactorizes the tangent. With a device solver the
-  // tangent stays in the memory of the backend, where the solver reads it
-  // in place.
+  // The problem and solvers outlive the time loop. Vendor direct solvers
+  // retain their symbolic analysis and refactorize each Newton tangent;
+  // the portable GMRES fallback reads each updated tangent in place.
+  // Both paths keep the matrix and coefficient vectors on the backend.
 #if defined(RODIN_USE_CUDSS) || defined(RODIN_USE_ROCSOLVER)
   using System = Math::LinearSystem<Rodin::Kokkos::Math::SparseMatrix<Real, Backend>,
     Rodin::Kokkos::Math::Vector<Real, Backend>>;
@@ -302,7 +323,10 @@ int main(int argc, char** argv)
 #endif
 #else
   Problem newton(du, w);
-  Solver::SparseLU linearSolver(newton);
+  Solver::GMRES linearSolver(newton);
+  // Resolve linear corrections more tightly than the outer Newton tolerance.
+  constexpr Real linearRelativeTolerance = 1e-12;
+  linearSolver.setTolerance(linearRelativeTolerance);
 #endif
   Solver::NewtonSolver solver(linearSolver);
   solver.setMaxIterations(50)
@@ -332,7 +356,7 @@ int main(int argc, char** argv)
 
     if (step == 1)
     {
-      // The check multiplies the tangent on the host.
+      // Check the assembled tangent against finite differences of the residual.
       Problem check(du, w);
       define(check, ty);
       checkDiscreteDerivative(check, u, dbcMap);
@@ -340,7 +364,7 @@ int main(int argc, char** argv)
 
     define(newton, ty);
     solver.solve(u);
-    if (!linearSolver.success())
+    if (!solver.converged())
       return EXIT_FAILURE;
 
     std::cout << "Step " << step << ", time " << t << std::endl;
