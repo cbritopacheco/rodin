@@ -269,6 +269,20 @@ python3 ~/rodin-valve/examples/Valve/seat_designs.py --designs fillet,rampup,ram
     --meshes ~/rodin-valve/resources/examples/Valve/seat --opening 25 -o seat_designs2.pdf
 ```
 
+**Tercera ronda, diseño D (`lip`), `run_valves_seat3.sh`.** Bidireccional:
+labios verticales de 1.6 mm sobre el fondo a ambos lados (sello y retención
+sea cual sea el sentido del flujo), rampas de 30° y 1.8 mm de hondo hasta el
+diámetro a ambos lados, borde al diámetro redondeado R 3 (tangente), esquinas
+del fondo R 0.6; la arista labio-rampa queda obtusa (150°), porque redondeada
+dejaría una cuña de fluido de ángulo cero contra la cara del cuchillo donde
+éste entra en la ranura (costados, aperturas pequeñas). Es un chaflán más
+hondo que B y sin sus esquinas del fondo. Aperturas 5, 10 y 25 %, mismas
+condiciones que la segunda ronda.
+
+```sh
+NP=45 NJOBS=3 bash ~/rodin-valve/examples/Valve/run_valves_seat3.sh
+```
+
 `seat_stats.py` promedia en el tiempo los campos guardados (tras el
 transitorio) en la **zona del sello** (y < 0, |z| ≤ 25 mm, fuera del
 diámetro o a menos de 1 mm de él) y reporta: ū media y percentil 10,

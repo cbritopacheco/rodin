@@ -70,6 +70,28 @@ def ramp_pocket(sign):
     return out if sign > 0 else out[::-1]
 
 
+def lip_pocket():
+    """Pocket outline of the "lip" seat (local z, y = r_bore - r), as
+    make_meshes.lip_profile_solid."""
+    h = 0.5 * t
+    rl = d - mm.LIP_LAND  # depth of the top of the lands
+    L = rl / math.tan(math.radians(mm.LIP_DEG))
+    right = [(h, d), (h, rl), (h + L, 0.0)]
+    corners = [(-z, r) for z, r in right[::-1]] + right
+    radii = [mm.LIP_RB, 0.0, mm.LIP_R, mm.LIP_R, 0.0, mm.LIP_RB]
+    ext = [(corners[0][0] - 20.0, 0.0)] + corners + [(corners[-1][0] + 20.0, 0.0)]
+    out = []
+    for i, rho in enumerate(radii):
+        P, A, B = ext[i + 1], ext[i], ext[i + 2]
+        if rho <= 0:
+            out.append(P); continue
+        a_, b_, c_ = mm._fillet(P, A, B, rho)
+        th0 = math.atan2(a_[1] - c_[1], a_[0] - c_[0]); th1 = math.atan2(b_[1] - c_[1], b_[0] - c_[0])
+        dth = (th1 - th0 + math.pi) % (2 * math.pi) - math.pi
+        out += [(c_[0] + rho * math.cos(th0 + k * dth / 20), c_[1] + rho * math.sin(th0 + k * dth / 20)) for k in range(21)]
+    return [(z, -r) for z, r in out]
+
+
 def liner_patch(ax, seat, zmax):
     """Liner below the bore surface with the pocket of the design."""
     depth = 14.0
@@ -90,6 +112,8 @@ def liner_patch(ax, seat, zmax):
         pocket = ramp_pocket(-1.0)
     elif seat == "rampdn":
         pocket = ramp_pocket(+1.0)
+    elif seat == "lip":
+        pocket = lip_pocket()
     pts = [(-zmax, 0)] + pocket + [(zmax, 0), (zmax, -depth), (-zmax, -depth)]
     ax.add_patch(Polygon(pts, closed=True, fc=LINER, ec="k", lw=0.8, hatch="//"))
 
@@ -180,6 +204,9 @@ def main():
              mm.RAMP2_DEG, d / math.tan(math.radians(mm.RAMP2_DEG)), mm.RAMP2_FR, mm.RAMP2_FB, fil)),
         ("rampdn", "A+C — rampa corta aguas abajo",
          "La misma, invertida: pared vertical aguas\narriba, rampa aguas abajo (el flujo choca con\nla pared y sale por la rampa). Equivale al\ncaso anterior con el flujo invertido."),
+        ("lip", "D — doble rampa con labio",
+         "Bidireccional: labios verticales de %g mm a ambos\nlados (sello y retención), rampas de %g° y %.1f mm\nde hondo, borde al diámetro R %g, fondo R %g.\nUn chaflán más hondo y sin esquinas en el fondo." % (
+             mm.LIP_LAND, mm.LIP_DEG, d - mm.LIP_LAND, mm.LIP_RB, mm.LIP_R)),
     ]
     want = a.designs.split(",")
     designs = [x for x in designs if x[0] in want]

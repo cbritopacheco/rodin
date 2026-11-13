@@ -50,7 +50,7 @@ import postprocess_valves as pv  # noqa: E402
 
 BORE = {"FPC8": 101.6e-3, "FPC16": 191.0e-3}  # m, radius
 DESIGN = {"": "CAD", "fillet": "A radios", "chamfer": "B chaflanes", "upramp": "C rampa",
-          "rampup": "A+C arriba", "rampdn": "A+C abajo"}
+          "rampup": "A+C arriba", "rampdn": "A+C abajo", "lip": "D labio"}
 
 
 def fluid_params(log):
@@ -225,7 +225,7 @@ def main():
     pdf.savefig(fig); plt.close(fig)
     # ---- metrics against the design ------------------------------------------
     openings = sorted({r_["opening_pct"] for r_ in rows})
-    designs = [d_ for d_ in ("cad", "fillet", "chamfer", "upramp", "rampup", "rampdn") if any(r_["design"] == d_ for r_ in rows)]
+    designs = [d_ for d_ in ("cad", "fillet", "chamfer", "upramp", "rampup", "rampdn", "lip") if any(r_["design"] == d_ for r_ in rows)]
     fig, axs = plt.subplots(1, 3, figsize=(11.7, 4.2))
     for ax, key, title in zip(axs, ("u_mean", "f_slow_0.1", "f_unyielded"),
                               ("ū en la zona del sello [m/s]", "fracción con ū < 0.1 m/s", "fracción sin fluir (τ < τ_y)")):

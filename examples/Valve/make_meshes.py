@@ -72,7 +72,18 @@ ATTR_INLET, ATTR_OUTLET, ATTR_WALL, ATTR_KNIFE = 1, 2, 3, 4
 #            rounded (RAMP2_FB, tangent to the bore).
 #   rampdn   the same mirrored: ramp on the downstream side, vertical wall
 #            upstream (flow against the ramp).
-SEATS = ("cad", "fillet", "chamfer", "upramp", "rampup", "rampdn")
+#   lip      bidirectional: vertical lands LIP_LAND deep above the floor on
+#            both sides (the knife is retained and seals on them and on the
+#            floor, whatever the flow direction), then ramps of LIP_DEG to
+#            the bore on both sides; floor corners rounded LIP_R, ramp-bore
+#            edges rounded LIP_RB (tangent to the bore), land-ramp edges
+#            obtuse (150 deg). A chamfer deeper than "chamfer" and without
+#            its corners.
+SEATS = ("cad", "fillet", "chamfer", "upramp", "rampup", "rampdn", "lip")
+LIP_LAND = 1.6
+LIP_DEG = 30.0
+LIP_R = 0.6
+LIP_RB = 3.0
 RAMP2_DEG = 25.0
 RAMP2_FR = 2.0
 RAMP2_FB = 4.0
@@ -136,6 +147,57 @@ def ramp_profile_solid(R, Rk, t, sign):
     return [e for e in out if e[0] == 3]
 
 
+def profile_solid(corners, radii, R):
+    """Solid of revolution about the pipe axis of a pocket profile in the
+    (z, r) half-plane: the corner polyline (it starts and ends on the bore,
+    r = R, and runs outside it), each corner rounded with its radius, the
+    first and last corners rounded tangent to the bore; closed inside the
+    bore at r = R - 1."""
+    occ = gmsh.model.occ
+    n = len(corners)
+    ext = [(corners[0][0] - 20.0 * math.copysign(1.0, corners[1][0] - corners[0][0]), R)] + list(corners) + \
+          [(corners[-1][0] + 20.0 * math.copysign(1.0, corners[-1][0] - corners[-2][0]), R)]
+    arcs = [_fillet(ext[i + 1], ext[i], ext[i + 2], radii[i]) if radii[i] > 0 else None for i in range(n)]
+
+    def pt(p):  # (z, r) -> (x = r, y = 0, z)
+        return occ.addPoint(float(p[1]), 0.0, float(p[0]))
+
+    q_start = pt((arcs[0][0][0], R - 1.0))
+    q_end = pt((arcs[-1][1][0], R - 1.0))
+    curves, prev = [], q_start
+    for i, arc in enumerate(arcs):
+        if arc is None:  # sharp corner
+            pc_ = pt(corners[i])
+            curves.append(occ.addLine(prev, pc_))
+            prev = pc_
+            continue
+        a_, b_, c_ = arc
+        pa, pb, pc = pt(a_), pt(b_), pt(c_)
+        curves.append(occ.addLine(prev, pa))
+        curves.append(occ.addCircleArc(pa, pc, pb))
+        prev = pb
+    curves += [occ.addLine(prev, q_end), occ.addLine(q_end, q_start)]
+    face = occ.addPlaneSurface([occ.addCurveLoop(curves)])
+    out = occ.revolve([(2, face)], 0, 0, 0, 0, 0, 1, 2 * math.pi)
+    return [e for e in out if e[0] == 3]
+
+
+def lip_profile_solid(R, Rk, t):
+    """Pocket of the "lip" seat (see SEATS)."""
+    h = 0.5 * t
+    rl = Rk - LIP_LAND  # top of the lands
+    L = (rl - R) / math.tan(math.radians(LIP_DEG))
+    right = [(h, Rk), (h, rl), (h + L, R)]
+    left = [(-z, r) for z, r in right[::-1]]
+    corners = left + right
+    # The land-ramp corners stay sharp (150 deg, obtuse): rounded, the land
+    # would leave the knife face tangentially and a zero-angle fluid wedge
+    # would form wherever the knife slides along it (sides of the bore at
+    # small openings).
+    radii = [LIP_RB, 0.0, LIP_R, LIP_R, 0.0, LIP_RB]
+    return profile_solid(corners, radii, R)
+
+
 def seat_solid(seat, R, Rk, t):
     """The pocket of the modified seat in the lower half of the bore (y < 0),
     overlapping the bore (r >= R - 1) so that it fuses cleanly with the pipe.
@@ -160,6 +222,9 @@ def seat_solid(seat, R, Rk, t):
     elif seat in ("rampup", "rampdn"):
         parts = None
         solid = ramp_profile_solid(R, Rk, t, -1.0 if seat == "rampup" else 1.0)
+    elif seat == "lip":
+        parts = None
+        solid = lip_profile_solid(R, Rk, t)
     else:
         raise ValueError(seat)
     if parts is not None:
