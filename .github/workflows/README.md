@@ -16,7 +16,7 @@ can share compilation without sharing runtime state.
 | Dedicated family workflows (for example [TestConvergence.yml](TestConvergence.yml)) | Generated single-family execution workflows, preserving numerical commands and rank partitions. |
 | [TestDirectoryBuild.yml](TestDirectoryBuild.yml) | Compile module/study-type groups using unchanged common objects. |
 | [CoveragePublish.yml](CoveragePublish.yml) | Validate every expected lane contribution and submit an incremental production line union to Codecov. |
-| [Build.yml](Build.yml) | Independent compilation checks across build types, threading and backend configurations. |
+| [Build.yml](Build.yml) | Independent CPU compilation checks across build types, threading and backend configurations, plus CUDA, HIP and SYCL compilation of Kokkos tests and examples in the images of `dev/docker/kokkos`. |
 | [Style.yml](Style.yml) | Formatting, house-style, naming and documentation-warning checks, including their tooling regressions. |
 | [Documentation.yml](Documentation.yml) | Independent documentation build and publication on master/develop pushes; build and checks only on pull requests. |
 | [Benchmarks.yml](Benchmarks.yml) | Validates performance benchmarks on ready PRs and main-branch pushes; publishes complete campaigns from master/develop. |
@@ -108,6 +108,11 @@ is resolved to the selected fallback transport; otherwise all attempts would
 keep consulting the original failing mirror list. Candidate-version discovery
 and installation-plan simulation use those same selected source definitions.
 Mirror fallback leaves the remaining third-party source definitions unchanged.
+Snapshot environments resolve Ubuntu mirror lists before their first update
+and explicitly map fallback hosts to the signed Ubuntu snapshot service. This
+ensures a fresh mirror schedules the pinned indexes before it has cached Release
+metadata. Index refreshes omit translations and command-not-found metadata
+within the existing 90-second budget.
 Final installation is offline, allows no package removals and has a
 900-second budget; configuration failures are not retried as download failures.
 Exhausted mirrors fail the job rather than skip its tests.
@@ -753,3 +758,27 @@ the validated Python 3.12.0 and Boost 1.74 environment after `ubuntu-latest`
 moved to Ubuntu 26.04. Runner changes require reviewing dependency availability
 and rerunning the complete configurations; compiler, numerical and coverage
 requirements remain unchanged.
+
+### Stable package snapshots for shared builds
+
+Shared test and benchmark environments resolve Ubuntu packages against
+`SHARED_APT_SNAPSHOT` in `dev/ci_environment.py`, through APT's signed
+[snapshot service](https://snapshot.ubuntu.com/). Both build producers and
+execution consumers use the same timestamp. Updating this pin is a dependency
+update and requires a new campaign; retries and archive restores retain it.
+The package preferences select the snapshot versions over newer preinstalled
+runner packages. Exact-version downgrades are permitted only for these
+snapshot installs. Signature checks, bounded downloads, no-removal installs,
+and runtime-library hash validation remain enforced. Mirror fallback retains
+the snapshot timestamp and cannot silently switch to the live archive.
+
+The 2026-11-12 campaign built against glibc `2.39-0ubuntu8.9`; consumers several
+hours later resolved `2.39-0ubuntu8.12`. Identical top-level package requests
+therefore failed the runtime hash check. The snapshot fixes that archive drift
+without weakening compatibility validation.
+
+Explicit CTest fixture producers declared under `examples/` set the
+`RODIN_TEST_OWNER` target property to their owning test directory and declare
+`RODIN_TEST_PROFILES`. They then participate in the same executable manifest,
+build selection, runtime inventory and fixture-preserving CTest execution as
+ordinary test targets.

@@ -93,7 +93,7 @@ class PagesTest(unittest.TestCase):
                                 for step in definition['steps']))
         action = yaml.safe_load((ROOT / '.github/actions/publish-pages/action.yml').read_text())
         steps = action['runs']['steps']
-        self.assertEqual(steps[1]['uses'], 'actions/upload-pages-artifact@v4')
+        self.assertEqual(steps[1]['uses'], 'actions/upload-pages-artifact@v5')
         self.assertEqual(steps[2]['uses'], 'actions/github-script@v8')
         self.assertEqual(steps[2]['env']['SNAPSHOT'], '${{ steps.snapshot.outputs.commit }}')
         self.assertEqual(steps[2]['env']['ARTIFACT_ID'], '${{ steps.artifact.outputs.artifact_id }}')

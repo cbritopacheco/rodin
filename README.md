@@ -69,6 +69,9 @@ Rodin can be easily installed from source on Linux and macOS systems.
 - OpenMP (for parallel execution)
 - SuiteSparse (for additional linear solvers)
 - MPI (for distributed computing)
+- PETSc (for distributed Krylov solvers and preconditioners)
+- Kokkos 4.2+, with Kokkos-Kernels, for assembly and solvers on NVIDIA, AMD
+  or Intel GPUs (validated with Kokkos 5.2.2)
 
 ### Quick Install
 
@@ -367,6 +370,19 @@ Rodin provides many powerful features for finite element analysis.
 - Gauss-Legendre quadrature
 - See the [complete list of quadrature formulas](https://cbritopacheco.github.io/rodin/docs/refs/heads/master/namespace_rodin_1_1_q_f.html)
 
+**GPU and Distributed Computing:**
+- Meshes resident in GPU memory, with assembly and solvers on NVIDIA (CUDA),
+  AMD (HIP) and Intel (SYCL) GPUs through Kokkos
+- P1, H1 and P0g spaces on the GPU, with multi-field systems
+- Distributed meshes and spaces with MPI, on the CPU or with one GPU per
+  process
+- GPU solvers: Kokkos-Kernels CG and GMRES, hypre BoomerAMG, PETSc Krylov
+  solvers and preconditioners, and the direct solvers cuDSS (NVIDIA) and
+  rocSOLVER (AMD)
+- See the [Kokkos guide](https://cbritopacheco.github.io/rodin/docs/refs/heads/master/guides-kokkos.html), with its
+  [known limitations and workarounds](https://cbritopacheco.github.io/rodin/docs/refs/heads/master/guides-kokkos.html#guides-kokkos-limitations),
+  and the [MPI guide](https://cbritopacheco.github.io/rodin/docs/refs/heads/master/guides-mpi.html)
+
 **Advanced Mesh Operations:**
 - SubMesh extraction for domain decomposition
 - Mesh partitioning for parallel computing
@@ -394,6 +410,12 @@ Rodin provides comprehensive documentation covering all aspects of the library.
 - [Queries](https://cbritopacheco.github.io/rodin/docs/refs/heads/master/guides-meshes-queries.html) - Geometric measurements
 - [I/O](https://cbritopacheco.github.io/rodin/docs/refs/heads/master/guides-meshes-io.html) - File formats and operations
 - [Utilities](https://cbritopacheco.github.io/rodin/docs/refs/heads/master/guides-meshes-utilities.html) - Advanced operations
+
+**Solvers and Parallel Computing:**
+- [Solvers](https://cbritopacheco.github.io/rodin/docs/refs/heads/master/guides-solvers.html) - Direct and iterative solvers, on the CPU and the GPU
+- [MPI](https://cbritopacheco.github.io/rodin/docs/refs/heads/master/guides-mpi.html) - Distributed meshes, spaces and systems
+- [Kokkos](https://cbritopacheco.github.io/rodin/docs/refs/heads/master/guides-kokkos.html) - GPU assembly and solvers on CUDA, HIP and SYCL
+- [Backends](https://cbritopacheco.github.io/rodin/docs/refs/heads/master/guides-backends.html) - Supported configurations
 
 ### Examples
 
@@ -462,21 +484,24 @@ manager.
 
 ## CMake options
 
-| Option                 | Description                                       |
-|------------------------|---------------------------------------------------|
-| RODIN_BUILD_EXAMPLES   | Builds the examples in the `examples/` directory. |
-| RODIN_BUILD_DOC        | Builds the documentation using Doxygen            |
-| RODIN_USE_MCSS         | Builds the documentation using Doxygen and m.css  |
-| RODIN_BUILD_SRC        | Build the Rodin source code                       |
-| RODIN_BUILD_EXAMPLES   | Build the Rodin examples                          |
-| RODIN_BUILD_DOC        | Build the Rodin documentation                     |
-| RODIN_USE_MCSS         | Use m.css style documentation                     |
-| RODIN_WITH_PLOT        | Build the Rodin::Plot module                      |
-| RODIN_USE_MPI          | Build with MPI support                            |
-| RODIN_USE_OPENMP       | Build with OpenMP support                         |
-| RODIN_USE_SUITESPARSE  | Build with SuiteSparse support                    |
-| RODIN_SILENCE_WARNINGS | Silence warnings outputted by Rodin               |
-| RODIN_BUILD_PY         | Build Python bindings                             |
+| Option                  | Description                                    |
+|-------------------------|------------------------------------------------|
+| RODIN_BUILD_SRC         | Build the Rodin source code                    |
+| RODIN_BUILD_EXAMPLES    | Build the examples in the `examples/` directory |
+| RODIN_BUILD_DOC         | Build the documentation with Doxygen           |
+| RODIN_USE_MCSS          | Build the documentation with m.css             |
+| RODIN_USE_MPI           | Build with MPI support                          |
+| RODIN_USE_PETSC         | Build with PETSc support (ON by default)       |
+| RODIN_USE_KOKKOS        | Build the Rodin::Kokkos GPU module             |
+| RODIN_USE_HYPRE         | Build with hypre support (BoomerAMG)           |
+| RODIN_USE_CUDSS         | Build with the NVIDIA cuDSS direct solver      |
+| RODIN_USE_ROCSOLVER     | Build with the AMD rocSOLVER direct solver     |
+| RODIN_USE_OPENMP        | Build with OpenMP support                      |
+| RODIN_USE_UMFPACK       | Build with the SuiteSparse UMFPACK solver      |
+| RODIN_SILENCE_WARNINGS  | Silence warnings outputted by Rodin            |
+| RODIN_WITH_PY           | Build Python bindings                          |
+
+[INSTALL.md](INSTALL.md#cmake-configuration-options) lists every option.
 
 ## Benchmark machine
 

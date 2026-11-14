@@ -31,6 +31,7 @@
 
 #include "Rodin/Assembly/AssemblyBase.h"
 #include "Rodin/PETSc/Assembly/ConstraintMap.h"
+#include "Rodin/PETSc/Assembly/FieldLayout.h"
 #include "Rodin/Alert/MemberFunctionException.h"
 #include "Rodin/Alert/Raise.h"
 #include "Rodin/MPI/Assembly.h"
@@ -136,7 +137,8 @@ namespace Rodin::Assembly
        */
       MPI* copy() const noexcept override
       {
-        return new MPI(*this);
+        // The CUDA front end does not parse the injected class name here.
+        return new auto(*this);
       }
   };
 
@@ -245,7 +247,8 @@ namespace Rodin::Assembly
        */
       MPI* copy() const noexcept override
       {
-        return new MPI(*this);
+        // The CUDA front end does not parse the injected class name here.
+        return new auto(*this);
       }
   };
 
@@ -430,7 +433,8 @@ namespace Rodin::Assembly
        */
       MPI* copy() const noexcept override
       {
-        return new MPI(*this);
+        // The CUDA front end does not parse the injected class name here.
+        return new auto(*this);
       }
   };
 
@@ -1130,7 +1134,8 @@ namespace Rodin::Assembly
        */
       MPI* copy() const noexcept override
       {
-        return new MPI(*this);
+        // The CUDA front end does not parse the injected class name here.
+        return new auto(*this);
       }
   };
 
@@ -1324,6 +1329,21 @@ namespace Rodin::Assembly
           localCols += (ce - cb);
         });
 
+        // Rows and columns of the degrees of freedom in the PETSc layout.
+        const auto layout = [&](auto& fns, const auto& offsets) {
+          std::vector<PETSc::Assembly::FieldLayout::Field> fields;
+          fns.iapply([&](size_t i, const auto& ref) {
+            size_t first, last;
+            ref.get().getFiniteElementSpace().getOwnershipRange(first, last);
+            fields.push_back({static_cast<PetscInt>(offsets[i]),
+              static_cast<PetscInt>(first), static_cast<PetscInt>(last - first)});
+          });
+          return PETSc::Assembly::FieldLayout(axb.getCommunicator(), fields);
+        };
+        const PETSc::Assembly::FieldLayout rowOf = layout(vs, testOffsets);
+        const PETSc::Assembly::FieldLayout colOf = layout(us, trialOffsets);
+        axb.setFieldStarts(colOf.getFieldStarts());
+
         PetscErrorCode ierr;
 
         bool hasIdentifications = false;
@@ -1456,7 +1476,7 @@ namespace Rodin::Assembly
             if (!constraints.isFixed(row) && constraints.isFixed(col))
             {
               const PetscScalar shift = -val * constraints.getFixedValue(col);
-              ierr = VecSetValue(b, static_cast<PetscInt>(row), shift, ADD_VALUES);
+              ierr = VecSetValue(b, rowOf(static_cast<PetscInt>(row)), shift, ADD_VALUES);
               assert(ierr == PETSC_SUCCESS);
             }
             return;
@@ -1466,7 +1486,7 @@ namespace Rodin::Assembly
             : PetscScalar(0);
           for (const auto& r : constraints.expand(row))
           {
-            const PetscInt I = static_cast<PetscInt>(r.index);
+            const PetscInt I = rowOf(static_cast<PetscInt>(r.index));
             if (colValue != PetscScalar(0))
             {
               const PetscScalar rhsShift = -Math::conj(r.coefficient) * val * colValue;
@@ -1476,7 +1496,7 @@ namespace Rodin::Assembly
             }
             for (const auto& c : constraints.expand(col))
             {
-              const PetscInt J = static_cast<PetscInt>(c.index);
+              const PetscInt J = colOf(static_cast<PetscInt>(c.index));
               const PetscScalar v = Math::conj(r.coefficient) * val * c.coefficient;
               // Insert unconditionally. PETSc decides whether zero-valued
               // insertions affect the pattern according to its current
@@ -1493,7 +1513,7 @@ namespace Rodin::Assembly
             return;
           for (const auto& r : constraints.expand(row))
           {
-            const PetscInt I = static_cast<PetscInt>(r.index);
+            const PetscInt I = rowOf(static_cast<PetscInt>(r.index));
             const PetscScalar v = Math::conj(r.coefficient) * val;
             ierr = VecSetValue(b, I, v, ADD_VALUES);
             assert(ierr == PETSC_SUCCESS);
@@ -1782,7 +1802,7 @@ namespace Rodin::Assembly
           for (const Index gs : constraints.getIdentifiedRows())
           {
             if (ownsTrialGlobal(gs))
-              rowsToZero.push_back(static_cast<PetscInt>(gs));
+              rowsToZero.push_back(rowOf(static_cast<PetscInt>(gs)));
           }
 
           // MatZeroRows bumps the matrix's nonzero-state counter even when it
@@ -1816,14 +1836,14 @@ namespace Rodin::Assembly
             {
               if (!ownsTrialGlobal(gs))
                 continue;
-              const PetscInt I = static_cast<PetscInt>(gs);
+              const PetscInt I = rowOf(static_cast<PetscInt>(gs));
               const PetscScalar one = 1.0;
-              ierr = MatSetValue(A, I, I, one, ADD_VALUES);
+              ierr = MatSetValue(A, I, colOf(static_cast<PetscInt>(gs)), one, ADD_VALUES);
               assert(ierr == PETSC_SUCCESS);
               (void)ierr;
               for (const auto& e : constraints.expand(gs))
               {
-                const PetscInt J = static_cast<PetscInt>(e.index);
+                const PetscInt J = colOf(static_cast<PetscInt>(e.index));
                 const PetscScalar v = -e.coefficient;
                 ierr = MatSetValue(A, I, J, v, ADD_VALUES);
                 assert(ierr == PETSC_SUCCESS);
@@ -1862,7 +1882,7 @@ namespace Rodin::Assembly
         {
           if (constraints.isFixed(i) && ownsTrialGlobal(i))
           {
-            bcIdx.push_back(static_cast<PetscInt>(i));
+            bcIdx.push_back(rowOf(static_cast<PetscInt>(i)));
             bcVals.push_back(constraints.getFixedValue(i));
           }
         }
@@ -1945,7 +1965,8 @@ namespace Rodin::Assembly
        */
       MPI* copy() const noexcept override
       {
-        return new MPI(*this);
+        // The CUDA front end does not parse the injected class name here.
+        return new auto(*this);
       }
   };
 }

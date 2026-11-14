@@ -33,6 +33,8 @@
 #include <boost/mpi/communicator.hpp>
 #include <petscmat.h>
 #include <petscvec.h>
+#include <string>
+#include <vector>
 
 #include "Rodin/Alert/MemberFunctionException.h"
 #include "Rodin/Math/LinearSystem.h"
@@ -192,7 +194,7 @@ namespace Rodin::Math
           /// @brief Destroys all owned PETSc index sets and clears the splits.
           void clear() noexcept
           {
-            PetscErrorCode ierr;
+            [[maybe_unused]] PetscErrorCode ierr;
             for (auto& s : m_splits)
             {
               if (s.is)
@@ -203,7 +205,6 @@ namespace Rodin::Math
               }
             }
             m_splits.clear();
-            (void)ierr;
           }
 
           /**
@@ -212,7 +213,7 @@ namespace Rodin::Math
            */
           void copyFrom(const FieldSplits& other)
           {
-            PetscErrorCode ierr;
+            [[maybe_unused]] PetscErrorCode ierr;
 
             m_splits.reserve(other.m_splits.size());
             for (const auto& s : other.m_splits)
@@ -234,8 +235,6 @@ namespace Rodin::Math
 
               m_splits.push_back(std::move(out));
             }
-
-            (void)ierr;
           }
 
           /**
@@ -274,6 +273,108 @@ namespace Rodin::Math
           bool empty() const noexcept
           {
             return m_splits.empty();
+          }
+
+          /**
+           * @brief Returns the name under which split @p i is installed.
+           * @param[in] i Split index.
+           * @returns The split name, or its index when it has none.
+           */
+          std::string getName(size_t i) const
+          {
+            return m_splits[i].name.empty() ? std::to_string(i) : m_splits[i].name;
+          }
+
+          /**
+           * @brief Installs the splits on a field-split preconditioner.
+           *
+           * PETSc appends every split set in code, even one it already
+           * holds, so a preconditioner that holds these splits is left as
+           * is. A change of names, order, count or indices resets the blocks
+           * before installing the new configuration. Empty stored splits
+           * leave runtime-defined splits under PETSc control.
+           * @param[in] pc Preconditioner of type `PCFIELDSPLIT`.
+           * @returns `PETSC_SUCCESS`, or the first PETSc error.
+           */
+          PetscErrorCode install(::PC pc) const
+          {
+            if (m_splits.empty())
+              return PETSC_SUCCESS;
+            // PETSc has no pre-setup split-count query. The indexed query
+            // reports an out-of-range error when no extra split exists.
+            PetscErrorCode ierr = PetscPushErrorHandler(PetscReturnErrorHandler, nullptr);
+            if (ierr != PETSC_SUCCESS)
+              return ierr;
+            ::IS extra = PETSC_NULLPTR;
+            const PetscErrorCode probe = PCFieldSplitGetISByIndex(
+              pc, static_cast<PetscInt>(m_splits.size()), &extra);
+            ierr = PetscPopErrorHandler();
+            if (ierr != PETSC_SUCCESS)
+              return ierr;
+            if (probe != PETSC_SUCCESS && probe != PETSC_ERR_ARG_OUTOFRANGE)
+              return probe;
+            bool installed = probe == PETSC_ERR_ARG_OUTOFRANGE;
+            for (size_t k = 0; installed && k < m_splits.size(); ++k)
+            {
+              ::IS named = PETSC_NULLPTR, indexed = PETSC_NULLPTR;
+              ierr = PCFieldSplitGetIS(pc, getName(k).c_str(), &named);
+              if (ierr != PETSC_SUCCESS)
+                return ierr;
+              if (!named)
+              {
+                installed = false;
+                break;
+              }
+              ierr = PCFieldSplitGetISByIndex(pc, static_cast<PetscInt>(k), &indexed);
+              if (ierr != PETSC_SUCCESS)
+                return ierr;
+              PetscBool equal = PETSC_FALSE;
+              ierr = ISEqual(named, m_splits[k].is, &equal);
+              if (ierr != PETSC_SUCCESS)
+                return ierr;
+              installed = named == indexed && equal;
+            }
+            if (installed)
+              return PETSC_SUCCESS;
+            {
+              // PCReset also releases the operators, which are set again.
+              PetscBool hasOperator = PETSC_FALSE, hasPreconditioner = PETSC_FALSE;
+              ierr = PCGetOperatorsSet(pc, &hasOperator, &hasPreconditioner);
+              if (ierr != PETSC_SUCCESS)
+                return ierr;
+              ::Mat operators[2] = {PETSC_NULLPTR, PETSC_NULLPTR};
+              if (hasOperator || hasPreconditioner)
+              {
+                ierr = PCGetOperators(pc, &operators[0], &operators[1]);
+                if (ierr != PETSC_SUCCESS)
+                  return ierr;
+                for (::Mat m : operators)
+                {
+                  ierr = PetscObjectReference(reinterpret_cast<PetscObject>(m));
+                  if (ierr != PETSC_SUCCESS)
+                    return ierr;
+                }
+              }
+              ierr = PCReset(pc);
+              if (ierr == PETSC_SUCCESS && (hasOperator || hasPreconditioner))
+                ierr = PCSetOperators(pc, operators[0], operators[1]);
+              for (::Mat& m : operators)
+              {
+                const PetscErrorCode destroyed = MatDestroy(&m);
+                if (ierr == PETSC_SUCCESS)
+                  ierr = destroyed;
+              }
+              if (ierr != PETSC_SUCCESS)
+                return ierr;
+            }
+            for (size_t k = 0; k < m_splits.size(); ++k)
+            {
+              assert(m_splits[k].is);
+              ierr = PCFieldSplitSetIS(pc, getName(k).c_str(), m_splits[k].is);
+              if (ierr != PETSC_SUCCESS)
+                return ierr;
+            }
+            return PETSC_SUCCESS;
           }
 
         private:
@@ -490,6 +591,32 @@ namespace Rodin::Math
         return m_fieldSplits;
       }
 
+      /**
+       * @brief Sets the first row of each field on this process.
+       *
+       * An assembly sets them when it lays out the owned rows of a process
+       * field after field, instead of numbering each field from its offset
+       * in the system. The owned degrees of freedom of field @f$ k @f$ are
+       * then the rows from @p starts[k] on, in the order of its space.
+       * @param starts First row of each field, empty for the offsets.
+       * @returns Reference to `*this`.
+       */
+      LinearSystem& setFieldStarts(std::vector<PetscInt> starts)
+      {
+        m_fieldStarts = std::move(starts);
+        return *this;
+      }
+
+      /**
+       * @brief Gets the first row of each field on this process.
+       * @returns First row of each field, empty when each field is numbered
+       * from its offset in the system.
+       */
+      const std::vector<PetscInt>& getFieldStarts() const noexcept
+      {
+        return m_fieldStarts;
+      }
+
     private:
       MPI_Comm m_comm; ///< The MPI communicator for the linear system.
       MatrixType m_operator; ///< The operator of the linear system.
@@ -497,6 +624,8 @@ namespace Rodin::Math
       VectorType m_vector; ///< The vector of the linear system.
 
       FieldSplits m_fieldSplits; ///< The field splits for block preconditioning.
+
+      std::vector<PetscInt> m_fieldStarts; ///< First row of each field on this process.
   };
 }
 

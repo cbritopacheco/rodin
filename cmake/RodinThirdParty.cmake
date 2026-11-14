@@ -29,6 +29,11 @@ function(rodin_add_mmg)
   set(USE_SCOTCH OFF)
   set(BUILD_TESTING OFF)
   set(BUILD_DOC OFF)
+  # MMG asks for CMake 3.5, which CMake 4 deprecates, and packages the runtime
+  # of the compiler with CPack, which looks for the libraries of the classic
+  # Intel compiler.
+  set(CMAKE_POLICY_VERSION_MINIMUM 3.10)
+  set(CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_NO_WARNINGS ON)
   add_subdirectory(${PROJECT_SOURCE_DIR}/third-party/mmg
     ${PROJECT_BINARY_DIR}/third-party/mmg EXCLUDE_FROM_ALL)
 
@@ -49,11 +54,14 @@ function(rodin_add_googletest)
   set(gtest_force_shared_crt ON)
   add_subdirectory(${PROJECT_SOURCE_DIR}/third-party/googletest
     ${PROJECT_BINARY_DIR}/third-party/googletest EXCLUDE_FROM_ALL)
-  # GoogleTest enables -Wall; silence a warning in its vendored GCC code.
+  # GoogleTest enables -Wall; silence a warning in its vendored GCC code. On
+  # IntelLLVM it disables a warning and asks for -Winline, that icpx knows
+  # neither.
   foreach(_target gtest gtest_main gmock gmock_main)
     if(TARGET ${_target})
       target_compile_options(${_target} PRIVATE
-        $<$<CXX_COMPILER_ID:GNU>:-Wno-maybe-uninitialized>)
+        $<$<CXX_COMPILER_ID:GNU>:-Wno-maybe-uninitialized>
+        "$<$<CXX_COMPILER_ID:IntelLLVM>:-Wno-unknown-warning-option;-diag-disable=10430>")
     endif()
   endforeach()
 endfunction()
@@ -73,6 +81,8 @@ endfunction()
 function(rodin_add_termcolor)
   set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
   set(TERMCOLOR_TESTS OFF)
+  # termcolor asks for CMake 3.5, which CMake 4 deprecates.
+  set(CMAKE_POLICY_VERSION_MINIMUM 3.10)
   add_subdirectory(${PROJECT_SOURCE_DIR}/third-party/termcolor
     ${PROJECT_BINARY_DIR}/third-party/termcolor EXCLUDE_FROM_ALL)
   # Alert's public headers include termcolor. Preserve Rodin's existing

@@ -1,0 +1,62 @@
+cmake_minimum_required(VERSION 3.16)
+project(KokkosDependencies LANGUAGES CXX)
+
+get_filename_component(RODIN_SOURCE_DIR "${CMAKE_CURRENT_LIST_DIR}/../../.." ABSOLUTE)
+set(_mock "${CMAKE_CURRENT_BINARY_DIR}/mock")
+file(MAKE_DIRECTORY "${_mock}/include" "${_mock}/lib")
+
+# Dependency doubles exercise Rodin's find/package logic without a GPU toolchain.
+file(WRITE "${_mock}/FindMPI.cmake" [=[
+  if(NOT MPI_FIND_COMPONENTS STREQUAL "CXX")
+    message(FATAL_ERROR "CXX-only consumers must request the CXX MPI component")
+  endif()
+  set(MPI_CXX_FOUND TRUE)
+  set(MPI_FOUND TRUE)
+  add_library(MPI::MPI_CXX INTERFACE IMPORTED)
+]=])
+file(WRITE "${_mock}/include/HYPRE.h" "")
+file(WRITE "${_mock}/include/HYPRE_config.h"
+  "#define HYPRE_RELEASE_VERSION \"3.0.0\"\n")
+file(WRITE "${_mock}/lib/libHYPRE.a" "")
+set(HYPRE_INCLUDE_DIR "${_mock}/include" CACHE PATH "" FORCE)
+set(HYPRE_LIBRARY "${_mock}/lib/libHYPRE.a" CACHE FILEPATH "" FORCE)
+list(PREPEND CMAKE_MODULE_PATH "${_mock}" "${RODIN_SOURCE_DIR}/cmake")
+find_package(HYPRE REQUIRED)
+get_target_property(_mpi HYPRE::HYPRE INTERFACE_LINK_LIBRARIES)
+if(NOT _mpi STREQUAL "MPI::MPI_CXX")
+  message(FATAL_ERROR "hypre must propagate the CXX MPI target")
+endif()
+
+foreach(_package Boost HDF5 Threads Eigen3)
+  file(WRITE "${_mock}/Find${_package}.cmake" "set(${_package}_FOUND TRUE)\n")
+endforeach()
+file(WRITE "${_mock}/KokkosConfig.cmake" "set(Kokkos_ENABLE_SYCL ON)\n")
+file(WRITE "${_mock}/KokkosConfigVersion.cmake"
+  "set(PACKAGE_VERSION 5.2.2)\nset(PACKAGE_VERSION_COMPATIBLE TRUE)\n")
+file(WRITE "${_mock}/MKLConfig.cmake" [=[
+  if(NOT MKL_INTERFACE STREQUAL "lp64")
+    message(FATAL_ERROR "SYCL Kokkos-Kernels requires the LP64 interface")
+  endif()
+  add_library(MKL::MKL INTERFACE IMPORTED)
+]=])
+file(WRITE "${_mock}/KokkosKernelsConfig.cmake" [=[
+  if(NOT TARGET MKL::MKL)
+    message(FATAL_ERROR "oneMKL must be discovered before Kokkos-Kernels")
+  endif()
+  add_library(Kokkos::kokkoskernels INTERFACE IMPORTED)
+]=])
+file(WRITE "${_mock}/RodinTargets.cmake" "")
+
+# Configure and consume the actual exported package template, in a CXX-only project.
+file(READ "${RODIN_SOURCE_DIR}/cmake/RodinConfig.cmake.in" _template)
+string(REGEX MATCHALL "@RODIN_[A-Z0-9_]+@" _options "${_template}")
+foreach(_option IN LISTS _options)
+  string(REPLACE "@" "" _name "${_option}")
+  set(${_name} OFF)
+endforeach()
+set(RODIN_USE_KOKKOS ON)
+set(PACKAGE_INIT "")
+configure_file("${RODIN_SOURCE_DIR}/cmake/RodinConfig.cmake.in"
+  "${_mock}/RodinConfig.cmake" @ONLY)
+list(PREPEND CMAKE_PREFIX_PATH "${_mock}")
+find_package(Rodin REQUIRED CONFIG PATHS "${_mock}" NO_DEFAULT_PATH)

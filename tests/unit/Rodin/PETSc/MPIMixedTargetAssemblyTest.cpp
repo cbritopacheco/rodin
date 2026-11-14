@@ -13,6 +13,7 @@
 #include <Rodin/MPI/Geometry/Sharder.h>
 #include <Rodin/MPI/Variational/P1.h>
 #include <Rodin/MPI/Variational/P0.h>
+#include <Rodin/PETSc/Assembly/FieldLayout.h>
 #include "MixedTargetAssembly.h"
 
 using namespace Rodin;
@@ -151,6 +152,28 @@ int main(int argc, char** argv)
 
 namespace
 {
+  /// @brief Field of a system: offset in the system and space.
+  template <class FES>
+  PETSc::Assembly::FieldLayout::Field field(PetscInt offset, const FES& fes)
+  {
+    size_t first = 0, last = 0;
+    fes.getOwnershipRange(first, last);
+    return {offset, PetscInt(first), PetscInt(last - first)};
+  }
+
+  /// @brief Indices in the system of the degrees of freedom owned by this process.
+  std::vector<PetscInt> ownedIndices(
+    const std::vector<PETSc::Assembly::FieldLayout::Field>& fields)
+  {
+    std::vector<PetscInt> res;
+    for (const auto& f : fields)
+    {
+      for (PetscInt i = 0; i < f.count; ++i)
+        res.push_back(f.offset + f.first + i);
+    }
+    return res;
+  }
+
   /// @brief Checks each heterogeneous block against exact segment mass integrals.
   template <bool FirstConstant, bool SecondConstant>
   void checkHeterogeneousMassBlocks()
@@ -230,47 +253,47 @@ namespace
     PetscInt ownershipBegin, ownershipEnd;
     ASSERT_EQ(
       MatGetOwnershipRange(matrix, &ownershipBegin, &ownershipEnd), PETSC_SUCCESS);
+    // The owned rows of a process hold its degrees of freedom of each field
+    // in turn.
+    const std::vector<PETSc::Assembly::FieldLayout::Field> fields = {
+      field(0, first), field(PetscInt(firstSize), second)};
+    const PETSc::Assembly::FieldLayout rowOf(MPI_COMM_WORLD, fields);
     const auto& splits = system.getFieldSplits().getSplits();
     ASSERT_EQ(splits.size(), 2u);
-    for (size_t field = 0; field < splits.size(); ++field)
+    for (size_t k = 0; k < splits.size(); ++k)
     {
       PetscInt globalSize, localSize;
-      ASSERT_EQ(ISGetSize(splits[field].is, &globalSize), PETSC_SUCCESS);
-      ASSERT_EQ(ISGetLocalSize(splits[field].is, &localSize), PETSC_SUCCESS);
-      EXPECT_EQ(globalSize, PetscInt(field == 0 ? firstSize : secondSize));
-      const PetscInt offset = field == 0 ? 0 : PetscInt(firstSize);
+      ASSERT_EQ(ISGetSize(splits[k].is, &globalSize), PETSC_SUCCESS);
+      ASSERT_EQ(ISGetLocalSize(splits[k].is, &localSize), PETSC_SUCCESS);
+      EXPECT_EQ(globalSize, PetscInt(k == 0 ? firstSize : secondSize));
+      ASSERT_EQ(localSize, fields[k].count);
       const PetscInt* indices;
-      ASSERT_EQ(ISGetIndices(splits[field].is, &indices), PETSC_SUCCESS);
+      ASSERT_EQ(ISGetIndices(splits[k].is, &indices), PETSC_SUCCESS);
       for (PetscInt i = 0; i < localSize; ++i)
       {
         EXPECT_GE(indices[i], ownershipBegin);
         EXPECT_LT(indices[i], ownershipEnd);
-        EXPECT_GE(indices[i], offset);
-        EXPECT_LT(indices[i], offset + globalSize);
+        EXPECT_EQ(indices[i], rowOf(fields[k].offset + fields[k].first + i));
       }
-      ASSERT_EQ(ISRestoreIndices(splits[field].is, &indices), PETSC_SUCCESS);
+      ASSERT_EQ(ISRestoreIndices(splits[k].is, &indices), PETSC_SUCCESS);
     }
     const auto vector = system.getVector();
     Math::Matrix<PetscScalar> actual(totalSize, totalSize);
     actual.setZero();
     Math::Vector<PetscScalar> load(totalSize);
     load.setZero();
-    PetscInt begin, end;
-    ASSERT_EQ(MatGetOwnershipRange(matrix, &begin, &end), PETSC_SUCCESS);
-    for (PetscInt i = begin; i < end; ++i)
+    for (const PetscInt i : ownedIndices(fields))
     {
+      const PetscInt row = rowOf(i);
       for (PetscInt j = 0; j < PetscInt(totalSize); ++j)
       {
+        const PetscInt column = rowOf(j);
         PetscScalar value;
-        ASSERT_EQ(MatGetValues(matrix, 1, &i, 1, &j, &value), PETSC_SUCCESS);
+        ASSERT_EQ(MatGetValues(matrix, 1, &row, 1, &column, &value), PETSC_SUCCESS);
         actual(i, j) = value;
       }
-    }
-    ASSERT_EQ(VecGetOwnershipRange(vector, &begin, &end), PETSC_SUCCESS);
-    for (PetscInt i = begin; i < end; ++i)
-    {
       PetscScalar value;
-      ASSERT_EQ(VecGetValues(vector, 1, &i, &value), PETSC_SUCCESS);
+      ASSERT_EQ(VecGetValues(vector, 1, &row, &value), PETSC_SUCCESS);
       load[i] = value;
     }
     MPI_Allreduce(MPI_IN_PLACE, actual.data(), int(totalSize * totalSize), MPIU_SCALAR,
@@ -345,34 +368,45 @@ TEST(PETSc_MPIMixedTargetAssembly, UnequalVectorComponents)
   ASSERT_EQ(MPI_Allreduce(MPI_IN_PLACE, expected.data(), int(expected.size()),
               MPIU_SCALAR, MPI_SUM, MPI_COMM_WORLD),
     MPI_SUCCESS);
-  const auto check = [&](::Mat matrix) {
-    PetscInt begin, end, columns;
-    ASSERT_EQ(MatGetOwnershipRange(matrix, &begin, &end), PETSC_SUCCESS);
-    ASSERT_EQ(MatGetSize(matrix, nullptr, &columns), PETSC_SUCCESS);
-    for (PetscInt row = begin; row < end; ++row)
+  // The rows and columns of a system of several fields are those of the
+  // owned degrees of freedom of a process, field after field.
+  const auto check = [&](::Mat matrix,
+                       const std::vector<PETSc::Assembly::FieldLayout::Field>& rows,
+                       const std::vector<PETSc::Assembly::FieldLayout::Field>& columns) {
+    const PETSc::Assembly::FieldLayout rowOf(MPI_COMM_WORLD, rows);
+    const PETSc::Assembly::FieldLayout columnOf(MPI_COMM_WORLD, columns);
+    PetscInt count;
+    ASSERT_EQ(MatGetSize(matrix, nullptr, &count), PETSC_SUCCESS);
+    for (const PetscInt i : ownedIndices(rows))
     {
-      for (PetscInt column = 0; column < columns; ++column)
+      const PetscInt row = rowOf(i);
+      for (PetscInt j = 0; j < count; ++j)
       {
+        const PetscInt column = columnOf(j);
         PetscScalar actual;
         ASSERT_EQ(MatGetValues(matrix, 1, &row, 1, &column, &actual), PETSC_SUCCESS);
-        const PetscScalar value = row < expected.rows() && column < expected.cols()
-          ? expected(row, column)
-          : PetscScalar(0);
-        EXPECT_LT(PetscAbsScalar(actual - value), 1e-12)
-          << "entry=" << row << ',' << column;
+        const PetscScalar value =
+          i < expected.rows() && j < expected.cols() ? expected(i, j) : PetscScalar(0);
+        EXPECT_LT(PetscAbsScalar(actual - value), 1e-12) << "entry=" << i << ',' << j;
       }
     }
+  };
+  // A single field is laid out as its space.
+  const auto single = [](const auto& fes) {
+    return std::vector<PETSc::Assembly::FieldLayout::Field>{field(0, fes)};
   };
   BilinearForm form(u, v);
   form = Integral(Component(u, 0), Component(v, 0));
   form.assemble();
-  check(form.getOperator());
-  Problem single(u, v);
-  single = Integral(Component(u, 0), Component(v, 0));
-  single.assemble();
-  check(single.getLinearSystem().getOperator());
+  check(form.getOperator(), single(test), single(trial));
+  Problem one(u, v);
+  one = Integral(Component(u, 0), Component(v, 0));
+  one.assemble();
+  check(one.getLinearSystem().getOperator(), single(test), single(trial));
   Problem mixed(u, v, p, q);
   mixed = Integral(Component(u, 0), Component(v, 0));
   mixed.assemble();
-  check(mixed.getLinearSystem().getOperator());
+  check(mixed.getLinearSystem().getOperator(),
+    {field(0, test), field(PetscInt(test.getSize()), auxiliary)},
+    {field(0, trial), field(PetscInt(trial.getSize()), auxiliary)});
 }

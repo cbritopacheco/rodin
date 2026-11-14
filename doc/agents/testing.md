@@ -118,6 +118,20 @@ Two rules that make the difference between coverage and theatre:
 - New capability defaults off; its tests prove both the feature and the
   default-off no-regression.
 
+## Local MPI runs
+
+An Open MPI built with CUDA support loads its CUDA accelerator component in
+every process, even for CPU-only runs, and made the CPU MPI tests and
+benchmarks 4 to 6 times slower on a workstation with an NVIDIA GPU. Disable it
+for CPU runs and timings, through the environment so that CTest's `mpiexec`
+inherits it:
+
+```sh
+export OMPI_MCA_accelerator=null   # or: mpirun --mca accelerator null ...
+```
+
+Keep it for runs that pass device buffers to MPI.
+
 ## CI (.github/workflows/)
 
 `Build.yml`, `Tests.yml` (unit, manufactured, convergence, installation and

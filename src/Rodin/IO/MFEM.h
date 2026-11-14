@@ -1893,7 +1893,9 @@ namespace Rodin::IO
       using ObjectType = Geometry::Mesh<ContextType>;
 
       /// @brief Parent class type.
-      using Parent = MeshPrinterBase<ContextType>;
+      using Parent = MeshLoaderBase<ContextType>;
+
+      using Parent::load;
 
       /**
        * @brief Constructs an MFEM mesh loader for the given mesh.
@@ -1978,6 +1980,8 @@ namespace Rodin::IO
 
       /// @brief Parent class type.
       using Parent = MeshPrinterBase<ContextType>;
+
+      using Parent::print;
 
       /**
        * @brief Constructs an MFEM mesh printer for the given mesh.
@@ -3111,6 +3115,8 @@ namespace Rodin::IO
       /// @brief Parent class type.
       using Parent = Printer<ObjectType>;
 
+      using Parent::print;
+
       /**
        * @brief Constructs a grid function printer.
        * @param[in] gf Grid function to write to output
@@ -3195,6 +3201,8 @@ namespace Rodin::IO
 
       /// @brief Parent class type.
       using Parent = Printer<ObjectType>;
+
+      using Parent::print;
 
       /**
        * @brief Constructs a grid function printer.
@@ -3281,6 +3289,8 @@ namespace Rodin::IO
 
       /// @brief Parent class type.
       using Parent = Printer<ObjectType>;
+
+      using Parent::print;
 
       /**
        * @brief Constructs a grid function printer.
@@ -3872,6 +3882,8 @@ namespace Rodin::IO
       /// @brief CRTP or finite element base class.
       using Parent = GridFunctionPrinterBase<FileFormat::MFEM, FES, Math::Vector<Scalar>>;
       using Parent::Parent;
+      using Parent::print;
+
       void print(std::ostream& os) override
       {
         const auto& field = this->getObject();

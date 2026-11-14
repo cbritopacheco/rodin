@@ -28,6 +28,16 @@ namespace Rodin::Geometry
 {
   class Bounds;
 
+  template <class Derived>
+  class SpaceFillingCurveOrdering;
+
+  namespace Ordering
+  {
+    class Morton;
+    class Hilbert;
+    class RCM;
+  }
+
   /**
    * @brief Template container indexed by polytope geometry types.
    * @tparam T Type of values to store
@@ -144,7 +154,7 @@ namespace Rodin::Geometry
    * | @ref Connectivity "Connectivity<Context::MPI>" | Distributed connectivity facade for rank-local @ref Rodin::Geometry::Shard "shard" topology and MPI mesh operations. |
    *
    * @tparam ContextType Context type (Local, MPI, etc.)
-   * @see <a href="_connectivity_8h.html">Connectivity.h</a>
+   * @see @ref Rodin/Geometry/Connectivity.h "Connectivity.h"
    */
   template <class ContextType>
   class Connectivity;

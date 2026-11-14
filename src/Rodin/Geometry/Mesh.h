@@ -44,6 +44,7 @@
 #include "Rodin/Alert/MemberFunctionException.h"
 
 #include "ForwardDecls.h"
+#include "Types.h"
 #include "Connectivity.h"
 #include "Point.h"
 #include "PointCloud.h"
@@ -296,6 +297,7 @@ namespace Rodin::Geometry
    * |----------------|-------------|
    * | [Mesh<Context::Local>](class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html) | Sequential mesh storing the full incidence complex and geometry in a single process. |
    * | [Mesh<Context::MPI>](class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html) | Distributed mesh storing a rank-local shard, global/local index maps, and MPI context for parallel assembly. |
+   * | [Mesh<Context::Kokkos<Context::Local, Backend>>](class_rodin_1_1_geometry_1_1_mesh_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_context_1_1_local_00_01_backend_01_4_01_4.html) | Local mesh with resident Kokkos storage, device incidence discovery, geometry and measure reductions. |
    *
    * @see @ref Mesh
    */
@@ -1691,6 +1693,64 @@ namespace Rodin::Geometry
        */
       virtual Mesh& trace(
         const Map<Attribute, Attribute>& tmap, const FlatSet<Attribute>& attrs);
+
+      /**
+       * @brief Renumbers a copy using the Morton ordering.
+       * @param[in] ordering Configured vertex ordering policy.
+       * @returns Renumbered mesh, with the reconstruction semantics of the permutation overload.
+       *
+       * Apply before building finite element spaces; existing fields and
+       * spaces are not transferred. The policy can also be called directly
+       * to retain its new-to-old vertex permutation.
+       */
+      Mesh renumber(const Ordering::Morton& ordering) const;
+
+      /**
+       * @brief Renumbers a copy using the Hilbert ordering.
+       * @param[in] ordering Configured vertex ordering policy.
+       * @returns Renumbered mesh, with the reconstruction semantics of the permutation overload.
+       *
+       * Apply before building finite element spaces; existing fields and
+       * spaces are not transferred. The policy can also be called directly
+       * to retain its new-to-old vertex permutation.
+       */
+      Mesh renumber(const Ordering::Hilbert& ordering) const;
+
+      /**
+       * @brief Renumbers a copy using the RCM ordering.
+       * @param[in] ordering Configured vertex ordering policy.
+       * @returns Renumbered mesh, with the reconstruction semantics of the permutation overload.
+       *
+       * Apply before building finite element spaces; existing fields and
+       * spaces are not transferred. The policy can also be called directly
+       * to retain its new-to-old vertex permutation.
+       */
+      Mesh renumber(const Ordering::RCM& ordering) const;
+
+      /**
+       * @brief Rebuilds a copy using an explicit vertex permutation.
+       * @param[in] newToOld Old vertex index at each new vertex index.
+       * @returns Renumbered copy of this mesh.
+       *
+       * The permutation must contain each old vertex exactly once. Wrong size,
+       * duplicates and out-of-range indices raise an Alert::Exception.
+       *
+       * Polytopes of each positive dimension held by the connectivity are
+       * ordered by their smallest new vertex index, ties keeping their
+       * original order. Coordinates, vertex lists, orientations and attributes
+       * are carried over unchanged; only the indices change. Connectivity
+       * other than the polytope to vertex lists is not carried and must be
+       * computed again, and polytope transformations set on this mesh are not
+       * carried either: the copy has the native geometry of its vertices.
+       *
+       * Assembly on a device sums the contributions of the cells in index
+       * order, so a mesh whose cell and vertex numberings are unrelated, such
+       * as one produced by a mesher, scatters its contributions across the
+       * matrix. Renumbering it once before building the spaces restores the
+       * locality. The numbering seen by the user changes, so the method is
+       * never applied implicitly.
+       */
+      Mesh renumber(const IndexVector& newToOld) const;
 
       SubMeshBase& asSubMesh() override;
 

@@ -292,7 +292,7 @@ namespace Rodin::Variational
       void createVector()
       {
         PetscErrorCode ierr;
-        if constexpr (std::is_same_v<ContextType, Context::MPI>)
+        if constexpr (Context::IsMPI<ContextType>::value)
         {
           const auto& mesh = m_v.get().getFiniteElementSpace().getMesh();
           const auto& comm = mesh.getContext().getCommunicator();

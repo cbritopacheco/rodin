@@ -589,6 +589,46 @@ namespace Rodin::Tests::Unit
     EXPECT_NE(newXML.str().find("Time Value=\"3\""), std::string::npos);
   }
 
+  /// @brief Flushing after each step writes the document a single flush writes.
+  TEST_F(XDMFTest, RepeatedFlushesMatchOneFlush)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Segment, {3});
+    P1 fes(mesh);
+    GridFunction field(fes);
+    field = 1.0;
+    const auto path = m_directory / "steps.xdmf";
+    const auto read = [&]() {
+      std::ifstream input(path.string(), std::ios::binary);
+      return std::string((std::istreambuf_iterator<char>(input)), {});
+    };
+
+    XDMF writer(m_directory / "steps");
+    writer.grid("first").setMesh(mesh).add("u", field);
+    writer.grid("second").setMesh(mesh).add("v", field);
+    for (int step = 0; step < 4; ++step)
+      writer.write(step).flush();
+    const std::string incremental = read();
+    EXPECT_NE(incremental.find("Time Value=\"3\""), std::string::npos);
+
+    // A change of padding rewrites the whole document.
+    writer.setPadding(6).flush();
+    EXPECT_EQ(read(), incremental);
+
+    // A document changed by someone else is rewritten too.
+    {
+      std::ofstream output(path.string(), std::ios::trunc);
+      output << "<Xdmf/>";
+    }
+    writer.flush();
+    EXPECT_EQ(read(), incremental);
+
+    writer.write(4.0).close();
+    const std::string closed = read();
+    EXPECT_EQ(closed.find("</Xdmf>"), closed.size() - 8);
+    EXPECT_NE(closed.find("Time Value=\"4\""), std::string::npos);
+    EXPECT_EQ(closed.rfind("<?xml"), 0u);
+  }
+
   /// @brief Per-grid patterns and padding control transient file references.
   TEST_F(XDMFTest, GridPatternsOverrideWriterPatterns)
   {

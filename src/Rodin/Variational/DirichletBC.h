@@ -554,7 +554,8 @@ namespace Rodin::Variational
        */
       constexpr DirichletBC& on(A1 a1, A2 a2, As... as)
       {
-        return on(FlatSet<Geometry::Attribute>{a1, a2, as...});
+        return on(FlatSet<Geometry::Attribute>{
+          Geometry::Attribute(a1), Geometry::Attribute(a2), Geometry::Attribute(as)...});
       }
 
       /**
@@ -1038,7 +1039,8 @@ namespace Rodin::Variational
       template <class A1, class A2, class... As>
       constexpr DirichletBC& on(A1 a1, A2 a2, As... as)
       {
-        return on(FlatSet<Geometry::Attribute>{a1, a2, as...});
+        return on(FlatSet<Geometry::Attribute>{
+          Geometry::Attribute(a1), Geometry::Attribute(a2), Geometry::Attribute(as)...});
       }
 
       /**

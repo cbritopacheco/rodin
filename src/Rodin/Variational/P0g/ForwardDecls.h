@@ -37,6 +37,8 @@ namespace Rodin::Variational
    *
    * @tparam Range Value range of the finite element space.
    * @tparam Mesh Mesh type on which the space is defined.
+   *
+   * @see @ref P0gSpecializations "P0g Template Specializations"
    */
   template <class Range, class Mesh>
   class P0g;

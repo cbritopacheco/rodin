@@ -35,8 +35,12 @@ DOWNLOAD_TIMEOUT = 300
 INSTALL_TIMEOUT = 900
 MIRRORS = (None, 'https://archive.ubuntu.com/ubuntu',
            'https://mirrors.edge.kernel.org/ubuntu')
-UBUNTU_URI = re.compile(r'https?://(?:azure\.archive|archive|security)\.ubuntu\.com/ubuntu/?')
+UBUNTU_URI = re.compile(r'https?://(?:(?:azure\.archive|archive|security)\.ubuntu\.com|'
+                       r'mirrors\.edge\.kernel\.org)/ubuntu/?')
 YAML_VERSION = '6.0.2'
+# Shared build campaigns must not cross a live archive security update. Refresh
+# this signed Ubuntu snapshot deliberately for producers and consumers together.
+SHARED_APT_SNAPSHOT = '20261113T000000Z'
 # A wheel install normally takes seconds. Bound network stalls to three minutes
 # per attempt and retry whole pip invocations, including malformed index JSON.
 PYTHON_INSTALL_TIMEOUT = 180
@@ -180,6 +184,11 @@ def setup_sources(system=Path('/etc/apt')):
 
 def sources(directory, mirror, system=Path('/etc/apt')):
     """Copy source definitions; change Ubuntu transport only, retaining trust rules."""
+    snapshot = os.environ.get('RODIN_APT_SNAPSHOT', '')
+    if snapshot == 'shared':
+        snapshot = SHARED_APT_SNAPSHOT
+    if snapshot and not re.fullmatch(r'[0-9]{8}T[0-9]{6}Z', snapshot):
+        raise ValueError('Invalid Ubuntu package snapshot: ' + snapshot)
     directory.mkdir(parents=True, exist_ok=True)
     parts = directory / 'sources.list.d'
     parts.mkdir(exist_ok=True)
@@ -189,7 +198,7 @@ def sources(directory, mirror, system=Path('/etc/apt')):
     entries += sorted((system / 'sources.list.d').glob('*.sources'))
     for source in entries:
         text = source.read_text()
-        if mirror:
+        if mirror or snapshot:
             # Hosted images can hide the selected archive behind APT's local
             # mirror-list transport. Replacing direct URLs alone leaves those
             # definitions downloading from the same stalled Azure endpoint.
@@ -200,13 +209,32 @@ def sources(directory, mirror, system=Path('/etc/apt')):
                 urls = [line.split()[0] for line in mirror_file.read_text().splitlines()
                         if line.strip() and not line.lstrip().startswith('#')]
                 if urls and all(UBUNTU_URI.fullmatch(url) for url in urls):
-                    text = text.replace('mirror+file:' + reference, mirror.rstrip('/') + '/')
-            text = UBUNTU_URI.sub(mirror.rstrip('/') + '/', text)
+                    text = text.replace('mirror+file:' + reference, (mirror or urls[0]).rstrip('/') + '/')
+            if mirror:
+                text = UBUNTU_URI.sub(mirror.rstrip('/') + '/', text)
         target = directory / 'sources.list' if source == main else parts / source.name
         target.write_text(text)
     (directory / 'sources.list').touch(exist_ok=True)
-    return ['-o', 'Dir::Etc::sourcelist=' + str(directory / 'sources.list'),
-            '-o', 'Dir::Etc::sourceparts=' + str(parts)]
+    options = ['-o', 'Dir::Etc::sourcelist=' + str(directory / 'sources.list'),
+               '-o', 'Dir::Etc::sourceparts=' + str(parts)]
+    if snapshot:
+        # A fresh fallback host has no cached Release metadata from which APT
+        # can discover its snapshot service. Route every supported mirror to
+        # the same signed snapshot before the first index update; otherwise
+        # update can fetch live indexes which policy then excludes.
+        for archive in MIRRORS:
+            if archive:
+                options += ['-o', 'Acquire::Snapshots::URI::Host::' + urlsplit(archive).hostname +
+                            '=https://snapshot.ubuntu.com/ubuntu/@SNAPSHOTID@/']
+        # APT 2.7+ redirects supported Ubuntu archives to the signed snapshot.
+        # Prefer its versions even over newer preinstalled runner packages.
+        preferences = directory / 'preferences'
+        original = system / 'preferences'
+        text = original.read_text() if original.is_file() else ''
+        preferences.write_text(text + '\nPackage: *\nPin: release o=Ubuntu\nPin-Priority: 1001\n')
+        options += ['-o', 'APT::Snapshot=' + snapshot,
+                    '-o', 'Dir::Etc::preferences=' + str(preferences)]
+    return options
 
 
 def apt(arguments, source_options, archives, timeout, capture=False):
@@ -217,8 +245,16 @@ def apt(arguments, source_options, archives, timeout, capture=False):
                'apt-get', '-o', 'Acquire::Retries=1',
                '-o', 'Acquire::http::Timeout=20', '-o', 'Acquire::https::Timeout=20',
                '-o', 'APT::Update::Error-Mode=any',
+               # Provisioning needs package indexes, not translated descriptions
+               # or command-not-found suggestions, within the same time budget.
+               '-o', 'Acquire::Languages=none',
+               '-o', 'Acquire::IndexTargets::deb::CNF::DefaultEnabled=false',
                '-o', 'APT::Keep-Downloaded-Packages=true',
-               '-o', 'Dir::Cache::archives=' + str(archives), *source_options, *arguments]
+               '-o', 'Dir::Cache::archives=' + str(archives), *source_options]
+    if 'install' in arguments and any(option.startswith('APT::Snapshot=') for option in source_options):
+        # Only disposable CI snapshot environments permit exact-version rollback.
+        command.append('--allow-downgrades')
+    command += arguments
     result = subprocess.run(command, check=True, text=True,
                             stdout=subprocess.PIPE if capture else None,
                             env=dict(os.environ, DEBIAN_FRONTEND='noninteractive', LC_ALL='C'))
@@ -311,7 +347,7 @@ def prepare(requested, archives, state):
     architecture = subprocess.check_output(['dpkg', '--print-architecture'], text=True).strip()
     # Image identity covers the preinstalled package baseline. Compiler flags,
     # MPI rank counts and test selections do not fragment dependency caches.
-    baseline = [system, architecture, os.environ.get('ImageOS'), os.environ.get('ImageVersion'), requested]
+    baseline = [system, architecture, os.environ.get('ImageOS'), os.environ.get('ImageVersion'), requested, os.environ.get('RODIN_APT_SNAPSHOT', '')]
     prefix = 'rodin-apt-v3-' + hashlib.sha256(json.dumps(baseline, sort_keys=True).encode()).hexdigest()[:24] + '-'
     key = prefix + hashlib.sha256(json.dumps(versions, sort_keys=True).encode()).hexdigest()[:24]
     if os.environ.get('GITHUB_OUTPUT'):

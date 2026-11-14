@@ -4,13 +4,17 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+#include <algorithm>
+#include <functional>
+#include <limits>
+#include <queue>
+#include <utility>
+#include <vector>
+
+#include "Rodin/Alert/MemberFunctionException.h"
+
 #include "BalancedCompactPartitioner.h"
 #include "Mesh.h"
-#include "Polytope.h"
-#include "PolytopeIterator.h"
-#include <queue>
-#include <vector>
-#include <limits>
 
 namespace Rodin::Geometry
 {
@@ -28,189 +32,163 @@ namespace Rodin::Geometry
     return m_mesh.get();
   }
 
-  // Partition the mesh into exactly numClusters clusters along dimension d.
-  // The algorithm selects numClusters seeds (via furthest–point sampling),
-  // computes the ideal cluster size, and then grows regions via a best–first search.
-  // To enforce compactness, a candidate cell is rejected if its distance from
-  // the cluster's current centroid is more than compactFactor times the cluster's radius.
-  void BalancedCompactPartitioner::partition(size_t numClusters, size_t d)
+  void BalancedCompactPartitioner::partition(size_t count, size_t d)
   {
-    // Structure to hold cluster (seed) information.
-    struct ClusterInfo
+    if (count == 0)
     {
-      size_t size;                        // Number of cells already assigned.
-      Math::SpatialVector<Real> centroid; // Running centroid of the cluster.
-      Real radius;                        // Maximum distance of any assigned cell from centroid.
-    };
-
-    const auto computePolytopeCentroid = [](const MeshBase& mesh, size_t d, Index polyIndex)
-    {
-      auto poly = mesh.getPolytope(d, polyIndex);
-      const auto& vertices = poly->getVertices();
-      size_t spaceDim = mesh.getSpaceDimension();
-      Math::SpatialVector<Real> centroid(spaceDim);
-      centroid.setZero();
-      for (size_t i = 0; i < static_cast<size_t>(vertices.size()); ++i)
-      {
-        centroid += mesh.getVertexCoordinates(vertices[i]);
-      }
-      centroid /= vertices.size();
-      return centroid;
-    };
-
-    m_count = numClusters;
+      Alert::MemberFunctionException(*this, __func__)
+        << "The number of partitions must be positive." << Alert::Raise;
+    }
+    m_count = count;
     const MeshBase& mesh = getMesh();
-    size_t n = mesh.getPolytopeCount(d);
+    const auto& conn = mesh.getConnectivity();
+    const size_t n = conn.getCount(d);
+    m_partition.assign(n, 0);
     if (n == 0)
       return;
+    RODIN_GEOMETRY_REQUIRE_INCIDENCE(mesh, d, d);
+    const auto& adjacency = conn.getIncidence(d, d);
+    const size_t sdim = mesh.getSpaceDimension();
 
-    // --- Seed Selection: Furthest–Point Sampling ---
-    struct SeedItem
-    {
-      Index polyIndex;
-      Math::SpatialVector<Real> centroid;
-    };
-    std::vector<SeedItem> seeds;
-    std::vector<bool> seedChosen(n, false);
-
-    // Choose the first seed arbitrarily (cell 0).
-    seeds.push_back({ 0, computePolytopeCentroid(mesh, d, 0) });
-    seedChosen[0] = true;
-
-    for (size_t s = 1; s < numClusters; s++)
-    {
-      Index bestCandidate = 0;
-      Real bestDist = -1;
-      for (Index i = 0; i < n; i++)
-      {
-        if (seedChosen[i])
-          continue;
-        Math::SpatialVector<Real> cent = computePolytopeCentroid(mesh, d, i);
-        Real minDist = std::numeric_limits<Real>::max();
-        for (const auto& seed : seeds)
-        {
-          Real dVal = (cent - seed.centroid).norm();
-          if (dVal < minDist)
-            minDist = dVal;
-        }
-        if (minDist > bestDist)
-        {
-          bestDist = minDist;
-          bestCandidate = i;
-        }
-      }
-      seeds.push_back({bestCandidate, computePolytopeCentroid(mesh, d, bestCandidate)});
-      seedChosen[bestCandidate] = true;
-    }
-
-    // --- Region Growing with Compactness Constraint ---
-    // Initialize the partition mapping.
-    m_partition.resize(n, n); // Default invalid id = n.
-    // Cluster info: for each seed, maintain its size, current centroid, and current radius.
-    std::vector<ClusterInfo> clusters(numClusters);
-    for (size_t s = 0; s < numClusters; s++)
-    {
-      clusters[s].size = 0;
-      clusters[s].centroid = seeds[s].centroid;
-      clusters[s].radius = 0; // Initially, no cell has been added beyond the seed.
-    }
-    std::vector<bool> assigned(n, false);
-
-    // Define the compactness factor. Only cells within compactFactor * (current cluster radius)
-    // from the cluster centroid are accepted. (For a seed with zero radius, we always accept.)
-    // Dimensionless heuristic radius allowance; not an optimality bound.
-    constexpr Real compactFactor = 2.0;
-
-    // PQ item holds a candidate cell assignment.
-    struct PQItem
-    {
-      Index polyIndex;
-      size_t seedId;
-      Real distance; // Distance from the cluster's current centroid.
-    };
-
-    struct ComparePQItem
-    {
-      bool operator()(const PQItem& a, const PQItem& b)
-      {
-        return a.distance > b.distance;
-      }
-    };
-    std::priority_queue<PQItem, std::vector<PQItem>, ComparePQItem> pq;
-
-    // Initialize PQ with the seed cells.
-    for (size_t s = 0; s < seeds.size(); s++)
-    {
-      pq.push({seeds[s].polyIndex, s, 0.0});
-    }
-
-    // Grow regions until all cells in n are assigned.
-    while (!pq.empty())
-    {
-      PQItem item = pq.top();
-      pq.pop();
-      Index cell = item.polyIndex;
-      size_t seedId = item.seedId;
-      if (assigned[cell])
-        continue;
-
-      // Check compactness: if the cluster is non-empty, reject cell if too far.
-      Math::SpatialVector<Real> cellCentroid = computePolytopeCentroid(mesh, d, cell);
-      Real dist = (cellCentroid - clusters[seedId].centroid).norm();
-      if (clusters[seedId].size > 0 && clusters[seedId].radius > 0)
-      {
-        if (dist > compactFactor * clusters[seedId].radius)
-          continue;
-      }
-
-      // Accept the cell into the cluster.
-      m_partition[cell] = seedId;
-      assigned[cell] = true;
-
-      // Update cluster info.
-      size_t oldSize = clusters[seedId].size;
-      Math::SpatialVector<Real> oldCentroid = clusters[seedId].centroid;
-      clusters[seedId].size++;
-      // New centroid is the weighted average.
-      clusters[seedId].centroid = (oldCentroid * oldSize + cellCentroid) / clusters[seedId].size;
-      // Update radius: use the maximum distance from the new centroid.
-      Real newDist = (cellCentroid - clusters[seedId].centroid).norm();
-      clusters[seedId].radius = std::max(clusters[seedId].radius, newDist);
-
-      // Expand: push all unassigned adjacent cells.
-      auto poly = mesh.getPolytope(d, cell);
-      for (auto adj = poly->getAdjacent(); !adj.end(); ++adj)
-      {
-        Index adjIndex = (*adj).getIndex();
-        if (assigned[adjIndex])
-          continue;
-        Math::SpatialVector<Real> adjCentroid = computePolytopeCentroid(mesh, d, adjIndex);
-        Real newDistance = (adjCentroid - clusters[seedId].centroid).norm();
-        pq.push({adjIndex, seedId, newDistance});
-      }
-    }
-
-    // For any cell still unassigned, assign it to the nearest seed.
+    // Centroids of the polytopes, stored once.
+    std::vector<Real> centroids(n * sdim, 0);
     for (Index i = 0; i < n; i++)
     {
-      if (!assigned[i])
+      const auto& vertices = conn.getPolytope(d, i);
+      Real* c = centroids.data() + i * sdim;
+      for (std::uint8_t v = 0; v < vertices.size(); v++)
       {
-        Math::SpatialVector<Real> cent = computePolytopeCentroid(mesh, d, i);
-        size_t bestSeed = 0;
-        Real bestD = std::numeric_limits<Real>::max();
-        for (size_t s = 0; s < numClusters; s++)
+        const auto x = mesh.getVertexCoordinates(vertices[v]);
+        for (size_t k = 0; k < sdim; k++)
+          c[k] += x(k);
+      }
+      for (size_t k = 0; k < sdim; k++)
+        c[k] /= vertices.size();
+    }
+    const auto distance = [&](Index i, const Real* c) {
+      const Real* x = centroids.data() + i * sdim;
+      Real r = 0;
+      for (size_t k = 0; k < sdim; k++)
+        r += (x[k] - c[k]) * (x[k] - c[k]);
+      return r;
+    };
+
+    // Recursive bisection. A set of polytopes for the parts [first, first +
+    // count) splits into one region for the first count / 2 parts and the rest
+    // for the others. The region starts from a polytope at the periphery of
+    // the set and grows through the adjacency, lowest first along the axis to
+    // the polytope furthest from it, until it has its exact share. Every
+    // polytope of a set carries the first part of the set, so that the growth
+    // stays inside it.
+    struct Task
+    {
+      std::vector<Index> cells;
+      size_t first;
+      size_t count;
+    };
+    std::vector<Task> tasks;
+    {
+      std::vector<Index> cells(n);
+      for (Index i = 0; i < n; i++)
+        cells[i] = i;
+      tasks.push_back({std::move(cells), 0, count});
+    }
+    // The height of a polytope does not change, so a polytope enters the front
+    // once.
+    std::vector<bool> queued(n, false);
+    using Candidate = std::pair<Real, Index>;
+    std::priority_queue<Candidate, std::vector<Candidate>, std::greater<Candidate>> front;
+    while (!tasks.empty())
+    {
+      Task task = std::move(tasks.back());
+      tasks.pop_back();
+      if (task.count == 1 || task.cells.empty())
+        continue;
+      const size_t half = task.count / 2;
+      const size_t second = task.first + half;
+      const size_t target = task.cells.size() * half / task.count;
+      for (const Index i : task.cells)
+        m_partition[i] = second;
+
+      // The polytope furthest from the first one of the set.
+      const auto furthest = [&](Index from) {
+        const Real* c = centroids.data() + from * sdim;
+        Index best = from;
+        Real bestDistance = -1;
+        for (const Index i : task.cells)
         {
-          Real dVal = (cent - clusters[s].centroid).norm();
-          if (dVal < bestD)
+          if (m_partition[i] != second)
+            continue;
+          const Real r = distance(i, c);
+          if (r > bestDistance)
           {
-            bestD = dVal;
-            bestSeed = s;
+            bestDistance = r;
+            best = i;
           }
         }
-        m_partition[i] = bestSeed;
-        clusters[bestSeed].size++;
-        assigned[i] = true;
+        return best;
+      };
+      const Index seed = furthest(task.cells.front());
+      const Index end = furthest(seed);
+      const Real* origin = centroids.data() + seed * sdim;
+      std::vector<Real> axis(sdim);
+      for (size_t k = 0; k < sdim; k++)
+        axis[k] = centroids[end * sdim + k] - origin[k];
+      const auto height = [&](Index i) {
+        const Real* x = centroids.data() + i * sdim;
+        Real r = 0;
+        for (size_t k = 0; k < sdim; k++)
+          r += (x[k] - origin[k]) * axis[k];
+        return r;
+      };
+
+      size_t taken = 0;
+      while (taken < target)
+      {
+        if (front.empty())
+        {
+          // A new component of the set, from its lowest polytope.
+          Index next = n;
+          Real lowest = std::numeric_limits<Real>::max();
+          for (const Index i : task.cells)
+          {
+            if (m_partition[i] != second)
+              continue;
+            const Real h = height(i);
+            if (h < lowest)
+            {
+              lowest = h;
+              next = i;
+            }
+          }
+          front.push({lowest, next});
+          queued[next] = true;
+        }
+        const Index i = front.top().second;
+        front.pop();
+        m_partition[i] = task.first;
+        taken++;
+        for (const Index j : adjacency[i])
+        {
+          if (m_partition[j] == second && !queued[j])
+          {
+            front.push({height(j), j});
+            queued[j] = true;
+          }
+        }
       }
+      front = {};
+      for (const Index i : task.cells)
+        queued[i] = false;
+
+      std::vector<Index> region, rest;
+      region.reserve(target);
+      rest.reserve(task.cells.size() - target);
+      for (const Index i : task.cells)
+        (m_partition[i] == task.first ? region : rest).push_back(i);
+      task.cells = {};
+      tasks.push_back({std::move(rest), second, task.count - half});
+      tasks.push_back({std::move(region), task.first, half});
     }
   }
 

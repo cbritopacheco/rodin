@@ -1,0 +1,15 @@
+diff -ru a/blas/tpls/KokkosBlas1_nrm2_tpl_spec_avail.hpp b/blas/tpls/KokkosBlas1_nrm2_tpl_spec_avail.hpp
+--- a/blas/tpls/KokkosBlas1_nrm2_tpl_spec_avail.hpp
++++ b/blas/tpls/KokkosBlas1_nrm2_tpl_spec_avail.hpp
+@@ -62,9 +62,8 @@
+ KOKKOSBLAS1_NRM2_TPL_SPEC_AVAIL(Kokkos::LayoutLeft, Kokkos::HIP, Kokkos::HIPSpace)
+ #endif
+ 
+-#if defined(KOKKOSKERNELS_ENABLE_TPL_MKL) && defined(KOKKOS_ENABLE_SYCL)
+-KOKKOSBLAS1_NRM2_TPL_SPEC_AVAIL(Kokkos::LayoutLeft, Kokkos::SYCL, Kokkos::SYCLDeviceUSMSpace)
+-#endif
++// The nrm2 of oneMKL 2026 reads past n on Intel GPUs, up to the next
++// multiple of 2048: the native kernel serves SYCL instead.
+ 
+ }  // namespace Impl
+ }  // namespace KokkosBlas

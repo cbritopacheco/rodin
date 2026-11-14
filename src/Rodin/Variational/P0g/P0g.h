@@ -89,7 +89,10 @@ namespace Rodin::Variational
    * This is the global analogue of P0 (which is elementwise constant).
    */
   /**
-   * @brief Supported P0g range specializations.
+   * @defgroup P0gSpecializations P0g Template Specializations
+   * @brief Template specializations of the P0g class.
+   * @see <a href="class_rodin_1_1_variational_1_1_p0g.html">P0g</a>
+   *
    * | Range | Local context | MPI context |
    * |-------|---------------|-------------|
    * | Scalar | Supported | Supported |

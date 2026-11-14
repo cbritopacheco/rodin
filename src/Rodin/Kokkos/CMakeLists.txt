@@ -1,0 +1,187 @@
+#[[
+         Copyright Carlos BRITO PACHECO 2026.
+Distributed under the Boost Software License, Version 1.0.
+      (See accompanying file LICENSE or copy at
+         https://www.boost.org/LICENSE_1_0.txt)
+]]
+
+add_library(RodinKokkos INTERFACE)
+add_library(Rodin::Kokkos ALIAS RodinKokkos)
+set_target_properties(RodinKokkos PROPERTIES EXPORT_NAME Kokkos)
+
+target_compile_features(RodinKokkos INTERFACE cxx_std_20)
+
+target_link_libraries(RodinKokkos
+  INTERFACE
+    Rodin::Geometry
+    Rodin::Context
+    Rodin::Variational
+    Rodin::Assembly
+    Kokkos::kokkos
+    Kokkos::kokkoskernels
+)
+
+# Vendor GPU solvers belong to the Kokkos module. Keep their dependencies
+# off the core solver target so ordinary CPU sources remain ordinary C++.
+if (RODIN_USE_CUDSS)
+  target_link_libraries(RodinKokkos INTERFACE cudss CUDA::cudart Rodin::Solver)
+  target_sources(RodinKokkos INTERFACE
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Solver/CuDSS.h>)
+endif()
+
+if (RODIN_USE_ROCSOLVER)
+  target_link_libraries(RodinKokkos INTERFACE
+    roc::rocsolver roc::rocsparse roc::rocblas hip::host Rodin::Solver)
+  target_sources(RodinKokkos INTERFACE
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Solver/RocSolverRF.h>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Solver/RocSolverRFPivots.h>)
+endif()
+
+# IGC gives a thread 128 registers by default on the Arc Pro B70, and the
+# bilinear integration kernels spill hundreds of them, which made them four
+# times slower than on an RTX 2080 Ti. The automatic mode gives 256 registers
+# to the kernels that would spill and leaves the others at 128. The option goes
+# to ocloc, which compiles the device code ahead of time; SHELL keeps CMake
+# from merging the repeated -Xsycl-target-backend with the one of Kokkos.
+if (Kokkos_ENABLE_SYCL AND "INTEL_BMG" IN_LIST Kokkos_ARCH)
+  target_compile_options(RodinKokkos INTERFACE
+    "$<$<COMPILE_LANGUAGE:CXX>:SHELL:-Xsycl-target-backend \"-options -ze-intel-enable-auto-large-GRF-mode\">")
+endif()
+
+# Under nvcc, Eigen marks its functions __host__ __device__, and its helpers of
+# std::complex call constexpr functions of the standard library: nvcc warns 28
+# times per source that the device cannot call them. Rodin never calls them on
+# the device.
+if (Kokkos_ENABLE_CUDA AND Kokkos_CXX_COMPILER_ID STREQUAL "NVIDIA")
+  target_compile_options(RodinKokkos INTERFACE
+    "$<$<COMPILE_LANGUAGE:CXX>:SHELL:-Xcudafe --diag_suppress=20015>")
+endif()
+
+target_sources(RodinKokkos INTERFACE
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/ForwardDecls.h>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Context.h>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Context/CUDA.h>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Context/HIP.h>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Context/SYCL.h>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Context/Kokkos.h>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Geometry.h>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/IO/GridFunctionPrinter.h>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/IO/GridFunctionLoader.h>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Math.h>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Math/Vector.h>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Variational/GridFunction.h>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Math/LinearSystem.h>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Math/SparseMatrix.h>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Assembly.h>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Assembly/Kokkos.h>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Assembly/KokkosIteration.h>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Utility.h>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Geometry/Connectivity.h>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Geometry/Mesh.h>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Geometry/MeshView.h>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Variational.h>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Variational/DOFs.h>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Variational/View.h>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Variational/H1.h>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Variational/HyperElasticLaw.h>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Variational/Integral.h>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Variational/Integration.h>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Variational/BilinearFormIntegrator.h>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Variational/LinearFormIntegrator.h>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Variational/InternalVirtualWork.h>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Variational/LinearElasticityIntegral.h>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Variational/P0g.h>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Variational/P1.h>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Variational/Potential.h>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Variational/Projection.h>
+)
+
+install(TARGETS RodinKokkos EXPORT RodinTargets)
+
+if (RODIN_USE_PETSC)
+  add_library(RodinKokkosPETSc INTERFACE)
+  add_library(Rodin::Kokkos::PETSc ALIAS RodinKokkosPETSc)
+  set_target_properties(RodinKokkosPETSc PROPERTIES EXPORT_NAME Kokkos::PETSc)
+
+  target_link_libraries(RodinKokkosPETSc
+    INTERFACE
+      Rodin::Kokkos
+      Rodin::PETSc
+  )
+
+  target_sources(RodinKokkosPETSc INTERFACE
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/PETSc.h>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Assembly/PETSc.h>
+  )
+
+  install(TARGETS RodinKokkosPETSc EXPORT RodinTargets)
+
+  if (RODIN_USE_MPI)
+    add_library(RodinKokkosMPI INTERFACE)
+    add_library(Rodin::Kokkos::MPI ALIAS RodinKokkosMPI)
+    set_target_properties(RodinKokkosMPI PROPERTIES EXPORT_NAME Kokkos::MPI)
+
+    target_link_libraries(RodinKokkosMPI
+      INTERFACE
+        Rodin::Kokkos::PETSc
+        Rodin::MPI
+    )
+
+    target_sources(RodinKokkosMPI INTERFACE
+      $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/MPI.h>
+      $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/MPI/Geometry/Mesh.h>
+      $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/MPI/Variational/P1.h>
+      $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/MPI/Variational/P0g.h>
+      $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/MPI/Variational/H1.h>
+    )
+
+    install(TARGETS RodinKokkosMPI EXPORT RodinTargets)
+  endif()
+endif()
+
+if (RODIN_USE_KOKKOS)
+  add_library(RodinKokkosKernels INTERFACE)
+  add_library(Rodin::Kokkos::Kernels ALIAS RodinKokkosKernels)
+  set_target_properties(RodinKokkosKernels PROPERTIES EXPORT_NAME Kokkos::Kernels)
+
+  target_link_libraries(RodinKokkosKernels
+    INTERFACE
+      Rodin::Kokkos
+      Rodin::Solver
+      Kokkos::kokkoskernels
+  )
+
+  target_sources(RodinKokkosKernels INTERFACE
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Solver.h>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Solver/Krylov.h>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Solver/CG.h>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Solver/BiCGSTAB.h>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Solver/GMRES.h>
+  )
+
+  install(TARGETS RodinKokkosKernels EXPORT RodinTargets)
+endif()
+
+if (RODIN_USE_HYPRE)
+  add_library(RodinKokkosHypre INTERFACE)
+  add_library(Rodin::Kokkos::Hypre ALIAS RodinKokkosHypre)
+  set_target_properties(RodinKokkosHypre PROPERTIES EXPORT_NAME Kokkos::Hypre)
+
+  target_link_libraries(RodinKokkosHypre
+    INTERFACE
+      Rodin::Kokkos
+      Rodin::Solver
+      HYPRE::HYPRE
+  )
+
+  target_sources(RodinKokkosHypre INTERFACE
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Solver/BoomerAMG.h>
+  )
+
+  install(TARGETS RodinKokkosHypre EXPORT RodinTargets)
+endif()
+
+rodin_install_headers(
+  DIRECTORIES .
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/Rodin/Kokkos
+)

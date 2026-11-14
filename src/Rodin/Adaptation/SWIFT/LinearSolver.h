@@ -239,7 +239,10 @@ namespace Rodin::Adaptation::SWIFT
           {
             const auto solveDirect = [&](auto& direct, StringView backend) {
               const auto solveSystem = [&](LinearSystemType& system) {
-                if constexpr (requires { direct.factorize(system); })
+                if constexpr (requires {
+                                direct.factorize(system);
+                                direct.clear(Solver::Factorization::Symbolic);
+                              })
                 {
                   auto& next = system.getOperator();
                   next.makeCompressed();

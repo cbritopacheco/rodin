@@ -10,6 +10,7 @@
 #include <string>
 #include <type_traits>
 #include <utility>
+#include <vector>
 #include "Rodin/Geometry.h"
 #include "Rodin/PETSc.h"
 #include "Rodin/Variational.h"
@@ -199,7 +200,7 @@ TYPED_TEST(KSPLifecycle, MoveTransfersHandleAndPreservesConfiguration)
   EXPECT_EQ(emptyMove.getHandle(), nullptr);
 }
 
-/// @brief Named and unnamed stored splits are installed when the runtime preconditioner selects field splitting.
+/// @brief Named and unnamed stored splits are installed once when the runtime preconditioner selects field splitting, and replaced when they change.
 TYPED_TEST(KSPLifecycle, StoredFieldSplitsAreInstalledAtSolve)
 {
   auto& system = this->m_problem.getLinearSystem();
@@ -224,7 +225,35 @@ TYPED_TEST(KSPLifecycle, StoredFieldSplitsAreInstalledAtSolve)
     ASSERT_EQ(PetscOptionsSetValue(nullptr, (prefix + "_pc_type").c_str(), "jacobi"),
       PETSC_SUCCESS);
   }
+  const auto expectSplits = [&](PetscInt size) {
+    PetscInt count = 0;
+    ::KSP* subsolvers = nullptr;
+    ASSERT_EQ(PCFieldSplitGetSubKSP(pc, &count, &subsolvers), PETSC_SUCCESS);
+    EXPECT_EQ(count, 2);
+    ASSERT_EQ(PetscFree(subsolvers), PETSC_SUCCESS);
+    ::IS left = nullptr;
+    ASSERT_EQ(PCFieldSplitGetIS(pc, "left", &left), PETSC_SUCCESS);
+    ASSERT_NE(left, nullptr);
+    PetscInt n = 0;
+    ASSERT_EQ(ISGetSize(left, &n), PETSC_SUCCESS);
+    EXPECT_EQ(n, size);
+  };
   this->check(solver);
+  expectSplits(2);
+  // A second solve with the same splits must not append them again.
+  this->check(solver);
+  expectSplits(2);
+  // Equal copies of the installed splits keep the preconditioner.
+  system.setFieldSplits(PETSc::Math::LinearSystem::FieldSplits(system.getFieldSplits()));
+  this->check(solver);
+  expectSplits(2);
+  // Other splits replace the installed ones.
+  ASSERT_EQ(ISCreateStride(system.getCommunicator(), 3, 0, 1, &first), PETSC_SUCCESS);
+  ASSERT_EQ(ISCreateStride(system.getCommunicator(), 1, 3, 1, &second), PETSC_SUCCESS);
+  system.setFieldSplits(
+    PETSc::Math::LinearSystem::FieldSplits({{"left", first}, {"", second}}));
+  this->check(solver);
+  expectSplits(3);
   for (const char* name : {"left", "1"})
   {
     const std::string prefix = std::string("-lifecycle_fieldsplit_") + name;
@@ -233,11 +262,6 @@ TYPED_TEST(KSPLifecycle, StoredFieldSplitsAreInstalledAtSolve)
     ASSERT_EQ(
       PetscOptionsClearValue(nullptr, (prefix + "_pc_type").c_str()), PETSC_SUCCESS);
   }
-  PetscInt count = 0;
-  ::KSP* subsolvers = nullptr;
-  ASSERT_EQ(PCFieldSplitGetSubKSP(pc, &count, &subsolvers), PETSC_SUCCESS);
-  EXPECT_EQ(count, 2);
-  ASSERT_EQ(PetscFree(subsolvers), PETSC_SUCCESS);
 }
 
 /// @brief Reusing a solver clears obsolete prefixes and PREONLY-incompatible guesses.
@@ -264,6 +288,115 @@ TYPED_TEST(KSPLifecycle, ReconfigurationClearsStoredPETScState)
   solver.solve(system);
   ASSERT_EQ(KSPGetInitialGuessNonzero(solver.getHandle(), &nonzero), PETSC_SUCCESS);
   EXPECT_EQ(nonzero, PETSC_TRUE);
+}
+
+/// @brief Failures caused by the requested type or runtime options are raised, also in release builds.
+TYPED_TEST(KSPLifecycle, PETScFailuresRaise)
+{
+  auto& system = this->m_problem.getLinearSystem();
+  {
+    TypeParam solver(this->m_problem);
+    this->configure(solver);
+    solver.setType("rodin_unknown_ksp");
+    EXPECT_THROW(solver.solve(system), Alert::Exception);
+  }
+  {
+    // The factorization package is only requested when the preconditioner is set up.
+    TypeParam solver(this->m_problem);
+    this->configure(solver);
+    ASSERT_EQ(PetscOptionsSetValue(nullptr, "-lifecycle_pc_type", "lu"), PETSC_SUCCESS);
+    ASSERT_EQ(PetscOptionsSetValue(
+                nullptr, "-lifecycle_pc_factor_mat_solver_type", "rodin_unknown_package"),
+      PETSC_SUCCESS);
+    EXPECT_THROW(solver.solve(system), Alert::Exception);
+    ASSERT_EQ(PetscOptionsClearValue(nullptr, "-lifecycle_pc_type"), PETSC_SUCCESS);
+    ASSERT_EQ(PetscOptionsClearValue(nullptr, "-lifecycle_pc_factor_mat_solver_type"),
+      PETSC_SUCCESS);
+  }
+  TypeParam solver(this->m_problem);
+  this->configure(solver);
+  this->check(solver);
+}
+
+/// @brief Stored splits replace renamed, removed and reordered fields, preserving operators and composition.
+TEST(Rodin_PETSc_FieldSplits, ReplacesCompleteConfiguration)
+{
+  using Splits = PETSc::Math::LinearSystem::FieldSplits;
+  ::Mat matrix = nullptr;
+  ASSERT_EQ(MatCreateSeqAIJ(PETSC_COMM_SELF, 4, 4, 1, nullptr, &matrix), PETSC_SUCCESS);
+  for (PetscInt i = 0; i < 4; ++i)
+    ASSERT_EQ(MatSetValue(matrix, i, i, 2, INSERT_VALUES), PETSC_SUCCESS);
+  ASSERT_EQ(MatAssemblyBegin(matrix, MAT_FINAL_ASSEMBLY), PETSC_SUCCESS);
+  ASSERT_EQ(MatAssemblyEnd(matrix, MAT_FINAL_ASSEMBLY), PETSC_SUCCESS);
+  ::PC pc = nullptr;
+  ASSERT_EQ(PCCreate(PETSC_COMM_SELF, &pc), PETSC_SUCCESS);
+  ASSERT_EQ(PCSetType(pc, PCFIELDSPLIT), PETSC_SUCCESS);
+  ASSERT_EQ(PCSetOperators(pc, matrix, matrix), PETSC_SUCCESS);
+  ASSERT_EQ(PCFieldSplitSetType(pc, PC_COMPOSITE_SCHUR), PETSC_SUCCESS);
+  const auto make = [](const std::vector<std::pair<std::string, PetscInt>>& fields) {
+    std::vector<Splits::Split> splits;
+    PetscInt first = 0;
+    for (const auto& [name, size] : fields)
+    {
+      ::IS indices = nullptr;
+      EXPECT_EQ(ISCreateStride(PETSC_COMM_SELF, size, first, 1, &indices), PETSC_SUCCESS);
+      splits.push_back({name, indices});
+      first += size;
+    }
+    return Splits(std::move(splits));
+  };
+  auto original = make({{"left", 2}, {"right", 2}});
+  ASSERT_EQ(original.install(pc), PETSC_SUCCESS);
+  auto renamed = make({{"velocity", 2}, {"pressure", 2}});
+  ASSERT_EQ(renamed.install(pc), PETSC_SUCCESS);
+  ::IS obsolete = nullptr;
+  ASSERT_EQ(PCFieldSplitGetIS(pc, "left", &obsolete), PETSC_SUCCESS);
+  EXPECT_EQ(obsolete, nullptr);
+  ASSERT_EQ(PCFieldSplitGetIS(pc, "right", &obsolete), PETSC_SUCCESS);
+  EXPECT_EQ(obsolete, nullptr);
+  ASSERT_EQ(PetscPushErrorHandler(PetscReturnErrorHandler, nullptr), PETSC_SUCCESS);
+  const PetscErrorCode setup = PCSetUp(pc);
+  ASSERT_EQ(PetscPopErrorHandler(), PETSC_SUCCESS);
+  ASSERT_EQ(setup, PETSC_SUCCESS);
+  const auto check = [&](const Splits& splits) {
+    ASSERT_EQ(splits.install(pc), PETSC_SUCCESS);
+    ASSERT_EQ(PCSetUp(pc), PETSC_SUCCESS);
+    PetscInt count = 0;
+    ::KSP* subsolvers = nullptr;
+    ASSERT_EQ(PCFieldSplitGetSubKSP(pc, &count, &subsolvers), PETSC_SUCCESS);
+    EXPECT_EQ(count, static_cast<PetscInt>(splits.size()));
+    ASSERT_EQ(PetscFree(subsolvers), PETSC_SUCCESS);
+    for (size_t k = 0; k < splits.size(); ++k)
+    {
+      ::IS indices = nullptr;
+      ASSERT_EQ(
+        PCFieldSplitGetISByIndex(pc, static_cast<PetscInt>(k), &indices), PETSC_SUCCESS);
+      PetscBool equal = PETSC_FALSE;
+      ASSERT_EQ(ISEqual(indices, splits[k].is, &equal), PETSC_SUCCESS);
+      EXPECT_EQ(equal, PETSC_TRUE);
+    }
+    ::Mat op = nullptr, preconditioner = nullptr;
+    ASSERT_EQ(PCGetOperators(pc, &op, &preconditioner), PETSC_SUCCESS);
+    EXPECT_EQ(op, matrix);
+    EXPECT_EQ(preconditioner, matrix);
+  };
+  check(renamed);
+  ASSERT_EQ(PCFieldSplitSetType(pc, PC_COMPOSITE_ADDITIVE), PETSC_SUCCESS);
+  check(make({{"velocity", 1}, {"pressure", 1}, {"temperature", 2}}));
+  check(make({{"velocity", 1}, {"pressure", 1}}));
+  ASSERT_EQ(PCFieldSplitGetIS(pc, "temperature", &obsolete), PETSC_SUCCESS);
+  EXPECT_EQ(obsolete, nullptr);
+  check(renamed);
+  // Empty stored splits leave the runtime preconditioner untouched.
+  ASSERT_EQ(Splits{}.install(pc), PETSC_SUCCESS);
+  check(renamed);
+  // The names and sets are unchanged, but their positions have swapped.
+  ::IS pressure = nullptr, velocity = nullptr;
+  ASSERT_EQ(ISDuplicate(renamed[1].is, &pressure), PETSC_SUCCESS);
+  ASSERT_EQ(ISDuplicate(renamed[0].is, &velocity), PETSC_SUCCESS);
+  check(Splits({{"pressure", pressure}, {"velocity", velocity}}));
+  ASSERT_EQ(PCDestroy(&pc), PETSC_SUCCESS);
+  ASSERT_EQ(MatDestroy(&matrix), PETSC_SUCCESS);
 }
 
 int main(int argc, char** argv)

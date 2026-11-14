@@ -20,8 +20,23 @@
   <img src="Images/OscarRuz.jpeg" alt="Portrait of Oscar Ruz" />
   <h3>Oscar Ruz</h3>
 
-  Universidad de Santiago de Chile. Member of the
-  [Computational Heat and Fluid Flow Lab](https://cfdusach.cl/).
+  <em>Universidad de Santiago de Chile.</em>
+
+  Contributes biomechanical models for finite element simulation.
+  @endparblock
+
+  @m_class{m-block m-info m-badge rodin-credit-person}
+
+  @parblock
+  <img src="Images/JeanBaptisteKeck.jpg" alt="Portrait of Jean-Baptiste Keck" />
+  @htmlonly
+  <h4><a href="https://www.keckj.fr/">Jean-Baptiste Keck</a></h4>
+  @endhtmlonly
+
+  <em>Laboratoire Jean Kuntzmann.</em>
+
+  Contributes the Kokkos backend for GPU assembly, distributed execution
+  and device-resident solvers.
   @endparblock
 
   @section credits-index-laboratories Laboratories
@@ -69,8 +84,8 @@
   adaptation, quality optimization and level-set reconstruction through
   Rodin's MMG interfaces. The project distributes its
   [license terms](https://github.com/MmgTools/mmg/blob/master/LICENSE).
-  @cite dapogny2014three describes three-dimensional mesh adaptation and
-  level-set domain meshing.
+  Dapogny, Dobrzynski and Frey describe three-dimensional adaptive remeshing
+  and implicit domain meshing @cite dapogny2014three.
 
   @subsection credits-index-hdf5 HDF5
 

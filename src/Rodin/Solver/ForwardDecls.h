@@ -203,6 +203,7 @@ namespace Rodin::Solver
    * | Specialization | Description |
    * |----------------|-------------|
    * | @ref BiCGSTAB "BiCGSTAB<Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>>" | Stabilized bi-conjugate gradient solver for sparse non-symmetric systems. |
+   * | @ref BiCGSTAB "BiCGSTAB<Math::LinearSystem<Kokkos::Math::SparseMatrix<Real, Backend>, Vector>>" | Right Jacobi preconditioned BiCGSTAB in backend memory. |
    *
    * @see @ref BiCGSTABSpecializations "BiCGSTAB Template Specializations"
    */
@@ -350,6 +351,57 @@ namespace Rodin::Solver
   class MUMPS;
 #endif
 
+#ifdef RODIN_USE_CUDSS
+  /**
+   * @brief NVIDIA cuDSS sparse direct factorization on the GPU.
+   * @tparam LinearSystem Type of linear system to solve
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref CuDSS "CuDSS<Math::LinearSystem<Matrix, Math::Vector<Real>>>" | cuDSS factorization for real sparse systems whose matrix has a CuDSSOperator. |
+   *
+   * @see @ref CuDSSSpecializations "CuDSS Template Specializations"
+   */
+  template <class LinearSystem>
+  class CuDSS;
+#endif
+
+#ifdef RODIN_USE_ROCSOLVER
+  /**
+   * @brief AMD rocSOLVER sparse refactorization on the GPU.
+   * @tparam LinearSystem Type of linear system to solve
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref RocSolverRF "RocSolverRF<Math::LinearSystem<Matrix, Math::Vector<Real>>>" | rocSOLVER refactorization for real sparse systems whose matrix has a CuDSSOperator. |
+   *
+   * @see @ref RocSolverRFSpecializations "RocSolverRF Template Specializations"
+   */
+  template <class LinearSystem>
+  class RocSolverRF;
+#endif
+
+  namespace Internal
+  {
+    /**
+     * @brief How the GPU direct solvers, CuDSS and RocSolverRF, read the
+     * compressed arrays of a matrix type.
+     * @tparam Matrix Operator type of the linear system.
+     *
+     * A specialization provides the compressed arrays as the CSR arrays of
+     * the matrix, or of its transpose, and tells whether they are in device
+     * memory. It needs no GPU header, so that the module defining the
+     * matrix type defines it.
+     *
+     * | Specialization | Description |
+     * |----------------|-------------|
+     * | CuDSSOperator<Math::SparseMatrix<Real>> | Host CSC arrays, the CSR arrays of the transpose. |
+     * | CuDSSOperator<Kokkos::Math::SparseMatrix<Real, Backend>> | CSR arrays in the memory of a Kokkos backend. |
+     */
+    template <class Matrix>
+    struct CuDSSOperator;
+  }
+
 #ifdef RODIN_USE_CHOLMOD
   /**
    * @brief CHOLMOD solver implementations from SuiteSparse.
@@ -368,6 +420,20 @@ namespace Rodin::Solver
     class SupernodalLLT;
   }
 #endif
+}
+
+namespace Rodin::Solver::Internal
+{
+  /**
+   * @brief Whether coefficient storage can be read directly by GPU solvers.
+   * @tparam Vector Algebraic coefficient container.
+   */
+  template <class Vector>
+  struct CuDSSVector
+  {
+    /// @brief Host coefficient storage requires explicit staging.
+    static constexpr bool Resident = false;
+  };
 }
 
 #endif

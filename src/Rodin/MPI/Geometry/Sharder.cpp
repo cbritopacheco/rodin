@@ -4,8 +4,15 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+#include <algorithm>
 #include <cassert>
+#include <cstdint>
+#include <limits>
+#include <sstream>
+#include <string>
 #include <boost/multi_array.hpp>
+#include <boost/archive/binary_iarchive.hpp>
+#include <boost/archive/binary_oarchive.hpp>
 
 #include "Rodin/Geometry/Mesh.h"
 
@@ -16,9 +23,24 @@
 
 #include "Sharder.h"
 
-// Instantiate exports after the packed MPI archive declarations. This single
-// translation unit owns the built-in polymorphic geometry registrations.
+// Instantiate exports after the packed MPI and binary archive declarations.
+// This single translation unit owns the built-in polymorphic geometry
+// registrations.
 #include "Rodin/Serialization/Export.h"
+
+namespace
+{
+  /**
+   * @brief Largest message of a shard transfer.
+   *
+   * MPI counts are int, and boost::mpi packs with int positions, so a shard
+   * goes as a binary archive in chunks of this size. 1 GiB is the largest
+   * power of two below INT_MAX bytes, which leaves room for the size header
+   * that boost::mpi packs with each chunk.
+   */
+  constexpr size_t ChunkBytes = size_t(1) << 30;
+  static_assert(ChunkBytes < size_t(std::numeric_limits<int>::max()));
+}
 
 namespace Rodin::Geometry
 {
@@ -39,15 +61,31 @@ namespace Rodin::Geometry
     const auto& comm = ctx.getCommunicator();
     const int tag = ctx.getEnvironment().collectives_tag();
     auto& shards = this->getShards();
-    std::vector<boost::mpi::request> reqs(shards.size());
+    assert(root >= 0);
+    // One serialized shard at a time, released once sent, so that the root
+    // holds at most one archive besides the shards left to send.
     for (size_t i = 0; i < shards.size(); i++)
     {
-      assert(root >= 0);
       if (i == static_cast<size_t>(root))
         continue;
-      reqs[i] = comm.isend(i, tag, shards[i]);
+      std::string buffer;
+      {
+        std::ostringstream os(std::ios::binary);
+        {
+          boost::archive::binary_oarchive oa(os);
+          oa << shards[i];
+        }
+        shards[i] = Shard();
+        buffer = std::move(os).str();
+      }
+      const std::uint64_t size = buffer.size();
+      comm.send(static_cast<int>(i), tag, size);
+      for (size_t offset = 0; offset < buffer.size(); offset += ChunkBytes)
+      {
+        const size_t n = std::min(ChunkBytes, buffer.size() - offset);
+        comm.send(static_cast<int>(i), tag, buffer.data() + offset, static_cast<int>(n));
+      }
     }
-    boost::mpi::wait_all(reqs.begin(), reqs.end());
     return *this;
   }
 
@@ -64,8 +102,20 @@ namespace Rodin::Geometry
     }
     else
     {
+      std::uint64_t size = 0;
+      comm.recv(root, tag, size);
+      std::string buffer(size, '\0');
+      for (size_t offset = 0; offset < buffer.size(); offset += ChunkBytes)
+      {
+        const size_t n = std::min<size_t>(ChunkBytes, buffer.size() - offset);
+        comm.recv(root, tag, buffer.data() + offset, static_cast<int>(n));
+      }
       Shard s;
-      comm.recv(root, tag, s);
+      {
+        std::istringstream is(std::move(buffer), std::ios::binary);
+        boost::archive::binary_iarchive ia(is);
+        ia >> s;
+      }
       Mesh<Context::MPI>::Builder build(ctx);
       build.initialize(std::move(s));
       return build.finalize();

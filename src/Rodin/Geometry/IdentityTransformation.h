@@ -37,6 +37,7 @@ namespace Rodin::Geometry
       /// @brief Parent class type.
       using Parent = PolytopeTransformation;
       using Parent::jacobian;
+      using Parent::transform;
       using Parent::getDegree;
 
       /**

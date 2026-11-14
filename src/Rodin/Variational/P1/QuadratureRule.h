@@ -33,7 +33,7 @@
  *
  * @see <a href="class_rodin_1_1_variational_1_1_p1.html">P1</a>
  * @see <a href="_quadrature_formula_8h.html">QuadratureFormula</a>
- * @see <a href="_integral_8h.html">Integral</a>
+ * @see @ref Rodin/Variational/Integral.h "Integral"
  */
 #ifndef RODIN_VARIATIONAL_P1_QUADRATURERULE_H
 #define RODIN_VARIATIONAL_P1_QUADRATURERULE_H

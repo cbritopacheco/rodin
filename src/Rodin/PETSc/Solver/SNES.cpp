@@ -13,6 +13,7 @@
 #include <petsc.h>
 #include <petscsnes.h>
 
+#include "Rodin/Alert/MemberFunctionException.h"
 #include "Rodin/Variational/Problem.h"
 #include "Rodin/PETSc/Variational/Problem.h"
 
@@ -233,18 +234,30 @@ namespace Rodin::Solver
   {
     PetscErrorCode ierr;
 
+    // The type, the options and the inner solver are chosen by the user, so
+    // their failures must also be reported in release builds.
+    const auto raise = [&, function = __func__](const char* call) {
+      const char* text = nullptr;
+      PetscErrorMessage(ierr, &text, nullptr);
+      Alert::MemberFunctionException(*this, function)
+        << call << " failed with PETSc error " << ierr << ": "
+        << (text ? text : "unknown error") << "." << Alert::Raise;
+    };
+
     m_updated.reset();
     m_lhsAssembled.reset();
     m_rhsAssembled.reset();
 
     ierr = SNESSetType(m_snes, m_type);
-    assert(ierr == PETSC_SUCCESS);
+    if (ierr != PETSC_SUCCESS)
+      raise("SNESSetType");
 
     ierr = SNESSetTolerances(m_snes, m_abstol, m_rtol, m_stol, m_maxIt, m_maxF);
     assert(ierr == PETSC_SUCCESS);
 
     ierr = SNESSetFromOptions(m_snes);
-    assert(ierr == PETSC_SUCCESS);
+    if (ierr != PETSC_SUCCESS)
+      raise("SNESSetFromOptions");
 
     // Wire the stored field-split index sets into the inner KSP's PC when the
     // runtime PC is fieldsplit. This mirrors KSP::solve so block/Schur
@@ -265,20 +278,15 @@ namespace Rodin::Solver
 
       if (pctype && std::strcmp(pctype, PCFIELDSPLIT) == 0)
       {
-        const auto& splits = this->getProblem().getLinearSystem().getFieldSplits();
-        for (size_t k = 0; k < splits.size(); ++k)
-        {
-          const auto& s = splits[k];
-          assert(s.is);
-          const std::string name = !s.name.empty() ? s.name : std::to_string(k);
-          ierr = PCFieldSplitSetIS(pc, name.c_str(), s.is);
-          assert(ierr == PETSC_SUCCESS);
-        }
+        ierr = this->getProblem().getLinearSystem().getFieldSplits().install(pc);
+        if (ierr != PETSC_SUCCESS)
+          raise("PCFieldSplitSetIS");
       }
     }
 
     ierr = SNESSolve(m_snes, PETSC_NULLPTR, x);
-    assert(ierr == PETSC_SUCCESS);
+    if (ierr != PETSC_SUCCESS)
+      raise("SNESSolve");
 
     ierr = Update(x, this);
     assert(ierr == PETSC_SUCCESS);

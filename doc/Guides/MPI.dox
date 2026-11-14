@@ -247,8 +247,9 @@
 
   @section guides-mpi-fes Distributed finite element spaces
 
-  The P1 finite element space is specialized for MPI meshes.  It wraps a
-  local shard P1 space and augments it with distributed global indexing.
+  The `P0`, `P0g`, `P1` and `H1<K>` finite element spaces are specialized for
+  MPI meshes. Each wraps the space of the local shard and augments it with
+  distributed global indexing.
 
   @code{.cpp}
   P1 Vh(mesh);  // mesh is Mesh<Context::MPI>
@@ -257,6 +258,26 @@
   Owned DOFs receive contiguous global ranges per rank, while ghost DOFs are
   synchronized from their owner ranks.  The space provides bidirectional
   local↔global DOF index maps.
+
+  @section guides-mpi-device Device assembly
+
+  `Mesh<Context::Kokkos<Context::MPI, Backend>>` makes the shard of a
+  reconciled `Mesh<Context::MPI>` resident on a GPU, with `Backend` one of
+  `Context::CUDA`, `Context::HIP` and `Context::SYCL`. Problems on it are
+  assembled by device kernels into `MATMPIAIJKOKKOS` and `VECMPIKOKKOS`
+  systems of PETSc and solved by PETSc on the device; each process uses one
+  GPU. Exchanges of device buffers require a CUDA-aware or ROCm-aware MPI;
+  otherwise, and always with SYCL, PETSc runs with `-use_gpu_aware_mpi 0`.
+
+  The assembly reads the vertex coordinates and degrees of freedom of each
+  cell from device memory, so its speed depends on the ordering of the
+  mesh. `mesh.renumber(Geometry::Ordering::Morton{})` returns a copy of the
+  global mesh ordered along space; renumbering before partitioning makes the distributed Oseen
+  assembly 1.3 to 2 times faster. The @ref guides-kokkos-mpi
+  "Distributed Meshes" section of the Kokkos guide lists the supported
+  spaces and conditions, and the `KokkosMPIPoissonScaling` and
+  `KokkosMPIOseenScaling` examples of `examples/Kokkos/MPI` give complete
+  programs.
 
   @section guides-mpi-example Complete example
 
@@ -338,5 +359,6 @@
   - @ref guides-backends "Backends"
   - @ref guides-petsc "PETSc module"
   - @ref guides-solvers "Solvers"
+  - @ref guides-kokkos "GPU assembly and solvers with Kokkos"
 
   */

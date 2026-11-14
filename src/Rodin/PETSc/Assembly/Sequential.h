@@ -119,7 +119,7 @@ namespace Rodin::Assembly
        */
       Sequential* copy() const noexcept override
       {
-        return new Sequential(*this);
+        return new Sequential{*this};
       }
   };
 
@@ -218,7 +218,7 @@ namespace Rodin::Assembly
        */
       Sequential* copy() const noexcept override
       {
-        return new Sequential(*this);
+        return new Sequential{*this};
       }
   };
 
@@ -373,7 +373,7 @@ namespace Rodin::Assembly
        */
       Sequential* copy() const noexcept override
       {
-        return new Sequential(*this);
+        return new Sequential{*this};
       }
   };
 
@@ -966,7 +966,7 @@ namespace Rodin::Assembly
        */
       Sequential* copy() const noexcept override
       {
-        return new Sequential(*this);
+        return new Sequential{*this};
       }
   };
 
@@ -1685,7 +1685,7 @@ namespace Rodin::Assembly
        */
       Sequential* copy() const noexcept override
       {
-        return new Sequential(*this);
+        return new Sequential{*this};
       }
   };
 }

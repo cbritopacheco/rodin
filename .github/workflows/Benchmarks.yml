@@ -17,12 +17,12 @@ jobs:
     name: Infrastructure checks
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           lfs: false
       - name: Initialize pinned search engine
         run: git submodule update --init third-party/m.css
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
       - run: pip install -r doc/requirements.txt
@@ -48,10 +48,10 @@ jobs:
     if: ${{ (always()) && !github.event.pull_request.draft }}
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           lfs: false
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
       - run: pip install -r doc/requirements.txt
@@ -101,10 +101,10 @@ jobs:
         env:
           POOL: ${{ needs.Pool.result }}
         run: test "$POOL" = success
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           lfs: false
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
       - run: pip install -r doc/requirements.txt
@@ -112,7 +112,7 @@ jobs:
         with:
           names: '["benchmark-complete"]'
           path: benchmark-inputs
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           ref: gh-pages
           path: .ci-pages

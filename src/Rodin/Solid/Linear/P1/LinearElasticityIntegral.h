@@ -34,7 +34,7 @@
  * problem = Solid::Linear::LinearElasticityIntegral(u, v)(lambda, mu);
  * @endcode
  *
- * @see <a href="_linear_elasticity_integral_8h.html">LinearElasticityIntegral</a>
+ * @see @ref Rodin/Solid/Linear/LinearElasticityIntegral.h "LinearElasticityIntegral"
  * @see <a href="class_rodin_1_1_variational_1_1_p1.html">P1</a>
  */
 

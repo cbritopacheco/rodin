@@ -21,7 +21,8 @@ doc/agents/conventions.md. Remember asserts compile out under `-DNDEBUG`
 (Release/RelWithDebInfo), so a swallowed failure surfaces later as a
 confusing downstream error (historically: "Row too large" long after a failed
 resize). When debugging such symptoms, suspect an earlier silently-failed
-PETSc call.
+PETSc call. The user-driven calls of `KSP::solve` and `SNES::solve` are the
+exception and raise in every build (see conventions.md).
 
 ## No in-place resize — LinearSystem lifetime contract
 
@@ -82,3 +83,20 @@ existing collective contract. Const synchronization releases read access only;
 it diagnoses pending writes instead of committing them. A caller borrowing a
 const grid function must first complete writes through the mutable owner.
 Mutable reductions synchronize before delegating to read-only reductions.
+
+## Run to run variation of distributed solves on CUDA
+
+On CUDA, a distributed Krylov solve can take a different number of
+iterations from one run to the next on the same system, while the same
+solve on one process, on the host or on HIP does not. The assembly is not
+the cause: the matrix and the right-hand side are bitwise identical between
+runs. `MatMult` of an MPIAIJ matrix adds the off-diagonal block with
+`MatMultAdd`, which Kokkos Kernels hands to `cusparseSpMV` with
+`CUSPARSE_SPMV_ALG_DEFAULT` and beta = 1. For beta != 0 that algorithm, as
+`CUSPARSE_SPMV_CSR_ALG1`, changes the last bit of some entries between calls;
+`CUSPARSE_SPMV_CSR_ALG2` and beta = 0 are deterministic. A long BiCGStab
+solve amplifies these differences into several percent of iterations
+(456 to 513 on the Oseen atrium Coarse mesh at 2 processes). Kokkos Kernels
+selects `ALG_DEFAULT` for every CUDA spmv and PETSc passes it no handle, so
+Rodin cannot change it: compare iteration counts on CUDA as ranges, not
+exact values.

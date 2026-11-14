@@ -35,6 +35,7 @@ runs:
       uses: ./.github/actions/apt-dependencies
       with:
         packages: ${{ steps.packages.outputs.packages }}
+        snapshot: shared
     - name: Select and verify compatible compiler
       shell: bash
       env:
@@ -43,7 +44,7 @@ runs:
     - name: Restore SuiteSparse
       id: suitesparse
       if: fromJSON(inputs.definition).mode == 'optional'
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: ${{ github.workspace }}/suitesparse
         key: suitesparse-7.14.1-${{ runner.os }}-gcc-14

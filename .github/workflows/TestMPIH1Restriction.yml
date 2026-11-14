@@ -26,7 +26,7 @@ jobs:
       OMPI_MCA_hwloc_base_binding_policy: none
       OMPI_MCA_mpi_yield_when_idle: '1'
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
       with:
         submodules: recursive
         lfs: false

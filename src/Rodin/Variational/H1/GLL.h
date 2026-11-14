@@ -115,45 +115,41 @@ namespace Rodin::Variational
         if constexpr (K == 0)
         {
           nodes[0] = static_cast<Real>(0.0);
-          return nodes;
         }
-
-        nodes[0] = static_cast<Real>(-1.0);
-        nodes[K] = static_cast<Real>(1.0);
-
-        if constexpr (K == 1)
+        else
         {
-          return nodes;
-        }
+          nodes[0] = static_cast<Real>(-1.0);
+          nodes[K] = static_cast<Real>(1.0);
 
-        for (size_t i = 1; i < K; ++i)
-        {
-          // Initial guess: Chebyshev point
-          const Real ii   = static_cast<Real>(i);
-          const Real kReal = static_cast<Real>(K);
-          Real x = static_cast<Real>(-constexprCos(Math::Constants::pi() * ii / kReal));
-
-          for (size_t it = 0; it < RODIN_VARIATIONAL_H1_GLL_MAX_ITERATIONS; ++it)
+          for (size_t i = 1; i < K; ++i)
           {
-            Real P, dP;
-            LegendrePolynomial<K>::getValue(P, dP, x); // P_K(x), P'_K(x)
+            // Initial guess: Chebyshev point
+            const Real ii = static_cast<Real>(i);
+            const Real kReal = static_cast<Real>(K);
+            Real x = static_cast<Real>(-constexprCos(Math::Constants::pi() * ii / kReal));
 
-            const Real oneMinusX2 = static_cast<Real>(1.0) - x * x;
+            for (size_t it = 0; it < RODIN_VARIATIONAL_H1_GLL_MAX_ITERATIONS; ++it)
+            {
+              Real P, dP;
+              LegendrePolynomial<K>::getValue(P, dP, x); // P_K(x), P'_K(x)
 
-            // f(x) = (1 - x^2) P'_K(x)
-            const Real f = oneMinusX2 * dP;
+              const Real oneMinusX2 = static_cast<Real>(1.0) - x * x;
 
-            // From Legendre ODE: f'(x) = -K(K+1) P_K(x)
-            const Real df = -static_cast<Real>(K) * static_cast<Real>(K + 1) * P;
+              // f(x) = (1 - x^2) P'_K(x)
+              const Real f = oneMinusX2 * dP;
 
-            const Real dx = -f / df;
-            x += dx;
+              // From Legendre ODE: f'(x) = -K(K+1) P_K(x)
+              const Real df = -static_cast<Real>(K) * static_cast<Real>(K + 1) * P;
 
-            if (Math::abs(dx) < RODIN_VARIATIONAL_H1_GLL_TOLERANCE)
-              break;
+              const Real dx = -f / df;
+              x += dx;
+
+              if (Math::abs(dx) < RODIN_VARIATIONAL_H1_GLL_TOLERANCE)
+                break;
+            }
+
+            nodes[i] = x;
           }
-
-          nodes[i] = x;
         }
 
         return nodes;

@@ -1,0 +1,700 @@
+/**
+  @page guides-kokkos GPU assembly and solvers with Kokkos
+  @brief Resident meshes, device assembly and device solvers on CUDA, HIP and SYCL.
+
+  @tableofcontents
+  @m_footernavigation
+
+  @section guides-kokkos-architecture Architecture
+
+  The optional `Rodin::Kokkos` target mirrors the core Context, Geometry and Assembly
+  directories. It specializes `Geometry::Mesh` and `Geometry::Connectivity`
+  for `Context::Kokkos<Context::Local, Backend>`. The mesh derives directly
+  from `Geometry::MeshBase`; its topology, coordinates, optional attributes,
+  and geometric maps live in the selected Kokkos memory space. The CUDA tag
+  selects `::Kokkos::Cuda` and its device memory, the HIP tag selects
+  `::Kokkos::HIP` and its device memory, and the SYCL tag selects
+  `::Kokkos::SYCL` and its device USM memory. A native Kokkos execution
+  space, such as `::Kokkos::Serial`, selects that execution space explicitly.
+
+  There is no persistent CPU mesh and no separate publication step. File
+  loading and builders use temporary host construction data, then create
+  independently owned resident arrays. Copies deep-copy those arrays.
+  Scaling, coordinate edits, label edits and map replacement update resident
+  storage before returning. Measures use Kokkos quadrature reductions.
+
+  @section guides-kokkos-usage Usage
+
+  @code{.cpp}
+  #include <Rodin/Kokkos.h>
+
+  int main(int argc, char** argv)
+  {
+    ::Kokkos::ScopeGuard runtime(argc, argv);
+    using namespace Rodin;
+    using ContextType = Context::Kokkos<Context::Local, Context::CUDA>;
+    ContextType context;
+
+    // Reuse Rodin construction, then compute incidences on the resident mesh.
+    auto input = Geometry::Mesh<Context::Local>::UniformGrid(
+      Geometry::Polytope::Type::Triangle, {8, 8});
+    Geometry::Mesh<ContextType> mesh(context, input);
+    mesh.getConnectivity().compute(1, 2);
+
+    mesh.scale(0.5); // Executes on the selected Kokkos instance.
+    const Real area = mesh.getArea(); // Resident quadrature reduction.
+    const Assembly::KokkosIteration iteration(mesh, Geometry::Region::Cells);
+    const Index count = iteration.getCount();
+    using ExecutionSpace = ContextType::ExecutionSpaceType;
+    ::Kokkos::View<Real*, ContextType::MemorySpaceType> distortion(
+      "triangle distortion", count);
+    ::Kokkos::parallel_for("mesh geometry",
+      ::Kokkos::RangePolicy<ExecutionSpace>(context.getExecutionSpace(), 0, count),
+      KOKKOS_LAMBDA(Index i)
+      {
+        if (!iteration.filter(i))
+          return;
+        Rodin::Kokkos::Geometry::Vector reference(2);
+        reference(0) = 1.0 / 3.0;
+        reference(1) = 1.0 / 3.0;
+        distortion(i) = iteration.getPolytope(i).getPoint(reference).getDistortion();
+      });
+    context.getExecutionSpace().fence();
+  }
+  @endcode
+
+  `Geometry::Mesh<ContextType>::Builder` also accepts the usual
+  `initialize`, `nodes`, `vertex`, `polytope`, and `attribute` construction
+  operations; `finalize()` returns a resident mesh. `mesh.load(path, format)`
+  and `mesh.save(path, format)` reuse existing Rodin file formats with
+  temporary host adapters. Input meshes and builders need not outlive the
+  resulting mesh. Construction imports explicitly materialized input incidences
+  and preserves entity numbering and ordered vertices. Additional relations and
+  missing intermediate entities are computed directly in resident memory.
+
+  @section guides-kokkos-interfaces Host and Device Interfaces
+
+  `MeshBase` remains a host polymorphic interface. Existing iterators,
+  transformations, quadrature caches, Eigen-valued points and
+  reference-returning connectivity queries work through it. Coordinates and
+  labels are read from resident memory. Connectivity references and host
+  evaluation objects are materialized lazily; they do not own authoritative
+  mesh state. These compatibility queries incur transfers on CUDA and are
+  not intended for the device execution loop.
+
+  Kernels use the borrowed device view, which accesses resident topology,
+  geometry and labels without host callbacks or virtual dispatch. The
+  pointer-backed view queries must execute in the selected memory space.
+  Launch counts are available through the mesh's small host metadata.
+  Device point-evaluation scratch belongs to the calling thread.
+
+  Geometry must remain fixed while evaluation is in progress. Finish kernels
+  before mutating or destroying the mesh. Reacquire views after mutations,
+  loading, assignment, or moving their owner. A borrowed view does not own allocations.
+  `flush()` has the existing LocalMesh meaning: it clears evaluation caches
+  and resets attached transformations to default vertex-based maps. It does
+  not transfer a host mesh. Coordinate setters and scaling perform this
+  invalidation automatically.
+
+  @section guides-kokkos-incidence Resident Incidence Computation
+
+  The Kokkos connectivity specialization implements Rodin's existing
+  `compute(d, dp, mode)` dispatch, `discover`, `restrict`, `clear`, `isDirty`,
+  and `setDirty` vocabulary. Transposition and ordered intersection use
+  device kernels, sorting, duplicate removal and prefix sums. Each relation
+  owns independent CSR arrays.
+
+  @code{.cpp}
+  auto& connectivity = mesh.getConnectivity();
+  connectivity.compute(1, 2); // Discover edges and compute edge-to-cell incidence.
+  connectivity.compute(2, 1); // Reference-ordered cell-to-edge incidence.
+  connectivity.clear(2, 1).restrict(2, 1); // Use existing edges only.
+  @endcode
+
+  Discovery emits reference-cell subentities in Rodin's local ordering.
+  Symmetric vertex keys group identical entities; first-occurrence scans
+  retain existing IDs and assign new IDs in the same order as LocalMesh.
+  Ordered vertices are retained independently of the canonical keys. This
+  supports mixed reference geometries, duplicate incidence contributions,
+  and nonmanifold adjacency. Restricted computation skips missing entities.
+  Like the core API, a clean relation is cached independently of the mode;
+  clear it explicitly before requesting recomputation under another mode.
+  Entity growth invalidates relations touching the enlarged dimension.
+
+  Actual mesh topology stays in Kokkos memory throughout computation. The
+  host launches passes and reads small allocation/count scalars. The tiny
+  reference-cell tables reuse Rodin's existing subentity enumeration and are
+  uploaded as immutable constants; they contain no actual mesh topology.
+  Host compatibility queries still explicitly materialize host data when used.
+
+  Mesh attribute and map slots grow on their first use after discovery, using
+  resident kernels. Existing local IDs, labels and independent control points
+  are preserved; new entities have absent attributes and vertex-based default
+  maps. This is internal storage provisioning, with no user synchronization or
+  publication method. Finish kernels before computing connectivity and reacquire
+  borrowed views afterward.
+
+  @section guides-kokkos-iteration Assembly Region Traversal
+
+  @ref Rodin::Assembly::KokkosIteration follows the indexed traversal contract
+  of @ref Rodin::Assembly::SequentialIteration and
+  @ref Rodin::Assembly::OpenMPIteration. Construct it on the host from the
+  resident mesh and the existing @ref Rodin::Geometry::Region enumeration.
+  Its private device handle is captured through the iteration object; callers
+  use getDimension(), getCount(), filter(i) and getPolytope(i), without
+  explicitly obtaining a mesh device view. Scheduling remains the assembly
+  backend's responsibility. The usage example above shows the corresponding
+  internal kernel launch; iteration does not schedule traversal kernels.
+
+  Cells visits maximal-dimensional entities. Faces visits all codimension-one
+  entities. Boundary and Interface scan the same face candidates, accepting
+  exactly one and more than one incident cell respectively. Interface thus
+  retains LocalMesh semantics for nonmanifold adjacency. getCount() reports
+  candidates before filtering, and an empty selection is valid. Attribute
+  selection remains separate from the region predicate, as in existing assembly.
+
+  @code{.cpp}
+  const size_t dimension = mesh.getDimension();
+  mesh.getConnectivity().compute(dimension - 1, dimension);
+  const Assembly::KokkosIteration boundary(mesh, Geometry::Region::Boundary);
+  const Assembly::KokkosIteration interface(mesh, Geometry::Region::Interface);
+  // Both counts equal mesh.getFaceCount(); filter(i) selects the region.
+  @endcode
+
+  No incidence is discovered or computed by iteration. Nonempty filtered face
+  traversal diagnoses missing face-to-cell incidence during host construction.
+  Zero-dimensional meshes support Cells; face regions raise an exception.
+  getCount() and getDimension() use scalar metadata on either host or device.
+  filter() and getPolytope() run in the selected execution space. Their entity
+  results access resident geometry and optional labels without host callbacks.
+  Descriptors borrow mesh allocations and must be reconstructed after mutation;
+  their kernels must finish before the mesh changes or is destroyed.
+
+  @section guides-kokkos-scope Current Support
+
+  This specialization implements the MeshBase contract for a complete local
+  mesh, including host iteration, optional attributes, coordinate updates,
+  measures, boundary/interface classification, transformations, quadrature
+  queries and existing mesh file formats. Missing intermediate entities and
+  incidence relations can be computed on the resident mesh. Mesh loading
+  replaces the topology as a whole. A Kokkos SubMesh specialization is not provided;
+  `isSubMesh()` returns false and `asSubMesh()` raises an exception.
+
+  Identity and `ParametricTransformation<Variational::RealP1Element>` maps
+  are supported on points, segments, triangles, quadrilaterals, tetrahedra,
+  hexahedra, wedges and pyramids, including embedded entities. Default maps
+  use resident mesh vertices directly. Independent P1 control points remain
+  independent until geometry invalidation, matching the local mesh. Other
+  transformations are rejected without silently approximating their geometry.
+
+  Assembly region traversal is available through KokkosIteration. On this
+  mesh, `P1`, `H1<K>` and `P0g` spaces, grid functions, variational
+  expressions, integrals over cells, boundaries, interfaces and faces,
+  global integrators, `LinearElasticityIntegral`,
+  `Solid::InternalVirtualWork` with the Neo-Hookean, Saint Venant-Kirchhoff,
+  Mooney-Rivlin and Yeoh laws, projections, Dirichlet, periodic and
+  identification constraints, and problems are assembled by device kernels
+  into Eigen or PETSc systems. Rodin solvers, including
+  `Solver::NewtonSolver`, act on the assembled systems.
+
+  The kernels add the contributions of the cells in index order. A mesh
+  whose cell and vertex numberings are unrelated, as produced by most
+  meshers, scatters these contributions across the matrix; `Mesh::renumber(ordering)`
+  returns a copy ordered along space, which is built once before the spaces.
+  The ordering must be selected explicitly on the local mesh before
+  partitioning or upload:
+  @code{.cpp}
+  Geometry::Ordering::Hilbert ordering;
+  ordering.setBitsPerCoordinate(21);
+  auto hilbertMesh = mesh.renumber(ordering);
+  auto rcmMesh = mesh.renumber(Geometry::Ordering::RCM{});
+  auto mortonMesh = mesh.renumber(Geometry::Ordering::Morton{});
+  @endcode
+  The Morton and Hilbert ordering policies normalize each coordinate
+  in the mesh bounding box. Their automatic bit depth is the smaller of 52
+  and 63 divided by the space dimension, rounded down. Explicit depths must
+  be positive, at most 52, and fit within 63 total key bits. Passing `std::nullopt` to
+  `setBitsPerCoordinate` restores automatic precision. Equal keys retain
+  original vertex order.
+
+  The RCM policy uses the graph of vertices sharing a cell, with
+  deterministic pseudo-peripheral roots and degree/index tie breaking. It is
+  a bandwidth heuristic for the vertex graph; finite element DOF layouts can differ.
+  Each policy is also callable and returns a new-to-old vertex permutation,
+  which can be passed directly to `mesh.renumber(permutation)`. All variants
+  return a rebuilt mesh, preserving local vertex order and attributes.
+  Derived incidence must be recomputed and attached geometry maps are not
+  transferred. Existing fields and spaces must be rebuilt for the new mesh.
+
+  On the atrium mesh of the examples, renumbering makes the distributed
+  Oseen assembly 1.3 to 2 times faster and the bilinear form alone 3 to 4
+  times faster, depending on the GPU.
+
+  Kokkos-Kernels is required by the Kokkos module. Grid functions, trial
+  functions and problems on Kokkos spaces select backend coefficient storage
+  by default. The operator, right-hand side and solution remain in the context's
+  memory space:
+  @code{.cpp}
+  using Vector = Rodin::Kokkos::Math::Vector<Real, Backend>;
+  using Matrix = Rodin::Kokkos::Math::SparseMatrix<Real, Backend>;
+  using System = Math::LinearSystem<Matrix, Vector>;
+  Problem poisson(u, v); // deduces this backend system
+  poisson = Integral(Grad(u), Grad(v)) - Integral(f, v) + DirichletBC(u, Zero());
+  Solver::CG solver(poisson);
+  solver.solve();
+  @endcode
+  Assembly collects coordinate contributions in a KokkosSparse::CooMatrix,
+  applies Rodin's existing constraint and reduction semantics, and builds a
+  KokkosSparse::CrsMatrix. SparseMatrix owns that native matrix with deep-copy
+  semantics and exposes it through getView(). Mixed problems and preassembled
+  forms are supported. Reassembly with unchanged sizes reuses the output arrays.
+
+  Vector owns its coefficients independently. getView() borrows their Kokkos
+  view for kernels; toHost() creates an independent host snapshot. Scalar host
+  indexing transfers the accessed entry, so bulk changes should use vector
+  arithmetic, projection or a kernel. File-format adapters stage coefficients
+  on the host only for the duration of input or output. Explicitly requested
+  host matrix and vector types remain available for host solver paths.
+
+  On an NVIDIA GPU, `Solver::CuDSS` (`RODIN_USE_CUDSS`, requiring CUDA-enabled
+  Kokkos) reads backend CSR arrays directly. Include `Rodin/Kokkos/Solver.h`
+  or `Rodin/Kokkos/Solver/CuDSS.h` and link `Rodin::Kokkos`. Keep the Kokkos
+  runtime initialized for the solver lifetime. The former explicit
+  `Rodin/Solver/CuDSS.h` include forwards to the Kokkos integration; the core
+  `Rodin/Solver.h` umbrella does not include vendor GPU implementations.
+  The ordinary `Solver::CuDSS solver(problem)` API, factorization reuse,
+  symmetry declarations and explicit host matrix/vector paths are retained.
+
+  On an AMD GPU, `Solver::RocSolverRF` (`RODIN_USE_ROCSOLVER`, requiring
+  HIP-enabled Kokkos and `RODIN_USE_UMFPACK`) reads the same arrays. Include
+  `Rodin/Kokkos/Solver.h`, link `Rodin::Kokkos`, and keep the Kokkos runtime
+  initialized for the solver lifetime. rocSOLVER only refactorizes: the first
+  factorization fixes the pivots on the host with UMFPACK, or with AMD after
+  `setSymmetric(RocSolverRF<System>::Symmetry::PositiveDefinite)`, and the
+  following ones run on the device with those pivots:
+  @code{.cpp}
+  Solver::RocSolverRF solver(poisson);
+  solver.setSymmetric(decltype(solver)::Symmetry::PositiveDefinite);
+  solver.solve();
+  @endcode
+  rocSOLVER reports neither a zero pivot nor a negative one; the solver
+  checks the diagonal of the factors with a Kokkos reduction for the former,
+  and a matrix declared positive definite must be so, otherwise the solution
+  is wrong.
+
+  `Rodin/Kokkos/Solver.h` specializes
+  `Solver::CG`, `Solver::BiCGSTAB` and `Solver::GMRES` for such a system.
+  They iterate on the device with a Jacobi preconditioner and link
+  `Rodin::Kokkos::Kernels`:
+  @code{.cpp}
+  #include <Rodin/Kokkos/Solver.h>
+
+  Solver::CG solver(poisson);
+  solver.setTolerance(1e-8).solve();
+  @endcode
+
+  With `RODIN_USE_HYPRE`, `Rodin/Kokkos/Solver/BoomerAMG.h` provides
+  `Solver::BoomerAMG`, the conjugate gradient of hypre preconditioned by
+  BoomerAMG, which builds its hierarchy from the device arrays and links
+  `Rodin::Kokkos::Hypre`. The hierarchy is kept from one solve to the next and
+  preconditions the conjugate gradient on the current matrix; `setup()`
+  builds it again when the matrix has changed too much. It initializes MPI
+  and hypre if the application has not; the application finalizes them after
+  the last solver:
+  @code{.cpp}
+  #include <Rodin/Kokkos/Solver/BoomerAMG.h>
+
+  Solver::BoomerAMG solver(poisson);
+  solver.setStrongThreshold(0.7).setAggressiveLevels(2).solve();
+  // Later steps reuse the hierarchy of the first matrix.
+  solver.solve();
+  // Rebuild it from the current matrix.
+  solver.setup(poisson.getLinearSystem());
+  @endcode
+
+  BiCGSTAB handles nonsymmetric real systems with a right Jacobi
+  preconditioner. Backend vectors remain in backend memory; explicit host
+  vectors use transfer buffers. A matching-size solution is the initial guess.
+  The default tolerance is machine epsilon and the default iteration limit is
+  twice the row count. The solver verifies the true relative residual before
+  reporting success and reports recurrence breakdown through success().
+  @code{.cpp}
+  Solver::BiCGSTAB solver(problem);
+  solver.setTolerance(1e-10).setMaxIterations(1000).solve();
+  // Diagnostic methods on the Kokkos specialization:
+  const auto iterations = solver.getIterationNumber();
+  const auto residual = solver.getError();
+  @endcode
+
+  @section guides-kokkos-mpi Distributed Meshes
+
+  `Mesh<Context::Kokkos<Context::MPI, Backend>>` makes the shard of a
+  distributed mesh resident on the device. It is built from a
+  `Mesh<Context::MPI>`, which must outlive it, and answers every query in the
+  local numbering of the shard, ghosts included. The boundary, the interface
+  and the measures are those of the distributed mesh. The device view marks
+  the entities the process owns, so that integrators visit each polytope on
+  one process only.
+
+  @code{.cpp}
+  #include <Rodin/Kokkos/MPI.h>
+
+  using DeviceContext = Context::Kokkos<Context::MPI, Context::CUDA>;
+  Mesh<Context::MPI> host = ...; // distributed and reconciled
+  const Mesh<DeviceContext> mesh(DeviceContext(Context::MPI(env, world)), host);
+  P1<Real, Mesh<DeviceContext>> vh(mesh);
+  PETSc::Variational::TrialFunction u(vh);
+  PETSc::Variational::TestFunction v(vh);
+  Problem poisson(u, v);
+  poisson = Integral(Grad(u), Grad(v)) - Integral(f, v) + DirichletBC(u, g);
+  PETSc::Solver::CG(poisson).solve();
+  @endcode
+
+  The `P1` space on this mesh answers its host members, getSize(),
+  getDOFs() and getGlobalIndex(), as the distributed host space does, while
+  the device members, getLocalSize() and getDOFsView(), refer to the local
+  numbering of the kernels. Single field PETSc problems are assembled on the
+  device into `MATMPIAIJKOKKOS` and `VECMPIKOKKOS` objects: each process
+  hands its entries in global indices to PETSc, which sums them on their
+  owners. A degree of freedom fixed on one process is fixed on every process
+  holding it. Grid functions store their coefficients in ghosted Kokkos
+  vectors.
+
+  Distributed device assembly covers `P1`, `H1<K>` and `P0g` spaces, single
+  or multi-field problems, integrals, standalone bilinear and linear forms,
+  and Dirichlet, periodic and identification conditions. The owned rows of a
+  process hold its degrees of freedom of each field in turn, and
+  `LinearSystem::getFieldStarts()` gives the first row of each field. Eigen
+  systems are not distributed. Link the
+  `Rodin::Kokkos::MPI` target, available when Rodin is configured with both
+  `RODIN_USE_MPI` and `RODIN_USE_PETSC`. PETSc must be built with Kokkos;
+  with a CUDA-aware or ROCm-aware MPI, such as Open MPI configured
+  `--with-cuda` or `--with-rocm`, device buffers are exchanged directly,
+  otherwise run with `-use_gpu_aware_mpi 0`. Open MPI does not know SYCL
+  memory, so SYCL runs always take that option.
+
+  `Geometry::BalancedCompactPartitioner` splits the cells by recursive
+  bisection into regions grown through the adjacency, whose sizes differ by
+  at most one cell; compact parts keep the ghost layer of each process
+  small. `KokkosMPIOseenScaling` (`examples/Kokkos/MPI`) partitions the
+  atrium mesh with it. The scaling examples report the first repetition in
+  its own `-log_view` stage, since it loads the device kernels and builds
+  the sparsity pattern and the preconditioner.
+
+  @section guides-kokkos-solvers Choosing a Solver
+
+  The device kernels assemble the system; where it is solved depends on the
+  system type the problem is named with:
+
+  | System | Assembled into | Solvers | Where the solve runs |
+  | --- | --- | --- | --- |
+  | `Math::LinearSystem<Math::SparseMatrix<Real>, ...>` (default) | host matrix, copied from the device | every Rodin solver | host, or GPU for `CuDSS` and `RocSolverRF`, which copy the matrix to the device |
+  | `Math::LinearSystem<Kokkos::Math::SparseMatrix<Real, Backend>, ...>` | device CSR | `CuDSS`, `RocSolverRF`, Kokkos `CG`, `BiCGSTAB` and `GMRES`, `BoomerAMG` | device, on one process |
+  | PETSc system on a Kokkos mesh | `MATAIJKOKKOS` or `MATMPIAIJKOKKOS` | PETSc KSP and SNES | device for the Krylov iteration and the PETSc preconditioners implemented on Kokkos matrices, one or several processes |
+
+  A distributed device system is solved by PETSc only; the other device
+  solvers act on one process. `CuDSS` requires an NVIDIA GPU and
+  `RocSolverRF` an AMD GPU. On an Intel GPU no direct solver runs on the
+  device: a saddle point system on one GPU is either solved by PETSc with
+  a Schur field split or assembled into the default host matrix and
+  factorized on the host.
+
+  | Problem | One GPU | Several GPUs |
+  | --- | --- | --- |
+  | SPD (Poisson, diffusion, mass) | Kokkos-Kernels `CG`; `BoomerAMG` when the Jacobi iteration count grows with the mesh | PETSc CG with GAMG (`KokkosMPIPoissonScaling`) or Jacobi |
+  | Vector elasticity | PETSc CG with GAMG and the rigid body modes (`MatSetNearNullSpace`) | same |
+  | Nonsymmetric (advection, Oseen step) | Kokkos-Kernels `GMRES`, or PETSc BiCGStab with Jacobi | PETSc BiCGStab with Jacobi (`KokkosMPIOseenScaling`) |
+  | Saddle point (Stokes, Navier-Stokes) | `CuDSS` or `RocSolverRF` while the factors fit in device memory; PETSc FGMRES with a Schur field split beyond | PETSc FGMRES with a Schur field split |
+  | Sequence of systems with one pattern (time steps, Newton tangents) | `CuDSS` or `RocSolverRF`, one instance, `factorize` at each step | PETSc, reusing the preconditioner |
+
+  Parts of the work stay on the host:
+  - mesh loading, partitioning and distribution of the shards;
+  - the first factorization of `RocSolverRF`, which fixes the pivots with
+    UMFPACK or AMD; the later ones run on the device;
+  - the Eigen and SuiteSparse solvers, `MUMPS`, and most of SuperLU_DIST in
+    PETSc (it hands only a few large Schur updates to the GPU);
+  - the ghost exchanges of PETSc without a GPU-aware MPI
+    (`-use_gpu_aware_mpi 0`), which go through host buffers.
+
+  The measurements behind these choices are in the
+  `doc/agents/solvers-assembly.md` agent guide.
+
+  @section guides-kokkos-build CUDA Build
+
+  Kokkos 4.2 or newer is required for comparator-based device sorting; Rodin
+  is validated with Kokkos 5.2.2.
+  Build and install Kokkos separately with CUDA enabled and an architecture
+  matching the target GPU. This example selects an Ampere compute-capability
+  8.0 target; substitute the appropriate Kokkos architecture option for the
+  actual device.
+
+  @code{.bash}
+  cmake -S /path/to/kokkos -B /path/to/kokkos-build \
+    -DCMAKE_INSTALL_PREFIX=/path/to/kokkos-install \
+    -DCMAKE_CXX_COMPILER=/path/to/kokkos/bin/nvcc_wrapper \
+    -DCMAKE_CXX_STANDARD=20 \
+    -DKokkos_ENABLE_CUDA=ON \
+    -DKokkos_ENABLE_SERIAL=ON \
+    -DKokkos_ARCH_AMPERE80=ON \
+    -DCUDAToolkit_ROOT=/usr/local/cuda
+  cmake --build /path/to/kokkos-build --parallel
+  cmake --install /path/to/kokkos-build
+
+  cmake -S . -B build-kokkos-cuda \
+    -DCMAKE_CXX_COMPILER=g++ \
+    -DCMAKE_PREFIX_PATH=/path/to/kokkos-install \
+    -DRODIN_USE_KOKKOS=ON \
+    -DRODIN_BUILD_UNIT_TESTS=ON \
+    -DRODIN_BUILD_EXAMPLES=OFF \
+    -DRODIN_USE_PETSC=OFF \
+    -DRODIN_MULTITHREADED=OFF \
+    -DRODIN_INSTALL_RESOURCES=OFF
+  cmake --build build-kokkos-cuda --parallel \
+    --target RodinKokkosContextTest RodinKokkosGeometryMeshTest \
+      RodinKokkosGeometryConnectivityTest RodinKokkosAssemblyKokkosIterationTest
+  ctest --test-dir build-kokkos-cuda/tests -R '^Kokkos_' --output-on-failure
+  @endcode
+
+  Application translation units that instantiate device geometry kernels must
+  be compiled by a CUDA-capable compiler. Rodin is configured with the host
+  compiler that built Kokkos's host code: when it is not `nvcc_wrapper`,
+  `find_package(Kokkos)` installs `kokkos_launch_compiler`, which redirects
+  only targets linked to `Kokkos::kokkos` to `nvcc_wrapper`. The remaining
+  Rodin libraries are compiled by the host compiler. Setting
+  `CMAKE_CXX_COMPILER` to `nvcc_wrapper` also works but compiles every
+  translation unit through NVCC. A Kokkos build without CUDA cannot
+  instantiate the CUDA context and never substitutes CPU execution.
+
+  When several CUDA toolkits are installed, `CUDAToolkit_ROOT` must name the
+  toolkit of the `nvcc` that compiles Kokkos: CMake otherwise links the CUDA
+  runtime of the system directories, whose `cudaDeviceProp` layout may differ
+  from the headers, and every kernel launch then fails with a zero block size.
+  Check that `libkokkoscore` links the `libcudart` of that toolkit.
+
+  Place `using namespace Rodin;` inside a function, as in the examples, not
+  at namespace scope. Rodin has its own `Rodin::Kokkos` namespace, and a
+  directive at global scope makes the name `Kokkos` ambiguous at global
+  scope. NVCC resolves the `using namespace Kokkos;` directives of the Kokkos
+  templates where they are instantiated, after such a directive, and
+  reports `"Kokkos" is ambiguous` in `Kokkos_CopyViews.hpp`.
+
+  NVCC parenthesizes host expressions before handing them to GCC, which then
+  rejects a restricted integral of deduced operands as the first term of a
+  sum, `Integral(Grad(u), Grad(v)).over(1) + Integral(u, v)`, with "template
+  placeholder not permitted in parameter". Place such a term after another
+  term, or name it.
+
+  See the upstream
+  [Kokkos configuration guide](https://kokkos.org/kokkos-core-wiki/get-started/configuration-guide.html)
+  and
+  [source-build instructions](https://kokkos.org/kokkos-core-wiki/get-started/building-from-source.html)
+  for compiler and architecture requirements.
+
+  @section guides-kokkos-build-hip HIP Build
+
+  Build Kokkos with HIP enabled and the architecture of the target GPU, here
+  an RDNA4 `gfx1201`, with `hipcc` as compiler. Rodin is then configured with
+  the `clang++` of ROCm. The Kokkos target adds `-xhip` and the offload
+  architecture to the targets that link it, so only the Kokkos module and its
+  consumers are compiled for the device. Configuring Rodin with `hipcc`
+  instead compiles every translation unit as HIP: the host-only core then
+  fails on `constexpr` functions that call host code, and Eigen
+  `long double` calls become ambiguous with the device math overloads.
+
+  @code{.bash}
+  cmake -S /path/to/kokkos -B /path/to/kokkos-build \
+    -DCMAKE_INSTALL_PREFIX=/path/to/kokkos-install \
+    -DCMAKE_CXX_COMPILER=/opt/rocm/bin/hipcc \
+    -DCMAKE_PREFIX_PATH=/opt/rocm \
+    -DCMAKE_CXX_STANDARD=20 \
+    -DKokkos_ENABLE_HIP=ON \
+    -DKokkos_ENABLE_SERIAL=ON \
+    -DKokkos_ARCH_AMD_GFX1201=ON
+  cmake --build /path/to/kokkos-build --parallel
+  cmake --install /path/to/kokkos-build
+
+  cmake -S . -B build-kokkos-hip -G Ninja \
+    -DCMAKE_CXX_COMPILER=/opt/rocm/lib/llvm/bin/clang++ \
+    -DCMAKE_C_COMPILER=/opt/rocm/lib/llvm/bin/clang \
+    -DCMAKE_PREFIX_PATH="/opt/rocm;/path/to/kokkos-install" \
+    -DRODIN_USE_KOKKOS=ON \
+    -DRODIN_BUILD_UNIT_TESTS=ON
+  @endcode
+
+  With the ROCm `clang++`, `FindOpenMP` resolves the libomp of ROCm by itself;
+  under `hipcc` it returns the flag without the library and the links fail.
+  A PETSc built for HIP (`--with-hip --with-hip-arch=gfx1201
+  --with-kokkos-dir=...`) provides
+  Kokkos-Kernels and hypre as on CUDA. Kokkos-Kernels 5.2.2 still names
+  `rocsparse_indextype_u16`, which rocSPARSE no longer declares from ROCm 10:
+  remove that branch of `rocsparse_index_type()` in
+  `sparse/src/KokkosSparse_Utils_rocsparse.hpp` and hand PETSc the patched
+  sources with `--download-kokkos-kernels=/path/to/kokkos-kernels.tar.gz`.
+
+  hypre takes the warp size of the GPU from `rocm-smi`, which ROCm 10 no
+  longer ships, and otherwise assumes the 64 lanes of the CDNA GPUs. On a
+  RDNA GPU, whose `rocminfo` reports a wavefront of 32, BoomerAMG then
+  faults on the device: pass
+  `--download-hypre-configure-arguments=--with-gpu-warp-size=32` to PETSc.
+
+  The ROCm runtime loads its own zlib, `librocm_sysdeps_z.so.1`. When MPI
+  initializes, the PCI component of hwloc reads compressed PCI identifiers
+  through libpciaccess, whose `gzopen64` binds to the system zlib and whose
+  `gzgets` and `gzclose` bind to that of ROCm, and the process intermittently
+  aborts in `MPI_Init`. Running with `HWLOC_COMPONENTS=-pci`, or preloading
+  the system `libz.so.1`, avoids it.
+
+  PETSc also builds the distributed direct solvers for HIP. SuperLU_DIST
+  (`--download-superlu_dist`) needs no option. STRUMPACK links rocSOLVER
+  through rocThrust, whose `hip::device` target compiles every C++ source as
+  HIP, so it takes the ROCm `clang++`:
+  `--download-strumpack-cmake-arguments=-DCMAKE_CXX_COMPILER=/opt/rocm/lib/llvm/bin/clang++`.
+  SLATE, which STRUMPACK uses for the fronts shared by several ranks
+  (`--download-slate`), must take the same compiler through
+  `--download-slate-cmake-arguments`. Its headers hold an `omp_nest_lock_t`,
+  of 16 bytes with libgomp and of 8 with libomp, so a SLATE built by `g++`
+  disagrees with STRUMPACK on the layout of its matrices and faults in every
+  factorization on more than one rank. SLATE also requires
+  `MPI_THREAD_MULTIPLE`. Rodin does not initialize MPI, so the application
+  requests that level, for instance with
+  `boost::mpi::environment env(argc, argv, boost::mpi::threading::multiple)`,
+  or sets `PETSC_MPI_THREAD_REQUIRED` before `PetscInitialize`.
+
+  @section guides-kokkos-build-sycl SYCL Build
+
+  Intel GPUs are reached through the SYCL backend of Kokkos and the `icpx`
+  compiler of oneAPI; Rodin is validated with oneAPI 2026.2 on an Arc Pro
+  B70 (Battlemage, Xe2). The kernels are compiled ahead of time for one
+  architecture. Kokkos 5.2.2 and PETSc 3.26 know the data center GPUs
+  (`INTEL_PVC`, `--with-sycl-arch=pvc`) but not Battlemage: the patches
+  `kokkos-sycl-bmg.patch` and `petsc-sycl-bmg.patch` of `dev/docker/kokkos`
+  add `INTEL_BMG` to Kokkos and `bmg` to PETSc.
+
+  @code{.bash}
+  cmake -S /path/to/kokkos -B /path/to/kokkos-build \
+    -DCMAKE_INSTALL_PREFIX=/path/to/kokkos-install \
+    -DCMAKE_CXX_COMPILER=icpx -DCMAKE_CXX_EXTENSIONS=OFF \
+    -DCMAKE_CXX_STANDARD=20 -DBUILD_SHARED_LIBS=ON \
+    -DKokkos_ENABLE_SERIAL=ON -DKokkos_ENABLE_SYCL=ON \
+    -DKokkos_ARCH_INTEL_BMG=ON
+  cmake --build /path/to/kokkos-build --parallel
+  cmake --install /path/to/kokkos-build
+
+  cmake -S . -B build-kokkos-sycl -G Ninja \
+    -DCMAKE_CXX_COMPILER=icpx \
+    -DCMAKE_PREFIX_PATH=/path/to/kokkos-install \
+    -DRODIN_USE_KOKKOS=ON \
+    -DRODIN_BUILD_UNIT_TESTS=ON
+  @endcode
+
+  Under `icpx`, Rodin compiles OpenMP with `-fopenmp=libomp` and the
+  floating point model `precise`: the OpenMP lowering of `-fiopenmp`
+  miscompiles the host assembly from `-O1` on, and the default `fast` model
+  of `icpx` assumes finite values and reassociates sums. For `INTEL_BMG`, the
+  Kokkos module passes `-ze-intel-enable-auto-large-GRF-mode` to the device
+  compiler, so that kernels which would spill their 128 registers take 256.
+  Device code is compiled ahead of time by each compile command, so a
+  backend option must reach the compile line, not the link line.
+
+  The GPU runtime and its compiler, IGC, come from the releases of Intel
+  rather than from the distribution. Rodin is validated with the compute
+  runtime 26.31, IGC 2.40 and the Level Zero loader 1.32. IGC 2.41 and 2.42
+  crash on a kernel of oneDPL that hypre compiles at run time.
+
+  PETSc takes SYCL, oneMKL for BLAS and LAPACK, and Kokkos-Kernels through
+  the 32-bit integer interface of oneMKL, which `MKLConfig` of Kokkos-Kernels
+  must take as well:
+  @code{.bash}
+  ./configure --with-sycl=1 --with-syclc=icpx --with-sycl-arch=bmg \
+    --with-cxx-dialect=20 --with-blaslapack-dir=$MKLROOT \
+    --with-kokkos-dir=/path/to/kokkos-install \
+    --download-kokkos-kernels=/path/to/kokkos-kernels.tar.gz \
+    --download-kokkos-kernels-cmake-arguments=-DMKL_INTERFACE=lp64 \
+    --download-hypre
+  @endcode
+  The Kokkos-Kernels sources are patched with
+  `kokkos-kernels-sycl-nrm2.patch`, so that the Euclidean norm of a device
+  vector does not call oneMKL (see @ref guides-kokkos-limitations).
+
+  Three settings of the environment apply to every run. Open MPI does not
+  know SYCL memory, so PETSc exchanges host buffers
+  (`PETSC_OPTIONS=-use_gpu_aware_mpi 0`). The Level Zero component of hwloc
+  crashes `mpirun` (`HWLOC_COMPONENTS=-levelzero`). PETSc also enumerates the
+  OpenCL devices, on which Kokkos refuses to run
+  (`ONEAPI_DEVICE_SELECTOR=level_zero:gpu`).
+
+  `dev/docker/kokkos/Dockerfile.sycl` builds this whole stack, Open MPI and
+  hypre included; `dev/docker/kokkos/README.md` describes the three images,
+  CUDA, HIP and SYCL, and how `ci-test.sh` runs the tests in them.
+
+  @section guides-kokkos-consumers Installed Consumers
+
+  Installed consumers enable the same compiler setup and link the module:
+
+  @code{.cmake}
+  find_package(Rodin REQUIRED)
+  add_executable(mesh_device main.cpp)
+  target_link_libraries(mesh_device PRIVATE Rodin::Kokkos)
+  @endcode
+
+  @section guides-kokkos-limitations Known Limitations and Workarounds
+
+  The following defects lie in the libraries and drivers below Rodin. Each
+  entry gives the affected configuration, the observed effect and the
+  workaround that Rodin or its build applies.
+
+  - <b>Euclidean norm of oneMKL on Intel GPUs.</b> The `nrm2` of oneMKL
+    2026.0 to 2026.2 on an Arc Pro B70 reads past the end of a vector of
+    more than about 65536 entries, up to the next multiple of 2048, when
+    the length is not such a multiple. Kokkos-Kernels calls it for
+    `KokkosBlas::nrm2` on SYCL, and PETSc for `VecNorm` of its Kokkos
+    vectors. The work vectors of a PETSc Krylov method share one
+    allocation, so the norm adds the entries of the next vector: CG and
+    BiCGStab compute a wrong residual norm and do not converge, and a
+    field split reads uninitialized memory. The patch
+    `kokkos-kernels-sycl-nrm2.patch` makes Kokkos-Kernels use its own
+    kernel on SYCL.
+  - <b>Intel graphics compiler.</b> IGC 2.40 and 2.41 drop the stores of
+    some lanes in irreducible loops, and double atomic additions in team
+    scratch memory hang about one launch in two on the Arc Pro B70. The
+    device kernels of Rodin avoid both constructions. IGC 2.41 and 2.42
+    crash on a kernel of oneDPL compiled at run time by hypre, so IGC 2.40
+    is required.
+  - <b>OpenMP under icpx.</b> `-fiopenmp` miscompiles the host assembly from
+    `-O1` on; Rodin compiles OpenMP with `-fopenmp=libomp` under `icpx`.
+  - <b>Open MPI and SYCL memory.</b> Open MPI does not exchange SYCL device
+    buffers, so distributed SYCL runs use `-use_gpu_aware_mpi 0`.
+  - <b>GAMG on V100.</b> The aggressive MIS-k coarsening of PETSc GAMG
+    builds corrupted matrices in the device products `MatPtAP` and
+    `MatTranspose` on V100, and P1 triangles at 16.8 million degrees of
+    freedom crash in `KokkosSparse::spgemm_symbolic`. The workaround is
+    `-pc_gamg_aggressive_coarsening 0`.
+  - <b>Reproducibility on CUDA.</b> The iteration count of a distributed
+    Krylov solve varies between runs on CUDA, while the assembled matrix
+    and right-hand side are bitwise identical. The sparse product of the
+    off-diagonal block calls `cusparseSpMV` with a nonzero beta, whose
+    default algorithm changes the last bit of some entries between calls.
+    Iteration counts on CUDA are therefore compared as ranges.
+  - <b>ROCm runtime.</b> On ROCm 10, Kokkos-Kernels 5.2.2 names a removed
+    rocSPARSE index type, hypre assumes 64 lanes per wavefront, and the
+    zlib of ROCm can abort `MPI_Init`; the
+    @ref guides-kokkos-build-hip "HIP build" section gives the workaround of
+    each.
+
+  @section guides-kokkos-validation Validation
+
+  Tests select CUDA, HIP or SYCL when Kokkos has that backend enabled. Otherwise they explicitly
+  select the default host execution space and exercise the same specialization.
+  They compare all reference geometries and embeddings with LocalMesh,
+  topology and attributes, resident updates, copy independence, lifetime,
+  measure reductions and MeshBase compatibility. Connectivity tests compare
+  exact discovery numbering, oriented keys, incidence traversal order, dirty
+  flags, restriction and recomputation with the CPU implementation. Iteration
+  tests compare every region predicate and entity descriptor against sequential
+  assembly traversal across reference families, embedded mixed meshes and
+  nonmanifold adjacency, including explicit incidence requirements and empty
+  selections. A Threads
+  build can exercise the same kernels concurrently on the host. Passing host tests does not
+  certify CUDA, HIP or SYCL compilation, device execution or GPU performance; those
+  require the device toolchain and compatible hardware.
+*/

@@ -54,6 +54,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <functional>
+#include <memory>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -758,11 +759,26 @@ namespace Rodin::IO
           nullptr; ///< Effective mesh for visualization (shard for MPI).
         const Geometry::MeshBase* sourceMesh =
           nullptr; ///< Original mesh for identity checks.
+        std::function<std::shared_ptr<const Geometry::MeshBase>()>
+          mirror; ///< Copies a device mesh to the host, empty for host meshes.
+        std::shared_ptr<const Geometry::MeshBase>
+          mirrorMesh; ///< Host copy of a device mesh, written in its place.
         GridOptions options; ///< Per-grid export options.
         bool staticMeshWritten = false; ///< Whether the static mesh has been exported.
         boost::filesystem::path staticMeshFile; ///< Path to the static mesh file.
         std::vector<AttributeRecord> attributes; ///< Registered attributes.
         std::vector<SnapshotRecord> snapshots; ///< Recorded snapshots.
+        std::string xml; ///< XML of the first serialized snapshots.
+        size_t serialized = 0; ///< Number of snapshots serialized in xml.
+      };
+
+      /// @brief State of the document at the last flush.
+      struct FlushRecord
+      {
+        bool rewrite = true; ///< Whether the next flush rewrites the document.
+        boost::filesystem::path path; ///< Document written.
+        std::uintmax_t size = 0; ///< Size of the document written.
+        std::vector<size_t> grids; ///< Size of the XML written for each grid.
       };
 
       boost::filesystem::path m_stem; ///< Output stem path.
@@ -771,6 +787,7 @@ namespace Rodin::IO
       bool m_closed = false; ///< Whether close() has been called.
       size_t m_snapshotCount = 0; ///< Total snapshots written.
       std::vector<GridRecord> m_grids; ///< All grids in this domain.
+      FlushRecord m_flushed; ///< Document written by the last flush.
 
       // --- MPI distributed mode -----------------------------------------------
       bool m_distributed = false; ///< Whether the writer is in distributed mode.
@@ -790,6 +807,14 @@ namespace Rodin::IO
        */
       void writeUniformGrid(std::ostream& os, const std::string& gridName,
         const SnapshotRecord& snap, size_t baseIndent) const;
+
+      /**
+       * @brief Writes the XML element of one snapshot of a grid.
+       * @param os Output stream receiving the formatted data.
+       * @param gr Grid of the snapshot.
+       * @param s Index of the snapshot.
+       */
+      void writeSnapshot(std::ostream& os, const GridRecord& gr, size_t s) const;
 
       /**
        * @brief Gathers per-rank mesh metadata into snap.pieces.
@@ -817,8 +842,18 @@ namespace Rodin::IO
     // For distributed (MPI) meshes, store the shard for visualization
     // since the writeXDMF helpers require a local mesh. The original mesh
     // pointer is kept in sourceMesh for identity checks in add().
+    // Device meshes are written through a local copy, built by write().
+    gr.mirror = nullptr;
+    gr.mirrorMesh.reset();
     if constexpr (requires { mesh.getShard(); })
       gr.mesh = &mesh.getShard();
+    else if constexpr (requires { mesh.toHost(); })
+    {
+      gr.mesh = nullptr;
+      gr.mirror = [&mesh]() -> std::shared_ptr<const Geometry::MeshBase> {
+        return std::make_shared<const decltype(mesh.toHost())>(mesh.toHost());
+      };
+    }
     else
       gr.mesh = &mesh;
     gr.sourceMesh = &mesh;
@@ -882,14 +917,45 @@ namespace Rodin::IO
     // for serial). The attribute write helpers iterate over this mesh's
     // vertices/cells, not over gf.getFiniteElementSpace().getMesh(), which
     // may be a distributed MPI mesh with global counts.
-    const auto* visMesh = [&] {
+    // A device mesh has no visualization mesh until write() copies it to
+    // the host, so the callback looks it up when it runs.
+    const auto* visMesh = [&]() -> const Geometry::MeshBase* {
       const auto& source = gf.getFiniteElementSpace().getMesh();
       if constexpr (requires { source.getShard(); })
         return &source.getShard();
+      else if constexpr (requires { source.toHost(); })
+        return nullptr;
       else
         return &source;
     }();
-    rec.write = [&gf, visMesh](const boost::filesystem::path& path, Center center) {
+    rec.write = [&gf, visMesh, owner = m_owner, index = m_index](
+                  const boost::filesystem::path& path, Center center) {
+      // A device field is copied onto the host copy of its mesh, which
+      // write() builds since the field's mesh is the mesh of the grid.
+      if constexpr (requires { gf.getFiniteElementSpace().getMesh().toHost(); })
+      {
+        const auto& mesh =
+          static_cast<const Geometry::Mesh<Context::Local>&>(*owner->m_grids[index].mesh);
+        const auto fes = gf.getFiniteElementSpace().toHost(mesh);
+        Variational::GridFunction host(fes);
+        host.getData() = gf.getData();
+        switch (center)
+        {
+          case Center::Node:
+            HDF5::writeXDMFNodeAttribute(host, mesh, path);
+            return;
+          case Center::Cell:
+            HDF5::writeXDMFCellAttribute(host, mesh, path);
+            return;
+        }
+        return;
+      }
+      else
+      {
+        // The host copy of the mesh is only needed by device fields.
+        static_cast<void>(owner);
+        static_cast<void>(index);
+      }
       switch (center)
       {
         case Center::Node:

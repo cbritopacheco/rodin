@@ -69,6 +69,7 @@
 #include "Rodin/Geometry/PolytopeIterator.h"
 
 #include "Rodin/Alert/MemberFunctionException.h"
+#include "Rodin/Context/ForwardDecls.h"
 
 #include "Rodin/IO/ForwardDecls.h"
 #include "Rodin/IO/MEDIT.h"
@@ -107,6 +108,33 @@ namespace Rodin::FormLanguage
 
 namespace Rodin::Variational
 {
+  /**
+   * @brief Projection of a source on a grid function of a device space.
+   *
+   * Specialized by the device backend owning the mesh context. Grid
+   * functions of a device space project through it, since the host
+   * interpolation path is not instantiated for them.
+   *
+   * @tparam Context Mesh context of the space.
+   */
+  template <class Context>
+  struct ContextProjection;
+
+  /**
+   * @brief Tells whether a callable is a predicate of the device projection
+   * of a mesh context.
+   *
+   * A named concept defers the lookup of the projection to the satisfaction
+   * check: a requires clause naming `ContextProjection<Context>` directly is
+   * rejected by NVCC 12 for host contexts, whose projection is incomplete.
+   *
+   * @tparam Context Mesh context, whose projection must be complete.
+   * @tparam Pred Callable type.
+   */
+  template <class Context, class Pred>
+  concept IsDeviceProjectionPredicate =
+    ContextProjection<Context>::template IsPredicate<Pred>;
+
   /**
    * @defgroup GridFunctionSpecializations GridFunction Template Specializations
    * @brief Template specializations of the GridFunction class.
@@ -290,7 +318,7 @@ namespace Rodin::Variational
        * @brief Returns a constant reference to the GridFunction data.
        * @returns A constant reference to the GridFunction data.
        */
-      constexpr const auto& getData()
+      constexpr const auto& getData() const
       {
         return getReferencedGridFunction().getData();
       }
@@ -433,6 +461,15 @@ namespace Rodin::Variational
 
       /// @brief Parent CRTP reference type.
       using Parent = GridFunctionBaseReference<Derived>;
+
+      /**
+       * @brief Whether the space lives on a Kokkos device mesh.
+       *
+       * Device grid functions are evaluated through Kokkos device views, so
+       * the host interpolation path is not instantiated for them.
+       */
+      static constexpr bool IsDevice = Context::IsKokkos<
+        typename FormLanguage::Traits<typename FESType::MeshType>::ContextType>::value;
 
       static_assert(std::is_same_v<RangeType, ScalarType> ||
         FormLanguage::IsVectorRange<RangeType>::Value ||
@@ -817,23 +854,32 @@ namespace Rodin::Variational
        */
       constexpr void interpolate(RangeType& res, const Geometry::Point& p) const
       {
-        const auto& fes = this->getFiniteElementSpace();
-        const auto& polytope = p.getPolytope();
-        const size_t d = polytope.getDimension();
-        const Index i = polytope.getIndex();
+        if constexpr (IsDevice)
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "Device grid functions are evaluated on Kokkos devices only."
+            << Alert::Raise;
+        }
+        else
+        {
+          const auto& fes = this->getFiniteElementSpace();
+          const auto& polytope = p.getPolytope();
+          const size_t d = polytope.getDimension();
+          const Index i = polytope.getIndex();
 
-        const auto& dofs = getCachedDOFs(d, i);
-        const auto coefficient = [&](size_t local) -> decltype(auto) {
-          return this->operator[](dofs[local]);
-        };
-        const auto& element = fes.getFiniteElement(d, i);
-        const auto expansion = [&](const Math::SpatialPoint& coordinates) {
-          RangeType value;
-          element.evaluate(value, coefficient, coordinates);
-          return value;
-        };
-        const auto mapping = fes.getPushforward({d, i}, expansion);
-        res = mapping(p);
+          const auto& dofs = getCachedDOFs(d, i);
+          const auto coefficient = [&](size_t local) -> decltype(auto) {
+            return this->operator[](dofs[local]);
+          };
+          const auto& element = fes.getFiniteElement(d, i);
+          const auto expansion = [&](const Math::SpatialPoint& coordinates) {
+            RangeType value;
+            element.evaluate(value, coefficient, coordinates);
+            return value;
+          };
+          const auto mapping = fes.getPushforward({d, i}, expansion);
+          res = mapping(p);
+        }
       }
 
       /**
@@ -843,50 +889,60 @@ namespace Rodin::Variational
        */
       constexpr void interpolate(RangeType& res, const IntegrationPoint& ip) const
       {
-        if (ip.getReferenceQuadratureFormula() == nullptr)
+        if constexpr (IsDevice)
         {
-          static_cast<const Derived&>(*this).interpolate(res, ip.getPoint());
-          return;
+          Alert::MemberFunctionException(*this, __func__)
+            << "Device grid functions are evaluated on Kokkos devices only."
+            << Alert::Raise;
         }
-        const auto& p = ip.getPoint();
-        const auto& polytope = p.getPolytope();
-        const size_t d = polytope.getDimension();
-        const Index i = polytope.getIndex();
-
-        const auto& dofs = getCachedDOFs(d, i);
-        const auto& fes = this->getFiniteElementSpace();
-        const auto& element = fes.getFiniteElement(d, i);
-        const auto coefficient = [&](size_t local) -> decltype(auto) {
-          return this->operator[](dofs[local]);
-        };
-        const auto expansion = [&](const auto& sample) {
-          RangeType value;
-          if constexpr (std::is_same_v<std::decay_t<decltype(sample)>, IntegrationPoint>)
-          {
-            const auto* formula = sample.getReferenceQuadratureFormula();
-            if constexpr (requires {
-                            element.evaluate(
-                              value, coefficient, *formula, sample.getIndex());
-                          })
-            {
-              if (formula)
-              {
-                element.evaluate(value, coefficient, *formula, sample.getIndex());
-                return value;
-              }
-            }
-            element.evaluate(
-              value, coefficient, sample.getPoint().getReferenceCoordinates());
-          }
-          else
-            element.evaluate(value, coefficient, sample);
-          return value;
-        };
-        const auto mapping = fes.getPushforward({d, i}, expansion);
-        if constexpr (requires { mapping(ip); })
-          res = mapping(ip);
         else
-          res = mapping(p);
+        {
+          if (ip.getReferenceQuadratureFormula() == nullptr)
+          {
+            static_cast<const Derived&>(*this).interpolate(res, ip.getPoint());
+            return;
+          }
+          const auto& p = ip.getPoint();
+          const auto& polytope = p.getPolytope();
+          const size_t d = polytope.getDimension();
+          const Index i = polytope.getIndex();
+
+          const auto& dofs = getCachedDOFs(d, i);
+          const auto& fes = this->getFiniteElementSpace();
+          const auto& element = fes.getFiniteElement(d, i);
+          const auto coefficient = [&](size_t local) -> decltype(auto) {
+            return this->operator[](dofs[local]);
+          };
+          const auto expansion = [&](const auto& sample) {
+            RangeType value;
+            if constexpr (std::is_same_v<std::decay_t<decltype(sample)>,
+                            IntegrationPoint>)
+            {
+              const auto* formula = sample.getReferenceQuadratureFormula();
+              if constexpr (requires {
+                              element.evaluate(
+                                value, coefficient, *formula, sample.getIndex());
+                            })
+              {
+                if (formula)
+                {
+                  element.evaluate(value, coefficient, *formula, sample.getIndex());
+                  return value;
+                }
+              }
+              element.evaluate(
+                value, coefficient, sample.getPoint().getReferenceCoordinates());
+            }
+            else
+              element.evaluate(value, coefficient, sample);
+            return value;
+          };
+          const auto mapping = fes.getPushforward({d, i}, expansion);
+          if constexpr (requires { mapping(ip); })
+            res = mapping(ip);
+          else
+            res = mapping(p);
+        }
       }
 
       /**
@@ -958,8 +1014,13 @@ namespace Rodin::Variational
       template <class T>
       Derived& project(const T& fn)
       {
-        return static_cast<Derived&>(*this).project(
-          Geometry::Region::Cells, fn, [](const Geometry::Polytope&) { return true; });
+        if constexpr (IsDevice)
+          return projectOnDevice(Geometry::Region::Cells, fn, {});
+        else
+        {
+          return static_cast<Derived&>(*this).project(
+            Geometry::Region::Cells, fn, [](const Geometry::Polytope&) { return true; });
+        }
       }
 
       /**
@@ -975,8 +1036,13 @@ namespace Rodin::Variational
       template <class T>
       Derived& project(const Geometry::Region& region, const T& fn)
       {
-        return static_cast<Derived&>(*this).project(
-          region, fn, [](const Geometry::Polytope&) { return true; });
+        if constexpr (IsDevice)
+          return projectOnDevice(region, fn, {});
+        else
+        {
+          return static_cast<Derived&>(*this).project(
+            region, fn, [](const Geometry::Polytope&) { return true; });
+        }
       }
 
       /**
@@ -995,10 +1061,15 @@ namespace Rodin::Variational
       Derived& project(
         const Geometry::Region& region, const T& fn, const Geometry::Attribute& attr)
       {
-        return static_cast<Derived&>(*this).project(
-          region, fn, [&](const Geometry::Polytope& polytope) {
-            return polytope.getAttribute() == attr;
-          });
+        if constexpr (IsDevice)
+          return projectOnDevice(region, fn, {attr});
+        else
+        {
+          return static_cast<Derived&>(*this).project(
+            region, fn, [&](const Geometry::Polytope& polytope) {
+              return polytope.getAttribute() == attr;
+            });
+        }
       }
 
       /**
@@ -1018,11 +1089,45 @@ namespace Rodin::Variational
       Derived& project(const Geometry::Region& region, const T& fn,
         const FlatSet<Geometry::Attribute>& attrs)
       {
-        return static_cast<Derived&>(*this).project(
-          region, fn, [&](const Geometry::Polytope& polytope) {
-            const auto attribute = polytope.getAttribute();
-            return attrs.empty() || (attribute && attrs.count(*attribute));
-          });
+        if constexpr (IsDevice)
+          return projectOnDevice(region, fn, attrs);
+        else
+        {
+          return static_cast<Derived&>(*this).project(
+            region, fn, [&](const Geometry::Polytope& polytope) {
+              const auto attribute = polytope.getAttribute();
+              return attrs.empty() || (attribute && attrs.count(*attribute));
+            });
+        }
+      }
+
+      /**
+       * @brief Projects a source on entities of a region selected by a device
+       * predicate.
+       * @tparam T Function, expression, or constant source type
+       * @tparam Pred Device predicate type
+       *
+       * The predicate is evaluated on the device on each polytope of
+       * @p region, as given by the device projection of the mesh context, for
+       * instance a `KOKKOS_LAMBDA` taking a
+       * `const Rodin::Kokkos::Geometry::PolytopeView&`.
+       *
+       * @returns Reference to this grid function
+       * @param region Region on which to apply the operation.
+       * @param fn Function to evaluate.
+       * @param pred Device predicate selecting the entities on which to project.
+       */
+      template <class T, class Pred>
+        requires IsDevice &&
+        (!std::is_invocable_r_v<bool, const Pred&, const Geometry::Polytope&>) &&
+        IsDeviceProjectionPredicate<
+          typename FormLanguage::Traits<typename FESType::MeshType>::ContextType, Pred>
+      Derived& project(const Geometry::Region& region, const T& fn, const Pred& pred)
+      {
+        ContextProjection<typename FormLanguage::Traits<
+          typename FESType::MeshType>::ContextType>::project(static_cast<Derived&>(*this),
+          region, fn, {}, pred);
+        return static_cast<Derived&>(*this);
       }
 
       /**
@@ -1054,6 +1159,7 @@ namespace Rodin::Variational
        * @returns Reference to this object after the operation.
        */
       template <class Function, class Pred>
+        requires std::is_invocable_r_v<bool, const Pred&, const Geometry::Polytope&>
       Derived& project(
         const Geometry::Region& region, const Function& fn, const Pred& pred)
       {
@@ -1144,7 +1250,7 @@ namespace Rodin::Variational
        * @returns Mutable reference to the coefficient
        * @note CRTP function to be overriden in Derived class.
        */
-      ScalarType& operator[](Index global)
+      decltype(auto) operator[](Index global)
       {
         return static_cast<Derived&>(*this).operator[](global);
       }
@@ -1155,7 +1261,7 @@ namespace Rodin::Variational
        * @returns Const reference to the coefficient
        * @note CRTP function to be overriden in Derived class.
        */
-      const ScalarType& operator[](Index global) const
+      decltype(auto) operator[](Index global) const
       {
         return static_cast<const Derived&>(*this).operator[](global);
       }
@@ -1285,6 +1391,24 @@ namespace Rodin::Variational
 
     private:
       /**
+       * @brief Projects a source through the device backend of the space.
+       * @param region Region on which to project.
+       * @param fn Function, expression, or constant to evaluate.
+       * @param attrs Mesh attributes selecting the region; empty selects it
+       * all.
+       * @returns Reference to this grid function.
+       */
+      template <class T>
+      Derived& projectOnDevice(const Geometry::Region& region, const T& fn,
+        const FlatSet<Geometry::Attribute>& attrs)
+      {
+        ContextProjection<typename FormLanguage::Traits<
+          typename FESType::MeshType>::ContextType>::project(static_cast<Derived&>(*this),
+          region, fn, attrs);
+        return static_cast<Derived&>(*this);
+      }
+
+      /**
        * @brief Uses a generic element's established polynomial information.
        * @param element Reference element, with no required family index.
        * @returns Its degree bound, or no automatic estimate.
@@ -1408,15 +1532,12 @@ namespace Rodin::Variational
 
   /**
    * @ingroup GridFunctionSpecializations
-   * @brief Grid function storing its degrees of freedom in a dense
-   * Math::Vector over the space's scalar type (the standard local
-   * backend).
+   * @brief Grid function owning its coefficients in the selected data container.
+   * @tparam FES Finite element space.
+   * @tparam Data Coefficient owner, selected by the algebra backend.
    */
-  template <class FES>
-  class GridFunction<FES, Math::Vector<typename FormLanguage::Traits<FES>::ScalarType>>
-    final
-    : public GridFunctionBase<
-        GridFunction<FES, Math::Vector<typename FormLanguage::Traits<FES>::ScalarType>>>
+  template <class FES, class Data>
+  class GridFunction final : public GridFunctionBase<GridFunction<FES, Data>>
   {
     public:
       /// @brief Finite element space type.
@@ -1429,7 +1550,7 @@ namespace Rodin::Variational
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
       /// @brief Coefficient data storage type.
-      using DataType = Math::Vector<ScalarType>;
+      using DataType = Data;
 
       /// @brief Parent class type.
       using Parent = GridFunctionBase<GridFunction<FESType, DataType>>;
@@ -1533,7 +1654,7 @@ namespace Rodin::Variational
        * @param[in] global Global DOF index
        * @returns Mutable reference to the coefficient
        */
-      ScalarType& operator[](Index global)
+      decltype(auto) operator[](Index global)
       {
         return this->getData()[global];
       }
@@ -1543,7 +1664,7 @@ namespace Rodin::Variational
        * @param[in] global Global DOF index
        * @returns Const reference to the coefficient
        */
-      const ScalarType& operator[](Index global) const
+      decltype(auto) operator[](Index global) const
       {
         return this->getData()[global];
       }
@@ -1651,6 +1772,7 @@ namespace Rodin::Variational
        * @returns Reference to this grid function
        */
       template <class Function, class Pred>
+        requires std::is_invocable_r_v<bool, const Pred&, const Geometry::Polytope&>
       GridFunction& project(
         const Geometry::Region& region, const Function& v, const Pred& pred)
       {
@@ -1703,7 +1825,10 @@ namespace Rodin::Variational
       {
         const auto sz = this->getFiniteElementSpace().getSize();
         assert(offset + static_cast<size_t>(sz) <= static_cast<size_t>(data.size()));
-        this->getData() = data.segment(offset, sz);
+        if constexpr (requires { this->getData().assign(data, offset, sz); })
+          this->getData().assign(data, offset, sz);
+        else
+          this->getData() = data.segment(offset, sz);
         return *this;
       }
 

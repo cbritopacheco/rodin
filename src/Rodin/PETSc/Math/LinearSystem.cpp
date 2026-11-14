@@ -61,7 +61,8 @@ namespace Rodin::Math
       m_operator(other.m_operator),
       m_solution(other.m_solution),
       m_vector(other.m_vector),
-      m_fieldSplits(other.m_fieldSplits)
+      m_fieldSplits(other.m_fieldSplits),
+      m_fieldStarts(other.m_fieldStarts)
   {
     reference(reinterpret_cast<PetscObject>(m_operator));
     reference(reinterpret_cast<PetscObject>(m_solution));
@@ -74,7 +75,8 @@ namespace Rodin::Math
       m_operator(std::exchange(other.m_operator, PETSC_NULLPTR)),
       m_solution(std::exchange(other.m_solution, PETSC_NULLPTR)),
       m_vector(std::exchange(other.m_vector, PETSC_NULLPTR)),
-      m_fieldSplits(std::move(other.m_fieldSplits))
+      m_fieldSplits(std::move(other.m_fieldSplits)),
+      m_fieldStarts(std::move(other.m_fieldStarts))
   {}
 
   LinearSystem<::Mat, ::Vec>::~LinearSystem()
@@ -95,6 +97,7 @@ namespace Rodin::Math
       m_solution = other.m_solution;
       m_vector = other.m_vector;
       m_fieldSplits = other.m_fieldSplits;
+      m_fieldStarts = other.m_fieldStarts;
       reference(reinterpret_cast<PetscObject>(m_operator));
       reference(reinterpret_cast<PetscObject>(m_solution));
       reference(reinterpret_cast<PetscObject>(m_vector));
@@ -114,6 +117,7 @@ namespace Rodin::Math
       m_solution = std::exchange(other.m_solution, PETSC_NULLPTR);
       m_vector = std::exchange(other.m_vector, PETSC_NULLPTR);
       m_fieldSplits = std::move(other.m_fieldSplits);
+      m_fieldStarts = std::move(other.m_fieldStarts);
     }
     return *this;
   }

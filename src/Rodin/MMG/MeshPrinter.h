@@ -32,6 +32,8 @@ namespace Rodin::MMG
   class MeshPrinter : public IO::Printer<MMG::Mesh>
   {
     public:
+      using IO::Printer<MMG::Mesh>::print;
+
       /**
        * @brief Constructs a printer for a given MMG mesh.
        * @param[in] mesh Mesh to print.

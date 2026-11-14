@@ -3,7 +3,8 @@ from pathlib import Path
 import tempfile
 import unittest
 
-from documentation_links import publish_enum_anchors, unlink_unpublished_references, verify_local_links
+from documentation_links import (publish_enum_anchors, set_aside_concepts, unlink_unpublished_references,
+                                 verify_local_links)
 
 
 class DocumentationLinksTest(unittest.TestCase):
@@ -36,6 +37,20 @@ class DocumentationLinksTest(unittest.TestCase):
         self.assertIn('href="public.html"', page.read_text())
         verify_local_links(self.site)
         self.assertEqual(unlink_unpublished_references(self.xml, self.site), 0)
+
+    def test_concept_is_set_aside_and_unlinked(self):
+        (self.xml / 'concept_space.xml').write_text(
+            '<doxygen><compounddef kind="concept">'
+            '<briefdescription>Device space</briefdescription>'
+            '</compounddef></doxygen>')
+        self.definition('public', 'Documented API')
+        self.assertEqual(set_aside_concepts(self.xml), 1)
+        self.assertEqual(sorted(path.name for path in self.xml.glob('*.xml')), ['public.xml'])
+        page = self.site / 'page.html'
+        page.write_text('<code>requires <a href="concept_space.html">Space</a></code>')
+        self.assertEqual(unlink_unpublished_references(self.xml, self.site), 1)
+        self.assertIn('<code>requires Space</code>', page.read_text())
+        verify_local_links(self.site)
 
     def test_missing_public_page_or_unknown_link_cannot_be_silently_removed(self):
         self.definition('public', 'Documented API')

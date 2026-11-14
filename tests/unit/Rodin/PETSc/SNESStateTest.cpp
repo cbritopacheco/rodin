@@ -142,6 +142,27 @@ TEST(Rodin_PETSc_SNESState, CubicManufacturedRootAndWarmStart)
   EXPECT_EQ(snes.getIterationNumber(), 0);
 }
 
+/// @brief An invalid nonlinear solver type is raised, also in release builds.
+TEST(Rodin_PETSc_SNESState, PETScFailuresRaise)
+{
+  auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Segment, {3});
+  P1<PetscScalar> space(mesh);
+  PETSc::Variational::TrialFunction du(space);
+  PETSc::Variational::TestFunction v(space);
+  Problem problem(du, v);
+#ifdef PETSC_USE_COMPLEX
+  const auto one = ComplexFunction(1);
+#else
+  const auto one = RealFunction(1);
+#endif
+  problem = Integral(du, v) - Integral(one, v);
+  problem.assemble();
+  Solver::KSP ksp(problem);
+  Solver::SNES snes(ksp);
+  snes.setType("rodin_unknown_snes");
+  EXPECT_THROW(snes.solve(), Alert::Exception);
+}
+
 #ifdef PETSC_USE_COMPLEX
 /**
  * @brief Newton solves recover the non-real manufactured root and preserve warm starts.

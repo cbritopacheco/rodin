@@ -40,6 +40,7 @@
 #include <numeric>
 
 #include "Rodin/Alert/Notation.h"
+#include "Rodin/Context/ForwardDecls.h"
 #include "Rodin/IO/HDF5.h"
 #include "Rodin/Alert.h"
 
@@ -249,8 +250,7 @@ namespace Rodin::IO
 
         ierr = VecAssemblyEnd(vec);
         assert(ierr == PETSC_SUCCESS);
-        if constexpr (std::is_same_v<typename ObjectType::FESMeshContextType,
-                        Context::MPI>)
+        if constexpr (Context::IsMPI<typename ObjectType::FESMeshContextType>::value)
         {
           ierr = VecGhostUpdateBegin(vec, INSERT_VALUES, SCATTER_FORWARD);
           assert(ierr == PETSC_SUCCESS);

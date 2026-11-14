@@ -10,6 +10,11 @@ if(POLICY CMP0167)
   cmake_policy(SET CMP0167 NEW)
 endif()
 
+# Normalize the DESTINATION of install() (CMake 3.31+)
+if(POLICY CMP0177)
+  cmake_policy(SET CMP0177 NEW)
+endif()
+
 # Prohibit in-source builds
 if ("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
   message(FATAL_ERROR "In-source builds are prohibited.")
@@ -68,10 +73,14 @@ option(RODIN_BUILD_TIDY               "Configure the clang-tidy aggregate target
 option(RODIN_WITH_PY                  "Build Python bindings"                     OFF)
 option(RODIN_USE_MCSS                 "Build documentation with m.css"            OFF)
 option(RODIN_USE_MPI                  "Use Rodin with MPI support"                OFF)
+option(RODIN_USE_KOKKOS               "Use Rodin with Kokkos support"             OFF)
 option(RODIN_USE_OPENMP               "Use Rodin with OpenMP support"             OFF)
 option(RODIN_USE_UMFPACK              "Use Rodin with UMFPACK support"            OFF)
 option(RODIN_USE_PARU                 "Use Rodin with ParU support"               OFF)
 option(RODIN_USE_MUMPS                "Use Rodin with MUMPS support"              OFF)
+option(RODIN_USE_CUDSS                "Use Rodin with NVIDIA cuDSS support"       OFF)
+option(RODIN_USE_ROCSOLVER            "Use Rodin with AMD rocSOLVER support"      OFF)
+option(RODIN_USE_HYPRE                "Use Rodin with hypre support"              OFF)
 option(RODIN_USE_PASTIX               "Use Rodin with PaStiX support"             OFF)
 option(RODIN_USE_KLU                  "Use Rodin with KLU support"                OFF)
 option(RODIN_USE_SUPERLU              "Use Rodin with SuperLU support"            OFF)
@@ -184,6 +193,14 @@ rodin_add_compile_options(LANG C CXX OPTIONS -Wno-error=double-promotion -Wno-er
 rodin_add_compile_options(LANG C CXX OPTIONS -Wno-old-style-cast -Wno-deprecated-anon-enum-enum-conversion)
 rodin_add_compile_options(LANG C CXX OPTIONS -Wno-error=array-bounds)
 rodin_add_compile_options(LANG C CXX OPTIONS -Wno-error=nontrivial-memcall)
+
+# icx and icpx default to -fp-model=fast, which assumes finite values and
+# reassociates sums: Rodin relies on the IEEE semantics of the other compilers.
+foreach(LANG C CXX)
+  if(CMAKE_${LANG}_COMPILER_ID STREQUAL "IntelLLVM")
+    add_compile_options($<$<COMPILE_LANGUAGE:${LANG}>:-fp-model=precise>)
+  endif()
+endforeach()
 
 # Apple's ld (Xcode >= 15) warns whenever a static library appears more than
 # once on the link line, which CMake's transitive component dependencies
@@ -301,6 +318,23 @@ if (RODIN_BUILD_SRC)
     find_package(PETSc REQUIRED)
   endif()
 
+  # ---- Kokkos ----
+  if (RODIN_USE_KOKKOS)
+    find_package(Kokkos 4.2 CONFIG REQUIRED)
+  endif()
+
+  # ---- Kokkos-Kernels ----
+  if (RODIN_USE_KOKKOS)
+    # On SYCL, Kokkos-Kernels links oneMKL through the targets of MKLConfig
+    # but its package does not look for them. PETSc takes the 32-bit integer
+    # interface of oneMKL, which MKLConfig must then take as well.
+    if (Kokkos_ENABLE_SYCL AND NOT TARGET MKL::MKL)
+      set(MKL_INTERFACE lp64 CACHE STRING "Integer interface of oneMKL")
+      find_package(MKL CONFIG QUIET)
+    endif()
+    find_package(KokkosKernels CONFIG REQUIRED)
+  endif()
+
   # ---- Scotch ----
   if (RODIN_USE_SCOTCH)
     find_package(Scotch REQUIRED)
@@ -309,6 +343,39 @@ if (RODIN_BUILD_SRC)
   # ---- MUMPS ----
   if (RODIN_USE_MUMPS)
     find_package(MUMPS REQUIRED)
+  endif()
+
+  # ---- cuDSS ----
+  if (RODIN_USE_CUDSS)
+    if (NOT RODIN_USE_KOKKOS OR NOT Kokkos_ENABLE_CUDA)
+      message(FATAL_ERROR "RODIN_USE_CUDSS requires RODIN_USE_KOKKOS and a CUDA-enabled Kokkos installation.")
+    endif()
+    find_package(CUDAToolkit REQUIRED)
+    find_package(cudss CONFIG REQUIRED)
+  endif()
+
+  # ---- rocSOLVER ----
+  # The refactorization of rocSOLVER needs a first pivot order, which
+  # UMFPACK computes on the host.
+  if (RODIN_USE_ROCSOLVER)
+    if (NOT RODIN_USE_UMFPACK)
+      message(FATAL_ERROR "RODIN_USE_ROCSOLVER requires RODIN_USE_UMFPACK.")
+    endif()
+    if (NOT RODIN_USE_KOKKOS OR NOT Kokkos_ENABLE_HIP)
+      message(FATAL_ERROR "RODIN_USE_ROCSOLVER requires RODIN_USE_KOKKOS and a HIP-enabled Kokkos installation.")
+    endif()
+    find_package(hip CONFIG REQUIRED)
+    find_package(rocblas CONFIG REQUIRED)
+    find_package(rocsparse CONFIG REQUIRED)
+    find_package(rocsolver CONFIG REQUIRED)
+  endif()
+
+  # ---- hypre ----
+  if (RODIN_USE_HYPRE)
+    if (NOT RODIN_USE_KOKKOS)
+      message(FATAL_ERROR "RODIN_USE_HYPRE requires RODIN_USE_KOKKOS.")
+    endif()
+    find_package(HYPRE REQUIRED)
   endif()
 
   # ---- SuiteSparse ---------------------------------------------------------
@@ -379,6 +446,17 @@ if (RODIN_BUILD_SRC)
     rodin_add_pybind11()
     add_subdirectory(py)
   endif()
+
+  # The OpenMP lowering of icpx (-fiopenmp) miscompiles the assembly loops of
+  # Rodin from -O1 on (oneAPI 2026.2): in an omp for, a test on an Optional
+  # under a loop-invariant branch skips every iteration, so a form restricted
+  # to attributes assembles to zero. The front end of Clang lowers them right
+  # and calls the same runtime, libiomp5, which the link keeps through
+  # -fiopenmp. Each find_package(OpenMP) resets the target, hence the place.
+  if (RODIN_USE_OPENMP AND CMAKE_CXX_COMPILER_ID STREQUAL "IntelLLVM")
+    set_property(TARGET OpenMP::OpenMP_CXX PROPERTY INTERFACE_COMPILE_OPTIONS
+      $<$<COMPILE_LANGUAGE:CXX>:-fopenmp=libomp>)
+  endif()
 endif()
 
 if (RODIN_BUILD_DOC)
@@ -423,6 +501,7 @@ install(FILES
   "${PROJECT_SOURCE_DIR}/cmake/FindPETSc.cmake"
   "${PROJECT_SOURCE_DIR}/cmake/FindSuiteSparse.cmake"
   "${PROJECT_SOURCE_DIR}/cmake/FindMUMPS.cmake"
+  "${PROJECT_SOURCE_DIR}/cmake/FindHYPRE.cmake"
   DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/Rodin
 )
 

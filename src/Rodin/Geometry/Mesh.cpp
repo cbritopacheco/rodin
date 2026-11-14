@@ -4,6 +4,10 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+#include <cmath>
+#include <limits>
+#include <numeric>
+
 #include "Rodin/Alert/MemberFunctionException.h"
 
 #include "Rodin/Math/SpatialVector.h"
@@ -18,6 +22,7 @@
 #include "Rodin/IO/HDF5.h"
 
 #include "Mesh.h"
+#include "Ordering.h"
 #include "SubMesh.h"
 
 #include "Polytope.h"
@@ -359,6 +364,92 @@ namespace Rodin::Geometry
     }
 
     return *this;
+  }
+
+  Mesh<Context::Local> Mesh<Context::Local>::renumber(
+    const Ordering::Morton& ordering) const
+  {
+    return renumber(ordering(*this));
+  }
+
+  Mesh<Context::Local> Mesh<Context::Local>::renumber(
+    const Ordering::Hilbert& ordering) const
+  {
+    return renumber(ordering(*this));
+  }
+
+  Mesh<Context::Local> Mesh<Context::Local>::renumber(const Ordering::RCM& ordering) const
+  {
+    return renumber(ordering(*this));
+  }
+
+  Mesh<Context::Local> Mesh<Context::Local>::renumber(
+    const IndexVector& vertexOrder) const
+  {
+    const size_t sdim = getSpaceDimension();
+    const size_t D = getDimension();
+    const size_t vertexCount = getVertexCount();
+    if (vertexOrder.size() != vertexCount)
+    {
+      Alert::MemberFunctionException(*this, __func__)
+        << "The vertex permutation must contain every mesh vertex." << Alert::Raise;
+    }
+    std::vector<bool> seen(vertexCount, false);
+    for (const Index vertex : vertexOrder)
+    {
+      if (vertex >= vertexCount || seen[vertex])
+      {
+        Alert::MemberFunctionException(*this, __func__)
+          << "The vertex permutation must be a bijection of the mesh vertex indices."
+          << Alert::Raise;
+      }
+      seen[vertex] = true;
+    }
+    std::vector<Index> newVertex(vertexCount);
+    for (Index v = 0; v < vertexCount; ++v)
+      newVertex[vertexOrder[v]] = v;
+
+    Builder build;
+    build.initialize(sdim).nodes(vertexCount);
+    for (Index v = 0; v < vertexCount; ++v)
+    {
+      build.vertex(m_vertices[vertexOrder[v]]);
+      build.attribute({0, v}, getAttribute(0, vertexOrder[v]));
+    }
+
+    const auto& conn = getConnectivity();
+    for (size_t d = 1; d <= D; ++d)
+    {
+      const size_t count = conn.getCount(d);
+      if (count == 0)
+        continue;
+      std::vector<Index> smallest(count);
+      for (Index p = 0; p < count; ++p)
+      {
+        const auto& key = conn.getPolytope(d, p);
+        Index least = std::numeric_limits<Index>::max();
+        for (std::uint8_t j = 0; j < key.size(); ++j)
+          least = std::min(least, newVertex[key[j]]);
+        smallest[p] = least;
+      }
+      std::vector<Index> order(count);
+      std::iota(order.begin(), order.end(), Index(0));
+      std::stable_sort(order.begin(), order.end(),
+        [&](Index a, Index b) { return smallest[a] < smallest[b]; });
+
+      build.reserve(d, count);
+      for (Index p = 0; p < count; ++p)
+      {
+        const Index old = order[p];
+        const auto& key = conn.getPolytope(d, old);
+        IndexArray vertices(key.size());
+        for (std::uint8_t j = 0; j < key.size(); ++j)
+          vertices.coeffRef(j) = newVertex[key[j]];
+        build.polytope(conn.getGeometry(d, old), std::move(vertices));
+        build.attribute({d, p}, getAttribute(d, old));
+      }
+    }
+    return build.finalize();
   }
 
   Mesh<Context::Local>& Mesh<Context::Local>::scale(Real c)

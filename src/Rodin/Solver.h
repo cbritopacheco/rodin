@@ -11,8 +11,9 @@
  * @file Solver.h
  * @brief Main header for the Solver module
  *
- * This file includes all solver implementations available in Rodin. The Solver
- * module provides various algorithms for solving linear systems @f$ Ax = b @f$
+ * This file includes the native solver implementations. Vendor GPU integrations
+ * are provided by Rodin/Kokkos/Solver.h. The Solver module provides algorithms
+ * for solving linear systems @f$ Ax = b @f$
  * that arise from finite element discretizations.
  *
  * Available solver categories:
