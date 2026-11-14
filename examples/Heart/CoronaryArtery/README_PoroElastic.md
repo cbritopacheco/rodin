@@ -97,7 +97,8 @@ defaults the diagnostics agree to 6 digits.
 rank, field and snapshot); the CSV is written every step.
 
 ```sh
-RANKS_PER_CASE=50 CYCLES=4 examples/Heart/CoronaryArtery/run_poroelastic_scenarios_mpi.sh
-# batch 1: nostenosis x 3 scenarios, 3 x 50 ranks; batch 2: stenosis80
+RANKS_PER_CASE=30 CYCLES=4 examples/Heart/CoronaryArtery/run_poroelastic_scenarios_mpi.sh
+# all 6 cases (2 geometries x 3 scenarios) at once, 6 x 30 = 180 ranks
+# BATCH=geometry: one geometry at a time (3 cases together)
 # results/coronary_poroelastic_mpi/<geometry>/<scenario>
 ```

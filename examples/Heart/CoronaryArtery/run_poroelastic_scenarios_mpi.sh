@@ -2,11 +2,11 @@
 #
 # MPI runner of CoronaryArtery_Explicit_PoroElastic_MPI for every
 # (geometry, scenario) pair: by default 2 geometries x 3 scenarios = 6 cases,
-# one batch per geometry.  The cases of a batch run together, each with
-# RANKS_PER_CASE MPI ranks (3 x 50 = 150 processes); the next geometry starts
-# when the batch finishes.  Every case gets its own block of cores
-# (taskset on the mpirun, ranks unbound inside the block), so concurrent
-# mpiruns never bind to the same cores.
+# all at once with RANKS_PER_CASE MPI ranks each (6 x 30 = 180 processes).
+# BATCH=geometry runs one geometry at a time instead (3 cases together, the
+# next geometry when they finish).  Every case gets its own block of cores
+# (taskset on the mpirun, ranks unbound inside the block) when the machine
+# has enough cores, so concurrent mpiruns never bind to the same cores.
 #
 # The meshes are read from meshes/*.mesh.gz next to this script (plain git,
 # no LFS) and decompressed into $OUT/meshes.
@@ -20,12 +20,14 @@
 #   RODIN          repository root            (default: three levels above this script)
 #   BUILD          build directory            (default: $RODIN/build)
 #   MPIRUN         MPI launcher               (default: mpirun)
-#   RANKS_PER_CASE MPI ranks per case         (default: 50)
+#   RANKS_PER_CASE MPI ranks per case         (default: 30)
+#   BATCH          all: every case at once; geometry: one geometry at a time
+#                  (default: all)
 #   CYCLES         cardiac cycles per case    (default: 4)
 #   DT             time step [s]              (default: 1e-3)
 #   OUTPUT_EVERY   XDMF snapshot stride       (default: 10 steps)
-#   GEOMETRIES     batches, run one after another (default: nostenosis stenosis80)
-#   SCENARIOS      cases of each batch, run together (default: healthy aortic_stenosis hyperviscosity)
+#   GEOMETRIES     geometries                 (default: nostenosis stenosis80)
+#   SCENARIOS      scenarios of each geometry (default: healthy aortic_stenosis hyperviscosity)
 #                  available: healthy, aortic_stenosis, hyperviscosity, lvh
 #   OUT            output root                (default: $RODIN/results/coronary_poroelastic_mpi)
 #   BUILD_FIRST=1  rebuild the target before running
@@ -40,7 +42,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 RODIN="${RODIN:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 BUILD="${BUILD:-$RODIN/build}"
 MPIRUN="${MPIRUN:-mpirun}"
-RANKS_PER_CASE="${RANKS_PER_CASE:-50}"
+RANKS_PER_CASE="${RANKS_PER_CASE:-30}"
+BATCH="${BATCH:-all}"
 CYCLES="${CYCLES:-4}"
 DT="${DT:-1e-3}"
 OUTPUT_EVERY="${OUTPUT_EVERY:-10}"
@@ -85,8 +88,29 @@ for g in "${GEOMS[@]}"; do
 done
 
 NSCEN=${#SCENS[@]}
+NGEOM=${#GEOMS[@]}
 (( RANKS_PER_CASE >= 1 )) || { echo "RANKS_PER_CASE must be >= 1"; exit 1; }
 NSTEPS=$(python3 -c "print(round($CYCLES * 0.85 / $DT))")
+
+# Batches: lists of "geometry/scenario" run together.
+BATCHES=()
+case "$BATCH" in
+  all)
+    list=""
+    for g in "${GEOMS[@]}"; do for sc in "${SCENS[@]}"; do list+="$g/$sc "; done; done
+    BATCHES+=("$list")
+    PER_BATCH=$(( NGEOM * NSCEN ))
+    ;;
+  geometry)
+    for g in "${GEOMS[@]}"; do
+      list=""
+      for sc in "${SCENS[@]}"; do list+="$g/$sc "; done
+      BATCHES+=("$list")
+    done
+    PER_BATCH=$NSCEN
+    ;;
+  *) echo "BATCH must be 'all' or 'geometry'"; exit 1 ;;
+esac
 
 # Launcher flavour: no binding inside the core block of each case.
 if "$MPIRUN" --version 2>&1 | grep -qi "open mpi\|open-rte\|prrte"; then
@@ -94,24 +118,27 @@ if "$MPIRUN" --version 2>&1 | grep -qi "open mpi\|open-rte\|prrte"; then
 else
   BIND=(-bind-to none)
 fi
+NCORES=$(nproc --all)
 HAVE_TASKSET=0
-if command -v taskset > /dev/null && (( $(nproc --all) >= NSCEN * RANKS_PER_CASE )); then
+if command -v taskset > /dev/null && (( NCORES >= PER_BATCH * RANKS_PER_CASE )); then
   HAVE_TASKSET=1
 fi
 
 mkdir -p "$OUT"
 echo "Rodin: $RODIN"
-echo "Batches (one after another): ${GEOMS[*]}"
-echo "Cases per batch (together):  ${SCENS[*]}  |  $RANKS_PER_CASE rank(s) each, $(( NSCEN * RANKS_PER_CASE )) per batch"
+echo "Batches: ${#BATCHES[@]} ($BATCH), $PER_BATCH case(s) each x $RANKS_PER_CASE rank(s) = $(( PER_BATCH * RANKS_PER_CASE )) processes on $NCORES cores"
+(( PER_BATCH * RANKS_PER_CASE <= NCORES )) || echo "Warning: more processes than cores (oversubscribed, no pinning)"
 echo "Steps: $NSTEPS (dt=$DT, $CYCLES cycles), XDMF every $OUTPUT_EVERY   Output: $OUT"
 
 status=0
-for geom in "${GEOMS[@]}"; do
-  prefix=$(mesh_prefix "$geom")
-  echo "[$(date '+%F %T')] batch $geom"
+for b in "${!BATCHES[@]}"; do
+  read -r -a CASES <<< "${BATCHES[$b]}"
+  echo "[$(date '+%F %T')] batch $(( b + 1 ))/${#BATCHES[@]}: ${CASES[*]}"
   PIDS=()
-  for i in "${!SCENS[@]}"; do
-    name="${SCENS[$i]}"
+  for i in "${!CASES[@]}"; do
+    geom="${CASES[$i]%%/*}"
+    name="${CASES[$i]#*/}"
+    prefix=$(mesh_prefix "$geom")
     dir="$OUT/$geom/$name"
     mkdir -p "$dir"
     first=$(( i * RANKS_PER_CASE ))
@@ -134,17 +161,18 @@ for geom in "${GEOMS[@]}"; do
         $EXTRA
     ) > "$dir/run.log" 2>&1 &
     PIDS+=($!)
-    echo "  [$geom/$name] pid ${PIDS[-1]}  cores $first-$last  log $dir/run.log"
+    if (( HAVE_TASKSET )); then where="cores $first-$last"; else where="unpinned"; fi
+    echo "  [$geom/$name] pid ${PIDS[-1]}  $where  log $dir/run.log"
   done
 
   for i in "${!PIDS[@]}"; do
     if wait "${PIDS[$i]}"; then
-      echo "  [$geom/${SCENS[$i]}] finished"
+      echo "  [${CASES[$i]}] finished"
     else
-      echo "  [$geom/${SCENS[$i]}] FAILED (see $OUT/$geom/${SCENS[$i]}/run.log)"
+      echo "  [${CASES[$i]}] FAILED (see $OUT/${CASES[$i]}/run.log)"
       status=1
     fi
   done
-  echo "[$(date '+%F %T')] batch $geom done"
+  echo "[$(date '+%F %T')] batch $(( b + 1 )) done"
 done
 exit $status
