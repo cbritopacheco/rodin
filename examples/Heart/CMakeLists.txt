@@ -108,6 +108,26 @@ if (RODIN_USE_PETSC)
     Rodin::Geometry
     Rodin::Assembly)
 
+  # MPI version of the closed-loop coronary FSI (distributed meshes,
+  # assembly and solvers; interface exchanged through a PETSc VecScatter).
+  if (RODIN_USE_MPI)
+    add_executable(CoronaryArtery_Explicit_PoroElastic_MPI
+      CoronaryArtery_Explicit_PoroElastic_MPI.cpp)
+    target_link_libraries(CoronaryArtery_Explicit_PoroElastic_MPI
+      PUBLIC
+      Rodin::Heart
+      Rodin::Variational
+      Rodin::PETSc
+      Rodin::MPI
+      Rodin::Alert
+      Rodin::Solver
+      Rodin::Geometry
+      Rodin::Assembly)
+    if (RODIN_USE_SCOTCH)
+      target_link_libraries(CoronaryArtery_Explicit_PoroElastic_MPI PUBLIC Rodin::Scotch)
+    endif()
+  endif()
+
   # Coagulation-kinetics testbed on a simplified geometry: one inlet, one
   # outlet, an R_mu-Windkessel outlet and an ectatic segment that provides the
   # recirculation the kinetics need. Sequential and PETSc-only, like the P1/P1

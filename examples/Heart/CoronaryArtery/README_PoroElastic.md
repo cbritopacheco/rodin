@@ -73,3 +73,31 @@ CORES_PER_CASE=50 CYCLES=4 examples/Heart/CoronaryArtery/run_poroelastic_scenari
 `-coronary_solid_mesh`, `-coronary_lumped_supply` (0D lumped supply
 conductance, default 0), `-coronary_heart_disp_epicardial` (attachment target
 with `y + (h − h0)/2` instead of `y`).
+
+## MPI version
+
+`CoronaryArtery_Explicit_PoroElastic_MPI` (needs `-DRODIN_USE_MPI=ON`) is the
+same model with distributed meshes, assembly and solvers. Fluid and solid are
+partitioned independently (Scotch if available, otherwise
+`BalancedCompactPartitioner`); the interface fields (wall displacement, Robin
+datum `T + alpha u_f`) go through one PETSc `VecScatter` built from the
+reference coordinates of the conforming interface nodes. With 1 rank it
+reproduces the sequential run digit for digit; with 2 ranks and the iterative
+defaults the diagnostics agree to 6 digits.
+
+| prefix | problem | default |
+|---|---|---|
+| `coronary_fluid_` | Oseen/VMS saddle point | GMRES(200) + ASM(1)/ILU(1), rtol 1e-8 |
+| `coronary_solid_` | wall Newton (SNES) | LU, MUMPS |
+| `coronary_ale_` | harmonic ALE lift | CG + GAMG, rtol 1e-10 |
+| `coronary_aux_` | contact weight, transmural xi | CG + GAMG |
+| `coronary_mass_` | L2 projections | CG + Jacobi |
+
+`-coronary_output_every N` (default 10) sets the XDMF stride (one HDF5 file per
+rank, field and snapshot); the CSV is written every step.
+
+```sh
+RANKS_PER_CASE=50 CYCLES=4 examples/Heart/CoronaryArtery/run_poroelastic_scenarios_mpi.sh
+# batch 1: nostenosis x 3 scenarios, 3 x 50 ranks; batch 2: stenosis80
+# results/coronary_poroelastic_mpi/<geometry>/<scenario>
+```
