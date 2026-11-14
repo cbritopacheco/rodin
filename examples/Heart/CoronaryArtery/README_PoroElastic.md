@@ -47,8 +47,23 @@ same BDF1 interface rate, so the fixed point has `u_f = v_Γ` and
 The distal network (`R_a`, `R_v`, `C`) is calibrated on the healthy hand-off
 for every scenario, so only the scenario differs between runs.
 
+## Geometries
+
+`meshes/` holds the two FSI pairs as plain gzip files (no Git LFS):
+
+| key | fluid / solid | notes |
+|---|---|---|
+| `nostenosis` | `NoStenosisFluid` / `NoStenosisSolid` | built by `meshes/make_nostenosis_mesh.py` |
+| `stenosis80` | `Stenosis80Fluid` / `Stenosis80Solid` | = `Stenosis80.mesh` / `Prismatic80.mesh` |
+
+The stenotic pair is the healthy `FSIFluid`/`FSISolid` pair scaled by 25/66 and
+deformed at the lesion. The stenosis-free solid is the stenotic solid with only
+its 832 lesion vertices replaced (same wedges, labels, wall thickness and
+contact patch); away from the lesion both pairs agree to 1e-7 mm.
+
 ```sh
 NPROC=50 CYCLES=4 examples/Heart/CoronaryArtery/run_poroelastic_scenarios.sh
+# 2 geometries x 3 scenarios = 6 cases, 8 cores each, in results/coronary_poroelastic/<geometry>/<scenario>
 ```
 
 ## Options added
