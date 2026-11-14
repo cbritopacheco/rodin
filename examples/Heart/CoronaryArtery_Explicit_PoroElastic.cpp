@@ -12,30 +12,34 @@
  * solid, coupled in a CLOSED LOOP to the 0D poroelastic left ventricle
  * (Rodin/Heart/PoroelasticSphere).
  *
- * Closed loop (all exchanges lagged one step, staggered):
- *   0D -> 3D : inlet pressure p_in = p_ar (proximal Windkessel node);
- *              tissue pressure p_f (interstitial) as reference and drainage
- *              pressure of every outlet compartment.
- *   3D -> 0D : the inlet flux Q_in is drawn from the proximal Windkessel
- *              node (Cp dp_ar/dt + q_p + Q_in = 0); the compartment drainage
- *              sum_i q_v,i enters the porosity balance
- *              V_w0 dPhi/dt = Q_lumped + sum_i q_v,i - gamma_ven (p_f - p_sv).
- *   Outlet i : 3D --[R_a Phi_a, implicit]--> (p_c, C) --[R_v Phi_v]--> p_f,
- *              p_tm = p_c - p_f, Starling throat shut for p_tm <= 0.
- *   The residual conductance gamma_ar of the 0D input represents the
- *   myocardium NOT perfused by the resolved tree.
+ * Closed loop (all exchanges lagged one step, staggered), Sec. 5.3:
+ *   0D -> 3D : inlet pressure p_in = p_ar; effective pore pressure p~ as the
+ *              reference of every outlet compartment; mid-surface
+ *              displacement y as the target -l y of the myocardial attachment.
+ *   3D -> 0D : the inlet flux q_in is drawn from the proximal Windkessel node;
+ *              the compartment discharge sum_i q_v,i is the myocardial supply
+ *              Q_ar of V_w0 dPhi/dt = Q_ar - Q_ven (and sets the pore shear).
+ *   Outlet i : p_out = p_c + R_a chi_a Q (resistive part implicit),
+ *              C dp_tm/dt = Q - q_v, q_v = max(p_tm, 0) / (R_v chi_v),
+ *              p_tm = p_c - p~.
  *
- * Fluid: Carreau-Yasuda, conservative BDF1 ALE, orthogonal-subscale VMS
- * (convective + grad-div + PSPG), all stabilization parameters evaluated
- * pointwise at the quadrature point from the local lagged viscosity and the
- * element diameter.  Solid: graded Yeoh, total Lagrangian, Newmark.  Coupling:
- * Robin-Robin loose coupling (Burman, Durst, Fernandez, Guzman & Ruz 2025).
+ * One Carreau-Yasuda blood law (Table 1) feeds the 3D flow, the outlet
+ * compartments, the pore drainage and the Windkessel; -coronary_scenario
+ * {healthy, aortic_stenosis, hyperviscosity, lvh} modifies it or the cardiac
+ * parameters consistently at all scales (CoronaryArtery/PoroelasticLV.h).
  *
- * Wall traction and wall shear stress are evaluated pointwise from the L2
- * recovered velocity gradient G: D = (G + G^T)/2, gamma = sqrt(2 D:D),
- * mu = mu_CY(gamma), t = p n - 2 mu D n, tau_w = tangential part of 2 mu D n.
- * The same recovered gradient feeds the Robin datum, the load transfer and
- * the WSS output, so the three cannot drift apart.
+ * Fluid: conservative BDF1 ALE, IMEX (lagged transport, viscosity and
+ * projections), orthogonal-subscale VMS (dynamic convective subscale,
+ * grad-div, PSPG), tau evaluated pointwise.  Solid: graded Yeoh, total
+ * Lagrangian, Newmark.  Coupling: Robin-Robin (Burman, Durst, Fernandez,
+ * Guzman & Ruz 2025) on the conforming interface, transferred node by node:
+ *   solid : P n_s + alpha v_G = alpha u_f + T,
+ *   fluid : J_G sigma n_f + alpha u_f = alpha v_G - T,
+ *   T <- T + alpha (u_f - v_G)        (variational fluid reaction),
+ * with v_G = (d^{n+1} - d^n)/dt the BDF1 interface rate shared by both sides
+ * (= ALE mesh velocity on Gamma), T the traction per reference area and
+ * J_G = dS/dS_0.  The fixed point has u_f = v_G and P n_s = -J_G sigma n_f.
+ * The recovered velocity gradient only serves WSS diagnostics.
  *
  * Attributes: fluid FSI 2, inlet 4, outlets 7,8,9,10,14,15; solid FSI 1,
  * inlet 150, outlets 151..156; 99 = clamped ring band; 101 = heart contact.
@@ -61,6 +65,7 @@
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
+#include <utility>
 #include <vector>
 
 #include <petscsys.h>
@@ -78,6 +83,7 @@
 #include "Rodin/Heart/PoroelasticSphere.h"
 
 #include "CoronaryArtery/GradedYeoh.h"
+#include "CoronaryArtery/PoroelasticLV.h"
 #include "CoronaryArtery/VMSConvectionIntegrator.h"
 
 using namespace Rodin;
@@ -86,10 +92,12 @@ using namespace Rodin::Math;
 using namespace Rodin::Solver;
 using namespace Rodin::Variational;
 using namespace Rodin::Heart;
+using namespace Rodin::Examples::Heart;
 
 namespace
 {
-  using Model = Rodin::Heart::PoroelasticSphereT<>;
+  using Model = PoroelasticLV;
+  using CarreauYasuda = BloodRheology;
   using MeshType = Geometry::Mesh<Context::Local>;
 
   struct BoundaryFluid
@@ -129,23 +137,6 @@ namespace
       Real phiA = 1.0;  ///< mu_ap/mu_N, arteriolar limb.
       Real phiV = 1.0;  ///< mu_ap/mu_N, venular limb.
       Real vol = 0.0;   ///< Stored volume C max(p_tm, 0).
-  };
-
-  struct CarreauYasuda
-  {
-      Real mu0 = 0.301;
-      Real muInf = 0.0055;
-      Real lambda = 16.15;
-      Real n = 0.21;
-      Real yasuda = 0.77;
-      Real gammaRegularization = 1.0e-3;
-
-      Real operator()(Real shearRate) const
-      {
-        return muInf +
-          (mu0 - muInf) *
-          std::pow(1.0 + std::pow(lambda * shearRate, yasuda), (n - 1.0) / yasuda);
-      }
   };
 
   enum class RheologyModel
@@ -204,10 +195,12 @@ namespace
 
   struct Config
   {
-      std::string resultsDir = "results_poroelastic";
-      std::string xdmfBasename =
-        "results_poroelastic/CoronaryArtery_Explicit_PoroElastic";
-      std::string csvPath = "results_poroelastic/CoronaryArtery_Explicit_PoroElastic.csv";
+      std::string scenario = "healthy";
+      std::string resultsDir; // default: results_poroelastic_<scenario>
+      std::string fluidMeshPath =
+        "../resources/examples/Heart/CoronaryArtery/Stenosis80.mesh";
+      std::string solidMeshPath =
+        "../resources/examples/Heart/CoronaryArtery/Prismatic80.mesh";
       Real meshScale = 1.0e-3;
 
       Real cyclePeriod = 0.85;
@@ -218,9 +211,12 @@ namespace
       /// replaced by the lumped conductance gammaLca = Q_lca/(p_ar - p_f) so
       /// the hand-off starts from a periodic 0D state.  Time is reset to 0.
       size_t zeroDWarmupCycles = 2;
-      /// Tissue pressure used for the lumped-tree estimate before any 0D
-      /// step has produced p_f (only relevant with zeroDWarmupCycles == 0).
+      /// Pore pressure used for the lumped-tree estimate before any 0D
+      /// step has produced p~ (only relevant with zeroDWarmupCycles == 0).
       Real restingTissuePressure = 4.6e3;
+      /// Lumped myocardial supply of the 0D model during the coupled run
+      /// (0: the resolved tree perfuses the whole wall, as in the paper).
+      Real lumpedSupplyConductance = 0.0;
 
       // Outlet calibration: areas measured on the mesh, Murray split
       // Q_i ~ r_i^3, resting budget dP = p_ar(0) - p_f(0):
@@ -270,8 +266,10 @@ namespace
       Real aleStiffPower = 0.75;
       Real aleRefSize = 5.0e-4;
 
-      bool meshConsistentInterfaceVelocity = true;
       bool subtractHeartHandoffOffset = true;
+      /// Attachment target -l y with the mid-surface displacement y (paper,
+      /// eq. 53); true uses the epicardial displacement y + (h - h0)/2.
+      bool heartEpicardialDisplacement = false;
 
       Real solidDensity = 1060.0;
       Real solidViscosity = 4.e3;
@@ -306,156 +304,15 @@ namespace
       Real gradeTransitionWidth = 0.08;
   };
 
-  static Real smoothstep(Real s)
+  /// 0D poroelastic LV input of the scenario.  The two external sources read
+  /// the lagged 3D fluxes through the references (staggered coupling: data at
+  /// t_{n+1}, absent from the 0D Jacobian).
+  static Model::Input makeModelInput(const Scenario& scenario, Real gammaAr,
+    const Real& qArterialLag, const Real& qTissueLag)
   {
-    s = s < 0.0 ? 0.0 : (s > 1.0 ? 1.0 : s);
-    return s * s * (3.0 - 2.0 * s);
-  }
-
-  static Real periodic_activation(Real t)
-  {
-    const Real T = 0.85;
-    const Real tau = t - T * std::floor(t / T);
-
-    const Real tRampStart = 0.15, tRampEnd = 0.21, tPlateauEnd = 0.36;
-    const Real tRelaxEnd = 0.45, tNegativeEnd = 0.6;
-    const Real positiveValue = 35.0, negativeValue = -20.0;
-
-    if (tau < tRampStart)
-      return 0.0;
-    if (tau < tRampEnd)
-      return positiveValue * smoothstep((tau - tRampStart) / (tRampEnd - tRampStart));
-    if (tau < tPlateauEnd)
-      return positiveValue;
-    if (tau < tRelaxEnd)
-      return positiveValue +
-        (negativeValue - positiveValue) *
-        smoothstep((tau - tPlateauEnd) / (tRelaxEnd - tPlateauEnd));
-    if (tau < tNegativeEnd)
-      return negativeValue;
-    return negativeValue * (1.0 - smoothstep((tau - tNegativeEnd) / (T - tNegativeEnd)));
-  }
-
-  static Real load_dependent_relaxation_m0(Real ec)
-  {
-    const Real lowEc = 0.0, highEc = 2.0, lowValue = 1.6, highValue = 1.0;
-    if (ec <= lowEc)
-      return lowValue;
-    if (ec >= highEc)
-      return highValue;
-    const Real s = (ec - lowEc) / (highEc - lowEc);
-    return (1.0 - s) * lowValue + s * highValue;
-  }
-
-  static Real load_dependent_relaxation_dm0(Real ec)
-  {
-    const Real lowEc = 0.0, highEc = 2.0, lowValue = 1.6, highValue = 1.0;
-    if (ec <= lowEc || ec >= highEc)
-      return 0.0;
-    return (highValue - lowValue) / (highEc - lowEc);
-  }
-
-  static Real atrial_pressure(Real t)
-  {
-    const Real T = 0.85;
-    const Real tau = t - T * std::floor(t / T);
-    const Real minValue = 500.0, maxValue = 1000.0, secondThreshold = 1250.0;
-    const Real t1 = 0.02, t2 = 0.15, t3 = 0.17, t4 = 0.56, t5 = 0.62, t6 = 0.85;
-
-    auto ramp = [](Real a, Real b, Real s) { return a + (b - a) * smoothstep(s); };
-
-    if (tau < t1)
-      return ramp(minValue, maxValue, tau / t1);
-    if (tau < t2)
-      return maxValue;
-    if (tau < t3)
-      return ramp(maxValue, minValue, (tau - t2) / (t3 - t2));
-    if (tau < t4)
-      return ramp(minValue, secondThreshold, (tau - t3) / (t4 - t3));
-    if (tau < t5)
-      return secondThreshold;
-    if (tau < t6)
-      return ramp(secondThreshold, minValue, (tau - t5) / (t6 - t5));
-    return minValue;
-  }
-
-  /// 0D poroelastic LV input.  The two external sources read the lagged 3D
-  /// fluxes through the references (staggered coupling: data at t_{n+1},
-  /// absent from the 0D Jacobian).
-  static Model::Input makeModelInput(const Real& qArterialLag, const Real& qTissueLag)
-  {
-    Model::Input in;
-
-    in.R0 = 2.4e-2;
-    in.d0 = 1.45e-2;
-    in.phi0 = 0.1;
-
-    in.Es = 3.0e6;
-    in.mu = 70.0;
-    in.eta = 70.0;
-    in.alpha = 1.5;
-    in.alphaR = 0.12;
-    in.k0 = 1.0e5;
-    in.sigma0 = 1.25e5;
-
-    // Perfusion: storage modulus, residual lumped arterial conductance (the
-    // territory not resolved by the 3D tree) and venous conductance.
-    in.KPhi = 2.0e5;
-    in.gammaAr = 4.7e-10;
-    in.gammaVen = 7.0e-10;
-
-    in.Rp = 5.0e7;
-    in.Cp = 6e-9;
-    in.Rd = 1.0e8;
-    in.Cd = 1.0e-9;
-
-    in.mu_0 = 5.35;
-    in.mu_Inf = 0.0033;
-    in.lambda = 14.445;
-    in.n = 0.8;
-    in.m = 0.003;
-    in.yasuda = 0.62;
-    in.mu_plasma = 0.0032704;
-    in.k_0 = 3.5678;
-    in.gamma_c = 10.2754;
-    in.k_Inf = 1.5352;
-    in.proximalRadius = 0.0125;
-    in.proximalLength = 0.35;
-    in.distalRadius = 0.002;
-    in.distalLength = 0.55;
-    in.windkesselRheology = Rodin::Heart::CCMLC2014::Model::WindkesselRheology::Cross;
-
-    in.Kat = 6.0e-7;
-    in.Kp = 5.0e-11;
-    in.Kar = 1.0e-7;
-    in.cavityCapacity = 5.0e-12;
-
-    in.absRegularization = 1e-14;
-    in.wallQuadraturePoints = 8;
-
-    in.initFibDef = 0.0;
-    in.initActiveStiffness = 0.0;
-    in.initActiveStress = 0.0;
-
-    in.pSv = [](Real) { return 1.0e3; };
-    in.pAt = atrial_pressure;
-    in.u = periodic_activation;
-    in.m0 = load_dependent_relaxation_m0;
-    in.dm0 = load_dependent_relaxation_dm0;
-
+    Model::Input in = makePoroelasticLVInput(scenario, gammaAr);
     in.qArterialExternal = [&qArterialLag](Real) { return qArterialLag; };
     in.qPerfusionExternal = [&qTissueLag](Real) { return qTissueLag; };
-
-    using PassiveEnergy = std::decay_t<decltype(in.passiveEnergy)>;
-    typename PassiveEnergy::Parameters hp;
-    hp.mu1 = 0.0;
-    hp.mu2 = 0.0;
-    hp.C0 = 1.9e3;
-    hp.C1 = 1.1e-1;
-    hp.C2 = 1.9e3;
-    hp.C3 = 1.1e-1;
-    in.passiveEnergy = PassiveEnergy(hp);
-
     return in;
   }
 
@@ -466,34 +323,7 @@ namespace
       .setRelativeTolerance(1.0e-8)
       .setStepTolerance(1.0e-10)
       .setDampingFactor(1.0);
-
-    Model::State s0;
-    s0.t = 0.0;
-    s0.y = 0.0;
-    s0.phi = in.phi0;
-    s0.pv = in.pAt(0.0) - 100.0;
-    s0.par = 11000.0;
-    s0.pd = 10000.0;
-    s0.ec = in.initFibDef;
-    s0.gamma = std::sqrt(std::max<Real>(in.initActiveStiffness, 0.0));
-    s0.beta = (s0.gamma > 0.0) ? (in.initActiveStress / s0.gamma) : 0.0;
-    s0.kc = s0.gamma * s0.gamma;
-    s0.tauc = s0.gamma * s0.beta;
-    s0.w = in.m0(s0.ec);
-
-    model.initialize(s0);
-  }
-
-  /// Epicardial radial displacement r_out - R_out of the uniform-J shell:
-  /// r_out^3 = (R_in + y)^3 + J (R_out^3 - R_in^3), J = 1 - phi0 + Phi.
-  static Real epicardialDisplacement(const Model::Input& in, const Model::State& s)
-  {
-    const Real Rin = in.R0;
-    const Real Rout = in.R0 + in.d0;
-    const Real rin = Rin + s.y;
-    const Real J = 1.0 - in.phi0 + s.phi;
-    const Real rout3 = rin * rin * rin + J * (Rout * Rout * Rout - Rin * Rin * Rin);
-    return std::cbrt(std::max<Real>(rout3, 0.0)) - Rout;
+    model.initialize(makePoroelasticLVInitialState(in));
   }
 
   static MeshType makeMesh(const Config& cfg, const std::string& meshPath)
@@ -763,32 +593,101 @@ namespace
     return map;
   }
 
-  static Point forwardFluidPointToSolid(
-    const Point& p, const MeshType& solidReferenceMesh, const InterfaceMap& map)
+  /// Fluid/solid vertex pairs of the conforming interface (FSI and ring
+  /// faces), matched on the reference coordinates.
+  static std::vector<std::pair<Index, Index>> buildInterfaceVertexPairs(
+    const MeshType& fluidReferenceMesh, const MeshType& solidReferenceMesh)
   {
-    const auto found = map.fluidToSolid.find(p.getPolytope().getIndex());
-    if (found == map.fluidToSolid.end())
-      throw std::runtime_error("Fluid point is not on a mapped FSI face.");
+    auto collect = [](const MeshType& mesh, Attribute fsi, Attribute ring) {
+      std::unordered_set<Index> vertices;
+      for (auto it = mesh.getBoundary(); it; ++it)
+      {
+        const auto a = it->getAttribute();
+        if (a != fsi && a != ring)
+          continue;
+        for (const auto& v : it->getVertices())
+          vertices.insert(v);
+      }
+      return vertices;
+    };
+    const auto fluidVertices =
+      collect(fluidReferenceMesh, BoundaryFluid::FSI, BoundaryFluid::FSIRing);
+    const auto solidVertices =
+      collect(solidReferenceMesh, BoundarySolid::FSI, BoundarySolid::FSIRing);
 
-    auto solidFace = solidReferenceMesh.getFace(found->second);
-    const Math::SpatialPoint pc = p.getPhysicalCoordinates();
-    Math::SpatialPoint rc;
-    solidFace->getTransformation().inverse(rc, pc);
-    return Point(*solidFace, rc, pc);
-  }
+    Math::SpatialPoint lo, hi;
+    bool haveBox = false;
+    for (const Index v : solidVertices)
+    {
+      const auto x = solidReferenceMesh.getVertexCoordinates(v);
+      if (!haveBox)
+      {
+        lo = x;
+        hi = x;
+        haveBox = true;
+        continue;
+      }
+      for (Index i = 0; i < static_cast<Index>(x.size()); ++i)
+      {
+        lo(i) = std::min(lo(i), x(i));
+        hi(i) = std::max(hi(i), x(i));
+      }
+    }
+    const Real diag = haveBox ? Real((hi - lo).norm()) : Real(0);
+    const Real tol = std::max(Real(1e-12), Real(1e-6) * diag);
 
-  static Point forwardSolidPointToFluid(
-    const Point& p, const MeshType& fluidMesh, const InterfaceMap& map)
-  {
-    const auto found = map.solidToFluid.find(p.getPolytope().getIndex());
-    if (found == map.solidToFluid.end())
-      throw std::runtime_error("Solid point is not on a mapped FSI face.");
+    auto cellOf = [&](const Math::SpatialPoint& c) {
+      std::array<long long, 3> k{0, 0, 0};
+      for (Index i = 0; i < std::min<Index>(3, static_cast<Index>(c.size())); ++i)
+        k[i] = static_cast<long long>(std::floor(c(i) / tol));
+      return k;
+    };
+    std::map<std::array<long long, 3>, std::vector<Index>> grid;
+    for (const Index v : solidVertices)
+      grid[cellOf(solidReferenceMesh.getVertexCoordinates(v))].push_back(v);
 
-    auto fluidFace = fluidMesh.getFace(found->second);
-    const Math::SpatialPoint pc = p.getPhysicalCoordinates();
-    Math::SpatialPoint rc;
-    fluidFace->getTransformation().inverse(rc, pc);
-    return Point(*fluidFace, rc, pc);
+    std::vector<std::pair<Index, Index>> pairs;
+    pairs.reserve(fluidVertices.size());
+    std::size_t unmatched = 0;
+    for (const Index vf : fluidVertices)
+    {
+      const auto x = fluidReferenceMesh.getVertexCoordinates(vf);
+      const auto base = cellOf(x);
+      Real best = std::numeric_limits<Real>::max();
+      Index bestSolid = 0;
+      for (long long dx = -1; dx <= 1; ++dx)
+        for (long long dy = -1; dy <= 1; ++dy)
+          for (long long dz = -1; dz <= 1; ++dz)
+          {
+            const auto g = grid.find({base[0] + dx, base[1] + dy, base[2] + dz});
+            if (g == grid.end())
+              continue;
+            for (const Index vs : g->second)
+            {
+              const Real d = Real((solidReferenceMesh.getVertexCoordinates(vs) - x).norm());
+              if (d < best)
+              {
+                best = d;
+                bestSolid = vs;
+              }
+            }
+          }
+      if (best > tol)
+      {
+        ++unmatched;
+        continue;
+      }
+      pairs.emplace_back(vf, bestSolid);
+    }
+    if (unmatched > 0 || pairs.size() != solidVertices.size())
+    {
+      std::ostringstream os;
+      os << "buildInterfaceVertexPairs: " << unmatched << " unmatched fluid vertices, "
+         << pairs.size() << " pairs for " << solidVertices.size()
+         << " solid interface vertices (tol=" << tol << ").";
+      throw std::runtime_error(os.str());
+    }
+    return pairs;
   }
 
   static bool isFiniteVec(const Math::SpatialVector<Real>& x)
@@ -831,8 +730,23 @@ namespace
         value = (v == PETSC_TRUE);
     };
 
+    auto optString = [](const char* key, std::string& value) {
+      char buffer[PETSC_MAX_PATH_LEN] = {0};
+      PetscBool set = PETSC_FALSE;
+      PetscOptionsGetString(
+        PETSC_NULLPTR, PETSC_NULLPTR, key, buffer, sizeof(buffer), &set);
+      if (set)
+        value = buffer;
+    };
+
     const Real inf = std::numeric_limits<Real>::infinity();
 
+    optString("-coronary_scenario", cfg.scenario);
+    optString("-coronary_results_dir", cfg.resultsDir);
+    optString("-coronary_fluid_mesh", cfg.fluidMeshPath);
+    optString("-coronary_solid_mesh", cfg.solidMeshPath);
+    optReal("-coronary_lumped_supply", cfg.lumpedSupplyConductance, 0.0, inf);
+    optBool("-coronary_heart_disp_epicardial", cfg.heartEpicardialDisplacement);
     optReal("-coronary_dt", cfg.dt, 1.0e-9, inf);
     optInt("-coronary_nsteps", cfg.nsteps, 0);
     optInt("-coronary_warmup_cycles", cfg.zeroDWarmupCycles, 0);
@@ -852,8 +766,6 @@ namespace
     optReal("-coronary_inlet_impedance", cfg.inletImpedance, 0.0, inf);
     optReal("-coronary_heart_disp_penalty", cfg.heartDisplacementPenalty, 0.0, inf);
     optReal("-coronary_heart_disp_scale", cfg.heartDisplacementScale, -inf, inf);
-    optBool(
-      "-coronary_mesh_consistent_interface_vel", cfg.meshConsistentInterfaceVelocity);
     optBool("-coronary_subtract_heart_offset", cfg.subtractHeartHandoffOffset);
 
     // Newmark: gamma >= 1/2, beta = (gamma + 1/2)^2 / 4 unless overridden.
@@ -1131,7 +1043,13 @@ int main(int argc, char** argv)
     Config cfg;
     readOptions(cfg);
 
-    if (!cfg.resultsDir.empty())
+    const Scenario scenario = Scenario::make(cfg.scenario);
+    cfg.viscosity = scenario.blood();
+    if (cfg.resultsDir.empty())
+      cfg.resultsDir = "results_poroelastic_" + scenario.name;
+    const std::string xdmfBasename =
+      cfg.resultsDir + "/CoronaryArtery_Explicit_PoroElastic";
+    const std::string csvPath = cfg.resultsDir + "/CoronaryArtery_Explicit_PoroElastic.csv";
     {
       std::error_code ec;
       std::filesystem::create_directories(cfg.resultsDir, ec);
@@ -1139,38 +1057,52 @@ int main(int argc, char** argv)
         std::cerr << "Warning: could not create results directory '" << cfg.resultsDir
                   << "': " << ec.message() << '\n';
     }
+    if (isRoot)
+      Alert::Info() << "Scenario '" << scenario.name << "': aortic conductance x"
+                    << scenario.aorticConductance << ", blood viscosity x"
+                    << scenario.bloodViscosity << ", wall thickness x"
+                    << scenario.wallThickness << ", passive stiffness x"
+                    << scenario.passiveStiffness << ", vascular compliance x"
+                    << scenario.storageCompliance << ", permeability x"
+                    << scenario.permeability << "  -> " << cfg.resultsDir << Alert::Raise;
 
     // ------------------------------------------------------------------
     // 0D poroelastic LV.  The lagged 3D fluxes enter through these two
-    // scalars (flow drawn from p_ar; flow delivered into the interstitium).
+    // scalars (flow drawn from p_ar; myocardial supply sum_i q_v,i).
     // ------------------------------------------------------------------
     Real qArterialLag = 0.0;
     Real qTissueLag = 0.0;
-    Model::Input modelInput = makeModelInput(qArterialLag, qTissueLag);
+    Model::Input modelInput = makeModelInput(
+      scenario, cfg.lumpedSupplyConductance, qArterialLag, qTissueLag);
     Model model(modelInput);
     initializeModel(model, modelInput);
 
     const Real dt = cfg.dt;
     const size_t stepsPerCycle = static_cast<size_t>(std::llround(cfg.cyclePeriod / dt));
 
-    // 0D warm-up with the resolved tree replaced by a lumped conductance
-    // gammaLca = Q_lca / (p_ar(0) - p_f,rest); the closed loop then hands
-    // off from a periodic state.  Times are shifted back by whole cycles so
-    // the coupled run starts at t = 0 with the same activation phase.
+    // 0D warm-up under a standalone closure: the resolved tree is replaced by
+    // the lumped conductance gammaLca = Q_lca / (p_ar(0) - p~_rest) (scaled by
+    // the blood viscosity), so the closed loop hands off from a periodic
+    // state.  Times are shifted back by whole cycles so the coupled run starts
+    // at t = 0 with the same activation phase.
     const Real gammaLca = cfg.lcaTargetFlow /
-      std::max<Real>(model.getState().par - cfg.restingTissuePressure, 1.0);
-    if (cfg.zeroDWarmupCycles > 0)
-    {
+      std::max<Real>(model.getState().par - cfg.restingTissuePressure, 1.0) /
+      scenario.bloodViscosity;
+    auto warmUp = [&](Model& m, Real& qA, Real& qT, Real gamma) {
       const size_t warmSteps = cfg.zeroDWarmupCycles * stepsPerCycle;
       for (size_t k = 0; k < warmSteps; ++k)
       {
-        const auto rep = model.step(dt);
+        const auto rep = m.step(dt);
         if (!rep.converged)
           throw std::runtime_error("0D warm-up failed at step " + std::to_string(k));
-        const auto& s = model.getState();
-        qArterialLag = gammaLca * (s.par - s.pf);
-        qTissueLag = qArterialLag;
+        const auto& st = m.getState();
+        qA = gamma * (st.par - st.pf);
+        qT = qA;
       }
+    };
+    if (cfg.zeroDWarmupCycles > 0)
+    {
+      warmUp(model, qArterialLag, qTissueLag, gammaLca);
 
       auto st = model.getState();
       auto hist = model.getHistory();
@@ -1184,7 +1116,7 @@ int main(int argc, char** argv)
 
       if (isRoot)
         Alert::Info() << "[0D] warm-up: " << cfg.zeroDWarmupCycles << " cycle(s), "
-                      << "p_ar=" << st.par << " Pa  p_f=" << st.pf
+                      << "p_ar=" << st.par << " Pa  p~=" << st.pf
                       << " Pa  phi=" << st.phi << "  y=" << st.y
                       << " m  (gammaLca=" << gammaLca << " m^3/(Pa s))" << Alert::Raise;
     }
@@ -1193,14 +1125,31 @@ int main(int argc, char** argv)
     const Real pf0 =
       (cfg.zeroDWarmupCycles > 0) ? model.getState().pf : cfg.restingTissuePressure;
 
-    const std::string fluidMesh =
-      "../resources/examples/Heart/CoronaryArtery/Stenosis80.mesh";
-    MeshType meshFluid = makeMesh(cfg, fluidMesh);
+    // The distal network (R_a, R_v, C) is a property of the coronary bed: it
+    // is calibrated on the healthy hand-off for every scenario, so that only
+    // the scenario itself differs between runs.
+    Real parCal = par0, pfCal = pf0;
+    if (scenario.name != "healthy" && cfg.zeroDWarmupCycles > 0)
+    {
+      Real qA = 0.0, qT = 0.0;
+      const Scenario healthy = Scenario::make("healthy");
+      const Model::Input hin = makeModelInput(healthy, 0.0, qA, qT);
+      Model hmodel(hin);
+      initializeModel(hmodel, hin);
+      const Real gammaH = cfg.lcaTargetFlow /
+        std::max<Real>(hmodel.getState().par - cfg.restingTissuePressure, 1.0);
+      warmUp(hmodel, qA, qT, gammaH);
+      parCal = hmodel.getState().par;
+      pfCal = hmodel.getState().pf;
+      if (isRoot)
+        Alert::Info() << "[calib] healthy reference budget: p_ar=" << parCal
+                      << " Pa  p~=" << pfCal << " Pa" << Alert::Raise;
+    }
+
+    MeshType meshFluid = makeMesh(cfg, cfg.fluidMeshPath);
     const size_t dimFluid = meshFluid.getSpaceDimension();
 
-    const std::string solidMesh =
-      "../resources/examples/Heart/CoronaryArtery/Prismatic80.mesh";
-    MeshType meshSolid = makeMesh(cfg, solidMesh);
+    MeshType meshSolid = makeMesh(cfg, cfg.solidMeshPath);
     const size_t dimSolid = meshSolid.getSpaceDimension();
 
     const size_t dim = dimFluid;
@@ -1218,7 +1167,28 @@ int main(int argc, char** argv)
     std::vector<Math::SpatialPoint> referenceVertices;
     saveReferenceVertices(meshFluid, referenceVertices);
 
+    // Conforming interface: face pairing (consistency check) and the vertex
+    // pairs through which every interface field is transferred node by node.
     const InterfaceMap interfaceMap = buildInterfaceMap(meshFluid, meshSolid);
+    const auto interfaceVertices = buildInterfaceVertexPairs(meshFluid, meshSolid);
+    if (isRoot)
+      std::cout << "FSI interface: " << interfaceMap.segments.size() << " face pair(s), "
+                << interfaceVertices.size() << " vertex pair(s)\n";
+
+    // Reference measure of the fluid FSI faces; J_G = |face| / |face_0|.
+    std::vector<Real> fluidFaceReferenceMeasure(meshFluid.getFaceCount(), 0.0);
+    std::vector<Real> fluidFaceInverseStretch(meshFluid.getFaceCount(), 1.0);
+    for (auto it = meshFluid.getBoundary(); it; ++it)
+      if (it->getAttribute() == BoundaryFluid::FSI)
+        fluidFaceReferenceMeasure[it->getIndex()] = it->getMeasure();
+    auto updateInterfaceStretch = [&]() {
+      for (auto it = meshFluid.getBoundary(); it; ++it)
+      {
+        const Index f = it->getIndex();
+        if (it->getAttribute() == BoundaryFluid::FSI && it->getMeasure() > 0.0)
+          fluidFaceInverseStretch[f] = fluidFaceReferenceMeasure[f] / it->getMeasure();
+      }
+    };
 
     using VelocityFES = H1<1, Math::SpatialVector<Real>, MeshType>;
     using PressureFES = H1<1, Real, MeshType>;
@@ -1266,10 +1236,18 @@ int main(int argc, char** argv)
     PETSc::Variational::GridFunction solidAcceleration(dh);
     PETSc::Variational::GridFunction solidVelocityOld(dh);
     PETSc::Variational::GridFunction solidAccelerationOld(dh);
+    // Prestressed displacement at the hand-off: reference of the attachment
+    // target when the hand-off offset is subtracted.
+    PETSc::Variational::GridFunction dHandoff(dh);
 
+    // fluidTraction: recovered traction p n - 2 mu D n (diagnostic only).
+    // tractionTransfer: Robin traction T per reference area (exchanged).
+    // wallDisplacementFluid: solid displacement on the fluid interface nodes.
+    // robinDataSolid: solid Robin datum T + alpha u_f on the solid nodes.
     PETSc::Variational::GridFunction fluidTraction(dfh);
     PETSc::Variational::GridFunction tractionTransfer(dfh);
-    PETSc::Variational::GridFunction uWall(dfh);
+    PETSc::Variational::GridFunction wallDisplacementFluid(uh);
+    PETSc::Variational::GridFunction robinDataSolid(dh);
 
     PETSc::Variational::TrialFunction l(lh);
     PETSc::Variational::TestFunction t(lh);
@@ -1303,12 +1281,14 @@ int main(int argc, char** argv)
     solidAcceleration = zero;
     solidVelocityOld = zero;
     solidAccelerationOld = zero;
+    dHandoff = zero;
     aleDisp = zero;
     aleDispOld = zero;
     meshVelocity = zero;
     fluidTraction = zero;
     tractionTransfer = zero;
-    uWall = zero;
+    wallDisplacementFluid = zero;
+    robinDataSolid = zero;
 
     uOld.setName("FluidVelocity");
     shearWall.setName("shearStress");
@@ -1317,39 +1297,42 @@ int main(int argc, char** argv)
     solidVelocity.setName("SolidVelocity");
     meshVelocity.setName("ALEMeshVelocity");
     fluidTraction.setName("FluidTraction");
+    tractionTransfer.setName("InterfaceTraction");
     aleDisp.setName("ALEDisp");
 
-    IO::XDMF xdmf_fluid(cfg.xdmfBasename + "fluid");
+    IO::XDMF xdmf_fluid(xdmfBasename + "fluid");
     xdmf_fluid.setMesh(meshFluid);
     xdmf_fluid.add("FluidVelocity", uOld);
     xdmf_fluid.add("FluidPressure", pOld);
     xdmf_fluid.add("ALEMeshVelocity", meshVelocity);
     xdmf_fluid.add("FluidTraction", fluidTraction);
+    xdmf_fluid.add("InterfaceTraction", tractionTransfer);
     xdmf_fluid.add("ALEDisp", aleDisp);
     xdmf_fluid.add("shearStress", shearWall);
     xdmf_fluid.write(0.0).flush();
 
-    IO::XDMF xdmf_solid(cfg.xdmfBasename + "solid");
+    IO::XDMF xdmf_solid(xdmfBasename + "solid");
     xdmf_solid.setMesh(meshSolid);
     xdmf_solid.add("Displacement", dState);
     xdmf_solid.add("SolidVelocity", solidVelocity);
     xdmf_solid.write(0.0).flush();
 
-    IO::XDMF xdmf_laplacian(cfg.xdmfBasename + "laplacian");
+    IO::XDMF xdmf_laplacian(xdmfBasename + "laplacian");
     xdmf_laplacian.setMesh(meshSolid);
     xdmf_laplacian.add("laplacian", l.getSolution());
 
     std::ofstream csv;
     if (isRoot)
     {
-      csv.open(cfg.csvPath);
+      csv.open(csvPath);
       csv << std::setprecision(12);
-      csv << "t,lv_y,lv_y_epi,lv_phi,lv_pv,lv_par,lv_pd,lv_pf,lv_lambda_bar"
+      csv << "t,lv_y,lv_y_epi,lv_h,lv_phi,lv_pv,lv_par,lv_pd,lv_pf,lv_pP,lv_lambda_bar"
+          << ",lv_q_ar,lv_q_ven,lv_shear_rate,lv_nu_eff"
           << ",q_in,q_out_total,q_tissue,q_lumped";
       for (const Attribute outlet : BoundaryFluid::Outlets)
         csv << ",q_out_" << outlet << ",p_out_" << outlet;
       csv << ",ptm_mean,phi_a_mean,phi_v_mean,stored_volume";
-      csv << ",e_interface,coupling_rel\n";
+      csv << ",e_interface,slip_rms,q_interface_slip,coupling_rel\n";
     }
 
     std::map<Attribute, Outlet> wk;
@@ -1380,7 +1363,7 @@ int main(int argc, char** argv)
     //   p_tm,i(0) = f_v dP Phi_v0 (steady state of the calibrated network).
     if (cfg.autoCalibrateOutlets)
     {
-      const Real dP = std::max<Real>(par0 - pf0, 1.0);
+      const Real dP = std::max<Real>(parCal - pfCal, 1.0);
       const Real fv = cfg.venularPressureFraction;
       const Real dPv = std::max<Real>(fv * dP, 1.0);
       const Real dPa = std::max<Real>((1.0 - fv) * dP, 1.0);
@@ -1513,7 +1496,8 @@ int main(int argc, char** argv)
       Alert::Info() << "Robin parameter alpha = " << robinAlpha
                     << "  (gamma * sqrt(rho_s E_eq), gamma = " << cfg.robinGamma
                     << ", E_eq = " << solidYoungEquiv << " Pa)" << Alert::Raise;
-    const Real robinVelocityCoeff = robinAlpha * solidVelocityCoeff;
+    // BDF1 interface rate v_G = (d - d^n)/dt on both sides of the Robin pair.
+    const Real robinRateCoeff = robinAlpha / dt;
 
     const auto& cy = cfg.viscosity;
     const Real gammaReg = cy.gammaRegularization;
@@ -1653,102 +1637,97 @@ int main(int argc, char** argv)
     auto wallShear =
       VectorFunction(dim, [&](const Point& pt) { return wallSampleAt(pt).shear; });
 
-    // Areal stretch A_t/A_0 of a solid FSI face at the iterate dIter.
-    auto arealStretchAt = [&](const Point& xs) -> Real {
-      Real stretch = 1.0;
-      const auto& verts = xs.getPolytope().getVertices();
-      if (dim == 3 && verts.size() == 3)
-      {
-        Math::SpatialPoint X0 = meshSolid.getVertexCoordinates(verts[0]);
-        Math::SpatialPoint X1 = meshSolid.getVertexCoordinates(verts[1]);
-        Math::SpatialPoint X2 = meshSolid.getVertexCoordinates(verts[2]);
-
-        Math::SpatialPoint x0 = X0, x1 = X1, x2 = X2;
-        for (Index c = 0; c < 3; ++c)
-        {
-          x0(c) += dIter[dh.getGlobalIndex({0, verts[0]}, c)];
-          x1(c) += dIter[dh.getGlobalIndex({0, verts[1]}, c)];
-          x2(c) += dIter[dh.getGlobalIndex({0, verts[2]}, c)];
-        }
-
-        const auto triArea = [](const Math::SpatialPoint& a, const Math::SpatialPoint& b,
-                               const Math::SpatialPoint& c) -> Real {
-          const Math::SpatialPoint e1 = b - a;
-          const Math::SpatialPoint e2 = c - a;
-          const Real nx = e1(1) * e2(2) - e1(2) * e2(1);
-          const Real ny = e1(2) * e2(0) - e1(0) * e2(2);
-          const Real nz = e1(0) * e2(1) - e1(1) * e2(0);
-          return 0.5 * std::sqrt(nx * nx + ny * ny + nz * nz);
-        };
-
-        const Real A0 = triArea(X0, X1, X2);
-        const Real At = triArea(x0, x1, x2);
-        if (A0 > 0.0)
-          stretch = At / A0;
-      }
-      return stretch;
+    // Inverse interface stretch 1/J_G of the current fluid FSI face: Robin
+    // data per reference area are integrated on the moving wall.
+    RealFunction inverseStretchFn = [&](const Point& pp) -> Real {
+      const Index f = pp.getPolytope().getIndex();
+      return (f < fluidFaceInverseStretch.size()) ? fluidFaceInverseStretch[f] : 1.0;
     };
 
-    // Fluid traction on the solid, pulled back to the reference area.
-    auto fluidStress = VectorFunction(dim, [&](const Point& xs) {
-      const Point xf = forwardSolidPointToFluid(xs, meshFluid, interfaceMap);
-
-      Math::SpatialVector<Real> value(dim);
-      value.setZero();
-      const auto force = tractionTransfer(xf);
-      for (Index i = 0; i < static_cast<Index>(dim); ++i)
-        value(i) = force(i);
-
-      if (!isFiniteVec(value))
-      {
-        static bool reported = false;
-        if (!reported)
+    // Node-by-node transfers on the conforming interface.
+    std::vector<std::array<std::pair<Index, Index>, 3>> interfaceDofs;
+    interfaceDofs.reserve(interfaceVertices.size());
+    for (const auto& [vf, vs] : interfaceVertices)
+    {
+      std::array<std::pair<Index, Index>, 3> row;
+      for (Index c = 0; c < 3; ++c)
+        row[c] = {uh.getGlobalIndex({0, vf}, c), dh.getGlobalIndex({0, vs}, c)};
+      interfaceDofs.push_back(row);
+    }
+    auto releaseAccess = [](auto& gf) {
+      std::as_const(gf).flush();
+      gf.flush();
+    };
+    // Solid displacement -> fluid interface nodes (Dirichlet datum of the lift).
+    auto transferWallDisplacement = [&]() {
+      for (const auto& row : interfaceDofs)
+        for (const auto& [f, sd] : row)
+          wallDisplacementFluid[f] = std::as_const(dIter)[sd];
+      releaseAccess(dIter);
+      releaseAccess(wallDisplacementFluid);
+    };
+    // Variational fluid reaction T <- T + alpha (u_f - v_G) and solid datum
+    // g = T + alpha u_f.  On the interface nodes v_G is the ALE mesh velocity.
+    auto updateInterfaceTraction = [&]() {
+      for (const auto& row : interfaceDofs)
+        for (const auto& [f, sd] : row)
         {
-          reported = true;
-          Alert::Warning() << "fluidStress: non-finite cross-mesh traction sample; "
-                           << "using zero there (warned once)." << Alert::Raise;
+          const Real uf = std::as_const(uCur)[f];
+          const Real vg = std::as_const(meshVelocity)[f];
+          Real& T = tractionTransfer[f];
+          T += robinAlpha * (uf - vg);
+          robinDataSolid[sd] = T + robinAlpha * uf;
         }
-        value.setZero();
-        return value;
-      }
-
-      value *= arealStretchAt(xs);
-      return value;
-    });
-
-    // Interface velocity of the fluid Robin datum: the BDF1 mesh velocity
-    // (GCL-consistent) or the solid Newmark velocity.
-    auto interfaceSolidVelocity = VectorFunction(dim, [&](const Point& xf) {
-      Math::SpatialVector<Real> value(dim);
-      value.setZero();
-
-      if (cfg.meshConsistentInterfaceVelocity)
+      releaseAccess(uCur);
+      releaseAccess(meshVelocity);
+      releaseAccess(tractionTransfer);
+      releaseAccess(robinDataSolid);
+    };
+    // Hand-off traction of a uniform lumen pressure p on the current wall,
+    // per reference area, with lumped trace masses (preserves the resultant):
+    //   T_i = sum_f p n_f |f| / 3  /  sum_f |f_0| / 3.
+    auto setPressureTraction = [&](Real pressure) {
+      std::vector<Math::SpatialVector<Real>> force(meshFluid.getVertexCount());
+      std::vector<Real> mass(meshFluid.getVertexCount(), 0.0);
+      for (auto it = meshFluid.getBoundary(); it; ++it)
       {
-        const auto wv = meshVelocity(xf);
-        for (Index i = 0; i < static_cast<Index>(dim); ++i)
-          value(i) = wv(i);
-      }
-      else
-      {
-        const Point xs = forwardFluidPointToSolid(xf, meshSolid, interfaceMap);
-        const auto us = solidVelocity(xs);
-        for (Index i = 0; i < static_cast<Index>(dim); ++i)
-          value(i) = us(i);
-      }
-
-      if (!isFiniteVec(value))
-      {
-        static bool reported = false;
-        if (!reported)
+        if (it->getAttribute() != BoundaryFluid::FSI)
+          continue;
+        Math::SpatialPoint rc(2);
+        rc(0) = 1.0 / 3.0;
+        rc(1) = 1.0 / 3.0;
+        const Point pt(*it, rc, centroid(meshFluid, *it));
+        const Math::SpatialVector<Real> n = normalFluid.getValue(pt);
+        const Real area = it->getMeasure();
+        const Real area0 = fluidFaceReferenceMeasure[it->getIndex()];
+        for (const auto& vtx : it->getVertices())
         {
-          reported = true;
-          Alert::Warning() << "interfaceSolidVelocity: non-finite sample; using zero "
-                           << "there (warned once)." << Alert::Raise;
+          if (force[vtx].size() == 0)
+          {
+            force[vtx].resize(3);
+            force[vtx].setZero();
+          }
+          for (Index c = 0; c < 3; ++c)
+            force[vtx](c) += pressure * n(c) * area / 3.0;
+          mass[vtx] += area0 / 3.0;
         }
-        value.setZero();
       }
-      return value;
-    });
+      tractionTransfer = zero;
+      for (Index vtx = 0; vtx < static_cast<Index>(mass.size()); ++vtx)
+        if (mass[vtx] > 0.0)
+          for (Index c = 0; c < 3; ++c)
+            tractionTransfer[dfh.getGlobalIndex({0, vtx}, c)] = force[vtx](c) / mass[vtx];
+      releaseAccess(tractionTransfer);
+    };
+    auto updateSolidRobinData = [&]() {
+      for (const auto& row : interfaceDofs)
+        for (const auto& [f, sd] : row)
+          robinDataSolid[sd] =
+            std::as_const(tractionTransfer)[f] + robinAlpha * std::as_const(uCur)[f];
+      releaseAccess(uCur);
+      releaseAccess(tractionTransfer);
+      releaseAccess(robinDataSolid);
+    };
 
     const auto transportLag = uOld - meshVelocity;
     const auto convU = Mult(Jacobian(u), transportLag);
@@ -1928,10 +1907,12 @@ int main(int argc, char** argv)
           .over(BoundaryFluid::Inlet) +
       cfg.inletTangentialDamping *
         BoundaryIntegral(Dot(duTangential, v)).over(BoundaryFluid::Inlet)
-      // Robin-Robin (fluid side): sigma_f n + alpha u = alpha d_dot_s + lambda^{k-1}.
-      + robinAlpha * BoundaryIntegral(u, v).over(BoundaryFluid::FSI) -
-      robinAlpha * BoundaryIntegral(interfaceSolidVelocity, v).over(BoundaryFluid::FSI) +
-      BoundaryIntegral(tractionFSI, v).over(BoundaryFluid::FSI)
+      // Robin-Robin (fluid side): J_G sigma_f n + alpha u = alpha v_G - T,
+      // integrated on the current wall with dS_0 = dS / J_G.
+      + robinAlpha * BoundaryIntegral(inverseStretchFn * u, v).over(BoundaryFluid::FSI) -
+      robinAlpha *
+        BoundaryIntegral(inverseStretchFn * meshVelocity, v).over(BoundaryFluid::FSI) +
+      BoundaryIntegral(inverseStretchFn * tractionTransfer, v).over(BoundaryFluid::FSI)
       // Interface convective stabilization -(rho/2)((u^n - w).n)(u.v).
       - 0.5 * cfg.fluidDensity *
         BoundaryIntegral(Dot(transportLag, normalFluid) * Dot(u, v))
@@ -1941,30 +1922,6 @@ int main(int argc, char** argv)
     PETSc::Variational::TestFunction vMass(uh);
     LinearForm<VelocityFES, ::Vec> massOld(vMass);
     massOld = (cfg.fluidDensity / dt) * Integral(uOld, vMass);
-
-    auto interfaceSolidDisplacement = VectorFunction(dim, [&](const Point& xf) {
-      const Point xs = forwardFluidPointToSolid(xf, meshSolid, interfaceMap);
-
-      Math::SpatialVector<Real> value(dim);
-      value.setZero();
-
-      const auto ds = dIter(xs);
-      for (Index i = 0; i < static_cast<Index>(dim); ++i)
-        value(i) = ds(i);
-
-      if (!isFiniteVec(value))
-      {
-        static bool reported = false;
-        if (!reported)
-        {
-          reported = true;
-          Alert::Warning() << "interfaceSolidDisplacement: non-finite cross-mesh "
-                           << "sample; using zero there (warned once)." << Alert::Raise;
-        }
-        value.setZero();
-      }
-      return value;
-    });
 
     // Harmonic ALE lift on the reference configuration, element-size stiffened.
     PETSc::Variational::TrialFunction dMove(uh);
@@ -1980,43 +1937,8 @@ int main(int argc, char** argv)
 
     Problem ale(dMove, vMove);
     ale = Integral(aleStiffFn * Jacobian(dMove), Jacobian(vMove)) +
-      DirichletBC(dMove, interfaceSolidDisplacement).on(BoundaryFluid::FSI) +
+      DirichletBC(dMove, wallDisplacementFluid).on(BoundaryFluid::FSI) +
       DirichletBC(dMove, zero).on(BoundaryFluid::Inlet, BoundaryFluid::FSIRing);
-
-    // Solid Robin datum (per reference area):
-    //   rVC (dState - dPred) + alpha vPred - alpha u_f^{k-1}.
-    auto robinInterfaceData = VectorFunction(dim, [&](const Point& xs) {
-      const Point xf = forwardSolidPointToFluid(xs, meshFluid, interfaceMap);
-
-      Math::SpatialVector<Real> value(dim);
-      value.setZero();
-
-      Math::SpatialVector<Real> uf(dim);
-      uf.setZero();
-      {
-        const auto ufRaw = uWall(xf);
-        for (Index i = 0; i < static_cast<Index>(dim); ++i)
-          uf(i) = ufRaw(i);
-        if (!isFiniteVec(uf))
-        {
-          static bool reported = false;
-          if (!reported)
-          {
-            reported = true;
-            Alert::Warning() << "robinInterfaceData: non-finite cross-mesh velocity "
-                             << "sample; using zero there (warned once)." << Alert::Raise;
-          }
-          uf.setZero();
-        }
-      }
-      const auto vp = vPred(xs);
-      const auto dS = dState(xs);
-      const auto dP = dPred(xs);
-      for (Index i = 0; i < static_cast<Index>(dim); ++i)
-        value(i) =
-          robinVelocityCoeff * (dS(i) - dP(i)) + robinAlpha * vp(i) - robinAlpha * uf(i);
-      return value;
-    });
 
     // 0D heart motion: weak d.n = disp_0D on the contact patch, weighted by
     // the heart-contact laplacian l.
@@ -2074,12 +1996,17 @@ int main(int argc, char** argv)
         BoundaryIntegral(Dot(dState, normalSolid), Dot(w, normalSolid))
           .over(BoundarySolid::Contact[0]) -
       heartK *
+        BoundaryIntegral(Dot(dHandoff, normalSolid), Dot(w, normalSolid))
+          .over(BoundarySolid::Contact[0]) -
+      heartK *
         BoundaryIntegral(disp0DFn * l.getSolution(), Dot(w, normalSolid))
           .over(BoundarySolid::Contact[0])
-      // Robin-Robin (solid side): sigma_s n_s + alpha d_dot = alpha u_f^lag + t_f^lag.
-      + robinVelocityCoeff * BoundaryIntegral(Dot(d, w)).over(BoundarySolid::FSI) +
-      BoundaryIntegral(robinInterfaceData, w).over(BoundarySolid::FSI) -
-      BoundaryIntegral(fluidStress, w).over(BoundarySolid::FSI);
+      // Robin-Robin (solid side): P n_s + alpha v_G = alpha u_f + T, with the
+      // BDF1 interface rate v_G = (d - d^n)/dt.
+      + robinRateCoeff * BoundaryIntegral(Dot(d, w)).over(BoundarySolid::FSI) +
+      robinRateCoeff * BoundaryIntegral(dState, w).over(BoundarySolid::FSI) -
+      robinRateCoeff * BoundaryIntegral(dOld, w).over(BoundarySolid::FSI) -
+      BoundaryIntegral(robinDataSolid, w).over(BoundarySolid::FSI);
 
     solid.assemble();
     Solver::KSP kspSolid(solid);
@@ -2146,6 +2073,7 @@ int main(int argc, char** argv)
     xdmf_laplacian.write().flush();
     xdmf_laplacian.close();
 
+    Real handoffPressure = 0.0;
     if (cfg.prestressSteps > 0)
     {
       // Static follower-pressure prestress to prestressFraction * p_ar(0);
@@ -2244,6 +2172,11 @@ int main(int argc, char** argv)
 
       dOld.setData(dState.getData());
       dIter.setData(dState.getData());
+      // Attachment target -l (y - y_0) about the preloaded wall: without it
+      // the penalty would pull the preloaded contact patch back to d.n = 0.
+      if (cfg.subtractHeartHandoffOffset)
+        dHandoff.setData(dState.getData());
+      transferWallDisplacement();
       restoreMeshToReference(meshFluid, referenceVertices);
       ale.assemble();
       Solver::KSP(ale).solve();
@@ -2252,11 +2185,14 @@ int main(int argc, char** argv)
       moveMeshWithVertexDisplacement(meshFluid, referenceVertices, uh, aleDisp);
       computeCellDiameters(meshFluid, hCell);
 
-      // Seed the fluid pressure at p0 so the transferred traction balances
-      // the prestressed wall at the hand-off (recovered gradient is zero).
-      pOld = p0;
-      pCur = p0;
-      tractionTransfer.project(Region::Faces, tractionFSI, BoundaryFluid::FSI);
+      // Seed the fluid pressure at p0 and the Robin traction with the
+      // follower load of the prestress, so the wall is balanced at hand-off.
+      updateInterfaceStretch();
+      handoffPressure = applied;
+      pOld = applied;
+      pCur = applied;
+      setPressureTraction(applied);
+      updateSolidRobinData();
     }
 
     using FluxLinearForm = LinearForm<PressureFES, ::Vec>;
@@ -2274,6 +2210,9 @@ int main(int argc, char** argv)
     qTissueLag = 0.0;
     for (const auto& [tag, bc] : wk)
       qTissueLag += bc.qv;
+
+    // Uniform lumen pressure at the hand-off (the applied prestress load).
+    const Real pHandoff = handoffPressure;
 
     // ==================================================================
     // Time loop.  Step n -> n+1:
@@ -2294,31 +2233,32 @@ int main(int argc, char** argv)
       }
 
       const auto& s = model.getState();
-      const Real yEpi = epicardialDisplacement(modelInput, s);
+      // Attachment target -l y (eq. 53): mid-surface displacement by default.
+      const Real yHeart = cfg.heartEpicardialDisplacement ? s.yEpi : s.y;
 
       if (cfg.subtractHeartHandoffOffset)
       {
         if (step == 1)
-          disp0DOffset = yEpi;
-        disp0D = cfg.heartDisplacementScale * (yEpi - disp0DOffset);
+          disp0DOffset = yHeart;
+        disp0D = cfg.heartDisplacementScale * (yHeart - disp0DOffset);
       }
       else
       {
-        disp0D = cfg.heartDisplacementScale * yEpi;
+        disp0D = cfg.heartDisplacementScale * yHeart;
       }
 
-      Real loadRamp = 1.0;
-      if (cfg.prestressFraction < 1.0 && cfg.prestressRampSteps > 0)
-      {
-        const Real sRamp = std::min(Real(1.0),
-          static_cast<Real>(step - 1) / static_cast<Real>(cfg.prestressRampSteps));
-        loadRamp =
-          cfg.prestressFraction + (1.0 - cfg.prestressFraction) * smoothstep(sRamp);
-      }
+      // Boundary pressures ramped from the uniform hand-off pressure of the
+      // preloaded lumen to their operating values (inlet and outlets alike),
+      // so the first steps see no pressure jump against the seeded state.
+      Real sRamp = 1.0;
+      if (cfg.prestressRampSteps > 0)
+        sRamp = smoothstep(std::min(Real(1.0),
+          static_cast<Real>(step - 1) / static_cast<Real>(cfg.prestressRampSteps)));
+      auto ramped = [&](Real target) { return pHandoff + sRamp * (target - pHandoff); };
 
-      pinValue = loadRamp * s.par;
+      pinValue = ramped(s.par);
       for (const auto& [tag, bc] : wk)
-        outletPressureValue[tag] = loadRamp * (bc.ptm + s.pf);
+        outletPressureValue[tag] = ramped(bc.ptm + s.pf);
 
       // Newmark predictors.
       dPred = dOld;
@@ -2342,7 +2282,7 @@ int main(int argc, char** argv)
                       << "  (coupling iterations: " << cfg.couplingIterations << ")"
                       << Alert::Raise;
         Alert::Info() << "  [0D] t=" << s.t << " s  p_ar=" << s.par << "  p_v=" << s.pv
-                      << "  p_f=" << s.pf << " Pa  phi=" << s.phi << "  y_epi=" << yEpi
+                      << "  p~=" << s.pf << " Pa  phi=" << s.phi << "  y=" << s.y
                       << " m  disp0D=" << disp0D << " m"
                       << "  Q_in^lag=" << (qArterialLag * 6.0e7) << " mL/min"
                       << "  Q_tissue^lag=" << (qTissueLag * 6.0e7) << " mL/min"
@@ -2401,6 +2341,7 @@ int main(int argc, char** argv)
         if (couple > 1 && rel < cfg.couplingTolerance)
           break;
 
+        transferWallDisplacement();
         restoreMeshToReference(meshFluid, referenceVertices);
         ale.assemble();
         Solver::KSP(ale).solve();
@@ -2425,6 +2366,7 @@ int main(int argc, char** argv)
 
         moveMeshWithVertexDisplacement(meshFluid, referenceVertices, uh, aleDisp);
         computeCellDiameters(meshFluid, hCell);
+        updateInterfaceStretch();
 
         uConv = uOld;
         uConv -= meshVelocity;
@@ -2454,16 +2396,17 @@ int main(int argc, char** argv)
         uCur.setData(u.getSolution().getData());
         pCur.setData(p.getSolution().getData());
 
-        // Recovered gradient of the new iterate; the traction read by the
-        // next solid solve and by the fluid Robin datum is built from it.
-        recoverGradient();
-        fluidTraction.project(Region::Faces, tractionFSI, BoundaryFluid::FSI);
-        tractionTransfer.project(Region::Faces, tractionFSI, BoundaryFluid::FSI);
-        uWall.project(Region::Faces, uCur, BoundaryFluid::FSI);
+        // Variational Robin reaction of the new iterate and the solid datum
+        // of the next solid solve.
+        updateInterfaceTraction();
       }
 
       if (stepFailed)
         break;
+
+      // Recovered gradient: WSS and recovered-traction diagnostics only.
+      recoverGradient();
+      fluidTraction.project(Region::Faces, tractionFSI, BoundaryFluid::FSI);
 
       // Nodal WSS: area-weighted (lumped) boundary average of the pointwise
       // wall shear tau_w(x) on the FSI surface.
@@ -2524,25 +2467,21 @@ int main(int argc, char** argv)
         qOutSum += qo;
       }
 
-      // Interface power E = int (sigma_f n_f).(u_f - d_dot_s) on Gamma_FSI.
-      auto sigmaFn = VectorFunction(dim, [&](const Point& pt) {
-        Math::SpatialVector<Real> tr = wallSampleAt(pt).traction;
-        for (Index i = 0; i < static_cast<Index>(dim); ++i)
-          tr(i) = -tr(i);
-        return tr;
-      });
-      flux = BoundaryIntegral(Dot(sigmaFn, uCur), qFlux).over(BoundaryFluid::FSI);
-      flux.assemble();
-      const Real ePowerFluid = flux(one);
-      flux = BoundaryIntegral(Dot(sigmaFn, interfaceSolidVelocity), qFlux)
+      // Splitting power of the exchanged traction,
+      // E = int_{Gamma_0} T.(u_f - v_G) dS_0 (zero at the coupled fixed point).
+      const auto slipVec = uCur - meshVelocity;
+      flux = BoundaryIntegral(inverseStretchFn * Dot(tractionTransfer, slipVec), qFlux)
                .over(BoundaryFluid::FSI);
       flux.assemble();
-      const Real ePowerSolid = flux(one);
-      const Real eInterface = ePowerFluid - ePowerSolid;
+      const Real eInterface = flux(one);
+      // Normal splitting flux int_Gamma (u_f - v_G).n: volume exchanged
+      // through the wall by the Robin splitting (zero at the fixed point).
+      flux = BoundaryIntegral(Dot(slipVec, normalFluid), qFlux).over(BoundaryFluid::FSI);
+      flux.assemble();
+      const Real qInterfaceSlip = flux(one);
 
       Real slipRms = 0.0;
       {
-        const auto slipVec = uCur - interfaceSolidVelocity;
         flux = BoundaryIntegral(Dot(slipVec, slipVec), qFlux).over(BoundaryFluid::FSI);
         flux.assemble();
         const Real slipSq = flux(one);
@@ -2561,7 +2500,8 @@ int main(int argc, char** argv)
           Alert::Info() << "  [diag] p in [" << pMin << ", " << pMax << "] Pa"
                         << "  mass(qIn+qOut) = " << (qIn + qOutSum)
                         << "  E_iface = " << eInterface << " W"
-                        << "  slip(RMS|u_f-u_s|) = " << slipRms << " m/s"
+                        << "  slip(RMS|u_f-v_G|) = " << slipRms << " m/s"
+                        << "  int(u_f-v_G).n = " << qInterfaceSlip << " m^3/s"
                         << "  | coupling: iters = " << couplesDone << "/"
                         << cfg.couplingIterations << "  interface change = " << lastRel
                         << Alert::Raise;
@@ -2592,9 +2532,11 @@ int main(int argc, char** argv)
       if (isRoot && csv)
       {
         const Real qLumped = modelInput.gammaAr * (s.par - s.pf);
-        csv << s.t << ',' << s.y << ',' << yEpi << ',' << s.phi << ',' << s.pv << ','
-            << s.par << ',' << s.pd << ',' << s.pf << ',' << s.lambdaBar << ',' << qIn
-            << ',' << qOutSum << ',' << qTissueLag << ',' << qLumped;
+        csv << s.t << ',' << s.y << ',' << s.yEpi << ',' << s.thickness << ',' << s.phi
+            << ',' << s.pv << ',' << s.par << ',' << s.pd << ',' << s.pf << ',' << s.pP
+            << ',' << s.lambdaBar << ',' << s.qArterial << ',' << s.qVenous << ','
+            << s.shearRate << ',' << s.poreViscosity << ',' << qIn << ',' << qOutSum << ','
+            << qTissueLag << ',' << qLumped;
         for (const Attribute outlet : BoundaryFluid::Outlets)
           csv << ',' << qOut[outlet] << ',' << wk[outlet].pout;
         {
@@ -2610,7 +2552,8 @@ int main(int argc, char** argv)
           csv << ',' << (ptmSum / nOut) << ',' << (phiASum / nOut) << ','
               << (phiVSum / nOut) << ',' << volSum;
         }
-        csv << ',' << eInterface << ',' << lastRel << '\n';
+        csv << ',' << eInterface << ',' << slipRms << ',' << qInterfaceSlip << ','
+            << lastRel << '\n';
         csv.flush();
       }
     }

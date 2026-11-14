@@ -13,18 +13,19 @@
  * @f[
  *   (y, \Phi, p_v, p_{ar}, p_d, e_c, k_c, \tau_c, w).
  * @f]
- * The wall is quasi-static — the pressure-volume law of the @f$ v_1 @f$
- * projection is an algebraic equation in @f$ y @f$ — and the fluid mass
- * balance @f$ V_{w0}\dot\Phi = Q @f$ with the lumped two-resistor perfusion
- * source @f$ Q = \gamma_{ar}(p_{ar} - \tilde p) - \gamma_{ven}(\tilde p - p_{sv}) @f$
- * is the differential equation of the porosity. The active, valve and
- * Windkessel equations are those of CCMLC2014 on the same implicit time grid.
- * The coronary inflow @f$ \gamma_{ar}(p_{ar} - \tilde p) @f$ is drawn from the
- * proximal Windkessel compartment so that fluid is conserved. An external
- * coronary model (a 3D tree coupled in a staggered way) enters through the
- * two lagged sources of the input, @f$ Q_{ar}^{ext}(t) @f$ drawn from the
- * proximal node and @f$ Q_{\Phi}^{ext}(t) @f$ delivered into the interstitium;
- * both are data at @f$ t_{n+1} @f$ and do not enter the Jacobian.
+ * The wall is quasi-static: the shell pressure law
+ * @f$ p_v = 2 h_0 \bar P_{\theta\theta} / (R_0 \bar\lambda_\theta^2) @f$, with the
+ * multiplier eliminated by the radial-stress closure, is an algebraic
+ * equation in @f$ y @f$. The blood-volume balance
+ * @f$ V_{w0}\dot{\bar\Phi} = Q_{ar} - Q_{ven} @f$ is the differential equation
+ * of the porosity. The active, valve and Windkessel equations are those of
+ * CCMLC2014 on the same implicit time grid. The lumped supply
+ * @f$ \gamma_{ar}(p_{ar} - \tilde p) @f$ is drawn from the proximal Windkessel
+ * compartment so that blood is conserved. An external coronary model (a 3D
+ * tree coupled in a staggered way) enters through two lagged sources:
+ * @f$ Q_{ar}^{ext}(t) @f$ drawn from the proximal node and the supply
+ * @f$ Q_{\Phi}^{ext}(t) @f$ delivered to the myocardium; both are data at
+ * @f$ t_{n+1} @f$. The latter also sets the effective pore shear rate.
  */
 #ifndef RODIN_HEART_POROELASTICSPHERE_NUMERICS_DYNAMICSYSTEM_H
 #define RODIN_HEART_POROELASTICSPHERE_NUMERICS_DYNAMICSYSTEM_H
@@ -38,6 +39,7 @@
 #include "Rodin/Heart/CCMLC2014/Physics/Windkessel.h"
 #include "Rodin/Heart/PoroelasticSphere/Model/State.h"
 #include "Rodin/Heart/PoroelasticSphere/Physics/Kinematics.h"
+#include "Rodin/Heart/PoroelasticSphere/Physics/Perfusion.h"
 #include "Rodin/Heart/PoroelasticSphere/Physics/WallStress.h"
 
 namespace Rodin::Heart::PoroelasticSphere::Numerics
@@ -58,7 +60,8 @@ namespace Rodin::Heart::PoroelasticSphere::Numerics
       explicit DynamicSystem(const Input& input)
         : m_input(input),
           m_kinematics(input),
-          m_wall(input)
+          m_wall(input),
+          m_perfusion(input)
       {}
 
       /**
@@ -122,22 +125,21 @@ namespace Rodin::Heart::PoroelasticSphere::Numerics
         const Scalar wDot =
           timeDerivative(evalData.w, evalData.sn.w, evalData.snm1.w, tc);
 
-        // Wall equilibrium (v1 projection): P_v(r_in, Phi) - p_v = 0.
+        // Shell equilibrium: 2 h0 P_tt / (R0 lt^2) - p_v = 0.
         residualVector[Model::RadialDisplacement] = evalData.wallPressure - evalData.pv;
 
-        // Fluid mass balance: V_w0 dPhi/dt = Q_in + Q_Phi^ext - Q_out.
-        residualVector[Model::Porosity] = evalData.phiDot -
-          (evalData.perfusionInflow + evalData.externalPerfusionInflow -
-            evalData.perfusionOutflow) /
-            evalData.Vw0;
+        // Blood-volume balance: V_w0 dPhi/dt = Q_ar - Q_ven.
+        residualVector[Model::Porosity] =
+          evalData.phiDot - evalData.netPerfusion / evalData.Vw0;
 
+        // Cavity: V_cav = 4 pi (R0 + y)^3 / 3.
         residualVector[Model::VentricularPressure] = m_input.cavityCapacity * pvDot +
           evalData.cavityFluxCur +
-          Scalar(4) * std::numbers::pi_v<Scalar> * evalData.rin * evalData.rin *
+          Scalar(4) * std::numbers::pi_v<Scalar> * evalData.radius * evalData.radius *
             evalData.yDot;
 
         residualVector[Model::ArterialPressure] = m_input.Cp * parDot +
-          evalData.windkesselflowP + evalData.perfusionInflow +
+          evalData.windkesselflowP + evalData.perfusionLumped +
           evalData.externalArterialOutflow;
 
         residualVector[Model::DistalPressure] =
@@ -187,33 +189,34 @@ namespace Rodin::Heart::PoroelasticSphere::Numerics
         const Scalar a0 = tc.current;
 
         const Scalar dEdy = evalData.diffGreen;
-        const Scalar dEdphi = evalData.diffGreenWrtPorosity;
         const Scalar F = Scalar(1) + Scalar(2) * evalData.strain1D;
 
-        // Wall equilibrium.
+        // Shell equilibrium.
         jacobianMatrix(Model::RadialDisplacement, Model::RadialDisplacement) =
           evalData.dWallPressure_dy;
         jacobianMatrix(Model::RadialDisplacement, Model::Porosity) =
           evalData.dWallPressure_dphi;
         jacobianMatrix(Model::RadialDisplacement, Model::VentricularPressure) =
-          -Scalar(1);
+          evalData.dWallPressure_dpv - Scalar(1);
         jacobianMatrix(Model::RadialDisplacement, Model::FiberDeformation) =
           evalData.dWallPressure_dec;
 
-        // Fluid mass balance: d(Q_in - Q_out)/dpf = -(gamma_ar + gamma_ven).
-        const Scalar gSum = (m_input.gammaAr + m_input.gammaVen) / evalData.Vw0;
+        // Blood-volume balance.
+        const Scalar iV = Scalar(1) / evalData.Vw0;
         jacobianMatrix(Model::Porosity, Model::RadialDisplacement) =
-          gSum * evalData.dPf_dy;
-        jacobianMatrix(Model::Porosity, Model::Porosity) = a0 + gSum * evalData.dPf_dphi;
+          -iV * evalData.dNet_dy;
+        jacobianMatrix(Model::Porosity, Model::Porosity) = a0 - iV * evalData.dNet_dphi;
+        jacobianMatrix(Model::Porosity, Model::VentricularPressure) =
+          -iV * evalData.dNet_dpv;
         jacobianMatrix(Model::Porosity, Model::ArterialPressure) =
-          -m_input.gammaAr / evalData.Vw0;
+          -iV * evalData.dNet_dpar;
         jacobianMatrix(Model::Porosity, Model::FiberDeformation) =
-          gSum * evalData.dPf_dec;
+          -iV * evalData.dNet_dec;
 
         // Cavity pressure balance.
         jacobianMatrix(Model::VentricularPressure, Model::RadialDisplacement) =
-          Scalar(4) * std::numbers::pi_v<Scalar> * evalData.rin *
-          (Scalar(2) * evalData.yDot + evalData.rin * a0);
+          Scalar(4) * std::numbers::pi_v<Scalar> * evalData.radius *
+          (Scalar(2) * evalData.yDot + evalData.radius * a0);
 
         jacobianMatrix(Model::VentricularPressure, Model::VentricularPressure) =
           m_input.cavityCapacity * a0 + evalData.dCavityFluxCur_dPv;
@@ -221,22 +224,23 @@ namespace Rodin::Heart::PoroelasticSphere::Numerics
         jacobianMatrix(Model::VentricularPressure, Model::ArterialPressure) =
           evalData.dCavityFluxCur_dPar;
 
-        // Proximal Windkessel balance (with the coronary inflow drawn from it).
+        // Proximal Windkessel balance (lumped supply drawn from it).
+        const Scalar gAr = m_input.gammaAr;
         jacobianMatrix(Model::ArterialPressure, Model::VentricularPressure) =
-          -evalData.dWindkesselOutflow_dPv;
+          -evalData.dWindkesselOutflow_dPv - gAr * evalData.dPf_dpv;
 
         jacobianMatrix(Model::ArterialPressure, Model::ArterialPressure) +=
-          m_input.Cp * a0 + evalData.dWindkesselflowP_dPar + m_input.gammaAr;
+          m_input.Cp * a0 + evalData.dWindkesselflowP_dPar + gAr;
 
         jacobianMatrix(Model::ArterialPressure, Model::DistalPressure) +=
           evalData.dWindkesselflowP_dPd;
 
         jacobianMatrix(Model::ArterialPressure, Model::RadialDisplacement) =
-          -m_input.gammaAr * evalData.dPf_dy;
+          -gAr * evalData.dPf_dy;
         jacobianMatrix(Model::ArterialPressure, Model::Porosity) =
-          -m_input.gammaAr * evalData.dPf_dphi;
+          -gAr * evalData.dPf_dphi;
         jacobianMatrix(Model::ArterialPressure, Model::FiberDeformation) =
-          -m_input.gammaAr * evalData.dPf_dec;
+          -gAr * evalData.dPf_dec;
 
         // --- Row: DistalPressure ---
         jacobianMatrix(Model::DistalPressure, Model::ArterialPressure) +=
@@ -255,9 +259,6 @@ namespace Rodin::Heart::PoroelasticSphere::Numerics
 
         jacobianMatrix(Model::FiberDeformation, Model::RadialDisplacement) =
           -m_input.Es * dEdy * (F + Scalar(2) * (evalData.strain1D - evalData.ec));
-
-        jacobianMatrix(Model::FiberDeformation, Model::Porosity) =
-          -m_input.Es * dEdphi * (F + Scalar(2) * (evalData.strain1D - evalData.ec));
 
         jacobianMatrix(Model::FiberDeformation, Model::FiberDeformation) =
           m_input.mu * a0 * h3 + Scalar(6) * activeRateStress * h2 + m_input.Es * F;
@@ -462,27 +463,18 @@ namespace Rodin::Heart::PoroelasticSphere::Numerics
         m_kinematics.evaluate(data);
 
         // Series-element fiber stress of the single contractile unit,
-        // evaluated at the mid-wall hoop strain.
+        // evaluated at the hoop strain.
         const Scalar h = activeStretch(data.ec);
         const Scalar h2 = h * h;
         const Scalar h3 = h2 * h;
         data.active.activeStressOneDimensional =
           m_input.Es / h2 * (data.strain1D - data.ec);
         data.active.partialActiveStressWrtDisplacement = m_input.Es / h2 * data.diffGreen;
-        data.active.partialActiveStressWrtPorosity =
-          m_input.Es / h2 * data.diffGreenWrtPorosity;
         data.active.partialActiveStressWrtFiberDeformation =
           m_input.Es * (-Scalar(1) / h2 - Scalar(4) * (data.strain1D - data.ec) / h3);
 
         m_wall.evaluate(data);
-
-        // Interstitial pressure and perfusion source.
-        data.pf = m_input.KPhi * (data.phi - m_input.phi0) - data.lambdaBar;
-        data.dPf_dy = -data.dLambdaBar_dy;
-        data.dPf_dphi = m_input.KPhi - data.dLambdaBar_dphi;
-        data.dPf_dec = -data.dLambdaBar_dec;
-        data.perfusionInflow = m_input.gammaAr * (data.par - data.pf);
-        data.perfusionOutflow = m_input.gammaVen * (data.pf - data.pSvMid);
+        m_perfusion.evaluate(data);
       }
 
       template <class EvalData>
@@ -560,6 +552,7 @@ namespace Rodin::Heart::PoroelasticSphere::Numerics
       const Input& m_input;
       Physics::WallKinematics<Input> m_kinematics;
       Physics::WallStressEvaluator<PassiveLaw, Input> m_wall;
+      Physics::PerfusionEvaluator<Input> m_perfusion;
   };
 }
 

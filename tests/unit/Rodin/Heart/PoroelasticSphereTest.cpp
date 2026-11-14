@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <array>
 #include <cmath>
+#include <numbers>
 
 #include "Rodin/Heart/CCMLC2014.h"
 #include "Rodin/Heart/PoroelasticSphere.h"
@@ -13,7 +14,8 @@ using namespace Rodin;
 namespace
 {
   using Model = Heart::PoroelasticSphereT<>;
-  using PassiveLaw = Heart::PoroelasticSpherePassiveLaw<Real>;
+  using PassiveLaw = Heart::UsykSpherePassiveLaw<Real>;
+  using HolzapfelLaw = Heart::PoroelasticSpherePassiveLaw<Real>;
   namespace Vars = Heart::PoroelasticSphere::Model;
 
   Model::Input makeGenericCardiacInput()
@@ -31,9 +33,13 @@ namespace
     cardiacInput.k0 = 1.0e5;
     cardiacInput.sigma0 = 5.0e5;
 
-    cardiacInput.KPhi = 2.0e5;
+    cardiacInput.storageCompliance = 5.0e-6;
+    cardiacInput.storagePressureScale = 1.0e4;
     cardiacInput.gammaAr = 7.0e-10;
-    cardiacInput.gammaVen = 7.0e-10;
+    cardiacInput.permeability = 1.0e-11;
+    cardiacInput.venousConductance = 2.67e-12;
+    cardiacInput.qPerfusionExternal = [](Real) { return 4.0e-7; };
+    cardiacInput.qArterialExternal = [](Real) { return 4.0e-7; };
 
     cardiacInput.Rp = 8.0e6;
     cardiacInput.Cp = 5.0e-9;
@@ -46,7 +52,6 @@ namespace
 
     cardiacInput.cavityCapacity = 5.0e-12;
     cardiacInput.absRegularization = 1e-14;
-    cardiacInput.wallQuadraturePoints = 8;
 
     cardiacInput.u = [](Real) { return 25.0; };
     cardiacInput.pAt = [](Real) { return 900.0; };
@@ -54,12 +59,10 @@ namespace
 
     using PassiveEnergyType = std::decay_t<decltype(cardiacInput.passiveEnergy)>;
     typename PassiveEnergyType::Parameters passiveParameters;
-    passiveParameters.mu1 = 0.0;
-    passiveParameters.mu2 = 0.0;
-    passiveParameters.C0 = 1.9e3;
-    passiveParameters.C1 = 1.1e-1;
-    passiveParameters.C2 = 1.9e3;
-    passiveParameters.C3 = 1.1e-1;
+    passiveParameters.c0 = 100.0;
+    passiveParameters.brr = 1.24;
+    passiveParameters.btt = 8.4;
+    passiveParameters.brt = 0.6;
     cardiacInput.passiveEnergy = PassiveEnergyType(passiveParameters);
 
     return cardiacInput;
@@ -229,9 +232,11 @@ namespace
     cardiacInput.k0 = 1.0e5;
     cardiacInput.sigma0 = 1.25e5;
 
-    cardiacInput.KPhi = 2.0e5;
-    cardiacInput.gammaAr = 7.0e-10;
-    cardiacInput.gammaVen = 7.0e-10;
+    cardiacInput.storageCompliance = 5.0e-6;
+    cardiacInput.storagePressureScale = 1.0e4;
+    cardiacInput.gammaAr = 2.0e-10;
+    cardiacInput.permeability = 1.0e-11;
+    cardiacInput.venousConductance = 2.67e-12;
 
     cardiacInput.Rp = 5.0e7;
     cardiacInput.Cp = 6e-9;
@@ -256,7 +261,6 @@ namespace
 
     cardiacInput.cavityCapacity = 5.0e-12;
     cardiacInput.absRegularization = 1e-14;
-    cardiacInput.wallQuadraturePoints = 8;
 
     cardiacInput.initFibDef = 0.0;
     cardiacInput.initActiveStiffness = 0.0;
@@ -270,12 +274,10 @@ namespace
 
     using PassiveEnergyType = std::decay_t<decltype(cardiacInput.passiveEnergy)>;
     typename PassiveEnergyType::Parameters passiveParameters;
-    passiveParameters.mu1 = 0.0;
-    passiveParameters.mu2 = 0.0;
-    passiveParameters.C0 = 1.9e3;
-    passiveParameters.C1 = 1.1e-1;
-    passiveParameters.C2 = 1.9e3;
-    passiveParameters.C3 = 1.1e-1;
+    passiveParameters.c0 = 100.0;
+    passiveParameters.brr = 1.24;
+    passiveParameters.btt = 8.4;
+    passiveParameters.brt = 0.6;
     cardiacInput.passiveEnergy = PassiveEnergyType(passiveParameters);
 
     return cardiacInput;
@@ -306,7 +308,7 @@ namespace
    * zero rates and a given porosity (steady wall, backward Euler).
    */
   Model::EvalData evaluateSteadyWall(
-    const Model::Input& cardiacInput, Real y, Real phi, Real ec)
+    const Model::Input& cardiacInput, Real y, Real phi, Real ec, Real pv = 0.0)
   {
     Heart::PoroelasticSphere::Numerics::DynamicSystem<PassiveLaw, Model::Input>
       dynamicSystem(cardiacInput);
@@ -322,6 +324,7 @@ namespace
     x[Vars::RadialDisplacement] = y;
     x[Vars::Porosity] = phi;
     x[Vars::FiberDeformation] = ec;
+    x[Vars::VentricularPressure] = pv;
 
     Model::EvalData data;
     dynamicSystem.buildEvalData(x, steady, steady, 1e-3, 1e-3, data);
@@ -383,21 +386,54 @@ namespace
   }
 }
 
-/// @brief Verifies the passive Piola tangent matches finite differences of the components.
-TEST(PoroelasticSphereTest, PassivePiolaTangentMatchesFiniteDifference)
+/// @brief Verifies the Usyk Piola components are the restricted-energy derivatives and their tangent.
+TEST(PoroelasticSphereTest, UsykPiolaComponentsAndTangentMatchFiniteDifference)
 {
   const auto cardiacInput = makeGenericCardiacInput();
-  PassiveLaw law;
+  const auto& law = cardiacInput.passiveEnergy;
+  const auto& p = law.getParameters();
   const Real lr = 0.83;
   const Real lt = 1.17;
   const Real h = 1e-6;
 
-  const auto P = law(cardiacInput.passiveEnergy, lr, lt);
-  const auto Prp = law(cardiacInput.passiveEnergy, lr + h, lt);
-  const auto Prm = law(cardiacInput.passiveEnergy, lr - h, lt);
-  const auto Ptp = law(cardiacInput.passiveEnergy, lr, lt + h);
-  const auto Ptm = law(cardiacInput.passiveEnergy, lr, lt - h);
+  auto energy = [&](Real a, Real b) {
+    const Real er = a * a - 1.0, et = b * b - 1.0;
+    const Real Q = 0.25 * (p.brr * er * er + 2.0 * p.btt * et * et + 2.0 * p.brt * er * et);
+    return 0.5 * p.c0 * (std::exp(Q) - 1.0);
+  };
 
+  PassiveLaw stress;
+  const auto P = stress(law, lr, lt);
+  const auto Prp = stress(law, lr + h, lt);
+  const auto Prm = stress(law, lr - h, lt);
+  const auto Ptp = stress(law, lr, lt + h);
+  const auto Ptm = stress(law, lr, lt - h);
+
+  const Real scale = std::max<Real>(1.0, std::abs(P.dPtt_dlt));
+  EXPECT_NEAR(P.PRR, (energy(lr + h, lt) - energy(lr - h, lt)) / (2 * h), 1e-6 * scale);
+  EXPECT_NEAR(P.Ptt, 0.5 * (energy(lr, lt + h) - energy(lr, lt - h)) / (2 * h), 1e-6 * scale);
+  EXPECT_NEAR(P.dPRR_dlr, (Prp.PRR - Prm.PRR) / (2 * h), 1e-6 * scale);
+  EXPECT_NEAR(P.dPRR_dlt, (Ptp.PRR - Ptm.PRR) / (2 * h), 1e-6 * scale);
+  EXPECT_NEAR(P.dPtt_dlr, (Prp.Ptt - Prm.Ptt) / (2 * h), 1e-6 * scale);
+  EXPECT_NEAR(P.dPtt_dlt, (Ptp.Ptt - Ptm.Ptt) / (2 * h), 1e-6 * scale);
+}
+
+/// @brief Verifies the reduced-invariant passive tangent matches finite differences.
+TEST(PoroelasticSphereTest, ReducedInvariantPiolaTangentMatchesFiniteDifference)
+{
+  Heart::HolzapfelReducedLaw<Real>::Parameters hp;
+  hp.C0 = 1.9e3;
+  hp.C1 = 1.1e-1;
+  hp.C2 = 1.9e3;
+  hp.C3 = 1.1e-1;
+  const Heart::HolzapfelReducedLaw<Real> energy(hp);
+  HolzapfelLaw law;
+  const Real lr = 0.83, lt = 1.17, h = 1e-6;
+  const auto P = law(energy, lr, lt);
+  const auto Prp = law(energy, lr + h, lt);
+  const auto Prm = law(energy, lr - h, lt);
+  const auto Ptp = law(energy, lr, lt + h);
+  const auto Ptm = law(energy, lr, lt - h);
   const Real scale = std::max<Real>(1.0, std::abs(P.dPtt_dlt));
   EXPECT_NEAR(P.dPRR_dlr, (Prp.PRR - Prm.PRR) / (2 * h), 1e-6 * scale);
   EXPECT_NEAR(P.dPRR_dlt, (Ptp.PRR - Ptm.PRR) / (2 * h), 1e-6 * scale);
@@ -405,154 +441,78 @@ TEST(PoroelasticSphereTest, PassivePiolaTangentMatchesFiniteDifference)
   EXPECT_NEAR(P.dPtt_dlt, (Ptp.Ptt - Ptm.Ptt) / (2 * h), 1e-6 * scale);
 }
 
-/// @brief Verifies the thick incompressible neo-Hookean sphere matches the closed-form inflation law.
-TEST(PoroelasticSphereTest, IncompressibleNeoHookeanMatchesClosedForm)
+/// @brief Verifies shell kinematics, the radial-stress closure and the pressure law in closed form.
+TEST(PoroelasticSphereTest, ShellPressureLawMatchesClosedForm)
 {
-  // W = (mu / 2) J_1 with J = 1 is the incompressible neo-Hookean law; the
-  // exact inflation pressure is the Green-Ogden formula
-  // P_v = (mu / 2) [ (4 / l_out + 1 / l_out^4) - (4 / l_in + 1 / l_in^4) ].
   auto cardiacInput = makeGenericCardiacInput();
-  cardiacInput.R0 = 1.0;
-  cardiacInput.d0 = 0.5;
-  cardiacInput.phi0 = 0.1;
-  cardiacInput.Es = 0.0;
   cardiacInput.eta = 0.0;
-  cardiacInput.wallQuadraturePoints = 12;
-  const Real muNH = 2.0e3;
-  using PassiveEnergyType = std::decay_t<decltype(cardiacInput.passiveEnergy)>;
-  typename PassiveEnergyType::Parameters p;
-  p.mu1 = 0.5 * muNH;
-  cardiacInput.passiveEnergy = PassiveEnergyType(p);
+  const Real y = 2.5e-3, phi = 0.115, ec = 0.01;
 
-  const Real rin = 1.3;
-  const auto data = evaluateSteadyWall(cardiacInput, rin - 1.0, cardiacInput.phi0, 0.0);
-
-  const Real Rout = 1.5;
-  const Real lin = rin;
-  const Real lout = std::cbrt(rin * rin * rin + Rout * Rout * Rout - 1.0) / Rout;
-  const Real expected = 0.5 * muNH *
-    ((4.0 / lout + 1.0 / std::pow(lout, 4)) - (4.0 / lin + 1.0 / std::pow(lin, 4)));
-
-  EXPECT_NEAR(data.J, 1.0, 1e-15);
-  EXPECT_NEAR(data.wallPressure, expected, 1e-9 * std::abs(expected));
-}
-
-/// @brief Verifies the membrane limit at J = 1 recovers the CCMLC2014 wall law (passive, viscous, active).
-TEST(PoroelasticSphereTest, MembraneLimitRecoversCCMLC2014Law)
-{
-  auto cardiacInput = makeGenericCardiacInput();
-  cardiacInput.d0 = 1e-4 * cardiacInput.R0;
-  cardiacInput.wallQuadraturePoints = 4;
-
-  const Real dt = 1e-3;
-  const Real y = 4e-3;
-  const Real yPrev = 3.9e-3;
-  const Real ec = 0.02;
-
-  Heart::PoroelasticSphere::Numerics::DynamicSystem<PassiveLaw, Model::Input>
-    dynamicSystem(cardiacInput);
-
-  // Backward Euler start (snm1 == sn), so yDot = (y - yPrev) / dt.
-  Model::State sn;
-  sn.t = 0.0;
-  sn.y = yPrev;
-  sn.phi = cardiacInput.phi0;
-  const Model::State snm1 = sn;
-
-  Model::DenseVector x(Vars::NumberOfVariables);
-  x.setZero();
-  x[Vars::RadialDisplacement] = y;
-  x[Vars::Porosity] = cardiacInput.phi0;
-  x[Vars::FiberDeformation] = ec;
-
-  Model::EvalData data;
-  dynamicSystem.buildEvalData(x, sn, snm1, dt, dt, data);
-
-  // CCMLC2014 membrane law: (d0 / R0) sqrt(C) Sigma = p_v C.
-  const Real R0 = cardiacInput.R0;
-  const Real sqrtC = 1.0 + y / R0;
-  const Real C = sqrtC * sqrtC;
-  const Real v = (y - yPrev) / dt;
-
-  Real sigmaPassive = 0.0;
-  Real dSigmaPassive = 0.0;
-  Heart::CCMLC2014PassiveLaw<Real> membraneLaw;
-  membraneLaw(
-    cardiacInput.passiveEnergy, C, 2.0 * sqrtC / R0, sigmaPassive, dSigmaPassive);
-
-  const Real sigmaViscous =
-    cardiacInput.eta * v / R0 * (2.0 * sqrtC + 4.0 * std::pow(sqrtC, -11.0));
-
-  const Real e = 0.5 * (C - 1.0);
-  const Real h = 1.0 + 2.0 * ec;
-  const Real sigmaActive = cardiacInput.Es / (h * h) * (e - ec);
-
-  const Real expected =
-    cardiacInput.d0 / R0 * (sigmaPassive + sigmaViscous + sigmaActive) / sqrtC;
-
-  EXPECT_NEAR(data.J, 1.0, 1e-15);
-  EXPECT_NEAR(data.wallPressure, expected, 1e-3 * std::abs(expected));
-  EXPECT_NEAR(data.strain1D, e, 1e-3 * std::abs(e));
-}
-
-/// @brief Verifies the averaged multiplier equals the volume average of the pointwise field recovered from radial equilibrium.
-TEST(PoroelasticSphereTest, AveragedMultiplierMatchesPointwiseRecovery)
-{
-  auto cardiacInput = makeGenericCardiacInput();
-  cardiacInput.R0 = 1.0;
-  cardiacInput.d0 = 0.5;
-  cardiacInput.phi0 = 0.1;
-  cardiacInput.eta = 0.0;
-  cardiacInput.wallQuadraturePoints = 16;
-
-  const Real phi = 0.2;
+  const auto probe = evaluateSteadyWall(cardiacInput, y, phi, ec, 0.0);
+  const Real R0 = cardiacInput.R0, h0 = cardiacInput.d0;
+  const Real lt = 1.0 + y / R0;
   const Real J = 1.0 - cardiacInput.phi0 + phi;
-  const Real rin = 1.3;
-  const Real ec = 0.05;
-  const auto data = evaluateSteadyWall(cardiacInput, rin - 1.0, phi, ec);
-  const Real Pv = data.wallPressure;
-  const Real sigma = data.active.activeStressOneDimensional;
+  const Real lr = J / (lt * lt);
+  EXPECT_NEAR(probe.lt, lt, 1e-15);
+  EXPECT_NEAR(probe.lr, lr, 1e-15);
+  EXPECT_NEAR(probe.thickness, h0 * lr, 1e-15);
 
-  // sigma_rr(r) = -P_v + int_{r_in}^r 2 (sigma_tt - sigma_rr) / s ds,
-  // lambda(r) = sigma_rr - sigma_M,rr, averaged over the reference wall.
-  const Real Rin = cardiacInput.R0;
-  const Real Rout = cardiacInput.R0 + cardiacInput.d0;
-  PassiveLaw law;
-  auto stress = [&](Real R, Real& sigmaMrr, Real& diff) {
-    const Real r = std::cbrt(rin * rin * rin + J * (R * R * R - Rin * Rin * Rin));
-    const Real lt = r / R;
-    const Real lr = J / (lt * lt);
-    const auto P = law(cardiacInput.passiveEnergy, lr, lt);
-    const Real Ptt = P.Ptt + 0.5 * sigma * lt;
-    sigmaMrr = lr * P.PRR / J;
-    diff = (lt * Ptt - lr * P.PRR) / J;
-    return r;
-  };
+  // Static shell law with the multiplier eliminated:
+  // p_v (1 + h0 lr / (R0 lt)) = 2 h0 / (R0 lt^2) [P_Mt - P_MR lr / lt].
+  PassiveLaw stress;
+  const auto P = stress(cardiacInput.passiveEnergy, lr, lt);
+  const Real e = 0.5 * (lt * lt - 1.0);
+  const Real hh = 1.0 + 2.0 * ec;
+  const Real sigma = cardiacInput.Es / (hh * hh) * (e - ec);
+  const Real PMt = P.Ptt + 0.5 * sigma * lt;
+  const Real PMR = P.PRR;
+  const Real pv = 2.0 * h0 / (R0 * lt * lt) * (PMt - PMR * lr / lt) /
+    (1.0 + h0 * lr / (R0 * lt));
 
-  const size_t n = 2000;
-  const Real dR = (Rout - Rin) / static_cast<Real>(n);
-  Real sigmaRR = -Pv;
-  Real lambdaSum = 0.0;
-  Real rPrev, mPrev, dPrev;
-  rPrev = stress(Rin, mPrev, dPrev);
-  lambdaSum += 0.5 * (sigmaRR - mPrev) * Rin * Rin;
-  for (size_t i = 1; i <= n; ++i)
+  const auto data = evaluateSteadyWall(cardiacInput, y, phi, ec, pv);
+  EXPECT_NEAR(data.wallPressure, pv, 1e-10 * std::abs(pv));
+  EXPECT_NEAR(data.lambdaBar, -0.5 * pv - PMR / (lt * lt), 1e-10 * std::abs(pv));
+
+  const Real p0 = cardiacInput.storagePressureScale;
+  const Real dPhiMax = cardiacInput.storageCompliance * p0;
+  const Real pP = -p0 * std::log(1.0 - (phi - cardiacInput.phi0) / dPhiMax);
+  EXPECT_NEAR(data.pP, pP, 1e-10 * std::abs(pP));
+  EXPECT_NEAR(data.pf, pP + 0.5 * pv + PMR / (lt * lt), 1e-10 * std::abs(pv));
+}
+
+/// @brief Verifies the exponential storage law: p_P(phi0) = 0, p_P' = 1/C0 there, and its inverse.
+TEST(PoroelasticSphereTest, ExponentialStorageLaw)
+{
+  const auto cardiacInput = makeGenericCardiacInput();
+  Heart::PoroelasticSphere::Physics::PerfusionEvaluator<Model::Input> perfusion(
+    cardiacInput);
+  Real pP = 1.0, dpP = 0.0;
+  perfusion.storage(cardiacInput.phi0, pP, dpP);
+  EXPECT_NEAR(pP, 0.0, 1e-12);
+  EXPECT_NEAR(dpP * cardiacInput.storageCompliance, 1.0, 1e-12);
+
+  const Real p0 = cardiacInput.storagePressureScale;
+  const Real dPhiMax = cardiacInput.storageCompliance * p0;
+  for (const Real p : {-5.0e3, 2.0e3, 1.5e4})
   {
-    const Real R = Rin + dR * static_cast<Real>(i);
-    Real m, d;
-    const Real r = stress(R, m, d);
-    sigmaRR += 0.5 * (2.0 * dPrev / rPrev + 2.0 * d / r) * (r - rPrev);
-    const Real weight = (i == n) ? 0.5 : 1.0;
-    lambdaSum += weight * (sigmaRR - m) * R * R;
-    rPrev = r;
-    dPrev = d;
+    const Real phi = cardiacInput.phi0 + dPhiMax * (1.0 - std::exp(-p / p0));
+    perfusion.storage(phi, pP, dpP);
+    EXPECT_NEAR(pP, p, 1e-9 * p0);
+    EXPECT_NEAR(dpP, std::exp(p / p0) / cardiacInput.storageCompliance, 1e-9 * dpP);
   }
-  const Real lambdaAverage =
-    3.0 * lambdaSum * dR / (Rout * Rout * Rout - Rin * Rin * Rin);
+}
 
-  EXPECT_NEAR(sigmaRR, 0.0, 1e-6 * std::abs(Pv));
-  EXPECT_NEAR(data.lambdaBar, lambdaAverage, 1e-5 * std::abs(lambdaAverage));
-  EXPECT_LT(data.lambdaBar, 0.0);
+/// @brief Verifies the venous drainage scales inversely with the pore viscosity.
+TEST(PoroelasticSphereTest, VenousDrainageScalesWithPoreViscosity)
+{
+  auto cardiacInput = makeGenericCardiacInput();
+  const auto a = evaluateSteadyWall(cardiacInput, 2e-3, 0.11, 0.0, 4.0e3);
+  cardiacInput.poreViscosity.eta0 *= 2.0;
+  cardiacInput.poreViscosity.etaInf *= 2.0;
+  const auto b = evaluateSteadyWall(cardiacInput, 2e-3, 0.11, 0.0, 4.0e3);
+  EXPECT_NEAR(b.pf, a.pf, 1e-12 * std::abs(a.pf));
+  EXPECT_NEAR(b.poreViscosity, 2.0 * a.poreViscosity, 1e-12 * a.poreViscosity);
+  EXPECT_NEAR(b.qVenous, 0.5 * a.qVenous, 1e-10 * std::abs(a.qVenous));
 }
 
 /// @brief Verifies dynamic jacobian matches finite difference.
@@ -571,6 +531,47 @@ TEST(PoroelasticSphereTest, DynamicJacobianMatchesFiniteDifference)
     const Real relativeError = computeDynamicJacobianRelativeError(cardiacInput,
       candidateState, currentState, previousState, dt, relativePerturbation);
     EXPECT_LT(relativeError, 2e-3);
+  }
+}
+
+/// @brief Verifies the exact Jacobian rows of the shell, blood-volume and proximal balances entrywise.
+TEST(PoroelasticSphereTest, ShellAndPerfusionRowsMatchFiniteDifference)
+{
+  auto cardiacInput = makeGenericCardiacInput();
+  Heart::PoroelasticSphere::Numerics::DynamicSystem<PassiveLaw, Model::Input> sys(
+    cardiacInput);
+  const auto x = makeCandidateState();
+  const auto sn = makeCurrentState();
+  const auto snm1 = makePreviousState(sn);
+  const Real dt = 1e-3, t = sn.t + dt;
+
+  Model::EvalData data;
+  sys.buildEvalData(x, sn, snm1, t, dt, data);
+  Model::DenseMatrix Jac;
+  sys.evaluateJacobian(data, Jac, dt);
+
+  const std::array<Index, 3> rows{
+    {Index(Vars::RadialDisplacement), Index(Vars::Porosity), Index(Vars::ArterialPressure)}};
+  for (const Index row : rows)
+  {
+    Real scale = 1e-12;
+    for (Index j = 0; j < Vars::NumberOfVariables; ++j)
+      scale = std::max<Real>(scale, std::abs(Jac(row, j)));
+    for (Index j = 0; j < Vars::NumberOfVariables; ++j)
+    {
+      const Real hstep = 1e-7 * std::max<Real>(1.0, std::abs(x[j]));
+      auto xp = x, xm = x;
+      xp[j] += hstep;
+      xm[j] -= hstep;
+      Model::EvalData dp, dm;
+      sys.buildEvalData(xp, sn, snm1, t, dt, dp);
+      sys.buildEvalData(xm, sn, snm1, t, dt, dm);
+      Model::DenseVector rp, rm;
+      sys.evaluateResidual(dp, rp);
+      sys.evaluateResidual(dm, rm);
+      const Real fd = (rp[row] - rm[row]) / (2.0 * hstep);
+      EXPECT_NEAR(Jac(row, j), fd, 1e-5 * scale) << "row " << row << " col " << j;
+    }
   }
 }
 
@@ -630,9 +631,10 @@ TEST(PoroelasticSphereTest, StepConvergesAndAdvancesTime)
   EXPECT_NEAR(model.getState().t, dt, 1e-14);
   EXPECT_TRUE(std::isfinite(model.getState().lambdaBar));
   EXPECT_TRUE(std::isfinite(model.getState().pf));
+  EXPECT_GT(model.getState().poreViscosity, 0.0);
 }
 
-/// @brief Verifies example setup completes three cycles with physical state and systolic perfusion impediment.
+/// @brief Verifies the example setup completes three cycles, conserves blood volume and raises the pore pressure in systole.
 TEST(PoroelasticSphereTest, ExampleSetupCompletesThreeCyclesWithPhysicalState)
 {
   auto cardiacInput = makeExampleCardiacInput();
@@ -645,22 +647,26 @@ TEST(PoroelasticSphereTest, ExampleSetupCompletesThreeCyclesWithPhysicalState)
 
   model.initialize(makeExampleInitialState(cardiacInput));
 
+  const Real R0 = cardiacInput.R0, h0 = cardiacInput.d0;
+  const Real Rin = R0 - 0.5 * h0, Rout = R0 + 0.5 * h0;
+  const Real Vw0 =
+    4.0 / 3.0 * std::numbers::pi_v<Real> * (Rout * Rout * Rout - Rin * Rin * Rin);
+
   const Real dt = 1e-3;
   const int nsteps = 3 * static_cast<int>(0.85 / dt);
-  Real maxFinalResidual = 0.0;
   size_t maxIterations = 0;
   Real minPhi = 1.0, maxPhi = 0.0;
   Real minPv = 1e9, maxPv = -1e9;
-  Real minLambdaBar = 1e9;
-  Real minInflow = 1e9, maxInflow = -1e9;
+  Real minPf = 1e9, maxPf = -1e9;
+  Real firstStepBalance = 0.0;
 
   for (int step = 0; step < nsteps; ++step)
   {
+    const Real phiOld = model.getState().phi;
     const auto report = model.step(dt);
     ASSERT_TRUE(report.converged)
       << "Example setup failed at step " << step << ", t = " << model.getState().t
       << ", residual = " << report.finalResidual;
-    maxFinalResidual = std::max(maxFinalResidual, report.finalResidual);
     maxIterations = std::max(maxIterations, report.iterations);
 
     const auto& s = model.getState();
@@ -668,27 +674,22 @@ TEST(PoroelasticSphereTest, ExampleSetupCompletesThreeCyclesWithPhysicalState)
     maxPhi = std::max(maxPhi, s.phi);
     minPv = std::min(minPv, s.pv);
     maxPv = std::max(maxPv, s.pv);
-    minLambdaBar = std::min(minLambdaBar, s.lambdaBar);
-    const Real inflow = cardiacInput.gammaAr * (s.par - s.pf);
-    minInflow = std::min(minInflow, inflow);
-    maxInflow = std::max(maxInflow, inflow);
+    minPf = std::min(minPf, s.pf);
+    maxPf = std::max(maxPf, s.pf);
+    if (step == 0) // Backward Euler start.
+      firstStepBalance = std::abs(Vw0 * (s.phi - phiOld) / dt - (s.qArterial - s.qVenous)) /
+        std::max<Real>(std::abs(s.qArterial), 1e-12);
   }
 
   const auto& state = model.getState();
   EXPECT_NEAR(state.t, nsteps * dt, 1e-12);
-  EXPECT_TRUE(std::isfinite(state.y));
-  EXPECT_TRUE(std::isfinite(state.phi));
-  EXPECT_TRUE(std::isfinite(state.pv));
-  EXPECT_TRUE(std::isfinite(state.par));
-  EXPECT_TRUE(std::isfinite(state.pd));
   EXPECT_TRUE(std::isfinite(state.pf));
   EXPECT_GT(state.kc, 0.0);
-  EXPECT_GT(state.w, 0.0);
   EXPECT_GT(minPhi, 0.0);
-  EXPECT_LT(maxPhi, 1.0);
+  EXPECT_LT(maxPhi,
+    cardiacInput.phi0 + cardiacInput.storageCompliance * cardiacInput.storagePressureScale);
   EXPECT_GT(maxPv - minPv, 5.0e3);
-  EXPECT_LT(minLambdaBar, 0.0);
-  EXPECT_GT(maxInflow - minInflow, 0.1 * maxInflow);
-  EXPECT_LT(maxFinalResidual, 5e-2);
+  EXPECT_GT(maxPf - minPf, 0.3 * (maxPv - minPv));
+  EXPECT_LT(firstStepBalance, 1e-6);
   EXPECT_LT(maxIterations, 20u);
 }

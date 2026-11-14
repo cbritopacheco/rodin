@@ -47,14 +47,17 @@ namespace Rodin::Heart
   /**
    * @brief Default 0D poroelastic sphere model type.
    *
-   * Thick-walled, solid-incompressible poroelastic spherical wall with the
-   * CCMLC2014 passive, active and circulation laws.
+   * Spherical shell reduction of the solid-incompressible poroelastic wall
+   * with the Usyk-type passive energy, the CCMLC2014 active, valve and
+   * circulation laws, exponential pore storage and shear-dependent venous
+   * drainage. The CCMLC2014 reduced-invariant energy remains available
+   * through HolzapfelReducedLaw / PoroelasticSpherePassiveLaw.
    *
-   * @tparam PassiveEnergyLaw Reduced passive energy law.
-   * @tparam PassiveLaw Radial Piola stress operator from the reduced invariants.
+   * @tparam PassiveEnergyLaw Passive energy law.
+   * @tparam PassiveLaw Radial Piola stress operator.
    */
-  template <class PassiveEnergyLaw = HolzapfelReducedLaw<Real>,
-    class PassiveLaw = PoroelasticSpherePassiveLaw<Real>>
+  template <class PassiveEnergyLaw = UsykSphericalEnergy<Real>,
+    class PassiveLaw = UsykSpherePassiveLaw<Real>>
   using PoroelasticSphereT =
     PoroelasticSphere::Solver::StepperT<PassiveEnergyLaw, PassiveLaw>;
 }

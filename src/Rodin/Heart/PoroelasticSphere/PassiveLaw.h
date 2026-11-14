@@ -6,8 +6,12 @@
  */
 /**
  * @file PassiveLaw.h
- * @brief Conversion from reduced passive energy derivatives to the radial
- * first Piola-Kirchhoff components of the thick spherical wall.
+ * @brief Radial first Piola-Kirchhoff components of the passive skeleton
+ * of the spherical wall.
+ *
+ * Two passive responses are provided: the reduced exponential energy of Usyk
+ * type restricted to the spherical stretches (default), and the CCMLC2014
+ * reduced-invariant energy evaluated on the same kinematics.
  */
 #ifndef RODIN_HEART_POROELASTICSPHERE_PASSIVELAW_H
 #define RODIN_HEART_POROELASTICSPHERE_PASSIVELAW_H
@@ -42,7 +46,105 @@ namespace Rodin::Heart
   };
 
   /**
-   * @brief Default passive stress law for the 0D poroelastic sphere.
+   * @brief Reduced exponential passive energy of Usyk type restricted to
+   * @f$ \mathbf F = \mathrm{diag}(\lambda_r, \lambda_\theta, \lambda_\theta) @f$,
+   * @f[
+   *   \widehat\Psi_M = \frac{c_0}{2}\big(e^Q - 1\big), \quad
+   *   Q = \tfrac14\big[b_{rr}(\lambda_r^2 - 1)^2 + 2 b_{\theta\theta}(\lambda_\theta^2 - 1)^2
+   *     + 2 b_{r\theta}(\lambda_r^2 - 1)(\lambda_\theta^2 - 1)\big],
+   * @f]
+   * with @f$ P_{M,R} = \partial_{\lambda_r}\widehat\Psi_M @f$ and
+   * @f$ P_{M,\theta} = \tfrac12 \partial_{\lambda_\theta}\widehat\Psi_M @f$.
+   *
+   * @tparam Scalar Scalar numeric type.
+   */
+  template <class Scalar>
+  class UsykSphericalEnergy
+  {
+    public:
+      /// @brief Material parameters.
+      struct Parameters
+      {
+        Scalar c0 = Scalar(100);    ///< Stress scale @f$ c_0 @f$ (Pa).
+        Scalar brr = Scalar(1.24);  ///< Radial exponent @f$ b_{rr} @f$.
+        Scalar btt = Scalar(8.4);   ///< Tangential exponent @f$ b_{\theta\theta} @f$.
+        Scalar brt = Scalar(0);     ///< Coupling exponent @f$ b_{r\theta} @f$.
+      };
+
+      /// @brief Constructs the law with a parameter set.
+      explicit UsykSphericalEnergy(const Parameters& params = Parameters())
+        : m_params(params)
+      {}
+
+      /// @brief Returns the parameter set.
+      const Parameters& getParameters() const noexcept
+      {
+        return m_params;
+      }
+
+      /**
+       * @brief Radial Piola components and their tangent.
+       * @param[in] lr Radial stretch @f$ \lambda_r @f$.
+       * @param[in] lt Hoop stretch @f$ \lambda_\theta @f$.
+       */
+      RadialPiolaStress<Scalar> radialStress(const Scalar lr, const Scalar lt) const
+      {
+        const auto& p = m_params;
+        const Scalar er = lr * lr - Scalar(1);
+        const Scalar et = lt * lt - Scalar(1);
+        const Scalar Q = Scalar(0.25) *
+          (p.brr * er * er + Scalar(2) * p.btt * et * et + Scalar(2) * p.brt * er * et);
+        const Scalar e = std::exp(Q);
+
+        const Scalar Qr = lr * (p.brr * er + p.brt * et);
+        const Scalar Qt = lt * (Scalar(2) * p.btt * et + p.brt * er);
+        const Scalar Qrr = p.brr * er + p.brt * et + Scalar(2) * p.brr * lr * lr;
+        const Scalar Qrt = Scalar(2) * p.brt * lr * lt;
+        const Scalar Qtt =
+          Scalar(2) * p.btt * et + p.brt * er + Scalar(4) * p.btt * lt * lt;
+
+        const Scalar aR = Scalar(0.5) * p.c0 * e;
+        const Scalar aT = Scalar(0.25) * p.c0 * e;
+
+        RadialPiolaStress<Scalar> out;
+        out.PRR = aR * Qr;
+        out.Ptt = aT * Qt;
+        out.dPRR_dlr = aR * (Qr * Qr + Qrr);
+        out.dPRR_dlt = aR * (Qt * Qr + Qrt);
+        out.dPtt_dlr = aT * (Qr * Qt + Qrt);
+        out.dPtt_dlt = aT * (Qt * Qt + Qtt);
+        return out;
+      }
+
+    private:
+      Parameters m_params;
+  };
+
+  /**
+   * @brief Default passive stress law of the poroelastic sphere: forwards to
+   * UsykSphericalEnergy::radialStress.
+   *
+   * @tparam Scalar Scalar numeric type.
+   */
+  template <class Scalar>
+  struct UsykSpherePassiveLaw
+  {
+      /**
+       * @brief Evaluate the radial Piola components and their tangent.
+       * @param[in] law Usyk energy.
+       * @param[in] lr Radial stretch.
+       * @param[in] lt Hoop stretch.
+       */
+      template <class PassiveEnergyLaw>
+      RadialPiolaStress<Scalar> operator()(
+        const PassiveEnergyLaw& law, const Scalar lr, const Scalar lt) const
+      {
+        return law.radialStress(lr, lt);
+      }
+  };
+
+  /**
+   * @brief CCMLC2014 reduced-invariant passive stress on the radial kinematics.
    *
    * Evaluates the CCMLC2014 reduced-invariant energy @f$ W(J_1, J_2, J_4) @f$
    * on the radial deformation @f$ \mathbf F = \mathrm{diag}(\lambda_r,

@@ -356,11 +356,23 @@ namespace Rodin::Heart::PoroelasticSphere::Solver
           m_state = unpackUnknownsIntoState(m_x, m_state, m_history.n.t + dt);
           m_state.lambdaBar = evalData.lambdaBar;
           m_state.pf = evalData.pf;
+          m_state.pP = evalData.pP;
+          m_state.thickness = evalData.thickness;
+          m_state.yEpi = m_state.y + Scalar(0.5) * (evalData.thickness - m_input.d0);
+          m_state.qArterial = evalData.qArterial;
+          m_state.qVenous = evalData.qVenous;
+          m_state.shearRate = evalData.shearRate;
+          m_state.poreViscosity = evalData.poreViscosity;
         }
 
         return m_report;
       }
 
+      /// @brief Returns the model input.
+      const Input& getInput() const noexcept
+      {
+        return m_input;
+      }
       /// @brief Returns the current state.
       const State& getState() const noexcept
       {

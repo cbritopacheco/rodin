@@ -9,15 +9,15 @@
  * @brief State, input and intermediate data structures for the 0D
  * solid-incompressible poroelastic sphere.
  *
- * The wall is the variationally consistent 0D reduction of the thick
- * poroelastic spherical shell (uniform Lagrangian porosity, exact pointwise
- * solid incompressibility, Galerkin projection on the tangent fields
- * @f$ v_1, v_2 @f$). The passive, viscous and active laws, the valves and the
- * Windkessel are those of the CCMLC2014 model
- * (Caruel et al., Biomech Model Mechanobiol 2014, doi:10.1007/s10237-013-0544-6),
- * so the CCMLC2014 parameter sets carry over; in the membrane limit
- * @f$ d_0 / R_0 \to 0 @f$, @f$ J = 1 @f$ the wall law reduces to the CCMLC2014
- * one.
+ * Zero-dimensional reduction of the finite-strain poroelastic ventricle
+ * (Ruz et al., multiscale coronary FSI, Sec. 3): spherical shell of mid-surface
+ * radius @f$ R_0 @f$ and thickness @f$ h_0 @f$, mid-surface displacement
+ * @f$ y @f$, volume-averaged Lagrangian porosity @f$ \bar\Phi @f$, solid
+ * incompressibility @f$ \bar\lambda_r \bar\lambda_\theta^2 = 1 - \phi_0 + \bar\Phi @f$,
+ * radial-stress closure @f$ \bar\sigma_{rr} = -p_v/2 @f$, exponential pore
+ * storage and shear-dependent venous drainage. Active contraction, valves and
+ * Windkessel follow CCMLC2014 (Caruel et al., Biomech Model Mechanobiol 2014,
+ * doi:10.1007/s10237-013-0544-6); myocardial inertia is neglected.
  */
 #ifndef RODIN_HEART_POROELASTICSPHERE_MODEL_STATE_H
 #define RODIN_HEART_POROELASTICSPHERE_MODEL_STATE_H
@@ -35,12 +35,12 @@ namespace Rodin::Heart::PoroelasticSphere::Model
    * @brief Indices of the nonlinear unknown vector for one time step.
    *
    * The wall is quasi-static: the CCMLC2014 pair @f$ (y, v) @f$ collapses to
-   * the endocardial displacement @f$ y = r_{in} - R_{in} @f$, and the
-   * Lagrangian porosity @f$ \Phi @f$ is added as a differential unknown.
+   * the mid-surface displacement @f$ y @f$, and the averaged Lagrangian
+   * porosity @f$ \bar\Phi @f$ is added as a differential unknown.
    */
   enum Variable : size_t
   {
-    RadialDisplacement = 0, ///< @f$ y_{n+1} @f$ — endocardial radial displacement.
+    RadialDisplacement = 0, ///< @f$ y_{n+1} @f$ — mid-surface radial displacement.
     Porosity,               ///< @f$ \Phi^{n+1} @f$ — Lagrangian porosity (uniform).
     VentricularPressure,    ///< @f$ p_v^{n+1} @f$ — left-ventricular pressure.
     ArterialPressure,       ///< @f$ p_{ar}^{n+1} @f$ — proximal arterial pressure.
@@ -66,7 +66,7 @@ namespace Rodin::Heart::PoroelasticSphere::Model
   template <class Scalar>
   struct StateT
   {
-      Scalar y = 0.0; ///< Endocardial radial displacement @f$ y = r_{in} - R_{in} @f$.
+      Scalar y = 0.0; ///< Mid-surface radial displacement @f$ y @f$.
       Scalar phi =
         0.0; ///< Lagrangian porosity @f$ \Phi @f$ (fluid volume per unit reference volume).
       Scalar pv = 0.0; ///< Left-ventricular pressure @f$ p_v @f$.
@@ -83,7 +83,14 @@ namespace Rodin::Heart::PoroelasticSphere::Model
       Scalar lambdaBar =
         0.0; ///< Wall-averaged incompressibility multiplier @f$ \bar\lambda @f$ (explicit).
       Scalar pf =
-        0.0; ///< Interstitial fluid pressure @f$ \tilde p = \Psi_P'(\Phi) - \bar\lambda @f$ (explicit).
+        0.0; ///< Effective pore pressure @f$ \tilde p = p_P(\bar\Phi) - \bar\lambda @f$ (explicit).
+      Scalar pP = 0.0; ///< Storage pressure @f$ p_P(\bar\Phi) @f$ (explicit).
+      Scalar yEpi = 0.0; ///< Epicardial displacement @f$ y + (h - h_0)/2 @f$ (explicit).
+      Scalar thickness = 0.0; ///< Current wall thickness @f$ h = h_0 \bar\lambda_r @f$ (explicit).
+      Scalar qArterial = 0.0; ///< Myocardial supply @f$ Q_{ar} @f$ (explicit).
+      Scalar qVenous = 0.0; ///< Venous drainage @f$ Q_{ven} @f$ (explicit).
+      Scalar shearRate = 0.0; ///< Effective pore shear rate (explicit).
+      Scalar poreViscosity = 0.0; ///< Effective pore viscosity @f$ \nu_{eff} @f$ (explicit).
 
       Scalar t = 0.0; ///< Time associated with this state.
   };
@@ -97,8 +104,8 @@ namespace Rodin::Heart::PoroelasticSphere::Model
   template <class Scalar, class PassiveEnergyLaw>
   struct InputT
   {
-      Scalar d0 = 1.0; ///< Reference wall thickness @f$ R_{out} - R_{in} @f$.
-      Scalar R0 = 1.0; ///< Reference cavity (endocardial) radius @f$ R_{in} @f$.
+      Scalar d0 = 1.0; ///< Reference wall thickness @f$ h_0 = R_{out} - R_{in} @f$.
+      Scalar R0 = 1.0; ///< Reference mid-surface radius @f$ R_0 = (R_{in} + R_{out})/2 @f$.
       Scalar phi0 = Scalar(0.1); ///< Reference porosity @f$ \phi_0 @f$.
 
       Scalar Es = 1.0; ///< Elastic stiffness parameter.
@@ -110,10 +117,30 @@ namespace Rodin::Heart::PoroelasticSphere::Model
       Scalar k0 = 0.0; ///< Active stiffness rate coefficient.
       Scalar sigma0 = 0.0; ///< Active stress rate coefficient.
 
-      Scalar KPhi =
-        0.0; ///< Fluid storage modulus: @f$ \Psi_P(\Phi) = \tfrac12 K_\Phi (\Phi - \phi_0)^2 @f$ (0: pure Terzaghi).
-      Scalar gammaAr = 0.0; ///< Arterial perfusion conductance @f$ \gamma_{ar} @f$.
-      Scalar gammaVen = 0.0; ///< Venous perfusion conductance @f$ \gamma_{ven} @f$.
+      Scalar storageCompliance =
+        Scalar(5e-6); ///< Reference vascular compliance @f$ C_0 @f$ (1/Pa).
+      Scalar storagePressureScale =
+        Scalar(1e4); ///< Storage pressure scale @f$ p_0 @f$ (Pa); @f$ \Delta\Phi_{max} = C_0 p_0 @f$.
+      Scalar storageSaturationGuard = Scalar(
+        0.95); ///< Fraction of @f$ \Delta\Phi_{max} @f$ beyond which @f$ p_P @f$ is continued linearly (Newton safeguard).
+      Scalar gammaAr =
+        0.0; ///< Lumped arterial supply conductance @f$ \gamma_{ar} @f$ (territory not resolved by an external model).
+      Scalar permeability = Scalar(1e-11); ///< Intrinsic permeability @f$ K @f$ (m^2).
+      Scalar poreShearFactor =
+        Scalar(1.4142135623730951); ///< Pore-geometry factor @f$ \alpha_{pm} @f$ (sqrt(2): parallel capillaries).
+      Scalar venousConductance =
+        Scalar(2.7e-12); ///< Geometric venous conductance factor @f$ G_{ven,0} @f$ (m^3).
+
+      /// @brief Carreau-Yasuda parameters of the pore (blood) viscosity.
+      struct PoreViscosity
+      {
+          Scalar eta0 = Scalar(0.056); ///< Low-shear viscosity (Pa s).
+          Scalar etaInf = Scalar(3.45e-3); ///< High-shear viscosity (Pa s).
+          Scalar lambda = Scalar(1.902); ///< Time scale (s).
+          Scalar n = Scalar(0.22); ///< Power-law index.
+          Scalar a = Scalar(1.25); ///< Yasuda exponent.
+          Scalar shearRegularization = Scalar(1e-3); ///< @f$ \varepsilon_\gamma @f$ (1/s).
+      } poreViscosity; ///< Pore viscosity law.
 
       Scalar Cp = 1.0; ///< Proximal (arterial) compliance.
       Scalar Cd = 1.0; ///< Distal compliance.
@@ -147,8 +174,6 @@ namespace Rodin::Heart::PoroelasticSphere::Model
 
       Scalar absRegularization =
         Scalar(1e-14); ///< Regularization scalar for absolute values.
-      size_t wallQuadraturePoints =
-        8; ///< Gauss-Legendre points across the wall @f$ [R_{in}, R_{out}] @f$.
       TimeScheme timeScheme =
         TimeScheme::BDF2; ///< Implicit time discretization for dynamic states.
       WindkesselRheology windkesselRheology =
@@ -185,7 +210,7 @@ namespace Rodin::Heart::PoroelasticSphere::Model
 
       std::function<Scalar(Scalar)> qPerfusionExternal = [](Scalar) {
         return Scalar(0);
-      }; ///< Flow delivered into the interstitium by an external coronary model, evaluated at @f$ t_{n+1} @f$.
+      }; ///< Myocardial supply delivered by an external coronary model (part of @f$ Q_{ar} @f$), evaluated at @f$ t_{n+1} @f$.
 
       PassiveEnergyLaw passiveEnergy; ///< Passive reduced constitutive law.
   };
@@ -237,8 +262,6 @@ namespace Rodin::Heart::PoroelasticSphere::Model
         0.0; ///< Series-element fiber stress @f$ \sigma_{1D} @f$.
       Scalar partialActiveStressWrtDisplacement =
         0.0; ///< @f$ \partial \sigma_{1D} / \partial y @f$.
-      Scalar partialActiveStressWrtPorosity =
-        0.0; ///< @f$ \partial \sigma_{1D} / \partial \Phi @f$.
       Scalar partialActiveStressWrtFiberDeformation =
         0.0; ///< @f$ \partial \sigma_{1D} / \partial e_c @f$.
   };
@@ -276,44 +299,58 @@ namespace Rodin::Heart::PoroelasticSphere::Model
       Scalar parMid = 0.0; ///< Arterial pressure seen by the Windkessel evaluator.
       Scalar pdMid = 0.0; ///< Distal pressure seen by the Windkessel evaluator.
 
-      Scalar rin = 0.0; ///< Deformed endocardial radius @f$ r_{in} = R_{in} + y @f$.
-      Scalar J = 1.0; ///< Uniform volume ratio @f$ J = 1 - \phi_0 + \Phi @f$.
-      Scalar Vw0 =
-        0.0; ///< Reference wall volume @f$ V_{w0} = \tfrac{4\pi}{3}(R_{out}^3 - R_{in}^3) @f$.
+      Scalar radius = 0.0; ///< Deformed mid-surface radius @f$ R_0 + y @f$.
+      Scalar J = 1.0; ///< Volume ratio @f$ J = 1 - \phi_0 + \bar\Phi @f$.
+      Scalar Vw0 = 0.0; ///< Reference wall volume @f$ \tfrac{4\pi}{3}(R_{out}^3 - R_{in}^3) @f$.
+      Scalar Aw0 = 0.0; ///< Reference mid-surface area @f$ 4\pi R_0^2 @f$.
 
-      Scalar lambdaMid = 1.0; ///< Mid-wall hoop stretch @f$ \lambda_\theta(R_m) @f$.
-      Scalar strain1D =
-        0.0; ///< Mid-wall Green-Lagrange hoop strain @f$ e = \tfrac12(\lambda_\theta^2 - 1) @f$.
+      Scalar lt = 1.0; ///< @f$ \bar\lambda_\theta @f$.
+      Scalar lr = 1.0; ///< @f$ \bar\lambda_r @f$.
+      Scalar lt_y = 0.0; ///< @f$ \partial \bar\lambda_\theta / \partial y @f$.
+      Scalar lr_y = 0.0; ///< @f$ \partial \bar\lambda_r / \partial y @f$.
+      Scalar lr_phi = 0.0; ///< @f$ \partial \bar\lambda_r / \partial \bar\Phi @f$.
+      Scalar ltDot = 0.0; ///< @f$ \dot{\bar\lambda}_\theta @f$.
+      Scalar ltDot_y = 0.0; ///< Total derivative wrt @f$ y @f$.
+      Scalar lrDot = 0.0; ///< @f$ \dot{\bar\lambda}_r @f$.
+      Scalar lrDot_y = 0.0; ///< Total derivative wrt @f$ y @f$.
+      Scalar lrDot_phi = 0.0; ///< Total derivative wrt @f$ \bar\Phi @f$.
+      Scalar thickness = 0.0; ///< Current thickness @f$ h_0 \bar\lambda_r @f$.
+
+      Scalar lambdaMid = 1.0; ///< Hoop stretch of the contractile unit.
+      Scalar strain1D = 0.0; ///< Hoop Green-Lagrange strain @f$ e = \tfrac12(\lambda_\theta^2 - 1) @f$.
       Scalar diffGreen = 0.0; ///< @f$ \partial e / \partial y @f$.
-      Scalar diffGreenWrtPorosity = 0.0; ///< @f$ \partial e / \partial \Phi @f$.
 
-      Scalar wallPressure =
-        0.0; ///< Cavity pressure sustained by the wall, @f$ P_v(r_{in}, \Phi) @f$ from the @f$ v_1 @f$ projection.
-      Scalar dWallPressure_dy = 0.0; ///< Total derivative wrt @f$ y @f$ (rates included).
-      Scalar dWallPressure_dphi =
-        0.0; ///< Total derivative wrt @f$ \Phi @f$ (rates included).
-      Scalar dWallPressure_dec = 0.0; ///< Derivative wrt @f$ e_c @f$.
+      Scalar PMR = 0.0, PMR_y = 0.0, PMR_phi = 0.0; ///< Radial skeletal stress and derivatives.
+      Scalar PMt = 0.0, PMt_y = 0.0, PMt_phi = 0.0,
+             PMt_ec = 0.0; ///< Tangential skeletal stress and derivatives.
+      Scalar Ptt = 0.0; ///< Total tangential nominal stress @f$ \bar P_{\theta\theta} @f$.
 
-      Scalar lambdaBar =
-        0.0; ///< Wall-averaged multiplier @f$ \bar\lambda @f$ from the @f$ v_2 @f$ projection.
-      Scalar dLambdaBar_dy = 0.0; ///< Total derivative wrt @f$ y @f$.
-      Scalar dLambdaBar_dphi = 0.0; ///< Total derivative wrt @f$ \Phi @f$.
-      Scalar dLambdaBar_dec = 0.0; ///< Derivative wrt @f$ e_c @f$.
+      Scalar wallPressure = 0.0; ///< Shell pressure law @f$ 2 h_0 \bar P_{\theta\theta} / (R_0 \lambda_\theta^2) @f$.
+      Scalar dWallPressure_dy = 0.0, dWallPressure_dphi = 0.0, dWallPressure_dpv = 0.0,
+             dWallPressure_dec = 0.0; ///< Derivatives of the wall pressure.
 
-      Scalar pf =
-        0.0; ///< Interstitial pressure @f$ \tilde p = K_\Phi(\Phi - \phi_0) - \bar\lambda @f$.
-      Scalar dPf_dy = 0.0; ///< Total derivative wrt @f$ y @f$.
-      Scalar dPf_dphi = 0.0; ///< Total derivative wrt @f$ \Phi @f$.
-      Scalar dPf_dec = 0.0; ///< Derivative wrt @f$ e_c @f$.
+      Scalar lambdaBar = 0.0; ///< Multiplier @f$ \bar\lambda = -p_v/2 - P_{M,R}/\lambda_\theta^2 @f$.
+      Scalar dLambdaBar_dy = 0.0, dLambdaBar_dphi = 0.0, dLambdaBar_dpv = 0.0,
+             dLambdaBar_dec = 0.0; ///< Derivatives of @f$ \bar\lambda @f$.
 
-      Scalar perfusionInflow =
-        0.0; ///< Arterial perfusion inflow @f$ \gamma_{ar}(p_{ar} - \tilde p) @f$.
-      Scalar perfusionOutflow =
-        0.0; ///< Venous perfusion outflow @f$ \gamma_{ven}(\tilde p - p_{sv}) @f$.
+      Scalar pP = 0.0; ///< Storage pressure @f$ p_P(\bar\Phi) @f$.
+      Scalar pf = 0.0; ///< Effective pore pressure @f$ \tilde p @f$.
+      Scalar dPf_dy = 0.0, dPf_dphi = 0.0, dPf_dpv = 0.0,
+             dPf_dec = 0.0; ///< Derivatives of @f$ \tilde p @f$.
+
+      Scalar perfusionLumped = 0.0; ///< Lumped supply @f$ \gamma_{ar}(p_{ar} - \tilde p) @f$.
+      Scalar qArterial = 0.0; ///< Total supply @f$ Q_{ar} @f$.
+      Scalar qVenous = 0.0; ///< Drainage @f$ Q_{ven} @f$.
+      Scalar shearRate = 0.0; ///< Effective pore shear rate.
+      Scalar poreViscosity = 0.0; ///< Effective pore viscosity.
+      Scalar netPerfusion = 0.0; ///< @f$ Q_{ar} - Q_{ven} @f$.
+      Scalar dNet_dy = 0.0, dNet_dphi = 0.0, dNet_dpv = 0.0, dNet_dpar = 0.0,
+             dNet_dec = 0.0; ///< Derivatives of @f$ Q_{ar} - Q_{ven} @f$.
+
       Scalar externalArterialOutflow =
         0.0; ///< External flow drawn from the proximal Windkessel node (@ref InputT::qArterialExternal).
       Scalar externalPerfusionInflow =
-        0.0; ///< External flow delivered into the interstitium (@ref InputT::qPerfusionExternal).
+        0.0; ///< External myocardial supply (@ref InputT::qPerfusionExternal).
 
       Scalar pAtCur = 0.0; ///< Atrial pressure at @f$ t_{n+1} @f$.
       Scalar pSvMid = 0.0; ///< Venous pressure at @f$ t_{n+1} @f$.
