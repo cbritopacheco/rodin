@@ -108,6 +108,11 @@ is resolved to the selected fallback transport; otherwise all attempts would
 keep consulting the original failing mirror list. Candidate-version discovery
 and installation-plan simulation use those same selected source definitions.
 Mirror fallback leaves the remaining third-party source definitions unchanged.
+Snapshot environments resolve Ubuntu mirror lists before their first update
+and explicitly map fallback hosts to the signed Ubuntu snapshot service. This
+ensures a fresh mirror schedules the pinned indexes before it has cached Release
+metadata. Index refreshes omit translations and command-not-found metadata
+within the existing 90-second budget.
 Final installation is offline, allows no package removals and has a
 900-second budget; configuration failures are not retried as download failures.
 Exhausted mirrors fail the job rather than skip its tests.
