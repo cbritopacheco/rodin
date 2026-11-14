@@ -62,8 +62,9 @@ its 832 lesion vertices replaced (same wedges, labels, wall thickness and
 contact patch); away from the lesion both pairs agree to 1e-7 mm.
 
 ```sh
-NPROC=50 CYCLES=4 examples/Heart/CoronaryArtery/run_poroelastic_scenarios.sh
-# 2 geometries x 3 scenarios = 6 cases, 8 cores each, in results/coronary_poroelastic/<geometry>/<scenario>
+CORES_PER_CASE=50 CYCLES=4 examples/Heart/CoronaryArtery/run_poroelastic_scenarios.sh
+# batch 1: nostenosis x {healthy, aortic_stenosis, hyperviscosity}, 3 x 50 cores
+# batch 2: stenosis80 x {...} when batch 1 ends; results/coronary_poroelastic/<geometry>/<scenario>
 ```
 
 ## Options added
