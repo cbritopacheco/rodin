@@ -46,13 +46,13 @@ namespace Rodin::Tests::Manufactured
     TestFunction v(fes);
     RealFunction exact(
       KOKKOS_LAMBDA(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p)->Real {
-      return 1 + p.x();
-    });
+        return 1 + p.x();
+      });
     const bool advective = mesh.getSpaceDimension() > 1;
     RealFunction force(
       KOKKOS_LAMBDA(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p)->Real {
-      return (advective ? 2 : 1) + p.x();
-    });
+        return (advective ? 2 : 1) + p.x();
+      });
     // Brace initialization avoids NVCC/GCC parsing deduced expression nodes
     // as parameter declarations inside the generic lambda.
     const auto solve = [&](const auto& beta) {

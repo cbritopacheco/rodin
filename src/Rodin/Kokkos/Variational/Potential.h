@@ -861,12 +861,12 @@ namespace Rodin::Kokkos::Variational
           }
           const auto centroid =
             [&](const ::Rodin::Kokkos::View<::Rodin::Geometry::Polytope>& cell) {
-            const Index g = static_cast<Index>(cell.getGeometry());
-            Geometry::Vector reference(cell.getDimension());
-            for (Index d = 0; d < cell.getDimension(); ++d)
-              reference(d) = centroids(g * ReferenceStride + d);
-            return cell.getPoint(reference);
-          };
+              const Index g = static_cast<Index>(cell.getGeometry());
+              Geometry::Vector reference(cell.getDimension());
+              for (Index d = 0; d < cell.getDimension(); ++d)
+                reference(d) = centroids(g * ReferenceStride + d);
+              return cell.getPoint(reference);
+            };
           const auto x = centroid(trialCell);
           const auto y = centroid(testCell);
           const Real scale = (x.getDistortion() * y.getDistortion()) *

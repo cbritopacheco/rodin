@@ -177,7 +177,10 @@ namespace Rodin::Kokkos
   template <>
   struct View<::Rodin::Solid::SaintVenantKirchhoff>
   {
-    /// @brief Copies material parameters; later host changes require a new view.
+    /**
+     * @brief Copies material parameters; later host changes require a new view.
+     * @param law Host constitutive law supplying the material parameters.
+     */
     explicit View(const ::Rodin::Solid::SaintVenantKirchhoff& law)
       : lambda(law.getLameFirstParameter()),
         mu(law.getShearModulus())
@@ -301,7 +304,10 @@ namespace Rodin::Kokkos
   template <>
   struct View<::Rodin::Solid::Yeoh>
   {
-    /// @brief Copies material parameters; later host changes require a new view.
+    /**
+     * @brief Copies material parameters; later host changes require a new view.
+     * @param law Host constitutive law supplying the material parameters.
+     */
     explicit View(const ::Rodin::Solid::Yeoh& law)
       : c1(law.getMaterialConstantC1()),
         c2(law.getMaterialConstantC2()),
@@ -400,7 +406,10 @@ namespace Rodin::Kokkos
   template <>
   struct View<::Rodin::Solid::MooneyRivlin>
   {
-    /// @brief Copies material parameters; later host changes require a new view.
+    /**
+     * @brief Copies material parameters; later host changes require a new view.
+     * @param law Host constitutive law supplying the material parameters.
+     */
     explicit View(const ::Rodin::Solid::MooneyRivlin& law)
       : c1(law.getMaterialConstantC1()),
         c2(law.getMaterialConstantC2()),

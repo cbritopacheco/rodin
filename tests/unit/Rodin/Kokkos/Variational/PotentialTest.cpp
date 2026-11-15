@@ -55,7 +55,7 @@ namespace Rodin::Tests::Unit
     const auto dk =
       KOKKOS_LAMBDA(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& x,
         const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& y)
-                      ->Real
+        ->Real
     {
       return 1 + x.x() * y.y() + Real(0.5) * (x.y() - y.x());
     };
@@ -67,7 +67,7 @@ namespace Rodin::Tests::Unit
     const auto ds =
       KOKKOS_LAMBDA(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& x,
         const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& y)
-                      ->Real
+        ->Real
     {
       const Real dx = x.x() - y.x();
       const Real dy = x.y() - y.y();
@@ -116,7 +116,7 @@ namespace Rodin::Tests::Unit
     const auto dk =
       KOKKOS_LAMBDA(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& x,
         const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& y)
-                      ->Real
+        ->Real
     {
       return 2 + x.x() * y.x() - y.y();
     };
@@ -211,7 +211,7 @@ namespace Rodin::Tests::Unit
     const auto dk =
       KOKKOS_LAMBDA(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& x,
         const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& y)
-                      ->Real
+        ->Real
     {
       return 1 + x.x() * y.y();
     };

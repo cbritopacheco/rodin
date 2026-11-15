@@ -143,10 +143,10 @@ int main(int argc, char** argv)
       VectorFunction lidVelocity(
         KOKKOS_LAMBDA(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& point)
           ->Real {
-          const Real offset = (point.x() - 0.5) / 0.25;
-          const Real profile = offset * offset < 1 ? 1 - offset * offset : Real(0);
-          return speed * profile * profile;
-        },
+            const Real offset = (point.x() - 0.5) / 0.25;
+            const Real profile = offset * offset < 1 ? 1 - offset * offset : Real(0);
+            return speed * profile * profile;
+          },
         Real(0));
       Problem flow(u, p, v, q);
       flow = (1 / dt) * Integral(u, v) + Integral(Dot(Mult(Jacobian(u), velocity), v)) +
