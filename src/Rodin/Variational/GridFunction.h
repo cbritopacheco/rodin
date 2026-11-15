@@ -1110,7 +1110,7 @@ namespace Rodin::Variational
        * The predicate is evaluated on the device on each polytope of
        * @p region, as given by the device projection of the mesh context, for
        * instance a `KOKKOS_LAMBDA` taking a
-       * `const Rodin::Kokkos::Geometry::PolytopeView&`.
+       * `const ::Rodin::Kokkos::View<::Rodin::Geometry::Polytope>&`.
        *
        * @returns Reference to this grid function
        * @param region Region on which to apply the operation.

@@ -37,9 +37,10 @@ namespace Rodin::Tests::Unit
     TestFunction dv(dfes);
 
     RealFunction hf([](const Geometry::Point& p) { return 2 + p.x() - p.y(); });
-    RealFunction df(KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real {
-      return 2 + p.x() - p.y();
-    });
+    RealFunction df(
+      KOKKOS_LAMBDA(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p)->Real {
+        return 2 + p.x() - p.y();
+      });
 
     expectSameForm(hu, hv, BoundaryIntegral(hu, hv), du, dv, BoundaryIntegral(du, dv));
     expectSameForm(
@@ -95,9 +96,10 @@ namespace Rodin::Tests::Unit
     dg.getData() = hg.getData();
 
     RealFunction hf([](const Geometry::Point& p) { return 2 + p.x() - p.y(); });
-    RealFunction df(KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real {
-      return 2 + p.x() - p.y();
-    });
+    RealFunction df(
+      KOKKOS_LAMBDA(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p)->Real {
+        return 2 + p.x() - p.y();
+      });
 
     expectSameLinearForm(hv, BoundaryIntegral(hf, hv), dv, BoundaryIntegral(df, dv));
     expectSameLinearForm(
@@ -150,9 +152,10 @@ namespace Rodin::Tests::Unit
     TestFunction dv(dfes);
 
     RealFunction hlambda([](const Geometry::Point& p) { return 2 + p.x() * p.y(); });
-    RealFunction dlambda(KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real {
-      return 2 + p.x() * p.y();
-    });
+    RealFunction dlambda(
+      KOKKOS_LAMBDA(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p)->Real {
+        return 2 + p.x() * p.y();
+      });
 
     expectSameForm(hu, hv, LinearElasticityIntegral(hu, hv)(Real(1.5), Real(0.7)), du, dv,
       LinearElasticityIntegral(du, dv)(Real(1.5), Real(0.7)));

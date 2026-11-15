@@ -14,7 +14,7 @@
  * Specializes Solid::InternalVirtualWorkTangent and
  * Solid::InternalVirtualWorkResidual on vector device spaces for the
  * Neo-Hookean law, with closed form entries, and for the laws of
- * Kokkos::Variational::LawView, through their elasticity tensors, so that
+ * Kokkos::View, through their elasticity tensors, so that
  * Solid::InternalVirtualWork assembles Newton problems of resident Kokkos
  * meshes on the device.
  */
@@ -616,7 +616,7 @@ namespace Rodin::Solid
         static constexpr Index TestCapacity = TestDOFsType::getCapacity(Vertices);
 
         /// @brief Device view of the mesh.
-        Rodin::Kokkos::Geometry::MeshView view;
+        ::Rodin::Kokkos::View<::Rodin::Geometry::MeshBase> view;
 
         /// @brief Quadrature tables of the integrated polytopes.
         QuadratureType quadrature;
@@ -851,7 +851,7 @@ namespace Rodin::Solid
           {alignof(Point), alignof(Kinematics), alignof(Vector), alignof(Real)});
 
         /// @brief Device view of the mesh.
-        Rodin::Kokkos::Geometry::MeshView view;
+        ::Rodin::Kokkos::View<::Rodin::Geometry::MeshBase> view;
 
         /// @brief Quadrature tables of the integrated polytopes.
         QuadratureType quadrature;
@@ -1503,7 +1503,7 @@ namespace Rodin::Solid
           DOFsType::getCapacity(Vertices) * RODIN_MAXIMAL_SPACE_DIMENSION;
 
         /// @brief Device view of the mesh.
-        Rodin::Kokkos::Geometry::MeshView view;
+        ::Rodin::Kokkos::View<::Rodin::Geometry::MeshBase> view;
 
         /// @brief Quadrature tables of the integrated polytopes.
         QuadratureType quadrature;
@@ -1616,7 +1616,7 @@ namespace Rodin::Solid
 
   /**
    * @brief Device tangent of the internal virtual work of a hyperelastic
-   * law of Kokkos::Variational::LawView.
+   * law of Kokkos::View.
    *
    * Represents
    * @f[
@@ -1651,7 +1651,7 @@ namespace Rodin::Solid
       using LawType = Law;
 
       /// @brief Device law type.
-      using LawViewType = typename Kokkos::Variational::LawView<Law>::Type;
+      using LawViewType = ::Rodin::Kokkos::View<Law>;
 
       /// @brief Trial function type.
       using TrialType = Variational::TrialFunction<Solution, TrialFES>;
@@ -1866,7 +1866,7 @@ namespace Rodin::Solid
         const auto& displacement = m_displacement.get();
         const StateViewType state(
           displacement.getFiniteElementSpace(), displacement.getData());
-        const LawViewType law = Kokkos::Variational::LawView<Law>::get(m_law);
+        const LawViewType law = ::Rodin::Kokkos::View<Law>(m_law);
         const Index vertices = m_polytopes.getQuadrature().getMaximumVertexCount();
         Kokkos::Variational::visitVertexCapacity(vertices, [&](auto n) {
           constexpr Index Vertices = decltype(n)::value;
@@ -2131,7 +2131,7 @@ namespace Rodin::Solid
         static constexpr Index Row = Kokkos::Variational::ElasticityRow;
 
         /// @brief Device view of the mesh.
-        Rodin::Kokkos::Geometry::MeshView view;
+        ::Rodin::Kokkos::View<::Rodin::Geometry::MeshBase> view;
 
         /// @brief Quadrature tables of the integrated polytopes.
         QuadratureType quadrature;
@@ -2373,7 +2373,7 @@ namespace Rodin::Solid
           std::max({alignof(Point), alignof(Vector), alignof(Real)});
 
         /// @brief Device view of the mesh.
-        Rodin::Kokkos::Geometry::MeshView view;
+        ::Rodin::Kokkos::View<::Rodin::Geometry::MeshBase> view;
 
         /// @brief Quadrature tables of the integrated polytopes.
         QuadratureType quadrature;
@@ -2681,7 +2681,7 @@ namespace Rodin::Solid
 
   /**
    * @brief Device residual of the internal virtual work of a hyperelastic
-   * law of Kokkos::Variational::LawView.
+   * law of Kokkos::View.
    *
    * Represents
    * @f[
@@ -2708,7 +2708,7 @@ namespace Rodin::Solid
       using LawType = Law;
 
       /// @brief Device law type.
-      using LawViewType = typename Kokkos::Variational::LawView<Law>::Type;
+      using LawViewType = ::Rodin::Kokkos::View<Law>;
 
       /// @brief Test function type.
       using TestType = Variational::TestFunction<TestFES>;
@@ -2898,7 +2898,7 @@ namespace Rodin::Solid
         const auto& displacement = m_displacement.get();
         const StateViewType state(
           displacement.getFiniteElementSpace(), displacement.getData());
-        const LawViewType law = Kokkos::Variational::LawView<Law>::get(m_law);
+        const LawViewType law = ::Rodin::Kokkos::View<Law>(m_law);
         const Index vertices = m_polytopes.getQuadrature().getMaximumVertexCount();
         Kokkos::Variational::visitVertexCapacity(vertices, [&](auto n) {
           integratePolytopes<decltype(n)::value>(fes.getMesh(), m_polytopes,
@@ -3017,7 +3017,7 @@ namespace Rodin::Solid
           DOFsType::getCapacity(Vertices) * RODIN_MAXIMAL_SPACE_DIMENSION;
 
         /// @brief Device view of the mesh.
-        Rodin::Kokkos::Geometry::MeshView view;
+        ::Rodin::Kokkos::View<::Rodin::Geometry::MeshBase> view;
 
         /// @brief Quadrature tables of the integrated polytopes.
         QuadratureType quadrature;

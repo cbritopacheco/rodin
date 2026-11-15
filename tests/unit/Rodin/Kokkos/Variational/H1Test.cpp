@@ -44,9 +44,10 @@ namespace Rodin::Tests::Unit
     TestFunction dv(dfes);
 
     RealFunction hf([](const Geometry::Point& p) { return 2 + p.x() * p.y(); });
-    RealFunction df(KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real {
-      return 2 + p.x() * p.y();
-    });
+    RealFunction df(
+      KOKKOS_LAMBDA(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p)->Real {
+        return 2 + p.x() * p.y();
+      });
     GridFunction hg(hfes);
     fillCoefficients(hg.getData());
     GridFunction dg(dfes);
@@ -83,9 +84,10 @@ namespace Rodin::Tests::Unit
     TestFunction dv(dfes);
 
     RealFunction hf([](const Geometry::Point& p) { return 2 + p.x() - p.y(); });
-    RealFunction df(KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real {
-      return 2 + p.x() - p.y();
-    });
+    RealFunction df(
+      KOKKOS_LAMBDA(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p)->Real {
+        return 2 + p.x() - p.y();
+      });
     GridFunction hg(hfes);
     fillCoefficients(hg.getData());
     GridFunction dg(dfes);
@@ -121,9 +123,10 @@ namespace Rodin::Tests::Unit
     TestFunction dv(dfes);
 
     RealFunction hlambda([](const Geometry::Point& p) { return 2 + p.x() * p.y(); });
-    RealFunction dlambda(KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real {
-      return 2 + p.x() * p.y();
-    });
+    RealFunction dlambda(
+      KOKKOS_LAMBDA(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p)->Real {
+        return 2 + p.x() * p.y();
+      });
 
     expectSameForm(hu, hv, LinearElasticityIntegral(hu, hv)(Real(1.5), Real(0.7)), du, dv,
       LinearElasticityIntegral(du, dv)(Real(1.5), Real(0.7)));
@@ -168,9 +171,10 @@ namespace Rodin::Tests::Unit
     TestFunction dv(dfes);
 
     RealFunction hf([](const Geometry::Point& p) { return 2 + p.x() - p.y(); });
-    RealFunction df(KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real {
-      return 2 + p.x() - p.y();
-    });
+    RealFunction df(
+      KOKKOS_LAMBDA(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p)->Real {
+        return 2 + p.x() - p.y();
+      });
     GridFunction hg(hfes);
     fillCoefficients(hg.getData());
     GridFunction dg(dfes);
@@ -197,9 +201,10 @@ namespace Rodin::Tests::Unit
     TestFunction dv(dfes);
 
     RealFunction hg([](const Geometry::Point& p) { return 1 + p.x() * p.x() - p.y(); });
-    RealFunction dg(KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real {
-      return 1 + p.x() * p.x() - p.y();
-    });
+    RealFunction dg(
+      KOKKOS_LAMBDA(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p)->Real {
+        return 1 + p.x() * p.x() - p.y();
+      });
     GridFunction hw(hfes);
     fillCoefficients(hw.getData());
     GridFunction dw(dfes);
@@ -264,7 +269,9 @@ namespace Rodin::Tests::Unit
 
     VectorFunction hf{[](const Geometry::Point& p) { return p.x() * p.y(); }, Real(1)};
     VectorFunction df(
-      KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real { return p.x() * p.y(); },
+      KOKKOS_LAMBDA(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p)->Real {
+        return p.x() * p.y();
+      },
       Real(1));
 
     Problem hs(hu, hp, hl, hv, hq, hm);

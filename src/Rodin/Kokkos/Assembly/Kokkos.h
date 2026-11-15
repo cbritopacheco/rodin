@@ -4065,7 +4065,7 @@ namespace Rodin::Assembly
       struct BoundaryOwners
       {
         /// @brief Device mesh.
-        ::Rodin::Kokkos::Geometry::MeshView view;
+        ::Rodin::Kokkos::View<::Rodin::Geometry::MeshBase> view;
 
         /// @brief Essential attributes, empty to select the boundary.
         AttributeView attributes;
@@ -4105,7 +4105,7 @@ namespace Rodin::Assembly
       struct BoundaryValues
       {
         /// @brief Device mesh.
-        ::Rodin::Kokkos::Geometry::MeshView view;
+        ::Rodin::Kokkos::View<::Rodin::Geometry::MeshBase> view;
 
         /// @brief Essential attributes, empty to select the boundary.
         AttributeView attributes;
@@ -4174,7 +4174,8 @@ namespace Rodin::Assembly
        */
       template <class AttributeView, class ValueView>
       static void evaluate(const ExecutionSpace& execution,
-        const ::Rodin::Kokkos::Geometry::MeshView& view, const AttributeView& attributes,
+        const ::Rodin::Kokkos::View<::Rodin::Geometry::MeshBase>& view,
+        const AttributeView& attributes,
         const ::Kokkos::View<Index*, MemorySpace>& owners,
         const ::Kokkos::View<Real*, MemorySpace>& values, const ValueView& value,
         const DOFsType& dofs, Index faceCount, Index vdim)
@@ -4235,8 +4236,8 @@ namespace Rodin::Assembly
        */
       template <class AttributeView>
       KOKKOS_INLINE_FUNCTION static bool isConstrained(
-        const ::Rodin::Kokkos::Geometry::MeshView& view, const AttributeView& attributes,
-        Index f)
+        const ::Rodin::Kokkos::View<::Rodin::Geometry::MeshBase>& view,
+        const AttributeView& attributes, Index f)
       {
         const Index d = view.getDimension();
         if (attributes.extent(0) == 0)

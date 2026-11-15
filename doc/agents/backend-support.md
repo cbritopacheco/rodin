@@ -319,3 +319,16 @@ that CUDA and HIP do not:
 - If OpenMP is involved, test determinism and accumulation semantics. Most
   speedups should come from per-cell caching, not a duplicate fast path.
 
+
+### Kokkos object views
+
+`Rodin::Kokkos::View<T>` is the execution-facing representation of a Rodin
+object, distinct from the array container `::Kokkos::View`. Geometry
+specializations are declared in `Kokkos/Geometry/View.h`: mesh and connectivity
+`getView()` methods return typed, read-only borrowed handles. Their storage is
+invalidated by owner destruction or replacement; construction does not transfer
+or synchronize the mesh. Backend-independent mesh and connectivity base views
+remain available to integrators. Constitutive specializations in
+`Kokkos/Variational/HyperElasticLaw.h` copy material parameters; later changes
+to the host law require constructing a new view. Unsupported object types have
+no default representation.

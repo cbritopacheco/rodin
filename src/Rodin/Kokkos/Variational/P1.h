@@ -36,7 +36,7 @@ namespace Rodin::Variational
    *
    * The host members answer the form language queries made while building
    * and copying forms. Device evaluation of the basis goes through
-   * Rodin::Kokkos::Geometry::PointView::evaluateBasis(), which is the P1
+   * ::Rodin::Kokkos::View<::Rodin::Geometry::Point>::evaluateBasis(), which is the P1
    * Lagrange basis of each reference geometry.
    *
    * @tparam Backend Kokkos backend of the mesh context.

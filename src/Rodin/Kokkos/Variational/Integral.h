@@ -52,7 +52,8 @@ namespace Rodin::Kokkos::Variational
    */
   template <class AttributeView>
   KOKKOS_INLINE_FUNCTION bool isSelected(
-    const Geometry::PolytopeView& cell, const AttributeView& attributes)
+    const ::Rodin::Kokkos::View<::Rodin::Geometry::Polytope>& cell,
+    const AttributeView& attributes)
   {
     if (attributes.extent(0) == 0)
       return true;
@@ -82,8 +83,10 @@ namespace Rodin::Kokkos::Variational
    * owner only.
    */
   template <class AttributeView>
-  KOKKOS_INLINE_FUNCTION bool isIntegrated(const Geometry::MeshView& view,
-    ::Rodin::Geometry::Region region, const Geometry::PolytopeView& polytope,
+  KOKKOS_INLINE_FUNCTION bool isIntegrated(
+    const ::Rodin::Kokkos::View<::Rodin::Geometry::MeshBase>& view,
+    ::Rodin::Geometry::Region region,
+    const ::Rodin::Kokkos::View<::Rodin::Geometry::Polytope>& polytope,
     const AttributeView& attributes)
   {
     if (!view.isOwned(polytope.getDimension(), polytope.getIndex()))
@@ -533,7 +536,7 @@ namespace Rodin::Kokkos::Variational::Internal
        */
       KOKKOS_INLINE_FUNCTION
       Rodin::Kokkos::Geometry::Vector getReference(
-        const Rodin::Kokkos::Geometry::PolytopeView& cell, Index q) const
+        const ::Rodin::Kokkos::View<::Rodin::Geometry::Polytope>& cell, Index q) const
       {
         const Index rdim = cell.getDimension();
         Rodin::Kokkos::Geometry::Vector reference(rdim);
@@ -549,8 +552,8 @@ namespace Rodin::Kokkos::Variational::Internal
        * @return Point on the polytope.
        */
       KOKKOS_INLINE_FUNCTION
-      Rodin::Kokkos::Geometry::PointView getPoint(
-        const Rodin::Kokkos::Geometry::PolytopeView& cell, Index q) const
+      ::Rodin::Kokkos::View<::Rodin::Geometry::Point> getPoint(
+        const ::Rodin::Kokkos::View<::Rodin::Geometry::Polytope>& cell, Index q) const
       {
         return cell.getPoint(getReference(cell, q));
       }
@@ -653,7 +656,7 @@ namespace Rodin::Kokkos::Variational::Internal
        * @param count Polytope count.
        */
       static void findRepresentatives(const ExecutionSpace& execution,
-        const Rodin::Kokkos::Geometry::MeshView& view,
+        const ::Rodin::Kokkos::View<::Rodin::Geometry::MeshBase>& view,
         const ::Kokkos::View<Index[GeometryCount], MemorySpace>& first, Index dimension,
         Index count)
       {
@@ -665,7 +668,7 @@ namespace Rodin::Kokkos::Variational::Internal
       struct Representatives
       {
         /// @brief Device mesh.
-        Rodin::Kokkos::Geometry::MeshView view;
+        ::Rodin::Kokkos::View<::Rodin::Geometry::MeshBase> view;
 
         /// @brief Minimum polytope index of every geometry.
         ::Kokkos::View<Index[GeometryCount], MemorySpace> first;
@@ -913,7 +916,7 @@ namespace Rodin::Kokkos::Variational::Internal
       struct EntryCount
       {
         /// @brief Device mesh.
-        Rodin::Kokkos::Geometry::MeshView view;
+        ::Rodin::Kokkos::View<::Rodin::Geometry::MeshBase> view;
 
         /// @brief Integration region.
         ::Rodin::Geometry::Region region;
@@ -1037,8 +1040,9 @@ namespace Rodin::Kokkos::Variational::Internal
        */
       template <class TrialDOFs, class TestDOFs>
       static size_t locate(const ExecutionSpace& execution,
-        const Rodin::Kokkos::Geometry::MeshView& view, ::Rodin::Geometry::Region region,
-        Index dimension, const AttributesType& attributes,
+        const ::Rodin::Kokkos::View<::Rodin::Geometry::MeshBase>& view,
+        ::Rodin::Geometry::Region region, Index dimension,
+        const AttributesType& attributes,
         const ::Kokkos::View<Index*, MemorySpace>& offsets, Index count,
         const TrialDOFs& trialDOFs, Index trialVDim, const TestDOFs& testDOFs,
         Index testVDim, size_t& spacing)
@@ -1851,7 +1855,7 @@ namespace Rodin::Kokkos::Variational
           alignof(TrialValue), alignof(IntegrationPointView), alignof(Real)});
 
         /// @brief Device mesh.
-        Rodin::Kokkos::Geometry::MeshView view;
+        ::Rodin::Kokkos::View<::Rodin::Geometry::MeshBase> view;
 
         /// @brief Quadrature tables of the polytopes.
         QuadratureType quadrature;
@@ -2061,7 +2065,7 @@ namespace Rodin::Kokkos::Variational
           getComponentCapacity<TestRange, Trial, Test>();
 
         /// @brief Device mesh.
-        Rodin::Kokkos::Geometry::MeshView view;
+        ::Rodin::Kokkos::View<::Rodin::Geometry::MeshBase> view;
 
         /// @brief Quadrature tables of the polytopes.
         QuadratureType quadrature;
@@ -2530,7 +2534,7 @@ namespace Rodin::Kokkos::Variational
           DOFsType::getCapacity(Vertices) * VectorCapacity;
 
         /// @brief Device mesh.
-        Rodin::Kokkos::Geometry::MeshView view;
+        ::Rodin::Kokkos::View<::Rodin::Geometry::MeshBase> view;
 
         /// @brief Quadrature tables of the polytopes.
         QuadratureType quadrature;

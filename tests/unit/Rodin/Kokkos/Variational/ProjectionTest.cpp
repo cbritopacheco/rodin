@@ -60,7 +60,8 @@ namespace Rodin::Tests::Unit
     const auto hf = [](const Geometry::Point& p) {
       return 1 + p.x() * p.y() - Real(0.3) * p.x() * p.y() * p.y();
     };
-    const auto df = KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real
+    const auto df =
+      KOKKOS_LAMBDA(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p)->Real
     {
       return 1 + p.x() * p.y() - Real(0.3) * p.x() * p.y() * p.y();
     };
@@ -89,7 +90,9 @@ namespace Rodin::Tests::Unit
       });
 
     const auto hp = [](const Polytope& polytope) { return polytope.getIndex() % 3 != 0; };
-    const auto dp = KOKKOS_LAMBDA(const DeviceGeometry::PolytopeView& polytope)->bool
+    const auto dp =
+      KOKKOS_LAMBDA(const ::Rodin::Kokkos::View<::Rodin::Geometry::Polytope>& polytope)
+        ->bool
     {
       return polytope.getIndex() % 3 != 0;
     };
@@ -114,9 +117,10 @@ namespace Rodin::Tests::Unit
     const auto dfes = make(mesh);
     const RealFunction hfn(
       [](const Geometry::Point& p) { return 2 - p.x() * p.x() * p.y(); });
-    const RealFunction dfn(KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real {
-      return 2 - p.x() * p.x() * p.y();
-    });
+    const RealFunction dfn(
+      KOKKOS_LAMBDA(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p)->Real {
+        return 2 - p.x() * p.x() * p.y();
+      });
     expectSameProjection(
       hfes, dfes, [&](auto& g) { g.project(Geometry::Region::Cells, hfn, 1); },
       [&](auto& g) { g.project(Geometry::Region::Cells, dfn, 1); });
@@ -143,16 +147,19 @@ namespace Rodin::Tests::Unit
 
     const auto hf0 = [](const Geometry::Point& p) { return 1 + p.x() * p.y() * p.y(); };
     const auto hf1 = [](const Geometry::Point& p) { return p.x() - Real(0.5) * p.y(); };
-    const auto df0 = KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real
+    const auto df0 =
+      KOKKOS_LAMBDA(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p)->Real
     {
       return 1 + p.x() * p.y() * p.y();
     };
-    const auto df1 = KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real
+    const auto df1 =
+      KOKKOS_LAMBDA(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p)->Real
     {
       return p.x() - Real(0.5) * p.y();
     };
     const auto dv =
-      KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->DeviceGeometry::Vector
+      KOKKOS_LAMBDA(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p)
+        ->DeviceGeometry::Vector
     {
       DeviceGeometry::Vector v(d);
       for (Index r = 0; r < d; ++r)

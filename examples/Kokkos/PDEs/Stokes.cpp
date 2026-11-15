@@ -68,7 +68,7 @@ int main(int argc, char** argv)
   TestFunction meanTest(meanSpace);
   constexpr Real viscosity = 1;
   VectorFunction lidVelocity(
-    KOKKOS_LAMBDA(const Rodin::Kokkos::Geometry::PointView& x)->Real {
+    KOKKOS_LAMBDA(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& x)->Real {
       return 16 * x.x() * x.x() * (1 - x.x()) * (1 - x.x());
     },
     Real(0));

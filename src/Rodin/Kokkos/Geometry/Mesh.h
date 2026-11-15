@@ -78,7 +78,7 @@ namespace Rodin::Geometry
       using ConnectivityType = Connectivity<ContextType>;
 
       /// Borrowed device mesh handle.
-      using View = Rodin::Kokkos::Geometry::MeshView;
+      using View = ::Rodin::Kokkos::View<Mesh<ContextType>>;
 
       /**
        * @brief Constructs resident meshes with the existing local builder vocabulary.
@@ -412,11 +412,11 @@ namespace Rodin::Geometry
       {
         synchronizeEntities();
         const auto topology = m_connectivity.getView();
-        return {getDimension(), m_sdim, topology.entityOffsets, topology.geometries,
+        return {{getDimension(), m_sdim, topology.entityOffsets, topology.geometries,
           topology.vertexOffsets, topology.vertexIndices, m_coordinates.data(),
           m_attributes.data(), m_attributePresent.data(), m_geometryKinds.data(),
           m_controlOffsets.data(), m_controls.data(), topology.incidenceDescriptors,
-          nullptr};
+          nullptr}};
       }
 
       /// @param d Entity dimension. @returns Entity count.

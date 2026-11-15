@@ -112,12 +112,12 @@ namespace Rodin::Examples
   struct HandAssembly
   {
     using RealView = ::Kokkos::View<Real*, MemorySpace>;
-    using IndexView = ::Kokkos::View<int*, MemorySpace>;
+    using Indices = ::Kokkos::View<int*, MemorySpace>;
 
     int nv;
     int nt;
     RealView x;
-    IndexView tets;
+    Indices tets;
     RealView w;
     RealView values;
     RealView rhs;
@@ -217,7 +217,7 @@ namespace Rodin::Examples
      * @param values Matrix entries.
      * @param rhs Vector entries.
      */
-    static void kernel(const Parameters P, int nv, int nt, RealView x, IndexView tets,
+    static void kernel(const Parameters P, int nv, int nt, RealView x, Indices tets,
       RealView w, RealView values, RealView rhs)
     {
       ::Kokkos::parallel_for(

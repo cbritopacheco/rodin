@@ -166,7 +166,8 @@ namespace Rodin::Kokkos::Variational
        * @return Vertex @f$ i @f$ or midpoint of the edge @f$ (i, j) @f$.
        */
       KOKKOS_INLINE_FUNCTION
-      Geometry::Vector getNode(const Geometry::PolytopeView& polytope, Index q) const
+      Geometry::Vector getNode(
+        const ::Rodin::Kokkos::View<::Rodin::Geometry::Polytope>& polytope, Index q) const
       {
         const Index d = polytope.getDimension();
         KOKKOS_ASSERT(q < getCount(d));
@@ -393,7 +394,7 @@ namespace Rodin::Kokkos::Variational
       template <class Point>
       KOKKOS_INLINE_FUNCTION Real getBasis(const Point& ip, Index q) const
       {
-        const Geometry::PointView& p = ip.getPoint();
+        const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p = ip.getPoint();
         const Index g = static_cast<Index>(p.getPolytope().getGeometry());
         const Geometry::Vector& r = p.getReferenceCoordinates();
         const Index n = m_count[g];
@@ -429,7 +430,7 @@ namespace Rodin::Kokkos::Variational
       template <class Point>
       KOKKOS_INLINE_FUNCTION Geometry::Vector getGradient(const Point& ip, Index q) const
       {
-        const Geometry::PointView& p = ip.getPoint();
+        const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p = ip.getPoint();
         const auto type = p.getPolytope().getGeometry();
         const Index g = static_cast<Index>(type);
         const Geometry::Vector& r = p.getReferenceCoordinates();
@@ -481,7 +482,8 @@ namespace Rodin::Kokkos::Variational
        * @return Node of Rodin::Variational::H1Element.
        */
       KOKKOS_INLINE_FUNCTION
-      Geometry::Vector getNode(const Geometry::PolytopeView& polytope, Index q) const
+      Geometry::Vector getNode(
+        const ::Rodin::Kokkos::View<::Rodin::Geometry::Polytope>& polytope, Index q) const
       {
         const Index g = static_cast<Index>(polytope.getGeometry());
         KOKKOS_ASSERT(q < m_count[g]);
@@ -792,7 +794,8 @@ namespace Rodin::Kokkos::Variational
        * @return Scalar global indices in local order.
        */
       KOKKOS_INLINE_FUNCTION
-      Geometry::IndexView bind(const Geometry::PolytopeView& polytope) const
+      ::Rodin::Kokkos::View<::Rodin::IndexVector> bind(
+        const ::Rodin::Kokkos::View<::Rodin::Geometry::Polytope>& polytope) const
       {
         const Index d = polytope.getDimension();
         const Index i = polytope.getIndex();
@@ -829,7 +832,8 @@ namespace Rodin::Kokkos::Variational
 
       /// @param polytope Polytope. @param q Local index. @return Reference node.
       KOKKOS_INLINE_FUNCTION
-      Geometry::Vector getNode(const Geometry::PolytopeView& polytope, Index q) const
+      Geometry::Vector getNode(
+        const ::Rodin::Kokkos::View<::Rodin::Geometry::Polytope>& polytope, Index q) const
       {
         if constexpr (K == 2)
         {
@@ -847,7 +851,8 @@ namespace Rodin::Kokkos::Variational
        * tetrahedron.
        */
       KOKKOS_INLINE_FUNCTION
-      static bool isSimplex(const Geometry::PolytopeView& polytope)
+      static bool isSimplex(
+        const ::Rodin::Kokkos::View<::Rodin::Geometry::Polytope>& polytope)
       {
         using Type = ::Rodin::Geometry::Polytope::Type;
         const Type g = polytope.getGeometry();

@@ -13,6 +13,8 @@
  */
 
 #include "Rodin/Context/ForwardDecls.h"
+#include "Rodin/Geometry/ForwardDecls.h"
+#include "View.h"
 
 namespace Rodin::Assembly
 {
@@ -71,19 +73,24 @@ namespace Rodin::Kokkos::Geometry
 
   class Matrix;
 
-  struct IndexView;
-
   struct IncidenceDescriptor;
 
-  struct IncidenceView;
+}
 
-  struct ConnectivityView;
-
-  struct MeshView;
-
-  struct PolytopeView;
-
-  class PointView;
+namespace Rodin::Kokkos
+{
+  template <>
+  struct View<::Rodin::IndexVector>;
+  template <>
+  struct View<::Rodin::Geometry::Incidence>;
+  template <>
+  struct View<::Rodin::Geometry::ConnectivityBase>;
+  template <>
+  struct View<::Rodin::Geometry::MeshBase>;
+  template <>
+  struct View<::Rodin::Geometry::Polytope>;
+  template <>
+  struct View<::Rodin::Geometry::Point>;
 }
 
 #endif

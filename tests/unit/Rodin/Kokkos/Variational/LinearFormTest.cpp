@@ -32,9 +32,10 @@ namespace Rodin::Tests::Unit
     dw.getData() = hw.getData();
 
     RealFunction hf([](const Geometry::Point& p) { return 2 + p.x() - p.y(); });
-    RealFunction df(KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real {
-      return 2 + p.x() - p.y();
-    });
+    RealFunction df(
+      KOKKOS_LAMBDA(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p)->Real {
+        return 2 + p.x() - p.y();
+      });
 
     LinearForm hostForm(hv);
     hostForm = Integral(hv);
@@ -94,7 +95,7 @@ namespace Rodin::Tests::Unit
     VectorFunction hf{
       [](const Geometry::Point& p) { return 1 + p.x() * p.y(); }, Real(0.5)};
     VectorFunction df(
-      KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real {
+      KOKKOS_LAMBDA(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p)->Real {
         return 1 + p.x() * p.y();
       },
       Real(0.5));
@@ -111,9 +112,10 @@ namespace Rodin::Tests::Unit
     TestFunction dv(dfes);
 
     RealFunction hf([](const Geometry::Point& p) { return 1 + p.x() * p.x(); });
-    RealFunction df(KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real {
-      return 1 + p.x() * p.x();
-    });
+    RealFunction df(
+      KOKKOS_LAMBDA(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p)->Real {
+        return 1 + p.x() * p.x();
+      });
 
     LinearForm hl(hv);
     hl = Integral(hv);

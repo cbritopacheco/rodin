@@ -40,12 +40,15 @@ namespace Rodin::Tests::Unit
     const auto pairs = makePairs(hfes.getSize(), fixedDOFs(hu, 5));
 
     RealFunction hf([](const Geometry::Point& p) { return 1 + p.x() * p.y(); });
-    RealFunction df(KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real {
-      return 1 + p.x() * p.y();
-    });
+    RealFunction df(
+      KOKKOS_LAMBDA(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p)->Real {
+        return 1 + p.x() * p.y();
+      });
     RealFunction hg([](const Geometry::Point& p) { return 2 - p.x(); });
     RealFunction dg(
-      KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real { return 2 - p.x(); });
+      KOKKOS_LAMBDA(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p)->Real {
+        return 2 - p.x();
+      });
 
     Problem hp(hu, hv);
     hp = Integral(Grad(hu), Grad(hv)) + Integral(hu, hv) - Integral(hf, hv) +
@@ -70,7 +73,9 @@ namespace Rodin::Tests::Unit
 
     RealFunction hf([](const Geometry::Point& p) { return p.x() - p.y(); });
     RealFunction df(
-      KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real { return p.x() - p.y(); });
+      KOKKOS_LAMBDA(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p)->Real {
+        return p.x() - p.y();
+      });
 
     Problem hp(hu, hv);
     hp = Integral(Grad(hu), Grad(hv)) - Integral(hf, hv) + DirichletBC(hu, -hu).on(1) +
@@ -122,11 +127,15 @@ namespace Rodin::Tests::Unit
 
     VectorFunction hf{[](const Geometry::Point& p) { return p.x() * p.y(); }, Real(1)};
     VectorFunction df(
-      KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real { return p.x() * p.y(); },
+      KOKKOS_LAMBDA(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p)->Real {
+        return p.x() * p.y();
+      },
       Real(1));
     RealFunction hs([](const Geometry::Point& p) { return p.x() - p.y(); });
     RealFunction ds(
-      KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real { return p.x() - p.y(); });
+      KOKKOS_LAMBDA(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p)->Real {
+        return p.x() - p.y();
+      });
     const Real eps = 1e-3;
 
     Problem hstokes(hu, hp, hv, hq);

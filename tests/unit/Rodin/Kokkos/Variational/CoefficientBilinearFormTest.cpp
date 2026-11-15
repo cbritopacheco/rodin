@@ -27,9 +27,10 @@ namespace Rodin::Tests::Unit
     dg.getData() = hg.getData();
 
     RealFunction hf([](const Geometry::Point& p) { return 2 + p.x() - p.y(); });
-    RealFunction df(KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real {
-      return 2 + p.x() - p.y();
-    });
+    RealFunction df(
+      KOKKOS_LAMBDA(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p)->Real {
+        return 2 + p.x() - p.y();
+      });
 
     expectSameForm(hu, hv, Integral(hg * hu, hv), du, dv, Integral(dg * du, dv));
     expectSameForm(hu, hv, Integral(hg * Grad(hu), Grad(hv)), du, dv,
@@ -105,7 +106,7 @@ namespace Rodin::Tests::Unit
     VectorFunction hw{
       [](const Geometry::Point& p) { return 1 + p.x() * p.y(); }, Real(0.5)};
     VectorFunction dw(
-      KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real {
+      KOKKOS_LAMBDA(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p)->Real {
         return 1 + p.x() * p.y();
       },
       Real(0.5));

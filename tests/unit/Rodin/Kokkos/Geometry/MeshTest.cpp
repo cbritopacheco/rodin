@@ -382,6 +382,12 @@ namespace Rodin::Tests::Unit
   {
     static_assert(std::is_base_of_v<Geometry::MeshBase, DeviceMesh>);
     static_assert(!std::is_base_of_v<HostMesh, DeviceMesh>);
+    static_assert(std::is_same_v<decltype(std::declval<const DeviceMesh&>().getView()),
+      Kokkos::View<DeviceMesh>>);
+    static_assert(std::is_trivially_copyable_v<Kokkos::View<DeviceMesh>>);
+    static_assert(std::is_same_v<
+      decltype(std::declval<const DeviceMesh::ConnectivityType&>().getView()),
+      Kokkos::View<DeviceMesh::ConnectivityType>>);
     const TestContext context;
     auto source = HostMesh::UniformGrid(Polytope::Type::Triangle, {3, 3});
     source.getConnectivity().compute(1, 2);

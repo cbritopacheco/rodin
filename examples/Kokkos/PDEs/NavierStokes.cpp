@@ -120,7 +120,7 @@ int main(int argc, char** argv)
     const Real speed = peakLidSpeed * ramp;
     const Real width = halfWidth;
     VectorFunction lidVelocity(
-      KOKKOS_LAMBDA(const Rodin::Kokkos::Geometry::PointView& point)->Real {
+      KOKKOS_LAMBDA(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& point)->Real {
         const Real offset = (point.x() - center) / width;
         const Real profile = offset * offset < 1 ? 1 - offset * offset : Real(0);
         return speed * profile * profile;

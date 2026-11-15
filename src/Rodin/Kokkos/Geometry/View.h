@@ -4,8 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_KOKKOS_GEOMETRY_MESHVIEW_H
-#define RODIN_KOKKOS_GEOMETRY_MESHVIEW_H
+#ifndef RODIN_KOKKOS_GEOMETRY_VIEW_H
+#define RODIN_KOKKOS_GEOMETRY_VIEW_H
 
 /**
  * @file
@@ -16,6 +16,7 @@
 
 #include "Rodin/Geometry/Polytope.h"
 #include "Rodin/Geometry/Types.h"
+#include "Rodin/Kokkos/ForwardDecls.h"
 #include "Rodin/Types.h"
 
 namespace Rodin::Kokkos::Geometry
@@ -254,8 +255,13 @@ namespace Rodin::Kokkos::Geometry
       ::Kokkos::Array<Real, 9> m_data;
   };
 
+}
+
+namespace Rodin::Kokkos
+{
   /// @brief Read-only borrowed index range in resident mesh storage.
-  struct IndexView
+  template <>
+  struct View<::Rodin::IndexVector>
   {
     /// @brief First entry in the range.
     const Index* data;
@@ -293,6 +299,10 @@ namespace Rodin::Kokkos::Geometry
       return operator[](i);
     }
   };
+}
+
+namespace Rodin::Kokkos::Geometry
+{
 
   /**
    * @brief Borrowed resident arrays for one dimension-pair relation.
@@ -306,8 +316,13 @@ namespace Rodin::Kokkos::Geometry
     Index count; ///< Number of source rows.
   };
 
+}
+
+namespace Rodin::Kokkos
+{
   /// @brief Borrowed compressed-row incidence relation.
-  struct IncidenceView
+  template <>
+  struct View<::Rodin::Geometry::Incidence>
   {
     /// @brief Relative row offsets, including the terminal offset.
     const Index* offsets;
@@ -338,7 +353,7 @@ namespace Rodin::Kokkos::Geometry
      * @return Borrowed incident entity indices.
      */
     KOKKOS_INLINE_FUNCTION
-    IndexView getIncidence(Index i) const
+    View<::Rodin::IndexVector> getIncidence(Index i) const
     {
       KOKKOS_ASSERT(i < count);
       const Index begin = offsets[i];
@@ -351,7 +366,7 @@ namespace Rodin::Kokkos::Geometry
      * @return Borrowed incident entity indices.
      */
     KOKKOS_INLINE_FUNCTION
-    IndexView operator[](Index i) const
+    View<::Rodin::IndexVector> operator[](Index i) const
     {
       return getIncidence(i);
     }
@@ -368,7 +383,8 @@ namespace Rodin::Kokkos::Geometry
    * neither owns storage nor computes topology. Connectivity mutation or owner
    * destruction invalidates every borrowed handle.
    */
-  struct ConnectivityView
+  template <>
+  struct View<::Rodin::Geometry::ConnectivityBase>
   {
     /// @brief Maximum topological dimension.
     Index dimension;
@@ -386,7 +402,7 @@ namespace Rodin::Kokkos::Geometry
     const Index* vertexIndices;
 
     /// @brief Relation descriptors, indexed by source and target dimension.
-    const IncidenceDescriptor* incidenceDescriptors;
+    const Geometry::IncidenceDescriptor* incidenceDescriptors;
 
     /// @brief Returns the maximal dimension. @return Topological dimension.
     KOKKOS_INLINE_FUNCTION
@@ -427,7 +443,7 @@ namespace Rodin::Kokkos::Geometry
      * @return Borrowed ordered vertex indices.
      */
     KOKKOS_INLINE_FUNCTION
-    IndexView getPolytope(Index d, Index i) const
+    View<::Rodin::IndexVector> getPolytope(Index d, Index i) const
     {
       KOKKOS_ASSERT(i < getCount(d));
       const Index entity = entityOffsets[d] + i;
@@ -455,7 +471,7 @@ namespace Rodin::Kokkos::Geometry
      * @return Borrowed compressed-row relation.
      */
     KOKKOS_INLINE_FUNCTION
-    IncidenceView getIncidence(Index d, Index dp) const
+    View<::Rodin::Geometry::Incidence> getIncidence(Index d, Index dp) const
     {
       KOKKOS_ASSERT(hasIncidence(d, dp));
       const auto descriptor = incidenceDescriptors[d * (dimension + 1) + dp];
@@ -470,11 +486,15 @@ namespace Rodin::Kokkos::Geometry
      * @return Borrowed incident entity indices.
      */
     KOKKOS_INLINE_FUNCTION
-    IndexView getIncidence(Index d, Index dp, Index i) const
+    View<::Rodin::IndexVector> getIncidence(Index d, Index dp, Index i) const
     {
       return getIncidence(d, dp).getIncidence(i);
     }
   };
+}
+
+namespace Rodin::Kokkos::Geometry
+{
 
   /// @brief Device-supported geometric transformation representation.
   enum class GeometryKind : std::uint8_t
@@ -484,9 +504,10 @@ namespace Rodin::Kokkos::Geometry
     Identity ///< Identity map on equal reference and physical dimensions.
   };
 
-  struct PolytopeView;
-  class PointView;
+}
 
+namespace Rodin::Kokkos
+{
   /**
    * @brief Read-only borrowed device mesh with attached geometric maps.
    *
@@ -499,7 +520,8 @@ namespace Rodin::Kokkos::Geometry
    * accessed. Destruction or replacement of the owner invalidates this
    * view and all derived handles.
    */
-  struct MeshView
+  template <>
+  struct View<::Rodin::Geometry::MeshBase>
   {
     /// @brief Maximum topological dimension.
     Index dimension;
@@ -529,7 +551,7 @@ namespace Rodin::Kokkos::Geometry
     const std::uint8_t* attributePresent;
 
     /// @brief Supported transformation kind per flattened entity.
-    const GeometryKind* geometryKinds;
+    const Geometry::GeometryKind* geometryKinds;
 
     /// @brief Control-point offsets per flattened entity, in point units.
     const Index* controlOffsets;
@@ -538,7 +560,7 @@ namespace Rodin::Kokkos::Geometry
     const Real* controls;
 
     /// @brief Explicit relation descriptors indexed by dimension pairs.
-    const IncidenceDescriptor* incidenceDescriptors;
+    const Geometry::IncidenceDescriptor* incidenceDescriptors;
 
     /// @brief Ownership per flattened entity; null when every entity is owned.
     const std::uint8_t* owned;
@@ -559,7 +581,7 @@ namespace Rodin::Kokkos::Geometry
 
     /// @brief Borrows mesh topology. @return Device connectivity view.
     KOKKOS_INLINE_FUNCTION
-    ConnectivityView getConnectivity() const
+    View<::Rodin::Geometry::ConnectivityBase> getConnectivity() const
     {
       return {dimension, entityOffsets, geometries, vertexOffsets, vertexIndices,
         incidenceDescriptors};
@@ -611,10 +633,10 @@ namespace Rodin::Kokkos::Geometry
      * @return Device-local coordinate vector.
      */
     KOKKOS_INLINE_FUNCTION
-    Vector getVertexCoordinates(Index i) const
+    Geometry::Vector getVertexCoordinates(Index i) const
     {
       KOKKOS_ASSERT(i < getVertexCount());
-      Vector result(spatialDimension);
+      Geometry::Vector result(spatialDimension);
       for (Index c = 0; c < spatialDimension; ++c)
         result(c) = coordinates[i * spatialDimension + c];
       return result;
@@ -627,7 +649,7 @@ namespace Rodin::Kokkos::Geometry
      * @return Device polytope handle.
      */
     KOKKOS_INLINE_FUNCTION
-    PolytopeView getPolytope(Index d, Index i) const;
+    View<::Rodin::Geometry::Polytope> getPolytope(Index d, Index i) const;
 
     /**
      * @brief Borrows a maximal-dimensional entity.
@@ -635,14 +657,15 @@ namespace Rodin::Kokkos::Geometry
      * @return Device cell handle.
      */
     KOKKOS_INLINE_FUNCTION
-    PolytopeView getCell(Index i) const;
+    View<::Rodin::Geometry::Polytope> getCell(Index i) const;
   };
 
   /// @brief Read-only device handle to one mesh entity.
-  struct PolytopeView
+  template <>
+  struct View<::Rodin::Geometry::Polytope>
   {
     /// @brief Borrowed mesh storage and metadata.
-    MeshView mesh;
+    View<::Rodin::Geometry::MeshBase> mesh;
 
     /// @brief Entity dimension.
     Index dimension;
@@ -673,7 +696,7 @@ namespace Rodin::Kokkos::Geometry
 
     /// @brief Returns ordered vertices. @return Borrowed vertex index range.
     KOKKOS_INLINE_FUNCTION
-    IndexView getVertices() const
+    View<::Rodin::IndexVector> getVertices() const
     {
       return mesh.getConnectivity().getPolytope(dimension, index);
     }
@@ -702,14 +725,18 @@ namespace Rodin::Kokkos::Geometry
      * @return Device point borrowing this entity's geometry.
      */
     KOKKOS_INLINE_FUNCTION
-    PointView getPoint(const Vector& reference) const;
+    View<::Rodin::Geometry::Point> getPoint(const Geometry::Vector& reference) const;
   };
+}
+
+namespace Rodin::Kokkos::Geometry
+{
 
   /**
    * @brief P1 basis of a reference geometry known at compile time.
    *
    * The values and reference gradients are those of
-   * PointView::evaluateBasis, evaluated for every vertex at once with static
+   * View<::Rodin::Geometry::Point>::evaluateBasis, evaluated for every vertex at once with static
    * bounds. Only the simplices, the quadrilateral and the hexahedron are
    * provided.
    *
@@ -803,6 +830,10 @@ namespace Rodin::Kokkos::Geometry
       }
   };
 
+}
+
+namespace Rodin::Kokkos
+{
   /**
    * @brief Thread-local reference point on a device mesh entity.
    *
@@ -815,7 +846,8 @@ namespace Rodin::Kokkos::Geometry
    * caches. At the pyramid apex the symmetric centreline derivative convention
    * matches Rodin's host P1 basis.
    */
-  class PointView
+  template <>
+  struct View<::Rodin::Geometry::Point>
   {
     public:
       /**
@@ -824,7 +856,7 @@ namespace Rodin::Kokkos::Geometry
        * @param reference Owned reference coordinate tuple.
        */
       KOKKOS_INLINE_FUNCTION
-      PointView(PolytopeView polytope, const Vector& reference)
+      View(View<::Rodin::Geometry::Polytope> polytope, const Geometry::Vector& reference)
         : m_polytope(polytope),
           m_reference(reference)
       {
@@ -839,7 +871,8 @@ namespace Rodin::Kokkos::Geometry
        * @param physical Image of @p reference under the geometric map.
        */
       KOKKOS_INLINE_FUNCTION
-      PointView(PolytopeView polytope, const Vector& reference, const Vector& physical)
+      View(View<::Rodin::Geometry::Polytope> polytope, const Geometry::Vector& reference,
+        const Geometry::Vector& physical)
         : m_polytope(polytope),
           m_reference(reference),
           m_physical(physical)
@@ -849,7 +882,7 @@ namespace Rodin::Kokkos::Geometry
 
       /// @brief Returns the bound entity. @return Borrowed polytope handle.
       KOKKOS_INLINE_FUNCTION
-      const PolytopeView& getPolytope() const
+      const View<::Rodin::Geometry::Polytope>& getPolytope() const
       {
         return m_polytope;
       }
@@ -865,11 +898,11 @@ namespace Rodin::Kokkos::Geometry
        * reference cell by an affine map.
        */
       KOKKOS_INLINE_FUNCTION
-      PointView getCellPoint(Index cell) const;
+      View<::Rodin::Geometry::Point> getCellPoint(Index cell) const;
 
       /// @brief Returns reference coordinates. @return Owned reference tuple.
       KOKKOS_INLINE_FUNCTION
-      const Vector& getReferenceCoordinates() const
+      const Geometry::Vector& getReferenceCoordinates() const
       {
         return m_reference;
       }
@@ -879,14 +912,14 @@ namespace Rodin::Kokkos::Geometry
        * @return Physical coordinates @f$ F_K(r) @f$, evaluated at construction.
        */
       KOKKOS_INLINE_FUNCTION
-      const Vector& getPhysicalCoordinates() const
+      const Geometry::Vector& getPhysicalCoordinates() const
       {
         return m_physical;
       }
 
       /// @brief Returns physical coordinates. @return Physical coordinate tuple.
       KOKKOS_INLINE_FUNCTION
-      const Vector& getCoordinates() const
+      const Geometry::Vector& getCoordinates() const
       {
         return m_physical;
       }
@@ -925,21 +958,22 @@ namespace Rodin::Kokkos::Geometry
 
       /**
        * @brief Evaluates the geometric Jacobian.
-       * @return Matrix @f$ J = \partial F_K / \partial r @f$, physical by reference.
+       * @return Geometry::Matrix @f$ J = \partial F_K / \partial r @f$, physical by reference.
        */
       KOKKOS_INLINE_FUNCTION
-      Matrix getJacobian() const
+      Geometry::Matrix getJacobian() const
       {
         const auto& mesh = m_polytope.mesh;
         const Index entity = mesh.entityOffsets[m_polytope.dimension] + m_polytope.index;
-        Matrix result(mesh.spatialDimension, m_reference.size());
-        if (mesh.geometryKinds[entity] == GeometryKind::Identity)
+        Geometry::Matrix result(mesh.spatialDimension, m_reference.size());
+        if (mesh.geometryKinds[entity] == Geometry::GeometryKind::Identity)
         {
           for (Index d = 0; d < m_reference.size(); ++d)
             result(d, d) = 1;
           return result;
         }
-        const bool vertexMap = mesh.geometryKinds[entity] == GeometryKind::VertexP1;
+        const bool vertexMap =
+          mesh.geometryKinds[entity] == Geometry::GeometryKind::VertexP1;
         const Index begin =
           vertexMap ? mesh.vertexOffsets[entity] : mesh.controlOffsets[entity];
         const Index count = vertexMap ? mesh.vertexOffsets[entity + 1] - begin
@@ -947,7 +981,7 @@ namespace Rodin::Kokkos::Geometry
         for (Index a = 0; a < count; ++a)
         {
           Real value;
-          Vector gradient(m_reference.size());
+          Geometry::Vector gradient(m_reference.size());
           evaluateBasis(a, value, gradient);
           for (Index c = 0; c < mesh.spatialDimension; ++c)
           {
@@ -967,10 +1001,10 @@ namespace Rodin::Kokkos::Geometry
        * @return Gram matrix @f$ J^T J @f$.
        */
       KOKKOS_INLINE_FUNCTION
-      Matrix getMetric() const
+      Geometry::Matrix getMetric() const
       {
-        const Matrix jacobian = getJacobian();
-        Matrix result(jacobian.cols(), jacobian.cols());
+        const Geometry::Matrix jacobian = getJacobian();
+        Geometry::Matrix result(jacobian.cols(), jacobian.cols());
         for (Index i = 0; i < result.rows(); ++i)
         {
           for (Index j = 0; j < result.cols(); ++j)
@@ -990,13 +1024,13 @@ namespace Rodin::Kokkos::Geometry
        * the empty matrix with zero rows and physical-dimension columns.
        */
       KOKKOS_INLINE_FUNCTION
-      Matrix getJacobianInverse() const
+      Geometry::Matrix getJacobianInverse() const
       {
-        const Matrix jacobian = getJacobian();
+        const Geometry::Matrix jacobian = getJacobian();
         if (jacobian.rows() == jacobian.cols())
           return jacobian.inverse();
-        const Matrix inverseMetric = getMetric().inverse();
-        Matrix result(jacobian.cols(), jacobian.rows());
+        const Geometry::Matrix inverseMetric = getMetric().inverse();
+        Geometry::Matrix result(jacobian.cols(), jacobian.rows());
         for (Index i = 0; i < result.rows(); ++i)
         {
           for (Index j = 0; j < result.cols(); ++j)
@@ -1015,7 +1049,7 @@ namespace Rodin::Kokkos::Geometry
       KOKKOS_INLINE_FUNCTION
       Real getJacobianDeterminant() const
       {
-        const Matrix jacobian = getJacobian();
+        const Geometry::Matrix jacobian = getJacobian();
         if (jacobian.rows() == jacobian.cols())
           return jacobian.determinant();
         const Real det = getMetric().determinant();
@@ -1029,7 +1063,7 @@ namespace Rodin::Kokkos::Geometry
       KOKKOS_INLINE_FUNCTION
       Real getDistortion() const
       {
-        const Matrix jacobian = getJacobian();
+        const Geometry::Matrix jacobian = getJacobian();
         const Index d = jacobian.cols();
         if (d == 0)
           return 1;
@@ -1069,7 +1103,7 @@ namespace Rodin::Kokkos::Geometry
        * both as the geometric map of P1 meshes and as the P1 shape functions.
        */
       KOKKOS_INLINE_FUNCTION
-      void evaluateBasis(Index a, Real& value, Vector& gradient) const
+      void evaluateBasis(Index a, Real& value, Geometry::Vector& gradient) const
       {
         using Type = ::Rodin::Geometry::Polytope::Type;
         const Type type = m_polytope.getGeometry();
@@ -1164,14 +1198,15 @@ namespace Rodin::Kokkos::Geometry
     private:
       /// @brief Evaluates the geometric map. @return @f$ F_K(r) @f$.
       KOKKOS_INLINE_FUNCTION
-      Vector computePhysicalCoordinates() const
+      Geometry::Vector computePhysicalCoordinates() const
       {
         const auto& mesh = m_polytope.mesh;
         const Index entity = mesh.entityOffsets[m_polytope.dimension] + m_polytope.index;
-        if (mesh.geometryKinds[entity] == GeometryKind::Identity)
+        if (mesh.geometryKinds[entity] == Geometry::GeometryKind::Identity)
           return m_reference;
-        Vector result(mesh.spatialDimension);
-        const bool vertexMap = mesh.geometryKinds[entity] == GeometryKind::VertexP1;
+        Geometry::Vector result(mesh.spatialDimension);
+        const bool vertexMap =
+          mesh.geometryKinds[entity] == Geometry::GeometryKind::VertexP1;
         const Index begin =
           vertexMap ? mesh.vertexOffsets[entity] : mesh.controlOffsets[entity];
         const Index count = vertexMap ? mesh.vertexOffsets[entity + 1] - begin
@@ -1179,7 +1214,7 @@ namespace Rodin::Kokkos::Geometry
         for (Index a = 0; a < count; ++a)
         {
           Real value;
-          Vector gradient(m_reference.size());
+          Geometry::Vector gradient(m_reference.size());
           evaluateBasis(a, value, gradient);
           for (Index c = 0; c < mesh.spatialDimension; ++c)
           {
@@ -1195,30 +1230,37 @@ namespace Rodin::Kokkos::Geometry
         return result;
       }
 
-      PolytopeView m_polytope;
-      Vector m_reference;
-      Vector m_physical;
+      View<::Rodin::Geometry::Polytope> m_polytope;
+      Geometry::Vector m_reference;
+      Geometry::Vector m_physical;
   };
 
   KOKKOS_INLINE_FUNCTION
-  PolytopeView MeshView::getPolytope(Index d, Index i) const
+  View<::Rodin::Geometry::Polytope> View<::Rodin::Geometry::MeshBase>::getPolytope(
+    Index d, Index i) const
   {
     KOKKOS_ASSERT(i < getCount(d));
     return {*this, d, i};
   }
 
   KOKKOS_INLINE_FUNCTION
-  PolytopeView MeshView::getCell(Index i) const
+  View<::Rodin::Geometry::Polytope> View<::Rodin::Geometry::MeshBase>::getCell(
+    Index i) const
   {
     return getPolytope(dimension, i);
   }
 
   KOKKOS_INLINE_FUNCTION
-  PointView PolytopeView::getPoint(const Vector& reference) const
+  View<::Rodin::Geometry::Point> View<::Rodin::Geometry::Polytope>::getPoint(
+    const Geometry::Vector& reference) const
   {
     return {*this, reference};
   }
 
+}
+
+namespace Rodin::Kokkos::Geometry
+{
   /**
    * @brief Gets a coordinate of a reference vertex.
    *
@@ -1277,14 +1319,19 @@ namespace Rodin::Kokkos::Geometry
     return (bits >> (3 * a + d)) & 1 ? Real(1) : Real(0);
   }
 
+}
+
+namespace Rodin::Kokkos
+{
   KOKKOS_INLINE_FUNCTION
-  PointView PointView::getCellPoint(Index cell) const
+  View<::Rodin::Geometry::Point> View<::Rodin::Geometry::Point>::getCellPoint(
+    Index cell) const
   {
-    const PolytopeView polytope = m_polytope.mesh.getCell(cell);
+    const View<::Rodin::Geometry::Polytope> polytope = m_polytope.mesh.getCell(cell);
     const auto type = polytope.getGeometry();
-    const IndexView cellVertices = polytope.getVertices();
-    const IndexView faceVertices = m_polytope.getVertices();
-    Vector reference(polytope.getDimension());
+    const View<::Rodin::IndexVector> cellVertices = polytope.getVertices();
+    const View<::Rodin::IndexVector> faceVertices = m_polytope.getVertices();
+    Geometry::Vector reference(polytope.getDimension());
     for (Index a = 0; a < faceVertices.size(); ++a)
     {
       Index local = 0;
@@ -1292,13 +1339,35 @@ namespace Rodin::Kokkos::Geometry
         ++local;
       KOKKOS_ASSERT(local < cellVertices.size());
       Real value;
-      Vector gradient(m_reference.size());
+      Geometry::Vector gradient(m_reference.size());
       evaluateBasis(a, value, gradient);
       for (Index d = 0; d < reference.size(); ++d)
-        reference(d) += value * getReferenceVertexCoordinate(type, local, d);
+        reference(d) += value * Geometry::getReferenceVertexCoordinate(type, local, d);
     }
     return {polytope, reference, m_physical};
   }
+}
+
+namespace Rodin::Kokkos
+{
+  /**
+   * @brief Typed borrowed mesh interface with backend-independent kernel access.
+   * @tparam Distribution Local or MPI distribution.
+   * @tparam Backend Execution backend.
+   */
+  template <class Distribution, class Backend>
+  struct View<::Rodin::Geometry::Mesh<Context::Kokkos<Distribution, Backend>>>
+    : View<::Rodin::Geometry::MeshBase>
+  {};
+
+  /**
+   * @brief Typed borrowed resident connectivity interface.
+   * @tparam Backend Execution backend.
+   */
+  template <class Backend>
+  struct View<::Rodin::Geometry::Connectivity<Context::Kokkos<Context::Local, Backend>>>
+    : View<::Rodin::Geometry::ConnectivityBase>
+  {};
 }
 
 #endif

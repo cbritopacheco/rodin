@@ -23,7 +23,7 @@
 #include "Rodin/Geometry/Connectivity.h"
 #include "Rodin/Kokkos/Context/Kokkos.h"
 #include "Rodin/Kokkos/Utility.h"
-#include "MeshView.h"
+#include "View.h"
 
 namespace Rodin::Geometry
 {
@@ -61,7 +61,7 @@ namespace Rodin::Geometry
       using MemorySpace = typename ContextType::MemorySpaceType;
 
       /// Borrowed device incidence complex.
-      using View = Rodin::Kokkos::Geometry::ConnectivityView;
+      using View = ::Rodin::Kokkos::View<Connectivity<ContextType>>;
 
       /// The existing discovery/restriction vocabulary.
       using Mode = Connectivity<Rodin::Context::Local>::Mode;
@@ -259,8 +259,8 @@ namespace Rodin::Geometry
       /// @returns Borrowed resident tables, invalidated by mutation.
       View getView() const
       {
-        return {m_dimension, m_entityOffsets.data(), m_geometries.data(),
-          m_vertexOffsets.data(), m_vertices.data(), m_descriptors.data()};
+        return {{m_dimension, m_entityOffsets.data(), m_geometries.data(),
+          m_vertexOffsets.data(), m_vertices.data(), m_descriptors.data()}};
       }
 
       /// @returns Associated execution context.
@@ -508,7 +508,6 @@ namespace Rodin::Geometry
       using Descriptor = Rodin::Kokkos::Geometry::IncidenceDescriptor;
 
       /// @brief Borrowed compressed-row incidence relation.
-      using IncidenceView = Rodin::Kokkos::Geometry::IncidenceView;
 
       /**
        * @brief One-dimensional resident array in the context memory space.
@@ -666,7 +665,8 @@ namespace Rodin::Geometry
       /// @brief Emission of transpose pairs, parallel over original source rows.
       struct TransposeEntries
       {
-        IncidenceView source; ///< Original CSR relation.
+        ::Rodin::Kokkos::View<::Rodin::Geometry::Incidence>
+          source; ///< Original CSR relation.
         Array<Entry> entries; ///< Transposed pairs.
 
         /// @param j Original source index.
@@ -686,7 +686,8 @@ namespace Rodin::Geometry
          * @var left
          * Relation from the source dimension to the pivot dimension.
          */
-        IncidenceView left, right; ///< Two relations through the pivot dimension.
+        ::Rodin::Kokkos::View<::Rodin::Geometry::Incidence> left,
+          right; ///< Two relations through the pivot dimension.
 
         /**
          * @var counts
@@ -1100,7 +1101,8 @@ namespace Rodin::Geometry
       }
 
       /// @param d Source dimension. @param dp Target dimension. @returns Materialized resident relation.
-      IncidenceView relation(size_t d, size_t dp) const
+      ::Rodin::Kokkos::View<::Rodin::Geometry::Incidence> relation(
+        size_t d, size_t dp) const
       {
         const auto& r = m_incidence[d][dp];
         assert(r.present);

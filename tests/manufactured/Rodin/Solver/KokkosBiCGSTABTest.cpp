@@ -44,11 +44,13 @@ namespace Rodin::Tests::Manufactured
     P1 fes(mesh);
     TrialFunction u(fes);
     TestFunction v(fes);
-    RealFunction exact(KOKKOS_LAMBDA(const Rodin::Kokkos::Geometry::PointView& p)->Real {
+    RealFunction exact(
+      KOKKOS_LAMBDA(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p)->Real {
       return 1 + p.x();
     });
     const bool advective = mesh.getSpaceDimension() > 1;
-    RealFunction force(KOKKOS_LAMBDA(const Rodin::Kokkos::Geometry::PointView& p)->Real {
+    RealFunction force(
+      KOKKOS_LAMBDA(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p)->Real {
       return (advective ? 2 : 1) + p.x();
     });
     // Brace initialization avoids NVCC/GCC parsing deduced expression nodes

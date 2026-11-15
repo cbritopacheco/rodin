@@ -157,14 +157,14 @@ namespace Rodin::Assembly
        * @returns Borrowed device polytope descriptor.
        */
       KOKKOS_INLINE_FUNCTION
-      Rodin::Kokkos::Geometry::PolytopeView getPolytope(Index i) const
+      ::Rodin::Kokkos::View<::Rodin::Geometry::Polytope> getPolytope(Index i) const
       {
         KOKKOS_ASSERT(i < m_count);
         return m_mesh.getPolytope(m_dimension, i);
       }
 
     private:
-      Rodin::Kokkos::Geometry::MeshView m_mesh;
+      ::Rodin::Kokkos::View<::Rodin::Geometry::MeshBase> m_mesh;
       Geometry::Region m_region;
       size_t m_dimension;
       size_t m_count;

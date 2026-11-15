@@ -46,7 +46,7 @@ namespace Rodin::Kokkos::Variational
    * Gauss-Legendre rule, any other pair by the centroid rules of both cells.
    *
    * The kernel is a KOKKOS_LAMBDA. For scalar spaces it takes the trial and
-   * the test points, as const Rodin::Kokkos::Geometry::PointView&, and
+   * the test points, as const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>&, and
    * returns a Real. For vector spaces it takes first a
    * Rodin::Kokkos::Geometry::Matrix&, sized to the vector dimension and set
    * to zero, which it fills.
@@ -133,12 +133,13 @@ namespace Rodin::Kokkos::Variational
         "Kokkos potentials are implemented for P1 spaces only.");
 
       static_assert(Scalar ? std::is_invocable_r_v<Real, const KernelType&,
-                               const Geometry::PointView&, const Geometry::PointView&>
+                               const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>&,
+                               const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>&>
                            : std::is_invocable_v<const KernelType&, Geometry::Matrix&,
-                               const Geometry::PointView&, const Geometry::PointView&>,
-        "The kernel of a Kokkos potential must be a KOKKOS_LAMBDA taking two const "
-        "Rodin::Kokkos::Geometry::PointView&, after a Rodin::Kokkos::Geometry::Matrix& "
-        "for vector spaces.");
+                               const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>&,
+                               const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>&>,
+        "A Kokkos potential kernel takes two const point views, preceded by a "
+        "matrix reference for vector spaces.");
 
       /// @brief Maximum number of components of the spaces.
       static constexpr Index VectorCapacity = Scalar ? 1 : RODIN_MAXIMAL_SPACE_DIMENSION;
@@ -364,7 +365,7 @@ namespace Rodin::Kokkos::Variational
       struct CellRange
       {
         /// @brief Device mesh.
-        Geometry::MeshView view;
+        ::Rodin::Kokkos::View<::Rodin::Geometry::MeshBase> view;
 
         /// @brief Integration region of the cells.
         ::Rodin::Geometry::Region region;
@@ -405,7 +406,7 @@ namespace Rodin::Kokkos::Variational
       struct SelectedCells
       {
         /// @brief Device mesh.
-        Geometry::MeshView view;
+        ::Rodin::Kokkos::View<::Rodin::Geometry::MeshBase> view;
 
         /// @brief Integration region of the cells.
         ::Rodin::Geometry::Region region;
@@ -443,7 +444,7 @@ namespace Rodin::Kokkos::Variational
       struct CellOffsets
       {
         /// @brief Device mesh.
-        Geometry::MeshView view;
+        ::Rodin::Kokkos::View<::Rodin::Geometry::MeshBase> view;
 
         /// @brief Dimension of the cells.
         Index dimension;
@@ -487,9 +488,10 @@ namespace Rodin::Kokkos::Variational
        * @param selection Selected cells and their offsets.
        */
       template <class DOFs>
-      static void select(const ExecutionSpace& execution, const Geometry::MeshView& view,
-        Index dimension, Index count, const AttributesType& attributes, const DOFs& dofs,
-        Index vdim, Selection& selection)
+      static void select(const ExecutionSpace& execution,
+        const ::Rodin::Kokkos::View<::Rodin::Geometry::MeshBase>& view, Index dimension,
+        Index count, const AttributesType& attributes, const DOFs& dofs, Index vdim,
+        Selection& selection)
       {
         const auto policy = Internal::Quadrature<MeshType>::policy;
         const ::Rodin::Geometry::Region region = ::Rodin::Geometry::Region::Cells;
@@ -648,7 +650,7 @@ namespace Rodin::Kokkos::Variational
         KernelType kernel;
 
         /// @brief Device mesh.
-        Geometry::MeshView view;
+        ::Rodin::Kokkos::View<::Rodin::Geometry::MeshBase> view;
 
         /// @brief Dimension of the cells.
         Index dimension;
@@ -857,7 +859,8 @@ namespace Rodin::Kokkos::Variational
             }
             return;
           }
-          const auto centroid = [&](const Geometry::PolytopeView& cell) {
+          const auto centroid =
+            [&](const ::Rodin::Kokkos::View<::Rodin::Geometry::Polytope>& cell) {
             const Index g = static_cast<Index>(cell.getGeometry());
             Geometry::Vector reference(cell.getDimension());
             for (Index d = 0; d < cell.getDimension(); ++d)

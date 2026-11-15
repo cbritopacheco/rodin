@@ -38,12 +38,14 @@ namespace Rodin::Tests::Unit
 
     RealFunction hf([](const Geometry::Point& p) { return 1 + p.x() * p.y(); });
     RealFunction hg([](const Geometry::Point& p) { return 2 * p.x() - p.y() + 1; });
-    RealFunction df(KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real {
-      return 1 + p.x() * p.y();
-    });
-    RealFunction dg(KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real {
-      return 2 * p.x() - p.y() + 1;
-    });
+    RealFunction df(
+      KOKKOS_LAMBDA(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p)->Real {
+        return 1 + p.x() * p.y();
+      });
+    RealFunction dg(
+      KOKKOS_LAMBDA(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p)->Real {
+        return 2 * p.x() - p.y() + 1;
+      });
 
     Problem hp(hu, hv);
     hp = Integral(Grad(hu), Grad(hv)) + Integral(hu, hv) - Integral(hf, hv) +
@@ -134,7 +136,9 @@ namespace Rodin::Tests::Unit
     const Real eps = 1e-2;
     VectorFunction hf{[](const Geometry::Point& p) { return p.x() * p.y(); }, Real(1)};
     VectorFunction df(
-      KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real { return p.x() * p.y(); },
+      KOKKOS_LAMBDA(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p)->Real {
+        return p.x() * p.y();
+      },
       Real(1));
 
     Problem hs(hu, hp, hv, hq);
@@ -181,9 +185,10 @@ namespace Rodin::Tests::Unit
     // factorization of PETSc requires.
     const Real eps = 1e-2;
     RealFunction hf([](const Geometry::Point& p) { return 1 + p.x() * p.y(); });
-    RealFunction df(KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real {
-      return 1 + p.x() * p.y();
-    });
+    RealFunction df(
+      KOKKOS_LAMBDA(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p)->Real {
+        return 1 + p.x() * p.y();
+      });
 
     Problem hn(hu, hl, hv, hm);
     hn = Integral(Grad(hu), Grad(hv)) + Integral(hl, hv) + Integral(hu, hm) -
@@ -222,12 +227,14 @@ namespace Rodin::Tests::Unit
 
     RealFunction hf([](const Geometry::Point& p) { return 1 + p.x() * p.y(); });
     RealFunction hg([](const Geometry::Point& p) { return p.x() * p.x() - p.y(); });
-    RealFunction df(KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real {
-      return 1 + p.x() * p.y();
-    });
-    RealFunction dg(KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real {
-      return p.x() * p.x() - p.y();
-    });
+    RealFunction df(
+      KOKKOS_LAMBDA(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p)->Real {
+        return 1 + p.x() * p.y();
+      });
+    RealFunction dg(
+      KOKKOS_LAMBDA(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p)->Real {
+        return p.x() * p.x() - p.y();
+      });
 
     Problem hp(hu, hv);
     hp = Integral(Grad(hu), Grad(hv)) + Integral(hu, hv) - Integral(hf, hv) +
@@ -284,7 +291,9 @@ namespace Rodin::Tests::Unit
     const Real eps = 1e-2;
     VectorFunction hf{[](const Geometry::Point& p) { return p.x() * p.y(); }, Real(1)};
     VectorFunction df(
-      KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real { return p.x() * p.y(); },
+      KOKKOS_LAMBDA(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p)->Real {
+        return p.x() * p.y();
+      },
       Real(1));
 
     Problem hs(hu, hp, hv, hq);
@@ -330,12 +339,14 @@ namespace Rodin::Tests::Unit
 
     RealFunction hf([](const Geometry::Point& p) { return 1 + p.x() * p.y(); });
     RealFunction hg([](const Geometry::Point& p) { return 2 * p.x() - p.y() + 1; });
-    RealFunction df(KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real {
-      return 1 + p.x() * p.y();
-    });
-    RealFunction dg(KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real {
-      return 2 * p.x() - p.y() + 1;
-    });
+    RealFunction df(
+      KOKKOS_LAMBDA(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p)->Real {
+        return 1 + p.x() * p.y();
+      });
+    RealFunction dg(
+      KOKKOS_LAMBDA(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p)->Real {
+        return 2 * p.x() - p.y() + 1;
+      });
 
     PETSc::Variational::BilinearForm hm(hu, hv);
     hm = Integral(hu, hv);

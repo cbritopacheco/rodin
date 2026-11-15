@@ -68,9 +68,10 @@ namespace Rodin::Tests::Unit
     TestFunction dv(dfes);
 
     RealFunction hf([](const Geometry::Point& p) { return 1 + p.x() + 2 * p.y(); });
-    RealFunction df(KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real {
-      return 1 + p.x() + 2 * p.y();
-    });
+    RealFunction df(
+      KOKKOS_LAMBDA(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p)->Real {
+        return 1 + p.x() + 2 * p.y();
+      });
 
     BilinearForm ha(hu, hv);
     ha = Integral(hf * hu, hv) + Integral(hf * Grad(hu), Grad(hv));

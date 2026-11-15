@@ -4,6 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+#include <optional>
+
 #include <Rodin/Solid.h>
 #include <Rodin/Solver/NewtonSolver.h>
 #include <Rodin/Solver/SparseLU.h>
@@ -28,6 +30,26 @@ namespace Rodin::Tests::Unit
   {
     for (Index i = 0; i < static_cast<Index>(data.size()); ++i)
       data.coeffRef(i) = Real(0.005) * std::sin(Real(0.7) * i);
+  }
+
+  /// @brief Material views are parameter snapshots suitable for kernel capture.
+  TEST(Kokkos_Variational_InternalVirtualWork, MaterialViewParameters)
+  {
+    static_assert(
+      std::is_trivially_copyable_v<Kokkos::View<Solid::SaintVenantKirchhoff>>);
+    static_assert(std::is_trivially_copyable_v<Kokkos::View<Solid::Yeoh>>);
+    static_assert(std::is_trivially_copyable_v<Kokkos::View<Solid::MooneyRivlin>>);
+    std::optional<Solid::Yeoh> law(
+      std::in_place, Real(0.4), Real(0.2), Real(0.1), Real(2.5));
+    const Kokkos::View<Solid::Yeoh> view(*law);
+    law.emplace(Real(1), Real(2), Real(3), Real(4));
+    EXPECT_EQ(view.c1, Real(0.4));
+    EXPECT_EQ(view.c2, Real(0.2));
+    EXPECT_EQ(view.c3, Real(0.1));
+    EXPECT_EQ(view.kappa, Real(2.5));
+    const Kokkos::View<Solid::Yeoh> updated(*law);
+    EXPECT_EQ(updated.c1, Real(1));
+    EXPECT_EQ(updated.kappa, Real(4));
   }
 
   /// @brief The tangent and residual of a law match the host.

@@ -52,8 +52,9 @@ namespace Rodin::Tests::Unit
     const auto hk = [](const Geometry::Point& x, const Geometry::Point& y) {
       return 1 + x.x() * y.y() + Real(0.5) * (x.y() - y.x());
     };
-    const auto dk = KOKKOS_LAMBDA(
-      const DeviceGeometry::PointView& x, const DeviceGeometry::PointView& y)
+    const auto dk =
+      KOKKOS_LAMBDA(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& x,
+        const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& y)
                       ->Real
     {
       return 1 + x.x() * y.y() + Real(0.5) * (x.y() - y.x());
@@ -63,8 +64,9 @@ namespace Rodin::Tests::Unit
       const Real dy = x.y() - y.y();
       return 1 / std::sqrt(dx * dx + dy * dy);
     };
-    const auto ds = KOKKOS_LAMBDA(
-      const DeviceGeometry::PointView& x, const DeviceGeometry::PointView& y)
+    const auto ds =
+      KOKKOS_LAMBDA(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& x,
+        const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& y)
                       ->Real
     {
       const Real dx = x.x() - y.x();
@@ -111,8 +113,9 @@ namespace Rodin::Tests::Unit
     const auto hk = [](const Geometry::Point& x, const Geometry::Point& y) {
       return 2 + x.x() * y.x() - y.y();
     };
-    const auto dk = KOKKOS_LAMBDA(
-      const DeviceGeometry::PointView& x, const DeviceGeometry::PointView& y)
+    const auto dk =
+      KOKKOS_LAMBDA(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& x,
+        const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& y)
                       ->Real
     {
       return 2 + x.x() * y.x() - y.y();
@@ -163,7 +166,8 @@ namespace Rodin::Tests::Unit
       }
     };
     const auto dk = KOKKOS_LAMBDA(DeviceGeometry::Matrix & m,
-      const DeviceGeometry::PointView& x, const DeviceGeometry::PointView& y)
+      const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& x,
+      const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& y)
     {
       for (Index i = 0; i < m.rows(); ++i)
       {
@@ -204,16 +208,18 @@ namespace Rodin::Tests::Unit
     const auto hk = [](const Geometry::Point& x, const Geometry::Point& y) {
       return 1 + x.x() * y.y();
     };
-    const auto dk = KOKKOS_LAMBDA(
-      const DeviceGeometry::PointView& x, const DeviceGeometry::PointView& y)
+    const auto dk =
+      KOKKOS_LAMBDA(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& x,
+        const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& y)
                       ->Real
     {
       return 1 + x.x() * y.y();
     };
     RealFunction hf([](const Geometry::Point& p) { return 1 + p.x() * p.y(); });
-    RealFunction df(KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real {
-      return 1 + p.x() * p.y();
-    });
+    RealFunction df(
+      KOKKOS_LAMBDA(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p)->Real {
+        return 1 + p.x() * p.y();
+      });
 
     Problem hp(hu, hv);
     hp = Integral(Grad(hu), Grad(hv)) + Integral(Potential(hk, hu), hv) -

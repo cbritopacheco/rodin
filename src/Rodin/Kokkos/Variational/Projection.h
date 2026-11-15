@@ -35,7 +35,8 @@ namespace Rodin::Kokkos::Variational
   {
     /// @param p Device point. @return The constant.
     KOKKOS_INLINE_FUNCTION
-    Value getValue([[maybe_unused]] const Geometry::PointView& p) const
+    Value getValue(
+      [[maybe_unused]] const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p) const
     {
       return value;
     }
@@ -53,7 +54,7 @@ namespace Rodin::Kokkos::Variational
   {
     /// @param p Device point. @return Value of the callable.
     KOKKOS_INLINE_FUNCTION
-    auto getValue(const Geometry::PointView& p) const
+    auto getValue(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p) const
     {
       return f(p);
     }
@@ -67,7 +68,9 @@ namespace Rodin::Kokkos::Variational
   {
     /// @param p Device polytope. @return true.
     KOKKOS_INLINE_FUNCTION
-    bool operator()([[maybe_unused]] const Geometry::PolytopeView& p) const
+    bool operator()(
+      [[maybe_unused]] const ::Rodin::Kokkos::View<::Rodin::Geometry::Polytope>& p)
+      const
     {
       return true;
     }
@@ -87,8 +90,8 @@ namespace Rodin::Variational
    * freedom outside the selection keep their values.
    *
    * The source is a function expression with a device lowering, a callable
-   * taking a const Rodin::Kokkos::Geometry::PointView&, or a constant. A
-   * device predicate, callable on a const Rodin::Kokkos::Geometry::PolytopeView&
+   * taking a const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>&, or a constant. A
+   * device predicate, callable on a const ::Rodin::Kokkos::View<::Rodin::Geometry::Polytope>&
    * and returning bool, further restricts the selected polytopes.
    *
    * @tparam Backend Kokkos backend of the mesh context.
@@ -111,7 +114,7 @@ namespace Rodin::Variational
     /// @brief Tells whether a callable is a device predicate on polytopes.
     template <class Pred>
     static constexpr bool IsPredicate = std::is_invocable_r_v<bool, const Pred&,
-      const ::Rodin::Kokkos::Geometry::PolytopeView&>;
+      const ::Rodin::Kokkos::View<::Rodin::Geometry::Polytope>&>;
 
     /**
      * @brief Projects a source on a grid function.
@@ -215,7 +218,7 @@ namespace Rodin::Variational
      * @brief Lowers a source to a device view.
      * @param fn Source.
      * @param vdim Vector dimension of the space.
-     * @return Device view providing getValue(const PointView&).
+     * @return Device view providing getValue(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>&).
      */
     template <class Function>
     static auto lower(const Function& fn, [[maybe_unused]] Index vdim)
@@ -239,9 +242,9 @@ namespace Rodin::Variational
       else
       {
         static_assert(std::is_invocable_v<const Function&,
-                        const ::Rodin::Kokkos::Geometry::PointView&>,
+                        const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>&>,
           "A function projected on a Kokkos mesh must be a KOKKOS_LAMBDA taking a "
-          "const Rodin::Kokkos::Geometry::PointView&.");
+          "const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>&.");
         return ::Rodin::Kokkos::Variational::CallableView<Function>{fn};
       }
     }
@@ -280,7 +283,7 @@ namespace Rodin::Variational
     struct Owners
     {
       /// @brief Device mesh.
-      ::Rodin::Kokkos::Geometry::MeshView view;
+      ::Rodin::Kokkos::View<::Rodin::Geometry::MeshBase> view;
 
       /// @brief Region on which to project.
       Geometry::Region region;
@@ -329,7 +332,7 @@ namespace Rodin::Variational
     struct Values
     {
       /// @brief Device mesh.
-      ::Rodin::Kokkos::Geometry::MeshView view;
+      ::Rodin::Kokkos::View<::Rodin::Geometry::MeshBase> view;
 
       /// @brief Region on which to project.
       Geometry::Region region;
@@ -415,9 +418,9 @@ namespace Rodin::Variational
      */
     template <class AttributeView, class Select, class ValueView, class DOFs>
     static void evaluate(const ExecutionSpace& execution,
-      const ::Rodin::Kokkos::Geometry::MeshView& view, Geometry::Region region, Index d,
-      const AttributeView& attributes, const Select& select,
-      const ::Kokkos::View<Index*, MemorySpace>& owners,
+      const ::Rodin::Kokkos::View<::Rodin::Geometry::MeshBase>& view,
+      Geometry::Region region, Index d, const AttributeView& attributes,
+      const Select& select, const ::Kokkos::View<Index*, MemorySpace>& owners,
       const ::Kokkos::View<Real*, MemorySpace>& values, const ValueView& value,
       const DOFs& dofs, Index count, Index vdim)
     {

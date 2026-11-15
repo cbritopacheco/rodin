@@ -18,10 +18,10 @@
  * |--------|-------------|
  * | `static constexpr Index getCapacity(Index vertices)` | Maximum local count on a polytope of that many vertices. |
  * | `Index getStride() const` | Offset between the components of a vector space. |
- * | `bind(const Geometry::PolytopeView&) const` | Scalar global indices of a polytope, in local order. |
+ * | `bind(const ::Rodin::Kokkos::View<::Rodin::Geometry::Polytope>&) const` | Scalar global indices of a polytope, in local order. |
  * | `getBasis(const IntegrationPointView&, Index) const` | Basis value at an integration point. |
  * | `getGradient(const IntegrationPointView&, Index) const` | Physical basis gradient at an integration point. |
- * | `Geometry::Vector getNode(const Geometry::PolytopeView&, Index) const` | Reference coordinates of a Lagrange node, when the space interpolates at nodes. |
+ * | `Geometry::Vector getNode(const ::Rodin::Kokkos::View<::Rodin::Geometry::Polytope>&, Index) const` | Reference coordinates of a Lagrange node, when the space interpolates at nodes. |
  *
  * Component @f$ r @f$ of the scalar degree of freedom @f$ q @f$ of a vector
  * space has the global index @f$ q + r s @f$, where @f$ s @f$ is the stride,
@@ -32,7 +32,7 @@
 #include "Rodin/Configure.h"
 #include "Rodin/Geometry/Polytope.h"
 
-#include "Rodin/Kokkos/Geometry/MeshView.h"
+#include "Rodin/Kokkos/Geometry/View.h"
 
 namespace Rodin::Kokkos::Variational
 {
@@ -51,7 +51,8 @@ namespace Rodin::Kokkos::Variational
    * @return Reference coordinates of the P1 node of local vertex a.
    */
   KOKKOS_INLINE_FUNCTION
-  Geometry::Vector getReferenceVertex(const Geometry::PolytopeView& polytope, Index a)
+  Geometry::Vector getReferenceVertex(
+    const ::Rodin::Kokkos::View<::Rodin::Geometry::Polytope>& polytope, Index a)
   {
     const Index rdim = polytope.getDimension();
     Geometry::Vector result(rdim);
@@ -84,7 +85,8 @@ namespace Rodin::Kokkos::Variational
 
     /// @param polytope Device polytope. @return Its vertices.
     KOKKOS_INLINE_FUNCTION
-    Geometry::IndexView bind(const Geometry::PolytopeView& polytope) const
+    ::Rodin::Kokkos::View<::Rodin::IndexVector> bind(
+      const ::Rodin::Kokkos::View<::Rodin::Geometry::Polytope>& polytope) const
     {
       return polytope.getVertices();
     }
@@ -106,7 +108,8 @@ namespace Rodin::Kokkos::Variational
 
     /// @param polytope Device polytope. @param q Local vertex index. @return Reference vertex.
     KOKKOS_INLINE_FUNCTION
-    Geometry::Vector getNode(const Geometry::PolytopeView& polytope, Index q) const
+    Geometry::Vector getNode(
+      const ::Rodin::Kokkos::View<::Rodin::Geometry::Polytope>& polytope, Index q) const
     {
       return getReferenceVertex(polytope, q);
     }
@@ -157,7 +160,9 @@ namespace Rodin::Kokkos::Variational
 
     /// @param polytope Device polytope, ignored. @return The single degree of freedom.
     KOKKOS_INLINE_FUNCTION
-    ConstantIndex bind([[maybe_unused]] const Geometry::PolytopeView& polytope) const
+    ConstantIndex bind(
+      [[maybe_unused]] const ::Rodin::Kokkos::View<::Rodin::Geometry::Polytope>&
+        polytope) const
     {
       return {};
     }

@@ -23,9 +23,10 @@ namespace Rodin::Tests::Unit
     TestFunction dv(dfes);
 
     RealFunction hf([](const Geometry::Point& p) { return 2 + p.x() - p.y(); });
-    RealFunction df(KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real {
-      return 2 + p.x() - p.y();
-    });
+    RealFunction df(
+      KOKKOS_LAMBDA(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p)->Real {
+        return 2 + p.x() - p.y();
+      });
     expectSameForm(hu, hv, Integral(hf * Jacobian(hu), Jacobian(hv)), du, dv,
       Integral(df * Jacobian(du), Jacobian(dv)));
     expectSameForm(hu, hv, Integral(Jacobian(hu) * hf, Jacobian(hv)), du, dv,

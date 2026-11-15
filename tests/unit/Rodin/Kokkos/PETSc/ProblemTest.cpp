@@ -138,12 +138,14 @@ namespace Rodin::Tests::Unit
     PETSc::Variational::TrialFunction pu(fes);
     PETSc::Variational::TestFunction pv(fes);
 
-    RealFunction f(KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real {
-      return 1 + p.x() * p.y();
-    });
-    RealFunction g(KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real {
-      return 2 * p.x() - p.y() + 1;
-    });
+    RealFunction f(
+      KOKKOS_LAMBDA(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p)->Real {
+        return 1 + p.x() * p.y();
+      });
+    RealFunction g(
+      KOKKOS_LAMBDA(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p)->Real {
+        return 2 * p.x() - p.y() + 1;
+      });
 
     Problem sp(su, sv);
     sp = Integral(Grad(su), Grad(sv)) + Integral(su, sv) - Integral(f, sv) +
@@ -170,10 +172,14 @@ namespace Rodin::Tests::Unit
     PETSc::Variational::TestFunction pq(qh);
 
     VectorFunction f(
-      KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real { return p.x() * p.y(); },
+      KOKKOS_LAMBDA(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p)->Real {
+        return p.x() * p.y();
+      },
       Real(1));
     RealFunction s(
-      KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real { return p.x() - p.y(); });
+      KOKKOS_LAMBDA(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p)->Real {
+        return p.x() - p.y();
+      });
     const Real eps = 1e-3;
 
     Problem sstokes(su, sp, sv, sq);
@@ -210,15 +216,16 @@ namespace Rodin::Tests::Unit
     PETSc::Variational::TrialFunction pu(fes);
     PETSc::Variational::TestFunction pv(fes);
 
-    const auto k = KOKKOS_LAMBDA(
-      const DeviceGeometry::PointView& x, const DeviceGeometry::PointView& y)
+    const auto k = KOKKOS_LAMBDA(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& x,
+      const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& y)
                      ->Real
     {
       return 1 + x.x() * y.y();
     };
-    RealFunction f(KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real {
-      return 1 + p.x() * p.y();
-    });
+    RealFunction f(
+      KOKKOS_LAMBDA(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p)->Real {
+        return 1 + p.x() * p.y();
+      });
 
     auto si = Integral(Potential(k, su), sv);
     si.setTrialAttributes({1});
@@ -238,7 +245,8 @@ namespace Rodin::Tests::Unit
     PETSc::Variational::TrialFunction pw(vh);
     PETSc::Variational::TestFunction pz(vh);
     const auto m = KOKKOS_LAMBDA(DeviceGeometry::Matrix & a,
-      const DeviceGeometry::PointView& x, const DeviceGeometry::PointView& y)
+      const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& x,
+      const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& y)
     {
       for (Index i = 0; i < a.rows(); ++i)
       {
@@ -266,9 +274,10 @@ namespace Rodin::Tests::Unit
     TestFunction sv(fes);
     PETSc::Variational::TrialFunction pu(fes);
     PETSc::Variational::TestFunction pv(fes);
-    RealFunction g(KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real {
-      return 2 * p.x() - p.y() + 1;
-    });
+    RealFunction g(
+      KOKKOS_LAMBDA(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p)->Real {
+        return 2 * p.x() - p.y() + 1;
+      });
 
     Problem sp(su, sv);
     sp = Integral(Grad(su), Grad(sv)) + BoundaryIntegral(su, sv).over(2) -
@@ -306,11 +315,14 @@ namespace Rodin::Tests::Unit
     PETSc::Variational::TrialFunction pu(fes);
     PETSc::Variational::TestFunction pv(fes);
     const auto pairs = makePairs(fes.getSize(), fixedDOFs(su, 5));
-    RealFunction f(KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real {
-      return 1 + p.x() * p.y();
-    });
+    RealFunction f(
+      KOKKOS_LAMBDA(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p)->Real {
+        return 1 + p.x() * p.y();
+      });
     RealFunction g(
-      KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real { return 2 - p.x(); });
+      KOKKOS_LAMBDA(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p)->Real {
+        return 2 - p.x();
+      });
 
     Problem sp(su, sv);
     sp = Integral(Grad(su), Grad(sv)) + Integral(su, sv) - Integral(f, sv) +
@@ -378,11 +390,14 @@ namespace Rodin::Tests::Unit
     TestFunction sv(fes);
     PETSc::Variational::TrialFunction pu(fes);
     PETSc::Variational::TestFunction pv(fes);
-    RealFunction f(KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real {
-      return 1 + p.x() * p.y();
-    });
+    RealFunction f(
+      KOKKOS_LAMBDA(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p)->Real {
+        return 1 + p.x() * p.y();
+      });
     RealFunction g(
-      KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real { return 2 - p.x(); });
+      KOKKOS_LAMBDA(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p)->Real {
+        return 2 - p.x();
+      });
 
     BilinearForm sm(su, sv);
     sm = Integral(su, sv) + BoundaryIntegral(su, sv).over(2);
@@ -445,7 +460,9 @@ namespace Rodin::Tests::Unit
     PETSc::Variational::TrialFunction u(fes);
     PETSc::Variational::TestFunction v(fes);
     RealFunction f(
-      KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real { return p.x() + p.y(); });
+      KOKKOS_LAMBDA(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p)->Real {
+        return p.x() + p.y();
+      });
     Problem pb(u, v);
     pb = Integral(Grad(u), Grad(v)) - Integral(f, v) + DirichletBC(u, RealFunction(1));
     pb.assemble();
@@ -499,7 +516,9 @@ namespace Rodin::Tests::Unit
     PETSc::Variational::TrialFunction pu(fes);
     PETSc::Variational::TestFunction pv(fes);
     RealFunction f(
-      KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real { return p.x() + p.y(); });
+      KOKKOS_LAMBDA(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p)->Real {
+        return p.x() + p.y();
+      });
     Problem sp(su, sv);
     sp = Integral(Grad(su), Grad(sv)) + Integral(su, sv).over(1) +
       BoundaryIntegral(su, sv).over(2) - Integral(f, sv) +
@@ -549,9 +568,13 @@ namespace Rodin::Tests::Unit
     PETSc::Variational::TrialFunction pu(fes);
     PETSc::Variational::TestFunction pv(fes);
     RealFunction f(
-      KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real { return p.x() + p.y(); });
+      KOKKOS_LAMBDA(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p)->Real {
+        return p.x() + p.y();
+      });
     RealFunction g(
-      KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real { return 2 - p.x(); });
+      KOKKOS_LAMBDA(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p)->Real {
+        return 2 - p.x();
+      });
     Problem sp(su, sv);
     sp = Integral(Grad(su), Grad(sv)) + Integral(su, sv) - Integral(f, sv) +
       DirichletBC(su, g).on(1);
@@ -597,13 +620,18 @@ namespace Rodin::Tests::Unit
     PETSc::Variational::TestFunction pv(vh);
     PETSc::Variational::TestFunction pq(qh);
     VectorFunction f(
-      KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real { return p.x() * p.y(); },
+      KOKKOS_LAMBDA(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p)->Real {
+        return p.x() * p.y();
+      },
       Real(1));
     RealFunction s(
-      KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real { return p.x() - p.y(); });
-    RealFunction g(KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real {
-      return 2 * p.x() - p.y() + 1;
-    });
+      KOKKOS_LAMBDA(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p)->Real {
+        return p.x() - p.y();
+      });
+    RealFunction g(
+      KOKKOS_LAMBDA(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p)->Real {
+        return 2 * p.x() - p.y() + 1;
+      });
     const Real eps = 1e-3;
 
     Problem sstokes(su, sp, sv, sq);
@@ -659,9 +687,10 @@ namespace Rodin::Tests::Unit
     TestFunction sv(fes);
     PETSc::Variational::TrialFunction pu(fes);
     PETSc::Variational::TestFunction pv(fes);
-    RealFunction f(KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real {
-      return 1 + p.x() * p.y();
-    });
+    RealFunction f(
+      KOKKOS_LAMBDA(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p)->Real {
+        return 1 + p.x() * p.y();
+      });
 
     using HostSystem = Math::LinearSystem<Math::SparseMatrix<Real>, Math::Vector<Real>>;
     Problem<HostSystem, decltype(su), decltype(sv)> sp(su, sv);

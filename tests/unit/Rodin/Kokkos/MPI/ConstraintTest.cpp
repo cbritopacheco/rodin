@@ -157,7 +157,8 @@ namespace Rodin::Tests::Unit
   }
 
   /// @brief Device source term of the periodic problems.
-  KOKKOS_INLINE_FUNCTION Real source(const DeviceGeometry::PointView& p)
+  KOKKOS_INLINE_FUNCTION Real source(
+    const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p)
   {
     return 1 + ::Kokkos::sin(2 * M_PI * p.x()) * ::Kokkos::cos(2 * M_PI * p.y()) +
       p.x() * p.y();
@@ -189,7 +190,9 @@ namespace Rodin::Tests::Unit
     Solver::SparseLU(sp).solve();
 
     RealFunction df(
-      KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real { return source(p); });
+      KOKKOS_LAMBDA(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p)->Real {
+        return source(p);
+      });
     PETSc::Variational::TrialFunction du(grid.fes);
     PETSc::Variational::TestFunction dv(grid.fes);
     Problem dp(du, dv);
@@ -239,10 +242,13 @@ namespace Rodin::Tests::Unit
     Solver::SparseLU(sp).solve();
 
     RealFunction df(
-      KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real { return source(p); });
-    RealFunction dg(KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real {
-      return 1 + p.x() + 2 * p.y();
-    });
+      KOKKOS_LAMBDA(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p)->Real {
+        return source(p);
+      });
+    RealFunction dg(
+      KOKKOS_LAMBDA(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p)->Real {
+        return 1 + p.x() + 2 * p.y();
+      });
     PETSc::Variational::TrialFunction du(grid.fes);
     PETSc::Variational::TestFunction dv(grid.fes);
     Problem dp(du, dv);
@@ -288,7 +294,9 @@ namespace Rodin::Tests::Unit
     Solver::SparseLU(sys).solve();
 
     RealFunction df(
-      KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real { return source(p); });
+      KOKKOS_LAMBDA(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p)->Real {
+        return source(p);
+      });
     PETSc::Variational::TrialFunction da(grid.fes);
     PETSc::Variational::TestFunction db(grid.fes);
     PETSc::Variational::TrialFunction dp(dq);
@@ -336,7 +344,9 @@ namespace Rodin::Tests::Unit
 
     RealFunction hf([](const Geometry::Point& p) { return source(p); });
     RealFunction df(
-      KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real { return source(p); });
+      KOKKOS_LAMBDA(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p)->Real {
+        return source(p);
+      });
 
     Problem hs(ha, hp, hb, hq);
     hs = Integral(Grad(ha), Grad(hb)) + Integral(ha, hb) - Integral(hf, hb) +

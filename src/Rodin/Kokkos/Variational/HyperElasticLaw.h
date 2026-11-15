@@ -19,7 +19,7 @@
  * @f]
  * whose action on @f$ dF @f$ is the host
  * HyperElasticLaw::getMaterialTangent(). The device law of a host law is
- * given by LawView.
+ * represented by Rodin::Kokkos::View<Law>.
  */
 
 #include <concepts>
@@ -30,7 +30,7 @@
 #include "Rodin/Solid/Constitutive/SaintVenantKirchhoff.h"
 #include "Rodin/Solid/Constitutive/Yeoh.h"
 
-#include "Rodin/Kokkos/Geometry/MeshView.h"
+#include "Rodin/Kokkos/Geometry/View.h"
 
 namespace Rodin::Kokkos::Variational
 {
@@ -158,6 +158,10 @@ namespace Rodin::Kokkos::Variational
     Real Jm2d = 1;
   };
 
+}
+
+namespace Rodin::Kokkos
+{
   /**
    * @brief Device Saint Venant-Kirchhoff law.
    *
@@ -170,8 +174,15 @@ namespace Rodin::Kokkos::Variational
    * @f]
    * as Solid::SaintVenantKirchhoff.
    */
-  struct SaintVenantKirchhoffView
+  template <>
+  struct View<::Rodin::Solid::SaintVenantKirchhoff>
   {
+    /// @brief Copies material parameters; later host changes require a new view.
+    explicit View(const ::Rodin::Solid::SaintVenantKirchhoff& law)
+      : lambda(law.getLameFirstParameter()),
+        mu(law.getShearModulus())
+    {}
+
     /// @brief Kinematics at a quadrature point.
     struct Point
     {
@@ -249,7 +260,7 @@ namespace Rodin::Kokkos::Variational
      * @param i Row of the stress.
      * @param scale Factor of the entries.
      * @param[out] row Entries of @f$ \text{scale} \ \mathbb{A}_{i \cdot \cdot \cdot} @f$
-     * at getElasticityIndex().
+     * at Variational::getElasticityIndex().
      */
     KOKKOS_INLINE_FUNCTION
     void getElasticity(const Point& p, Index i, Real scale, Real* row) const
@@ -266,7 +277,7 @@ namespace Rodin::Kokkos::Variational
               v += p.S(L, J);
             if (J == L)
               v += mu * p.B(i, k);
-            row[getElasticityIndex(J, k, L)] = scale * v;
+            row[Variational::getElasticityIndex(J, k, L)] = scale * v;
           }
         }
       }
@@ -287,10 +298,19 @@ namespace Rodin::Kokkos::Variational
    * @f$ P = W_1 \partial \bar I_1 / \partial F + \kappa (J - 1) J F^{-T} @f$,
    * @f$ W_1 = c_1 + 2 c_2 x + 3 c_3 x^2 @f$, as Solid::Yeoh.
    */
-  struct YeohView
+  template <>
+  struct View<::Rodin::Solid::Yeoh>
   {
+    /// @brief Copies material parameters; later host changes require a new view.
+    explicit View(const ::Rodin::Solid::Yeoh& law)
+      : c1(law.getMaterialConstantC1()),
+        c2(law.getMaterialConstantC2()),
+        c3(law.getMaterialConstantC3()),
+        kappa(law.getBulkModulus())
+    {}
+
     /// @brief Kinematics at a quadrature point.
-    using Point = IsochoricPoint;
+    using Point = Variational::IsochoricPoint;
 
     /**
      * @param h Displacement gradient @f$ H @f$, a square matrix.
@@ -326,7 +346,7 @@ namespace Rodin::Kokkos::Variational
      * @param i Row of the stress.
      * @param scale Factor of the entries.
      * @param[out] row Entries of @f$ \text{scale} \ \mathbb{A}_{i \cdot \cdot \cdot} @f$
-     * at getElasticityIndex().
+     * at Variational::getElasticityIndex().
      */
     KOKKOS_INLINE_FUNCTION
     void getElasticity(const Point& p, Index i, Real scale, Real* row) const
@@ -345,7 +365,7 @@ namespace Rodin::Kokkos::Variational
             const Real v = w2 * gi * p.getIsochoricGradient(k, L) +
               w1 * p.getIsochoricHessian(i, J, k, L) +
               p.getVolumetricElasticity(kappa, i, J, k, L);
-            row[getElasticityIndex(J, k, L)] = scale * v;
+            row[Variational::getElasticityIndex(J, k, L)] = scale * v;
           }
         }
       }
@@ -377,15 +397,23 @@ namespace Rodin::Kokkos::Variational
    * @f]
    * as Solid::MooneyRivlin.
    */
-  struct MooneyRivlinView
+  template <>
+  struct View<::Rodin::Solid::MooneyRivlin>
   {
+    /// @brief Copies material parameters; later host changes require a new view.
+    explicit View(const ::Rodin::Solid::MooneyRivlin& law)
+      : c1(law.getMaterialConstantC1()),
+        c2(law.getMaterialConstantC2()),
+        kappa(law.getBulkModulus())
+    {}
+
     /// @brief Kinematics at a quadrature point.
-    struct Point : IsochoricPoint
+    struct Point : Variational::IsochoricPoint
     {
       /// @param h Displacement gradient @f$ H @f$, a square matrix.
       KOKKOS_INLINE_FUNCTION
       explicit Point(const Geometry::Matrix& h)
-        : IsochoricPoint(h),
+        : Variational::IsochoricPoint(h),
           C(h.rows(), h.cols()),
           FC(h.rows(), h.cols()),
           B(h.rows(), h.cols())
@@ -510,7 +538,7 @@ namespace Rodin::Kokkos::Variational
      * @param i Row of the stress.
      * @param scale Factor of the entries.
      * @param[out] row Entries of @f$ \text{scale} \ \mathbb{A}_{i \cdot \cdot \cdot} @f$
-     * at getElasticityIndex().
+     * at Variational::getElasticityIndex().
      */
     KOKKOS_INLINE_FUNCTION
     void getElasticity(const Point& p, Index i, Real scale, Real* row) const
@@ -525,7 +553,7 @@ namespace Rodin::Kokkos::Variational
             const Real v = c1 * p.getIsochoricHessian(i, J, k, L) +
               c2 * p.getSecondHessian(i, J, k, L) +
               p.getVolumetricElasticity(kappa, i, J, k, L);
-            row[getElasticityIndex(J, k, L)] = scale * v;
+            row[Variational::getElasticityIndex(J, k, L)] = scale * v;
           }
         }
       }
@@ -540,68 +568,14 @@ namespace Rodin::Kokkos::Variational
     /// @brief Bulk modulus @f$ \kappa @f$.
     Real kappa;
   };
+}
 
-  /**
-   * @brief Device law of a host hyperelastic law.
-   *
-   * Specializations define Type, a trivially copyable device law, and
-   * get(), building it from the host law. Laws without a specialization,
-   * among them the laws reading constitutive inputs, stay on the host.
-   * Solid::NeoHookean has its own device integrators.
-   */
+namespace Rodin::Kokkos::Variational
+{
+
+  /// @brief Host laws admitting a device-callable parameter snapshot.
   template <class Law>
-  struct LawView
-  {};
-
-  /// @brief Device law of Solid::SaintVenantKirchhoff.
-  template <>
-  struct LawView<Solid::SaintVenantKirchhoff>
-  {
-    /// @brief Device law type.
-    using Type = SaintVenantKirchhoffView;
-
-    /// @param law Host law. @return Device law.
-    static Type get(const Solid::SaintVenantKirchhoff& law)
-    {
-      return {law.getLameFirstParameter(), law.getShearModulus()};
-    }
-  };
-
-  /// @brief Device law of Solid::Yeoh.
-  template <>
-  struct LawView<Solid::Yeoh>
-  {
-    /// @brief Device law type.
-    using Type = YeohView;
-
-    /// @param law Host law. @return Device law.
-    static Type get(const Solid::Yeoh& law)
-    {
-      return {law.getMaterialConstantC1(), law.getMaterialConstantC2(),
-        law.getMaterialConstantC3(), law.getBulkModulus()};
-    }
-  };
-
-  /// @brief Device law of Solid::MooneyRivlin.
-  template <>
-  struct LawView<Solid::MooneyRivlin>
-  {
-    /// @brief Device law type.
-    using Type = MooneyRivlinView;
-
-    /// @param law Host law. @return Device law.
-    static Type get(const Solid::MooneyRivlin& law)
-    {
-      return {
-        law.getMaterialConstantC1(), law.getMaterialConstantC2(), law.getBulkModulus()};
-    }
-  };
-
-  /// @brief Host hyperelastic laws with a device law in LawView.
-  template <class Law>
-  concept HyperElasticLaw = requires(const Law& law) {
-    { LawView<Law>::get(law) } -> std::same_as<typename LawView<Law>::Type>;
-  };
+  concept HyperElasticLaw = requires(const Law& law) { ::Rodin::Kokkos::View<Law>(law); };
 }
 
 #endif

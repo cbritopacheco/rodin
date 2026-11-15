@@ -25,7 +25,9 @@ namespace Rodin::Tests::Unit
     P1<Real, DeviceMesh> fes(mesh);
     ::Kokkos::View<Real*, TestMemorySpace> prescribed("changed fixed values", 1);
     RealFunction g(
-      KOKKOS_LAMBDA(const DeviceGeometry::PointView&)->Real { return prescribed(0); });
+      KOKKOS_LAMBDA(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>&)->Real {
+        return prescribed(0);
+      });
     PETSc::Variational::TrialFunction u(fes);
     PETSc::Variational::TestFunction v(fes);
     Problem problem(u, v);

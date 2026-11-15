@@ -85,11 +85,14 @@ namespace Rodin::Tests::Unit
     P1 fes(mesh);
     TrialFunction u(fes);
     TestFunction v(fes);
-    RealFunction f(KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real {
-      return 1 + p.x() * p.y();
-    });
+    RealFunction f(
+      KOKKOS_LAMBDA(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p)->Real {
+        return 1 + p.x() * p.y();
+      });
     RealFunction g(
-      KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real { return 2 * p.x() + 1; });
+      KOKKOS_LAMBDA(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p)->Real {
+        return 2 * p.x() + 1;
+      });
     using HostSystem = Math::LinearSystem<Math::SparseMatrix<Real>, Math::Vector<Real>>;
     Problem<HostSystem, decltype(u), decltype(v)> host(u, v);
     host = Integral(Grad(u), Grad(v)) + Integral(u, v) - Integral(f, v) +
@@ -112,7 +115,9 @@ namespace Rodin::Tests::Unit
     TestFunction v(fes);
     const auto pairs = makePairs(fes.getSize(), fixedDOFs(hu, 5));
     RealFunction g(
-      KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real { return 2 - p.x(); });
+      KOKKOS_LAMBDA(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p)->Real {
+        return 2 - p.x();
+      });
     using HostSystem = Math::LinearSystem<Math::SparseMatrix<Real>, Math::Vector<Real>>;
     Problem<HostSystem, decltype(u), decltype(v)> host(u, v);
     host = Integral(Grad(u), Grad(v)) + Integral(u, v) - Integral(RealFunction(1), v) +
@@ -162,9 +167,10 @@ namespace Rodin::Tests::Unit
     P1 fes(mesh);
     TrialFunction u(fes);
     TestFunction v(fes);
-    RealFunction f(KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real {
-      return 1 + p.x() * p.y();
-    });
+    RealFunction f(
+      KOKKOS_LAMBDA(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p)->Real {
+        return 1 + p.x() * p.y();
+      });
     using HostSystem = Math::LinearSystem<Math::SparseMatrix<Real>, Math::Vector<Real>>;
     Problem<HostSystem, decltype(u), decltype(v)> host(u, v);
     host = Integral(Grad(u), Grad(v)) + Integral(u, v) - Integral(f, v) +
@@ -281,9 +287,10 @@ namespace Rodin::Tests::Unit
     P1 fes(mesh);
     TrialFunction u(fes);
     TestFunction v(fes);
-    RealFunction f(KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real {
-      return 1 + p.x() * p.y();
-    });
+    RealFunction f(
+      KOKKOS_LAMBDA(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p)->Real {
+        return 1 + p.x() * p.y();
+      });
     using HostSystem = Math::LinearSystem<Math::SparseMatrix<Real>, Math::Vector<Real>>;
     Problem<HostSystem, decltype(u), decltype(v)> host(u, v);
     host = Integral(Grad(u), Grad(v)) + Integral(u, v) - Integral(f, v) +

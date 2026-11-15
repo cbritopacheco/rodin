@@ -71,7 +71,7 @@ namespace Rodin::Geometry
       using ConnectivityType = typename LocalType::ConnectivityType;
 
       /// @brief Borrowed device view.
-      using View = Rodin::Kokkos::Geometry::MeshView;
+      using View = ::Rodin::Kokkos::View<Mesh<ContextType>>;
 
       /**
        * @param context Execution association; Kokkos must already be initialized.
@@ -154,7 +154,8 @@ namespace Rodin::Geometry
        */
       View getView() const
       {
-        View res = m_shard.getView();
+        View res{};
+        static_cast<::Rodin::Kokkos::View<MeshBase>&>(res) = m_shard.getView();
         res.owned = m_owned.data();
         return res;
       }

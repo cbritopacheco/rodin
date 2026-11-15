@@ -62,13 +62,15 @@ namespace Rodin::Tests::Unit
     TestFunction dv(dfes);
 
     RealFunction hf([](const Geometry::Point& p) { return 1 + p.x() * p.y(); });
-    RealFunction df(KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real {
-      return 1 + p.x() * p.y();
-    });
+    RealFunction df(
+      KOKKOS_LAMBDA(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p)->Real {
+        return 1 + p.x() * p.y();
+      });
     RealFunction hg([](const Geometry::Point& p) { return 2 * p.x() - p.y() + 1; });
-    RealFunction dg(KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real {
-      return 2 * p.x() - p.y() + 1;
-    });
+    RealFunction dg(
+      KOKKOS_LAMBDA(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p)->Real {
+        return 2 * p.x() - p.y() + 1;
+      });
 
     Problem hp(hu, hv);
     hp = Integral(Grad(hu), Grad(hv)) - Integral(hf, hv) + DirichletBC(hu, hg);
@@ -122,11 +124,16 @@ namespace Rodin::Tests::Unit
 
     VectorFunction hf{[](const Geometry::Point& p) { return 1 + p.x(); }, Real(-1)};
     VectorFunction df(
-      KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real { return 1 + p.x(); },
+      KOKKOS_LAMBDA(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p)->Real {
+        return 1 + p.x();
+      },
       Real(-1));
     VectorFunction hg{[](const Geometry::Point& p) { return p.y(); }, Real(2)};
     VectorFunction dg(
-      KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real { return p.y(); }, Real(2));
+      KOKKOS_LAMBDA(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p)->Real {
+        return p.y();
+      },
+      Real(2));
 
     Problem hp(hu, hv);
     hp = Integral(Jacobian(hu), Jacobian(hv)) + Real(0.5) * Integral(Div(hu), Div(hv)) -
@@ -159,11 +166,15 @@ namespace Rodin::Tests::Unit
 
     VectorFunction hf{[](const Geometry::Point& p) { return p.x() * p.y(); }, Real(1)};
     VectorFunction df(
-      KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real { return p.x() * p.y(); },
+      KOKKOS_LAMBDA(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p)->Real {
+        return p.x() * p.y();
+      },
       Real(1));
     RealFunction hs([](const Geometry::Point& p) { return p.x() - p.y(); });
     RealFunction ds(
-      KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real { return p.x() - p.y(); });
+      KOKKOS_LAMBDA(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p)->Real {
+        return p.x() - p.y();
+      });
     const Real eps = 1e-3;
 
     Problem hstokes(hu, hp, hv, hq);
@@ -191,9 +202,10 @@ namespace Rodin::Tests::Unit
     TestFunction dv(dfes);
 
     RealFunction hg([](const Geometry::Point& p) { return 2 * p.x() - p.y() + 1; });
-    RealFunction dg(KOKKOS_LAMBDA(const DeviceGeometry::PointView& p)->Real {
-      return 2 * p.x() - p.y() + 1;
-    });
+    RealFunction dg(
+      KOKKOS_LAMBDA(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p)->Real {
+        return 2 * p.x() - p.y() + 1;
+      });
 
     Problem hp(hu, hv);
     hp = Integral(Grad(hu), Grad(hv)) + BoundaryIntegral(hu, hv).over(2) -

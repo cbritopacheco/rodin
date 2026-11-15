@@ -40,7 +40,7 @@
 #include "Rodin/Variational/P1/Jacobian.h"
 #include "Rodin/Variational/P1/ShapeFunction.h"
 
-#include "Rodin/Kokkos/Geometry/MeshView.h"
+#include "Rodin/Kokkos/Geometry/View.h"
 
 #include "P1.h"
 
@@ -59,7 +59,8 @@ namespace Rodin::FormLanguage
   struct IsDevicePointCallable<F,
     std::enable_if_t<
       std::conjunction_v<std::negation<std::is_invocable<F, const Geometry::Point&>>,
-        std::is_invocable_r<Real, F, const ::Rodin::Kokkos::Geometry::PointView&>>>>
+        std::is_invocable_r<Real, F,
+          const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>&>>>>
   {
     /// @brief True, the Kokkos backend evaluating the callable.
     static constexpr bool Value = true;
@@ -577,7 +578,8 @@ namespace Rodin::Kokkos::Variational
        * @param point Point on a mesh entity.
        */
       KOKKOS_INLINE_FUNCTION
-      explicit IntegrationPointView(const Geometry::PointView& point)
+      explicit IntegrationPointView(
+        const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& point)
         : m_point(point),
           m_count(point.getPolytope().getVertices().size())
       {
@@ -592,7 +594,8 @@ namespace Rodin::Kokkos::Variational
        * @param geometry Tag of a geometry known at run time only.
        */
       KOKKOS_INLINE_FUNCTION
-      IntegrationPointView(const Geometry::PolytopeView& polytope,
+      IntegrationPointView(
+        const ::Rodin::Kokkos::View<::Rodin::Geometry::Polytope>& polytope,
         const Geometry::Vector& reference, [[maybe_unused]] DynamicGeometry geometry)
         : IntegrationPointView(polytope.getPoint(reference))
       {}
@@ -605,7 +608,8 @@ namespace Rodin::Kokkos::Variational
        * @param geometry Tag of the geometry G.
        */
       template <::Rodin::Geometry::Polytope::Type G>
-      KOKKOS_INLINE_FUNCTION IntegrationPointView(const Geometry::PolytopeView& polytope,
+      KOKKOS_INLINE_FUNCTION IntegrationPointView(
+        const ::Rodin::Kokkos::View<::Rodin::Geometry::Polytope>& polytope,
         const Geometry::Vector& reference, [[maybe_unused]] StaticGeometry<G> geometry)
         : m_point(polytope, reference, reference),
           m_count(Geometry::StaticBasis<G>::Count)
@@ -626,7 +630,7 @@ namespace Rodin::Kokkos::Variational
        * @param point Point on the polytope of the current point.
        */
       KOKKOS_INLINE_FUNCTION
-      void setPoint(const Geometry::PointView& point)
+      void setPoint(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& point)
       {
         using Type = ::Rodin::Geometry::Polytope::Type;
         const Type type = point.getPolytope().getGeometry();
@@ -667,13 +671,14 @@ namespace Rodin::Kokkos::Variational
       KOKKOS_INLINE_FUNCTION void setPoint(
         const Geometry::Vector& reference, [[maybe_unused]] StaticGeometry<G> geometry)
       {
-        const Geometry::PolytopeView polytope = m_point.getPolytope();
+        const ::Rodin::Kokkos::View<::Rodin::Geometry::Polytope> polytope =
+          m_point.getPolytope();
         evaluate<G, !Geometry::StaticBasis<G>::Affine>(polytope, reference);
       }
 
       /// @brief Returns the evaluation point. @return Device point.
       KOKKOS_INLINE_FUNCTION
-      const Geometry::PointView& getPoint() const
+      const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& getPoint() const
       {
         return m_point;
       }
@@ -722,7 +727,7 @@ namespace Rodin::Kokkos::Variational
        * @param point Point on a mesh entity.
        */
       KOKKOS_INLINE_FUNCTION
-      void evaluate(const Geometry::PointView& point)
+      void evaluate(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& point)
       {
         // The inverse and the measure of a square map share one Jacobian.
         const Geometry::Matrix jacobian = point.getJacobian();
@@ -763,7 +768,8 @@ namespace Rodin::Kokkos::Variational
        */
       template <::Rodin::Geometry::Polytope::Type G, bool Full>
       KOKKOS_INLINE_FUNCTION void evaluate(
-        const Geometry::PolytopeView& polytope, const Geometry::Vector& reference)
+        const ::Rodin::Kokkos::View<::Rodin::Geometry::Polytope>& polytope,
+        const Geometry::Vector& reference)
       {
         using Basis = Geometry::StaticBasis<G>;
         constexpr Index D = Basis::Dimension;
@@ -805,7 +811,8 @@ namespace Rodin::Kokkos::Variational
             }
           }
         }
-        m_point = Geometry::PointView(polytope, reference, physical);
+        m_point =
+          ::Rodin::Kokkos::View<::Rodin::Geometry::Point>(polytope, reference, physical);
         if constexpr (Full)
         {
           const Geometry::Matrix inverse = jacobian.inverse();
@@ -823,7 +830,7 @@ namespace Rodin::Kokkos::Variational
         }
       }
 
-      Geometry::PointView m_point;
+      ::Rodin::Kokkos::View<::Rodin::Geometry::Point> m_point;
       Real m_distortion;
       Index m_count;
       ::Kokkos::Array<Real, Capacity> m_basis;
@@ -850,7 +857,7 @@ namespace Rodin::Kokkos::Variational
    *
    * A view is built on the host from the expression and copied by value into
    * kernels. It holds no host pointer and no virtual function. Function views
-   * provide `getValue(const Geometry::PointView&)`, while shape function views
+   * provide `getValue(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>&)`, while shape function views
    * provide `getBasis(const IntegrationPointView&, Index, Index)`, which
    * returns the value of component r of the basis function of the local scalar
    * degree of freedom a. A scalar view has the single component 0.
@@ -1123,9 +1130,10 @@ namespace Rodin::Kokkos::Variational
   template <class F>
   struct View<::Rodin::Variational::RealFunction<F>>
   {
-    static_assert(std::is_invocable_r_v<Real, const F&, const Geometry::PointView&>,
+    static_assert(std::is_invocable_r_v<Real, const F&,
+                    const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>&>,
       "A function evaluated on a Kokkos mesh must be a KOKKOS_LAMBDA taking a "
-      "const Rodin::Kokkos::Geometry::PointView&.");
+      "const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>&.");
 
     /// @param node Function expression.
     View(const ::Rodin::Variational::RealFunction<F>& node)
@@ -1134,7 +1142,7 @@ namespace Rodin::Kokkos::Variational
 
     /// @param p Device point. @return Function value.
     KOKKOS_INLINE_FUNCTION
-    Real getValue(const Geometry::PointView& p) const
+    Real getValue(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p) const
     {
       return f(p);
     }
@@ -1167,7 +1175,8 @@ namespace Rodin::Kokkos::Variational
 
     /// @param p Device point, unused. @return Constant value.
     KOKKOS_INLINE_FUNCTION
-    Real getValue([[maybe_unused]] const Geometry::PointView& p) const
+    Real getValue(
+      [[maybe_unused]] const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p) const
     {
       return value;
     }
@@ -1288,7 +1297,8 @@ namespace Rodin::Kokkos::Variational
 
     /// @param p Device point, unused. @return Constant value.
     KOKKOS_INLINE_FUNCTION
-    Real getValue([[maybe_unused]] const Geometry::PointView& p) const
+    Real getValue(
+      [[maybe_unused]] const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p) const
     {
       return value;
     }
@@ -1393,7 +1403,8 @@ namespace Rodin::Kokkos::Variational
 
     /// @param p Device point, unused. @return Zero.
     KOKKOS_INLINE_FUNCTION
-    Real getValue([[maybe_unused]] const Geometry::PointView& p) const
+    Real getValue(
+      [[maybe_unused]] const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p) const
     {
       return 0;
     }
@@ -1410,7 +1421,8 @@ namespace Rodin::Kokkos::Variational
 
     /// @param p Device point, unused. @return Zero vector.
     KOKKOS_INLINE_FUNCTION
-    Geometry::Vector getValue([[maybe_unused]] const Geometry::PointView& p) const
+    Geometry::Vector getValue(
+      [[maybe_unused]] const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p) const
     {
       return Geometry::Vector(dimension);
     }
@@ -1439,10 +1451,11 @@ namespace Rodin::Kokkos::Variational
 
     /// @param p Point on a boundary face. @return Outward unit normal.
     KOKKOS_INLINE_FUNCTION
-    Geometry::Vector getValue(const Geometry::PointView& p) const
+    Geometry::Vector getValue(
+      const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p) const
     {
       const auto& face = p.getPolytope();
-      const Geometry::MeshView& mesh = face.mesh;
+      const ::Rodin::Kokkos::View<::Rodin::Geometry::MeshBase>& mesh = face.mesh;
       const Index d = face.getDimension();
       const Index sdim = mesh.getSpaceDimension();
       KOKKOS_ASSERT(d + 1 == mesh.getDimension() && sdim == d + 1);
@@ -1609,7 +1622,7 @@ namespace Rodin::Kokkos::Variational
        * @param p Device point. @return Whether the point is bound to a face.
        */
       KOKKOS_INLINE_FUNCTION
-      static bool isFace(const Geometry::PointView& p)
+      static bool isFace(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p)
       {
         const auto& polytope = p.getPolytope();
         return polytope.getDimension() + 1 == polytope.mesh.getDimension();
@@ -1621,7 +1634,8 @@ namespace Rodin::Kokkos::Variational
        * @return Same physical point, bound to the cell.
        */
       KOKKOS_INLINE_FUNCTION
-      Geometry::PointView getCellPoint(const Geometry::PointView& p) const
+      ::Rodin::Kokkos::View<::Rodin::Geometry::Point> getCellPoint(
+        const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p) const
       {
         const auto& face = p.getPolytope();
         const Index d = face.mesh.getDimension();
@@ -1769,7 +1783,8 @@ namespace Rodin::Kokkos::Variational
        * through an IntegrationPointView of the point.
        */
       KOKKOS_INLINE_FUNCTION
-      Real interpolate(const Geometry::PointView& p, Index r) const
+      Real interpolate(
+        const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p, Index r) const
       {
         if constexpr (std::is_same_v<DOFsType, VertexDOFs>)
         {
@@ -1801,7 +1816,8 @@ namespace Rodin::Kokkos::Variational
        */
       KOKKOS_INLINE_FUNCTION
       Geometry::Matrix interpolateJacobian(
-        const Geometry::PointView& p, const TraceDomainView& trace = {}) const
+        const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p,
+        const TraceDomainView& trace = {}) const
       {
         return TraceDomainView::isFace(p) ? getCellJacobian(trace.getCellPoint(p))
                                           : getCellJacobian(p);
@@ -1814,8 +1830,8 @@ namespace Rodin::Kokkos::Variational
        * @return Trace of interpolateJacobian(p), summed in the same order.
        */
       KOKKOS_INLINE_FUNCTION
-      Real interpolateDivergence(
-        const Geometry::PointView& p, const TraceDomainView& trace = {}) const
+      Real interpolateDivergence(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p,
+        const TraceDomainView& trace = {}) const
       {
         return TraceDomainView::isFace(p) ? getCellDivergence(trace.getCellPoint(p))
                                           : getCellDivergence(p);
@@ -1865,7 +1881,8 @@ namespace Rodin::Kokkos::Variational
        * @return Vector of the components @f$ u_r(p) @f$.
        */
       KOKKOS_INLINE_FUNCTION
-      Geometry::Vector interpolateVector(const Geometry::PointView& p) const
+      Geometry::Vector interpolateVector(
+        const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p) const
       {
         Geometry::Vector result(m_vdim);
         for (Index r = 0; r < m_vdim; ++r)
@@ -1992,7 +2009,8 @@ namespace Rodin::Kokkos::Variational
        * @f$ \nabla u_r(p) @f$.
        */
       KOKKOS_INLINE_FUNCTION
-      Geometry::Matrix getCellJacobian(const Geometry::PointView& p) const
+      Geometry::Matrix getCellJacobian(
+        const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p) const
       {
         if constexpr (std::is_same_v<DOFsType, VertexDOFs>)
         {
@@ -2029,7 +2047,8 @@ namespace Rodin::Kokkos::Variational
        * @return Trace of getCellJacobian(p).
        */
       KOKKOS_INLINE_FUNCTION
-      Real getCellDivergence(const Geometry::PointView& p) const
+      Real getCellDivergence(
+        const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p) const
       {
         if constexpr (std::is_same_v<DOFsType, VertexDOFs>)
         {
