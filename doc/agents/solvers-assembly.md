@@ -256,6 +256,12 @@ copy. `Math::LinearSystem` remains the shared specialization point. Kokkos space
 deduction guides select backend coefficient vectors, forms and systems. Explicit
 host algebra containers retain compatibility with host solvers.
 
+`Kokkos/Assembly/Kokkos.h` remains the public assembly entry point and holds
+its policy specializations. `Integrator.h` contains backend integrator dispatch,
+`Constraints.h` owns constraint resolution and device expansions, and
+`SystemAssembly.h` owns COO reduction and symbolic reuse. Nested kernel functors
+remain with their owning classes.
+
 `Assembly::Internal::SystemAssembly` is an assembly algorithm, not an algebra
 owner. Its COO contributions use `KokkosSparse::CooMatrix`; constraint handling,
 contribution ordering and duplicate summation retain the existing Assembly
