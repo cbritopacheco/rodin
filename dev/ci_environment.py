@@ -31,6 +31,10 @@ CLEANUP_PATHS = ('/usr/share/dotnet', '/usr/local/lib/android', '/opt/ghc',
 # A healthy install took about 40 seconds in the measured campaign. These
 # budgets allow slower runners while bounding the observed 25–54 minute stalls.
 INDEX_TIMEOUT = 90
+# Slow but progressing signed snapshot refreshes exceeded 90 seconds in CI.
+# Allow three minutes per network refresh; local policy queries remain bounded
+# separately and the privileged process group is still terminated on timeout.
+INDEX_REFRESH_TIMEOUT = 180
 DOWNLOAD_TIMEOUT = 300
 INSTALL_TIMEOUT = 900
 MIRRORS = (None, 'https://archive.ubuntu.com/ubuntu',
@@ -212,21 +216,48 @@ def sources(directory, mirror, system=Path('/etc/apt')):
                     text = text.replace('mirror+file:' + reference, (mirror or urls[0]).rstrip('/') + '/')
             if mirror:
                 text = UBUNTU_URI.sub(mirror.rstrip('/') + '/', text)
+        if snapshot:
+            # APT::Snapshot alone schedules live indexes as well. Use the
+            # timestamped signed archive directly and disable snapshot discovery
+            # for these sources, so an unrelated live mirror cannot stall them.
+            uri = 'https://snapshot.ubuntu.com/ubuntu/' + snapshot + '/'
+            if source.suffix == '.sources':
+                paragraphs = re.split(r'(\n[ \t]*\n)', text)
+                for index, paragraph in enumerate(paragraphs):
+                    field = re.search(r'^URIs:[ \t]*([^\n]*(?:\n[ \t]+[^\n]*)*)',
+                                      paragraph, re.M | re.I)
+                    if not field or not any(UBUNTU_URI.fullmatch(value) for value in field[1].split()):
+                        continue
+                    paragraph = (paragraph[:field.start(1)] +
+                                 re.sub(r'\S+', lambda value: uri if UBUNTU_URI.fullmatch(value[0])
+                                        else value[0], field[1]) + paragraph[field.end(1):])
+                    option = re.compile(r'^Snapshot:[^\n]*(?:\n[ \t]+[^\n]*)*', re.M | re.I)
+                    if option.search(paragraph):
+                        paragraph = option.sub('Snapshot: no', paragraph)
+                    else:
+                        ending = '\n' if paragraph.endswith('\n') else ''
+                        paragraph = paragraph.rstrip('\n') + '\nSnapshot: no' + ending
+                    paragraphs[index] = paragraph
+                text = ''.join(paragraphs)
+            else:
+                lines = []
+                for line in text.splitlines(keepends=True):
+                    entry = re.match(r'^(\s*deb(?:-src)?\s+)(\[[^]\n]*\]\s+)?(\S+)(.*)', line)
+                    if entry and UBUNTU_URI.fullmatch(entry[3]):
+                        flags = entry[2].strip()[1:-1].split() if entry[2] else []
+                        flags = [value for value in flags if not value.lower().startswith('snapshot=')]
+                        flags.append('snapshot=no')
+                        line = (entry[1] + '[' + ' '.join(flags) + '] ' + uri + entry[4] +
+                                line[len(entry[0]):])
+                    lines.append(line)
+                text = ''.join(lines)
         target = directory / 'sources.list' if source == main else parts / source.name
         target.write_text(text)
     (directory / 'sources.list').touch(exist_ok=True)
     options = ['-o', 'Dir::Etc::sourcelist=' + str(directory / 'sources.list'),
                '-o', 'Dir::Etc::sourceparts=' + str(parts)]
     if snapshot:
-        # A fresh fallback host has no cached Release metadata from which APT
-        # can discover its snapshot service. Route every supported mirror to
-        # the same signed snapshot before the first index update; otherwise
-        # update can fetch live indexes which policy then excludes.
-        for archive in MIRRORS:
-            if archive:
-                options += ['-o', 'Acquire::Snapshots::URI::Host::' + urlsplit(archive).hostname +
-                            '=https://snapshot.ubuntu.com/ubuntu/@SNAPSHOTID@/']
-        # APT 2.7+ redirects supported Ubuntu archives to the signed snapshot.
+        # Retain the snapshot marker for exact-version installation policy.
         # Prefer its versions even over newer preinstalled runner packages.
         preferences = directory / 'preferences'
         original = system / 'preferences'
@@ -312,7 +343,7 @@ def prepare(requested, archives, state):
     for index, mirror in enumerate(MIRRORS):
         options = sources(state / str(index), mirror)
         try:
-            apt(['update'], options, archives, INDEX_TIMEOUT)
+            apt(['update'], options, archives, INDEX_REFRESH_TIMEOUT)
             break
         except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as error:
             last_error = error
@@ -365,7 +396,7 @@ def install(archives, state):
         options = sources(state / str(index), MIRRORS[index])
         try:
             if index != plan['source_index']:
-                apt(['update'], options, archives, INDEX_TIMEOUT)
+                apt(['update'], options, archives, INDEX_REFRESH_TIMEOUT)
             # Bound the whole transfer, not only idle sockets: slow downloads
             # can otherwise run for almost an hour while still making progress.
             apt(['--yes', '--no-remove', '--download-only', 'install', *pinned],

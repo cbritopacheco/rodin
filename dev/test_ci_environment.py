@@ -248,13 +248,17 @@ class EnvironmentTest(unittest.TestCase):
             self.assertIn('Dir::Etc::preferences=' + str(preferences), options)
             self.assertIn('Pin: release o=Ubuntu\nPin-Priority: 1001', preferences.read_text())
             self.assertIn('# Existing host preferences', preferences.read_text())
-            self.assertEqual((root / 'snapshot/sources.list').read_text(), original)
+            self.assertEqual((root / 'snapshot/sources.list').read_text(),
+                             original.replace('[signed-by=/keys/ubuntu.gpg]',
+                                              '[signed-by=/keys/ubuntu.gpg snapshot=no]').replace(
+                                 'https://archive.ubuntu.com/ubuntu',
+                                 'https://snapshot.ubuntu.com/ubuntu/' + environment.SHARED_APT_SNAPSHOT + '/'))
             self.assertEqual((system / 'sources.list').read_text(), original)
             with patch.dict(os.environ, RODIN_APT_SNAPSHOT='latest;invalid'):
                 with self.assertRaisesRegex(ValueError, 'snapshot'):
                     environment.sources(root / 'invalid', None, system)
 
-    def test_every_snapshot_mirror_has_an_explicit_signed_snapshot_route(self):
+    def test_every_snapshot_mirror_uses_only_the_same_signed_snapshot(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             system = root / 'etc'
@@ -265,9 +269,11 @@ class EnvironmentTest(unittest.TestCase):
             with patch.dict(os.environ, RODIN_APT_SNAPSHOT='shared'):
                 for index, mirror in enumerate(environment.MIRRORS):
                     options = environment.sources(root / str(index), mirror, system)
-                    for host in ['archive.ubuntu.com', 'mirrors.edge.kernel.org']:
-                        self.assertIn('Acquire::Snapshots::URI::Host::' + host +
-                                      '=https://snapshot.ubuntu.com/ubuntu/@SNAPSHOTID@/', options)
+                    copied = (root / str(index) / 'sources.list').read_text()
+                    self.assertIn('https://snapshot.ubuntu.com/ubuntu/' +
+                                  environment.SHARED_APT_SNAPSHOT + '/', copied)
+                    self.assertNotIn('archive.ubuntu.com', copied)
+                    self.assertNotIn('mirrors.edge.kernel.org', copied)
                     self.assertIn('APT::Snapshot=' + environment.SHARED_APT_SNAPSHOT, options)
                     self.assertIn('signed-by=/keys/ubuntu.gpg', (root / str(index) / 'sources.list').read_text())
             self.assertEqual((system / 'sources.list').read_text(), original)
@@ -293,9 +299,41 @@ class EnvironmentTest(unittest.TestCase):
                 environment.sources(root / 'snapshot', None, system)
             self.assertEqual((root / 'snapshot/sources.list.d/ubuntu.sources').read_text(),
                              original.replace('mirror+file:' + str(ubuntu),
-                                              'http://azure.archive.ubuntu.com/ubuntu/'))
+                                              'https://snapshot.ubuntu.com/ubuntu/' +
+                                              environment.SHARED_APT_SNAPSHOT + '/').rstrip('\n') +
+                             '\nSnapshot: no\n')
             self.assertEqual((root / 'snapshot/sources.list.d/vendor.list').read_text(), third_party)
             self.assertEqual((parts / 'ubuntu.sources').read_text(), original)
+
+    def test_snapshot_sources_exclude_live_indexes_and_preserve_vendor_trust(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            system = root / 'etc'
+            parts = system / 'sources.list.d'
+            parts.mkdir(parents=True)
+            legacy = ('# Keep this comment\n'
+                      'deb [arch=amd64 snapshot=yes signed-by=/keys/ubuntu.gpg] '
+                      'https://archive.ubuntu.com/ubuntu noble main\n')
+            vendor = ('Types: deb\nURIs: https://vendor.example/apt\n'
+                      'Suites: stable\nComponents: main\nSigned-By: /keys/vendor.gpg\n')
+            ubuntu = ('Types: deb deb-src\nURIs: https://archive.ubuntu.com/ubuntu\n'
+                      ' https://security.ubuntu.com/ubuntu\nSuites: noble noble-security\n'
+                      'Components: main universe\nSigned-By: /keys/ubuntu.gpg\nSnapshot: yes\n')
+            (system / 'sources.list').write_text(legacy)
+            (parts / 'mixed.sources').write_text(ubuntu + '\n' + vendor)
+            with patch.dict(os.environ, RODIN_APT_SNAPSHOT='shared'):
+                environment.sources(root / 'copy', None, system)
+            copied = (root / 'copy/sources.list').read_text()
+            self.assertIn('snapshot=no', copied)
+            self.assertIn('signed-by=/keys/ubuntu.gpg', copied)
+            self.assertNotIn('archive.ubuntu.com', copied)
+            content = (root / 'copy/sources.list.d/mixed.sources').read_text()
+            self.assertIn('Snapshot: no', content)
+            self.assertNotIn('Snapshot: yes', content)
+            self.assertNotIn('security.ubuntu.com', content)
+            self.assertTrue(content.endswith(vendor))
+            self.assertEqual((parts / 'mixed.sources').read_text(), ubuntu + '\n' + vendor)
+            self.assertEqual((system / 'sources.list').read_text(), legacy)
 
     @unittest.skipUnless(shutil.which('apt-get'), 'APT is required for offline URI routing validation')
     def test_real_apt_routes_snapshots_on_fresh_fallbacks(self):
@@ -327,7 +365,7 @@ class EnvironmentTest(unittest.TestCase):
                     uris = [shlex.split(line)[0] for line in result.stdout.splitlines()
                             if line.startswith("'")]
                     self.assertTrue(uris, result.stdout)
-                    self.assertTrue(any(uri.startswith('https://snapshot.ubuntu.com/ubuntu/' +
+                    self.assertTrue(all(uri.startswith('https://snapshot.ubuntu.com/ubuntu/' +
                                                        environment.SHARED_APT_SNAPSHOT + '/')
                                         for uri in uris), uris)
                 source.unlink()
@@ -434,6 +472,9 @@ class EnvironmentTest(unittest.TestCase):
             plan = environment.prepare(['lcov'], root / 'cache', root / 'state')
         self.assertEqual([c.args[0] for c in candidates.call_args_list], [['lcov'], dependencies])
         self.assertEqual(plan['versions'], versions)
+        self.assertEqual(apt.call_args_list[0].args[3], environment.INDEX_REFRESH_TIMEOUT)
+        self.assertTrue(all(call.args[3] == environment.INDEX_TIMEOUT
+                            for call in apt.call_args_list[1:]))
         simulation = apt.call_args_list[-1].args[0]
         for name, version in versions.items():
             self.assertIn(name + '=' + version, simulation)

@@ -99,7 +99,8 @@ the configured compiler major version and all numerical test selections. All
 dedicated execution lanes request this same environment from the restored build
 definition; they do not maintain separate compiler or package setup steps.
 
-Index attempts have a 90-second budget and complete package-download attempts a
+Index refresh attempts have a 180-second budget; local APT policy and plan
+queries retain a 90-second budget. Complete package-download attempts have a
 300-second budget. GNU `timeout` terminates the privileged APT process group
 before fallback. After the runner's original sources, fallback uses the official
 Ubuntu archive and then its kernel.org mirror, retaining suites, components,
@@ -108,11 +109,15 @@ is resolved to the selected fallback transport; otherwise all attempts would
 keep consulting the original failing mirror list. Candidate-version discovery
 and installation-plan simulation use those same selected source definitions.
 Mirror fallback leaves the remaining third-party source definitions unchanged.
-Snapshot environments resolve Ubuntu mirror lists before their first update
-and explicitly map fallback hosts to the signed Ubuntu snapshot service. This
-ensures a fresh mirror schedules the pinned indexes before it has cached Release
-metadata. Index refreshes omit translations and command-not-found metadata
-within the existing 90-second budget.
+Snapshot environments resolve Ubuntu mirror lists and point copied Ubuntu
+sources directly at the timestamped signed snapshot archive. Their source-local
+`Snapshot: no` / `snapshot=no` setting disables additional discovery of live
+indexes; it does not disable signature validation. This removes both redundant
+index downloads and the dependency on live mirror availability. Retries retain
+the same snapshot; non-snapshot environments retain the mirror sequence above.
+The network refresh budget accommodates the observed slow but progressing
+snapshot downloads while remaining bounded. Index refreshes omit translations
+and command-not-found metadata.
 Final installation is offline, allows no package removals and has a
 900-second budget; configuration failures are not retried as download failures.
 Exhausted mirrors fail the job rather than skip its tests.
