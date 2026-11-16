@@ -18,6 +18,36 @@ def append(markdown):
             stream.write(markdown + '\n')
 
 
+def resources(stats):
+    """Publish runner-wide measurements without presenting samples as exact RSS."""
+    def memory(key):
+        value = stats.get(key)
+        return 'Unavailable' if value is None else f'{value / 1024 ** 3:.2f} GiB'
+    cpu = stats.get('cpu_percent')
+    cpu = 'Unavailable' if cpu is None else f'{cpu:.1f}% of {stats["cpu_cores"]} logical CPUs'
+    elapsed = stats.get('elapsed_seconds')
+    elapsed = 'Unavailable' if elapsed is None else f'{elapsed:.1f} s'
+    rows = ['<details><summary>Runner resource usage</summary>', '',
+            '| Measurement | Value |', '| --- | --- |',
+            f'| Observed elapsed time | {elapsed} |',
+            f'| Average host CPU utilization | {cpu} |',
+            f'| Host RAM capacity | {memory("host_total_bytes")} |',
+            f'| Peak host memory used (sampled) | {memory("peak_host_used_bytes")} |',
+            f'| Minimum host memory available (sampled) | {memory("minimum_available_bytes")} |',
+            f'| Cgroup memory high-water mark | {memory("peak_cgroup_bytes")} |',
+            f'| Cgroup OOM events / kills during observation | '
+            f'{stats.get("oom_events") if stats.get("oom_events") is not None else "Unavailable"} / '
+            f'{stats.get("oom_kills") if stats.get("oom_kills") is not None else "Unavailable"} |', '',
+            f'Host measurements include the runner, containers and child processes; '
+            f'{stats.get("samples", 0)} samples at {stats.get("interval_seconds", "unknown")} s intervals. '
+            'CPU utilization is normalized to the whole host (100% means all CPUs busy). '
+            'Sampled memory uses MemTotal minus MemAvailable and can miss short peaks. '
+            'The kernel cgroup high-water mark can include usage before sampling started. '
+            'Missing counters are unavailable, not zero. A lost runner may prevent this summary.', '',
+            '</details>']
+    append('\n'.join(rows))
+
+
 def benchmark():
     """Record failed-lane context, including failures before execution begins."""
     lane = json.loads(os.environ['BENCHMARK_LANE'])
@@ -51,7 +81,8 @@ def benchmark():
     if resource_file.exists():
         resource_rows = []
         for line in resource_file.read_text().splitlines():
-            for label in ('Elapsed (wall clock) time', 'Maximum resident set size (kbytes)', 'Exit status'):
+            for label in ('Elapsed (wall clock) time', 'User time (seconds)', 'System time (seconds)',
+                          'Percent of CPU this job got', 'Maximum resident set size (kbytes)', 'Exit status'):
                 if line.strip().startswith(label):
                     resource_rows.append(cell(line.strip()))
         if resource_rows:

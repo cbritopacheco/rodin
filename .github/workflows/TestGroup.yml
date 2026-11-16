@@ -64,6 +64,9 @@ jobs:
         with:
           submodules: false
           lfs: false
+      - name: Start resource monitor
+        continue-on-error: true
+        run: python3 dev/ci_resource_monitor.py start
       - name: Initialize pinned submodules
         run: python3 dev/ci_submodules.py
       # These manufactured partitions construct every mesh with UniformGrid.
@@ -147,3 +150,7 @@ jobs:
               echo "::warning::Disk usage for $path is incomplete; some entries could not be read."
             fi
           done
+      - name: Summarize resource usage
+        if: always()
+        continue-on-error: true
+        run: python3 dev/ci_resource_monitor.py finish

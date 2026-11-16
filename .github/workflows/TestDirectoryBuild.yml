@@ -28,6 +28,9 @@ jobs:
         with:
           submodules: false
           lfs: false
+      - name: Start resource monitor
+        continue-on-error: true
+        run: python3 dev/ci_resource_monitor.py start
       - name: Initialize pinned submodules
         run: python3 dev/ci_submodules.py
       - name: Check compilation disk headroom
@@ -74,3 +77,7 @@ jobs:
           name: ci-built-${{ inputs.id }}
           path: ci-built-record/
           if-no-files-found: error
+      - name: Summarize resource usage
+        if: always()
+        continue-on-error: true
+        run: python3 dev/ci_resource_monitor.py finish

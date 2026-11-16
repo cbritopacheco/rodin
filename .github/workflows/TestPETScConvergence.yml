@@ -29,6 +29,9 @@ jobs:
       with:
         submodules: false
         lfs: false
+    - name: Start resource monitor
+      continue-on-error: true
+      run: python3 dev/ci_resource_monitor.py start
     - name: Initialize pinned submodules
       run: python3 dev/ci_submodules.py
     - name: Restore shared test build
@@ -79,5 +82,9 @@ jobs:
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         definition: '{"job":"${{ github.job }}","matrix":${{ toJSON(matrix) }}}'
+    - name: Summarize resource usage
+      if: always()
+      continue-on-error: true
+      run: python3 dev/ci_resource_monitor.py finish
     name: ${{ matrix.path }} (MT=${{ matrix.multithreaded }}, Suite=${{ matrix.suite }}, Context=${{ matrix.context }}, Geometry=${{
       matrix.geometry }}, Study=${{ matrix.study }})

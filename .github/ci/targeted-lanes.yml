@@ -162,6 +162,9 @@ jobs:
       with:
         submodules: false
         lfs: false
+    - name: Start resource monitor
+      continue-on-error: true
+      run: python3 dev/ci_resource_monitor.py start
     - name: Initialize pinned submodules
       run: python3 dev/ci_submodules.py
     - name: Restore shared test build
@@ -199,6 +202,10 @@ jobs:
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         definition: '{"job":"${{ github.job }}","matrix":${{ toJSON(matrix) }}}'
+    - name: Summarize resource usage
+      if: always()
+      continue-on-error: true
+      run: python3 dev/ci_resource_monitor.py finish
     name: ${{ matrix.path }} (MT=${{ matrix.multithreaded }}, Suite=${{ matrix.suite }})
   ConvergenceBaseline:
     runs-on: ubuntu-24.04
@@ -216,6 +223,9 @@ jobs:
       with:
         submodules: false
         lfs: false
+    - name: Start resource monitor
+      continue-on-error: true
+      run: python3 dev/ci_resource_monitor.py start
     - name: Initialize pinned submodules
       run: python3 dev/ci_submodules.py
     - uses: ./.github/actions/test-build
@@ -251,6 +261,10 @@ jobs:
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         definition: '{"job":"${{ github.job }}","matrix":${{ toJSON(matrix) }}}'
+    - name: Summarize resource usage
+      if: always()
+      continue-on-error: true
+      run: python3 dev/ci_resource_monitor.py finish
     name: ${{ matrix.path }} (MT=${{ matrix.multithreaded }}, Suite=${{ matrix.suite }})
   MPIH1Restriction:
     runs-on: ubuntu-24.04
@@ -373,6 +387,9 @@ jobs:
       with:
         submodules: false
         lfs: false
+    - name: Start resource monitor
+      continue-on-error: true
+      run: python3 dev/ci_resource_monitor.py start
     - name: Initialize pinned submodules
       run: python3 dev/ci_submodules.py
     - name: Restore shared test build
@@ -398,6 +415,10 @@ jobs:
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         definition: '{"job":"${{ github.job }}","matrix":${{ toJSON(matrix) }}}'
+    - name: Summarize resource usage
+      if: always()
+      continue-on-error: true
+      run: python3 dev/ci_resource_monitor.py finish
     name: ${{ matrix.path }} (MT=${{ matrix.multithreaded }}, NP=${{ matrix.np }}, Partition=${{ matrix.partition
       }})
   PETScConvergence:
@@ -2134,6 +2155,9 @@ jobs:
       with:
         submodules: false
         lfs: false
+    - name: Start resource monitor
+      continue-on-error: true
+      run: python3 dev/ci_resource_monitor.py start
     - name: Initialize pinned submodules
       run: python3 dev/ci_submodules.py
     - name: Restore shared test build
@@ -2192,6 +2216,10 @@ jobs:
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         definition: '{"job":"${{ github.job }}","matrix":${{ toJSON(matrix) }}}'
+    - name: Summarize resource usage
+      if: always()
+      continue-on-error: true
+      run: python3 dev/ci_resource_monitor.py finish
     name: ${{ matrix.path }} (MT=${{ matrix.multithreaded }}, Suite=${{ matrix.suite }}, Context=${{ matrix.context
       }}, Geometry=${{ matrix.geometry }}, Study=${{ matrix.study }})
   PETScDegreeConvergence:
@@ -2510,6 +2538,9 @@ jobs:
       with:
         submodules: false
         lfs: false
+    - name: Start resource monitor
+      continue-on-error: true
+      run: python3 dev/ci_resource_monitor.py start
     - name: Initialize pinned submodules
       run: python3 dev/ci_submodules.py
     - name: Restore shared test build
@@ -2529,6 +2560,10 @@ jobs:
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         definition: '{"job":"${{ github.job }}","matrix":${{ toJSON(matrix) }}}'
+    - name: Summarize resource usage
+      if: always()
+      continue-on-error: true
+      run: python3 dev/ci_resource_monitor.py finish
     name: ${{ matrix.path }} (MT=${{ matrix.multithreaded }}, Suite=${{ matrix.suite }}, Physics=${{ matrix.physics
       }}, Context=${{ matrix.context }})
   PETScCurvedConvergence:
@@ -4325,6 +4360,9 @@ jobs:
       with:
         submodules: false
         lfs: false
+    - name: Start resource monitor
+      continue-on-error: true
+      run: python3 dev/ci_resource_monitor.py start
     - name: Initialize pinned submodules
       run: python3 dev/ci_submodules.py
     - name: Restore shared test build
@@ -4350,6 +4388,10 @@ jobs:
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         definition: '{"job":"${{ github.job }}","matrix":${{ toJSON(matrix) }}}'
+    - name: Summarize resource usage
+      if: always()
+      continue-on-error: true
+      run: python3 dev/ci_resource_monitor.py finish
     name: ${{ matrix.path }} (MT=${{ matrix.multithreaded }}, Suite=${{ matrix.suite }}, Geometry=${{ matrix.geometry
       }}, Selection=${{ matrix.selection }}, Physics=${{ matrix.physics }}, Partition=${{ matrix.partition }})
   PETScCurvedBoundaryConvergence:
@@ -5351,6 +5393,9 @@ jobs:
       with:
         submodules: false
         lfs: false
+    - name: Start resource monitor
+      continue-on-error: true
+      run: python3 dev/ci_resource_monitor.py start
     - name: Initialize pinned submodules
       run: python3 dev/ci_submodules.py
     - name: Restore shared test build
@@ -5388,6 +5433,10 @@ jobs:
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         definition: '{"job":"${{ github.job }}","matrix":${{ toJSON(matrix) }}}'
+    - name: Summarize resource usage
+      if: always()
+      continue-on-error: true
+      run: python3 dev/ci_resource_monitor.py finish
     name: ${{ matrix.path }} (MT=${{ matrix.multithreaded }}, Physics=${{ matrix.physics }}, Geometry=${{ matrix.geometry }}, Selection=${{ matrix.selection }}, Study=${{ matrix.study }})
   PETScCurvedNonlinearTetrahedronConvergence:
     runs-on: ubuntu-24.04
@@ -5564,6 +5613,9 @@ jobs:
       with:
         submodules: false
         lfs: false
+    - name: Start resource monitor
+      continue-on-error: true
+      run: python3 dev/ci_resource_monitor.py start
     - name: Initialize pinned submodules
       run: python3 dev/ci_submodules.py
     - name: Restore shared test build
@@ -5586,6 +5638,10 @@ jobs:
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         definition: '{"job":"${{ github.job }}","matrix":${{ toJSON(matrix) }}}'
+    - name: Summarize resource usage
+      if: always()
+      continue-on-error: true
+      run: python3 dev/ci_resource_monitor.py finish
     name: ${{ matrix.path }} (MT=${{ matrix.multithreaded }}, Selection=${{ matrix.selection }}, Partition=${{ matrix.partition
       }})
   PETScComplexConvergence:
@@ -5733,6 +5789,9 @@ jobs:
       with:
         submodules: false
         lfs: false
+    - name: Start resource monitor
+      continue-on-error: true
+      run: python3 dev/ci_resource_monitor.py start
     - name: Initialize pinned submodules
       run: python3 dev/ci_submodules.py
     - name: Restore shared test build
@@ -5806,6 +5865,10 @@ jobs:
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         definition: '{"job":"${{ github.job }}","matrix":${{ toJSON(matrix) }}}'
+    - name: Summarize resource usage
+      if: always()
+      continue-on-error: true
+      run: python3 dev/ci_resource_monitor.py finish
     name: ${{ matrix.path }} (MT=${{ matrix.multithreaded }}, Suite=${{ matrix.suite }}, Context=${{ matrix.context
       }})
   PETScMatrixRanges:
@@ -5837,6 +5900,9 @@ jobs:
       with:
         submodules: false
         lfs: false
+    - name: Start resource monitor
+      continue-on-error: true
+      run: python3 dev/ci_resource_monitor.py start
     - name: Initialize pinned submodules
       run: python3 dev/ci_submodules.py
     - uses: ./.github/actions/test-build
@@ -5861,4 +5927,8 @@ jobs:
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         definition: '{"job":"${{ github.job }}","matrix":${{ toJSON(matrix) }}}'
+    - name: Summarize resource usage
+      if: always()
+      continue-on-error: true
+      run: python3 dev/ci_resource_monitor.py finish
     name: ${{ matrix.path }} (Scalar=${{ matrix.scalar }}, MT=${{ matrix.multithreaded }})

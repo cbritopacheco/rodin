@@ -133,6 +133,22 @@ commits and unknown failures remain fatal. `dev/ci_lfs.py` applies the same
 retry schedule to selected resource paths, including temporary hosted DNS
 resolver failures.
 
+Linux Kokkos builds, shared test builds and executions, installation checks,
+and benchmark jobs sample runner resources from checkout to the final step.
+Their collapsed **Runner resource usage** summary reports elapsed observation
+time, average host CPU utilization, sampled peak host memory used and minimum
+available memory, the kernel cgroup memory high-water mark, and changes in
+cgroup OOM event/kill counters. CPU utilization is normalized to all logical
+CPUs; host measurements include containers and the runner itself. Host memory
+used is `MemTotal - MemAvailable`, sampled every 15 seconds, so short peaks can
+be missed. The cgroup high-water mark can include pre-sampling usage. Missing
+measurements are explicitly unavailable; reset counters are not reported as
+zero. Diagnostics never change build/test outcomes and require no extra
+artifact uploads. A lost runner can prevent the final summary from running.
+Benchmark failure summaries also include the existing process-scoped GNU time
+user/system CPU time, CPU percentage and peak RSS; that percentage can exceed
+100% and is distinct from normalized host utilization.
+
 Compiler selection verifies matching GCC/G++ versions before exporting them.
 If `cmake --version` stalls, it retries up to three 30-second attempts with
 2- and 4-second delays. A nonzero exit fails immediately; exhausted timeouts

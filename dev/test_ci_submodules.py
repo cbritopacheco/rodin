@@ -146,7 +146,11 @@ os.execv(os.environ['REAL_GIT'], [os.environ['REAL_GIT'], *sys.argv[1:]])
                         continue  # Planning/publication needs only the root checkout.
                     count += 1
                     self.assertIs(step.get('with', {}).get('submodules'), False, str(path))
-                    self.assertEqual(steps[index + 1].get('run'), 'python3 dev/ci_submodules.py', str(path))
+                    following = index + 1
+                    if steps[following].get('name') == 'Start resource monitor':
+                        self.assertTrue(steps[following]['continue-on-error'])
+                        following += 1
+                    self.assertEqual(steps[following].get('run'), 'python3 dev/ci_submodules.py', str(path))
         self.assertGreater(count, 30)
 
 

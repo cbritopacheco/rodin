@@ -25,6 +25,9 @@ jobs:
         with:
           submodules: false
           lfs: false
+      - name: Start resource monitor
+        continue-on-error: true
+        run: python3 dev/ci_resource_monitor.py start
       - name: Initialize pinned submodules
         run: python3 dev/ci_submodules.py
       - uses: actions/setup-python@v6
@@ -60,6 +63,10 @@ jobs:
           name: benchmark-plan-group-${{ inputs.group }}
           path: benchmark-group/execution.json
           if-no-files-found: error
+      - name: Summarize resource usage
+        if: always()
+        continue-on-error: true
+        run: python3 dev/ci_resource_monitor.py finish
   Run:
     name: ${{ matrix.lane.label }}
     needs: Build
@@ -80,6 +87,9 @@ jobs:
         with:
           submodules: false
           lfs: false
+      - name: Start resource monitor
+        continue-on-error: true
+        run: python3 dev/ci_resource_monitor.py start
       - name: Initialize pinned submodules
         run: python3 dev/ci_submodules.py
       - uses: actions/setup-python@v6
@@ -138,3 +148,7 @@ jobs:
             benchmark-diagnostics/
             benchmark-result/
           if-no-files-found: warn
+      - name: Summarize resource usage
+        if: always()
+        continue-on-error: true
+        run: python3 dev/ci_resource_monitor.py finish

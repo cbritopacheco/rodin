@@ -242,6 +242,9 @@ jobs:
       with:
         submodules: false
         lfs: false
+    - name: Start resource monitor
+      continue-on-error: true
+      run: python3 dev/ci_resource_monitor.py start
     - name: Initialize pinned submodules
       run: python3 dev/ci_submodules.py
     - uses: ./.github/actions/prepare-apt
@@ -272,6 +275,10 @@ jobs:
 
           '
         retention-days: 7
+    - name: Summarize resource usage
+      if: always()
+      continue-on-error: true
+      run: python3 dev/ci_resource_monitor.py finish
     name: Installation / Ubuntu (OS=${{ matrix.os }}, Compiler=${{ matrix.compiler }}, MPI=${{ matrix.mpi }}, PETSc=${{ matrix.petsc
       }})
   InstallationMacOS:

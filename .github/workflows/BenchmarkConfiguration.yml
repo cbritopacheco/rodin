@@ -19,6 +19,9 @@ jobs:
         with:
           submodules: false
           lfs: false
+      - name: Start resource monitor
+        continue-on-error: true
+        run: python3 dev/ci_resource_monitor.py start
       - name: Initialize pinned submodules
         run: python3 dev/ci_submodules.py
       - uses: actions/setup-python@v6
@@ -47,6 +50,10 @@ jobs:
           name: benchmark-plan-common-${{ inputs.configuration }}
           path: benchmark-common/plan.json
           if-no-files-found: error
+      - name: Summarize resource usage
+        if: always()
+        continue-on-error: true
+        run: python3 dev/ci_resource_monitor.py finish
   Groups:
     name: ${{ matrix.group.label }}
     needs: Common
