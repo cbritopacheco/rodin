@@ -27,8 +27,10 @@ jobs:
     steps:
     - uses: actions/checkout@v5
       with:
-        submodules: recursive
+        submodules: false
         lfs: false
+    - name: Initialize pinned submodules
+      run: python3 dev/ci_submodules.py
     - uses: ./.github/actions/test-environment
       with:
         definition: ${{ inputs.definition }}

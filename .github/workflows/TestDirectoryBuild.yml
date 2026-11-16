@@ -26,8 +26,10 @@ jobs:
     steps:
       - uses: actions/checkout@v5
         with:
-          submodules: recursive
+          submodules: false
           lfs: false
+      - name: Initialize pinned submodules
+        run: python3 dev/ci_submodules.py
       - name: Check compilation disk headroom
         run: python3 dev/ci_environment.py disk
       - name: Hydrate discovery resources

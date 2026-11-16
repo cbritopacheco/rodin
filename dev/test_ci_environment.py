@@ -21,6 +21,9 @@ ROOT = Path(__file__).resolve().parents[1]
 
 class EnvironmentTest(unittest.TestCase):
     def setUp(self):
+        sleep = patch.object(environment.time, 'sleep')
+        self.retry_sleep = sleep.start()
+        self.addCleanup(sleep.stop)
         read_text = Path.read_text
         self.release = patch.object(Path, 'read_text', autospec=True,
                                    side_effect=lambda path, *args, **kwargs:
@@ -581,6 +584,24 @@ class EnvironmentTest(unittest.TestCase):
             self.assertNotEqual(keys[0], keys[1])
             self.assertEqual(prefixes[0], prefixes[1])
 
+    def test_signed_index_outage_has_bounded_backoff_and_fails_closed(self):
+        with tempfile.TemporaryDirectory() as tmp, \
+                patch.object(environment, 'sources', return_value=[]) as sources, \
+                patch.object(environment, 'candidates') as candidates, \
+                patch.object(environment.random, 'uniform', return_value=7) as jitter, \
+                patch.object(environment, 'apt', side_effect=subprocess.CalledProcessError(100, 'apt')) as apt:
+            root = Path(tmp)
+            with self.assertRaisesRegex(RuntimeError, 'All signed APT index sources failed'):
+                environment.prepare(['lcov'], root / 'cache', root / 'state')
+            self.assertFalse((root / 'state/plan.json').exists())
+        self.assertEqual(apt.call_count, 3)
+        self.assertTrue(all(call.args[0] == ['update'] for call in apt.call_args_list))
+        self.assertEqual([call.args[0] for call in self.retry_sleep.call_args_list], [37, 127])
+        self.assertEqual(jitter.call_count, 2)
+        jitter.assert_called_with(0, environment.APT_RETRY_JITTER)
+        candidates.assert_not_called()
+        self.assertEqual([call.args[1] for call in sources.call_args_list], list(environment.MIRRORS))
+
     def test_index_failure_retries_another_signed_mirror(self):
         original = ['-o', 'Dir::Etc::sourcelist=original.list']
         fallback = ['-o', 'Dir::Etc::sourcelist=fallback.list']
@@ -593,6 +614,7 @@ class EnvironmentTest(unittest.TestCase):
             root = Path(tmp)
             plan = environment.prepare(['lcov'], root / 'cache', root / 'state')
             self.assertEqual(plan['source_index'], 1)
+            self.retry_sleep.assert_called_once()
             self.assertEqual([c.args[0][0] for c in apt.call_args_list], ['update', 'update', '--simulate'])
             candidates.assert_called_once_with(['lcov'], fallback)
 
@@ -638,6 +660,7 @@ class EnvironmentTest(unittest.TestCase):
             self.assertIn('libdep=1:2.0-1', commands[0])
             self.assertIn('--download-only', commands[0])
             self.assertIn('--no-download', commands[3])
+            self.retry_sleep.assert_called_once()
             self.assertTrue(all('--no-remove' in command for command in commands if command != ['update']))
 
     def test_configuration_failure_is_not_retried_as_a_mirror_problem(self):
@@ -649,6 +672,7 @@ class EnvironmentTest(unittest.TestCase):
             with self.assertRaises(subprocess.CalledProcessError):
                 environment.install(root / 'cache', root)
             self.assertEqual(apt.call_count, 2)
+            self.retry_sleep.assert_not_called()
 
     def test_all_download_sources_failing_fails_the_job(self):
         with tempfile.TemporaryDirectory() as tmp, \

@@ -12,6 +12,7 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import random
 import re
 import shlex
 import shutil
@@ -39,6 +40,10 @@ DOWNLOAD_TIMEOUT = 300
 INSTALL_TIMEOUT = 900
 MIRRORS = (None, 'https://archive.ubuntu.com/ubuntu',
            'https://mirrors.edge.kernel.org/ubuntu')
+# Snapshot normalization can send every mirror attempt to the same service.
+# Spread retries beyond short 502/503 bursts and desynchronize matrix runners.
+APT_RETRY_DELAYS = (30, 120)
+APT_RETRY_JITTER = 30
 UBUNTU_URI = re.compile(r'https?://(?:(?:azure\.archive|archive|security)\.ubuntu\.com|'
                        r'mirrors\.edge\.kernel\.org)/ubuntu/?')
 YAML_VERSION = '6.0.2'
@@ -335,6 +340,12 @@ def installed_dependencies(requested, source_options):
     return sorted(dependencies - explicit)
 
 
+def wait_for_apt_retry(attempt):
+    delay = APT_RETRY_DELAYS[attempt] + random.uniform(0, APT_RETRY_JITTER)
+    print(f'Waiting {delay:.1f}s before the next signed APT attempt.', flush=True)
+    time.sleep(delay)
+
+
 def prepare(requested, archives, state):
     archives.mkdir(parents=True, exist_ok=True)
     (archives / 'partial').mkdir(exist_ok=True)
@@ -348,6 +359,8 @@ def prepare(requested, archives, state):
         except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as error:
             last_error = error
             print('APT index attempt failed:', mirror or 'runner sources', flush=True)
+            if index < len(MIRRORS) - 1:
+                wait_for_apt_retry(index)
     else:
         raise RuntimeError('All signed APT index sources failed') from last_error
     versions = candidates(requested, options)
@@ -405,6 +418,8 @@ def install(archives, state):
         except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as error:
             last_error = error
             print('APT download attempt failed:', MIRRORS[index] or 'runner sources', flush=True)
+            if index < len(MIRRORS) - 1:
+                wait_for_apt_retry(index - plan['source_index'])
     else:
         raise RuntimeError('All APT archive sources failed for the pinned package plan') from last_error
     # Only download/index errors trigger mirror fallback. Do not retry a failed

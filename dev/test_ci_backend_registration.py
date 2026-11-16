@@ -22,7 +22,7 @@ GEOMETRIES = ["Segment", "Triangle", "Quadrilateral", "Tetrahedron", "Pyramid", 
 
 
 class BackendRegistrationTest(unittest.TestCase):
-    def configure(self, directory, petsc=True, complex=False, coverage=False, build_type=None):
+    def configure(self, directory, petsc=True, complex=False, coverage=False, build_type=None, multithreaded=False):
         temporary = tempfile.TemporaryDirectory(prefix="rodin-ci-registration-")
         self.addCleanup(temporary.cleanup)
         source = Path(temporary.name)
@@ -38,6 +38,7 @@ class BackendRegistrationTest(unittest.TestCase):
             + f'set(RODIN_USE_PETSC {"ON" if petsc else "OFF"})\nset(RODIN_USE_MPI ON)\n'
             + f'set(RODIN_CONVERGENCE_PETSC_COMPLEX {"ON" if complex else "OFF"})\n'
             + f'set(RODIN_CODE_COVERAGE {"ON" if coverage else "OFF"})\n'
+            + f'set(RODIN_MULTITHREADED {"ON" if multithreaded else "OFF"})\n'
             + 'set(MPIEXEC_EXECUTABLE /usr/bin/true)\nset(MPIEXEC_NUMPROC_FLAG -n)\n'
             + f'include("{ROOT / "tests/convergence/PETScRefinement.cmake"}")\n'
             + ''.join(f'add_subdirectory("{ROOT / entry}" {folder})\n' for entry, folder in zip(directories, folders)))
@@ -516,6 +517,24 @@ class BackendRegistrationTest(unittest.TestCase):
             name = f"RodinConvergenceIsoparametricPETScStokesBoundary_MPI_np{rank}_P3P2Rates_Pyramid"
             self.assertIn(str(rank), configurations[1][0][name])
             self.assertEqual(properties[1][name]["PROCESSORS"], str(rank))
+
+    def test_curved_stokes_hexahedron_watchdog_requires_threaded_coverage(self):
+        reference = None
+        selected = 'RodinConvergenceIsoparametricPETScStokesBoundary_P3P2Rates_Hexahedron'
+        for coverage, threaded in itertools.product([False, True], repeat=2):
+            tests, build = self.configure('tests/convergence/isoparametric/Stokes',
+                                          coverage=coverage, multithreaded=threaded)
+            commands = {name: [arg.replace(str(build.parent), '<FIXTURE>') for arg in args]
+                        for name, args in tests.items()}
+            properties = self.properties(build)
+            self.assertEqual(properties[selected]['TIMEOUT'], '3600' if coverage and threaded else '1800')
+            for rank in range(1, 5):
+                name = f'RodinConvergenceIsoparametricPETScStokesBoundary_MPI_np{rank}_P3P2Rates_Hexahedron'
+                self.assertEqual(properties[name]['TIMEOUT'], '1800')
+                self.assertEqual(properties[name]['PROCESSORS'], str(rank))
+            if reference is None:
+                reference = commands
+            self.assertEqual(commands, reference)
 
     def test_expanded_jobs_fit_github_matrix_limit(self):
         jobs = yaml.safe_load((ROOT / ".github/ci/targeted-lanes.yml").read_text())["jobs"]

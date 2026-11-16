@@ -160,8 +160,10 @@ jobs:
     steps:
     - uses: actions/checkout@v5
       with:
-        submodules: recursive
+        submodules: false
         lfs: false
+    - name: Initialize pinned submodules
+      run: python3 dev/ci_submodules.py
     - name: Restore shared test build
       uses: ./.github/actions/test-build
       with:
@@ -212,8 +214,10 @@ jobs:
     steps:
     - uses: actions/checkout@v5
       with:
-        submodules: recursive
+        submodules: false
         lfs: false
+    - name: Initialize pinned submodules
+      run: python3 dev/ci_submodules.py
     - uses: ./.github/actions/test-build
       with:
         job: ConvergenceBaseline
@@ -367,8 +371,10 @@ jobs:
     steps:
     - uses: actions/checkout@v5
       with:
-        submodules: recursive
+        submodules: false
         lfs: false
+    - name: Initialize pinned submodules
+      run: python3 dev/ci_submodules.py
     - name: Restore shared test build
       uses: ./.github/actions/test-build
       with:
@@ -2126,8 +2132,10 @@ jobs:
     steps:
     - uses: actions/checkout@v5
       with:
-        submodules: recursive
+        submodules: false
         lfs: false
+    - name: Initialize pinned submodules
+      run: python3 dev/ci_submodules.py
     - name: Restore shared test build
       uses: ./.github/actions/test-build
       with:
@@ -2500,8 +2508,10 @@ jobs:
     steps:
     - uses: actions/checkout@v5
       with:
-        submodules: recursive
+        submodules: false
         lfs: false
+    - name: Initialize pinned submodules
+      run: python3 dev/ci_submodules.py
     - name: Restore shared test build
       uses: ./.github/actions/test-build
       with:
@@ -4313,8 +4323,10 @@ jobs:
     steps:
     - uses: actions/checkout@v5
       with:
-        submodules: recursive
+        submodules: false
         lfs: false
+    - name: Initialize pinned submodules
+      run: python3 dev/ci_submodules.py
     - name: Restore shared test build
       uses: ./.github/actions/test-build
       with:
@@ -5337,8 +5349,10 @@ jobs:
     steps:
     - uses: actions/checkout@v5
       with:
-        submodules: recursive
+        submodules: false
         lfs: false
+    - name: Initialize pinned submodules
+      run: python3 dev/ci_submodules.py
     - name: Restore shared test build
       uses: ./.github/actions/test-build
       with:
@@ -5548,8 +5562,10 @@ jobs:
     steps:
     - uses: actions/checkout@v5
       with:
-        submodules: recursive
+        submodules: false
         lfs: false
+    - name: Initialize pinned submodules
+      run: python3 dev/ci_submodules.py
     - name: Restore shared test build
       uses: ./.github/actions/test-build
       with:
@@ -5715,8 +5731,10 @@ jobs:
     steps:
     - uses: actions/checkout@v5
       with:
-        submodules: recursive
+        submodules: false
         lfs: false
+    - name: Initialize pinned submodules
+      run: python3 dev/ci_submodules.py
     - name: Restore shared test build
       uses: ./.github/actions/test-build
       with:
@@ -5817,8 +5835,10 @@ jobs:
     steps:
     - uses: actions/checkout@v5
       with:
-        submodules: recursive
+        submodules: false
         lfs: false
+    - name: Initialize pinned submodules
+      run: python3 dev/ci_submodules.py
     - uses: ./.github/actions/test-build
       with:
         job: PETScMatrixRanges

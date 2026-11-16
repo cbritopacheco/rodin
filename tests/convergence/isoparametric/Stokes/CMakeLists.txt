@@ -67,6 +67,13 @@ if (RODIN_USE_PETSC AND NOT RODIN_CONVERGENCE_PETSC_COMPLEX)
     PRIVATE RODIN_CURVED_STOKES_PETSC)
   target_link_libraries(RodinConvergenceIsoparametricPETScStokes
     PRIVATE GTest::gtest RodinConvergence Rodin::PETSc)
+  # In the threaded coverage lane, local cubic hexahedra exceeded 1800s,
+  # while MPI-one completed in 815s and local controls took 1726s. Allow
+  # the existing high-order budget without changing the numerical study.
+  if (RODIN_CODE_COVERAGE AND RODIN_MULTITHREADED)
+    set_tests_properties(RodinConvergenceIsoparametricPETScStokesBoundary_P3P2Rates_Hexahedron
+      PROPERTIES TIMEOUT ${_RODIN_CURVED_STOKES_Q3_PYRAMID_TIMEOUT})
+  endif()
   foreach(q 1 3)
     foreach(geometry IN LISTS _RODIN_CURVED_STOKES_GEOMETRIES)
       set(_local_test RodinConvergenceIsoparametricPETScStokes_Q${q}_${geometry})

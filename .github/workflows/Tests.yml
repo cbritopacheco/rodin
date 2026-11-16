@@ -240,8 +240,10 @@ jobs:
     - name: Checkout repository and submodules
       uses: actions/checkout@v5
       with:
-        submodules: recursive
+        submodules: false
         lfs: false
+    - name: Initialize pinned submodules
+      run: python3 dev/ci_submodules.py
     - uses: ./.github/actions/prepare-apt
     - name: Setup Cpp (C++ / C)
       uses: aminya/setup-cpp@v1
@@ -295,8 +297,10 @@ jobs:
     - name: Checkout repository and submodules
       uses: actions/checkout@v5
       with:
-        submodules: recursive
+        submodules: false
         lfs: false
+    - name: Initialize pinned submodules
+      run: python3 dev/ci_submodules.py
     - name: Setup Python
       run: 'brew list -1 | grep python | while read formula; do brew unlink $formula; brew link --overwrite $formula; done
         || true

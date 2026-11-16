@@ -115,12 +115,23 @@ sources directly at the timestamped signed snapshot archive. Their source-local
 indexes; it does not disable signature validation. This removes both redundant
 index downloads and the dependency on live mirror availability. Retries retain
 the same snapshot; non-snapshot environments retain the mirror sequence above.
+Index and download failures wait 30 and 120 seconds before the remaining
+attempts, each with up to 30 seconds of jitter. This spreads matrix requests
+across short service outages even when every source maps to the same snapshot.
 The network refresh budget accommodates the observed slow but progressing
 snapshot downloads while remaining bounded. Index refreshes omit translations
 and command-not-found metadata.
 Final installation is offline, allows no package removals and has a
 900-second budget; configuration failures are not retried as download failures.
 Exhausted mirrors fail the job rather than skip its tests.
+
+Test and benchmark jobs check out the root repository before running
+`dev/ci_submodules.py`. Recursive submodule hydration retains the recorded
+gitlink commits and retries only transient transport failures, with five
+300-second attempts and 15/30/60/120-second delays. Authentication, missing
+commits and unknown failures remain fatal. `dev/ci_lfs.py` applies the same
+retry schedule to selected resource paths, including temporary hosted DNS
+resolver failures.
 
 Compiler selection verifies matching GCC/G++ versions before exporting them.
 If `cmake --version` stalls, it retries up to three 30-second attempts with
