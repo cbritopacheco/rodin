@@ -125,4 +125,5 @@ colour bars drawn by matplotlib) and 600 dpi PNG, widths 90/140/190 mm.
 
 XDMF wedges: Rodin now writes wedges in the XDMF/VTK node order (the former
 order twisted the faces and showed holes in ParaView). `render_3d.py` also
-reads files written before the fix.
+reads files written before the fix; `postprocess/fix_xdmf_wedges.py RESULTS`
+rewrites their wedge topology in place (idempotent) for ParaView.
