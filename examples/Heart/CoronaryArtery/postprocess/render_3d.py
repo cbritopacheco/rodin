@@ -522,6 +522,60 @@ def assemble(grid_paths, row_labels, col_labels, cbar, out, width=st.DOUBLE,
     print(f"  wrote {out}.pdf")
 
 
+def assemble_rows(grid_paths, col_labels, cbars, out, width=st.DOUBLE, note=None):
+    """Rows of panels sharing columns, one colour bar per row:
+    cbars[r] = (cmap, norm, label)."""
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    from PIL import Image
+
+    flat = [p for row in grid_paths for p in row if p]
+    if not flat:
+        return
+    box = crop_box(flat)
+    ims = [[np.asarray(Image.open(p).convert("RGB").crop(box)) if p else None for p in row]
+           for row in grid_paths]
+    h, w = next(im for row in ims for im in row if im is not None).shape[:2]
+    nr, nc = len(ims), len(ims[0])
+    cb_w = 0.11
+    panel_w = width * (1 - cb_w) / nc
+    fig_h = nr * panel_w * h / w * 1.12 + 7 * st.MM
+    fig = plt.figure(figsize=(width, fig_h))
+    top = 1 - 6 * st.MM / fig_h
+    gs = fig.add_gridspec(nr, nc, left=0.0, right=1 - cb_w, top=top, bottom=0.01,
+                          wspace=0.03, hspace=0.12)
+    letters = "abcdefghijklmnopqrstuvwxyz"
+    k = 0
+    for r in range(nr):
+        axes = []
+        for c in range(nc):
+            ax = fig.add_subplot(gs[r, c])
+            ax.set_axis_off()
+            ax.imshow(ims[r][c] if ims[r][c] is not None else np.full((h, w, 3), 255, np.uint8))
+            if ims[r][c] is not None:
+                ax.text(0.0, 1.0, f"({letters[k]})", transform=ax.transAxes, ha="left",
+                        va="bottom", fontsize=8)
+                k += 1
+            if r == 0 and col_labels:
+                ax.set_title(col_labels[c], fontsize=8, pad=9)
+            axes.append(ax)
+        cmap, norm, label = cbars[r]
+        pos = axes[-1].get_position()
+        cax = fig.add_axes([1 - cb_w + 0.018, pos.y0 + 0.12 * pos.height, 0.011,
+                            0.76 * pos.height])
+        cb = fig.colorbar(matplotlib.cm.ScalarMappable(norm=norm, cmap=cmap), cax=cax)
+        cb.set_label(label)
+        cb.outline.set_linewidth(0.5)
+        cb.ax.tick_params(width=0.5, length=2.5, which="major")
+        cb.ax.tick_params(width=0.4, length=1.5, which="minor")
+    if note:
+        fig.text(1 - 0.01, 0.002, note, ha="right", va="bottom", fontsize=6.5, color="0.3")
+    st.save(fig, out)
+    plt.close(fig)
+    print(f"  wrote {out}.pdf")
+
+
 def robust_range(arrays, lo=1.0, hi=99.5, positive=False):
     v = np.concatenate([np.ravel(a) for a in arrays if a is not None and np.size(a)])
     if positive:
@@ -716,14 +770,15 @@ def main():
                 row.append(path)
             grid_c.append(row)
             rows_c.append(tag)
-        for (tag, cmap, norm, label), row in zip(
-                (("TAWSS", "magma", norm_w, "TAWSS [Pa]"),
-                 ("OSI", "cividis", colors.Normalize(*ol), "OSI [-]"),
-                 ("Streamlines", "turbo", colors.Normalize(*ul), r"$|\mathbf{u}|$ [m/s]")),
-                grid_c):
+        lesion_cbars = (("magma", norm_w, "TAWSS [Pa]"),
+                        ("cividis", colors.Normalize(*ol), "OSI [-]"),
+                        ("turbo", colors.Normalize(*ul), r"$|\mathbf{u}|$ [m/s]"))
+        for (tag, _), (cmap, norm, label), row in zip(
+                (("TAWSS", 0), ("OSI", 0), ("Streamlines", 0)), lesion_cbars, grid_c):
             assemble([row], [""], cols, (cmap, norm, label),
                      os.path.join(args.figures, f"fig3d_lesion_{tag.lower()}"),
                      note="80% stenosis, close-up of the lesion")
+        assemble_rows(grid_c, cols, lesion_cbars, os.path.join(args.figures, "fig3d_lesion"))
     print(f"  wrote {os.path.join(args.figures, 'metrics_3d.csv')}")
 
 
