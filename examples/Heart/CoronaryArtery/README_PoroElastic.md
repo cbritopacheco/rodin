@@ -102,3 +102,27 @@ RANKS_PER_CASE=30 CYCLES=4 examples/Heart/CoronaryArtery/run_poroelastic_scenari
 # BATCH=geometry: one geometry at a time (3 cases together)
 # results/coronary_poroelastic_mpi/<geometry>/<scenario>
 ```
+
+## Post-processing (CMAME figures)
+
+```sh
+python3 -m pip install numpy matplotlib h5py pyvista pillow   # once
+examples/Heart/CoronaryArtery/postprocess/compare_poroelastic_results.sh \
+  results/coronary_poroelastic_mpi results/coronary_poroelastic_mpi/figures
+```
+
+The last complete cycle of every `<geometry>/<scenario>` case is analysed.
+0D / coupling (`plot_poroelastic.py`): `fig_lv_poroelastic` (p_v, h, Φ, p̃,
+Q_ar, ν_CY), `fig_coronary_coupling` (Q_in, outlet pressure, p_tm, φ_a, φ_v,
+distal volume), `fig_phase_loops` (Φ–p̃ and Q_ar–p̃), `fig_scenario_changes`
+(% change vs healthy, and the stenosis effect), `metrics_poroelastic.{csv,tex}`.
+3D (`render_3d.py`, off-screen PyVista): `fig3d_wss_diastole`, `fig3d_tawss`
+(log scale), `fig3d_osi`, `fig3d_streamlines`, `fig3d_wall_motion` (cyclic wall
+displacement amplitude, exaggerated), `fig3d_lesion_{tawss,osi,streamlines}`
+(close-up located where the stenotic wall departs from the stenosis-free one),
+`metrics_3d.csv` (area-weighted TAWSS, low-TAWSS area, OSI, ...). PDF (vector,
+colour bars drawn by matplotlib) and 600 dpi PNG, widths 90/140/190 mm.
+
+XDMF wedges: Rodin now writes wedges in the XDMF/VTK node order (the former
+order twisted the faces and showed holes in ParaView). `render_3d.py` also
+reads files written before the fix.

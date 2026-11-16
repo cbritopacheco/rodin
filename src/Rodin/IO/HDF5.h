@@ -780,9 +780,11 @@ namespace Rodin::IO
               xdmfReferencePoint({1, 1, 0}), xdmfReferencePoint({0, 1, 0}),
               xdmfReferencePoint({0, 0, 1})};
           case PT::Wedge:
-            return {xdmfReferencePoint({0, 0, 0}), xdmfReferencePoint({1, 0, 0}),
-              xdmfReferencePoint({0, 1, 0}), xdmfReferencePoint({0, 0, 1}),
-              xdmfReferencePoint({1, 0, 1}), xdmfReferencePoint({0, 1, 1})};
+            // XDMF/VTK wedge: the base (0,1,2) normal points AWAY from the
+            // top face, i.e. Rodin's reference vertices 1 <-> 2, 4 <-> 5.
+            return {xdmfReferencePoint({0, 0, 0}), xdmfReferencePoint({0, 1, 0}),
+              xdmfReferencePoint({1, 0, 0}), xdmfReferencePoint({0, 0, 1}),
+              xdmfReferencePoint({0, 1, 1}), xdmfReferencePoint({1, 0, 1})};
           case PT::Hexahedron:
             return {xdmfReferencePoint({0, 0, 0}), xdmfReferencePoint({1, 0, 0}),
               xdmfReferencePoint({1, 1, 0}), xdmfReferencePoint({0, 1, 0}),
@@ -815,15 +817,21 @@ namespace Rodin::IO
             xdmfReferencePoint({0, 0.5, 0}), xdmfReferencePoint({0, 0, 0.5}),
             xdmfReferencePoint({0.5, 0, 0.5}), xdmfReferencePoint({0, 0.5, 0.5})};
         case PT::Wedge:
-          return {xdmfReferencePoint({0, 0, 0}), xdmfReferencePoint({1, 0, 0}),
-            xdmfReferencePoint({0, 1, 0}), xdmfReferencePoint({0, 0, 1}),
-            xdmfReferencePoint({1, 0, 1}), xdmfReferencePoint({0, 1, 1}),
-            xdmfReferencePoint({0.5, 0, 0}), xdmfReferencePoint({0.5, 0.5, 0}),
-            xdmfReferencePoint({0, 0.5, 0}), xdmfReferencePoint({0, 0, 0.5}),
-            xdmfReferencePoint({1, 0, 0.5}), xdmfReferencePoint({0, 1, 0.5}),
-            xdmfReferencePoint({0.5, 0, 1}), xdmfReferencePoint({0.5, 0.5, 1}),
-            xdmfReferencePoint({0, 0.5, 1}), xdmfReferencePoint({0.5, 0, 0.5}),
-            xdmfReferencePoint({0.5, 0.5, 0.5}), xdmfReferencePoint({0, 0.5, 0.5})};
+          // Wedge_18 in XDMF/VTK order (VTK_BIQUADRATIC_QUADRATIC_WEDGE):
+          // corners with the base normal away from the top (Rodin 1 <-> 2,
+          // 4 <-> 5), then the edges (0,1) (1,2) (2,0) (3,4) (4,5) (5,3)
+          // (0,3) (1,4) (2,5), then the quad faces (0,1,4,3) (1,2,5,4)
+          // (2,0,3,5).  The previous order listed the vertical edges before
+          // the top ones, which twisted the faces (holes in ParaView).
+          return {xdmfReferencePoint({0, 0, 0}), xdmfReferencePoint({0, 1, 0}),
+            xdmfReferencePoint({1, 0, 0}), xdmfReferencePoint({0, 0, 1}),
+            xdmfReferencePoint({0, 1, 1}), xdmfReferencePoint({1, 0, 1}),
+            xdmfReferencePoint({0, 0.5, 0}), xdmfReferencePoint({0.5, 0.5, 0}),
+            xdmfReferencePoint({0.5, 0, 0}), xdmfReferencePoint({0, 0.5, 1}),
+            xdmfReferencePoint({0.5, 0.5, 1}), xdmfReferencePoint({0.5, 0, 1}),
+            xdmfReferencePoint({0, 0, 0.5}), xdmfReferencePoint({0, 1, 0.5}),
+            xdmfReferencePoint({1, 0, 0.5}), xdmfReferencePoint({0, 0.5, 0.5}),
+            xdmfReferencePoint({0.5, 0.5, 0.5}), xdmfReferencePoint({0.5, 0, 0.5})};
         case PT::Pyramid:
           return {xdmfReferencePoint({0, 0, 0}), xdmfReferencePoint({1, 0, 0}),
             xdmfReferencePoint({1, 1, 0}), xdmfReferencePoint({0, 1, 0}),
@@ -1429,6 +1437,15 @@ namespace Rodin::IO
 
         if (geometry == Geometry::Polytope::Type::Segment)
           topology.push_back(static_cast<U64>(key.size()));
+
+        if (geometry == Geometry::Polytope::Type::Wedge && key.size() == 6)
+        {
+          // XDMF/VTK wedge orientation (see getXDMFReferenceNodes).
+          static constexpr size_t s_wedge[6] = {0, 2, 1, 3, 5, 4};
+          for (size_t k = 0; k < 6; ++k)
+            topology.push_back(static_cast<U64>(key[s_wedge[k]]));
+          continue;
+        }
 
         for (size_t k = 0; k < key.size(); ++k)
           topology.push_back(static_cast<U64>(key[k]));

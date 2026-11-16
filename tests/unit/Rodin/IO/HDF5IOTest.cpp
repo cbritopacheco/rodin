@@ -468,6 +468,38 @@ namespace Rodin::Tests::Unit
   }
 
   /// @brief Verifies XDMF mixed linear and curved cells uses mixed topology for IO HDF 5 by checking exact expected values.
+  // XDMF/VTK wedges: base (0,1,2) oriented away from the top face, and the
+  // Wedge_18 edge nodes (0,1) (1,2) (2,0) (3,4) (4,5) (5,3) (0,3) (1,4) (2,5)
+  // followed by the quad-face centres (0,1,4,3) (1,2,5,4) (2,0,3,5).
+  TEST(Rodin_IO_HDF5, XDMFWedgeReferenceNodesFollowVTKOrder)
+  {
+    for (const size_t order : {size_t(1), size_t(2)})
+    {
+      const auto n = HDF5::getXDMFReferenceNodes(Polytope::Type::Wedge, order);
+      ASSERT_EQ(n.size(), order == 1 ? 6u : 18u);
+      // Right-hand normal of the base triangle points away from vertex 3.
+      const auto vec = [](const Math::SpatialPoint& p) {
+        return Eigen::Vector3d(p(0), p(1), p(2));
+      };
+      const Eigen::Vector3d a = vec(n[1]) - vec(n[0]), b = vec(n[2]) - vec(n[0]),
+                            up = vec(n[3]) - vec(n[0]);
+      EXPECT_LT(a.cross(b).dot(up), 0.0);
+      if (order == 1)
+        continue;
+      const size_t edges[9][2] = {
+        {0, 1}, {1, 2}, {2, 0}, {3, 4}, {4, 5}, {5, 3}, {0, 3}, {1, 4}, {2, 5}};
+      for (size_t k = 0; k < 9; ++k)
+        EXPECT_NEAR((n[6 + k] - 0.5 * (n[edges[k][0]] + n[edges[k][1]])).norm(), 0.0, 1e-14);
+      const size_t faces[3][4] = {{0, 1, 4, 3}, {1, 2, 5, 4}, {2, 0, 3, 5}};
+      for (size_t k = 0; k < 3; ++k)
+      {
+        Math::SpatialPoint c = 0.25 * (n[faces[k][0]] + n[faces[k][1]] + n[faces[k][2]] +
+                                        n[faces[k][3]]);
+        EXPECT_NEAR((n[15 + k] - c).norm(), 0.0, 1e-14);
+      }
+    }
+  }
+
   TEST(Rodin_IO_HDF5, XDMFMixedLinearAndCurvedCellsUsesMixedTopology)
   {
     const boost::filesystem::path meshH5 = "/tmp/rodin_xdmf_mixed_linear_curved.h5";
