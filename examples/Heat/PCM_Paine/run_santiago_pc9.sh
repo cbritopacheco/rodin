@@ -40,15 +40,22 @@ fi
 CMAKE_ARGS="${CMAKE_ARGS:-}"
 BUILD_JOBS="${BUILD_JOBS:-8}"
 
-echo "[rodin] $(git -C "$REPO" rev-parse --abbrev-ref HEAD) $(git -C "$REPO" rev-parse --short HEAD)"
-if [ ! -f "$BUILD/CMakeCache.txt" ]; then
-  # shellcheck disable=SC2086
-  eval cmake -S "\"$REPO\"" -B "\"$BUILD\"" -DCMAKE_BUILD_TYPE=Release \
-    -DRODIN_USE_MPI=ON -DRODIN_USE_PETSC=ON $CMAKE_ARGS
+if [ -n "${BIN:-}" ]; then
+  # Prebuilt solver (e.g. the repository is on another branch with runs in
+  # progress): no build, no source check.
+  [ -x "$BIN" ] || { echo "BIN=$BIN is not executable" >&2; exit 1; }
+  echo "[rodin] prebuilt solver $BIN"
+else
+  echo "[rodin] $(git -C "$REPO" rev-parse --abbrev-ref HEAD) $(git -C "$REPO" rev-parse --short HEAD)"
+  if [ ! -f "$BUILD/CMakeCache.txt" ]; then
+    # shellcheck disable=SC2086
+    eval cmake -S "\"$REPO\"" -B "\"$BUILD\"" -DCMAKE_BUILD_TYPE=Release \
+      -DRODIN_USE_MPI=ON -DRODIN_USE_PETSC=ON $CMAKE_ARGS
+  fi
+  cmake --build "$BUILD" -j "$BUILD_JOBS" --target NaturalConvectionPCM
+  grep -q pcm_ygrade_both "$REPO/examples/Heat/NaturalConvectionPCM.cpp" \
+    || { echo "This NaturalConvectionPCM.cpp has no -pcm_ygrade_both: update the source first" >&2; exit 1; }
 fi
-cmake --build "$BUILD" -j "$BUILD_JOBS" --target NaturalConvectionPCM
-grep -q pcm_ygrade_both "$REPO/examples/Heat/NaturalConvectionPCM.cpp" \
-  || { echo "This NaturalConvectionPCM.cpp has no -pcm_ygrade_both: update the source first" >&2; exit 1; }
 
 export BUILD
 export OUT="${OUT:-$PWD/pcm_santiago}"
