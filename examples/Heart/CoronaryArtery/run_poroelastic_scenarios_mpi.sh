@@ -30,6 +30,8 @@
 #   SCENARIOS      scenarios of each geometry (default: healthy aortic_stenosis hyperviscosity)
 #                  available: healthy, aortic_stenosis, hyperviscosity, lvh
 #   OUT            output root                (default: $RODIN/results/coronary_poroelastic_mpi)
+#   TARGET         executable                 (default: CoronaryArtery_Explicit_PoroElastic_MPI;
+#                  CoronaryArtery_Monolithic_PoroElastic_MPI for the monolithic FSI)
 #   BUILD_FIRST=1  rebuild the target before running
 #   MPI_EXTRA      extra launcher options
 #   EXTRA          extra PETSc options passed to every case, e.g. the direct
@@ -53,7 +55,7 @@ OUT="${OUT:-$RODIN/results/coronary_poroelastic_mpi}"
 MPI_EXTRA="${MPI_EXTRA:-}"
 EXTRA="${EXTRA:-}"
 
-TARGET=CoronaryArtery_Explicit_PoroElastic_MPI
+TARGET="${TARGET:-CoronaryArtery_Explicit_PoroElastic_MPI}"
 EXE="$BUILD/examples/Heart/$TARGET"
 MESH_SRC="$SCRIPT_DIR/meshes"
 MESH_DIR="$OUT/meshes"
