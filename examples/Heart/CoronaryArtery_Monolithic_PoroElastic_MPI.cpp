@@ -28,7 +28,13 @@
  * coronary_mass_. Options: -coronary_newton_max_iterations,
  * -coronary_newton_rtol (|R|/|d - d^n|), -coronary_newton_atol [m],
  * -coronary_geometry_predictor 0|1|2 (geometry from d^n | d^n + dt v^n |
- * full Newmark predictor; the order-2 one injects energy over cycles).
+ * full Newmark predictor; the order-2 one injects energy over cycles),
+ * -coronary_geometry_iterations K (default 3), -coronary_geometry_rtol:
+ * SEMI-IMPLICIT geometry. Within a step, Newton-GMRES is solved on the
+ * frozen domain Omega(d_geo); then d_geo <- d and the step is re-solved,
+ * until |d - d_geo| / |d - d^n| <= rtol or K passes. Each pass keeps the
+ * shape derivatives out of the Jacobian (fixed point on the geometry only);
+ * K = 1 recovers the explicit-geometry scheme.
  *
  * --- Explicit (Robin-Robin) original: ------------------------------------
  *
@@ -350,6 +356,11 @@ namespace
       /// Order of the explicit geometry predictor: 0 d^n, 1 d^n + dt v^n,
       /// 2 Newmark predictor (+ dt^2 (1/2 - beta) a^n).
       size_t geometryPredictor = 1;
+      /// Semi-implicit geometry: maximum passes (geometry <- converged d,
+      /// re-solve) per step and tolerance on |d - d_geo| / |d - d^n|.
+      /// 1 = explicit geometry.
+      size_t geometryIterations = 3;
+      Real geometryRelTolerance = 1.0e-3;
       /// IQN-ILS(q): secant columns of the last q time steps are reused.
       size_t couplingIQNReuse = 4;
       /// Maximum number of IQN-ILS columns kept (oldest dropped first).
@@ -859,6 +870,8 @@ namespace
     optReal("-coronary_newton_atol", cfg.newtonAbsTolerance, 0.0, inf);
     optInt("-coronary_geometry_predictor", cfg.geometryPredictor, 0);
     cfg.geometryPredictor = std::min<size_t>(cfg.geometryPredictor, 2);
+    optInt("-coronary_geometry_iterations", cfg.geometryIterations, 1);
+    optReal("-coronary_geometry_rtol", cfg.geometryRelTolerance, 0.0, inf);
     optInt("-coronary_coupling_iqn_reuse", cfg.couplingIQNReuse, 0);
     optInt("-coronary_coupling_iqn_columns", cfg.couplingIQNColumns, 1);
     optInt("-coronary_prestress_steps", cfg.prestressSteps, 0);
@@ -2578,8 +2591,19 @@ int main(int argc, char** argv)
       //   J z = z - J_s^{-1} L(-A_N A_D^{-1} B z/dt)     (eq. (15) + solid tangent).
       // ================================================================
 
-      // (a) Explicit geometry from the predictor dGeo, mesh velocity,
-      //     VMS projections and fluid operators, all fixed in the step.
+      Real newtonRes = 0.0;
+      size_t newtonIts = 0;
+      size_t newtonItsTotal = 0;
+      size_t gmresIts = 0;
+      size_t geoPassesDone = 0;
+      Real geoChange = 0.0;
+      fluidKrylovIts = 0;
+      VecCopy(vecOf(dPred), newtonState);
+      for (size_t geoPass = 0; geoPass < cfg.geometryIterations; ++geoPass)
+      {
+      // (a) Geometry Omega(d_geo) (predictor on the first pass, last converged
+      //     d afterwards), mesh velocity, VMS projections and fluid operators,
+      //     all frozen during the Newton iterations of this pass.
       scatterField(interfaceScatter, dGeo, wallDisplacementFluid, SCATTER_FORWARD);
       restoreMeshToReference(meshFluid, referenceVertices);
       ale.assemble();
@@ -2593,6 +2617,7 @@ int main(int argc, char** argv)
           if (isRoot)
             std::cerr << "ALE lift non-finite at step " << step
                       << ": the fluid mesh is tangling.\n";
+          stepFailed = true;
           break;
         }
       }
@@ -2724,12 +2749,8 @@ int main(int argc, char** argv)
         return PETSC_SUCCESS;
       };
 
-      // (b) Newton iterations on the solid displacement.
-      VecCopy(vecOf(dPred), newtonState);
-      Real newtonRes = 0.0;
-      size_t newtonIts = 0;
-      size_t gmresIts = 0;
-      fluidKrylovIts = 0;
+      // (b) Newton iterations on the solid displacement (warm start from the
+      //     previous pass).
       tangentFailed = false;
       for (size_t k = 0; k <= cfg.newtonMaxIterations; ++k)
       {
@@ -2786,14 +2807,35 @@ int main(int argc, char** argv)
                     << ").\n";
         VecAXPY(newtonState, 1.0, newtonUpdate);
       }
+      newtonItsTotal += newtonIts;
+      if (stepFailed)
+        break;
+      ++geoPassesDone;
+      // (c) Geometry update: |d - d_geo| relative to the step increment.
+      {
+        PetscReal gd = 0.0, gi = 0.0;
+        VecWAXPY(solidWork, -1.0, vecOf(dGeo), vecOf(dState));
+        VecNorm(solidWork, NORM_2, &gd);
+        VecWAXPY(solidWork, -1.0, vecOf(dOld), vecOf(dState));
+        VecNorm(solidWork, NORM_2, &gi);
+        geoChange = (gi > 0.0) ? static_cast<Real>(gd / gi) : static_cast<Real>(gd);
+      }
+      if (isRoot && cfg.geometryIterations > 1)
+        Alert::Info() << "  geometry pass " << geoPass << "  |d - d_geo|/|d - d^n| = "
+                      << geoChange << Alert::Raise;
+      if (geoChange <= cfg.geometryRelTolerance || geoPass + 1 == cfg.geometryIterations)
+        break;
+      dGeo = dState;
+      } // geometry passes
       if (stepFailed)
         break;
       if (isRoot)
-        Alert::Info() << "  Newton-GMRES: " << newtonIts << " Newton, " << gmresIts
+        Alert::Info() << "  Newton-GMRES: " << geoPassesDone << " geometry pass(es), "
+                      << newtonItsTotal << " Newton, " << gmresIts
                       << " GMRES, " << fluidKrylovIts << " fluid Krylov iterations"
                       << Alert::Raise;
       lastRel = newtonRes;
-      couplesDone = newtonIts;
+      couplesDone = newtonItsTotal;
 
       // Fluid state of the last fluid solve (consistent with d_k).
       u.getSolution().setData(fluidState, flow.getTrialOffsets()[0]);
