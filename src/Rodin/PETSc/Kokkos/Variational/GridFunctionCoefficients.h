@@ -160,7 +160,8 @@ namespace Rodin::Kokkos::Variational
         if constexpr (distributed)
         {
           // PETSc owns the cached map independently of coefficient state.
-          auto& positions = ::Rodin::PETSc::Internal::GhostedPositions<MemorySpace>::of(data);
+          auto& positions =
+            ::Rodin::PETSc::Internal::GhostedPositions<MemorySpace>::of(data);
           positions.setSpace(fes);
           const auto table = positions.getView();
           if (table.size != static_cast<size_t>(count))

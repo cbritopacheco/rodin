@@ -116,7 +116,8 @@ namespace Rodin::Tests::Unit
     TrialFunction u(fes);
     TestFunction v(fes);
     Problem pb(u, v);
-    pb = Integral(Grad(u), Grad(v)) + Integral(u, v) - Integral(RealFunction(1), v);
+    const auto diffusion = Integral(Grad(u), Grad(v));
+    pb = diffusion + Integral(u, v) - Integral(RealFunction(1), v);
     pb.assemble();
     auto& system = pb.getLinearSystem();
     auto& matrix = system.getOperator();
