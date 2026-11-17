@@ -27,7 +27,7 @@ class EnvironmentTest(unittest.TestCase):
         read_text = Path.read_text
         self.release = patch.object(Path, 'read_text', autospec=True,
                                    side_effect=lambda path, *args, **kwargs:
-                                   'ID=ubuntu\nVERSION_ID="24.04"\n' if str(path) == '/etc/os-release'
+                                   'ID=ubuntu\nVERSION_ID="24.04"\nVERSION_CODENAME=noble\n' if str(path) == '/etc/os-release'
                                    else read_text(path, *args, **kwargs))
         self.release.start()
         self.addCleanup(self.release.stop)
@@ -583,6 +583,91 @@ class EnvironmentTest(unittest.TestCase):
             prefixes = [x for x in output.read_text().splitlines() if x.startswith('restore-prefix=')]
             self.assertNotEqual(keys[0], keys[1])
             self.assertEqual(prefixes[0], prefixes[1])
+
+    def test_empty_or_disabled_ubuntu_sources_get_a_signed_snapshot_fallback(self):
+        for disabled in [False, True]:
+            with self.subTest(disabled=disabled), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                system = root / 'etc'
+                parts = system / 'sources.list.d'
+                parts.mkdir(parents=True)
+                vendor = 'deb [signed-by=/keys/vendor.gpg] https://vendor.example/repo stable main\n'
+                (parts / 'vendor.list').write_text(vendor)
+                if disabled:
+                    (parts / 'ubuntu.sources').write_text(
+                        'Types: deb\nURIs: https://archive.ubuntu.com/ubuntu\n'
+                        'Suites: noble\nComponents: main\nEnabled: no\n')
+                keyring = root / 'ubuntu.gpg'
+                keyring.write_bytes(b'Ubuntu archive keyring fixture')
+                with patch.dict(os.environ, RODIN_APT_SNAPSHOT='shared'), \
+                        patch.object(environment, 'UBUNTU_KEYRING', keyring):
+                    environment.sources(root / 'state', None, system)
+                generated = (root / 'state/sources.list.d/rodin-ubuntu.sources').read_text()
+                self.assertIn('URIs: https://snapshot.ubuntu.com/ubuntu/' +
+                              environment.SHARED_APT_SNAPSHOT + '/', generated)
+                self.assertIn('Suites: noble noble-updates noble-backports noble-security', generated)
+                self.assertIn('Components: main restricted universe multiverse', generated)
+                self.assertIn('Signed-By: ' + str(keyring), generated)
+                self.assertNotIn('Trusted:', generated)
+                self.assertEqual((root / 'state/sources.list.d/vendor.list').read_text(), vendor)
+                self.assertEqual((parts / 'vendor.list').read_text(), vendor)
+
+    def test_binary_index_target_is_required_even_if_the_runner_disables_it(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            system = root / 'etc'
+            system.mkdir()
+            with patch.dict(os.environ, RODIN_APT_SNAPSHOT=''):
+                options = environment.sources(root / 'state', None, system)
+            with patch.object(environment.subprocess, 'run') as run, \
+                    patch.object(environment.subprocess, 'check_output', side_effect=[
+                        'lcov:\n  Candidate: 2.0-1\n', '']) as query:
+                environment.apt(['update'], options, Path('/cache'), 180)
+                self.assertEqual(environment.candidates(['lcov'], options), {'lcov': '2.0-1'})
+                self.assertEqual(environment.installed_dependencies(['lcov=2.0-1'], options), [])
+            commands = [run.call_args.args[0], *(call.args[0] for call in query.call_args_list)]
+            for command in commands:
+                self.assertIn('Acquire::IndexTargets::deb::Packages::DefaultEnabled=true', command)
+                self.assertNotIn('--allow-unauthenticated', command)
+            self.assertIn('APT::Update::Error-Mode=any', commands[0])
+
+    def test_snapshot_recovery_requires_the_existing_ubuntu_trust_root(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            system = root / 'etc'
+            system.mkdir()
+            with patch.dict(os.environ, RODIN_APT_SNAPSHOT='shared'), \
+                    patch.object(environment, 'UBUNTU_KEYRING', root / 'missing.gpg'):
+                with self.assertRaisesRegex(RuntimeError, 'Ubuntu archive keyring'):
+                    environment.sources(root / 'state', None, system)
+            self.assertFalse((root / 'state/sources.list.d/rodin-ubuntu.sources').exists())
+
+    def test_missing_candidate_retries_refresh_before_pinning_any_plan(self):
+        with tempfile.TemporaryDirectory() as directory, \
+                patch.object(environment, 'sources', return_value=[]), \
+                patch.object(environment, 'installed_dependencies', return_value=[]), \
+                patch.object(environment, 'candidates', side_effect=[
+                    environment.MissingCandidate('No APT candidate for lcov'), {'lcov': '2.0-1'}]), \
+                patch.object(environment.subprocess, 'check_output', return_value='amd64\n'), \
+                patch.object(environment, 'apt', side_effect=[None, None, '']) as apt:
+            root = Path(directory)
+            plan = environment.prepare(['lcov'], root / 'cache', root / 'state')
+            self.assertEqual(plan['source_index'], 1)
+            self.assertEqual(plan['versions'], {'lcov': '2.0-1'})
+            self.assertEqual([call.args[0][0] for call in apt.call_args_list], ['update', 'update', '--simulate'])
+            self.retry_sleep.assert_called_once()
+
+    def test_missing_candidates_exhaust_without_saving_a_plan(self):
+        with tempfile.TemporaryDirectory() as directory, \
+                patch.object(environment, 'sources', return_value=[]), \
+                patch.object(environment, 'candidates', side_effect=environment.MissingCandidate('No APT candidate for lcov')), \
+                patch.object(environment, 'apt') as apt:
+            root = Path(directory)
+            with self.assertRaisesRegex(RuntimeError, 'All signed APT index sources failed'):
+                environment.prepare(['lcov'], root / 'cache', root / 'state')
+            self.assertEqual(apt.call_count, 3)
+            self.assertEqual(self.retry_sleep.call_count, 2)
+            self.assertFalse((root / 'state/plan.json').exists())
 
     def test_signed_index_outage_has_bounded_backoff_and_fails_closed(self):
         with tempfile.TemporaryDirectory() as tmp, \

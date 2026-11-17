@@ -29,10 +29,17 @@ class SubmoduleRetryTest(unittest.TestCase):
                     patch.object(ci_submodules, 'run', side_effect=[
                         self.response(), error, self.response()]) as run, \
                     patch.object(ci_submodules.time, 'sleep') as sleep:
+                if isinstance(error, subprocess.TimeoutExpired):
+                    run.side_effect = [self.response(), error, self.response(), self.response()]
                 ci_submodules.hydrate()
             self.assertEqual(run.call_args_list[0].args[0], ['git', 'submodule', 'sync', '--recursive'])
             self.assertEqual(run.call_args_list[0].kwargs['timeout'], 60)
-            for call in run.call_args_list[1:]:
+            updates = run.call_args_list[1:]
+            if isinstance(error, subprocess.TimeoutExpired):
+                self.assertEqual(updates[1].args[0], ci_submodules.RECOVER)
+                self.assertEqual(updates[1].kwargs['timeout'], 60)
+                updates = [updates[0], updates[2]]
+            for call in updates:
                 self.assertEqual(call.args[0], ['git', 'submodule', 'update', '--init', '--recursive'])
                 self.assertEqual(call.kwargs['timeout'], 300)
             sleep.assert_called_once_with(15)
@@ -50,6 +57,68 @@ class SubmoduleRetryTest(unittest.TestCase):
             self.assertEqual(run.call_count, attempts + 1)
             self.assertEqual([call.args[0] for call in sleep.call_args_list],
                              list(ci_submodules.RETRY_DELAYS[:attempts - 1]))
+
+    def test_interrupted_checkout_restores_exact_pin_and_preserves_local_files(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            env = dict(os.environ, GIT_ALLOW_PROTOCOL='file', GIT_CONFIG_NOSYSTEM='1',
+                       GIT_CONFIG_GLOBAL=os.devnull, GIT_AUTHOR_NAME='CI test',
+                       GIT_AUTHOR_EMAIL='ci@example.invalid', GIT_COMMITTER_NAME='CI test',
+                       GIT_COMMITTER_EMAIL='ci@example.invalid')
+            def git(cwd, *args):
+                return subprocess.check_output(['git', *args], cwd=cwd, env=env,
+                                               text=True, stderr=subprocess.STDOUT).strip()
+            dependency = root / 'dependency'
+            dependency.mkdir()
+            git(dependency, 'init', '-q')
+            (dependency / 'data').write_text('pinned content')
+            git(dependency, 'add', '.')
+            git(dependency, 'commit', '-qm', 'pin')
+            pin = git(dependency, 'rev-parse', 'HEAD')
+            parent = root / 'parent'
+            parent.mkdir()
+            git(parent, 'init', '-q')
+            git(parent, 'submodule', 'add', str(dependency), 'child')
+            git(parent, 'commit', '-qam', 'record gitlink')
+            (dependency / 'data').write_text('new branch tip')
+            git(dependency, 'commit', '-qam', 'advance')
+            original = ci_submodules.run
+            interrupted = False
+            def run(command, timeout):
+                nonlocal interrupted
+                result = original(command, timeout)
+                if command[1:3] == ['submodule', 'update'] and not interrupted:
+                    self.assertEqual(result.returncode, 0, result.stderr)
+                    git(parent / 'child', 'symbolic-ref', 'HEAD', 'refs/heads/interrupted')
+                    (parent / 'child/local-file').write_text('keep me')
+                    interrupted = True
+                    raise subprocess.TimeoutExpired(command, timeout)
+                return result
+            previous = Path.cwd()
+            try:
+                os.chdir(parent)
+                with patch.dict(os.environ, env, clear=True), \
+                        patch.object(ci_submodules, 'run', side_effect=run), \
+                        patch.object(ci_submodules.time, 'sleep') as sleep:
+                    ci_submodules.hydrate()
+                sleep.assert_called_once_with(15)
+            finally:
+                os.chdir(previous)
+            self.assertEqual(git(parent / 'child', 'rev-parse', 'HEAD'), pin)
+            self.assertEqual((parent / 'child/data').read_text(), 'pinned content')
+            self.assertEqual((parent / 'child/local-file').read_text(), 'keep me')
+            # Recovery must not discard a conflicting untracked file.
+            git(parent / 'child', 'symbolic-ref', 'HEAD', 'refs/heads/interrupted-again')
+            git(parent / 'child', 'rm', '--cached', 'data')
+            (parent / 'child/data').write_text('local untracked content')
+            try:
+                os.chdir(parent)
+                with patch.dict(os.environ, env, clear=True):
+                    conflict = original(ci_submodules.RECOVER, timeout=60)
+            finally:
+                os.chdir(previous)
+            self.assertNotEqual(conflict.returncode, 0)
+            self.assertEqual((parent / 'child/data').read_text(), 'local untracked content')
 
     def test_watchdog_stops_clone_children_before_retry(self):
         with tempfile.TemporaryDirectory() as directory:

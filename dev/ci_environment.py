@@ -50,6 +50,7 @@ YAML_VERSION = '6.0.2'
 # Shared build campaigns must not cross a live archive security update. Refresh
 # this signed Ubuntu snapshot deliberately for producers and consumers together.
 SHARED_APT_SNAPSHOT = '20261113T000000Z'
+UBUNTU_KEYRING = Path('/usr/share/keyrings/ubuntu-archive-keyring.gpg')
 # A wheel install normally takes seconds. Bound network stalls to three minutes
 # per attempt and retry whole pip invocations, including malformed index JSON.
 PYTHON_INSTALL_TIMEOUT = 180
@@ -60,6 +61,10 @@ PYTHON_RETRY_DELAY = 2
 CMAKE_PROBE_TIMEOUT = 30
 CMAKE_PROBE_ATTEMPTS = 3
 CMAKE_PROBE_RETRY_DELAY = 2
+
+
+class MissingCandidate(ValueError):
+    """A refreshed index did not provide every requested package."""
 
 
 def install_python():
@@ -205,6 +210,7 @@ def sources(directory, mirror, system=Path('/etc/apt')):
     entries = [main] if main.exists() else []
     entries += sorted((system / 'sources.list.d').glob('*.list'))
     entries += sorted((system / 'sources.list.d').glob('*.sources'))
+    ubuntu = False
     for source in entries:
         text = source.read_text()
         if mirror or snapshot:
@@ -242,6 +248,9 @@ def sources(directory, mirror, system=Path('/etc/apt')):
                     else:
                         ending = '\n' if paragraph.endswith('\n') else ''
                         paragraph = paragraph.rstrip('\n') + '\nSnapshot: no' + ending
+                    binary = re.search(r'^Types:[ \t]*([^\n]+)', paragraph, re.M | re.I)
+                    disabled = re.search(r'^Enabled:[ \t]*no[ \t]*$', paragraph, re.M | re.I)
+                    ubuntu = ubuntu or bool(binary and 'deb' in binary[1].split() and not disabled)
                     paragraphs[index] = paragraph
                 text = ''.join(paragraphs)
             else:
@@ -249,6 +258,7 @@ def sources(directory, mirror, system=Path('/etc/apt')):
                 for line in text.splitlines(keepends=True):
                     entry = re.match(r'^(\s*deb(?:-src)?\s+)(\[[^]\n]*\]\s+)?(\S+)(.*)', line)
                     if entry and UBUNTU_URI.fullmatch(entry[3]):
+                        ubuntu = ubuntu or bool(re.match(r'^\s*deb\s', line))
                         flags = entry[2].strip()[1:-1].split() if entry[2] else []
                         flags = [value for value in flags if not value.lower().startswith('snapshot=')]
                         flags.append('snapshot=no')
@@ -258,9 +268,30 @@ def sources(directory, mirror, system=Path('/etc/apt')):
                 text = ''.join(lines)
         target = directory / 'sources.list' if source == main else parts / source.name
         target.write_text(text)
+    if snapshot and not ubuntu:
+        # APT update succeeds on an empty source set but cannot supply lcov
+        # or other uninstalled packages. Repair only explicit Ubuntu snapshot
+        # environments, using the runner's existing Ubuntu archive trust root.
+        release = dict(re.findall(r'^([A-Z_]+)=(.*)$', Path('/etc/os-release').read_text(), re.M))
+        codename = release.get('VERSION_CODENAME', '').strip('"')
+        if release.get('ID', '').strip('"') != 'ubuntu' or not re.fullmatch(r'[a-z][a-z0-9]*', codename):
+            raise RuntimeError('Cannot recover snapshot sources without an Ubuntu codename')
+        if not UBUNTU_KEYRING.is_file():
+            raise RuntimeError('Cannot recover snapshot sources without the Ubuntu archive keyring')
+        fallback = parts / 'rodin-ubuntu.sources'
+        fallback.write_text(
+            'Types: deb\nURIs: https://snapshot.ubuntu.com/ubuntu/' + snapshot + '/\n'
+            'Suites: ' + ' '.join(codename + pocket for pocket in ['', '-updates', '-backports', '-security']) + '\n'
+            'Components: main restricted universe multiverse\n'
+            'Signed-By: ' + str(UBUNTU_KEYRING) + '\nSnapshot: no\n')
+        print('No active Ubuntu binary sources copied; using signed snapshot sources for ' + codename, flush=True)
+    print(f'APT source copy: {len(entries)} source files; Ubuntu snapshot source available: {bool(snapshot)}', flush=True)
     (directory / 'sources.list').touch(exist_ok=True)
     options = ['-o', 'Dir::Etc::sourcelist=' + str(directory / 'sources.list'),
-               '-o', 'Dir::Etc::sourceparts=' + str(parts)]
+               '-o', 'Dir::Etc::sourceparts=' + str(parts),
+               # apt-cache must see the same required binary indexes as
+               # apt-get, even when a runner disables the default target.
+               '-o', 'Acquire::IndexTargets::deb::Packages::DefaultEnabled=true']
     if snapshot:
         # Retain the snapshot marker for exact-version installation policy.
         # Prefer its versions even over newer preinstalled runner packages.
@@ -312,7 +343,7 @@ def candidates(requested, source_options):
     for name in names:
         match = re.search(r'^\s*Candidate: (\S+)', records.get(name, records.get(name.split(':', 1)[0], '')), re.M)
         if not match or match[1] == '(none)':
-            raise ValueError('No APT candidate for ' + name)
+            raise MissingCandidate('No APT candidate for ' + name)
         result[name] = match[1]
     return result
 
@@ -355,15 +386,15 @@ def prepare(requested, archives, state):
         options = sources(state / str(index), mirror)
         try:
             apt(['update'], options, archives, INDEX_REFRESH_TIMEOUT)
+            versions = candidates(requested, options)
             break
-        except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as error:
+        except (subprocess.CalledProcessError, subprocess.TimeoutExpired, MissingCandidate) as error:
             last_error = error
-            print('APT index attempt failed:', mirror or 'runner sources', flush=True)
+            print('APT index attempt failed:', mirror or 'runner sources', str(error), flush=True)
             if index < len(MIRRORS) - 1:
                 wait_for_apt_retry(index)
     else:
         raise RuntimeError('All signed APT index sources failed') from last_error
-    versions = candidates(requested, options)
     # APT omits satisfied installed dependencies from its Inst records, while
     # --installed traversal omits new intermediate dependencies. Combine both
     # views until the explicit plan stops growing; never remove pins or accept

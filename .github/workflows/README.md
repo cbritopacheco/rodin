@@ -154,6 +154,22 @@ If `cmake --version` stalls, it retries up to three 30-second attempts with
 2- and 4-second delays. A nonzero exit fails immediately; exhausted timeouts
 fail before compiler variables are exported.
 
+If a snapshot runner has no active Ubuntu binary source, provisioning writes a
+fallback into its private source directory using the runner's Ubuntu codename,
+the existing Ubuntu archive keyring, and the same pinned snapshot. Vendor
+sources and system configuration are retained. A missing keyring or unknown
+codename fails closed. Binary package indexes are explicitly enabled for both
+APT downloads and policy queries, even if an inherited setting disables them.
+Candidate resolution is part of each refresh attempt,
+so an apparently successful update with missing packages is not accepted as a
+valid plan. Source-copy diagnostics make this case visible in the job log.
+
+A timed-out submodule attempt may leave a repository without a current
+revision. Before retrying, the helper spends at most 60 seconds recovering
+only submodules without a valid HEAD, fetching and checking out the enclosing
+repository's exact gitlink. It does not force checkout, remove worktrees or
+advance to a branch tip; an untracked-file conflict remains fatal.
+
 Disk checks log available space and require **8 GiB of free headroom**. This is
 a conservative initial policy, not a measured peak for every hierarchy group.
 With sufficient space they do nothing. Otherwise, on GitHub-hosted runners only,
