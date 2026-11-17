@@ -82,6 +82,8 @@
 #include <utility>
 #include <vector>
 
+#include <deque>
+
 #include <boost/mpi.hpp>
 #include <boost/mpi/collectives.hpp>
 #include <boost/serialization/vector.hpp>
@@ -310,7 +312,15 @@ namespace
       Real newmarkGamma = 0.5;
 
       size_t couplingIterations = 1;
-      Real couplingTolerance = 1.0e-6;
+      /// Relative residual of the interface fixed point (T, g) that ends the
+      /// coupling iterations of a step (see the IQN-ILS loop).
+      Real couplingTolerance = 1.0e-4;
+      /// IQN-ILS acceleration of the Robin-Robin iterations (0: plain sweeps).
+      size_t couplingIQN = 1;
+      /// IQN-ILS(q): secant columns of the last q time steps are reused.
+      size_t couplingIQNReuse = 4;
+      /// Maximum number of IQN-ILS columns kept (oldest dropped first).
+      size_t couplingIQNColumns = 40;
 
       Real robinAlpha = 0.0;
       Real robinGamma = 1.0;
@@ -807,6 +817,9 @@ namespace
     optReal("-coronary_resting_tissue_pressure", cfg.restingTissuePressure, 0.0, inf);
     optInt("-coronary_coupling_iterations", cfg.couplingIterations, 1);
     optReal("-coronary_coupling_tolerance", cfg.couplingTolerance, 0.0, inf);
+    optInt("-coronary_coupling_iqn", cfg.couplingIQN, 0);
+    optInt("-coronary_coupling_iqn_reuse", cfg.couplingIQNReuse, 0);
+    optInt("-coronary_coupling_iqn_columns", cfg.couplingIQNColumns, 1);
     optInt("-coronary_prestress_steps", cfg.prestressSteps, 0);
     optReal("-coronary_prestress_fraction", cfg.prestressFraction, 0.0, 1.0);
     optInt("-coronary_prestress_ramp_steps", cfg.prestressRampSteps, 0);
@@ -1411,7 +1424,7 @@ int main(int argc, char** argv)
       for (const Attribute outlet : BoundaryFluid::Outlets)
         csv << ",q_out_" << outlet << ",p_out_" << outlet;
       csv << ",ptm_mean,phi_a_mean,phi_v_mean,stored_volume";
-      csv << ",e_interface,slip_rms,q_interface_slip,coupling_rel\n";
+      csv << ",e_interface,slip_rms,q_interface_slip,coupling_rel,coupling_its\n";
     }
 
     std::map<Attribute, Outlet> wk;
@@ -1750,6 +1763,9 @@ int main(int argc, char** argv)
     // Mask of the interface DOFs on the fluid side (1 on Gamma, 0 elsewhere).
     PETSc::Variational::GridFunction interfaceMask(uh);
     PETSc::Variational::GridFunction interfaceTmp(uh);
+    // Interface fixed-point iterates on the fluid nodes (IQN-ILS loop).
+    PETSc::Variational::GridFunction interfaceTraction(uh);
+    PETSc::Variational::GridFunction robinDataFluid(uh);
     {
       PETSc::Variational::GridFunction onesSolid(dh);
       onesSolid = VectorFunction(dim, [&](const Point&) {
@@ -1760,6 +1776,8 @@ int main(int argc, char** argv)
       scatterField(interfaceScatter, onesSolid, interfaceMask, SCATTER_FORWARD);
     }
     interfaceTmp = zero;
+    interfaceTraction = zero;
+    robinDataFluid = zero;
 
     // Solid displacement -> fluid interface nodes (Dirichlet datum of the lift).
     auto transferWallDisplacement = [&]() {
@@ -2313,6 +2331,15 @@ int main(int argc, char** argv)
     //   (4) fluxes, gradient recovery, WSS, outlet compartments with p_f^{n+1},
     //       lagged fluxes for the next 0D step, commit.
     // ==================================================================
+    // IQN-ILS secant columns (residual and output differences of the
+    // interface fixed point), newest first, kept across time steps.
+    struct IQNColumn
+    {
+        std::array<::Vec, 2> V, W;
+        size_t step;
+    };
+    std::deque<IQNColumn> iqnColumns;
+
     for (size_t step = 1; step <= cfg.nsteps; ++step)
     {
       const auto rep = model.step(dt);
@@ -2389,6 +2416,53 @@ int main(int argc, char** argv)
       moveMeshWithVertexDisplacement(meshFluid, referenceVertices, uh, aleDispOld);
       massOld.assemble();
 
+      // Interface fixed point x = (T, g) on the fluid interface nodes:
+      // T the variational fluid reaction, g = T + alpha u_f the Robin datum
+      // of the solid. One sweep x -> H(x): solid(g) -> ALE -> fluid(T) ->
+      //   T~ = T + alpha (u_f - v_G),   g~ = T~ + alpha u_f   (masked to Gamma).
+      // At the fixed point u_f = v_G (kinematic) and the solid receives the
+      // fluid traction (dynamic), whatever alpha. IQN-ILS (Degroote et al.
+      // 2009) accelerates the sweeps; the step ends when
+      // |H(x) - x| <= tol |H(x)| or after couplingIterations sweeps.
+      interfaceTmp = uCur;
+      interfaceTmp *= robinAlpha;
+      interfaceTmp += tractionTransfer;
+      interfaceTmp *= interfaceMask;
+      robinDataFluid = interfaceTmp;
+      scatterField(interfaceScatter, robinDataFluid, robinDataSolid, SCATTER_REVERSE);
+
+      std::array<::Vec, 2> iqnPrevR{nullptr, nullptr}, iqnPrevH{nullptr, nullptr};
+      const auto vecOf = [](auto& gf) -> ::Vec {
+        std::as_const(gf).flush();
+        gf.flush();
+        return gf.getData();
+      };
+      const auto newPair = [&]() {
+        std::array<::Vec, 2> v{nullptr, nullptr};
+        VecDuplicate(vecOf(tractionTransfer), &v[0]);
+        VecDuplicate(vecOf(tractionTransfer), &v[1]);
+        return v;
+      };
+      const auto freePair = [](std::array<::Vec, 2>& v) {
+        for (auto& x : v)
+          if (x)
+            VecDestroy(&x);
+      };
+      const auto dotPair = [](const std::array<::Vec, 2>& a, const std::array<::Vec, 2>& b) {
+        PetscScalar d0 = 0, d1 = 0;
+        VecDot(a[0], b[0], &d0);
+        VecDot(a[1], b[1], &d1);
+        return static_cast<Real>(PetscRealPart(d0) + PetscRealPart(d1));
+      };
+      // IQN-ILS(q): drop the columns older than q steps.
+      while (!iqnColumns.empty() &&
+        (cfg.couplingIQN == 0 || iqnColumns.back().step + cfg.couplingIQNReuse < step))
+      {
+        freePair(iqnColumns.back().V);
+        freePair(iqnColumns.back().W);
+        iqnColumns.pop_back();
+      }
+
       for (size_t couple = 1; couple <= cfg.couplingIterations; ++couple)
       {
         snes.solve();
@@ -2411,7 +2485,7 @@ int main(int argc, char** argv)
         const Real rel = (stateNorm > 0.0)
           ? (static_cast<Real>(deltaNorm) / static_cast<Real>(stateNorm))
           : static_cast<Real>(deltaNorm);
-        lastRel = rel;
+        (void)rel;
         couplesDone = couple;
         dIter = dState;
 
@@ -2426,11 +2500,7 @@ int main(int argc, char** argv)
         if (isRoot)
           Alert::Info() << "  coupling iterate " << couple << " / "
                         << cfg.couplingIterations
-                        << "  relative interface change = " << rel
-                        << "  |d - dPrev| = " << deltaNorm << Alert::Raise;
-
-        if (couple > 1 && rel < cfg.couplingTolerance)
-          break;
+                        << "  relative displacement change = " << rel << Alert::Raise;
 
         transferWallDisplacement();
         restoreMeshToReference(meshFluid, referenceVertices);
@@ -2491,10 +2561,101 @@ int main(int argc, char** argv)
         uCur.setData(u.getSolution().getData());
         pCur.setData(p.getSolution().getData());
 
-        // Variational Robin reaction of the new iterate and the solid datum
-        // of the next solid solve.
-        updateInterfaceTraction();
+        // Sweep output H(x) = (T~, g~).
+        interfaceTraction = uCur;
+        interfaceTraction -= meshVelocity;
+        interfaceTraction *= interfaceMask;
+        interfaceTraction *= robinAlpha;
+        interfaceTraction += tractionTransfer;              // T~
+        interfaceTmp = uCur;
+        interfaceTmp *= robinAlpha;
+        interfaceTmp += interfaceTraction;
+        interfaceTmp *= interfaceMask;                      // g~
+
+        std::array<::Vec, 2> H = newPair(), R = newPair();
+        VecCopy(vecOf(interfaceTraction), H[0]);
+        VecCopy(vecOf(interfaceTmp), H[1]);
+        VecWAXPY(R[0], -1.0, vecOf(tractionTransfer), H[0]); // r = H(x) - x
+        VecWAXPY(R[1], -1.0, vecOf(robinDataFluid), H[1]);
+        const Real rNorm = std::sqrt(std::max(Real(0), dotPair(R, R)));
+        const Real hNorm = std::sqrt(std::max(Real(0), dotPair(H, H)));
+        lastRel = (hNorm > 0) ? rNorm / hNorm : rNorm;
+        if (isRoot)
+          Alert::Info() << "  coupling iterate " << couple << "  interface residual |H(x)-x|/|H(x)| = "
+                        << lastRel << Alert::Raise;
+
+        const bool done = (lastRel <= cfg.couplingTolerance) ||
+          (couple == cfg.couplingIterations);
+
+        // Next interface data: plain sweep x <- H(x) on the first iterate,
+        // at convergence and without IQN; otherwise the IQN-ILS update
+        //   x <- H_k + W c,  c = argmin |V c + r_k|,
+        // V, W the differences of residuals / outputs of this step.
+        std::array<::Vec, 2> X = newPair();
+        VecCopy(H[0], X[0]);
+        VecCopy(H[1], X[1]);
+        if (cfg.couplingIQN > 0 && iqnPrevR[0])
+        {
+          // New secant pair of this step (also kept when the step converges,
+          // for the next steps).
+          IQNColumn col{newPair(), newPair(), step};
+          VecWAXPY(col.V[0], -1.0, iqnPrevR[0], R[0]);
+          VecWAXPY(col.V[1], -1.0, iqnPrevR[1], R[1]);
+          VecWAXPY(col.W[0], -1.0, iqnPrevH[0], H[0]);
+          VecWAXPY(col.W[1], -1.0, iqnPrevH[1], H[1]);
+          if (dotPair(col.V, col.V) > 0.0)
+            iqnColumns.push_front(col);
+          else
+          {
+            freePair(col.V);
+            freePair(col.W);
+          }
+          while (iqnColumns.size() > cfg.couplingIQNColumns)
+          {
+            freePair(iqnColumns.back().V);
+            freePair(iqnColumns.back().W);
+            iqnColumns.pop_back();
+          }
+        }
+        if (!done && cfg.couplingIQN > 0 && !iqnColumns.empty())
+        {
+          const size_t m = iqnColumns.size();
+          Eigen::MatrixXd G(m, m);
+          Eigen::VectorXd b(m);
+          for (size_t i = 0; i < m; ++i)
+          {
+            b(i) = -dotPair(iqnColumns[i].V, R);
+            for (size_t j = 0; j <= i; ++j)
+              G(i, j) = G(j, i) = dotPair(iqnColumns[i].V, iqnColumns[j].V);
+          }
+          Eigen::ColPivHouseholderQR<Eigen::MatrixXd> qr(G);
+          qr.setThreshold(1e-12);
+          const Eigen::VectorXd c = qr.solve(b);
+          if (c.allFinite())
+            for (size_t i = 0; i < m; ++i)
+            {
+              VecAXPY(X[0], c(i), iqnColumns[i].W[0]);
+              VecAXPY(X[1], c(i), iqnColumns[i].W[1]);
+            }
+        }
+        freePair(iqnPrevR);
+        freePair(iqnPrevH);
+        iqnPrevR = R;
+        iqnPrevH = H;
+
+        // x <- X: fluid reaction T and solid datum g.
+        VecCopy(X[0], vecOf(tractionTransfer));
+        tractionTransfer *= Real(1.0);
+        VecCopy(X[1], vecOf(robinDataFluid));
+        robinDataFluid *= Real(1.0);
+        freePair(X);
+        scatterField(interfaceScatter, robinDataFluid, robinDataSolid, SCATTER_REVERSE);
+
+        if (done)
+          break;
       }
+      freePair(iqnPrevR);
+      freePair(iqnPrevH);
 
       if (stepFailed)
         break;
@@ -2624,7 +2785,7 @@ int main(int argc, char** argv)
               << (phiVSum / nOut) << ',' << volSum;
         }
         csv << ',' << eInterface << ',' << slipRms << ',' << qInterfaceSlip << ','
-            << lastRel << '\n';
+            << lastRel << ',' << couplesDone << '\n';
         csv.flush();
       }
     }
@@ -2633,6 +2794,11 @@ int main(int argc, char** argv)
     xdmf_solid.close();
     if (isRoot && csv)
       csv.close();
+    for (auto& col : iqnColumns)
+      for (auto* pair : {&col.V, &col.W})
+        for (auto& v : *pair)
+          if (v)
+            VecDestroy(&v);
     VecScatterDestroy(&interfaceScatter);
   }
   catch (const std::exception& e)
