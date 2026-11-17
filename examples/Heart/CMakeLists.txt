@@ -126,6 +126,23 @@ if (RODIN_USE_PETSC)
     if (RODIN_USE_SCOTCH)
       target_link_libraries(CoronaryArtery_Explicit_PoroElastic_MPI PUBLIC Rodin::Scotch)
     endif()
+
+    # Monolithic Dirichlet-Neumann Newton-GMRES variant (explicit geometry).
+    add_executable(CoronaryArtery_Monolithic_PoroElastic_MPI
+      CoronaryArtery_Monolithic_PoroElastic_MPI.cpp)
+    target_link_libraries(CoronaryArtery_Monolithic_PoroElastic_MPI
+      PUBLIC
+      Rodin::Heart
+      Rodin::Variational
+      Rodin::PETSc
+      Rodin::MPI
+      Rodin::Alert
+      Rodin::Solver
+      Rodin::Geometry
+      Rodin::Assembly)
+    if (RODIN_USE_SCOTCH)
+      target_link_libraries(CoronaryArtery_Monolithic_PoroElastic_MPI PUBLIC Rodin::Scotch)
+    endif()
   endif()
 
   # Coagulation-kinetics testbed on a simplified geometry: one inlet, one
