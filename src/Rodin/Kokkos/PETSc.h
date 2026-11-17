@@ -9,15 +9,9 @@
 
 /**
  * @file
- * @brief PETSc problems assembled on resident Kokkos meshes.
- *
- * Link the optional Rodin::Kokkos::PETSc CMake target when including this
- * module.
+ * @brief Compatibility include for PETSc algebra assembled with Kokkos.
  */
 
-#include "Rodin/PETSc.h"
-
-#include "Rodin/Kokkos.h"
-#include "Rodin/Kokkos/Assembly/PETSc.h"
+#include "Rodin/PETSc/Kokkos.h"
 
 #endif

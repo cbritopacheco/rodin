@@ -91,7 +91,9 @@ namespace Rodin::Variational
          const MeshType& mesh) requires std::is_same_v<RangeType, Real>
         : m_mesh(mesh),
           m_host(degree, mesh.getHost()),
-          m_local(degree, mesh.getLocal())
+          m_local(degree, mesh.getLocal()),
+          m_numberingRevision(::Rodin::Kokkos::Internal::GhostedPositions<
+            typename MeshType::MemorySpace>::nextRevision())
       {}
 
       /**
@@ -105,7 +107,9 @@ namespace Rodin::Variational
          size_t vdim) requires(!std::is_same_v<RangeType, Real>)
         : m_mesh(mesh),
           m_host(degree, mesh.getHost(), vdim),
-          m_local(degree, mesh.getLocal(), vdim)
+          m_local(degree, mesh.getLocal(), vdim),
+          m_numberingRevision(::Rodin::Kokkos::Internal::GhostedPositions<
+            typename MeshType::MemorySpace>::nextRevision())
       {}
       // clang-format on
 
@@ -117,7 +121,9 @@ namespace Rodin::Variational
         : Parent(other),
           m_mesh(other.m_mesh),
           m_host(other.m_host),
-          m_local(other.m_local)
+          m_local(other.m_local),
+          m_numberingRevision(::Rodin::Kokkos::Internal::GhostedPositions<
+            typename MeshType::MemorySpace>::nextRevision())
       {}
 
       /**
@@ -128,7 +134,9 @@ namespace Rodin::Variational
         : Parent(std::move(other)),
           m_mesh(std::move(other.m_mesh)),
           m_host(std::move(other.m_host)),
-          m_local(std::move(other.m_local))
+          m_local(std::move(other.m_local)),
+          m_numberingRevision(::Rodin::Kokkos::Internal::GhostedPositions<
+            typename MeshType::MemorySpace>::nextRevision())
       {}
 
       /// @param[in] d Dimension of the polytope. @param[in] i Local index of the polytope. @return Element of its reference geometry.
@@ -237,20 +245,30 @@ namespace Rodin::Variational
        * @brief Gets the positions of the local degrees of freedom in a
        * ghosted local form: the owned ones from the first owned global
        * index, then the ghosts in the local order.
-       * @return Device positions, computed at the first call and kept with
-       * the space, and size of the local form.
+       * @return Independent device positions and size of the local form.
+       * Persistent reuse is owned by the selected algebra adapter.
        */
       auto getGhostedPositions() const
       {
-        return m_positions.get(getMesh().getContext().getExecutionSpace(), *this);
+        return ::Rodin::Kokkos::Internal::GhostedPositions<
+          typename MeshType::MemorySpace>{}
+          .get(getMesh().getContext().getExecutionSpace(), *this);
+      }
+
+      /**
+       * @brief Identifies this space's fixed distributed numbering.
+       * @returns Revision distinct from other constructed, copied or moved spaces.
+       */
+      std::uint64_t getNumberingRevision() const
+      {
+        return m_numberingRevision;
       }
 
     private:
       std::reference_wrapper<const MeshType> m_mesh;
       HostType m_host;
       LocalType m_local;
-      mutable ::Rodin::Kokkos::Internal::GhostedPositions<typename MeshType::MemorySpace>
-        m_positions;
+      const std::uint64_t m_numberingRevision;
   };
 }
 

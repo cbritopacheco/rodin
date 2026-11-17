@@ -15,6 +15,167 @@ namespace Rodin::Tests::Unit
   using Coefficients = Rodin::Kokkos::Math::Vector<Real, TestBackend>;
   using Matrix = Rodin::Kokkos::Math::SparseMatrix<Real, TestBackend>;
 
+  /// @brief Vendor input borrows preserve constness and use the original arrays.
+  TEST(Kokkos_Math, DirectSolverArrayBorrows)
+  {
+    using Arrays = Solver::Internal::CuDSSOperator<Matrix>;
+    using HostMatrix = Math::SparseMatrix<Real>;
+    using HostArrays = Solver::Internal::CuDSSOperator<HostMatrix>;
+    static_assert(std::is_same_v<decltype(Arrays::getStarts(std::declval<Matrix&>())),
+      Math::SparseIndex*>);
+    static_assert(std::is_same_v<decltype(Arrays::getIndices(std::declval<Matrix&>())),
+      Math::SparseIndex*>);
+    static_assert(
+      std::is_same_v<decltype(Arrays::getValues(std::declval<Matrix&>())), Real*>);
+    static_assert(
+      std::is_same_v<decltype(Arrays::getStarts(std::declval<const Matrix&>())),
+        const Math::SparseIndex*>);
+    static_assert(
+      std::is_same_v<decltype(Arrays::getIndices(std::declval<const Matrix&>())),
+        const Math::SparseIndex*>);
+    static_assert(
+      std::is_same_v<decltype(Arrays::getValues(std::declval<const Matrix&>())),
+        const Real*>);
+    static_assert(
+      std::is_same_v<decltype(HostArrays::getStarts(std::declval<HostMatrix&>())),
+        Math::SparseIndex*>);
+    static_assert(
+      std::is_same_v<decltype(HostArrays::getIndices(std::declval<HostMatrix&>())),
+        Math::SparseIndex*>);
+    static_assert(
+      std::is_same_v<decltype(HostArrays::getValues(std::declval<HostMatrix&>())),
+        Real*>);
+    static_assert(
+      std::is_same_v<decltype(HostArrays::getValues(std::declval<const HostMatrix&>())),
+        const Real*>);
+    static_assert(
+      std::is_same_v<decltype(HostArrays::getStarts(std::declval<const HostMatrix&>())),
+        const Math::SparseIndex*>);
+    static_assert(
+      std::is_same_v<decltype(HostArrays::getIndices(std::declval<const HostMatrix&>())),
+        const Math::SparseIndex*>);
+    HostMatrix source(3, 3);
+    source.insert(0, 0) = 2;
+    source.insert(1, 1) = 3;
+    source.insert(2, 2) = 4;
+    HostArrays::prepare(source);
+    EXPECT_EQ(HostArrays::getStarts(source), source.outerIndexPtr());
+    EXPECT_EQ(HostArrays::getIndices(source), source.innerIndexPtr());
+    EXPECT_EQ(HostArrays::getValues(source), source.valuePtr());
+    const auto make = [&] {
+      const auto execution = TestContext{}.getExecutionSpace();
+      return Matrix(3, 3,
+        Rodin::Kokkos::Internal::upload(
+          execution, std::vector<Math::SparseIndex>{0, 1, 2, 3}, "borrow offsets"),
+        Rodin::Kokkos::Internal::upload(
+          execution, std::vector<Math::SparseIndex>{0, 1, 2}, "borrow columns"),
+        Rodin::Kokkos::Internal::upload(
+          execution, std::vector<Real>{2, 3, 4}, "borrow values"));
+    };
+    Matrix matrix = make();
+    const Matrix& read = matrix;
+    const auto check = [&] {
+      EXPECT_EQ(Arrays::getStarts(matrix), matrix.getRowStarts().data());
+      EXPECT_EQ(Arrays::getIndices(matrix), matrix.getColumns().data());
+      EXPECT_EQ(Arrays::getValues(matrix), matrix.getValues().data());
+      EXPECT_EQ(Arrays::getStarts(read), Arrays::getStarts(matrix));
+      EXPECT_EQ(Arrays::getIndices(read), Arrays::getIndices(matrix));
+      EXPECT_EQ(Arrays::getValues(read), Arrays::getValues(matrix));
+    };
+    check();
+    const auto* starts = Arrays::getStarts(matrix);
+    const auto* indices = Arrays::getIndices(matrix);
+    const auto* values = Arrays::getValues(matrix);
+    const auto borrowed =
+      ::Kokkos::View<Real*, TestMemorySpace, ::Kokkos::MemoryTraits<::Kokkos::Unmanaged>>(
+        Arrays::getValues(matrix), 3);
+    ::Kokkos::deep_copy(borrowed, Real(7));
+    EXPECT_EQ(matrix.toHost().coeff(1, 1), Real(7));
+    EXPECT_EQ(Arrays::getStarts(matrix), starts);
+    EXPECT_EQ(Arrays::getIndices(matrix), indices);
+    EXPECT_EQ(Arrays::getValues(matrix), values);
+    Matrix replacement = make();
+    matrix = std::move(replacement);
+    check();
+    EXPECT_NE(Arrays::getStarts(matrix), starts);
+    EXPECT_NE(Arrays::getIndices(matrix), indices);
+    EXPECT_NE(Arrays::getValues(matrix), values);
+  }
+
+#if defined(RODIN_USE_CUDSS) || defined(RODIN_USE_ROCSOLVER)
+  /**
+   * @brief Repeated device factorizations borrow input arrays without modifying them.
+   * @tparam Direct Vendor direct solver template.
+   */
+  template <template <class> class Direct>
+  void checkDirectSolverInputBorrows()
+  {
+    const auto source = makeTriangleMesh();
+    const DeviceMesh mesh(TestContext{}, source);
+    P1 fes(mesh);
+    TrialFunction u(fes);
+    TestFunction v(fes);
+    Problem pb(u, v);
+    pb = Integral(Grad(u), Grad(v)) + Integral(u, v) - Integral(RealFunction(1), v);
+    pb.assemble();
+    auto& system = pb.getLinearSystem();
+    auto& matrix = system.getOperator();
+    using System = std::decay_t<decltype(system)>;
+    Direct<System> solver(pb);
+    static_assert(Solver::Internal::CuDSSOperator<Matrix>::Resident);
+    const auto check = [&](Real expected) {
+      const auto before = matrix.toHost();
+      typename Solver::Internal::CuDSSOperator<Matrix>::Pattern pattern;
+      pattern.assign(matrix);
+      const auto* starts = matrix.getRowStarts().data();
+      const auto* columns = matrix.getColumns().data();
+      const auto* values = matrix.getValues().data();
+      solver.factorize(system);
+      ASSERT_TRUE(solver.success());
+      solver.solve(system);
+      ASSERT_TRUE(solver.success());
+      EXPECT_LT(
+        (system.getSolution().toHost().array() - expected).matrix().norm(), 1e-10);
+      EXPECT_EQ((matrix.toHost() - before).norm(), Real(0));
+      EXPECT_TRUE(pattern.matches(matrix));
+      EXPECT_EQ(matrix.getRowStarts().data(), starts);
+      EXPECT_EQ(matrix.getColumns().data(), columns);
+      EXPECT_EQ(matrix.getValues().data(), values);
+      // Native input arrays are borrowed, not duplicated in the host-input buffers.
+      EXPECT_EQ(solver.getResources().outer.size, 0u);
+      EXPECT_EQ(solver.getResources().inner.size, 0u);
+      EXPECT_EQ(solver.getResources().values.size, 0u);
+    };
+    check(Real(1));
+    const auto values = matrix.getValues();
+    ::Kokkos::parallel_for(
+      "scale vendor input",
+      ::Kokkos::RangePolicy<TestExecutionSpace>(0, values.extent(0)),
+      KOKKOS_LAMBDA(size_t i) { values(i) *= Real(2); });
+    check(Real(0.5));
+    const auto* previous = matrix.getValues().data();
+    matrix = Matrix(matrix);
+    EXPECT_NE(matrix.getValues().data(), previous);
+    check(Real(0.5));
+  }
+#endif
+
+#ifdef RODIN_USE_CUDSS
+  /// @brief cuDSS keeps native inputs in place through reuse and reallocation.
+  TEST(Kokkos_Math, CuDSSInputArraysAreBorrowed)
+  {
+    checkDirectSolverInputBorrows<Solver::CuDSS>();
+  }
+#endif
+
+#ifdef RODIN_USE_ROCSOLVER
+  /// @brief rocSOLVER keeps native inputs in place through reuse and reallocation.
+  TEST(Kokkos_Math, RocSolverInputArraysAreBorrowed)
+  {
+    checkDirectSolverInputBorrows<Solver::RocSolverRF>();
+  }
+#endif
+
   /// @brief Pivot certification must not reject small or large finite values.
   TEST(Kokkos_Math, RocSolverPivotPredicate)
   {

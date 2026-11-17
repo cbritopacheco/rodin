@@ -13,6 +13,7 @@
  */
 
 #include <algorithm>
+#include <atomic>
 #include <cassert>
 #include <cstdint>
 #include <list>
@@ -354,85 +355,60 @@ namespace Rodin::Kokkos::Internal
   };
 
   /**
-   * @brief Positions of the local degrees of freedom of a distributed space
-   * in a ghosted local form, kept with the space.
+   * @brief Constructs positions in owned-first, then locally ordered ghost storage.
+   * @tparam MemorySpace Memory space of the returned positions.
    *
-   * A ghosted local form holds the owned entries first, numbered from the
-   * first owned global index, then the ghosts in the order of the local
-   * degrees of freedom. The positions depend only on the numbering of the
-   * space, so they are computed and uploaded once, at the first request. A
-   * copy starts empty, and an assignment empties the target.
-   *
-   * @tparam MemorySpace Memory space of the positions.
+   * This numbering query owns no cache. Each result owns its device allocation;
+   * backend adapters may retain it for an immutable space numbering.
    */
   template <class MemorySpace>
   class GhostedPositions
   {
     public:
-      /// @brief Positions in the local form and size of that form.
+      /// @brief Device positions and number of entries in the local form.
       struct Table
       {
-        /// @brief Position in the local form of each local degree of freedom.
+        /// @brief Position of each local degree of freedom.
         ::Kokkos::View<const Index*, MemorySpace> positions;
 
-        /// @brief Number of owned entries and ghosts of the local form.
+        /// @brief Number of owned entries followed by ghosts.
         size_t size;
       };
 
-      GhostedPositions() = default;
-
       /**
-       * @brief Starts empty, the positions of the source stay with it.
-       * @param other Object whose positions are not copied.
+       * @brief Identifies a new immutable numbering, including copies and moves.
+       * @returns Process-local revision unique within this memory space.
        */
-      GhostedPositions([[maybe_unused]] const GhostedPositions& other) {}
-
-      /**
-       * @brief Forgets the positions, which were those of another numbering.
-       * @param other Object whose positions are not copied.
-       * @returns This object.
-       */
-      GhostedPositions& operator=([[maybe_unused]] const GhostedPositions& other)
+      static std::uint64_t nextRevision()
       {
-        std::lock_guard<std::mutex> lock(m_mutex);
-        m_table.reset();
-        return *this;
+        static std::atomic<std::uint64_t> revision{0};
+        return ++revision;
       }
 
       /**
-       * @brief Gets the positions of the local degrees of freedom of a space.
+       * @brief Constructs a numbering map without modifying the space.
        * @param execution Execution instance ordering the upload.
-       * @param fes Distributed space owning this object, giving its
-       * ownership range and the global index of each local degree of freedom.
-       * @returns Positions, to be read only, and size of the local form.
+       * @param fes Distributed space supplying ownership and global indices.
+       * @returns Owned position table, independent of the space lifetime.
        */
       template <class Execution, class FES>
-      Table get(const Execution& execution, const FES& fes)
+      Table get(const Execution& execution, const FES& fes) const
       {
-        std::lock_guard<std::mutex> lock(m_mutex);
-        if (!m_table)
-        {
-          Index begin = 0, end = 0;
-          fes.getOwnershipRange(begin, end);
-          const Index owned = end - begin;
-          const size_t size = fes.getLocalSize();
-          Index ghosts = 0;
-          const auto positions =
-            upload<Index>(execution, size, "Rodin ghosted positions", [&](Index* out) {
-              for (size_t i = 0; i < size; ++i)
-              {
-                const Index g = fes.getGlobalIndex(static_cast<Index>(i));
-                out[i] = (g >= begin && g < end) ? g - begin : owned + ghosts++;
-              }
-            });
-          m_table = Table{positions, static_cast<size_t>(owned + ghosts)};
-        }
-        return *m_table;
+        Index begin = 0, end = 0;
+        fes.getOwnershipRange(begin, end);
+        const Index owned = end - begin;
+        const size_t size = fes.getLocalSize();
+        Index ghosts = 0;
+        const auto positions =
+          upload<Index>(execution, size, "Rodin ghosted positions", [&](Index* out) {
+            for (size_t i = 0; i < size; ++i)
+            {
+              const Index g = fes.getGlobalIndex(static_cast<Index>(i));
+              out[i] = (g >= begin && g < end) ? g - begin : owned + ghosts++;
+            }
+          });
+        return {positions, static_cast<size_t>(owned + ghosts)};
       }
-
-    private:
-      std::mutex m_mutex;
-      Optional<Table> m_table;
   };
 
   /**

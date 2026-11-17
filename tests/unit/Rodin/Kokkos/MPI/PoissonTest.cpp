@@ -101,7 +101,8 @@ namespace Rodin::Tests::Unit
 
     // The positions of the coefficients in the ghosted local form follow from
     // the space alone: the writes did not make them be computed again.
-    const auto table = dfes.getGhostedPositions();
+    using Positions = ::Rodin::PETSc::Internal::GhostedPositions<TestMemorySpace>;
+    const auto table = Positions::of(ds.getData()).setSpace(dfes).getView();
     PetscInt count = 0;
     ::Vec form = nullptr;
     ASSERT_EQ(VecGhostGetLocalForm(ds.getData(), &form), PETSC_SUCCESS);
@@ -109,7 +110,8 @@ namespace Rodin::Tests::Unit
     ASSERT_EQ(VecGhostRestoreLocalForm(ds.getData(), &form), PETSC_SUCCESS);
     EXPECT_EQ(table.size, static_cast<size_t>(count));
     EXPECT_EQ(table.positions.extent(0), dfes.getLocalSize());
-    EXPECT_EQ(table.positions.data(), dfes.getGhostedPositions().positions.data());
+    EXPECT_EQ(table.positions.data(),
+      Positions::of(ds.getData()).setSpace(dfes).getView().positions.data());
   }
 
   /// @brief A stabilized P1/P1 Stokes problem matches the host.

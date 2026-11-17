@@ -287,3 +287,39 @@ and must be reacquired after storage replacement. File-format adapters stage
 coefficient vectors only at the IO boundary. Scalar host indexing of a backend
 vector performs an individual transfer; bulk work uses vector operations or
 `getView()` in a kernel.
+
+GPU direct solvers borrow matrix arrays through `CuDSSOperator` overloads that
+preserve owner constness. Mutable pointers require a non-const matrix, supplied
+by the existing `factorize(LinearSystem&)` contract; snapshot comparisons retain
+const access. The CuDSS and rocSOLVER input arrays are borrowed without additional
+matrix allocations or transfers. Vendor calls consume the arrays as inputs, and
+must not modify them. Native-input tests check unchanged coefficients and graph,
+retained addresses, empty host-input staging buffers, and rebinding after storage
+replacement. Host-input staging and rocSOLVER's initial host analysis are retained.
+
+The PETSc bridge is implemented under `PETSc/Kokkos`: `Assembly/Distribution.h`
+translates FEM indices to PETSc ownership, `COOCache.h` owns symbolic state,
+`COOAssembly.h` keeps the COO algorithm and its numerical submission together,
+and `Assembly/Kokkos.h` contains the existing assembly policy specializations.
+`Variational/GridFunctionCoefficients.h` owns PETSc vector access independently
+of matrix assembly. The public Kokkos PETSc headers forward to this bridge.
+`Rodin::Kokkos::MPI` and its mesh/space umbrella do not depend on PETSc.
+Borrowed host meshes must outlive distributed Kokkos meshes. Coefficient ghost
+updates remain the caller's responsibility; the bridge consumes borrowed
+PETSc arrays before restoring access and caches owned local gathers by state.
+
+Ghost-position reuse belongs to `PETSc/Kokkos/Variational/GhostedPositions.h`.
+A PETSc container attached to each coefficient vector owns one map per memory
+space. Numbering revisions, including new revisions for copied and moved
+spaces, invalidate both the map and the coefficient transfer-cache key. No
+space address is used as the sole validity check. MPI spaces hold only an
+immutable revision and keep `getGhostedPositions()` as an uncached query;
+there are no mutable members or PETSc dependencies in those spaces. The map
+cache follows the vector lifetime, and returned views keep old maps alive
+across replacement or vector destruction. As with PETSc vector access,
+cache access is serialized by the caller; no inter-rank collective is added.
+
+The ghost-position adapter uses `setSpace(fes)` as the non-const preparation
+stage and `getView() const` as a read-only query. Repeated const queries neither
+allocate nor update cache state. Changes of numbering are handled explicitly
+when binding the next space.

@@ -240,10 +240,32 @@ namespace Rodin::Kokkos::Math
       }
 
       /**
+       * @brief Borrows writable CSR storage without reallocating it.
+       * The caller must preserve the CSR invariants and explicitly refactorize
+       * any solver after changing the matrix.
+       * @return Resident array handle; valid until storage replacement.
+       */
+      Array<IndexType>& getRowStarts()
+      {
+        return m_starts;
+      }
+
+      /**
        * @brief Column of every coefficient.
        * @return Resident CSR column indices.
        */
       const typename View::index_type& getColumns() const
+      {
+        return m_matrix.graph.entries;
+      }
+
+      /**
+       * @brief Borrows writable CSR storage without reallocating it.
+       * The caller must preserve the CSR invariants and explicitly refactorize
+       * any solver after changing the matrix.
+       * @return Resident array handle; valid until storage replacement.
+       */
+      typename View::index_type& getColumns()
       {
         return m_matrix.graph.entries;
       }
@@ -501,6 +523,17 @@ namespace Rodin::Solver::Internal
     }
 
     /**
+     * @brief Borrows input storage from a non-const matrix for vendor APIs.
+     * The vendor consumes these arrays as inputs; no allocation or copy occurs.
+     * @param matrix Non-const owner of the compressed arrays.
+     * @return Borrowed pointer, valid until the owner replaces its storage.
+     */
+    static ::Rodin::Math::SparseIndex* getStarts(MatrixType& matrix)
+    {
+      return matrix.getRowStarts().data();
+    }
+
+    /**
      * @brief Column of every coefficient.
      * @param matrix Compressed device matrix.
      * @return Pointer to the CSR column indices of @p matrix.
@@ -511,11 +544,33 @@ namespace Rodin::Solver::Internal
     }
 
     /**
+     * @brief Borrows input storage from a non-const matrix for vendor APIs.
+     * The vendor consumes these arrays as inputs; no allocation or copy occurs.
+     * @param matrix Non-const owner of the compressed arrays.
+     * @return Borrowed pointer, valid until the owner replaces its storage.
+     */
+    static ::Rodin::Math::SparseIndex* getIndices(MatrixType& matrix)
+    {
+      return matrix.getColumns().data();
+    }
+
+    /**
      * @brief Value of every coefficient.
      * @param matrix Compressed device matrix.
      * @return Pointer to the CSR values of @p matrix.
      */
     static const Real* getValues(const MatrixType& matrix)
+    {
+      return matrix.getValues().data();
+    }
+
+    /**
+     * @brief Borrows input storage from a non-const matrix for vendor APIs.
+     * The vendor consumes these arrays as inputs; no allocation or copy occurs.
+     * @param matrix Non-const owner of the compressed arrays.
+     * @return Borrowed pointer, valid until the owner replaces its storage.
+     */
+    static Real* getValues(MatrixType& matrix)
     {
       return matrix.getValues().data();
     }

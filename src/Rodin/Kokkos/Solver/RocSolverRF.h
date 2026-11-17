@@ -691,9 +691,9 @@ namespace Rodin::Solver
         if constexpr (Arrays::Resident)
         {
           // rocSOLVER reads the arrays without writing them.
-          starts = const_cast<Math::SparseIndex*>(Arrays::getStarts(matrix));
-          indices = const_cast<Math::SparseIndex*>(Arrays::getIndices(matrix));
-          values = const_cast<ScalarType*>(Arrays::getValues(matrix));
+          starts = Arrays::getStarts(matrix);
+          indices = Arrays::getIndices(matrix);
+          values = Arrays::getValues(matrix);
         }
 
         rocblas_status status;
@@ -879,9 +879,12 @@ namespace Rodin::Solver
       /**
        * @brief Fixes the pivot order and the pattern of the factors, and
        * runs the rocSOLVER analysis.
+       * @param matrix Non-const owner borrowed for the vendor input arrays.
+       * @param rows Number of rows.
+       * @param nonzeros Number of stored coefficients.
        * @returns Whether the analysis succeeded.
        */
-      bool analyze(const OperatorType& matrix, Index rows, Index nonzeros)
+      bool analyze(OperatorType& matrix, Index rows, Index nonzeros)
       {
         auto& res = m_resources;
 
@@ -997,9 +1000,9 @@ namespace Rodin::Solver
         ScalarType* deviceValues;
         if constexpr (Arrays::Resident)
         {
-          deviceStarts = const_cast<Math::SparseIndex*>(Arrays::getStarts(matrix));
-          deviceIndices = const_cast<Math::SparseIndex*>(Arrays::getIndices(matrix));
-          deviceValues = const_cast<ScalarType*>(Arrays::getValues(matrix));
+          deviceStarts = Arrays::getStarts(matrix);
+          deviceIndices = Arrays::getIndices(matrix);
+          deviceValues = Arrays::getValues(matrix);
         }
         else
         {

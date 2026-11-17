@@ -37,6 +37,7 @@
 #include <Rodin/MPI/Geometry/Sharder.h>
 #include <Rodin/MPI/IO.h>
 #include <Rodin/Kokkos/MPI.h>
+#include <Rodin/PETSc/Kokkos.h>
 
 #include "../TestContext.h"
 

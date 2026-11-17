@@ -92,6 +92,12 @@ namespace Rodin::Assembly
       using BackendType = typename FormLanguage::Traits<
         typename FormLanguage::Traits<TrialFES>::MeshType>::ContextType::BackendType;
 
+      static_assert(
+        !Context::IsMPI<
+          typename FormLanguage::Traits<TrialFES>::MeshType::ContextType>::value,
+        "Native Kokkos algebra is not distributed. Use PETSc algebra with "
+        "Rodin/PETSc/Kokkos.h for a distributed assembled system.");
+
       /// @brief Default constructor.
       Kokkos() = default;
 
@@ -174,6 +180,11 @@ namespace Rodin::Assembly
       /// @brief Kokkos backend of the test mesh context.
       using BackendType = typename FormLanguage::Traits<
         typename FormLanguage::Traits<FES>::MeshType>::ContextType::BackendType;
+
+      static_assert(
+        !Context::IsMPI<typename FormLanguage::Traits<FES>::MeshType::ContextType>::value,
+        "Native Kokkos algebra is not distributed. Use PETSc algebra with "
+        "Rodin/PETSc/Kokkos.h for a distributed assembled system.");
 
       /// @brief Default constructor.
       Kokkos() = default;
@@ -323,6 +334,12 @@ namespace Rodin::Assembly
         typename FormLanguage::Traits<TrialFunction>::FESType>::MeshType>::ContextType::
         BackendType;
 
+      static_assert(
+        !Context::IsMPI<typename FormLanguage::Traits<typename FormLanguage::Traits<
+          TrialFunction>::FESType>::MeshType::ContextType>::value,
+        "Native Kokkos algebra is not distributed. Use PETSc algebra with "
+        "Rodin/PETSc/Kokkos.h for a distributed assembled system.");
+
       /// @brief Default constructor.
       Kokkos() = default;
 
@@ -462,6 +479,12 @@ namespace Rodin::Assembly
       /// @brief Kokkos backend of the mesh context of the first field.
       using BackendType = typename FormLanguage::Traits<typename FormLanguage::Traits<
         typename FormLanguage::Traits<U1>::FESType>::MeshType>::ContextType::BackendType;
+
+      static_assert(
+        !Context::IsMPI<typename FormLanguage::Traits<
+          typename FormLanguage::Traits<U1>::FESType>::MeshType::ContextType>::value,
+        "Native Kokkos algebra is not distributed. Use PETSc algebra with "
+        "Rodin/PETSc/Kokkos.h for a distributed assembled system.");
 
       /// @brief Default constructor.
       Kokkos() = default;

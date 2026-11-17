@@ -123,92 +123,6 @@ namespace Rodin::Solver::Internal
     }
   };
 
-  /**
-   * @brief Jacobi preconditioned conjugate gradient, following the iteration
-   * and the stopping test of Eigen's ConjugateGradient.
-   * @param execution Execution space instance.
-   * @param A Matrix.
-   * @param inverse Inverse of the diagonal of @f$ A @f$.
-   * @param b Right-hand side.
-   * @param x Initial guess, then solution.
-   * @param r Work vector.
-   * @param z Work vector.
-   * @param p Work vector.
-   * @param q Work vector.
-   * @param tolerance Relative tolerance on @f$ \|b - Ax\| / \|b\| @f$.
-   * @param maxIterations Iteration limit.
-   * @returns Convergence flag, iteration count and relative residual.
-   */
-  template <class Backend>
-  KokkosKrylovResult kokkosCG(
-    const typename KokkosKrylov<Backend>::ExecutionSpace& execution,
-    const typename KokkosKrylov<Backend>::CrsMatrix& A,
-    const typename KokkosKrylov<Backend>::Vector& inverse,
-    const typename KokkosKrylov<Backend>::Vector& b,
-    const typename KokkosKrylov<Backend>::Vector& x,
-    const typename KokkosKrylov<Backend>::Vector& r,
-    const typename KokkosKrylov<Backend>::Vector& z,
-    const typename KokkosKrylov<Backend>::Vector& p,
-    const typename KokkosKrylov<Backend>::Vector& q, Real tolerance, size_t maxIterations)
-  {
-    using Krylov = KokkosKrylov<Backend>;
-    using ExecutionSpace = typename Krylov::ExecutionSpace;
-    using Policy = ::Kokkos::RangePolicy<ExecutionSpace>;
-    const size_t n = b.extent(0);
-    KokkosKrylovResult res;
-    typename Krylov::SpMV product;
-
-    const Real rhsNorm2 = Krylov::dot(execution, b, b);
-    if (rhsNorm2 == Real(0))
-    {
-      ::Kokkos::deep_copy(execution, x, Real(0));
-      res.converged = true;
-      return res;
-    }
-    const Real threshold =
-      std::max(tolerance * tolerance * rhsNorm2, std::numeric_limits<Real>::min());
-
-    // r = b - A x
-    ::Kokkos::deep_copy(execution, r, b);
-    ::KokkosSparse::spmv(execution, &product, "N", Real(-1), A, x, Real(1), r);
-    Real residualNorm2 = Krylov::dot(execution, r, r);
-    if (residualNorm2 < threshold)
-    {
-      res.converged = true;
-      res.error = std::sqrt(residualNorm2 / rhsNorm2);
-      return res;
-    }
-
-    // p = D^{-1} r
-    Real absNew = 0;
-    ::Kokkos::parallel_reduce("Rodin::Solver::CG::precondition", Policy(execution, 0, n),
-      KokkosCGPrecondition<Backend>{inverse, r, p}, absNew);
-
-    size_t i = 0;
-    while (i < maxIterations)
-    {
-      ::KokkosSparse::spmv(execution, &product, "N", Real(1), A, p, Real(0), q);
-      const Real alpha = absNew / Krylov::dot(execution, p, q);
-
-      // x += alpha p, r -= alpha q, z = D^{-1} r, with |r|^2 and r.z.
-      Real rz = 0;
-      ::Kokkos::parallel_reduce("Rodin::Solver::CG::update", Policy(execution, 0, n),
-        KokkosCGUpdate<Backend>{x, p, r, q, inverse, z, alpha},
-        ::Kokkos::Sum<Real>(residualNorm2), ::Kokkos::Sum<Real>(rz));
-      if (residualNorm2 < threshold)
-        break;
-
-      const Real beta = rz / absNew;
-      absNew = rz;
-      ::Kokkos::parallel_for("Rodin::Solver::CG::direction", Policy(execution, 0, n),
-        KokkosCGDirection<Backend>{p, z, beta});
-      ++i;
-    }
-    res.iterations = i;
-    res.error = std::sqrt(residualNorm2 / rhsNorm2);
-    res.converged = res.error <= tolerance;
-    return res;
-  }
 }
 
 namespace Rodin::Solver
@@ -354,8 +268,7 @@ namespace Rodin::Solver
         }
         Krylov::invertDiagonal(execution, matrix, m_inverse);
         const auto A = Krylov::wrap(matrix);
-        m_result = Internal::kokkosCG<Backend>(execution, A, m_inverse, m_b, m_x, m_r,
-          m_z, m_p, m_q, m_tolerance, m_maxIterations ? *m_maxIterations : 2 * n);
+        m_result = iterate(execution, A, m_maxIterations ? *m_maxIterations : 2 * n);
         Krylov::download(m_x, axb.getSolution());
       }
 
@@ -396,6 +309,76 @@ namespace Rodin::Solver
       }
 
     private:
+      /**
+       * @brief Executes the CG iteration using this solver's retained vectors.
+       * @param execution Execution instance ordering the operations.
+       * @param A Prepared device matrix.
+       * @param maxIterations Iteration limit.
+       * @returns Convergence flag, iteration count and relative residual.
+       */
+      Internal::KokkosKrylovResult iterate(
+        const typename Krylov::ExecutionSpace& execution,
+        const typename Krylov::CrsMatrix& A, size_t maxIterations)
+      {
+        using ExecutionSpace = typename Krylov::ExecutionSpace;
+        using Policy = ::Kokkos::RangePolicy<ExecutionSpace>;
+        const size_t n = m_b.extent(0);
+        Internal::KokkosKrylovResult res;
+        typename Krylov::SpMV product;
+
+        const Real rhsNorm2 = Krylov::dot(execution, m_b, m_b);
+        if (rhsNorm2 == Real(0))
+        {
+          ::Kokkos::deep_copy(execution, m_x, Real(0));
+          res.converged = true;
+          return res;
+        }
+        const Real threshold = std::max(
+          m_tolerance * m_tolerance * rhsNorm2, std::numeric_limits<Real>::min());
+
+        // m_r = m_b - A m_x
+        ::Kokkos::deep_copy(execution, m_r, m_b);
+        ::KokkosSparse::spmv(execution, &product, "N", Real(-1), A, m_x, Real(1), m_r);
+        Real residualNorm2 = Krylov::dot(execution, m_r, m_r);
+        if (residualNorm2 < threshold)
+        {
+          res.converged = true;
+          res.error = std::sqrt(residualNorm2 / rhsNorm2);
+          return res;
+        }
+
+        // m_p = D^{-1} m_r
+        Real absNew = 0;
+        ::Kokkos::parallel_reduce("Rodin::Solver::CG::precondition",
+          Policy(execution, 0, n),
+          Internal::KokkosCGPrecondition<Backend>{m_inverse, m_r, m_p}, absNew);
+
+        size_t i = 0;
+        while (i < maxIterations)
+        {
+          ::KokkosSparse::spmv(execution, &product, "N", Real(1), A, m_p, Real(0), m_q);
+          const Real alpha = absNew / Krylov::dot(execution, m_p, m_q);
+
+          // m_x += alpha m_p, m_r -= alpha m_q, m_z = D^{-1} m_r, with |m_r|^2 and m_r.m_z.
+          Real rz = 0;
+          ::Kokkos::parallel_reduce("Rodin::Solver::CG::update", Policy(execution, 0, n),
+            Internal::KokkosCGUpdate<Backend>{m_x, m_p, m_r, m_q, m_inverse, m_z, alpha},
+            ::Kokkos::Sum<Real>(residualNorm2), ::Kokkos::Sum<Real>(rz));
+          if (residualNorm2 < threshold)
+            break;
+
+          const Real beta = rz / absNew;
+          absNew = rz;
+          ::Kokkos::parallel_for("Rodin::Solver::CG::direction", Policy(execution, 0, n),
+            Internal::KokkosCGDirection<Backend>{m_p, m_z, beta});
+          ++i;
+        }
+        res.iterations = i;
+        res.error = std::sqrt(residualNorm2 / rhsNorm2);
+        res.converged = res.error <= m_tolerance;
+        return res;
+      }
+
       Real m_tolerance = std::numeric_limits<Real>::epsilon();
       Optional<size_t> m_maxIterations;
       Internal::KokkosKrylovResult m_result;

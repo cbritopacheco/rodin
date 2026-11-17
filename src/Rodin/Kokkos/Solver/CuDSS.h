@@ -415,9 +415,9 @@ namespace Rodin::Solver
           res.clear(Factorization::Symbolic);
 
         res.numeric = false;
-        const Math::SparseIndex* starts = res.outer.data;
-        const Math::SparseIndex* indices = res.inner.data;
-        const ScalarType* values = res.values.data;
+        Math::SparseIndex* starts = res.outer.data;
+        Math::SparseIndex* indices = res.inner.data;
+        ScalarType* values = res.values.data;
         if constexpr (Arrays::Resident)
         {
           if (!res.symbolic)
@@ -602,9 +602,17 @@ namespace Rodin::Solver
           res.pattern.matches(matrix);
       }
 
-      /// @brief Creates the descriptors over the device arrays.
-      bool describe(Index rows, Index nonzeros, const Math::SparseIndex* starts,
-        const Math::SparseIndex* indices, const ScalarType* values)
+      /**
+       * @brief Creates descriptors borrowing the non-const input allocations.
+       * @param rows Number of rows.
+       * @param nonzeros Number of stored coefficients.
+       * @param starts Borrowed CSR row offsets.
+       * @param indices Borrowed CSR column indices.
+       * @param values Borrowed matrix coefficients.
+       * @returns Whether descriptor creation succeeded.
+       */
+      bool describe(Index rows, Index nonzeros, Math::SparseIndex* starts,
+        Math::SparseIndex* indices, ScalarType* values)
       {
         auto& res = m_resources;
         res.destroyDescriptors();
@@ -616,9 +624,8 @@ namespace Rodin::Solver
         static_assert(sizeof(Math::SparseIndex) == 4);
         // cuDSS reads the arrays without writing them.
         cudssStatus_t status = cudssMatrixCreateCsr(&res.matrix, rows, rows, nonzeros,
-          const_cast<Math::SparseIndex*>(starts), nullptr,
-          const_cast<Math::SparseIndex*>(indices), const_cast<ScalarType*>(values),
-          CUDA_R_32I, CUDA_R_32I, CUDA_R_64F, type, CUDSS_MVIEW_FULL, CUDSS_BASE_ZERO);
+          starts, nullptr, indices, values, CUDA_R_32I, CUDA_R_32I, CUDA_R_64F, type,
+          CUDSS_MVIEW_FULL, CUDSS_BASE_ZERO);
         if (status == CUDSS_STATUS_SUCCESS)
         {
           status = cudssMatrixCreateDn(

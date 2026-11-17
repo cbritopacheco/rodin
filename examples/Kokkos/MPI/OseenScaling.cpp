@@ -41,12 +41,16 @@
  * prints one line of key=value timings, in seconds, per repetition; each one
  * is the time between two barriers after a fence, so the slowest process.
  * The first repetition also builds the sparsity pattern and the
- * preconditioner, and every solve starts from zero. With -log_view, the first
+ * preconditioner, and every solve starts from zero. -mesh_save_shards prefix
+ * writes prefix-rank.h5 files; -mesh_shards prefix reloads those files directly
+ * on each rank. Keep the same process count and grid/atrium positional source
+ * convention; saved shards retain geometry, not time-step parameters. With -log_view, the first
  * repetition and the next ones are reported in two stages.
  */
 
 #include <algorithm>
 #include <array>
+#include <cassert>
 #include <chrono>
 #include <cmath>
 #include <cstdlib>
@@ -56,7 +60,6 @@
 #include <unordered_map>
 #include <vector>
 
-#include <petsc.h>
 #include <boost/mpi/collectives/all_reduce.hpp>
 #include <boost/mpi/collectives/broadcast.hpp>
 #include <boost/mpi/communicator.hpp>
@@ -70,6 +73,8 @@
 #include <Rodin/Solver.h>
 #include <Rodin/MPI/Geometry/Sharder.h>
 #include <Rodin/Kokkos/MPI.h>
+#include <Rodin/PETSc/Kokkos.h>
+#include <Rodin/MPI/IO/HDF5.h>
 
 #if defined(KOKKOS_ENABLE_CUDA)
 using Backend = Rodin::Context::CUDA;
@@ -306,58 +311,91 @@ namespace Rodin::Examples
     const Context::MPI& ctx, const std::string& source, bool renumber, size_t& cells)
   {
     const auto& comm = ctx.getCommunicator();
-    Geometry::Sharder<Context::MPI> sharder(ctx);
-    if (comm.rank() == 0)
+    [[maybe_unused]] PetscErrorCode ierr;
+    char input[PETSC_MAX_PATH_LEN] = "";
+    char output[PETSC_MAX_PATH_LEN] = "";
+    ierr = PetscOptionsGetString(
+      nullptr, nullptr, "-mesh_shards", input, sizeof(input), nullptr);
+    assert(ierr == PETSC_SUCCESS);
+    ierr = PetscOptionsGetString(
+      nullptr, nullptr, "-mesh_save_shards", output, sizeof(output), nullptr);
+    assert(ierr == PETSC_SUCCESS);
+    HostMesh mesh(ctx);
+    if (input[0])
     {
-      LocalMesh mesh;
-      if (isGrid(source))
-      {
-        const size_t n = std::stoul(source) + 1;
-        mesh = LocalMesh::UniformGrid(Geometry::Polytope::Type::Tetrahedron, {n, n, n});
-        mesh.scale(Real(1) / static_cast<Real>(n - 1));
-      }
-      else
-      {
-        mesh.load(source, IO::FileFormat::MEDIT);
-        PetscReal scale = 1e-3;
-        PetscOptionsGetReal(nullptr, nullptr, "-oseen_scale", &scale, nullptr);
-        mesh.scale(scale);
-      }
       PetscInt levels = 0;
-      PetscOptionsGetInt(nullptr, nullptr, "-oseen_refine", &levels, nullptr);
-      for (PetscInt l = 0; l < levels; ++l)
-        mesh = refine(mesh);
-      if (mesh.getPolytopeCount(Geometry::Polytope::Type::Tetrahedron) !=
-        mesh.getCellCount())
-        throw std::runtime_error(source + " has cells other than tetrahedra.");
-      if (renumber)
-        mesh = mesh.renumber(Geometry::Ordering::Morton{});
+      PetscBool scaleSet = PETSC_FALSE;
+      ierr = PetscOptionsGetInt(nullptr, nullptr, "-oseen_refine", &levels, nullptr);
+      assert(ierr == PETSC_SUCCESS);
+      ierr = PetscOptionsHasName(nullptr, nullptr, "-oseen_scale", &scaleSet);
+      assert(ierr == PETSC_SUCCESS);
+      if (renumber || levels != 0 || scaleSet)
+      {
+        Alert::Exception()
+          << "Saved mesh shards already contain geometry and ordering. "
+             "Do not combine -mesh_shards with refinement, scaling or renumbering."
+          << Alert::Raise;
+      }
+      mesh.load(
+        [&](int rank) { return std::string(input) + "-" + std::to_string(rank) + ".h5"; },
+        IO::FileFormat::HDF5);
       cells = mesh.getCellCount();
-      auto& conn = mesh.getConnectivity();
-      conn.compute(3, 3);
-      conn.compute(3, 0);
-      conn.compute(3, 2);
-      conn.compute(2, 3);
-      conn.compute(2, 0);
-      char name[16] = "compact";
-      PetscOptionsGetString(
-        nullptr, nullptr, "-oseen_partitioner", name, sizeof(name), nullptr);
-      if (std::string(name) == "greedy")
-      {
-        Geometry::GreedyPartitioner partitioner(mesh);
-        partitioner.partition(static_cast<size_t>(comm.size()));
-        sharder.shard(partitioner);
-      }
-      else
-      {
-        Geometry::BalancedCompactPartitioner partitioner(mesh);
-        partitioner.partition(static_cast<size_t>(comm.size()));
-        sharder.shard(partitioner);
-      }
     }
-    // The global mesh is released before the shards are sent.
-    sharder.scatter(0);
-    HostMesh mesh = sharder.gather(0);
+    else
+    {
+      Geometry::Sharder<Context::MPI> sharder(ctx);
+      if (comm.rank() == 0)
+      {
+        LocalMesh mesh;
+        if (isGrid(source))
+        {
+          const size_t n = std::stoul(source) + 1;
+          mesh = LocalMesh::UniformGrid(Geometry::Polytope::Type::Tetrahedron, {n, n, n});
+          mesh.scale(Real(1) / static_cast<Real>(n - 1));
+        }
+        else
+        {
+          mesh.load(source, IO::FileFormat::MEDIT);
+          PetscReal scale = 1e-3;
+          PetscOptionsGetReal(nullptr, nullptr, "-oseen_scale", &scale, nullptr);
+          mesh.scale(scale);
+        }
+        PetscInt levels = 0;
+        PetscOptionsGetInt(nullptr, nullptr, "-oseen_refine", &levels, nullptr);
+        for (PetscInt l = 0; l < levels; ++l)
+          mesh = refine(mesh);
+        if (mesh.getPolytopeCount(Geometry::Polytope::Type::Tetrahedron) !=
+          mesh.getCellCount())
+          throw std::runtime_error(source + " has cells other than tetrahedra.");
+        if (renumber)
+          mesh = mesh.renumber(Geometry::Ordering::Morton{});
+        cells = mesh.getCellCount();
+        auto& conn = mesh.getConnectivity();
+        conn.compute(3, 3);
+        conn.compute(3, 0);
+        conn.compute(3, 2);
+        conn.compute(2, 3);
+        conn.compute(2, 0);
+        char name[16] = "compact";
+        PetscOptionsGetString(
+          nullptr, nullptr, "-oseen_partitioner", name, sizeof(name), nullptr);
+        if (std::string(name) == "greedy")
+        {
+          Geometry::GreedyPartitioner partitioner(mesh);
+          partitioner.partition(static_cast<size_t>(comm.size()));
+          sharder.shard(partitioner);
+        }
+        else
+        {
+          Geometry::BalancedCompactPartitioner partitioner(mesh);
+          partitioner.partition(static_cast<size_t>(comm.size()));
+          sharder.shard(partitioner);
+        }
+      }
+      // The global mesh is released before the shards are sent.
+      sharder.scatter(0);
+      mesh = sharder.gather(0);
+    }
     boost::mpi::broadcast(comm, cells, 0);
     auto& conn = mesh.getConnectivity();
     conn.compute(3, 3);
@@ -366,6 +404,13 @@ namespace Rodin::Examples
     conn.compute(2, 3);
     conn.compute(2, 0);
     mesh.reconcile(2);
+    if (output[0])
+    {
+      mesh.save(
+        [&](
+          int rank) { return std::string(output) + "-" + std::to_string(rank) + ".h5"; },
+        IO::FileFormat::HDF5);
+    }
     return mesh;
   }
 

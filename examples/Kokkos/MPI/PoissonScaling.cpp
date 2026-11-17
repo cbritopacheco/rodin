@@ -24,12 +24,15 @@
  * triangle, quadrilateral, tetrahedron or hexahedron, n the number of
  * vertices along each axis, k the order, 1 or 2. Rank 0 prints one line of
  * key=value timings, in seconds, per repetition; each one is the time between
- * two barriers after a fence, so the slowest process. The first repetition
- * also builds the sparsity pattern and the multigrid hierarchy, and every
+ * two barriers after a fence, so the slowest process.
+ * -mesh_save_shards prefix writes prefix-rank.h5 and -mesh_shards prefix
+ * reloads those files on each rank with the same process count. The first
+ * repetition also builds the sparsity pattern and the multigrid hierarchy, and every
  * solve starts from zero. With -log_view, the first repetition and the next
  * ones are reported in two stages.
  */
 
+#include <cassert>
 #include <chrono>
 #include <cstdlib>
 #include <iostream>
@@ -37,7 +40,6 @@
 #include <string>
 #include <type_traits>
 
-#include <petsc.h>
 #include <boost/mpi/communicator.hpp>
 #include <boost/mpi/environment.hpp>
 
@@ -45,6 +47,8 @@
 #include <Rodin/Variational.h>
 #include <Rodin/Solver.h>
 #include <Rodin/Kokkos/MPI.h>
+#include <Rodin/PETSc/Kokkos.h>
+#include <Rodin/MPI/IO/HDF5.h>
 
 #if defined(KOKKOS_ENABLE_CUDA)
 using Backend = Rodin::Context::CUDA;
@@ -212,13 +216,39 @@ int main(int argc, char** argv)
       Stopwatch time(world);
       using Type = Geometry::Polytope::Type;
       const size_t d = (type == Type::Triangle || type == Type::Quadrilateral) ? 2 : 3;
+      [[maybe_unused]] PetscErrorCode ierr;
+      char input[PETSC_MAX_PATH_LEN] = "";
+      char output[PETSC_MAX_PATH_LEN] = "";
+      ierr = PetscOptionsGetString(
+        nullptr, nullptr, "-mesh_shards", input, sizeof(input), nullptr);
+      assert(ierr == PETSC_SUCCESS);
+      ierr = PetscOptionsGetString(
+        nullptr, nullptr, "-mesh_save_shards", output, sizeof(output), nullptr);
+      assert(ierr == PETSC_SUCCESS);
       HostMesh host(ctx);
       const double tmesh = time([&] {
-        if (d == 2)
-          host = HostMesh::UniformGrid(ctx, type, {n, n});
+        if (input[0])
+        {
+          host.load(
+            [&](int rank) {
+              return std::string(input) + "-" + std::to_string(rank) + ".h5";
+            },
+            Rodin::IO::FileFormat::HDF5);
+          if (host.getDimension() != d)
+          {
+            Rodin::Alert::Exception()
+              << "Saved mesh dimension does not match the selected cell type."
+              << Rodin::Alert::Raise;
+          }
+        }
         else
-          host = HostMesh::UniformGrid(ctx, type, {n, n, n});
-        host.scale(Real(1) / static_cast<Real>(n - 1));
+        {
+          if (d == 2)
+            host = HostMesh::UniformGrid(ctx, type, {n, n});
+          else
+            host = HostMesh::UniformGrid(ctx, type, {n, n, n});
+          host.scale(Real(1) / static_cast<Real>(n - 1));
+        }
         auto& conn = host.getConnectivity();
         conn.compute(d, d);
         conn.compute(d, 0);
@@ -232,6 +262,14 @@ int main(int argc, char** argv)
           conn.compute(1, 0);
           conn.compute(2, 1);
           host.reconcile(1);
+        }
+        if (output[0])
+        {
+          host.save(
+            [&](int rank) {
+              return std::string(output) + "-" + std::to_string(rank) + ".h5";
+            },
+            Rodin::IO::FileFormat::HDF5);
         }
       });
       // A first copy warms the device up; the second one is timed.

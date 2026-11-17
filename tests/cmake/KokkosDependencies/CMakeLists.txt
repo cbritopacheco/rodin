@@ -48,7 +48,7 @@ file(WRITE "${_mock}/KokkosKernelsConfig.cmake" [=[
 file(WRITE "${_mock}/RodinTargets.cmake" "")
 
 # Configure and consume the actual exported package template, in a CXX-only project.
-file(READ "${RODIN_SOURCE_DIR}/cmake/RodinConfig.cmake.in" _template)
+file(READ "${RODIN_SOURCE_DIR}/cmake/RodinDependencies.cmake.in" _template)
 string(REGEX MATCHALL "@RODIN_[A-Z0-9_]+@" _options "${_template}")
 foreach(_option IN LISTS _options)
   string(REPLACE "@" "" _name "${_option}")
@@ -58,5 +58,7 @@ set(RODIN_USE_KOKKOS ON)
 set(PACKAGE_INIT "")
 configure_file("${RODIN_SOURCE_DIR}/cmake/RodinConfig.cmake.in"
   "${_mock}/RodinConfig.cmake" @ONLY)
+configure_file("${RODIN_SOURCE_DIR}/cmake/RodinDependencies.cmake.in"
+  "${_mock}/RodinDependencies.cmake" @ONLY)
 list(PREPEND CMAKE_PREFIX_PATH "${_mock}")
 find_package(Rodin REQUIRED CONFIG PATHS "${_mock}" NO_DEFAULT_PATH)

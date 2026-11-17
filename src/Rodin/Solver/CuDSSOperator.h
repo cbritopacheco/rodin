@@ -140,6 +140,17 @@ namespace Rodin::Solver::Internal
     }
 
     /**
+     * @brief Borrows input storage from a non-const matrix for vendor APIs.
+     * The vendor consumes these arrays as inputs; no allocation or copy occurs.
+     * @param matrix Non-const owner of the compressed arrays.
+     * @return Borrowed pointer, valid until the owner replaces its storage.
+     */
+    static Math::SparseIndex* getStarts(MatrixType& matrix)
+    {
+      return matrix.outerIndexPtr();
+    }
+
+    /**
      * @brief Index of every coefficient in its compressed row.
      * @param matrix Compressed host sparse matrix.
      * @return Pointer to the inner index array of @p matrix.
@@ -150,11 +161,33 @@ namespace Rodin::Solver::Internal
     }
 
     /**
+     * @brief Borrows input storage from a non-const matrix for vendor APIs.
+     * The vendor consumes these arrays as inputs; no allocation or copy occurs.
+     * @param matrix Non-const owner of the compressed arrays.
+     * @return Borrowed pointer, valid until the owner replaces its storage.
+     */
+    static Math::SparseIndex* getIndices(MatrixType& matrix)
+    {
+      return matrix.innerIndexPtr();
+    }
+
+    /**
      * @brief Value of every coefficient.
      * @param matrix Compressed host sparse matrix.
      * @return Pointer to the coefficient array of @p matrix.
      */
     static const Real* getValues(const MatrixType& matrix)
+    {
+      return matrix.valuePtr();
+    }
+
+    /**
+     * @brief Borrows input storage from a non-const matrix for vendor APIs.
+     * The vendor consumes these arrays as inputs; no allocation or copy occurs.
+     * @param matrix Non-const owner of the compressed arrays.
+     * @return Borrowed pointer, valid until the owner replaces its storage.
+     */
+    static Real* getValues(MatrixType& matrix)
     {
       return matrix.valuePtr();
     }

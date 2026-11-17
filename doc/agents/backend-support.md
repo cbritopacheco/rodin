@@ -87,7 +87,11 @@ with empty plans. PETSc retains its separate COO cache. SubMesh
 is not provided. `Mesh<Context::Kokkos<Context::MPI, Backend>>` makes the
 shard of a `Mesh<Context::MPI>` resident and marks owned entities in its
 device view; `P1` and `P0g` PETSc problems, single or multi-field, are
-assembled on it into distributed Kokkos systems (`Rodin::Kokkos::MPI`). Each
+assembled on it into distributed PETSc Kokkos systems (`Rodin::Kokkos::PETSc`).
+`Rodin::Kokkos::MPI` independently provides the distributed mesh and spaces
+without linking PETSc. Include `Rodin/PETSc/Kokkos.h` for the combined path;
+the older PETSc adapter includes forward to it. Native algebra assembly on
+an MPI mesh has an explicit unsupported-combination diagnostic. Each
 field keeps its global numbering shifted by its offset, as on the host, for
 the constraints, the preassembled forms and the problem, but the PETSc rows of
 a process hold its owned degrees of freedom of each field in turn, so that the

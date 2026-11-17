@@ -6,6 +6,8 @@
  */
 #include <cstring>
 
+// Keep coefficient access self-contained, before the matrix assembly adapter.
+#include <Rodin/PETSc/Kokkos/Variational/GridFunctionCoefficients.h>
 #include <petsc.h>
 
 #include <Rodin/Kokkos/PETSc.h>

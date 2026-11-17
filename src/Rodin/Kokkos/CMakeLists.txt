@@ -102,6 +102,28 @@ target_sources(RodinKokkos INTERFACE
 
 install(TARGETS RodinKokkos EXPORT RodinTargets)
 
+if (RODIN_USE_MPI)
+  add_library(RodinKokkosMPI INTERFACE)
+  add_library(Rodin::Kokkos::MPI ALIAS RodinKokkosMPI)
+  set_target_properties(RodinKokkosMPI PROPERTIES EXPORT_NAME Kokkos::MPI)
+
+  target_link_libraries(RodinKokkosMPI
+    INTERFACE
+      Rodin::Kokkos
+      Rodin::MPI
+  )
+
+  target_sources(RodinKokkosMPI INTERFACE
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/MPI.h>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/MPI/Geometry/Mesh.h>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/MPI/Variational/P1.h>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/MPI/Variational/P0g.h>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/MPI/Variational/H1.h>
+  )
+
+  install(TARGETS RodinKokkosMPI EXPORT RodinTargets)
+endif()
+
 if (RODIN_USE_PETSC)
   add_library(RodinKokkosPETSc INTERFACE)
   add_library(Rodin::Kokkos::PETSc ALIAS RodinKokkosPETSc)
@@ -116,31 +138,20 @@ if (RODIN_USE_PETSC)
   target_sources(RodinKokkosPETSc INTERFACE
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/PETSc.h>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Assembly/PETSc.h>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../PETSc/Kokkos/Assembly/COOAssembly.h>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../PETSc/Kokkos/Assembly/COOCache.h>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../PETSc/Kokkos/Assembly/Distribution.h>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../PETSc/Kokkos/Assembly/Kokkos.h>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../PETSc/Kokkos/Variational/GridFunctionCoefficients.h>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../PETSc/Kokkos/Variational/GhostedPositions.h>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../PETSc/Kokkos.h>
   )
 
-  install(TARGETS RodinKokkosPETSc EXPORT RodinTargets)
-
   if (RODIN_USE_MPI)
-    add_library(RodinKokkosMPI INTERFACE)
-    add_library(Rodin::Kokkos::MPI ALIAS RodinKokkosMPI)
-    set_target_properties(RodinKokkosMPI PROPERTIES EXPORT_NAME Kokkos::MPI)
-
-    target_link_libraries(RodinKokkosMPI
-      INTERFACE
-        Rodin::Kokkos::PETSc
-        Rodin::MPI
-    )
-
-    target_sources(RodinKokkosMPI INTERFACE
-      $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/MPI.h>
-      $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/MPI/Geometry/Mesh.h>
-      $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/MPI/Variational/P1.h>
-      $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/MPI/Variational/P0g.h>
-      $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/MPI/Variational/H1.h>
-    )
-
-    install(TARGETS RodinKokkosMPI EXPORT RodinTargets)
+    target_link_libraries(RodinKokkosPETSc INTERFACE Rodin::Kokkos::MPI)
   endif()
+
+  install(TARGETS RodinKokkosPETSc EXPORT RodinTargets)
 endif()
 
 if (RODIN_USE_KOKKOS)

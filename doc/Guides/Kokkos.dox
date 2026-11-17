@@ -23,6 +23,56 @@
   Scaling, coordinate edits, label edits and map replacement update resident
   storage before returning. Measures use Kokkos quadrature reductions.
 
+  The targets separate execution, distribution and algebra:
+
+  | Target | Dependencies and responsibility |
+  |--------|---------------------------------|
+  | `Rodin::Kokkos` | Rodin core, Kokkos and Kokkos-Kernels; local device storage, integration and native algebra. |
+  | `Rodin::Kokkos::MPI` | Kokkos and Rodin MPI; distributed mesh shards, spaces and local device DOF maps, without PETSc. |
+  | `Rodin::Kokkos::PETSc` | Kokkos and Rodin PETSc, plus Kokkos MPI when enabled; translation to PETSc algebra and distributed solving. |
+
+  `Rodin/Kokkos/MPI.h` includes only distributed mesh and space support.
+  Applications selecting PETSc algebra additionally include
+  `Rodin/PETSc/Kokkos.h` and link `Rodin::Kokkos::PETSc`.
+  `Rodin/Kokkos/PETSc.h` and `Rodin/Kokkos/Assembly/PETSc.h` remain forwarding
+  includes for the adapter. Native Kokkos algebra is local: attempting to
+  assemble it on an MPI mesh is diagnosed, rather than treating a local CSR
+  as a distributed system.
+
+  Rodin MPI owns mesh entity ownership and finite-element numbering. PETSc
+  owns its matrix-row layout; the adapter translates between them. Local
+  integration kernels consume only device views and local indices. The
+  distributed device mesh borrows its host MPI mesh, which must outlive it.
+
+  | Stage | Execution and transfer policy |
+  |-------|-------------------------------|
+  | Load and partition | CPU, either from a root mesh or rank-specific HDF5 shards. |
+  | Construct device mesh and maps | Upload each local shard and retain its arrays. |
+  | Update coefficients | Prefer device updates; adapters gather into local numbering as required. |
+  | Prepare constraints | Host resolution and distributed synchronization followed by device metadata. |
+  | Integrate and reduce | GPU kernels compute contributions and numerical reductions. |
+  | Prepare PETSc structure | Host indices establish COO preallocation and communication metadata; reuse while valid. |
+  | Assemble and solve | Device values remain in PETSc GPU matrices/vectors; communication may stage through host memory. |
+  | Export | Download selected output; host orchestration alone does not require downloading numerical arrays. |
+
+  PETSc coefficient access lives in its own adapter header. It does not
+  update ghosts: callers must complete the required ghost updates before
+  assembly. Borrowed PETSc arrays are consumed before their access interval
+  is restored; retained gathers are owned by the mesh transfer cache and
+  keyed by the states of both the vector and its local form, together with
+  the immutable numbering revision of the space. Ghost-position maps are
+  owned by a PETSc container attached to the coefficient vector, independently
+  of coefficient values. Vector destruction releases the cache. MPI spaces
+  retain no mutable cache; their existing `getGhostedPositions()` accessor is
+  an uncached numbering query whose returned view owns its allocation.
+
+  The refactor retains the existing COO grouping, accumulation order,
+  constraints and symbolic validation algorithms. Custom grouping bounds
+  temporary memory and retains source-to-entry order between assemblies;
+  replacing it with library operations requires matching those contracts.
+  Transfer optimizations should be measured separately, reporting startup,
+  repeated assembly, solve iterations, peak memory and output costs.
+
   @section guides-kokkos-usage Usage
 
   @code{.cpp}
@@ -338,6 +388,7 @@
 
   @code{.cpp}
   #include <Rodin/Kokkos/MPI.h>
+  #include <Rodin/PETSc/Kokkos.h>
 
   using DeviceContext = Context::Kokkos<Context::MPI, Context::CUDA>;
   Mesh<Context::MPI> host = ...; // distributed and reconciled
@@ -366,8 +417,9 @@
   process hold its degrees of freedom of each field in turn, and
   `LinearSystem::getFieldStarts()` gives the first row of each field. Eigen
   systems are not distributed. Link the
-  `Rodin::Kokkos::MPI` target, available when Rodin is configured with both
-  `RODIN_USE_MPI` and `RODIN_USE_PETSC`. PETSc must be built with Kokkos;
+  `Rodin::Kokkos::PETSc` target, with `RODIN_USE_MPI` and
+  `RODIN_USE_PETSC` enabled. The independent `Rodin::Kokkos::MPI` target
+  provides geometry and spaces without PETSc. PETSc must be built with Kokkos;
   with a CUDA-aware or ROCm-aware MPI, such as Open MPI configured
   `--with-cuda` or `--with-rocm`, device buffers are exchanged directly,
   otherwise run with `-use_gpu_aware_mpi 0`. Open MPI does not know SYCL
@@ -377,7 +429,21 @@
   bisection into regions grown through the adjacency, whose sizes differ by
   at most one cell; compact parts keep the ghost layer of each process
   small. `KokkosMPIOseenScaling` (`examples/Kokkos/MPI`) partitions the
-  atrium mesh with it. The scaling examples report the first repetition in
+  atrium mesh with it. The scaling drivers accept
+  `-mesh_save_shards prefix` to write `prefix-rank.h5` and
+  `-mesh_shards prefix` to load the same partition directly on each rank.
+  All ranks participate in reconstruction, with the same process count.
+  The Oseen positional source still selects grid versus atrium boundary
+  conventions. Saved shards already include scale and ordering: do not
+  combine loading with renumbering, `-oseen_refine` or `-oseen_scale`.
+  Shard files do not persist physical parameters; supply the intended
+  `-oseen_dt` when loading a previously refined partition.
+  For example, both commands retain the positional arguments:
+  @code{.sh}
+  mpirun -n 2 KokkosMPIOseenScaling 8 2 -mesh_save_shards /tmp/oseen
+  mpirun -n 2 KokkosMPIOseenScaling 8 2 -mesh_shards /tmp/oseen
+  @endcode
+ The scaling examples report the first repetition in
   its own `-log_view` stage, since it loads the device kernels and builds
   the sparsity pattern and the preconditioner.
 
@@ -629,10 +695,30 @@
 
   @section guides-kokkos-consumers Installed Consumers
 
+  Package components have the names of the imported targets after `Rodin::`.
+  Selecting a component discovers the optional dependencies required by its
+  transitive target links. For example, a Kokkos MPI mesh consumer can use a
+  Rodin installation built with PETSc without discovering PETSc:
+
+  @code{.cmake}
+  find_package(Rodin REQUIRED COMPONENTS Kokkos::MPI)
+  add_executable(mesh_mpi main.cpp)
+  target_link_libraries(mesh_mpi PRIVATE Rodin::Kokkos::MPI)
+  @endcode
+
+  PETSc assembly consumers select `Kokkos::PETSc`. A later `find_package`
+  call may select additional components in the same project. Required
+  unavailable components fail discovery; optional components report their
+  availability through `Rodin_<component>_FOUND`. With no component list,
+  `find_package(Rodin REQUIRED)` retains whole-package dependency discovery.
+  Components select dependencies of the installed build; they do not disable
+  features compiled into a library. In particular, core libraries built with
+  MPI still require their transitive MPI dependency.
+
   Installed consumers enable the same compiler setup and link the module:
 
   @code{.cmake}
-  find_package(Rodin REQUIRED)
+  find_package(Rodin REQUIRED COMPONENTS Kokkos)
   add_executable(mesh_device main.cpp)
   target_link_libraries(mesh_device PRIVATE Rodin::Kokkos)
   @endcode

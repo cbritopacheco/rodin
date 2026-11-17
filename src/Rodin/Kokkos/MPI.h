@@ -9,7 +9,7 @@
 
 /**
  * @file
- * @brief PETSc problems assembled on distributed resident Kokkos meshes.
+ * @brief Distributed resident Kokkos meshes and finite-element spaces.
  *
  * Link the optional Rodin::Kokkos::MPI CMake target when including this
  * module.
@@ -17,7 +17,7 @@
 
 #include "Rodin/MPI.h"
 
-#include "Rodin/Kokkos/PETSc.h"
+#include "Rodin/Kokkos.h"
 #include "Rodin/Kokkos/MPI/Geometry/Mesh.h"
 #include "Rodin/Kokkos/MPI/Variational/P1.h"
 #include "Rodin/Kokkos/MPI/Variational/P0g.h"

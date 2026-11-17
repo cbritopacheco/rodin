@@ -495,10 +495,18 @@ configure_package_config_file(
   INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/Rodin
 )
 
+configure_file(
+  "${PROJECT_SOURCE_DIR}/cmake/RodinDependencies.cmake.in"
+  "${CMAKE_CURRENT_BINARY_DIR}/RodinDependencies.cmake"
+  @ONLY
+)
+
 install(FILES
   "${CMAKE_CURRENT_BINARY_DIR}/RodinConfig.cmake"
+  "${CMAKE_CURRENT_BINARY_DIR}/RodinDependencies.cmake"
   "${CMAKE_CURRENT_BINARY_DIR}/RodinConfigVersion.cmake"
   "${PROJECT_SOURCE_DIR}/cmake/FindPETSc.cmake"
+  "${PROJECT_SOURCE_DIR}/cmake/FindScotch.cmake"
   "${PROJECT_SOURCE_DIR}/cmake/FindSuiteSparse.cmake"
   "${PROJECT_SOURCE_DIR}/cmake/FindMUMPS.cmake"
   "${PROJECT_SOURCE_DIR}/cmake/FindHYPRE.cmake"
