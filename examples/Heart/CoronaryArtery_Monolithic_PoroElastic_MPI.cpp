@@ -17,7 +17,8 @@
  * (linear: semi-implicit convection) with the kinematic Dirichlet condition
  * u = (d - d^n)/dt on Gamma; S the nonlinear solid (SNES) loaded by the
  * variational fluid reaction (A_N x - b_N on Gamma). The geometry is
- * EXPLICIT (Newmark predictor), so the shape derivatives of eq. (18) vanish
+ * EXPLICIT (first-order predictor d^n + dt v^n by default, see
+ * -coronary_geometry_predictor), so the shape derivatives of eq. (18) vanish
  * and the fluid tangent problem is eq. (15) with du|_Gamma = z/dt only; the
  * solid tangent reuses the factorization of the last solid Newton step.
  * Explicit as well: geometry, mesh velocity, VMS projections, viscosity
@@ -25,7 +26,9 @@
  * Prefixes: coronary_newton_ (outer GMRES), coronary_fluid_ (fluid KSP on
  * the Dirichlet operator), coronary_solid_, coronary_ale_, coronary_aux_,
  * coronary_mass_. Options: -coronary_newton_max_iterations,
- * -coronary_newton_rtol (|R|/|d - d^n|), -coronary_newton_atol [m].
+ * -coronary_newton_rtol (|R|/|d - d^n|), -coronary_newton_atol [m],
+ * -coronary_geometry_predictor 0|1|2 (geometry from d^n | d^n + dt v^n |
+ * full Newmark predictor; the order-2 one injects energy over cycles).
  *
  * --- Explicit (Robin-Robin) original: ------------------------------------
  *
@@ -344,6 +347,9 @@ namespace
       size_t newtonMaxIterations = 15;
       Real newtonRelTolerance = 1.0e-5;
       Real newtonAbsTolerance = 1.0e-12;
+      /// Order of the explicit geometry predictor: 0 d^n, 1 d^n + dt v^n,
+      /// 2 Newmark predictor (+ dt^2 (1/2 - beta) a^n).
+      size_t geometryPredictor = 1;
       /// IQN-ILS(q): secant columns of the last q time steps are reused.
       size_t couplingIQNReuse = 4;
       /// Maximum number of IQN-ILS columns kept (oldest dropped first).
@@ -851,6 +857,8 @@ namespace
     optInt("-coronary_newton_max_iterations", cfg.newtonMaxIterations, 0);
     optReal("-coronary_newton_rtol", cfg.newtonRelTolerance, 0.0, inf);
     optReal("-coronary_newton_atol", cfg.newtonAbsTolerance, 0.0, inf);
+    optInt("-coronary_geometry_predictor", cfg.geometryPredictor, 0);
+    cfg.geometryPredictor = std::min<size_t>(cfg.geometryPredictor, 2);
     optInt("-coronary_coupling_iqn_reuse", cfg.couplingIQNReuse, 0);
     optInt("-coronary_coupling_iqn_columns", cfg.couplingIQNColumns, 1);
     optInt("-coronary_prestress_steps", cfg.prestressSteps, 0);
@@ -1362,6 +1370,7 @@ int main(int argc, char** argv)
     PETSc::Variational::GridFunction dIter(dh);
     PETSc::Variational::GridFunction etaState(dh);
     PETSc::Variational::GridFunction dPred(dh);
+    PETSc::Variational::GridFunction dGeo(dh);
     PETSc::Variational::GridFunction vPred(dh);
     PETSc::Variational::GridFunction solidVelocity(dh);
     PETSc::Variational::GridFunction solidAcceleration(dh);
@@ -1407,6 +1416,7 @@ int main(int argc, char** argv)
     dIter = zero;
     etaState = zero;
     dPred = zero;
+    dGeo = zero;
     vPred = zero;
     solidVelocity = zero;
     solidAcceleration = zero;
@@ -2511,6 +2521,21 @@ int main(int argc, char** argv)
       tmp *= dt * dt * (0.5 - betaN);
       dPred += tmp;
 
+      // Explicit geometry predictor (only moves the fluid domain; the
+      // Newmark update of the solid keeps using dPred).
+      if (cfg.geometryPredictor >= 2)
+        dGeo = dPred;
+      else
+      {
+        dGeo = dOld;
+        if (cfg.geometryPredictor == 1)
+        {
+          tmp = solidVelocityOld;
+          tmp *= dt;
+          dGeo += tmp;
+        }
+      }
+
       vPred = solidVelocityOld;
       tmp = solidAccelerationOld;
       tmp *= dt * (1.0 - gammaN);
@@ -2553,9 +2578,9 @@ int main(int argc, char** argv)
       //   J z = z - J_s^{-1} L(-A_N A_D^{-1} B z/dt)     (eq. (15) + solid tangent).
       // ================================================================
 
-      // (a) Explicit geometry from the Newmark predictor, mesh velocity,
+      // (a) Explicit geometry from the predictor dGeo, mesh velocity,
       //     VMS projections and fluid operators, all fixed in the step.
-      scatterField(interfaceScatter, dPred, wallDisplacementFluid, SCATTER_FORWARD);
+      scatterField(interfaceScatter, dGeo, wallDisplacementFluid, SCATTER_FORWARD);
       restoreMeshToReference(meshFluid, referenceVertices);
       ale.assemble();
       solveWith(ale, "coronary_ale_");
