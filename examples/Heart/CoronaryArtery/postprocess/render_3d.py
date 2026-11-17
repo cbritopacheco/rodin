@@ -214,6 +214,9 @@ def cycle_times(csv, period):
 
 
 class Case:
+    seeding = "volume"   # "volume": seeds throughout the lumen; "inlet": inlet disc
+    n_seeds = 1500
+
     def __init__(self, results, geom, scen, period):
         self.geom, self.scen = geom, scen
         self.dir = os.path.join(results, geom, scen)
@@ -329,16 +332,42 @@ class Case:
                 return pv.PolyData(P[inside][:n_seeds])
         return None
 
+    def _volume_seeds(self, g, n_seeds):
+        """Seeds spread over the whole lumen (main vessel and every branch).
+
+        Cells are drawn with probability ~ sqrt(volume): plain volume weighting
+        starves the small distal branches, uniform-per-cell overloads refined
+        regions.  Each seed is a random convex combination of the cell corners,
+        so it always lies inside the lumen."""
+        import pyvista as pv
+        vol = np.abs(g.compute_cell_sizes(length=False, area=False)["Volume"])
+        w = np.sqrt(np.maximum(vol, 0.0))
+        if w.sum() <= 0:
+            return None
+        rng = np.random.default_rng(7)
+        cells = rng.choice(g.n_cells, size=min(n_seeds, g.n_cells), replace=False,
+                           p=w / w.sum())
+        P = np.empty((len(cells), 3))
+        for k, cid in enumerate(cells):
+            X = g.get_cell(int(cid)).points
+            lam = rng.dirichlet(np.ones(len(X)))
+            P[k] = lam @ X
+        return pv.PolyData(P)
+
     def _streamlines(self, g):
-        seeds = self._inlet_seeds(g)
+        seeds_in = self._inlet_seeds(g)          # also locates the inlet for the camera
+        if self.seeding == "inlet":
+            seeds, direction, fac = seeds_in, "forward", 4.0
+        else:
+            seeds, direction, fac = self._volume_seeds(g, self.n_seeds), "both", 0.35
         if seeds is None:
-            print(f"  [{self.label()}] warning: no inlet seeds, streamlines skipped")
+            print(f"  [{self.label()}] warning: no seeds, streamlines skipped")
             return None
         diag = np.linalg.norm(np.ptp(g.points, axis=0))
         lines = g.streamlines_from_source(
-            seeds, vectors="U", integration_direction="forward", initial_step_length=0.2,
+            seeds, vectors="U", integration_direction=direction, initial_step_length=0.2,
             step_unit="cl", min_step_length=0.01, max_step_length=0.5, max_steps=20000,
-            max_length=4 * diag, terminal_speed=1e-8, compute_vorticity=False)
+            max_length=fac * diag, terminal_speed=1e-8, compute_vorticity=False)
         return lines if lines.n_points else None
 
     # --- solid ------------------------------------------------------------
@@ -429,7 +458,7 @@ def render_streamlines(path, lines, wall, clim, view, width, height, focus=None,
     p = make_plotter(width, height)
     p.add_mesh(wall, color="#cfcfcf", opacity=0.18, smooth_shading=True)
     if lines is not None:
-        lw = max(1.5, width / 900)
+        lw = max(1.2, width / 1300) if Case.seeding == "volume" else max(1.5, width / 900)
         p.add_mesh(lines, scalars="Umag", cmap="turbo", clim=clim, line_width=lw,
                    render_lines_as_tubes=True, show_scalar_bar=False)
     view.apply(p, focus, scale, width / height)
@@ -620,7 +649,11 @@ def main():
     ap.add_argument("--width", type=int, default=2400, help="panel width in pixels")
     ap.add_argument("--exaggeration", type=float, default=0.0,
                     help="wall-motion warp factor (0: automatic)")
+    ap.add_argument("--seeding", choices=["volume", "inlet"], default="volume",
+                    help="streamline seeds over the whole lumen (default) or at the inlet")
+    ap.add_argument("--seeds", type=int, default=1500, help="number of streamline seeds")
     args = ap.parse_args()
+    Case.seeding, Case.n_seeds = args.seeding, args.seeds
 
     import matplotlib
     matplotlib.use("Agg")
@@ -712,7 +745,9 @@ def main():
                 "streamlines")
     assemble(g, rows, cols, ("turbo", colors.Normalize(*ul), r"$|\mathbf{u}|$ [m/s]"),
              os.path.join(args.figures, "fig3d_streamlines"),
-             note="Instantaneous streamlines from the inlet, peak diastolic inflow")
+             note=("Instantaneous streamlines seeded throughout the lumen, peak diastolic inflow"
+                   if args.seeding == "volume" else
+                   "Instantaneous streamlines from the inlet, peak diastolic inflow"))
 
     solids = [c for c in cases if c.solid_surf is not None]
     if solids:

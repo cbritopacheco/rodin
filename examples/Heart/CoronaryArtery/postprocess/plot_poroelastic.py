@@ -241,6 +241,167 @@ def metrics_of(c):
     return m
 
 
+# ---------------------------------------------------------------------------
+# Diagnostics: periodicity, interface mass balance, solver effort
+# ---------------------------------------------------------------------------
+def cycle_rows(d, period, k_from_end):
+    """Rows of the k-th last complete cycle (k=1: last)."""
+    t = d["t"]
+    n = int(np.floor(t[-1] / period + 1e-9))
+    if n - k_from_end < 0:
+        return None
+    t0 = (n - k_from_end) * period
+    m = (t >= t0 - 1e-12) & (t <= t0 + period + 1e-12)
+    return m if m.sum() > 2 else None
+
+
+def diagnostics(d, period):
+    """Checks one should look at before trusting a run."""
+    integrate = getattr(np, "trapezoid", None) or np.trapz
+    t = d["t"]
+    out = {}
+    m1, m2 = cycle_rows(d, period, 1), cycle_rows(d, period, 2)
+    m = m1 if m1 is not None else np.ones_like(t, bool)
+
+    def avg(y, mask):
+        return float(integrate(y[mask], t[mask]) / (t[mask][-1] - t[mask][0]))
+
+    qar = d["lv_q_ar"]
+    qven = d["lv_q_ven"]
+    qin = -d["q_in"]
+    out["n_cycles"] = float(np.floor(t[-1] / period + 1e-9))
+    # 0D mass balance over the last cycle: stored volume must return -> Q_ar = Q_ven
+    out["Qar_Qven_imbalance"] = 100 * abs(avg(qar, m) - avg(qven, m)) / max(abs(avg(qar, m)), 1e-30)
+    # cycle-to-cycle change of the mean inflow and of the perfusion fraction
+    if m1 is not None and m2 is not None:
+        out["dQin_cycle"] = 100 * abs(avg(qin, m1) - avg(qin, m2)) / max(abs(avg(qin, m1)), 1e-30)
+        out["dphi_cycle"] = 100 * abs(avg(d["lv_phi"], m1) - avg(d["lv_phi"], m2)) / max(
+            abs(avg(d["lv_phi"], m1)), 1e-30)
+    else:
+        out["dQin_cycle"] = out["dphi_cycle"] = np.nan
+    # 3D-0D consistency: LCA inflow vs 0D arterial inflow
+    out["Qin_vs_Qar"] = 100 * (avg(qin, m) - avg(qar, m)) / max(abs(avg(qar, m)), 1e-30)
+    # interface leakage int (u - w).n over the wet wall (exactly 0 for a perfect coupling)
+    if "q_interface_slip" in d:
+        qs = d["q_interface_slip"]
+        out["leak_net"] = 100 * abs(avg(qs, m)) / max(abs(avg(qin, m)), 1e-30)
+        out["leak_rms"] = 100 * np.sqrt(avg(qs ** 2, m)) / max(np.sqrt(avg(qin ** 2, m)), 1e-30)
+    for k, name in (("coupling_its", "its_mean"), ("gmres_its", "gmres_mean")):
+        if k in d:
+            out[name] = float(np.mean(d[k][m]))
+            out[name.replace("mean", "max")] = float(np.max(d[k]))
+    if "coupling_rel" in d:
+        out["res_max"] = float(np.max(d["coupling_rel"][m]))
+    return out
+
+
+DIAGNOSTICS = [
+    # name, label, unit, warn-if-above
+    ("n_cycles", "Cycles simulated", "-", None),
+    ("dQin_cycle", "Cycle-to-cycle change of mean Q_in", "%", 2.0),
+    ("dphi_cycle", "Cycle-to-cycle change of mean Phi", "%", 1.0),
+    ("Qar_Qven_imbalance", "|<Q_ar> - <Q_ven>| / <Q_ar> (0D periodicity)", "%", 3.0),
+    ("Qin_vs_Qar", "(<Q_in> - <Q_ar>) / <Q_ar> (3D vs 0D inflow)", "%", None),
+    ("leak_net", "Net interface leak |<(u-w).n>| / <Q_in>", "%", 2.0),
+    ("leak_rms", "RMS interface leak / RMS Q_in", "%", 5.0),
+    ("its_mean", "Mean coupling (Newton) iterations per step", "-", None),
+    ("its_max", "Max coupling (Newton) iterations per step", "-", None),
+    ("gmres_mean", "Mean GMRES iterations per step", "-", None),
+    ("gmres_max", "Max GMRES iterations per step", "-", None),
+    ("res_max", "Max final coupling residual (last cycle)", "-", None),
+]
+
+
+def write_diagnostics(diag, out_dir):
+    names = [n for n, _, _, _ in DIAGNOSTICS if any(n in dd for _, _, dd in diag)]
+    with open(os.path.join(out_dir, "diagnostics.csv"), "w") as f:
+        f.write("geometry,scenario," + ",".join(names) + "\n")
+        for g, s, dd in diag:
+            f.write(f"{g},{s}," + ",".join(f"{dd.get(n, np.nan):.6g}" for n in names) + "\n")
+    w = max(len(l) for n, l, _, _ in DIAGNOSTICS if n in names) + 8
+    head = "".join(f"{s[:16]:>18s}" for _, s, _ in diag)
+    lines = ["", "  Run diagnostics (last cycle)", "  " + " " * w + head]
+    for n, lab, unit, warn in DIAGNOSTICS:
+        if n not in names:
+            continue
+        row = ""
+        for _, _, dd in diag:
+            v = dd.get(n, np.nan)
+            flag = "!" if (warn is not None and np.isfinite(v) and abs(v) > warn) else " "
+            row += f"{v:17.3g}{flag}"
+        lines.append(f"  {lab + ' [' + unit + ']':<{w}s}{row}")
+    lines.append("  '!' = above the usual tolerance: more cycles, smaller dt or tighter coupling.")
+    txt = "\n".join(lines)
+    print(txt)
+    with open(os.path.join(out_dir, "diagnostics.txt"), "w") as f:
+        f.write(txt + "\n")
+
+
+def numerics_figure(full, period, path):
+    """Coupling effort and interface leakage over the whole run."""
+    has_its = any("coupling_its" in d for _, _, d in full)
+    has_gm = any("gmres_its" in d for _, _, d in full)
+    panels = []
+    if has_its:
+        panels.append(("coupling_its", lambda d: d["coupling_its"],
+                       "Coupling iterations\nper step", "steps"))
+    if has_gm:
+        panels.append(("gmres_its", lambda d: d["gmres_its"], "GMRES iterations\nper step",
+                       "steps"))
+    panels.append(("q_interface_slip",
+                   lambda d: 100 * np.abs(d["q_interface_slip"]) / np.maximum(
+                       np.abs(d["q_in"]), 1e-3 * np.max(np.abs(d["q_in"]))),
+                   r"$|\int_\Gamma(\mathbf{u}-\mathbf{w})\cdot\mathbf{n}|/|Q_{in}|$ [%]",
+                   "line"))
+    if any("coupling_rel" in d for _, _, d in full):
+        panels.append(("coupling_rel", lambda d: d["coupling_rel"],
+                       "Final coupling residual", "log"))
+    panels = [p for p in panels if any(p[0] in d for _, _, d in full)]
+    if not panels:
+        return
+    ncols = 2
+    nrows = int(np.ceil(len(panels) / ncols))
+    fig, axes = plt.subplots(nrows, ncols, figsize=(st.DOUBLE, nrows * 42 * st.MM),
+                             sharex=True, squeeze=False)
+    letters = "abcdefgh"
+    for i, (key, fn, label, kind) in enumerate(panels):
+        ax = axes.flat[i]
+        for geom, scen, d in full:
+            if key not in d:
+                continue
+            y = fn(d)
+            if kind == "steps":
+                # thousands of steps: rolling mean over ~period/40 with min-max band
+                t = d["t"]
+                dt = np.median(np.diff(t)) if len(t) > 1 else period
+                w = max(1, int(round(period / 40 / max(dt, 1e-12))))
+                if w > 1 and len(y) > w:
+                    from numpy.lib.stride_tricks import sliding_window_view as swv
+                    Y = swv(np.pad(y, (w // 2, w - 1 - w // 2), mode="edge"), w)
+                    ax.fill_between(t, Y.min(1), Y.max(1), color=st.color(scen),
+                                    alpha=0.15, lw=0)
+                    y = Y.mean(1)
+                ax.plot(t, y, color=st.color(scen), ls=st.dash(geom), lw=0.9)
+            else:
+                ax.plot(d["t"], y, color=st.color(scen), ls=st.dash(geom), lw=0.8)
+        if kind == "log":
+            ax.set_yscale("log")
+        tmax = max(d["t"][-1] for _, _, d in full)
+        for k in range(1, int(tmax / period) + 1):
+            ax.axvline(k * period, color="0.8", lw=0.5, zorder=0)
+        ax.set_ylabel(label)
+        st.panel_label(ax, letters[i], x=-0.20)
+        if i // ncols == nrows - 1 or i + ncols >= len(panels):
+            ax.set_xlabel(r"$t$ [s]")
+            ax.tick_params(labelbottom=True)
+    for j in range(len(panels), nrows * ncols):
+        axes.flat[j].axis("off")
+    legend(fig, [(g, s, None) for g, s, _ in full], systole=False)
+    fig.tight_layout(rect=(0, 0, 1, 0.92), w_pad=1.5, h_pad=0.8)
+    st.save(fig, path)
+    plt.close(fig)
+
+
 def tex_escape(text):
     return text.replace("%", "\\%")
 
@@ -329,12 +490,17 @@ def main():
     found = discover(args.results)
     if not found:
         sys.exit(f"No {CSV_NAME} under {args.results}/<geometry>/<scenario>/")
-    cases, rows = [], []
+    cases, rows, full, diag = [], [], [], []
     for geom, scen, path in found:
         print(f"  {geom}/{scen}: {path}")
-        c = last_cycle(read_csv(path), args.period)
+        d = read_csv(path)
+        c = last_cycle(d, args.period)
         cases.append((geom, scen, c))
         rows.append((geom, scen, metrics_of(c)))
+        full.append((geom, scen, d))
+        diag.append((geom, scen, diagnostics(d, args.period)))
+    write_diagnostics(diag, args.figures)
+    numerics_figure(full, args.period, os.path.join(args.figures, "fig_numerics"))
 
     curve_figure(cases, ["pv", "h", "phi", "pf", "qar", "nu"],
                  os.path.join(args.figures, "fig_lv_poroelastic"))
