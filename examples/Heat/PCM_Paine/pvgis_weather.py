@@ -15,6 +15,7 @@ Roof irradiance: DNI cos(theta) + isotropic diffuse + ground reflection
   python3 pvgis_weather.py -o santiago_enero.csv              # mean January day
   python3 pvgis_weather.py --dia caluroso -o santiago_cal.csv # real day with max T
   python3 pvgis_weather.py --dia 15 -o santiago_15ene.csv     # 15 January of the TMY
+  python3 pvgis_weather.py --month 7 --dia frio -o santiago_jul_frio.csv  # coldest July day (lowest mean T)
   python3 pvgis_weather.py --input tmy.json ...               # already downloaded JSON
 
   curl -o tmy.json "https://re.jrc.ec.europa.eu/api/v5_3/tmy?lat=-33.445&lon=-70.683&outputformat=json"
@@ -61,7 +62,7 @@ def main():
     ap.add_argument("--lon", type=float, default=-70.683)
     ap.add_argument("--name", default="Santiago (Quinta Normal)")
     ap.add_argument("--month", type=int, default=1)
-    ap.add_argument("--dia", default="promedio", help="promedio | caluroso | despejado | day of the month")
+    ap.add_argument("--dia", default="promedio", help="promedio | caluroso (max T) | frio (lowest daily mean T) | despejado | day of the month")
     ap.add_argument("--tilt", type=float, default=25.0)
     ap.add_argument("--facing", choices=["north", "south", "east", "west", "flat"], default="north")
     ap.add_argument("--albedo", type=float, default=0.2)
@@ -146,6 +147,8 @@ def main():
     else:
         if a.dia == "caluroso":
             d = max(ok, key=lambda d: at(d, T).max())
+        elif a.dia == "frio":
+            d = min(ok, key=lambda d: at(d, T).mean())
         elif a.dia == "despejado":
             d = max(ok, key=lambda d: at(d, ghi).sum())
         else:

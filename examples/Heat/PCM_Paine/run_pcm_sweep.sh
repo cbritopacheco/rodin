@@ -52,7 +52,8 @@ THICKNESSES="${THICKNESSES:-5 10 15 20}"   # mm of PCM
 SITE="${SITE:-calama}"        # weather: paine or calama (paine_weather.py --site), or santiago
                               # (pvgis_weather.py: PVGIS TMY of Quinta Normal, January)
 TMY_JSON="${TMY_JSON:-}"      # santiago: PVGIS TMY JSON already downloaded (else downloaded)
-DIA="${DIA:-promedio}"        # santiago: promedio | caluroso | despejado | day of the month
+DIA="${DIA:-promedio}"        # santiago: promedio | caluroso | frio | despejado | day of the month
+MONTH="${MONTH:-1}"           # santiago: month of the TMY (1: January, 7: July)
 AL="${AL:-0.01}"              # m, aluminium plate below and above the PCM (0: none)
 NAL="${NAL:-4}"               # cells across each plate
 HIN="${HIN:-2}"               # W/m^2K, convection only on the attic side
@@ -86,11 +87,11 @@ fi
 mkdir -p "$OUT"
 WEATHER="$OUT/${SITE}_enero_${FACING}_${ANGLE}deg.csv"
 if [ "$SITE" = santiago ]; then
-  WEATHER="$OUT/santiago_enero_${DIA}_${FACING}_${ANGLE}deg.csv"
+  WEATHER="$OUT/santiago_m$(printf %02d "$MONTH")_${DIA}_${FACING}_${ANGLE}deg.csv"
   if [ -n "$TMY_JSON" ]; then
-    python3 "$HERE/pvgis_weather.py" --input "$TMY_JSON" --dia "$DIA" --tilt "$ANGLE" --facing "$FACING" -o "$WEATHER"
+    python3 "$HERE/pvgis_weather.py" --input "$TMY_JSON" --month "$MONTH" --dia "$DIA" --tilt "$ANGLE" --facing "$FACING" -o "$WEATHER"
   else
-    python3 "$HERE/pvgis_weather.py" --save "$OUT/tmy_santiago.json" --dia "$DIA" --tilt "$ANGLE" --facing "$FACING" -o "$WEATHER"
+    python3 "$HERE/pvgis_weather.py" --save "$OUT/tmy_santiago.json" --month "$MONTH" --dia "$DIA" --tilt "$ANGLE" --facing "$FACING" -o "$WEATHER"
   fi
 else
   python3 "$HERE/paine_weather.py" --site "$SITE" --tilt "$ANGLE" --facing "$FACING" -o "$WEATHER"

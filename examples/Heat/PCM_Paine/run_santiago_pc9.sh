@@ -58,6 +58,8 @@ export NP_MAP="${NP_MAP:-5:25 10:25 15:25 20:25 25:30 30:30 35:30 40:50 45:50 50
 export NP="${NP:-25}"
 export SITE="${SITE:-santiago}"
 export DIA="${DIA:-caluroso}"
+export MONTH="${MONTH:-1}"
+export TIN="${TIN:-24}"
 export TMY_JSON="${TMY_JSON:-}"
 export ANGLE="${ANGLE:-25}"
 export FACING="${FACING:-north}"
@@ -90,5 +92,5 @@ for g in "${tandas[@]}"; do
   # the next groups reuse the TMY downloaded by the first one
   if [ -z "$TMY_JSON" ] && [ -s "$OUT/tmy_santiago.json" ]; then export TMY_JSON="$OUT/tmy_santiago.json"; fi
 done
-bash "$HERE/postprocess_pcm.sh" "$OUT" --hours 6 9 12 15 18 21 --all-contours
-python3 "$HERE/figures_paper.py" "$OUT"   # paper figures + CSV in $OUT/figures
+bash "$HERE/postprocess_pcm.sh" "$OUT" --hours 6 9 12 15 18 21 --all-contours || echo "[warn] postprocess_pcm failed" >&2
+python3 "$HERE/figures_paper.py" "$OUT" || echo "[warn] figures_paper failed" >&2   # paper figures + CSV in $OUT/figures

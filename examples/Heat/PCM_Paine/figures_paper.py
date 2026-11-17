@@ -644,7 +644,11 @@ def fig_slope(cases, hours, out):
             y_mm = xy[:, 1] * 1e3
             tr = mtri.Triangulation(xy[:, 0], y_mm, tri)
             cf = a.tricontourf(tr, np.clip(T, lo, hi), levels=levels, cmap=TMAP)
-            cf.set_rasterized(True)
+            if tuple(int(v) for v in matplotlib.__version__.split(".")[:2]) >= (3, 8):
+                cf.set_rasterized(True)
+            else:  # older matplotlib: one artist per contour level
+                for coll in cf.collections:
+                    coll.set_rasterized(True)
             if "liquid_fraction" in f:
                 Y = f["liquid_fraction"]
                 yc = y_mm[tri].mean(axis=1)
@@ -783,10 +787,13 @@ def main():
         w = re.search(r"WEATHER=(\S+)", txt)
         if w and os.path.exists(w.group(1)):
             head = open(w.group(1)).readline()
-            p = re.search(r"#\s*(.*?),\s*(.*?) month \d+ of PVGIS.*?real year (\w+)", head)
+            p = re.search(r"#\s*(.*?),\s*(.*?) month (\d+) of PVGIS.*?real year (\w+)", head)
             if p:
-                what = {"mean": "mean January day"}.get(p.group(2).split(" of")[0], "January " + p.group(2))
-                site = "%s, %s (PVGIS TMY, %s)" % (p.group(1), what, p.group(3))
+                mon = ["January", "February", "March", "April", "May", "June", "July", "August",
+                       "September", "October", "November", "December"][int(p.group(3)) - 1]
+                d = p.group(2).split(" of")[0]
+                what = ("mean %s day" % mon) if d == "mean" else "%s %s" % (mon, d.replace("day ", ""))
+                site = "%s, %s (PVGIS TMY, %s)" % (p.group(1), what, p.group(4))
             else:
                 site = head.lstrip("# ").split(":")[0].strip()
     figs = os.path.join(a.out, "figures")
