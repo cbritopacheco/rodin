@@ -23,3 +23,9 @@ rodin_discover_tests(RodinManufacturedEikonal2D3DTest
   PROPERTIES
     LABELS manufactured
 )
+
+add_executable(RodinManufacturedEikonalFIMTest FIM.cpp)
+target_link_libraries(RodinManufacturedEikonalFIMTest
+  PRIVATE GTest::gtest_main Rodin::Rodin Rodin::Eikonal)
+rodin_discover_tests(RodinManufacturedEikonalFIMTest
+  PROPERTIES LABELS manufactured TIMEOUT 300)
