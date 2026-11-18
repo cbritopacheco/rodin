@@ -638,7 +638,7 @@ namespace Rodin::Solver
         auto& res = m_resources;
         copy(res.b.data, axb.getVector().data(), res.rows,
           CuDSSVector<VectorType>::Resident ? hipMemcpyDeviceToDevice
-                                                      : hipMemcpyHostToDevice);
+                                            : hipMemcpyHostToDevice);
         const rocblas_status status =
           rocsolver_dcsrrf_solve(res.handle, res.rows, 1, res.factorNonzeros,
             res.factorStarts.data, res.factorIndices.data, res.factorValues.data,
@@ -648,7 +648,7 @@ namespace Rodin::Solver
         VectorType x(res.rows);
         copy(x.data(), res.b.data, res.rows,
           CuDSSVector<VectorType>::Resident ? hipMemcpyDeviceToDevice
-                                                      : hipMemcpyDeviceToHost);
+                                            : hipMemcpyDeviceToHost);
         if (!x.allFinite())
         {
           record(Breakdown, Factorization::Numeric);

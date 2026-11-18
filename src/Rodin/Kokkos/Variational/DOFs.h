@@ -60,8 +60,7 @@ namespace Rodin::Kokkos::Variational
    * @param a Local vertex index.
    * @return Reference coordinates of the P1 node of local vertex a.
    */
-  KOKKOS_INLINE_FUNCTION
-  Geometry::Vector getReferenceVertex(
+  KOKKOS_INLINE_FUNCTION Geometry::Vector getReferenceVertex(
     const ::Rodin::Kokkos::View<::Rodin::Geometry::Polytope>& polytope, Index a)
   {
     const Index rdim = polytope.getDimension();
@@ -80,22 +79,19 @@ namespace Rodin::Kokkos::Variational
   struct VertexDOFs
   {
     /// @param vertices Vertex count. @return Vertex count.
-    KOKKOS_INLINE_FUNCTION
-    static constexpr Index getCapacity(Index vertices)
+    KOKKOS_INLINE_FUNCTION static constexpr Index getCapacity(Index vertices)
     {
       return vertices;
     }
 
     /// @brief Gets the offset between components. @return Vertex count of the mesh.
-    KOKKOS_INLINE_FUNCTION
-    Index getStride() const
+    KOKKOS_INLINE_FUNCTION Index getStride() const
     {
       return stride;
     }
 
     /// @param polytope Device polytope. @return Its vertices.
-    KOKKOS_INLINE_FUNCTION
-    ::Rodin::Kokkos::View<::Rodin::IndexVector> bind(
+    KOKKOS_INLINE_FUNCTION ::Rodin::Kokkos::View<::Rodin::IndexVector> bind(
       const ::Rodin::Kokkos::View<::Rodin::Geometry::Polytope>& polytope) const
     {
       return polytope.getVertices();
@@ -117,8 +113,7 @@ namespace Rodin::Kokkos::Variational
     }
 
     /// @param polytope Device polytope. @param q Local vertex index. @return Reference vertex.
-    KOKKOS_INLINE_FUNCTION
-    Geometry::Vector getNode(
+    KOKKOS_INLINE_FUNCTION Geometry::Vector getNode(
       const ::Rodin::Kokkos::View<::Rodin::Geometry::Polytope>& polytope, Index q) const
     {
       return getReferenceVertex(polytope, q);
@@ -132,15 +127,13 @@ namespace Rodin::Kokkos::Variational
   struct ConstantIndex
   {
     /// @return One.
-    KOKKOS_INLINE_FUNCTION
-    Index size() const
+    KOKKOS_INLINE_FUNCTION Index size() const
     {
       return 1;
     }
 
     /// @param q Local degree of freedom, necessarily zero. @return Zero, the global index.
-    KOKKOS_INLINE_FUNCTION
-    Index operator[]([[maybe_unused]] Index q) const
+    KOKKOS_INLINE_FUNCTION Index operator[]([[maybe_unused]] Index q) const
     {
       return 0;
     }
@@ -155,22 +148,20 @@ namespace Rodin::Kokkos::Variational
   struct ConstantDOFs
   {
     /// @param vertices Vertex count, ignored. @return One.
-    KOKKOS_INLINE_FUNCTION
-    static constexpr Index getCapacity([[maybe_unused]] Index vertices)
+    KOKKOS_INLINE_FUNCTION static constexpr Index getCapacity(
+      [[maybe_unused]] Index vertices)
     {
       return 1;
     }
 
     /// @return One.
-    KOKKOS_INLINE_FUNCTION
-    Index getStride() const
+    KOKKOS_INLINE_FUNCTION Index getStride() const
     {
       return 1;
     }
 
     /// @param polytope Device polytope, ignored. @return The single degree of freedom.
-    KOKKOS_INLINE_FUNCTION
-    ConstantIndex bind(
+    KOKKOS_INLINE_FUNCTION ConstantIndex bind(
       [[maybe_unused]] const ::Rodin::Kokkos::View<::Rodin::Geometry::Polytope>&
         polytope) const
     {

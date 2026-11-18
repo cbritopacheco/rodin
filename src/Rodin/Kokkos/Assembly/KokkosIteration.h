@@ -108,8 +108,7 @@ namespace Rodin::Assembly
        * @brief Gets the dimension of candidate entities.
        * @returns Topological dimension of the selected region.
        */
-      KOKKOS_INLINE_FUNCTION
-      size_t getDimension() const
+      KOKKOS_INLINE_FUNCTION size_t getDimension() const
       {
         return m_dimension;
       }
@@ -118,8 +117,7 @@ namespace Rodin::Assembly
        * @brief Gets the number of candidates before region filtering.
        * @returns All cell candidates or all face candidates.
        */
-      KOKKOS_INLINE_FUNCTION
-      size_t getCount() const
+      KOKKOS_INLINE_FUNCTION size_t getCount() const
       {
         return m_count;
       }
@@ -129,8 +127,7 @@ namespace Rodin::Assembly
        * @param i Candidate index, less than getCount().
        * @returns Whether the candidate belongs to the selected region.
        */
-      KOKKOS_INLINE_FUNCTION
-      bool filter(Index i) const
+      KOKKOS_INLINE_FUNCTION bool filter(Index i) const
       {
         KOKKOS_ASSERT(i < m_count);
         switch (m_region)
@@ -156,8 +153,8 @@ namespace Rodin::Assembly
        * @param i Candidate index, less than getCount(), independently of filter().
        * @returns Borrowed device polytope descriptor.
        */
-      KOKKOS_INLINE_FUNCTION
-      ::Rodin::Kokkos::View<::Rodin::Geometry::Polytope> getPolytope(Index i) const
+      KOKKOS_INLINE_FUNCTION ::Rodin::Kokkos::View<::Rodin::Geometry::Polytope>
+      getPolytope(Index i) const
       {
         KOKKOS_ASSERT(i < m_count);
         return m_mesh.getPolytope(m_dimension, i);

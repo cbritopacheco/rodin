@@ -34,8 +34,7 @@ namespace Rodin::Kokkos::Variational
   struct ConstantView
   {
     /// @param p Device point. @return The constant.
-    KOKKOS_INLINE_FUNCTION
-    Value getValue(
+    KOKKOS_INLINE_FUNCTION Value getValue(
       [[maybe_unused]] const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p) const
     {
       return value;
@@ -53,8 +52,8 @@ namespace Rodin::Kokkos::Variational
   struct CallableView
   {
     /// @param p Device point. @return Value of the callable.
-    KOKKOS_INLINE_FUNCTION
-    auto getValue(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p) const
+    KOKKOS_INLINE_FUNCTION auto getValue(
+      const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p) const
     {
       return f(p);
     }
@@ -67,8 +66,7 @@ namespace Rodin::Kokkos::Variational
   struct SelectAll
   {
     /// @param p Device polytope. @return true.
-    KOKKOS_INLINE_FUNCTION
-    bool operator()(
+    KOKKOS_INLINE_FUNCTION bool operator()(
       [[maybe_unused]] const ::Rodin::Kokkos::View<::Rodin::Geometry::Polytope>& p)
       const
     {

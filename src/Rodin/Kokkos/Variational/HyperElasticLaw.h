@@ -53,8 +53,7 @@ namespace Rodin::Kokkos::Variational
    * @param L Column of the deformation gradient.
    * @return Offset of @f$ \mathbb{A}_{iJkL} @f$ in row i.
    */
-  KOKKOS_INLINE_FUNCTION
-  constexpr Index getElasticityIndex(Index J, Index k, Index L)
+  KOKKOS_INLINE_FUNCTION constexpr Index getElasticityIndex(Index J, Index k, Index L)
   {
     return (J * ElasticityStride + k) * ElasticityStride + L;
   }
@@ -69,8 +68,7 @@ namespace Rodin::Kokkos::Variational
   struct IsochoricPoint
   {
     /// @param h Displacement gradient @f$ H @f$, a square matrix.
-    KOKKOS_INLINE_FUNCTION
-    explicit IsochoricPoint(const Geometry::Matrix& h)
+    KOKKOS_INLINE_FUNCTION explicit IsochoricPoint(const Geometry::Matrix& h)
       : F(h),
         FinvT(h.rows(), h.cols())
     {
@@ -99,8 +97,7 @@ namespace Rodin::Kokkos::Variational
      * @param j Column.
      * @return @f$ J^{-2/d} (2 F - \frac{2}{d} I_1 F^{-T})_{ij} @f$.
      */
-    KOKKOS_INLINE_FUNCTION
-    Real getIsochoricGradient(Index i, Index j) const
+    KOKKOS_INLINE_FUNCTION Real getIsochoricGradient(Index i, Index j) const
     {
       const Real d = Real(F.rows());
       return Jm2d * (2 * F(i, j) - (2 / d) * I1 * FinvT(i, j));
@@ -114,8 +111,8 @@ namespace Rodin::Kokkos::Variational
      * @param L Column of the second deformation gradient entry.
      * @return @f$ \partial^2 \bar I_1 / \partial F_{iJ} \partial F_{kL} @f$.
      */
-    KOKKOS_INLINE_FUNCTION
-    Real getIsochoricHessian(Index i, Index J, Index k, Index L) const
+    KOKKOS_INLINE_FUNCTION Real getIsochoricHessian(
+      Index i, Index J, Index k, Index L) const
     {
       const Real d = Real(F.rows());
       Real v =
@@ -134,8 +131,8 @@ namespace Rodin::Kokkos::Variational
      * @param l Column of the second deformation gradient entry.
      * @return Entry @f$ iJkL @f$ of the volumetric elasticity.
      */
-    KOKKOS_INLINE_FUNCTION
-    Real getVolumetricElasticity(Real kappa, Index i, Index j, Index k, Index l) const
+    KOKKOS_INLINE_FUNCTION Real getVolumetricElasticity(
+      Real kappa, Index i, Index j, Index k, Index l) const
     {
       return kappa *
         ((2 * J - 1) * J * FinvT(k, l) * FinvT(i, j) -
@@ -203,8 +200,7 @@ namespace Rodin::Kokkos
      * @param h Displacement gradient @f$ H @f$, a square matrix.
      * @return Kinematics at @f$ F = I + H @f$.
      */
-    KOKKOS_INLINE_FUNCTION
-    Point getPoint(const Geometry::Matrix& h) const
+    KOKKOS_INLINE_FUNCTION Point getPoint(const Geometry::Matrix& h) const
     {
       KOKKOS_ASSERT(h.rows() == h.cols());
       const Index d = h.rows();
@@ -241,8 +237,7 @@ namespace Rodin::Kokkos
      * @param p Kinematics.
      * @param[out] P First Piola-Kirchhoff stress @f$ F S @f$.
      */
-    KOKKOS_INLINE_FUNCTION
-    void getStress(const Point& p, Geometry::Matrix& P) const
+    KOKKOS_INLINE_FUNCTION void getStress(const Point& p, Geometry::Matrix& P) const
     {
       const Index d = p.F.rows();
       P = Geometry::Matrix(d, d);
@@ -265,8 +260,8 @@ namespace Rodin::Kokkos
      * @param[out] row Entries of @f$ \text{scale} \ \mathbb{A}_{i \cdot \cdot \cdot} @f$
      * at Variational::getElasticityIndex().
      */
-    KOKKOS_INLINE_FUNCTION
-    void getElasticity(const Point& p, Index i, Real scale, Real* row) const
+    KOKKOS_INLINE_FUNCTION void getElasticity(
+      const Point& p, Index i, Real scale, Real* row) const
     {
       const Index d = p.F.rows();
       for (Index J = 0; J < d; ++J)
@@ -322,8 +317,7 @@ namespace Rodin::Kokkos
      * @param h Displacement gradient @f$ H @f$, a square matrix.
      * @return Kinematics at @f$ F = I + H @f$.
      */
-    KOKKOS_INLINE_FUNCTION
-    Point getPoint(const Geometry::Matrix& h) const
+    KOKKOS_INLINE_FUNCTION Point getPoint(const Geometry::Matrix& h) const
     {
       return Point(h);
     }
@@ -332,8 +326,7 @@ namespace Rodin::Kokkos
      * @param p Kinematics.
      * @param[out] P First Piola-Kirchhoff stress.
      */
-    KOKKOS_INLINE_FUNCTION
-    void getStress(const Point& p, Geometry::Matrix& P) const
+    KOKKOS_INLINE_FUNCTION void getStress(const Point& p, Geometry::Matrix& P) const
     {
       const Index d = p.F.rows();
       const Real x = p.Jm2d * p.I1 - Real(d);
@@ -354,8 +347,8 @@ namespace Rodin::Kokkos
      * @param[out] row Entries of @f$ \text{scale} \ \mathbb{A}_{i \cdot \cdot \cdot} @f$
      * at Variational::getElasticityIndex().
      */
-    KOKKOS_INLINE_FUNCTION
-    void getElasticity(const Point& p, Index i, Real scale, Real* row) const
+    KOKKOS_INLINE_FUNCTION void getElasticity(
+      const Point& p, Index i, Real scale, Real* row) const
     {
       const Index d = p.F.rows();
       const Real x = p.Jm2d * p.I1 - Real(d);
@@ -420,8 +413,7 @@ namespace Rodin::Kokkos
     struct Point : Variational::IsochoricPoint
     {
       /// @param h Displacement gradient @f$ H @f$, a square matrix.
-      KOKKOS_INLINE_FUNCTION
-      explicit Point(const Geometry::Matrix& h)
+      KOKKOS_INLINE_FUNCTION explicit Point(const Geometry::Matrix& h)
         : Variational::IsochoricPoint(h),
           C(h.rows(), h.cols()),
           FC(h.rows(), h.cols()),
@@ -465,8 +457,7 @@ namespace Rodin::Kokkos
        * @param j Column.
        * @return @f$ J^{-4/d} (2 I_1 F - 2 F C - \frac{4}{d} I_2 F^{-T})_{ij} @f$.
        */
-      KOKKOS_INLINE_FUNCTION
-      Real getSecondGradient(Index i, Index j) const
+      KOKKOS_INLINE_FUNCTION Real getSecondGradient(Index i, Index j) const
       {
         const Real d = Real(F.rows());
         return Jm4d * (2 * I1 * F(i, j) - 2 * FC(i, j) - (4 / d) * I2 * FinvT(i, j));
@@ -480,8 +471,8 @@ namespace Rodin::Kokkos
        * @param L Column of the second deformation gradient entry.
        * @return @f$ \partial^2 \bar I_2 / \partial F_{iJ} \partial F_{kL} @f$.
        */
-      KOKKOS_INLINE_FUNCTION
-      Real getSecondHessian(Index i, Index J, Index k, Index L) const
+      KOKKOS_INLINE_FUNCTION Real getSecondHessian(
+        Index i, Index J, Index k, Index L) const
       {
         const Real d = Real(F.rows());
         const Real dI2 = 2 * I1 * F(k, L) - 2 * FC(k, L);
@@ -516,8 +507,7 @@ namespace Rodin::Kokkos
      * @param h Displacement gradient @f$ H @f$, a square matrix.
      * @return Kinematics at @f$ F = I + H @f$.
      */
-    KOKKOS_INLINE_FUNCTION
-    Point getPoint(const Geometry::Matrix& h) const
+    KOKKOS_INLINE_FUNCTION Point getPoint(const Geometry::Matrix& h) const
     {
       return Point(h);
     }
@@ -526,8 +516,7 @@ namespace Rodin::Kokkos
      * @param p Kinematics.
      * @param[out] P First Piola-Kirchhoff stress.
      */
-    KOKKOS_INLINE_FUNCTION
-    void getStress(const Point& p, Geometry::Matrix& P) const
+    KOKKOS_INLINE_FUNCTION void getStress(const Point& p, Geometry::Matrix& P) const
     {
       const Index d = p.F.rows();
       const Real volume = kappa * (p.J - 1) * p.J;
@@ -549,8 +538,8 @@ namespace Rodin::Kokkos
      * @param[out] row Entries of @f$ \text{scale} \ \mathbb{A}_{i \cdot \cdot \cdot} @f$
      * at Variational::getElasticityIndex().
      */
-    KOKKOS_INLINE_FUNCTION
-    void getElasticity(const Point& p, Index i, Real scale, Real* row) const
+    KOKKOS_INLINE_FUNCTION void getElasticity(
+      const Point& p, Index i, Real scale, Real* row) const
     {
       const Index d = p.F.rows();
       for (Index J = 0; J < d; ++J)

@@ -1086,8 +1086,7 @@ namespace Rodin::Geometry
         bool boundary; ///< Whether only boundary entities contribute.
 
         /// @param i Entity index. @param sum Reduction accumulator.
-        KOKKOS_INLINE_FUNCTION
-        void operator()(Index i, Real& sum) const
+        KOKKOS_INLINE_FUNCTION void operator()(Index i, Real& sum) const
         {
           if (view.getConnectivity().getGeometry(dimension, i) != geometry)
             return;

@@ -105,8 +105,7 @@ namespace Rodin::Kokkos::Variational
        * @param d Dimension of the simplex.
        * @return @f$ (d + 1)(d + 2) / 2 @f$.
        */
-      KOKKOS_INLINE_FUNCTION
-      static constexpr Index getCount(Index d)
+      KOKKOS_INLINE_FUNCTION static constexpr Index getCount(Index d)
       {
         return (d + 1) * (d + 2) / 2;
       }
@@ -165,8 +164,7 @@ namespace Rodin::Kokkos::Variational
        * @param q Local node index.
        * @return Vertex @f$ i @f$ or midpoint of the edge @f$ (i, j) @f$.
        */
-      KOKKOS_INLINE_FUNCTION
-      Geometry::Vector getNode(
+      KOKKOS_INLINE_FUNCTION Geometry::Vector getNode(
         const ::Rodin::Kokkos::View<::Rodin::Geometry::Polytope>& polytope, Index q) const
       {
         const Index d = polytope.getDimension();
@@ -231,8 +229,8 @@ namespace Rodin::Kokkos::Variational
        * @param g Reference geometry.
        * @return Number of nodes, zero for the unsupported pyramid.
        */
-      KOKKOS_INLINE_FUNCTION
-      static constexpr Index getCount(::Rodin::Geometry::Polytope::Type g)
+      KOKKOS_INLINE_FUNCTION static constexpr Index getCount(
+        ::Rodin::Geometry::Polytope::Type g)
       {
         using Type = ::Rodin::Geometry::Polytope::Type;
         constexpr Index n = K + 1;
@@ -481,8 +479,7 @@ namespace Rodin::Kokkos::Variational
        * @param q Local node index.
        * @return Node of Rodin::Variational::H1Element.
        */
-      KOKKOS_INLINE_FUNCTION
-      Geometry::Vector getNode(
+      KOKKOS_INLINE_FUNCTION Geometry::Vector getNode(
         const ::Rodin::Kokkos::View<::Rodin::Geometry::Polytope>& polytope, Index q) const
       {
         const Index g = static_cast<Index>(polytope.getGeometry());
@@ -595,8 +592,7 @@ namespace Rodin::Kokkos::Variational
        * the weight is selected the same way, since an index differing
        * between the threads of a warp would serialize its read.
        */
-      KOKKOS_INLINE_FUNCTION
-      Line getLine(Index i, Real x) const
+      KOKKOS_INLINE_FUNCTION Line getLine(Index i, Real x) const
       {
         Real value = 1;
         Real derivative = 0;
@@ -617,8 +613,7 @@ namespace Rodin::Kokkos::Variational
        * @param r Reference coordinates.
        * @return Table whose entry @f$ (k, p) @f$ is @f$ r_k^p @f$.
        */
-      KOKKOS_INLINE_FUNCTION
-      static Powers getPowers(const Geometry::Vector& r)
+      KOKKOS_INLINE_FUNCTION static Powers getPowers(const Geometry::Vector& r)
       {
         Powers powers;
         for (Index k = 0; k < r.size(); ++k)
@@ -757,8 +752,7 @@ namespace Rodin::Kokkos::Variational
        * @return Maximum node count over the geometries of at most
        * @p vertices vertices.
        */
-      KOKKOS_INLINE_FUNCTION
-      static constexpr Index getCapacity(Index vertices)
+      KOKKOS_INLINE_FUNCTION static constexpr Index getCapacity(Index vertices)
       {
         using Type = ::Rodin::Geometry::Polytope::Type;
         using Basis = LagrangeBasis<K, MemorySpace>;
@@ -782,8 +776,7 @@ namespace Rodin::Kokkos::Variational
       }
 
       /// @brief Gets the offset between components. @return Scalar space size.
-      KOKKOS_INLINE_FUNCTION
-      Index getStride() const
+      KOKKOS_INLINE_FUNCTION Index getStride() const
       {
         return m_stride;
       }
@@ -793,8 +786,7 @@ namespace Rodin::Kokkos::Variational
        * @param polytope Polytope of the mesh.
        * @return Scalar global indices in local order.
        */
-      KOKKOS_INLINE_FUNCTION
-      ::Rodin::Kokkos::View<::Rodin::IndexVector> bind(
+      KOKKOS_INLINE_FUNCTION ::Rodin::Kokkos::View<::Rodin::IndexVector> bind(
         const ::Rodin::Kokkos::View<::Rodin::Geometry::Polytope>& polytope) const
       {
         const Index d = polytope.getDimension();
@@ -831,8 +823,7 @@ namespace Rodin::Kokkos::Variational
       }
 
       /// @param polytope Polytope. @param q Local index. @return Reference node.
-      KOKKOS_INLINE_FUNCTION
-      Geometry::Vector getNode(
+      KOKKOS_INLINE_FUNCTION Geometry::Vector getNode(
         const ::Rodin::Kokkos::View<::Rodin::Geometry::Polytope>& polytope, Index q) const
       {
         if constexpr (K == 2)
@@ -850,8 +841,7 @@ namespace Rodin::Kokkos::Variational
        * @return Whether @p polytope is a point, a segment, a triangle or a
        * tetrahedron.
        */
-      KOKKOS_INLINE_FUNCTION
-      static bool isSimplex(
+      KOKKOS_INLINE_FUNCTION static bool isSimplex(
         const ::Rodin::Kokkos::View<::Rodin::Geometry::Polytope>& polytope)
       {
         using Type = ::Rodin::Geometry::Polytope::Type;

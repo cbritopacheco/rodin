@@ -559,7 +559,7 @@ namespace Rodin::Solver
         x.resize(res.rows);
         check(cudaMemcpy(x.data(), res.x.data, res.rows * sizeof(ScalarType),
                 CuDSSVector<VectorType>::Resident ? cudaMemcpyDeviceToDevice
-                                                            : cudaMemcpyDeviceToHost),
+                                                  : cudaMemcpyDeviceToHost),
           "copy the solution");
         record(0, Factorization::Numeric);
       }

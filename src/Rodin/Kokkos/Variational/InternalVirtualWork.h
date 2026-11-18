@@ -41,8 +41,7 @@ namespace Rodin::Kokkos::Variational
   struct NeoHookeanPoint
   {
     /// @param h Displacement gradient @f$ H @f$, a square matrix.
-    KOKKOS_INLINE_FUNCTION
-    explicit NeoHookeanPoint(const Geometry::Matrix& h)
+    KOKKOS_INLINE_FUNCTION explicit NeoHookeanPoint(const Geometry::Matrix& h)
       : F(h),
         Finv(h.rows(), h.cols())
     {
@@ -59,8 +58,7 @@ namespace Rodin::Kokkos::Variational
      * @param g Device vector of the space dimension.
      * @return @f$ F^{-T} g @f$.
      */
-    KOKKOS_INLINE_FUNCTION
-    Geometry::Vector pullBack(const Geometry::Vector& g) const
+    KOKKOS_INLINE_FUNCTION Geometry::Vector pullBack(const Geometry::Vector& g) const
     {
       Geometry::Vector result(g.size());
       for (Index s = 0; s < g.size(); ++s)
