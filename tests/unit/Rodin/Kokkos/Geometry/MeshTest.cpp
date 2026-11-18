@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <array>
 #include <limits>
+#include <string_view>
 #include <type_traits>
 
 #include <Rodin/Geometry.h>
@@ -26,6 +27,35 @@ namespace Rodin::Tests::Unit
   using DeviceMesh = Geometry::Mesh<TestContext>;
   using Polytope = Geometry::Polytope;
   static_assert(std::is_same_v<DeviceMesh::Context, TestContext>);
+
+  /// @brief Observes entity preparation without reading or materializing a mesh.
+  class EntityPreparationTrace
+  {
+    public:
+      EntityPreparationTrace()
+        : m_callbacks(::Kokkos::Tools::Experimental::get_callbacks())
+      {
+        s_active = this;
+        ::Kokkos::Tools::Experimental::set_begin_parallel_for_callback(
+          [](const char* name, const uint32_t, uint64_t* id) {
+            *id = 0;
+            if (std::string_view(name) == "Rodin discovered entity slots")
+              ++s_active->preparations;
+          });
+      }
+
+      ~EntityPreparationTrace()
+      {
+        ::Kokkos::Tools::Experimental::set_callbacks(m_callbacks);
+        s_active = nullptr;
+      }
+
+      size_t preparations = 0;
+
+    private:
+      inline static EntityPreparationTrace* s_active = nullptr;
+      ::Kokkos::Tools::Experimental::EventSet m_callbacks;
+  };
 
   /// @brief Host mesh whose virtual default cell map is independent of its vertices.
   class IdentityMesh final : public HostMesh
@@ -693,6 +723,46 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Borrowing connectivity is a read; later edits through that reference invalidate revisions.
+  TEST(Kokkos_Mesh, ConnectivityRevisionFollowsMutation)
+  {
+    DeviceMesh mesh(TestContext{}, makeMesh(Polytope::Type::Tetrahedron, 3));
+    const auto initial = mesh.getRevision();
+    auto& connectivity = mesh.getConnectivity();
+    EXPECT_EQ(mesh.getRevision(), initial);
+    connectivity.compute(2, 3);
+    const auto prepared = mesh.getRevision();
+    EXPECT_NE(prepared, initial);
+    connectivity.compute(2, 3);
+    EXPECT_EQ(mesh.getRevision(), prepared);
+    connectivity.clear(2, 3);
+    const auto cleared = mesh.getRevision();
+    EXPECT_NE(cleared, prepared);
+    connectivity.compute(2, 3);
+    EXPECT_NE(mesh.getRevision(), cleared);
+    const auto computed = mesh.getRevision();
+    connectivity.setDirty(2, 3);
+    EXPECT_NE(mesh.getRevision(), computed);
+  }
+
+  /// @brief Discovery finishes attached storage before any const mesh accessor is called.
+  TEST(Kokkos_Mesh, DiscoveryPreparesEntityStorageDuringMutation)
+  {
+    DeviceMesh mesh(TestContext{}, makeMesh(Polytope::Type::Tetrahedron, 3));
+    auto& connectivity = mesh.getConnectivity();
+    EntityPreparationTrace trace;
+    connectivity.compute(2, 3);
+    EXPECT_GT(trace.preparations, 0u);
+    const auto preparations = trace.preparations;
+    const DeviceMesh& read = mesh;
+    const auto revision = read.getRevision();
+    const auto view = read.getView();
+    EXPECT_FALSE(read.getAttribute(2, 0));
+    EXPECT_EQ(read.getRevision(), revision);
+    EXPECT_EQ(read.getView().attributes, view.attributes);
+    EXPECT_EQ(trace.preparations, preparations);
+  }
+
   /// @brief Growing edges and faces preserves attributes and independent maps at higher dimensions.
   TEST(Kokkos_Mesh, DiscoveryPreservesAttachedEntityData)
   {
@@ -759,6 +829,39 @@ namespace Rodin::Tests::Unit
     checkGeometry(source, moved);
     EXPECT_EQ(moved.getAttribute(3, 0), Optional<Geometry::Attribute>(7));
     EXPECT_TRUE(mesh.isEmpty());
+  }
+
+  /// @brief Copy and move keep future connectivity notifications bound to the destination.
+  TEST(Kokkos_Mesh, ConnectivityMutationAfterCopyAndMove)
+  {
+    DeviceMesh source(TestContext{}, makeMesh(Polytope::Type::Tetrahedron, 3));
+    source.setAttribute({3, 0}, 17);
+    const auto sourceRevision = source.getRevision();
+    const auto check = [&](DeviceMesh& mesh) {
+      const auto revision = mesh.getRevision();
+      auto& connectivity = mesh.getConnectivity();
+      connectivity.compute(2, 3);
+      EXPECT_NE(mesh.getRevision(), revision);
+      EXPECT_EQ(mesh.getAttribute(3, 0), Optional<Geometry::Attribute>(17));
+      EXPECT_EQ(source.getRevision(), sourceRevision);
+      EXPECT_EQ(source.getFaceCount(), 0u);
+    };
+    DeviceMesh copied(source);
+    check(copied);
+    DeviceMesh assigned;
+    assigned = source;
+    check(assigned);
+    DeviceMesh toMove(source);
+    DeviceMesh moved(std::move(toMove));
+    check(moved);
+    EXPECT_TRUE(toMove.isEmpty());
+    toMove = source;
+    DeviceMesh moveAssigned;
+    moveAssigned = std::move(toMove);
+    check(moveAssigned);
+    EXPECT_TRUE(toMove.isEmpty());
+    toMove = source;
+    check(toMove);
   }
 
   /// @brief Empty meshes already have a resident topology and need no publication step.

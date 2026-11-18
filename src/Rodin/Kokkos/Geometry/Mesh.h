@@ -46,7 +46,7 @@ namespace Rodin::Geometry
    * Legacy host iterators and reference-returning queries use the resident
    * data through explicit transfers and the existing evaluation caches.
    * Connectivity computation discovers entities on the device. Attribute and
-   * map tables grow lazily in resident memory, preserving existing local IDs.
+   * map tables grow during connectivity mutation, preserving existing local IDs.
    * Identity and real P1 maps on all Rodin reference
    * families are supported. Higher-order and custom maps are rejected.
    * Geometry must remain unchanged during evaluation. Borrowed views expire
@@ -166,7 +166,7 @@ namespace Rodin::Geometry
       /// @param context Execution association; Kokkos must already be initialized.
       explicit Mesh(ContextType context = ContextType())
         : m_context(std::move(context)),
-          m_connectivity(m_context)
+          m_connectivity(m_context, [this] { connectivityChanged(); })
       {
         initializeCaches();
       }
@@ -178,7 +178,8 @@ namespace Rodin::Geometry
       Mesh(ContextType context, const MeshBase& source)
         : MeshBase(source),
           m_context(std::move(context)),
-          m_connectivity(m_context, source.getConnectivity()),
+          m_connectivity(
+            m_context, source.getConnectivity(), [this] { connectivityChanged(); }),
           m_sdim(source.getSpaceDimension())
       {
         if (m_sdim > 3 || getDimension() > m_sdim)
@@ -285,10 +286,9 @@ namespace Rodin::Geometry
       Mesh(const Mesh& other)
         : MeshBase(other),
           m_context(other.m_context),
-          m_connectivity(other.m_connectivity),
+          m_connectivity(other.m_connectivity, [this] { connectivityChanged(); }),
           m_sdim(other.m_sdim)
       {
-        other.synchronizeEntities();
         const auto& execution = m_context.getExecutionSpace();
         m_coordinates = Rodin::Kokkos::Internal::clone(execution, other.m_coordinates);
         m_attributes = Rodin::Kokkos::Internal::clone(execution, other.m_attributes);
@@ -325,11 +325,9 @@ namespace Rodin::Geometry
       {
         if (this != &other)
         {
-          other.synchronizeEntities();
           MeshBase::operator=(other);
           m_context.getExecutionSpace().fence("Rodin mesh replacement");
           m_context = other.m_context;
-          m_connectivity = std::move(other.m_connectivity);
           m_sdim = other.m_sdim;
           m_coordinates = std::move(other.m_coordinates);
           m_attributes = std::move(other.m_attributes);
@@ -337,14 +335,11 @@ namespace Rodin::Geometry
           m_geometryKinds = std::move(other.m_geometryKinds);
           m_controlOffsets = std::move(other.m_controlOffsets);
           m_controls = std::move(other.m_controls);
-          m_transformations.clear();
-          m_quadratures.clear();
-          initializeCaches();
+          m_layoutOffsets = other.m_layoutOffsets;
+          m_connectivity = std::move(other.m_connectivity);
+          other.m_layoutOffsets = {};
           other.m_connectivity = ConnectivityType(other.m_context);
           other.m_sdim = 0;
-          other.m_transformations.clear();
-          other.m_quadratures.clear();
-          other.initializeCaches();
         }
         return *this;
       }
@@ -370,7 +365,6 @@ namespace Rodin::Geometry
       /// @returns Resident connectivity owner, which the caller may change.
       ConnectivityType& getConnectivity() override
       {
-        m_revision = nextRevision();
         return m_connectivity;
       }
 
@@ -384,16 +378,15 @@ namespace Rodin::Geometry
        * @brief Gets the revision of the entities and of their attributes.
        *
        * Revisions are unique across meshes. A mesh gets a new one when it is
-       * built or assigned, when an attribute is set, when its connectivity is
-       * handed out for modification and when discovered entities get their
-       * slots, so that a cache computed from the entities can tell whether it
+       * built or assigned, when an attribute is set and when its connectivity
+       * changes. Discovery prepares attached entity slots before returning,
+       * so that a cache computed from the entities can tell whether it
        * still holds. Coordinates and transformations do not change it.
        *
-       * @returns Revision, current after the entity slots are synchronized.
+       * @returns Current revision, without preparing storage or changing state.
        */
       std::uint64_t getRevision() const
       {
-        synchronizeEntities();
         return m_revision;
       }
 
@@ -410,7 +403,6 @@ namespace Rodin::Geometry
       /// @returns Borrowed resident data; kernels must finish before owner replacement.
       View getView() const
       {
-        synchronizeEntities();
         const auto topology = m_connectivity.getView();
         return {{getDimension(), m_sdim, topology.entityOffsets, topology.geometries,
           topology.vertexOffsets, topology.vertexIndices, m_coordinates.data(),
@@ -476,7 +468,6 @@ namespace Rodin::Geometry
        */
       void flush() override
       {
-        synchronizeEntities();
         ::Kokkos::deep_copy(
           m_context.getExecutionSpace(), m_geometryKinds, GeometryKind::VertexP1);
         ::Kokkos::deep_copy(m_context.getExecutionSpace(), m_controlOffsets, Index(0));
@@ -531,7 +522,6 @@ namespace Rodin::Geometry
       /// @param d Entity dimension. @param i Entity index. @returns Optional resident label.
       Optional<Attribute> getAttribute(size_t d, Index i) const override
       {
-        synchronizeEntities();
         assert(i < getPolytopeCount(d));
         const auto entity = m_connectivity.getOffset(d) + i;
         if (!Rodin::Kokkos::Internal::read(
@@ -545,7 +535,6 @@ namespace Rodin::Geometry
       Mesh& setAttribute(const std::pair<size_t, Index>& entity,
         const Optional<Attribute>& attribute) override
       {
-        synchronizeEntities();
         assert(entity.second < getPolytopeCount(entity.first));
         const Index index = m_connectivity.getOffset(entity.first) + entity.second;
         const auto& execution = m_context.getExecutionSpace();
@@ -562,7 +551,6 @@ namespace Rodin::Geometry
       Mesh& setPolytopeTransformation(const std::pair<size_t, Index> entity,
         PolytopeTransformation* transformation) override
       {
-        synchronizeEntities();
         std::unique_ptr<PolytopeTransformation> map(transformation);
         assert(entity.second < getPolytopeCount(entity.first));
         const Index index = m_connectivity.getOffset(entity.first) + entity.second;
@@ -637,7 +625,6 @@ namespace Rodin::Geometry
       const PolytopeTransformation& getPolytopeTransformation(
         size_t d, Index i) const override
       {
-        synchronizeEntities();
         return m_transformations.get({d, i}, getPolytopeCount(d),
           [this](
             size_t dimension, Index index) -> std::unique_ptr<PolytopeTransformation> {
@@ -706,7 +693,6 @@ namespace Rodin::Geometry
       {
         // One transfer per resident table: reading entity by entity costs a
         // copy and a synchronization per value.
-        synchronizeEntities();
         for (size_t d = 0; d <= getDimension(); ++d)
           m_connectivity.materialize(d);
         const auto mirror = [](const auto& source) {
@@ -1231,14 +1217,12 @@ namespace Rodin::Geometry
       }
 
       /**
-       * @brief Extends resident entity slots on first use after connectivity discovery.
-       * Like the core attribute and transformation indices, const queries may
-       * materialize newly required slots. Actual attributes and geometry stay
-       * resident; only the small dimension-count metadata is examined on the host.
+       * @brief Prepares attached entity slots during connectivity mutation.
+       * Existing attributes and maps remain resident and retain their entity IDs.
+       * Mutation requires exclusive access; const accessors never call this stage.
        */
-      void synchronizeEntities() const
+      void synchronizeEntities()
       {
-        std::lock_guard<std::mutex> lock(m_entityMutex);
         ::Kokkos::Array<Index, 5> offsets{};
         bool changed = false;
         for (size_t d = 0; d <= getDimension() + 1; ++d)
@@ -1274,7 +1258,15 @@ namespace Rodin::Geometry
         m_geometryKinds = std::move(work.kinds);
         m_controlOffsets = std::move(work.controls);
         m_layoutOffsets = offsets;
-        m_revision = nextRevision();
+      }
+
+      /// @brief Completes attached storage and invalidates host geometry after topology edits.
+      void connectivityChanged()
+      {
+        synchronizeEntities();
+        m_transformations.clear();
+        m_quadratures.clear();
+        initializeCaches();
       }
 
       /// @param count Iteration count. @returns Policy on this mesh's execution instance.
@@ -1444,13 +1436,12 @@ namespace Rodin::Geometry
       ConnectivityType m_connectivity;
       size_t m_sdim = 0;
       Array<Real> m_coordinates, m_controls;
-      mutable Array<Attribute> m_attributes;
-      mutable Array<unsigned char> m_attributePresent;
-      mutable Array<GeometryKind> m_geometryKinds;
-      mutable Array<Index> m_controlOffsets;
-      mutable ::Kokkos::Array<Index, 5> m_layoutOffsets{};
-      mutable std::mutex m_entityMutex;
-      mutable std::uint64_t m_revision = 0;
+      Array<Attribute> m_attributes;
+      Array<unsigned char> m_attributePresent;
+      Array<GeometryKind> m_geometryKinds;
+      Array<Index> m_controlOffsets;
+      ::Kokkos::Array<Index, 5> m_layoutOffsets{};
+      std::uint64_t m_revision = 0;
       PolytopeTransformationIndex m_transformations;
       PolytopeQuadratureIndex m_quadratures;
       mutable Rodin::Kokkos::Internal::TransferCache<MemorySpace> m_transfers;

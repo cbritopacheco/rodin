@@ -248,6 +248,52 @@ namespace Rodin::Tests::Unit
     EXPECT_FALSE(resident.isDirty(2, 1));
   }
 
+  /// @brief Revisions follow explicit mutations, including edits through a retained reference.
+  TEST(Kokkos_Connectivity, RevisionsAndOwnerNotifications)
+  {
+    const auto host = sharedCells(GeometryType::Tetrahedron);
+    size_t notifications = 0;
+    ResidentConnectivity resident(TestContext{}, host, [&] { ++notifications; });
+    const auto initial = resident.getRevision();
+    EXPECT_EQ(notifications, 0u);
+    resident.getGeometry(3, 0);
+    resident.getPolytope(3, 0);
+    resident.materialize(3);
+    resident.getView();
+    EXPECT_EQ(resident.getRevision(), initial);
+    resident.compute(2, 3);
+    const auto prepared = resident.getRevision();
+    EXPECT_NE(prepared, initial);
+    EXPECT_GT(notifications, 0u);
+    const auto preparedNotifications = notifications;
+    resident.compute(2, 3);
+    EXPECT_EQ(resident.getRevision(), prepared);
+    EXPECT_EQ(notifications, preparedNotifications);
+    resident.setDirty(2, 3);
+    const auto dirty = resident.getRevision();
+    EXPECT_NE(dirty, prepared);
+    resident.setDirty(2, 3);
+    EXPECT_EQ(resident.getRevision(), dirty);
+    resident.setDirty(2, 3, false);
+    EXPECT_NE(resident.getRevision(), dirty);
+    resident.clear(2, 3);
+    const auto cleared = resident.getRevision();
+    resident.clear(2, 3);
+    EXPECT_EQ(resident.getRevision(), cleared);
+    EXPECT_THROW(resident.clear(4, 0), Alert::Exception);
+    EXPECT_EQ(resident.getRevision(), cleared);
+
+    ResidentConnectivity copied(resident);
+    EXPECT_NE(copied.getRevision(), resident.getRevision());
+    const auto beforeCopyEdit = notifications;
+    copied.compute(1, 2);
+    EXPECT_EQ(notifications, beforeCopyEdit);
+    const auto beforeAssignment = resident.getRevision();
+    resident = std::move(copied);
+    EXPECT_NE(resident.getRevision(), beforeAssignment);
+    EXPECT_GT(notifications, beforeCopyEdit);
+  }
+
   /// @brief Empty resident connectivity needs no host topology or special discovery path.
   TEST(Kokkos_Connectivity, EmptyComplex)
   {

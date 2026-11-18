@@ -14,6 +14,8 @@
 
 #include <array>
 #include <atomic>
+#include <cstdint>
+#include <functional>
 #include <map>
 #include <mutex>
 #include <numeric>
@@ -44,7 +46,10 @@ namespace Rodin::Geometry
    * boundary during computation; actual mesh topology remains resident.
    * Legacy reference-returning queries materialize read-only host entries on
    * demand. Mutation requires exclusive access and invalidates borrowed views
-   * and host references. Copies own independent resident arrays.
+   * and host references. Copies own independent resident arrays. Owner callbacks
+   * stay with the destination on assignment and are not copied from the source;
+   * a mesh supplies its own callback at construction. Notifications are host
+   * operations and complete attached entity storage before mutation returns.
    */
   template <class Backend>
   class Connectivity<Rodin::Context::Kokkos<Rodin::Context::Local, Backend>> final
@@ -66,20 +71,27 @@ namespace Rodin::Geometry
       /// The existing discovery/restriction vocabulary.
       using Mode = Connectivity<Rodin::Context::Local>::Mode;
 
-      /// @param context Execution association; the runtime must be initialized.
-      explicit Connectivity(ContextType context = ContextType())
+      /**
+       * @param context Execution association; the runtime must be initialized.
+       * @param onChange Host owner notification after a resident mutation.
+       */
+      explicit Connectivity(
+        ContextType context = ContextType(), std::function<void()> onChange = {})
         : m_context(std::move(context))
       {
         m_entityOffsets = upload(IndexVector{0, 0}, "entity offsets");
         m_vertexOffsets = upload(IndexVector{0}, "vertex offsets");
         publishRelations();
+        m_onChange = std::move(onChange);
       }
 
       /**
        * @param context Execution association.
        * @param source Construction topology; it is not retained.
+       * @param onChange Host owner notification after a resident mutation.
        */
-      Connectivity(ContextType context, const ConnectivityBase& source)
+      Connectivity(ContextType context, const ConnectivityBase& source,
+        std::function<void()> onChange = {})
         : m_context(std::move(context)),
           m_dimension(source.getDimension())
       {
@@ -195,10 +207,14 @@ namespace Rodin::Geometry
           }
         }
         publishRelations();
+        m_onChange = std::move(onChange);
       }
 
-      /// @param other Connectivity to deep-copy.
-      Connectivity(const Connectivity& other)
+      /**
+       * @param other Connectivity to deep-copy, without its owner notification.
+       * @param onChange Notification associated with the new owner.
+       */
+      Connectivity(const Connectivity& other, std::function<void()> onChange = {})
         : m_context(other.m_context),
           m_dimension(other.m_dimension),
           m_offsets(other.m_offsets),
@@ -224,6 +240,7 @@ namespace Rodin::Geometry
           }
         }
         publishRelations();
+        m_onChange = std::move(onChange);
       }
 
       /// @param other Connectivity whose allocations are transferred.
@@ -252,6 +269,7 @@ namespace Rodin::Geometry
           m_keys.clear();
           m_types.clear();
           m_relations.clear();
+          changed();
         }
         return *this;
       }
@@ -261,6 +279,16 @@ namespace Rodin::Geometry
       {
         return {{m_dimension, m_entityOffsets.data(), m_geometries.data(),
           m_vertexOffsets.data(), m_vertices.data(), m_descriptors.data()}};
+      }
+
+      /**
+       * @brief Gets the revision of resident entities and incidence state.
+       * @returns Revision changed by relation replacement, dirty-state changes
+       * and assignment; cached reads and already prepared computations retain it.
+       */
+      std::uint64_t getRevision() const
+      {
+        return m_revision;
       }
 
       /// @returns Associated execution context.
@@ -477,7 +505,12 @@ namespace Rodin::Geometry
       Connectivity& setDirty(size_t d, size_t dp, bool dirty = true)
       {
         checkDimensions(d, dp);
-        m_incidence[d][dp].dirty = dirty;
+        auto& relation = m_incidence[d][dp];
+        if (relation.dirty != dirty)
+        {
+          relation.dirty = dirty;
+          changed();
+        }
         return *this;
       }
 
@@ -485,9 +518,12 @@ namespace Rodin::Geometry
       Connectivity& clear(size_t d, size_t dp)
       {
         checkDimensions(d, dp);
-        m_incidence[d][dp] = Relation{};
-        m_relations.erase({d, dp});
-        publishRelations();
+        if (m_incidence[d][dp].present || !m_incidence[d][dp].dirty)
+        {
+          m_incidence[d][dp] = Relation{};
+          m_relations.erase({d, dp});
+          publishRelations();
+        }
         return *this;
       }
 
@@ -1098,6 +1134,22 @@ namespace Rodin::Geometry
           }
         }
         m_descriptors = upload(descriptors, "incidence descriptors");
+        changed();
+      }
+
+      /// @brief Publishes a revision and completes the owning mesh's mutation stage.
+      void changed()
+      {
+        m_revision = nextRevision();
+        if (m_onChange)
+          m_onChange();
+      }
+
+      /// @returns A revision distinct from every earlier connectivity revision.
+      static std::uint64_t nextRevision()
+      {
+        static std::atomic<std::uint64_t> revision{0};
+        return ++revision;
       }
 
       /// @param d Source dimension. @param dp Target dimension. @returns Materialized resident relation.
@@ -1125,6 +1177,8 @@ namespace Rodin::Geometry
       void vertexRelation(size_t d);
 
       ContextType m_context;
+      std::function<void()> m_onChange;
+      std::uint64_t m_revision = 0;
       size_t m_dimension = 0;
       std::array<Index, 5> m_offsets{};
       std::array<size_t, 8> m_geometryCounts{};

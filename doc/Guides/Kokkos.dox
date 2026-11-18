@@ -177,12 +177,19 @@
   uploaded as immutable constants; they contain no actual mesh topology.
   Host compatibility queries still explicitly materialize host data when used.
 
-  Mesh attribute and map slots grow on their first use after discovery, using
-  resident kernels. Existing local IDs, labels and independent control points
+  Mesh attribute and map slots grow during the non-const connectivity mutation,
+  using resident kernels. Existing local IDs, labels and independent control points
   are preserved; new entities have absent attributes and vertex-based default
   maps. This is internal storage provisioning, with no user synchronization or
   publication method. Finish kernels before computing connectivity and reacquire
   borrowed views afterward.
+
+  Connectivity revisions advance on relation replacement, dirty-state changes
+  and assignment, including edits made through a previously borrowed reference.
+  Already prepared computations and accessor calls retain the revision. Mesh
+  revisions also account for attribute updates. Const mesh accessors neither
+  prepare entity storage nor change these revisions. Copies attach independent
+  owner notifications; assignment retains the destination's notification.
 
   @section guides-kokkos-iteration Assembly Region Traversal
 

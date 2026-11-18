@@ -56,7 +56,11 @@ Connectivity compute/discover/restrict operate directly on resident arrays,
 using device sorting and scans. Existing IDs, reference orientation and CPU
 traversal order are preserved. Missing edges/faces are discovered from cell
 keys; relation arrays are independently owned CSR tables. Mesh attribute/map
-slots grow lazily in resident memory while retaining existing entity data.
+slots grow during non-const connectivity mutation while retaining existing entity
+data. Revisions follow actual relation or dirty-state mutations, including those
+through retained references; borrowing connectivity and const mesh accessors do
+not change revisions or prepare device storage. Copies bind their own mesh owner,
+and assignment retains the destination's owner notification.
 Only small sizes and reference-cell constants cross the host boundary during
 computation. Device views
 borrow resident arrays and require completed kernels before mutation, owner
