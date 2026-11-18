@@ -52,10 +52,10 @@ namespace Rodin::Kokkos::Variational
     /// @brief Integrated mesh.
     const void* mesh = nullptr;
 
-    /// @brief Vector dimension of the trial space, zero for linear forms.
+    /// @brief Independent trial component copies, zero for linear forms.
     Index trialVDim = 0;
 
-    /// @brief Vector dimension of the test space.
+    /// @brief Independent test component copies, one for intrinsic vector bases.
     Index testVDim = 0;
 
     /// @brief Selected attributes; empty selects every polytope of the region.
@@ -70,10 +70,10 @@ namespace Rodin::Kokkos::Variational
     /// @brief Offset between the components of the test space.
     Index testStride = 0;
 
-    /// @brief Maximum scalar local count of the trial space, zero for linear forms.
+    /// @brief Maximum trial generator count, zero for linear forms.
     Index trialCapacity = 0;
 
-    /// @brief Maximum scalar local count of the test space.
+    /// @brief Maximum test generator count.
     Index testCapacity = 0;
 
     /// @brief Whether the entries couple pairs of polytopes, as global integrators do.
@@ -84,6 +84,12 @@ namespace Rodin::Kokkos::Variational
      * attributes and the region above selecting its test polytopes.
      */
     std::vector<::Rodin::Geometry::Attribute> trialAttributes = {};
+
+    /// @brief Identity of intrinsic trial numbering; null for componentwise spaces.
+    const void* trialSpace = nullptr;
+
+    /// @brief Identity of intrinsic test numbering; null for componentwise spaces.
+    const void* testSpace = nullptr;
 
     /**
      * @brief Compares two layouts member by member.

@@ -852,6 +852,240 @@ namespace Rodin::Kokkos::Variational
       using IntegrationPointView::IntegrationPointView;
   };
 
+}
+
+namespace Rodin::Kokkos
+{
+  /**
+   * @brief Physical element evaluation and coefficient numbering of a Kokkos space.
+   * @tparam FES Real scalar or vector finite-element space exposing getDOFsView().
+   *
+   * ## Architecture
+   *
+   * The view retains the space's prepared device DOF handles and its physical value
+   * dimension. Scalar reference bases are replicated by component, preserving
+   * the P1, H1 and P0g numbering and sparse component optimizations. An intrinsic
+   * vector basis has one coefficient per basis function, independently of its
+   * physical value dimension. Its DOF view supplies physical basis values and
+   * the supported differential operators, including any Piola mapping and
+   * cell orientation transformations. No nodal interpolation is assumed here.
+   *
+   * getCount() and getGlobalIndex() describe complete local basis functions.
+   * getComponentCount(), getStride() and getCapacity() retain the grouped
+   * representation used by existing assembly kernels; intrinsic vector bases
+   * have one component group and zero component stride. All data are prepared
+   * by the space before constructing this view; evaluation is const.
+   */
+  template <Variational::Space FES>
+    requires(Variational::ScalarSpace<FES> || Variational::VectorSpace<FES>)
+  struct View<FES>
+  {
+    /// @brief Device DOF and family evaluation tables.
+    using DOFsType = typename FES::DOFsType;
+
+    /// @brief Physical range of the element.
+    using RangeType = typename FES::RangeType;
+
+    /// @brief A scalar generator or an intrinsically vector-valued basis.
+    using BasisValue = std::decay_t<decltype(std::declval<const DOFsType&>().getBasis(
+      std::declval<const Variational::IntegrationPointView&>(), Index(0)))>;
+
+    /// @brief Whether independent scalar generators are replicated by component.
+    static constexpr bool Componentwise = std::is_same_v<BasisValue, Real>;
+
+    /// @brief Maximum number of independent copies of a basis generator.
+    static constexpr Index ComponentCapacity =
+      Componentwise && !std::is_same_v<RangeType, Real> ? RODIN_MAXIMAL_SPACE_DIMENSION
+                                                        : 1;
+
+    /// @param fes Space whose prepared device tables are borrowed.
+    explicit View(const FES& fes)
+      : m_dofs(fes.getDOFsView()),
+        m_dimension(fes.getVectorDimension())
+    {}
+
+    /// @returns Prepared device tables, without changing their ownership.
+    KOKKOS_INLINE_FUNCTION const DOFsType& getDOFs() const
+    {
+      return m_dofs;
+    }
+
+    /// @returns Physical value dimension, independent of coefficient multiplicity.
+    KOKKOS_INLINE_FUNCTION Index getVectorDimension() const
+    {
+      if constexpr (std::is_same_v<RangeType, Real>)
+        return 1;
+      else
+        return m_dimension;
+    }
+
+    /// @returns Number of independently numbered component copies.
+    KOKKOS_INLINE_FUNCTION Index getComponentCount() const
+    {
+      if constexpr (!Componentwise || std::is_same_v<RangeType, Real>)
+        return 1;
+      else
+        return m_dimension;
+    }
+
+    /// @returns Offset between independent component copies, zero for intrinsic bases.
+    KOKKOS_INLINE_FUNCTION Index getStride() const
+    {
+      if constexpr (Componentwise)
+        return m_dofs.getStride();
+      else
+        return 0;
+    }
+
+    /// @param vertices Vertex capacity. @returns Maximum number of basis generators.
+    KOKKOS_INLINE_FUNCTION static constexpr Index getCapacity(Index vertices)
+    {
+      return DOFsType::getCapacity(vertices);
+    }
+
+    /// @param polytope Bound entity. @returns Its generator indices in local order.
+    KOKKOS_INLINE_FUNCTION auto bind(
+      const ::Rodin::Kokkos::View<::Rodin::Geometry::Polytope>& polytope) const
+    {
+      return m_dofs.bind(polytope);
+    }
+
+    /// @param polytope Bound entity. @returns Complete local basis count.
+    KOKKOS_INLINE_FUNCTION Index getCount(
+      const ::Rodin::Kokkos::View<::Rodin::Geometry::Polytope>& polytope) const
+    {
+      return bind(polytope).size() * getComponentCount();
+    }
+
+    /**
+     * @param polytope Bound entity.
+     * @param local Complete local basis index.
+     * @returns Coefficient index of the basis function, in mesh-local numbering.
+     */
+    KOKKOS_INLINE_FUNCTION Index getGlobalIndex(
+      const ::Rodin::Kokkos::View<::Rodin::Geometry::Polytope>& polytope,
+      Index local) const
+    {
+      const Index components = getComponentCount();
+      const auto indices = bind(polytope);
+      KOKKOS_ASSERT(local < indices.size() * components);
+      return indices[local / components] + (local % components) * getStride();
+    }
+
+    /// @param ip Integration point. @param dof Generator index. @returns Generator value.
+    template <class Point>
+    KOKKOS_INLINE_FUNCTION auto getGenerator(const Point& ip, Index dof) const
+    {
+      if constexpr (Componentwise)
+        return m_dofs.getBasis(ip, dof);
+      else
+      {
+        const Geometry::Vector result = m_dofs.getBasis(ip, dof);
+        return result;
+      }
+    }
+
+    /// @param ip Integration point. @param local Complete local basis index. @returns Physical basis value.
+    template <class Point>
+    KOKKOS_INLINE_FUNCTION auto getBasis(const Point& ip, Index local) const
+    {
+      const Index components = getComponentCount();
+      return getBasis(ip, local / components, local % components);
+    }
+
+    /**
+     * @param ip Integration point. @param dof Generator index.
+     * @param component Independent copy index; zero for intrinsic bases.
+     * @returns Complete physical basis value.
+     */
+    template <class Point>
+    KOKKOS_INLINE_FUNCTION auto getBasis(
+      const Point& ip, Index dof, Index component) const
+    {
+      KOKKOS_ASSERT(component < getComponentCount());
+      if constexpr (Componentwise && !std::is_same_v<RangeType, Real>)
+      {
+        return Variational::UnitVector{
+          m_dimension, component, m_dofs.getBasis(ip, dof)};
+      }
+      else
+        return getGenerator(ip, dof);
+    }
+
+    /// @param ip Integration point. @param dof Scalar generator index. @returns Physical gradient.
+    template <class Point>
+    KOKKOS_INLINE_FUNCTION decltype(auto) getGradient(const Point& ip, Index dof) const
+      requires requires(const DOFsType& dofs) { dofs.getGradient(ip, dof); }
+    {
+      return m_dofs.getGradient(ip, dof);
+    }
+
+    /**
+     * @param ip Integration point. @param dof Generator index.
+     * @param component Independent copy index; zero for intrinsic bases.
+     * @returns Complete physical basis Jacobian, when supplied by the family.
+     */
+    template <class Point>
+    KOKKOS_INLINE_FUNCTION auto getJacobian(
+      const Point& ip, Index dof, Index component) const
+      requires((Componentwise && requires(const DOFsType& dofs) {
+        dofs.getGradient(ip, dof);
+      }) || (!Componentwise && requires(const DOFsType& dofs) {
+        dofs.getJacobian(ip, dof);
+      }))
+    {
+      KOKKOS_ASSERT(component < getComponentCount());
+      if constexpr (Componentwise)
+      {
+        return Variational::RowMatrix{
+          m_dimension, component, m_dofs.getGradient(ip, dof)};
+      }
+      else
+      {
+        const Geometry::Matrix result = m_dofs.getJacobian(ip, dof);
+        return result;
+      }
+    }
+
+    /**
+     * @param ip Integration point. @param dof Generator index.
+     * @param component Independent copy index; zero for intrinsic bases.
+     * @returns Physical divergence, evaluated directly by an intrinsic family.
+     */
+    template <class Point>
+    KOKKOS_INLINE_FUNCTION Real getDivergence(
+      const Point& ip, Index dof, Index component) const
+      requires Variational::VectorSpace<FES> &&
+      ((Componentwise && requires(const DOFsType& dofs) {
+        dofs.getGradient(ip, dof);
+      }) || (!Componentwise && requires(const DOFsType& dofs) {
+        dofs.getDivergence(ip, dof);
+      }))
+    {
+      KOKKOS_ASSERT(component < getComponentCount());
+      if constexpr (Componentwise)
+        return m_dofs.getGradient(ip, dof)(component);
+      else
+        return m_dofs.getDivergence(ip, dof);
+    }
+
+    /// @param ip Integration point. @param dof Generator index. @returns Family-provided physical curl.
+    template <class Point>
+    KOKKOS_INLINE_FUNCTION auto getCurl(const Point& ip, Index dof) const
+      requires requires(const DOFsType& dofs) { dofs.getCurl(ip, dof); }
+    {
+      return m_dofs.getCurl(ip, dof);
+    }
+
+    private:
+      DOFsType m_dofs;
+      Index m_dimension;
+  };
+}
+
+namespace Rodin::Kokkos::Variational
+{
+
   /**
    * @brief Device-callable view of a form language expression.
    *
@@ -1737,6 +1971,9 @@ namespace Rodin::Kokkos::Variational
       /// @brief Device degrees of freedom.
       using DOFsType = typename FESType::DOFsType;
 
+      /// @brief Physical element evaluation and numbering.
+      using ElementType = ::Rodin::Kokkos::View<FESType>;
+
       /// @brief Memory space of the coefficients.
       using MemorySpace = typename FESType::MeshType::MemorySpace;
 
@@ -1747,8 +1984,7 @@ namespace Rodin::Kokkos::Variational
        */
       template <class Data>
       GridFunctionView(const FESType& fes, const Data& data)
-        : m_vdim(fes.getVectorDimension()),
-          m_dofs(fes.getDOFsView()),
+        : m_dofs(fes),
           m_data(GridFunctionCoefficients<std::decay_t<Data>>::getView(fes, data))
       {}
 
@@ -1756,7 +1992,7 @@ namespace Rodin::Kokkos::Variational
       KOKKOS_INLINE_FUNCTION
       const DOFsType& getDOFs() const
       {
-        return m_dofs;
+        return m_dofs.getDOFs();
       }
 
       /// @brief Gets the coefficients. @return Device coefficients.
@@ -1770,7 +2006,7 @@ namespace Rodin::Kokkos::Variational
       KOKKOS_INLINE_FUNCTION
       Index getVectorDimension() const
       {
-        return m_vdim;
+        return m_dofs.getVectorDimension();
       }
 
       /**
@@ -1850,7 +2086,13 @@ namespace Rodin::Kokkos::Variational
         const auto dofs = m_dofs.bind(ip.getPoint().getPolytope());
         Real result = 0;
         forEachDOF(dofs.size(), [&](Index q) {
-          result += m_dofs.getBasis(ip, q) * m_data(dofs[q] + r * m_dofs.getStride());
+          if constexpr (ElementType::Componentwise)
+          {
+            result +=
+              m_dofs.getGenerator(ip, q) * m_data(dofs[q] + r * m_dofs.getStride());
+          }
+          else
+            result += m_dofs.getGenerator(ip, q)(r) * m_data(dofs[q]);
         });
         return result;
       }
@@ -1865,12 +2107,21 @@ namespace Rodin::Kokkos::Variational
       Geometry::Vector interpolateVector(const IntegrationPointView& ip) const
       {
         const auto dofs = m_dofs.bind(ip.getPoint().getPolytope());
-        Geometry::Vector result(m_vdim);
+        Geometry::Vector result(m_dofs.getVectorDimension());
         forEachDOF(dofs.size(), [&](Index q) {
-          const Real basis = m_dofs.getBasis(ip, q);
-          forEachComponent(m_vdim, [&](Index r) {
-            result(r) += basis * m_data(dofs[q] + r * m_dofs.getStride());
-          });
+          const auto basis = m_dofs.getGenerator(ip, q);
+          if constexpr (ElementType::Componentwise)
+          {
+            forEachComponent(m_dofs.getVectorDimension(), [&](Index r) {
+              result(r) += basis * m_data(dofs[q] + r * m_dofs.getStride());
+            });
+          }
+          else
+          {
+            const Real coefficient = m_data(dofs[q]);
+            forEachComponent(m_dofs.getVectorDimension(),
+              [&](Index r) { result(r) += basis(r) * coefficient; });
+          }
         });
         return result;
       }
@@ -1884,8 +2135,8 @@ namespace Rodin::Kokkos::Variational
       Geometry::Vector interpolateVector(
         const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& p) const
       {
-        Geometry::Vector result(m_vdim);
-        for (Index r = 0; r < m_vdim; ++r)
+        Geometry::Vector result(m_dofs.getVectorDimension());
+        for (Index r = 0; r < m_dofs.getVectorDimension(); ++r)
           result(r) = interpolate(p, r);
         return result;
       }
@@ -2018,7 +2269,7 @@ namespace Rodin::Kokkos::Variational
           const Geometry::Matrix inverse = p.getJacobianInverse();
           const Index rdim = inverse.rows();
           const Index sdim = inverse.cols();
-          Geometry::Matrix result(m_vdim, sdim);
+          Geometry::Matrix result(m_dofs.getVectorDimension(), sdim);
           for (Index a = 0; a < vertices.size(); ++a)
           {
             Real phi;
@@ -2029,7 +2280,7 @@ namespace Rodin::Kokkos::Variational
               Real gradient = 0;
               for (Index k = 0; k < rdim; ++k)
                 gradient += inverse(k, c) * reference(k);
-              for (Index r = 0; r < m_vdim; ++r)
+              for (Index r = 0; r < m_dofs.getVectorDimension(); ++r)
                 result(r, c) += gradient * m_data(vertices[a] + r * m_dofs.getStride());
             }
           }
@@ -2055,9 +2306,9 @@ namespace Rodin::Kokkos::Variational
           const auto vertices = p.getPolytope().getVertices();
           const Geometry::Matrix inverse = p.getJacobianInverse();
           const Index rdim = inverse.rows();
-          KOKKOS_ASSERT(m_vdim == inverse.cols());
+          KOKKOS_ASSERT(m_dofs.getVectorDimension() == inverse.cols());
           Real result = 0;
-          for (Index r = 0; r < m_vdim; ++r)
+          for (Index r = 0; r < m_dofs.getVectorDimension(); ++r)
           {
             Real diagonal = 0;
             for (Index a = 0; a < vertices.size(); ++a)
@@ -2091,13 +2342,26 @@ namespace Rodin::Kokkos::Variational
       {
         const auto dofs = m_dofs.bind(ip.getPoint().getPolytope());
         const Index sdim = ip.getGradient(0).size();
-        Geometry::Matrix result(m_vdim, sdim);
+        Geometry::Matrix result(m_dofs.getVectorDimension(), sdim);
         forEachDOF(dofs.size(), [&](Index q) {
-          const auto& gradient = m_dofs.getGradient(ip, q);
-          forEachComponent(m_vdim, [&](Index r) {
-            const Real value = m_data(dofs[q] + r * m_dofs.getStride());
-            forEachComponent(sdim, [&](Index c) { result(r, c) += gradient(c) * value; });
-          });
+          if constexpr (ElementType::Componentwise)
+          {
+            const auto& gradient = m_dofs.getGradient(ip, q);
+            forEachComponent(m_dofs.getVectorDimension(), [&](Index r) {
+              const Real value = m_data(dofs[q] + r * m_dofs.getStride());
+              forEachComponent(
+                sdim, [&](Index c) { result(r, c) += gradient(c) * value; });
+            });
+          }
+          else
+          {
+            const auto jacobian = m_dofs.getJacobian(ip, q, 0);
+            const Real value = m_data(dofs[q]);
+            forEachComponent(m_dofs.getVectorDimension(), [&](Index r) {
+              forEachComponent(
+                sdim, [&](Index c) { result(r, c) += jacobian(r, c) * value; });
+            });
+          }
         });
         return result;
       }
@@ -2111,20 +2375,27 @@ namespace Rodin::Kokkos::Variational
       Real getCellDivergence(const IntegrationPointView& ip) const
       {
         const auto dofs = m_dofs.bind(ip.getPoint().getPolytope());
-        KOKKOS_ASSERT(m_vdim == ip.getGradient(0).size());
+        KOKKOS_ASSERT(m_dofs.getVectorDimension() == ip.getGradient(0).size());
         Real result = 0;
-        forEachComponent(m_vdim, [&](Index r) {
-          Real diagonal = 0;
-          forEachDOF(dofs.size(), [&](Index q) {
-            diagonal +=
-              m_dofs.getGradient(ip, q)(r) * m_data(dofs[q] + r * m_dofs.getStride());
+        if constexpr (ElementType::Componentwise)
+        {
+          forEachComponent(m_dofs.getVectorDimension(), [&](Index r) {
+            Real diagonal = 0;
+            forEachDOF(dofs.size(), [&](Index q) {
+              diagonal +=
+                m_dofs.getGradient(ip, q)(r) * m_data(dofs[q] + r * m_dofs.getStride());
+            });
+            result += diagonal;
           });
-          result += diagonal;
-        });
+        }
+        else
+        {
+          forEachDOF(dofs.size(),
+            [&](Index q) { result += m_dofs.getDivergence(ip, q, 0) * m_data(dofs[q]); });
+        }
         return result;
       }
-      Index m_vdim;
-      DOFsType m_dofs;
+      ElementType m_dofs;
       ::Kokkos::View<Real*, MemorySpace> m_data;
   };
 
@@ -2273,7 +2544,7 @@ namespace Rodin::Kokkos::Variational
   {
     /// @param node Shape function expression.
     View(const ::Rodin::Variational::ShapeFunction<Derived, FES, Space>& node)
-      : dofs(node.getFiniteElementSpace().getDOFsView())
+      : dofs(node.getFiniteElementSpace())
     {}
 
     /**
@@ -2288,7 +2559,7 @@ namespace Rodin::Kokkos::Variational
     }
 
     /// @brief Device degrees of freedom.
-    typename FES::DOFsType dofs;
+    ::Rodin::Kokkos::View<FES> dofs;
   };
 
   /// @brief Physical gradient of the scalar basis of a device space.
@@ -2300,7 +2571,7 @@ namespace Rodin::Kokkos::Variational
     /// @param node Shape function expression.
     View(const ::Rodin::Variational::Grad<
       ::Rodin::Variational::ShapeFunction<Derived, FES, Space>>& node)
-      : dofs(node.getOperand().getFiniteElementSpace().getDOFsView())
+      : dofs(node.getOperand().getFiniteElementSpace())
     {}
 
     /**
@@ -2316,7 +2587,7 @@ namespace Rodin::Kokkos::Variational
     }
 
     /// @brief Device degrees of freedom.
-    typename FES::DOFsType dofs;
+    ::Rodin::Kokkos::View<FES> dofs;
   };
 
   /// @brief Function multiplying a shape function on the left.
@@ -2454,8 +2725,7 @@ namespace Rodin::Kokkos::Variational
   {
     /// @param node Shape function expression.
     View(const ::Rodin::Variational::ShapeFunction<Derived, FES, Space>& node)
-      : vdim(node.getFiniteElementSpace().getVectorDimension()),
-        dofs(node.getFiniteElementSpace().getDOFsView())
+      : dofs(node.getFiniteElementSpace())
     {}
 
     /**
@@ -2463,18 +2733,13 @@ namespace Rodin::Kokkos::Variational
      * @param component Vector component. @return Basis value.
      */
     KOKKOS_INLINE_FUNCTION
-    UnitVector getBasis(
-      const IntegrationPointView& ip, Index dof, Index component) const
+    auto getBasis(const IntegrationPointView& ip, Index dof, Index component) const
     {
-      KOKKOS_ASSERT(component < vdim);
-      return {vdim, component, dofs.getBasis(ip, dof)};
+      return dofs.getBasis(ip, dof, component);
     }
 
-    /// @brief Vector dimension.
-    Index vdim;
-
     /// @brief Device degrees of freedom.
-    typename FES::DOFsType dofs;
+    ::Rodin::Kokkos::View<FES> dofs;
   };
 
   /**
@@ -2491,8 +2756,7 @@ namespace Rodin::Kokkos::Variational
     /// @param node Shape function expression.
     View(const ::Rodin::Variational::Jacobian<
       ::Rodin::Variational::ShapeFunction<Derived, FES, Space>>& node)
-      : vdim(node.getFiniteElementSpace().getVectorDimension()),
-        dofs(node.getFiniteElementSpace().getDOFsView())
+      : dofs(node.getFiniteElementSpace())
     {}
 
     /**
@@ -2500,17 +2764,13 @@ namespace Rodin::Kokkos::Variational
      * @param component Vector component. @return Jacobian.
      */
     KOKKOS_INLINE_FUNCTION
-    RowMatrix getBasis(const IntegrationPointView& ip, Index dof, Index component) const
+    auto getBasis(const IntegrationPointView& ip, Index dof, Index component) const
     {
-      KOKKOS_ASSERT(component < vdim);
-      return {vdim, component, dofs.getGradient(ip, dof)};
+      return dofs.getJacobian(ip, dof, component);
     }
 
-    /// @brief Vector dimension.
-    Index vdim;
-
     /// @brief Device degrees of freedom.
-    typename FES::DOFsType dofs;
+    ::Rodin::Kokkos::View<FES> dofs;
   };
 
   /**
@@ -2526,8 +2786,7 @@ namespace Rodin::Kokkos::Variational
     /// @param node Shape function expression.
     View(const ::Rodin::Variational::Div<
       ::Rodin::Variational::ShapeFunction<Derived, FES, Space>>& node)
-      : vdim(node.getFiniteElementSpace().getVectorDimension()),
-        dofs(node.getFiniteElementSpace().getDOFsView())
+      : dofs(node.getFiniteElementSpace())
     {}
 
     /**
@@ -2537,15 +2796,11 @@ namespace Rodin::Kokkos::Variational
     KOKKOS_INLINE_FUNCTION
     Real getBasis(const IntegrationPointView& ip, Index dof, Index component) const
     {
-      KOKKOS_ASSERT(component < vdim);
-      return dofs.getGradient(ip, dof)(component);
+      return dofs.getDivergence(ip, dof, component);
     }
 
-    /// @brief Vector dimension.
-    Index vdim;
-
     /// @brief Device degrees of freedom.
-    typename FES::DOFsType dofs;
+    ::Rodin::Kokkos::View<FES> dofs;
   };
 
   /// @brief Sum of two shape functions.

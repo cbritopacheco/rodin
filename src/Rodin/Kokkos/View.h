@@ -31,6 +31,7 @@ namespace Rodin::Kokkos
    * | Geometry::MeshBase, Geometry::ConnectivityBase | Backend-independent borrowed kernel interfaces. |
    * | Geometry::Polytope, Geometry::Point | Borrowed entity and geometric evaluation. |
    * | IndexVector, Geometry::Incidence | Read-only index range and CSR incidence. |
+   * | Finite-element space exposing getDOFsView() | Physical basis evaluation, coefficient numbering and supported derivatives. |
    * | Solid::SaintVenantKirchhoff, Solid::Yeoh, Solid::MooneyRivlin | Copied material parameters and constitutive evaluation. |
    */
   template <class T>

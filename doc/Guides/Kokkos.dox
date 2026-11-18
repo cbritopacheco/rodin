@@ -492,6 +492,32 @@
   The measurements behind these choices are in the
   `doc/agents/solvers-assembly.md` agent guide.
 
+  @section guides-kokkos-element-evaluation Element evaluation contract
+
+  @c Rodin::Kokkos::View<FES> retains a space's prepared device DOF handles and
+  exposes complete local basis counts, coefficient indices and physical basis
+  values. Its @c getCount(polytope), @c getGlobalIndex(polytope,local) and
+  @c getBasis(point,local) describe complete basis functions. The existing
+  @c getDOFsView() API remains available.
+
+  Componentwise P1, H1 and P0g evaluation keeps its scalar generators and
+  sparse component optimizations. An intrinsic vector generator instead has
+  one coefficient, independently of its physical vector dimension. Its DOF
+  tables supply a complete physical @c getBasis and the supported operators:
+  @c getJacobian, @c getDivergence or @c getCurl. Unsupported operators are
+  absent from the evaluation interface; divergence does not require a scalar
+  gradient or a public Jacobian. Families apply their own geometric mappings
+  and entity orientation transformations before returning these values.
+
+  Element evaluation and coefficient contraction impose no nodal interpolation
+  requirement. Existing Lagrange interpolation remains unchanged; a future
+  moment-based family must provide its own DOF functionals and trace contracts.
+  This interface does not implement Raviart--Thomas or Nedelec spaces.
+  The synthetic coupled-vector tests cover Piola-style maps, orientation mixing,
+  permuted numbering, coefficient evaluation and both thread and team assembly.
+  Intrinsic spaces have distinct numbering identities in assembly layouts, so
+  equal dimensions alone do not allow entry-by-entry fusion of their forms.
+
   @section guides-kokkos-build CUDA Build
 
   Kokkos 4.2 or newer is required for comparator-based device sorting; Rodin

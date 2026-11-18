@@ -1145,10 +1145,10 @@ namespace Rodin::Kokkos::Variational
       using TestRange = typename TestFESType::RangeType;
 
       /// @brief Device degrees of freedom of the trial space.
-      using TrialDOFsType = typename TrialFESType::DOFsType;
+      using TrialDOFsType = ::Rodin::Kokkos::View<TrialFESType>;
 
       /// @brief Device degrees of freedom of the test space.
-      using TestDOFsType = typename TestFESType::DOFsType;
+      using TestDOFsType = ::Rodin::Kokkos::View<TestFESType>;
 
       /// @brief Type of the left operand of the dot product.
       using LHSType = ::Rodin::Variational::ShapeFunctionBase<LHSDerived, TrialFESType,
@@ -1269,12 +1269,18 @@ namespace Rodin::Kokkos::Variational
         const auto& trialfes = integrand.getLHS().getFiniteElementSpace();
         const auto& testfes = integrand.getRHS().getFiniteElementSpace();
         const auto& attributes = this->getAttributes();
-        return {&trialfes.getMesh(), static_cast<Index>(trialfes.getVectorDimension()),
-          static_cast<Index>(testfes.getVectorDimension()),
+        Layout layout{&trialfes.getMesh(),
+          static_cast<Index>(TrialDOFsType(trialfes).getComponentCount()),
+          static_cast<Index>(TestDOFsType(testfes).getComponentCount()),
           {attributes.begin(), attributes.end()}, this->getRegion(),
-          trialfes.getDOFsView().getStride(), testfes.getDOFsView().getStride(),
+          TrialDOFsType(trialfes).getStride(), TestDOFsType(testfes).getStride(),
           TrialDOFsType::getCapacity(RODIN_MAXIMUM_POLYTOPE_VERTICES),
           TestDOFsType::getCapacity(RODIN_MAXIMUM_POLYTOPE_VERTICES)};
+        if constexpr (!TrialDOFsType::Componentwise)
+          layout.trialSpace = &trialfes;
+        if constexpr (!TestDOFsType::Componentwise)
+          layout.testSpace = &testfes;
+        return layout;
       }
 
       /**
@@ -1312,8 +1318,9 @@ namespace Rodin::Kokkos::Variational
         // The diagonals hold one entry per component of each pair of scalar
         // degrees of freedom.
         return m_polytopes.prepare(mesh, this->getRegion(), this->getAttributes(),
-          trialfes.getDOFsView(), m_compact ? 1 : trialfes.getVectorDimension(),
-          testfes.getDOFsView(), testfes.getVectorDimension(),
+          TrialDOFsType(trialfes),
+          m_compact ? 1 : TrialDOFsType(trialfes).getComponentCount(),
+          TestDOFsType(testfes), TestDOFsType(testfes).getComponentCount(),
           [&](const ::Rodin::Geometry::Polytope& polytope) {
             return getOrder(integrand, polytope);
           });
@@ -1355,17 +1362,17 @@ namespace Rodin::Kokkos::Variational
         const MeshType& mesh = trialfes.getMesh();
         const View<LHSType> trial(integrand.getLHS());
         const View<RHSType> test(integrand.getRHS());
-        const TrialDOFsType trialDOFs = trialfes.getDOFsView();
-        const TestDOFsType testDOFs = testfes.getDOFsView();
-        const Index trialVDim = trialfes.getVectorDimension();
-        const Index testVDim = testfes.getVectorDimension();
+        const TrialDOFsType trialDOFs = TrialDOFsType(trialfes);
+        const TestDOFsType testDOFs = TestDOFsType(testfes);
+        const Index trialVDim = TrialDOFsType(trialfes).getComponentCount();
+        const Index testVDim = TestDOFsType(testfes).getComponentCount();
         const auto& quadrature = m_polytopes.getQuadrature();
         const Index vertices = quadrature.getMaximumVertexCount();
         const bool compact = m_compact;
-        constexpr bool p1 = std::is_same_v<TrialDOFsType, VertexDOFs> &&
-          std::is_same_v<TestDOFsType, VertexDOFs>;
-        const bool maximal = trialVDim == VectorCapacity<TrialRange> &&
-          testVDim == VectorCapacity<TestRange>;
+        constexpr bool p1 = std::is_same_v<typename TrialFESType::DOFsType, VertexDOFs> &&
+          std::is_same_v<typename TestFESType::DOFsType, VertexDOFs>;
+        const bool maximal = trialVDim == TrialDOFsType::ComponentCapacity &&
+          testVDim == TestDOFsType::ComponentCapacity;
         // Polytopes of one geometry filling the space take kernels of static size.
         if ((!p1 || maximal) &&
           quadrature.visitStaticGeometry(mesh.getSpaceDimension(), [&](auto shape) {
@@ -1416,9 +1423,9 @@ namespace Rodin::Kokkos::Variational
       static constexpr Index getLocalSize()
       {
         return TrialDOFsType::getCapacity(Vertices) *
-          getComponentCapacity<TrialRange, Trial, Test>() *
+          getComponentCapacity<TrialFESType, Trial, Test>() *
           TestDOFsType::getCapacity(Vertices) *
-          getComponentCapacity<TestRange, Trial, Test>();
+          getComponentCapacity<TestFESType, Trial, Test>();
       }
 
       /**
@@ -1434,7 +1441,8 @@ namespace Rodin::Kokkos::Variational
           std::declval<const IntegrationPointView&>(), Index(0), Index(0)))>;
         using TrialValue = std::decay_t<decltype(std::declval<const Trial&>().getBasis(
           std::declval<const IntegrationPointView&>(), Index(0), Index(0)))>;
-        return Rodin::Kokkos::Variational::IsComponentSparse<TestValue> &&
+        return TrialDOFsType::Componentwise && TestDOFsType::Componentwise &&
+          Rodin::Kokkos::Variational::IsComponentSparse<TestValue> &&
           Rodin::Kokkos::Variational::IsComponentSparse<TrialValue>;
       }
 
@@ -1444,10 +1452,12 @@ namespace Rodin::Kokkos::Variational
        * @return One for component diagonal integrands, the vector capacity
        * of the range otherwise.
        */
-      template <class Range, class Trial, class Test>
+      template <class FES, class Trial, class Test>
       static constexpr Index getComponentCapacity()
       {
-        return isComponentDiagonal<Trial, Test>() ? 1 : VectorCapacity<Range>;
+        return isComponentDiagonal<Trial, Test>()
+          ? 1
+          : ::Rodin::Kokkos::View<FES>::ComponentCapacity;
       }
 
       /**
@@ -1476,9 +1486,9 @@ namespace Rodin::Kokkos::Variational
         using TrialValue = StoredValue<Trial, Trial, Test>;
         return sizeof(IntegrationPointView) + sizeof(Real) +
           TestDOFsType::getCapacity(Vertices) *
-          getComponentCapacity<TestRange, Trial, Test>() * sizeof(TestValue) +
+          getComponentCapacity<TestFESType, Trial, Test>() * sizeof(TestValue) +
           TrialDOFsType::getCapacity(Vertices) *
-          getComponentCapacity<TrialRange, Trial, Test>() * sizeof(TrialValue);
+          getComponentCapacity<TrialFESType, Trial, Test>() * sizeof(TrialValue);
       }
 
       /**
@@ -1668,11 +1678,6 @@ namespace Rodin::Kokkos::Variational
       BilinearIntegral* copy() const noexcept override = 0;
 
     private:
-      /// @brief Maximum number of components of a value of the given range.
-      template <class Range>
-      static constexpr Index VectorCapacity =
-        std::is_same_v<Range, Real> ? 1 : RODIN_MAXIMAL_SPACE_DIMENSION;
-
       /**
        * @brief Maximum number of entries of the local matrix of a kernel.
        *
@@ -1734,27 +1739,31 @@ namespace Rodin::Kokkos::Variational
           Internal::IsP1Space<TrialFES>::Value && Internal::IsP1Space<TestFES>::Value;
         constexpr bool h1 =
           Internal::IsH1Space<TrialFES>::Value && Internal::IsH1Space<TestFES>::Value;
-        if (!order && kind != Internal::DerivativeKind::None && (p1 || h1))
+        if constexpr (kind != Internal::DerivativeKind::None && (p1 || h1))
         {
-          const size_t d = polytope.getDimension();
-          const Index i = polytope.getIndex();
-          const auto& trialfe =
-            integrand.getLHS().getFiniteElementSpace().getFiniteElement(d, i);
-          const auto& testfe =
-            integrand.getRHS().getFiniteElementSpace().getFiniteElement(d, i);
-          const size_t trialDegree = trialfe.getDegree().value_or(2 * trialfe.getOrder());
-          const size_t testDegree = testfe.getDegree().value_or(2 * testfe.getOrder());
-          if (p1 || kind == Internal::DerivativeKind::Gradients)
+          if (!order)
           {
-            order =
-              (trialDegree == 0 || testDegree == 0) ? 0 : trialDegree + testDegree - 2;
+            const size_t d = polytope.getDimension();
+            const Index i = polytope.getIndex();
+            const auto& trialfe =
+              integrand.getLHS().getFiniteElementSpace().getFiniteElement(d, i);
+            const auto& testfe =
+              integrand.getRHS().getFiniteElementSpace().getFiniteElement(d, i);
+            const size_t trialDegree =
+              trialfe.getDegree().value_or(2 * trialfe.getOrder());
+            const size_t testDegree = testfe.getDegree().value_or(2 * testfe.getOrder());
+            if (p1 || kind == Internal::DerivativeKind::Gradients)
+            {
+              order =
+                (trialDegree == 0 || testDegree == 0) ? 0 : trialDegree + testDegree - 2;
+            }
+            else if (kind == Internal::DerivativeKind::TrialDivergence)
+              order = trialDegree == 0 ? 0 : trialDegree + testDegree - 1;
+            else if (kind == Internal::DerivativeKind::TestDivergence)
+              order = testDegree == 0 ? 0 : trialDegree + testDegree - 1;
+            else
+              order = trialDegree == 0 ? testDegree : trialDegree + testDegree - 1;
           }
-          else if (kind == Internal::DerivativeKind::TrialDivergence)
-            order = trialDegree == 0 ? 0 : trialDegree + testDegree - 1;
-          else if (kind == Internal::DerivativeKind::TestDivergence)
-            order = testDegree == 0 ? 0 : trialDegree + testDegree - 1;
-          else
-            order = trialDegree == 0 ? testDegree : trialDegree + testDegree - 1;
         }
         if (!order)
         {
@@ -1820,11 +1829,11 @@ namespace Rodin::Kokkos::Variational
 
         /// @brief Maximum number of integrated trial indices of a polytope.
         static constexpr Index TrialCapacity = TrialDOFsType::getCapacity(Vertices) *
-          getComponentCapacity<TrialRange, Trial, Test>();
+          getComponentCapacity<TrialFESType, Trial, Test>();
 
         /// @brief Maximum number of integrated test indices of a polytope.
         static constexpr Index TestCapacity = TestDOFsType::getCapacity(Vertices) *
-          getComponentCapacity<TestRange, Trial, Test>();
+          getComponentCapacity<TestFESType, Trial, Test>();
 
         /// @brief Team scratch bytes of one quadrature point of a group.
         static constexpr size_t PointBytes = getTeamPointBytes<Vertices, Trial, Test>();
@@ -1932,8 +1941,9 @@ namespace Rodin::Kokkos::Variational
                               : polytope.getVertices().size() <= Vertices);
           const auto trialIndices = trialDOFs.bind(polytope);
           const auto testIndices = testDOFs.bind(polytope);
-          const Index trialStride = Exact ? VectorCapacity<TrialRange> : trialVDim;
-          const Index testStride = Exact ? VectorCapacity<TestRange> : testVDim;
+          const Index trialStride =
+            Exact ? TrialDOFsType::ComponentCapacity : trialVDim;
+          const Index testStride = Exact ? TestDOFsType::ComponentCapacity : testVDim;
           KOKKOS_ASSERT(!Diagonal || trialStride == testStride);
           // Integrated components per scalar degree of freedom, and copies of
           // each integrated entry on the diagonal of the component blocks.
@@ -2055,11 +2065,11 @@ namespace Rodin::Kokkos::Variational
 
         /// @brief Maximum number of integrated trial indices of a polytope.
         static constexpr Index TrialCapacity = TrialDOFsType::getCapacity(Vertices) *
-          getComponentCapacity<TrialRange, Trial, Test>();
+          getComponentCapacity<TrialFESType, Trial, Test>();
 
         /// @brief Maximum number of integrated test indices of a polytope.
         static constexpr Index TestCapacity = TestDOFsType::getCapacity(Vertices) *
-          getComponentCapacity<TestRange, Trial, Test>();
+          getComponentCapacity<TestFESType, Trial, Test>();
 
         /// @brief Device mesh.
         ::Rodin::Kokkos::View<::Rodin::Geometry::MeshBase> view;
@@ -2138,8 +2148,9 @@ namespace Rodin::Kokkos::Variational
                               : polytope.getVertices().size() <= Vertices);
           const auto trialIndices = trialDOFs.bind(polytope);
           const auto testIndices = testDOFs.bind(polytope);
-          const Index trialStride = Exact ? VectorCapacity<TrialRange> : trialVDim;
-          const Index testStride = Exact ? VectorCapacity<TestRange> : testVDim;
+          const Index trialStride =
+            Exact ? TrialDOFsType::ComponentCapacity : trialVDim;
+          const Index testStride = Exact ? TestDOFsType::ComponentCapacity : testVDim;
           KOKKOS_ASSERT(!Diagonal || trialStride == testStride);
           // Integrated components per scalar degree of freedom, and copies of
           // each integrated entry on the diagonal of the component blocks.
@@ -2244,7 +2255,7 @@ namespace Rodin::Kokkos::Variational
       using Range = typename FESType::RangeType;
 
       /// @brief Device degrees of freedom of the test space.
-      using DOFsType = typename FESType::DOFsType;
+      using DOFsType = ::Rodin::Kokkos::View<FESType>;
 
       /// @brief Type of the integrand.
       using IntegrandType = ::Rodin::Variational::ShapeFunctionBase<NestedDerived,
@@ -2352,10 +2363,14 @@ namespace Rodin::Kokkos::Variational
       {
         const auto& fes = getIntegrand().getFiniteElementSpace();
         const auto& attributes = this->getAttributes();
-        return {&fes.getMesh(), 0, static_cast<Index>(fes.getVectorDimension()),
+        Layout layout{&fes.getMesh(), 0,
+          static_cast<Index>(DOFsType(fes).getComponentCount()),
           {attributes.begin(), attributes.end()}, this->getRegion(), 0,
-          fes.getDOFsView().getStride(), 0,
+          DOFsType(fes).getStride(), 0,
           DOFsType::getCapacity(RODIN_MAXIMUM_POLYTOPE_VERTICES)};
+        if constexpr (!DOFsType::Componentwise)
+          layout.testSpace = &fes;
+        return layout;
       }
 
       /**
@@ -2368,8 +2383,9 @@ namespace Rodin::Kokkos::Variational
         const auto& integrand = getIntegrand();
         const auto& fes = integrand.getFiniteElementSpace();
         return m_polytopes.prepare(fes.getMesh(), this->getRegion(),
-          this->getAttributes(), ConstantDOFs{}, 1, fes.getDOFsView(),
-          fes.getVectorDimension(), [&](const ::Rodin::Geometry::Polytope& polytope) {
+          this->getAttributes(), ConstantDOFs{}, 1, DOFsType(fes),
+          DOFsType(fes).getComponentCount(),
+          [&](const ::Rodin::Geometry::Polytope& polytope) {
             return getOrder(integrand, polytope);
           });
       }
@@ -2398,11 +2414,11 @@ namespace Rodin::Kokkos::Variational
         const auto& integrand = getIntegrand();
         const auto& fes = integrand.getFiniteElementSpace();
         const View<IntegrandType> test(integrand);
-        const DOFsType dofs = fes.getDOFsView();
-        const Index vdim = fes.getVectorDimension();
+        const DOFsType dofs = DOFsType(fes);
+        const Index vdim = DOFsType(fes).getComponentCount();
         const auto& quadrature = m_polytopes.getQuadrature();
         const Index vertices = quadrature.getMaximumVertexCount();
-        constexpr bool p1 = std::is_same_v<DOFsType, VertexDOFs>;
+        constexpr bool p1 = std::is_same_v<typename FESType::DOFsType, VertexDOFs>;
         // Polytopes of one geometry filling the space take kernels of static size.
         if ((!p1 || vdim == VectorCapacity) &&
           quadrature.visitStaticGeometry(
@@ -2480,9 +2496,8 @@ namespace Rodin::Kokkos::Variational
       LinearIntegral* copy() const noexcept override = 0;
 
     private:
-      /// @brief Maximum number of components of a value of the range.
-      static constexpr Index VectorCapacity =
-        std::is_same_v<Range, Real> ? 1 : RODIN_MAXIMAL_SPACE_DIMENSION;
+      /// @brief Maximum number of independently numbered component copies.
+      static constexpr Index VectorCapacity = DOFsType::ComponentCapacity;
 
       /**
        * @brief Selects the quadrature order on a polytope.

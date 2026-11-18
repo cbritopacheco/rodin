@@ -18,12 +18,22 @@
  * |--------|-------------|
  * | `static constexpr Index getCapacity(Index vertices)` | Maximum local count on a polytope of that many vertices. |
  * | `Index getStride() const` | Offset between the components of a vector space. |
- * | `bind(const ::Rodin::Kokkos::View<::Rodin::Geometry::Polytope>&) const` | Scalar global indices of a polytope, in local order. |
- * | `getBasis(const IntegrationPointView&, Index) const` | Basis value at an integration point. |
- * | `getGradient(const IntegrationPointView&, Index) const` | Physical basis gradient at an integration point. |
+ * | `bind(const ::Rodin::Kokkos::View<::Rodin::Geometry::Polytope>&) const` | Coefficient indices of the basis generators, in local order. |
+ * | `getBasis(const IntegrationPointView&, Index) const` | Scalar generator or complete physical vector basis, including family mappings and orientation. |
+ * | `getGradient(const IntegrationPointView&, Index) const` | Physical scalar gradient, when supported. |
+ * | `getJacobian(const IntegrationPointView&, Index) const` | Physical intrinsic vector Jacobian, when supported. |
+ * | `getDivergence(const IntegrationPointView&, Index) const` | Physical intrinsic vector divergence, when supported. |
+ * | `getCurl(const IntegrationPointView&, Index) const` | Physical intrinsic vector curl, when supported. |
  * | `Geometry::Vector getNode(const ::Rodin::Kokkos::View<::Rodin::Geometry::Polytope>&, Index) const` | Reference coordinates of a Lagrange node, when the space interpolates at nodes. |
  *
- * Component @f$ r @f$ of the scalar degree of freedom @f$ q @f$ of a vector
+ * Rodin::Kokkos::View of the space adapts this contract to complete physical
+ * basis evaluation and coefficient numbering. Intrinsic vector bases have one
+ * coefficient per generator; they need no getStride(), getGradient() or getNode().
+ * Their reference-to-physical maps and cell-orientation transformations belong
+ * to their family evaluation, not to the generic assembly or coefficient loops.
+ * No RT or Nedelec family is supplied by this interface alone.
+ *
+ * For a componentwise Lagrange space, component @f$ r @f$ of the scalar degree of freedom @f$ q @f$ of a vector
  * space has the global index @f$ q + r s @f$, where @f$ s @f$ is the stride,
  * and the local index @f$ a\,d + r @f$ when @f$ q @f$ is the local index
  * @f$ a @f$ and @f$ d @f$ the vector dimension.
