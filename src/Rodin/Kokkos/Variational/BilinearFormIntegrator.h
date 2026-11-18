@@ -11,6 +11,8 @@
  * @file
  * @brief Backend interface for bilinear contribution preparation and evaluation.
  */
+#include "Rodin/Variational/BilinearFormIntegrator.h"
+
 #include "Integration.h"
 
 namespace Rodin::Kokkos::Variational
@@ -117,6 +119,44 @@ namespace Rodin::Kokkos::Variational
         ::Kokkos::fence("Rodin bilinear form integration");
         return result;
       }
+  };
+
+  /**
+   * @brief Rodin local bilinear integrator with backend execution.
+   * @tparam Backend Kokkos backend of the mesh context.
+   *
+   * The Rodin base owns the trial/test functions and integration regions.
+   * BilinearFormIntegrator provides the shared bulk integration interface.
+   */
+  template <class Backend>
+  class LocalBilinearFormIntegrator
+    : public ::Rodin::Variational::LocalBilinearFormIntegratorBase<Real>,
+      public BilinearFormIntegrator<Backend>
+  {
+    public:
+      /// @brief Rodin local integrator interface.
+      using Parent = ::Rodin::Variational::LocalBilinearFormIntegratorBase<Real>;
+
+      using Parent::Parent;
+  };
+
+  /**
+   * @brief Rodin global bilinear integrator with backend execution.
+   * @tparam Backend Kokkos backend of the mesh context.
+   *
+   * The Rodin base owns the trial/test functions and integration regions.
+   * BilinearFormIntegrator provides the shared bulk integration interface.
+   */
+  template <class Backend>
+  class GlobalBilinearFormIntegrator
+    : public ::Rodin::Variational::GlobalBilinearFormIntegratorBase<Real>,
+      public BilinearFormIntegrator<Backend>
+  {
+    public:
+      /// @brief Rodin global integrator interface.
+      using Parent = ::Rodin::Variational::GlobalBilinearFormIntegratorBase<Real>;
+
+      using Parent::Parent;
   };
 
 }

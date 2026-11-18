@@ -262,6 +262,17 @@ its policy specializations. `Integrator.h` contains backend integrator dispatch,
 `SystemAssembly.h` owns COO reduction and symbolic reuse. Nested kernel functors
 remain with their owning classes.
 
+Kokkos local and global bilinear integrators inherit the corresponding Rodin
+integrator base through `LocalBilinearFormIntegrator<Backend>` and
+`GlobalBilinearFormIntegrator<Backend>`. Both also implement the common
+`BilinearFormIntegrator<Backend>` bulk execution interface consumed by Assembly.
+The Kokkos `LinearFormIntegrator<Backend>` inherits Rodin's linear integrator
+base directly. Concrete integrals, potentials and internal-virtual-work terms
+inherit only their corresponding Kokkos base; cloning and moving preserve the
+single Rodin base and its owned trial/test functions. `prepare()` and `fill()`
+remain host-side execution interfaces; expression views are evaluated by the
+launched kernels.
+
 `Assembly::Internal::SystemAssembly` is an assembly algorithm, not an algebra
 owner. Its COO contributions use `KokkosSparse::CooMatrix`; constraint handling,
 contribution ordering and duplicate summation retain the existing Assembly

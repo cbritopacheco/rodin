@@ -1129,8 +1129,7 @@ namespace Rodin::Kokkos::Variational
    */
   template <class LHSDerived, class RHSDerived, Space TrialFES, Space TestFES>
   class BilinearIntegral
-    : public ::Rodin::Variational::LocalBilinearFormIntegratorBase<Real>,
-      public BilinearFormIntegrator<Internal::BackendOf<TrialFES>>
+    : public LocalBilinearFormIntegrator<Internal::BackendOf<TrialFES>>
   {
     public:
       /// @brief Finite element space of the trial functions.
@@ -1162,10 +1161,10 @@ namespace Rodin::Kokkos::Variational
       /// @brief Type of the integrand.
       using IntegrandType = ::Rodin::Variational::Dot<LHSType, RHSType>;
 
-      /// @brief Host integrator interface.
-      using Parent = ::Rodin::Variational::LocalBilinearFormIntegratorBase<Real>;
+      /// @brief Kokkos integrator base.
+      using Parent = LocalBilinearFormIntegrator<Internal::BackendOf<TrialFES>>;
 
-      /// @brief Device integrator interface.
+      /// @brief Bulk integration interface.
       using ViewParent = BilinearFormIntegrator<Internal::BackendOf<TrialFES>>;
 
       /// @brief Device triplet type.
@@ -1201,7 +1200,6 @@ namespace Rodin::Kokkos::Variational
        */
       BilinearIntegral(const BilinearIntegral& other)
         : Parent(other),
-          ViewParent(other),
           m_integrand(other.m_integrand->copy())
       {}
 
@@ -1211,7 +1209,6 @@ namespace Rodin::Kokkos::Variational
        */
       BilinearIntegral(BilinearIntegral&& other)
         : Parent(std::move(other)),
-          ViewParent(std::move(other)),
           m_integrand(std::move(other.m_integrand))
       {}
 
@@ -2237,8 +2234,7 @@ namespace Rodin::Kokkos::Variational
    * InterfaceIntegral specialize this class for device spaces.
    */
   template <class NestedDerived, Space FES>
-  class LinearIntegral : public ::Rodin::Variational::LinearFormIntegratorBase<Real>,
-                         public LinearFormIntegrator<Internal::BackendOf<FES>>
+  class LinearIntegral : public LinearFormIntegrator<Internal::BackendOf<FES>>
   {
     public:
       /// @brief Finite element space of the test functions.
@@ -2254,10 +2250,10 @@ namespace Rodin::Kokkos::Variational
       using IntegrandType = ::Rodin::Variational::ShapeFunctionBase<NestedDerived,
         FESType, ::Rodin::Variational::ShapeFunctionSpaceType::Test>;
 
-      /// @brief Host integrator interface.
-      using Parent = ::Rodin::Variational::LinearFormIntegratorBase<Real>;
+      /// @brief Kokkos integrator base.
+      using Parent = LinearFormIntegrator<Internal::BackendOf<FES>>;
 
-      /// @brief Device integrator interface.
+      /// @brief Bulk integration interface.
       using ViewParent = LinearFormIntegrator<Internal::BackendOf<FES>>;
 
       /// @brief Device entry type.
@@ -2290,7 +2286,6 @@ namespace Rodin::Kokkos::Variational
        */
       LinearIntegral(const LinearIntegral& other)
         : Parent(other),
-          ViewParent(other),
           m_integrand(other.m_integrand->copy())
       {}
 
@@ -2300,7 +2295,6 @@ namespace Rodin::Kokkos::Variational
        */
       LinearIntegral(LinearIntegral&& other)
         : Parent(std::move(other)),
-          ViewParent(std::move(other)),
           m_integrand(std::move(other.m_integrand))
       {}
 

@@ -64,8 +64,7 @@ namespace Rodin::Kokkos::Variational
   template <class Kernel, class LHSDerived, class RHSDerived, Space TrialFES,
     Space TestFES>
   class PotentialIntegral
-    : public ::Rodin::Variational::GlobalBilinearFormIntegratorBase<Real>,
-      public BilinearFormIntegrator<Internal::BackendOf<TrialFES>>
+    : public GlobalBilinearFormIntegrator<Internal::BackendOf<TrialFES>>
   {
     public:
       /// @brief Finite element space of the trial functions.
@@ -101,10 +100,10 @@ namespace Rodin::Kokkos::Variational
       /// @brief Type of the integrand.
       using IntegrandType = ::Rodin::Variational::Dot<LHSType, RHSType>;
 
-      /// @brief Host integrator interface.
-      using Parent = ::Rodin::Variational::GlobalBilinearFormIntegratorBase<Real>;
+      /// @brief Kokkos integrator base.
+      using Parent = GlobalBilinearFormIntegrator<Internal::BackendOf<TrialFES>>;
 
-      /// @brief Device integrator interface.
+      /// @brief Bulk integration interface.
       using ViewParent = BilinearFormIntegrator<Internal::BackendOf<TrialFES>>;
 
       /// @brief Mesh type.
@@ -190,7 +189,6 @@ namespace Rodin::Kokkos::Variational
        */
       PotentialIntegral(const PotentialIntegral& other)
         : Parent(other),
-          ViewParent(other),
           m_integrand(other.m_integrand->copy())
       {}
 
@@ -200,7 +198,6 @@ namespace Rodin::Kokkos::Variational
        */
       PotentialIntegral(PotentialIntegral&& other)
         : Parent(std::move(other)),
-          ViewParent(std::move(other)),
           m_integrand(std::move(other.m_integrand))
       {}
 

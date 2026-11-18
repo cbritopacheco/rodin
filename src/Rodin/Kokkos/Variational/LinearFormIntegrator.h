@@ -11,6 +11,8 @@
  * @file
  * @brief Backend interface for linear contribution preparation and evaluation.
  */
+#include "Rodin/Variational/LinearFormIntegrator.h"
+
 #include "Integration.h"
 
 namespace Rodin::Kokkos::Variational
@@ -28,9 +30,14 @@ namespace Rodin::Kokkos::Variational
    * @tparam Backend Kokkos backend of the mesh context.
    */
   template <class Backend>
-  class LinearFormIntegrator
+  class LinearFormIntegrator : public ::Rodin::Variational::LinearFormIntegratorBase<Real>
   {
     public:
+      /// @brief Rodin linear integrator interface.
+      using Parent = ::Rodin::Variational::LinearFormIntegratorBase<Real>;
+
+      using Parent::Parent;
+
       /// @brief Mesh context.
       using ContextType = ::Rodin::Context::Kokkos<::Rodin::Context::Local, Backend>;
 
@@ -40,7 +47,19 @@ namespace Rodin::Kokkos::Variational
       /// @brief Device entry type.
       using EntriesType = Entries<MemorySpace>;
 
-      virtual ~LinearFormIntegrator() = default;
+      /**
+       * @brief Copies the Rodin integrator and backend interface.
+       * @param other Source integrator.
+       */
+      LinearFormIntegrator(const LinearFormIntegrator& other) = default;
+
+      /**
+       * @brief Moves the Rodin integrator and backend interface.
+       * @param other Source integrator.
+       */
+      LinearFormIntegrator(LinearFormIntegrator&& other) = default;
+
+      ~LinearFormIntegrator() override = default;
 
       /// @brief Gets the arrangement of the entries. @return Entry layout.
       virtual Layout getLayout() const = 0;

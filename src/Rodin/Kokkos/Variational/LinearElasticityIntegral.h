@@ -54,8 +54,7 @@ namespace Rodin::Kokkos::Variational
    */
   template <class Solution, VectorSpace FES, class LambdaDerived, class MuDerived>
   class LinearElasticityIntegratorBase
-    : public ::Rodin::Variational::LocalBilinearFormIntegratorBase<Real>,
-      public BilinearFormIntegrator<Internal::BackendOf<FES>>
+    : public LocalBilinearFormIntegrator<Internal::BackendOf<FES>>
   {
     public:
       /// @brief Scalar type of the entries.
@@ -82,8 +81,8 @@ namespace Rodin::Kokkos::Variational
       /// @brief Test function type.
       using TestFunctionType = ::Rodin::Variational::TestFunction<FESType>;
 
-      /// @brief Host integrator interface.
-      using Parent = ::Rodin::Variational::LocalBilinearFormIntegratorBase<Real>;
+      /// @brief Kokkos local integrator interface.
+      using Parent = LocalBilinearFormIntegrator<Internal::BackendOf<FES>>;
 
       /// @brief Device integrator interface.
       using ViewParent = BilinearFormIntegrator<Internal::BackendOf<FES>>;

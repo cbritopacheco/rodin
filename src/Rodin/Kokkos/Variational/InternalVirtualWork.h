@@ -132,8 +132,7 @@ namespace Rodin::Solid
   class InternalVirtualWorkTangent<NeoHookean,
     Variational::TrialFunction<Solution, TrialFES>, Variational::TestFunction<TestFES>,
     Variational::GridFunction<StateFES, Data>>
-    final : public Variational::LocalBilinearFormIntegratorBase<Real>,
-            public Kokkos::Variational::BilinearFormIntegrator<
+    final : public Kokkos::Variational::LocalBilinearFormIntegrator<
               Kokkos::Variational::Internal::BackendOf<TrialFES>>
   {
     public:
@@ -161,10 +160,11 @@ namespace Rodin::Solid
       /// @brief Displacement state finite element space type.
       using StateFESType = StateFES;
 
-      /// @brief Host integrator interface.
-      using Parent = Variational::LocalBilinearFormIntegratorBase<Real>;
+      /// @brief Kokkos integrator base.
+      using Parent = Kokkos::Variational::LocalBilinearFormIntegrator<
+        Kokkos::Variational::Internal::BackendOf<TrialFES>>;
 
-      /// @brief Device integrator interface.
+      /// @brief Bulk integration interface.
       using ViewParent = Kokkos::Variational::BilinearFormIntegrator<
         Kokkos::Variational::Internal::BackendOf<TrialFES>>;
 
@@ -211,7 +211,6 @@ namespace Rodin::Solid
       /// @brief Copy constructor. @param other Tangent to copy.
       InternalVirtualWorkTangent(const InternalVirtualWorkTangent& other)
         : Parent(other),
-          ViewParent(other),
           m_law(other.m_law),
           m_trial(other.m_trial),
           m_test(other.m_test),
@@ -1187,8 +1186,7 @@ namespace Rodin::Solid
     Kokkos::Variational::VectorSpace StateFES, class Data>
   class InternalVirtualWorkResidual<NeoHookean, Variational::TestFunction<TestFES>,
     Variational::GridFunction<StateFES, Data>>
-    final : public Variational::LinearFormIntegratorBase<Real>,
-            public Kokkos::Variational::LinearFormIntegrator<
+    final : public Kokkos::Variational::LinearFormIntegrator<
               Kokkos::Variational::Internal::BackendOf<TestFES>>
   {
     public:
@@ -1210,10 +1208,11 @@ namespace Rodin::Solid
       /// @brief Displacement state finite element space type.
       using StateFESType = StateFES;
 
-      /// @brief Host integrator interface.
-      using Parent = Variational::LinearFormIntegratorBase<Real>;
+      /// @brief Kokkos integrator base.
+      using Parent = Kokkos::Variational::LinearFormIntegrator<
+        Kokkos::Variational::Internal::BackendOf<TestFES>>;
 
-      /// @brief Device integrator interface.
+      /// @brief Bulk integration interface.
       using ViewParent = Kokkos::Variational::LinearFormIntegrator<
         Kokkos::Variational::Internal::BackendOf<TestFES>>;
 
@@ -1255,7 +1254,6 @@ namespace Rodin::Solid
       /// @brief Copy constructor. @param other Residual to copy.
       InternalVirtualWorkResidual(const InternalVirtualWorkResidual& other)
         : Parent(other),
-          ViewParent(other),
           m_law(other.m_law),
           m_test(other.m_test),
           m_displacement(other.m_displacement),
@@ -1639,8 +1637,7 @@ namespace Rodin::Solid
     Kokkos::Variational::VectorSpace StateFES, class Data>
   class InternalVirtualWorkTangent<Law, Variational::TrialFunction<Solution, TrialFES>,
     Variational::TestFunction<TestFES>, Variational::GridFunction<StateFES, Data>>
-    final : public Variational::LocalBilinearFormIntegratorBase<Real>,
-            public Kokkos::Variational::BilinearFormIntegrator<
+    final : public Kokkos::Variational::LocalBilinearFormIntegrator<
               Kokkos::Variational::Internal::BackendOf<TrialFES>>
   {
     public:
@@ -1671,10 +1668,11 @@ namespace Rodin::Solid
       /// @brief Displacement state finite element space type.
       using StateFESType = StateFES;
 
-      /// @brief Host integrator interface.
-      using Parent = Variational::LocalBilinearFormIntegratorBase<Real>;
+      /// @brief Kokkos integrator base.
+      using Parent = Kokkos::Variational::LocalBilinearFormIntegrator<
+        Kokkos::Variational::Internal::BackendOf<TrialFES>>;
 
-      /// @brief Device integrator interface.
+      /// @brief Bulk integration interface.
       using ViewParent = Kokkos::Variational::BilinearFormIntegrator<
         Kokkos::Variational::Internal::BackendOf<TrialFES>>;
 
@@ -1723,7 +1721,6 @@ namespace Rodin::Solid
       /// @brief Copy constructor. @param other Tangent to copy.
       InternalVirtualWorkTangent(const InternalVirtualWorkTangent& other)
         : Parent(other),
-          ViewParent(other),
           m_law(other.m_law),
           m_trial(other.m_trial),
           m_test(other.m_test),
@@ -2696,8 +2693,7 @@ namespace Rodin::Solid
     class Data>
   class InternalVirtualWorkResidual<Law, Variational::TestFunction<TestFES>,
     Variational::GridFunction<StateFES, Data>>
-    final : public Variational::LinearFormIntegratorBase<Real>,
-            public Kokkos::Variational::LinearFormIntegrator<
+    final : public Kokkos::Variational::LinearFormIntegrator<
               Kokkos::Variational::Internal::BackendOf<TestFES>>
   {
     public:
@@ -2722,10 +2718,11 @@ namespace Rodin::Solid
       /// @brief Displacement state finite element space type.
       using StateFESType = StateFES;
 
-      /// @brief Host integrator interface.
-      using Parent = Variational::LinearFormIntegratorBase<Real>;
+      /// @brief Kokkos integrator base.
+      using Parent = Kokkos::Variational::LinearFormIntegrator<
+        Kokkos::Variational::Internal::BackendOf<TestFES>>;
 
-      /// @brief Device integrator interface.
+      /// @brief Bulk integration interface.
       using ViewParent = Kokkos::Variational::LinearFormIntegrator<
         Kokkos::Variational::Internal::BackendOf<TestFES>>;
 
@@ -2769,7 +2766,6 @@ namespace Rodin::Solid
       /// @brief Copy constructor. @param other Residual to copy.
       InternalVirtualWorkResidual(const InternalVirtualWorkResidual& other)
         : Parent(other),
-          ViewParent(other),
           m_law(other.m_law),
           m_test(other.m_test),
           m_displacement(other.m_displacement),

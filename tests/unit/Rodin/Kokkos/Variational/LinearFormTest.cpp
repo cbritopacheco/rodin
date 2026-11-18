@@ -6,6 +6,10 @@
  */
 #include "Common.h"
 
+#include <memory>
+#include <type_traits>
+#include <utility>
+
 namespace Rodin::Tests::Unit
 {
   using namespace Rodin::Variational;
@@ -187,4 +191,35 @@ namespace Rodin::Tests::Unit
   {
     checkCombinedLinearForm(makeMixedMesh());
   }
+
+  TEST(Kokkos_Variational_LinearForm, IntegratorBaseCopyAndMove)
+  {
+    const DeviceMesh mesh(TestContext{}, makeTriangleMesh());
+    P1 fes(mesh);
+    TestFunction v(fes);
+    auto integral = Integral(v);
+    integral.over(2, 3);
+
+    using Integrator = decltype(integral);
+    using RodinBase = ::Rodin::Variational::LinearFormIntegratorBase<Real>;
+    using BackendBase = ::Rodin::Kokkos::Variational::LinearFormIntegrator<TestBackend>;
+    static_assert(std::is_convertible_v<Integrator*, BackendBase*>);
+    static_assert(std::is_convertible_v<BackendBase*, RodinBase*>);
+    static_assert(std::is_convertible_v<Integrator*, RodinBase*>);
+
+    BackendBase& backend = integral;
+    RodinBase& base = backend;
+    std::unique_ptr<RodinBase> clone(base.copy());
+    ASSERT_NE(dynamic_cast<BackendBase*>(clone.get()), nullptr);
+    EXPECT_EQ(clone->getTestFunction().getUUID(), v.getUUID());
+    EXPECT_EQ(clone->getAttributes(), integral.getAttributes());
+
+    Integrator copied(integral);
+    EXPECT_NE(&copied.getTestFunction(), &integral.getTestFunction());
+    const auto* test = &copied.getTestFunction();
+    Integrator moved(std::move(copied));
+    EXPECT_EQ(&moved.getTestFunction(), test);
+    EXPECT_EQ(moved.getTestFunction().getUUID(), v.getUUID());
+  }
+
 }

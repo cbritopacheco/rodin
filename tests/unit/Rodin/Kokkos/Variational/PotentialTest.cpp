@@ -6,6 +6,10 @@
  */
 #include "Common.h"
 
+#include <memory>
+#include <type_traits>
+#include <utility>
+
 namespace Rodin::Tests::Unit
 {
   using namespace Rodin::Variational;
@@ -270,4 +274,46 @@ namespace Rodin::Tests::Unit
   {
     checkPotentialProblem(withClosure(makeTriangleMesh()));
   }
+
+  TEST(Kokkos_Variational_Potential, IntegratorBaseCopyAndMove)
+  {
+    const DeviceMesh mesh(TestContext{}, makeTriangleMesh());
+    P1 fes(mesh);
+    TrialFunction u(fes);
+    TestFunction v(fes);
+    const auto kernel = KOKKOS_LAMBDA(const ::Rodin::Kokkos::View<Geometry::Point>& x,
+      const ::Rodin::Kokkos::View<Geometry::Point>& y)
+                          ->Real
+    {
+      return 1 + x.x() * y.y();
+    };
+    auto integral = Integral(Potential(kernel, u), v);
+    integral.setTrialAttributes({2, 3});
+    integral.setTestAttributes({4});
+
+    using Integrator = decltype(integral);
+    using RodinBase = ::Rodin::Variational::GlobalBilinearFormIntegratorBase<Real>;
+    using BackendBase =
+      ::Rodin::Kokkos::Variational::GlobalBilinearFormIntegrator<TestBackend>;
+    static_assert(std::is_convertible_v<Integrator*, BackendBase*>);
+    static_assert(std::is_convertible_v<BackendBase*, RodinBase*>);
+    static_assert(std::is_convertible_v<Integrator*, RodinBase*>);
+
+    BackendBase& backend = integral;
+    RodinBase& base = backend;
+    std::unique_ptr<RodinBase> clone(base.copy());
+    ASSERT_NE(dynamic_cast<BackendBase*>(clone.get()), nullptr);
+    EXPECT_EQ(clone->getTestFunction().getUUID(), v.getUUID());
+    EXPECT_EQ(clone->getTrialFunction().getUUID(), u.getUUID());
+    EXPECT_EQ(clone->getTrialAttributes(), integral.getTrialAttributes());
+    EXPECT_EQ(clone->getTestAttributes(), integral.getTestAttributes());
+
+    Integrator copied(integral);
+    EXPECT_NE(&copied.getTestFunction(), &integral.getTestFunction());
+    const auto* test = &copied.getTestFunction();
+    Integrator moved(std::move(copied));
+    EXPECT_EQ(&moved.getTestFunction(), test);
+    EXPECT_EQ(moved.getTestFunction().getUUID(), v.getUUID());
+  }
+
 }
