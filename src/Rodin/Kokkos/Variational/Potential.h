@@ -297,14 +297,14 @@ namespace Rodin::Kokkos::Variational
         }
         if (!m_testSelection || *m_testSelection != this->getTestAttributes())
         {
-          m_testAttributes =
-            Internal::uploadAttributes(execution, this->getTestAttributes());
+          m_testAttributes = ::Rodin::Kokkos::Geometry::uploadAttributes(
+            execution, this->getTestAttributes());
           m_testSelection = this->getTestAttributes();
         }
         if (!m_trialSelection || *m_trialSelection != this->getTrialAttributes())
         {
-          m_trialAttributes =
-            Internal::uploadAttributes(execution, this->getTrialAttributes());
+          m_trialAttributes = ::Rodin::Kokkos::Geometry::uploadAttributes(
+            execution, this->getTrialAttributes());
           m_trialSelection = this->getTrialAttributes();
         }
         const auto view = mesh.getView();
@@ -390,7 +390,7 @@ namespace Rodin::Kokkos::Variational
           Index p, Index& m, Index& lo, Index& hi) const
         {
           const auto cell = view.getPolytope(dimension, p);
-          if (!Rodin::Kokkos::Variational::isIntegrated(view, region, cell, attributes))
+          if (!Rodin::Kokkos::Geometry::isIntegrated(view, region, cell, attributes))
             return;
           const Index n = dofs.bind(cell).size() * vdim;
           m += 1;
@@ -428,7 +428,7 @@ namespace Rodin::Kokkos::Variational
           Index p, Index& update, const bool final) const
         {
           const auto cell = view.getPolytope(dimension, p);
-          if (!Rodin::Kokkos::Variational::isIntegrated(view, region, cell, attributes))
+          if (!Rodin::Kokkos::Geometry::isIntegrated(view, region, cell, attributes))
             return;
           if (final)
             cells(update) = p;
@@ -490,7 +490,7 @@ namespace Rodin::Kokkos::Variational
         Index count, const AttributesType& attributes, const DOFs& dofs, Index vdim,
         Selection& selection)
       {
-        const auto policy = Internal::Quadrature<MeshType>::policy;
+        const auto policy = Quadrature<MeshType>::policy;
         const ::Rodin::Geometry::Region region = ::Rodin::Geometry::Region::Cells;
         Index selected = 0;
         Index smallest = 0;
@@ -588,7 +588,7 @@ namespace Rodin::Kokkos::Variational
       {
         const auto& execution = mesh.getContext().getExecutionSpace();
         const auto representatives =
-          Internal::Quadrature<MeshType>::getRepresentatives(mesh, dimension);
+          Quadrature<MeshType>::getRepresentatives(mesh, dimension);
         size_t order = 7;
         const auto& triangle = representatives[static_cast<size_t>(
           ::Rodin::Geometry::Polytope::Type::Triangle)];

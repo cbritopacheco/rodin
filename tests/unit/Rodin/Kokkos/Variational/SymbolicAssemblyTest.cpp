@@ -62,8 +62,8 @@ namespace Rodin::Tests::Unit
     const auto assemble = [&] {
       SymbolicAssembly engine(
         mesh.getContext().getExecutionSpace(), fes.getSize(), fes.getSize(), &symbolic);
-      engine.addMatrix(integral, 0, 0);
-      engine.addVector(load, 0, Real(1));
+      engine.add(integral, 0, 0);
+      engine.add(load, 0, Real(1));
       engine.finish(matrix, rhs);
     };
     coefficient = RealFunction(0);

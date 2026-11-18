@@ -94,9 +94,9 @@ namespace Rodin::PETSc::Internal
       template <class FES>
       GhostedPositions& setSpace(const FES& fes)
       {
-        if constexpr (requires { fes.getNumberingRevision(); })
+        if constexpr (requires { fes.getRevision(); })
         {
-          const auto revision = fes.getNumberingRevision();
+          const auto revision = fes.getRevision();
           if (!m_entry || m_entry->revision != revision)
             m_entry = Entry{revision, fes.getGhostedPositions()};
         }

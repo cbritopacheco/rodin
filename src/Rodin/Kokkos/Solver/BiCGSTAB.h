@@ -54,7 +54,7 @@ namespace Rodin::Solver
     final : public LinearSolverBase<::Rodin::Math::LinearSystem<
               ::Rodin::Kokkos::Math::SparseMatrix<Real, Backend>, VectorType_>>
   {
-    using Krylov = Internal::KokkosKrylov<Backend>;
+    using Krylov = ::Rodin::Kokkos::Solver::Krylov<Backend>;
     using WorkVector = typename Krylov::Vector;
     using ExecutionSpace = typename Krylov::ExecutionSpace;
     using Policy = ::Kokkos::RangePolicy<ExecutionSpace, ::Kokkos::IndexType<size_t>>;
@@ -161,9 +161,9 @@ namespace Rodin::Solver
           Krylov::reserve(m_b, n, "Rodin BiCGSTAB RHS");
         if constexpr (!requires { system.getSolution().getView(); })
           Krylov::reserve(m_x, n, "Rodin BiCGSTAB solution");
-        Krylov::upload(system.getVector(), m_b);
+        Krylov::bind(system.getVector(), m_b);
         if (static_cast<size_t>(system.getSolution().size()) == n)
-          Krylov::upload(system.getSolution(), m_x);
+          Krylov::bind(system.getSolution(), m_x);
         else
           ::Kokkos::deep_copy(m_x, Real(0));
         Krylov::reserve(m_inverse, n, "Rodin BiCGSTAB inverse diagonal");
@@ -179,7 +179,7 @@ namespace Rodin::Solver
         iterate(
           execution, Krylov::wrap(matrix), m_maxIterations ? *m_maxIterations : 2 * n);
         ::Rodin::Kokkos::Internal::checkLaunches("Rodin BiCGSTAB solve");
-        Krylov::download(m_x, system.getSolution());
+        Krylov::copy(m_x, system.getSolution());
       }
 
       /// @return Whether the last solve certified the requested relative residual.
@@ -437,7 +437,7 @@ namespace Rodin::Solver
 
       Real m_tolerance = std::numeric_limits<Real>::epsilon();
       Optional<size_t> m_maxIterations;
-      Internal::KokkosKrylovResult m_result;
+      ::Rodin::Kokkos::Solver::KrylovResult m_result;
       WorkVector m_inverse, m_b, m_x, m_r, m_shadow, m_p, m_v, m_y, m_s, m_z, m_t;
   };
 }

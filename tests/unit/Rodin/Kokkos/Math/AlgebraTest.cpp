@@ -5,8 +5,10 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 #include <Rodin/Kokkos/Solver.h>
-#include <Rodin/Solver/CuDSSOperator.h>
-#include <Rodin/Kokkos/Solver/RocSolverRFPivots.h>
+#include <Rodin/Kokkos/Solver/CuDSSOperator.h>
+#include <Rodin/Kokkos/Solver/CuDSSVector.h>
+#include <Rodin/Kokkos/Solver/CompressedPattern.h>
+#include <Rodin/Kokkos/Solver/RocSolverRF.h>
 #include "../Variational/Common.h"
 
 namespace Rodin::Tests::Unit
@@ -15,12 +17,130 @@ namespace Rodin::Tests::Unit
   using Coefficients = Rodin::Kokkos::Math::Vector<Real, TestBackend>;
   using Matrix = Rodin::Kokkos::Math::SparseMatrix<Real, TestBackend>;
 
+  template <class Destination, class Source>
+  concept CanUpload = requires(
+    Destination& destination, const Source& source) { destination.upload(source); };
+
+  static_assert(CanUpload<Coefficients, Math::Vector<Real>>);
+  static_assert(!CanUpload<const Coefficients, Math::Vector<Real>>);
+  static_assert(!CanUpload<Coefficients, Coefficients>);
+  static_assert(CanUpload<Matrix, Math::SparseMatrix<Real>>);
+  static_assert(!CanUpload<const Matrix, Math::SparseMatrix<Real>>);
+  static_assert(!CanUpload<Matrix, Matrix>);
+
+  /// @brief Symbolic constructors preserve transposition maps and ordering-induced fill.
+  TEST(Kokkos_Math, CompressedPatternConstructors)
+  {
+    using Pattern = Rodin::Kokkos::Solver::CompressedPattern;
+    using Indices = std::vector<Math::SparseIndex>;
+    const Indices starts{0, 2, 5, 7};
+    const Indices indices{0, 1, 0, 1, 2, 1, 2};
+    Indices positions;
+    const auto transposed =
+      Pattern::Transpose(3, starts.data(), indices.data(), positions);
+    EXPECT_EQ(transposed.starts, starts);
+    EXPECT_EQ(transposed.indices, indices);
+    EXPECT_EQ(positions, (Indices{0, 2, 1, 3, 5, 4, 6}));
+    const Indices permutation{1, 0, 2};
+    const auto cholesky =
+      Pattern::Cholesky(3, starts.data(), indices.data(), permutation);
+    EXPECT_EQ(cholesky.starts, (Indices{0, 1, 3, 6}));
+    EXPECT_EQ(cholesky.indices, (Indices{0, 0, 1, 0, 1, 2}));
+    const auto lu =
+      Pattern::LU(3, starts.data(), indices.data(), permutation, permutation);
+    EXPECT_EQ(lu.starts, (Indices{0, 3, 6, 9}));
+    EXPECT_EQ(lu.indices, (Indices{0, 1, 2, 0, 1, 2, 0, 1, 2}));
+    const Indices emptyStarts{0};
+    const Indices empty;
+    const auto emptyTranspose =
+      Pattern::Transpose(0, emptyStarts.data(), empty.data(), positions);
+    EXPECT_EQ(emptyTranspose.starts, emptyStarts);
+    EXPECT_TRUE(emptyTranspose.indices.empty());
+    EXPECT_TRUE(positions.empty());
+    EXPECT_EQ(
+      Pattern::Cholesky(0, emptyStarts.data(), empty.data(), empty).starts, emptyStarts);
+    EXPECT_EQ(
+      Pattern::LU(0, emptyStarts.data(), empty.data(), empty, empty).starts, emptyStarts);
+  }
+
+  /// @brief Transfers replace values and preserve independent host/backend ownership.
+  TEST(Kokkos_Math, VectorUploadDownloadSnapshots)
+  {
+    Math::Vector<Real> source(4);
+    source << 1, -2, 3, 4;
+    const auto expected = source;
+    Coefficients backend;
+    EXPECT_EQ(&backend.upload(source), &backend);
+    source.setConstant(9);
+    const auto& read = backend;
+    auto snapshot = read.download();
+    EXPECT_EQ((snapshot - expected).norm(), 0);
+    Math::Vector<Real> destination(11);
+    read.download(destination);
+    EXPECT_EQ(destination.size(), expected.size());
+    EXPECT_EQ((destination - expected).norm(), 0);
+    snapshot.setZero();
+    destination.setZero();
+    EXPECT_EQ((read.download() - expected).norm(), 0);
+    ::Kokkos::deep_copy(backend.getView(), Real(7));
+    EXPECT_EQ(source(0), 9);
+    EXPECT_EQ(snapshot.norm(), 0);
+    EXPECT_EQ((read.download().array() - Real(7)).matrix().norm(), 0);
+    backend.upload(expected.head(2).array() * Real(2));
+    EXPECT_EQ(backend.size(), 2u);
+    EXPECT_EQ((backend.download() - Real(2) * expected.head(2)).norm(), 0);
+    Math::Vector<Real> empty;
+    backend.upload(empty);
+    read.download(destination);
+    EXPECT_EQ(destination.size(), 0);
+    EXPECT_EQ(read.toHost().size(), 0);
+  }
+
+  /// @brief Sparse transfers preserve rectangular operators through CSC/CSR conversion.
+  TEST(Kokkos_Math, SparseUploadDownloadSnapshots)
+  {
+    Math::SparseMatrix<Real> source(3, 5);
+    source.insert(2, 0) = 4;
+    source.insert(0, 4) = -2;
+    source.insert(1, 1) = 3;
+    source.insert(2, 3) = 0;
+    const auto expected = source;
+    Matrix backend;
+    EXPECT_EQ(&backend.upload(source), &backend);
+    source.coeffRef(2, 0) = 11;
+    const auto& read = backend;
+    auto snapshot = read.download();
+    EXPECT_EQ(snapshot.rows(), 3);
+    EXPECT_EQ(snapshot.cols(), 5);
+    EXPECT_EQ(snapshot.nonZeros(), expected.nonZeros());
+    EXPECT_EQ((snapshot - expected).norm(), 0);
+    Math::SparseMatrix<Real> destination(1, 1);
+    destination.insert(0, 0) = 99;
+    read.download(destination);
+    EXPECT_EQ((destination - expected).norm(), 0);
+    destination.setZero();
+    snapshot.setZero();
+    EXPECT_EQ((read.download() - expected).norm(), 0);
+    ::Kokkos::deep_copy(backend.getValues(), Real(6));
+    EXPECT_EQ(source.coeff(2, 0), 11);
+    EXPECT_EQ(snapshot.norm(), 0);
+    backend.upload(Math::SparseMatrix<Real>(0, 5));
+    read.download(destination);
+    EXPECT_EQ(destination.rows(), 0);
+    EXPECT_EQ(destination.cols(), 5);
+    EXPECT_EQ(destination.nonZeros(), 0);
+    Matrix empty;
+    empty.download(destination);
+    EXPECT_EQ(destination.rows(), 0);
+    EXPECT_EQ(destination.cols(), 0);
+  }
+
   /// @brief Vendor input borrows preserve constness and use the original arrays.
   TEST(Kokkos_Math, DirectSolverArrayBorrows)
   {
-    using Arrays = Solver::Internal::CuDSSOperator<Matrix>;
+    using Arrays = Solver::CuDSSOperator<Matrix>;
     using HostMatrix = Math::SparseMatrix<Real>;
-    using HostArrays = Solver::Internal::CuDSSOperator<HostMatrix>;
+    using HostArrays = Solver::CuDSSOperator<HostMatrix>;
     static_assert(std::is_same_v<decltype(Arrays::getStarts(std::declval<Matrix&>())),
       Math::SparseIndex*>);
     static_assert(std::is_same_v<decltype(Arrays::getIndices(std::declval<Matrix&>())),
@@ -123,10 +243,10 @@ namespace Rodin::Tests::Unit
     auto& matrix = system.getOperator();
     using System = std::decay_t<decltype(system)>;
     Direct<System> solver(pb);
-    static_assert(Solver::Internal::CuDSSOperator<Matrix>::Resident);
+    static_assert(Solver::CuDSSOperator<Matrix>::Resident);
     const auto check = [&](Real expected) {
       const auto before = matrix.toHost();
-      typename Solver::Internal::CuDSSOperator<Matrix>::Pattern pattern;
+      typename Solver::CuDSSOperator<Matrix>::Pattern pattern;
       pattern.assign(matrix);
       const auto* starts = matrix.getRowStarts().data();
       const auto* columns = matrix.getColumns().data();
@@ -180,7 +300,7 @@ namespace Rodin::Tests::Unit
   /// @brief Pivot certification must not reject small or large finite values.
   TEST(Kokkos_Math, RocSolverPivotPredicate)
   {
-    using Pivots = Solver::Internal::RocSolverRFPivots;
+    using Pivots = Rodin::Kokkos::Solver::RocSolverRFPivots;
     for (const Real value : {Real(1), Real(-1), std::numeric_limits<Real>::min(),
            -std::numeric_limits<Real>::min(), std::numeric_limits<Real>::denorm_min(),
            -std::numeric_limits<Real>::denorm_min(), std::numeric_limits<Real>::max(),
@@ -199,7 +319,7 @@ namespace Rodin::Tests::Unit
   /// @brief Exercises the actual pivot reduction on the selected backend.
   TEST(Kokkos_Math, RocSolverPivotReduction)
   {
-    using Pivots = Solver::Internal::RocSolverRFPivots;
+    using Pivots = Rodin::Kokkos::Solver::RocSolverRFPivots;
     constexpr size_t Count = 4097;
     Matrix::Array<Real> values("test pivots", Count);
     const auto execution = TestContext{}.getExecutionSpace();
@@ -233,7 +353,7 @@ namespace Rodin::Tests::Unit
   /// @brief A solver snapshot detects edits even when sizes and pointers stay fixed.
   void checkCuDSSPatternExactComparison()
   {
-    using Pattern = Solver::Internal::CuDSSOperator<Matrix>::Pattern;
+    using Pattern = Solver::CuDSSOperator<Matrix>::Pattern;
     const auto execution = TestContext{}.getExecutionSpace();
     const auto make = [&](size_t rows, size_t columns,
                         const std::vector<Math::SparseIndex>& offsets,
@@ -331,7 +451,7 @@ namespace Rodin::Tests::Unit
   TEST(Kokkos_Math, CuDSSHostPatternComparison)
   {
     using HostMatrix = Math::SparseMatrix<Real>;
-    using Arrays = Solver::Internal::CuDSSOperator<HostMatrix>;
+    using Arrays = Solver::CuDSSOperator<HostMatrix>;
     HostMatrix matrix(3, 3);
     matrix.insert(0, 0) = 2;
     matrix.insert(1, 1) = 3;
@@ -390,7 +510,7 @@ namespace Rodin::Tests::Unit
     coefficient = Real(1);
     const auto native = coefficient.getData().getView();
     const auto borrowed =
-      Rodin::Kokkos::Variational::GridFunctionCoefficients<Coefficients>::getView(
+      Rodin::Kokkos::Variational::GridFunctionData<Coefficients>::prepare(
         fes, coefficient.getData());
     EXPECT_EQ(native.data(), borrowed.data());
     TrialFunction u(fes);

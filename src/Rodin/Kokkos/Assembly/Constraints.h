@@ -26,10 +26,12 @@
 #include "Rodin/Variational/PeriodicBC.h"
 #include "Rodin/Kokkos/Context/Kokkos.h"
 
-namespace Rodin::Assembly::Internal
+namespace Rodin::Assembly
 {
   /**
    * @brief Constraints of a device system, resolved on the host.
+   *
+   * ## Architecture
    *
    * Value constraints are recorded as they are assembled. When an
    * identification Dirichlet condition or a periodic condition is present,

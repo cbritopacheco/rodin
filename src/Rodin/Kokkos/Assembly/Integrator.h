@@ -9,7 +9,12 @@
 
 /**
  * @file
- * @brief Dispatch of Rodin integrators to their Kokkos implementations.
+ * @brief Host-side dispatch of polymorphic Rodin integrators to Kokkos.
+ *
+ * Assembly receives type-erased core integrator lists. Runtime casts unwrap
+ * scaling and negation and select the backend interface once while preparing
+ * each assembly input. They do not execute in element or quadrature kernels.
+ * Unsupported integrators raise instead of silently selecting host evaluation.
  */
 
 #include <utility>

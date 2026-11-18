@@ -12,8 +12,10 @@
  * @brief Resident Kokkos storage of a distributed mesh.
  */
 
+#include <algorithm>
 #include <cstdint>
 #include <functional>
+#include <memory>
 #include <vector>
 
 #include "Rodin/MPI/Geometry/Mesh.h"
@@ -28,7 +30,7 @@ namespace Rodin::Geometry
    * ## Architecture
    *
    * The mesh holds the shard of this process as a local resident mesh, the
-   * ownership of each of its entities, and a reference to the distributed
+   * ownership of each of its entities, and an independent distributed
    * host mesh it was built from. Every query is answered in the local
    * numbering of the shard, which the kernels of a local resident mesh
    * expect. The boundary, the interface and the measures are those of the
@@ -37,8 +39,11 @@ namespace Rodin::Geometry
    *
    * The device view marks the entities this process owns. Integrators skip
    * the others, so that each polytope is integrated once over the
-   * processes. The host mesh must outlive this mesh, and its shard must not
-   * change after this mesh is built.
+   * processes. Host metadata is owned by value. Geometry and attribute setters
+   * update this metadata and the resident shard in one explicit mutation stage;
+   * the source mesh is unchanged. Shared vertices must be updated consistently
+   * on their holding ranks, as for the host MPI mesh. These setters introduce
+   * no communication. Topology replacement requires rebuilding dependent spaces.
    *
    * @tparam Backend Kokkos backend of the mesh context.
    */
@@ -75,7 +80,7 @@ namespace Rodin::Geometry
 
       /**
        * @param context Execution association; Kokkos must already be initialized.
-       * @param host Distributed mesh, which must outlive this mesh.
+       * @param host Distributed mesh copied independently, without communication.
        */
       Mesh(ContextType context, const HostType& host)
         : m_context(std::move(context)),
@@ -103,7 +108,7 @@ namespace Rodin::Geometry
       }
 
       /**
-       * @brief Copies the mesh, sharing the host mesh and the resident ownership flags.
+       * @brief Copies host metadata and resident data, sharing read-only ownership flags.
        * @param other Mesh to copy.
        */
       Mesh(const Mesh& other) = default;
@@ -114,6 +119,17 @@ namespace Rodin::Geometry
        */
       Mesh(Mesh&& other) = default;
 
+      /// @param context Distribution and execution association of an empty mesh.
+      explicit Mesh(ContextType context)
+        : Mesh(context, HostType(context.getDistribution()))
+      {}
+
+      /// @param other Independent mesh snapshot. @returns This mesh.
+      Mesh& operator=(const Mesh& other) = default;
+
+      /// @param other Mesh whose storage is moved. @returns This mesh.
+      Mesh& operator=(Mesh&& other) = default;
+
       /// @returns Distributed execution context.
       const ContextType& getContext() const override
       {
@@ -123,7 +139,8 @@ namespace Rodin::Geometry
       /// @returns Distributed host mesh.
       const HostType& getHost() const
       {
-        return m_host.get();
+        checkTopology();
+        return m_host;
       }
 
       /// @returns Host shard of this process.
@@ -154,6 +171,7 @@ namespace Rodin::Geometry
        */
       View getView() const
       {
+        checkTopology();
         View res{};
         static_cast<::Rodin::Kokkos::View<MeshBase>&>(res) = m_shard.getView();
         res.owned = m_owned.data();
@@ -244,13 +262,14 @@ namespace Rodin::Geometry
       }
 
       /**
-       * @brief Raises an exception, the mesh being immutable.
-       * @param[in] c Requested scaling factor, ignored.
-       * @returns Never returns.
+       * @brief Scales local geometry and its owned host metadata, without communication.
+       * @param c Finite scaling factor. @returns This mesh.
        */
-      Mesh& scale([[maybe_unused]] Real c) override
+      Mesh& scale(Real c) override
       {
-        immutable(__func__);
+        checkTopology();
+        m_shard.scale(c);
+        m_host.scale(c);
         return *this;
       }
 
@@ -258,6 +277,7 @@ namespace Rodin::Geometry
       void flush() override
       {
         m_shard.flush();
+        m_host.flush();
       }
 
       /// @param vertex Local vertex index. @returns Coordinates of the vertex.
@@ -267,29 +287,29 @@ namespace Rodin::Geometry
       }
 
       /**
-       * @brief Raises an exception, the mesh being immutable.
-       * @param[in] idx Local vertex index, ignored.
-       * @param[in] s Requested coordinate, ignored.
-       * @param[in] i Coordinate index, ignored.
-       * @returns Never returns.
+       * @brief Updates one local coordinate in backend and host storage.
+       * @param idx Local vertex index. @param s New coordinate.
+       * @param i Coordinate index. @returns This mesh, without communication.
        */
-      Mesh& setVertexCoordinates([[maybe_unused]] Index idx, [[maybe_unused]] Real s,
-        [[maybe_unused]] size_t i) override
+      Mesh& setVertexCoordinates(Index idx, Real s, size_t i) override
       {
-        immutable(__func__);
+        checkTopology();
+        m_shard.setVertexCoordinates(idx, s, i);
+        m_host.setVertexCoordinates(idx, s, i);
         return *this;
       }
 
       /**
-       * @brief Raises an exception, the mesh being immutable.
-       * @param[in] idx Local vertex index, ignored.
-       * @param[in] coords Requested coordinates, ignored.
-       * @returns Never returns.
+       * @brief Updates a local vertex in backend and host storage.
+       * @param idx Local vertex index. @param coords New coordinates.
+       * @returns This mesh, without communication.
        */
-      Mesh& setVertexCoordinates([[maybe_unused]] Index idx,
-        [[maybe_unused]] const ::Rodin::Math::SpatialPoint& coords) override
+      Mesh& setVertexCoordinates(
+        Index idx, const ::Rodin::Math::SpatialPoint& coords) override
       {
-        immutable(__func__);
+        checkTopology();
+        m_shard.setVertexCoordinates(idx, coords);
+        m_host.setVertexCoordinates(idx, coords);
         return *this;
       }
 
@@ -300,28 +320,32 @@ namespace Rodin::Geometry
       }
 
       /**
-       * @brief Raises an exception, the mesh being immutable.
-       * @param[in] p Pair of (dimension, local index) of the polytope, ignored.
-       * @param[in] attr Requested attribute, ignored.
-       * @returns Never returns.
+       * @brief Updates a local attribute in backend and host storage.
+       * @param p Dimension and local entity index. @param attr New attribute.
+       * @returns This mesh, without communication.
        */
-      Mesh& setAttribute([[maybe_unused]] const std::pair<size_t, Index>& p,
-        [[maybe_unused]] const Optional<Attribute>& attr) override
+      Mesh& setAttribute(
+        const std::pair<size_t, Index>& p, const Optional<Attribute>& attr) override
       {
-        immutable(__func__);
+        checkTopology();
+        m_shard.setAttribute(p, attr);
+        m_host.setAttribute(p, attr);
         return *this;
       }
 
       /**
-       * @brief Raises an exception, the mesh being immutable.
-       * @param[in] p Pair of (dimension, local index) of the polytope, ignored.
-       * @param[in] trans Requested transformation, ignored and not taken over.
-       * @returns Never returns.
+       * @brief Replaces a local map in backend storage and copies it into host metadata.
+       * @param p Dimension and local entity index.
+       * @param trans Map whose ownership is taken, or null for the default map.
+       * @returns This mesh, without communication.
        */
-      Mesh& setPolytopeTransformation([[maybe_unused]] const std::pair<size_t, Index> p,
-        [[maybe_unused]] PolytopeTransformation* trans) override
+      Mesh& setPolytopeTransformation(
+        const std::pair<size_t, Index> p, PolytopeTransformation* trans) override
       {
-        immutable(__func__);
+        checkTopology();
+        std::unique_ptr<PolytopeTransformation> hostMap(trans ? trans->copy() : nullptr);
+        m_shard.setPolytopeTransformation(p, trans);
+        m_host.setPolytopeTransformation(p, hostMap.release());
         return *this;
       }
 
@@ -340,16 +364,50 @@ namespace Rodin::Geometry
       }
 
       /**
-       * @brief Raises an exception, the mesh being immutable.
-       * @param[in] filename Path to the mesh file, ignored.
-       * @param[in] fmt File format, ignored.
-       * @returns Never returns.
+       * @brief Collectively loads per-rank shards and builds their backend storage.
+       * @param filename Rank-local input path. @param fmt Mesh format.
+       * @returns This mesh. Existing spaces must be rebuilt after replacement.
        */
-      Mesh& load([[maybe_unused]] const boost::filesystem::path& filename,
-        [[maybe_unused]] IO::FileFormat fmt) override
+      Mesh& load(const boost::filesystem::path& filename, IO::FileFormat fmt) override
       {
-        immutable(__func__);
+        HostType host(m_context.getDistribution());
+        host.load(filename, fmt);
+        return upload(host);
+      }
+
+      /**
+       * @brief Replaces local backend storage and distributed metadata from a host mesh.
+       * @param source Compatible distributed mesh, unchanged by this operation.
+       * @returns This mesh, after transfer completion, without communication.
+       * Dependent spaces must be rebuilt after topology replacement.
+       */
+      Mesh& upload(const HostType& source)
+      {
+        Mesh next(m_context, source);
+        *this = std::move(next);
         return *this;
+      }
+
+      /// @returns Independent distributed host snapshot, without communication.
+      HostType download() const
+      {
+        checkTopology();
+        HostType result(m_host);
+        static_cast<Mesh<Rodin::Context::Local>&>(result.getShard()) = m_shard.download();
+        result.flush();
+        return result;
+      }
+
+      /// @param destination Distributed host destination, replaced without communication.
+      void download(HostType& destination) const
+      {
+        destination = download();
+      }
+
+      /// @returns Independent host snapshot; compatibility spelling of download().
+      HostType toHost() const
+      {
+        return download();
       }
 
       /// @param path Destination. @param format File format. Saves the distributed host mesh.
@@ -504,27 +562,44 @@ namespace Rodin::Geometry
 
     private:
       /**
-       * @brief Raises the exception reporting that the mesh is immutable.
-       * @param[in] function Name of the rejected member function.
+       * @brief Requires distributed ownership for every entity exposed to kernels.
+       * New distributed entities need an explicit host reconciliation and upload;
+       * incidence computation among already numbered entities remains rank-local.
        */
-      [[noreturn]] void immutable(const char* function) const
+      void checkTopology() const
       {
-        Alert::MemberFunctionException(*this, function)
-          << "A distributed Kokkos mesh mirrors its host mesh and cannot be modified."
-          << Alert::Raise;
-        std::abort();
+        const auto& host = m_host.getShard();
+        for (size_t d = 0; d <= std::max(host.getDimension(), m_shard.getDimension());
+             ++d)
+        {
+          if (host.getPolytopeCount(d) != m_shard.getPolytopeCount(d))
+          {
+            Alert::MemberFunctionException(*this, __func__)
+              << "Distributed entity changes require ownership reconciliation on "
+              << "the host mesh followed by upload and space reconstruction."
+              << Alert::Raise;
+          }
+        }
       }
 
       ContextType m_context;
-      std::reference_wrapper<const HostType> m_host;
+      HostType m_host;
       LocalType m_shard;
       ::Kokkos::View<std::uint8_t*, MemorySpace> m_owned;
   };
 
   /**
-   * @brief Deduces the distributed resident mesh of a host mesh.
-   * @param[in] context Kokkos MPI execution context.
-   * @param[in] host Distributed host mesh.
+   * @brief Deduces an empty distributed resident mesh.
+   * @param context Kokkos MPI execution context.
+   */
+  template <class Backend>
+  Mesh(Rodin::Context::Kokkos<Rodin::Context::MPI, Backend> context)
+    -> Mesh<Rodin::Context::Kokkos<Rodin::Context::MPI, Backend>>;
+
+  /**
+   * @brief Deduces the distributed resident mesh of a host snapshot.
+   * @param context Kokkos MPI execution context.
+   * @param host Distributed host mesh copied into the backend.
    */
   template <class Backend>
   Mesh(Rodin::Context::Kokkos<Rodin::Context::MPI, Backend> context,

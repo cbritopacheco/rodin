@@ -70,6 +70,10 @@ SpaceAfterTemplateKeyword: true
 PointerAlignment: Left
 ReferenceAlignment: Left
 QualifierAlignment: Leave
+AttributeMacros:
+  - KOKKOS_INLINE_FUNCTION
+  - KOKKOS_FUNCTION
+  - KOKKOS_FORCEINLINE_FUNCTION
 
 # Includes: never reorder — include order is load-bearing (ForwardDecls,
 # Configure.h) and re-sorting creates churn.

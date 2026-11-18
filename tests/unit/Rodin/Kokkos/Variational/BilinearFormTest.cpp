@@ -5,6 +5,7 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 #include "Common.h"
+#include <Rodin/Kokkos/Assembly/Integrator.h>
 
 #include <memory>
 #include <type_traits>
@@ -13,6 +14,28 @@
 namespace Rodin::Tests::Unit
 {
   using namespace Rodin::Variational;
+
+  /// @brief Cold dispatch unwraps scaling and rejects a host-only implementation.
+  TEST(Kokkos_Variational_BilinearForm, HostDispatchChecksTheBackend)
+  {
+    const auto source = makeTriangleMesh();
+    const DeviceMesh mesh(TestContext{}, source);
+    P1 fes(mesh);
+    TrialFunction u(fes);
+    TestFunction v(fes);
+    auto integral = Integral(u, v);
+    auto weighted = Real(3) * (-integral);
+    const auto [implementation, factor] =
+      ::Rodin::Assembly::Internal::getIntegrator<TestBackend>(weighted);
+    EXPECT_NE(implementation, nullptr);
+    EXPECT_EQ(factor, -3);
+    P1 hostSpace(source);
+    TrialFunction hostU(hostSpace);
+    TestFunction hostV(hostSpace);
+    auto hostIntegral = Integral(hostU, hostV);
+    EXPECT_THROW((::Rodin::Assembly::Internal::getIntegrator<TestBackend>(hostIntegral)),
+      Alert::Exception);
+  }
 
   static_assert(std::is_same_v<P1<Real, DeviceMesh>::MeshType, DeviceMesh>);
 

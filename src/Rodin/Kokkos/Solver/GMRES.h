@@ -26,19 +26,19 @@
 
 #include "Krylov.h"
 
-namespace Rodin::Solver::Internal
+namespace Rodin::Kokkos::Solver
 {
   /**
    * @brief Jacobi preconditioner of the Kokkos-Kernels GMRES.
    * @tparam Backend Kokkos backend of the matrix.
    */
   template <class Backend>
-  class KokkosJacobi final : public ::KokkosSparse::Experimental::Preconditioner<
-                               typename KokkosKrylov<Backend>::CrsMatrix>
+  class Jacobi final : public ::KokkosSparse::Experimental::Preconditioner<
+                         typename Krylov<Backend>::CrsMatrix>
   {
     public:
       /// @brief Krylov storage type.
-      using Krylov = KokkosKrylov<Backend>;
+      using Krylov = ::Rodin::Kokkos::Solver::Krylov<Backend>;
 
       /// @brief Kokkos device of the vectors.
       using Device = typename Krylov::Device;
@@ -47,7 +47,7 @@ namespace Rodin::Solver::Internal
        * @brief Preconditioner holding the inverse of a diagonal.
        * @param inverse Inverse of the diagonal.
        */
-      explicit KokkosJacobi(const typename Krylov::Vector& inverse)
+      explicit Jacobi(const typename Krylov::Vector& inverse)
         : m_inverse(inverse)
       {}
 
@@ -132,7 +132,7 @@ namespace Rodin::Solver
     final : public LinearSolverBase<::Rodin::Math::LinearSystem<
               ::Rodin::Kokkos::Math::SparseMatrix<Real, Backend>, VectorType_>>
   {
-    using Krylov = Internal::KokkosKrylov<Backend>;
+    using Krylov = ::Rodin::Kokkos::Solver::Krylov<Backend>;
 
     using Handle =
       ::KokkosKernels::Experimental::KokkosKernelsHandle<::Rodin::Math::SparseIndex,
@@ -263,9 +263,9 @@ namespace Rodin::Solver
           Krylov::reserve(m_b, n, "Rodin::Solver::GMRES::b");
         if constexpr (!requires { system.getSolution().getView(); })
           Krylov::reserve(m_x, n, "Rodin::Solver::GMRES::x");
-        Krylov::upload(system.getVector(), m_b);
+        Krylov::bind(system.getVector(), m_b);
         if (static_cast<size_t>(system.getSolution().size()) == n)
-          Krylov::upload(system.getSolution(), m_x);
+          Krylov::bind(system.getSolution(), m_x);
         else
           ::Kokkos::deep_copy(m_x, Real(0));
         Krylov::invertDiagonal(execution, matrix, m_inverse);
@@ -277,14 +277,14 @@ namespace Rodin::Solver
         Handle handle;
         handle.create_gmres_handle(static_cast<::Rodin::Math::SparseIndex>(restart),
           m_tolerance, static_cast<::Rodin::Math::SparseIndex>(cycles));
-        Internal::KokkosJacobi<Backend> jacobi(m_inverse);
+        ::Rodin::Kokkos::Solver::Jacobi<Backend> jacobi(m_inverse);
         ::KokkosSparse::Experimental::gmres(&handle, A, m_b, m_x, &jacobi);
         execution.fence();
         const auto* gmres = handle.get_gmres_handle();
         m_result.converged = gmres->get_conv_flag_val() == Handle::GMRESHandleType::Conv;
         m_result.iterations = static_cast<size_t>(gmres->get_num_iters());
         m_result.error = static_cast<Real>(gmres->get_end_rel_res());
-        Krylov::download(m_x, system.getSolution());
+        Krylov::copy(m_x, system.getSolution());
       }
 
       /**
@@ -327,7 +327,7 @@ namespace Rodin::Solver
       Real m_tolerance = std::numeric_limits<Real>::epsilon();
       Optional<size_t> m_maxIterations;
       size_t m_restart = 30;
-      Internal::KokkosKrylovResult m_result;
+      ::Rodin::Kokkos::Solver::KrylovResult m_result;
       typename Krylov::Vector m_inverse, m_b, m_x;
   };
 }

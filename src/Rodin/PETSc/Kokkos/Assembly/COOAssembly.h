@@ -235,7 +235,7 @@ namespace Rodin::Assembly::Internal
        * @param lbfi Local integrator, possibly negated or scaled by a real.
        * @param row Offset of its test space. @param col Offset of its trial space.
        */
-      void addMatrix(
+      void add(
         Variational::LocalBilinearFormIntegratorBase<Real>& lbfi, Index row, Index col)
       {
         const auto [integrator, sign] = getIntegrator<Backend>(lbfi);
@@ -247,7 +247,7 @@ namespace Rodin::Assembly::Internal
        * @param gbfi Global integrator, possibly negated.
        * @param row Offset of its test space. @param col Offset of its trial space.
        */
-      void addMatrix(
+      void add(
         Variational::GlobalBilinearFormIntegratorBase<Real>& gbfi, Index row, Index col)
       {
         const auto [integrator, sign] = getIntegrator<Backend>(gbfi);
@@ -260,8 +260,7 @@ namespace Rodin::Assembly::Internal
        * @param row Offset of its test space.
        * @param sign Factor of the contributions.
        */
-      void addVector(
-        Variational::LinearFormIntegratorBase<Real>& lfi, Index row, Real sign)
+      void add(Variational::LinearFormIntegratorBase<Real>& lfi, Index row, Real sign)
       {
         const auto [integrator, s] = getIntegrator<Backend>(lfi, sign);
         m_vectors.push_back({integrator, row, s});
@@ -272,7 +271,7 @@ namespace Rodin::Assembly::Internal
        * @param op Operator, alive until finish() returns.
        * @param row Offset of its test space. @param col Offset of its trial space.
        */
-      void addMatrix(::Mat op, Index row, Index col)
+      void add(::Mat op, Index row, Index col)
       {
         m_operators.push_back({op, row, col});
       }
@@ -282,7 +281,7 @@ namespace Rodin::Assembly::Internal
        * @param vec Vector, alive until finish() returns.
        * @param row Offset of its test space.
        */
-      void addVector(::Vec vec, Index row)
+      void add(::Vec vec, Index row)
       {
         m_preassembled.push_back({vec, row});
       }
@@ -346,33 +345,32 @@ namespace Rodin::Assembly::Internal
           }
         }
         integrateVectors(cache, fixed, expanded ? &constraints.expansions : nullptr);
-        sumContributions(cache);
+        sum(cache);
         if (expanded)
         {
-          imposeFixed(
+          impose(
             m_execution, m_rows, cache.imposed, cache.fixedValues, m_owned, cache.rhs);
         }
         else if (fixed)
         {
-          imposeFixed(
-            m_execution, m_rows, cache.fixed, cache.fixedValues, m_owned, cache.rhs);
+          impose(m_execution, m_rows, cache.fixed, cache.fixedValues, m_owned, cache.rhs);
         }
         m_execution.fence("Rodin PETSc system");
 
         if (A && expanded)
         {
-          setMatrix(cache, A, true, cache.expandedRows, cache.expandedCols,
-            cache.expandedOrder, cache.expandedStarts, cache.expandedValues);
+          set(cache, A, true, cache.expandedRows, cache.expandedCols, cache.expandedOrder,
+            cache.expandedStarts, cache.expandedValues);
         }
         else if (A)
         {
-          setMatrix(cache, A, false, cache.rows, cache.cols, cache.order, cache.starts,
+          set(cache, A, false, cache.rows, cache.cols, cache.order, cache.starts,
             cache.values);
         }
         if (b && m_distribution)
           setDistributedVector(cache, b);
         else if (b)
-          setVector(b, cache.rhs);
+          set(b, cache.rhs);
         // PETSc reads the buffers on its own execution space instance, and
         // the next assembly overwrites them.
         ::Kokkos::fence("Rodin PETSc system");
@@ -812,9 +810,9 @@ namespace Rodin::Assembly::Internal
        * @return Number of contributions, as counted by countEntry.
        */
       template <class Indices, class Values, class Fixed>
-      static size_t countVector(const ExecutionSpace& execution, size_t begin,
-        size_t count, const Indices& indices, const Values& values, Index row,
-        bool hasFixed, const Fixed& fixed, const Expansions& x, bool expanded)
+      static size_t count(const ExecutionSpace& execution, size_t begin, size_t count,
+        const Indices& indices, const Values& values, Index row, bool hasFixed,
+        const Fixed& fixed, const Expansions& x, bool expanded)
       {
         size_t res = 0;
         ::Kokkos::parallel_reduce("Rodin::Assembly::Kokkos::PETSc::countVector",
@@ -898,7 +896,7 @@ namespace Rodin::Assembly::Internal
        * of an entry.
        */
       template <class Indices, class Values, class Fixed>
-      static void listVector(const ExecutionSpace& execution, size_t begin, size_t count,
+      static void list(const ExecutionSpace& execution, size_t begin, size_t count,
         const Indices& indices, const Values& values, Index row, bool hasFixed,
         const Fixed& fixed, const Expansions& x, bool expanded, const Contributions& res)
       {
@@ -947,7 +945,7 @@ namespace Rodin::Assembly::Internal
        * On a distributed system, the other processes write zero.
        */
       template <class Fixed, class Values, class Owned, class RHS>
-      static void imposeFixed(const ExecutionSpace& execution, size_t count,
+      static void impose(const ExecutionSpace& execution, size_t count,
         const Fixed& fixed, const Values& values, const Owned& owned, const RHS& rhs)
       {
         const bool distributed = owned.extent(0) > 0;
@@ -2366,7 +2364,7 @@ namespace Rodin::Assembly::Internal
        * @param cache Buffers holding the contributions and the right-hand
        * side.
        */
-      void sumContributions(CacheType& cache) const
+      void sum(CacheType& cache) const
       {
         const size_t count = cache.contributions;
         if (count == 0)
@@ -2477,12 +2475,12 @@ namespace Rodin::Assembly::Internal
       void listEntries(CacheType& cache, size_t begin, size_t count, Index row,
         bool fixed, const Expansions& x, bool expanded) const
       {
-        const size_t n = countVector(m_execution, begin, count, cache.entryIndices,
+        const size_t n = COOAssembly::count(m_execution, begin, count, cache.entryIndices,
           cache.entryValues, row, fixed, cache.fixed, x, expanded);
         if (n == 0)
           return;
-        listVector(m_execution, begin, count, cache.entryIndices, cache.entryValues, row,
-          fixed, cache.fixed, x, expanded, reserve(cache, n));
+        list(m_execution, begin, count, cache.entryIndices, cache.entryValues, row, fixed,
+          cache.fixed, x, expanded, reserve(cache, n));
       }
 
       /**
@@ -2536,7 +2534,7 @@ namespace Rodin::Assembly::Internal
           const size_t count = static_cast<size_t>(n);
           resize(cache.entryIndices, count, "Rodin entry indices");
           resize(cache.entryValues, count, "Rodin entry values");
-          getVector(p.vec, cache.entryValues);
+          get(p.vec, cache.entryValues);
           Index row = p.row;
           // Alive until the fence that ends the iteration.
           std::vector<Index> indices;
@@ -2573,7 +2571,7 @@ namespace Rodin::Assembly::Internal
        * @param vec Vector copied.
        * @param res Destination, with the local size of the vector.
        */
-      void getVector(::Vec vec, const ::Kokkos::View<Real*, MemorySpace>& res) const
+      void get(::Vec vec, const ::Kokkos::View<Real*, MemorySpace>& res) const
       {
         using Unmanaged = ::Kokkos::MemoryTraits<::Kokkos::Unmanaged>;
         const size_t count = res.extent(0);
@@ -2618,7 +2616,7 @@ namespace Rodin::Assembly::Internal
        * @param values Values of the list.
        */
       template <class Indices, class Scalars>
-      void setMatrix(CacheType& cache, ::Mat A, bool expanded, const Indices& coordRows,
+      void set(CacheType& cache, ::Mat A, bool expanded, const Indices& coordRows,
         const Indices& coordCols, const COOOrder<MemorySpace>& order,
         const ::Kokkos::View<Index*, MemorySpace>& starts, const Scalars& values) const
       {
@@ -2727,7 +2725,7 @@ namespace Rodin::Assembly::Internal
        * @param b Vector filled.
        * @param rhs Right-hand side, of at least the row count.
        */
-      void setVector(::Vec b, const ::Kokkos::View<Real*, MemorySpace>& rhs) const
+      void set(::Vec b, const ::Kokkos::View<Real*, MemorySpace>& rhs) const
       {
         using Unmanaged = ::Kokkos::MemoryTraits<::Kokkos::Unmanaged>;
         const auto source = ::Kokkos::subview(rhs, std::make_pair(size_t(0), m_rows));

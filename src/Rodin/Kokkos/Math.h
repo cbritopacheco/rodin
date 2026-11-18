@@ -10,6 +10,10 @@
  * @file
  * @brief Kokkos-backed owning algebra containers and linear systems.
  */
+#include "Math/SpatialVector.h"
+#include "Math/SpatialMatrix.h"
+#include "Math/Triplets.h"
+#include "Math/Entries.h"
 #include "Math/Vector.h"
 #include "Math/SparseMatrix.h"
 #include "Math/LinearSystem.h"

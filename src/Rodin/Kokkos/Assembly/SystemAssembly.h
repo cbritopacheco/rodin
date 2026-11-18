@@ -708,7 +708,7 @@ namespace Rodin::Assembly::Internal
        * @param lbfi Local integrator, possibly negated or scaled by a real.
        * @param row Offset of its test space. @param col Offset of its trial space.
        */
-      void addMatrix(
+      void add(
         Variational::LocalBilinearFormIntegratorBase<Real>& lbfi, Index row, Index col)
       {
         const auto [integrator, sign] = getIntegrator<Backend>(lbfi);
@@ -720,7 +720,7 @@ namespace Rodin::Assembly::Internal
        * @param gbfi Global integrator, possibly negated.
        * @param row Offset of its test space. @param col Offset of its trial space.
        */
-      void addMatrix(
+      void add(
         Variational::GlobalBilinearFormIntegratorBase<Real>& gbfi, Index row, Index col)
       {
         const auto [integrator, sign] = getIntegrator<Backend>(gbfi);
@@ -732,19 +732,19 @@ namespace Rodin::Assembly::Internal
        * @param op Operator, alive until finish() returns.
        * @param row Offset of its test space. @param col Offset of its trial space.
        */
-      void addMatrix(const ::Rodin::Math::SparseMatrix<Real>& op, Index row, Index col)
+      void add(const ::Rodin::Math::SparseMatrix<Real>& op, Index row, Index col)
       {
         m_matrices.push_back({nullptr, &op, row, col, Real(1)});
       }
 
       /// @param op Backend operator. @param row Test offset. @param col Trial offset.
-      void addMatrix(const BackendMatrix& op, Index row, Index col)
+      void add(const BackendMatrix& op, Index row, Index col)
       {
         m_matrices.push_back({nullptr, nullptr, row, col, 1, &op});
       }
 
       /// @param vec Backend coefficients. @param row Test offset.
-      void addVector(const ::Rodin::Kokkos::Math::Vector<Real, Backend>& vec, Index row)
+      void add(const ::Rodin::Kokkos::Math::Vector<Real, Backend>& vec, Index row)
       {
         m_vectors.push_back({nullptr, nullptr, row, 1, m_matrices.size(), &vec});
       }
@@ -758,8 +758,7 @@ namespace Rodin::Assembly::Internal
        * @param row Offset of its test space.
        * @param sign Factor of the contributions.
        */
-      void addVector(
-        Variational::LinearFormIntegratorBase<Real>& lfi, Index row, Real sign)
+      void add(Variational::LinearFormIntegratorBase<Real>& lfi, Index row, Real sign)
       {
         const auto [integrator, s] = getIntegrator<Backend>(lfi, sign);
         m_vectors.push_back({integrator, nullptr, row, s, m_matrices.size()});
@@ -770,7 +769,7 @@ namespace Rodin::Assembly::Internal
        * @param vec Vector, alive until finish() returns.
        * @param row Offset of its test space.
        */
-      void addVector(const ::Rodin::Math::Vector<Real>& vec, Index row)
+      void add(const ::Rodin::Math::Vector<Real>& vec, Index row)
       {
         m_vectors.push_back({nullptr, &vec, row, Real(1), m_matrices.size()});
       }
@@ -862,7 +861,7 @@ namespace Rodin::Assembly::Internal
         Listed coefficients, eliminated;
         if (A || eliminate || (b && expanded))
         {
-          triplets = listMatrix(offsets);
+          triplets = list(offsets);
           if (expanded)
           {
             lifted = expand(triplets, constraints);
@@ -899,12 +898,12 @@ namespace Rodin::Assembly::Internal
             done = matrices;
             if (range.first < range.second)
             {
-              addEntries(Array<Index>(::Kokkos::subview(lifted.rows, range)),
+              add(Array<Index>(::Kokkos::subview(lifted.rows, range)),
                 Array<Real>(::Kokkos::subview(lifted.values, range)), Ranks(), nullptr,
                 rhs);
             }
           };
-          sumVectors(rhs, expanded ? &constraints.expansions : nullptr, lift);
+          sum(rhs, expanded ? &constraints.expansions : nullptr, lift);
           lift(m_matrices.size());
           if (constrained)
           {
@@ -916,11 +915,11 @@ namespace Rodin::Assembly::Internal
           }
           if (expanded)
           {
-            imposeFixed(m_execution, m_rows,
-              upload(constraints.imposed, "Rodin imposed DOFs"), fixedValues, rhs);
+            impose(m_execution, m_rows, upload(constraints.imposed, "Rodin imposed DOFs"),
+              fixedValues, rhs);
           }
           else if (constrained)
-            imposeFixed(m_execution, m_rows, fixed, fixedValues, rhs);
+            impose(m_execution, m_rows, fixed, fixedValues, rhs);
           b->resize(m_rows);
           if constexpr (requires { b->getView(); })
             ::Kokkos::deep_copy(m_execution, b->getView(), rhs);
@@ -1861,7 +1860,7 @@ namespace Rodin::Assembly::Internal
        * @param row Offset of its test space.
        * @param rhs Right-hand side, updated in place.
        */
-      static void addDense(const ExecutionSpace& execution, const Array<Real>& values,
+      static void add(const ExecutionSpace& execution, const Array<Real>& values,
         Index row, const Array<Real>& rhs)
       {
         ::Kokkos::parallel_for("Rodin::Assembly::Kokkos::addDense",
@@ -1899,7 +1898,7 @@ namespace Rodin::Assembly::Internal
        * @param values Fixed value of each row.
        * @param rhs Right-hand side, updated in place.
        */
-      static void imposeFixed(const ExecutionSpace& execution, size_t count,
+      static void impose(const ExecutionSpace& execution, size_t count,
         const Array<unsigned char>& fixed, const Array<Real>& values,
         const Array<Real>& rhs)
       {
@@ -2064,7 +2063,7 @@ namespace Rodin::Assembly::Internal
        * @f$ -(c_r a) d_j @f$ to row @f$ r @f$ when @f$ j @f$ has a nonzero
        * affine value @f$ d_j @f$, as the host assemblies do.
        */
-      static void expandMatrix(const ExecutionSpace& execution, const Triplets& triplets,
+      static void expand(const ExecutionSpace& execution, const Triplets& triplets,
         const Expansions& x, size_t extra, Lifted& res)
       {
         const size_t size = triplets.size;
@@ -2187,9 +2186,9 @@ namespace Rodin::Assembly::Internal
        * The nonzero contribution @f$ a @f$ of index @f$ i @f$ becomes the
        * contributions @f$ c_r a @f$ of the masters @f$ r @f$ of @f$ i @f$.
        */
-      static void expandVector(const ExecutionSpace& execution,
-        const Array<Index>& indices, const Array<Real>& values, const Ranks& ranks,
-        const Expansions& x, Array<Index>& resIndices, Array<Real>& resValues)
+      static void expand(const ExecutionSpace& execution, const Array<Index>& indices,
+        const Array<Real>& values, const Ranks& ranks, const Expansions& x,
+        Array<Index>& resIndices, Array<Real>& resValues)
       {
         const size_t size = indices.extent(0);
         const auto positions = order(execution, size, ranks);
@@ -2339,7 +2338,7 @@ namespace Rodin::Assembly::Internal
        * @return Listed contributions of all the matrices, in the order they
        * were added.
        */
-      Triplets listMatrix(std::vector<size_t>& offsets) const
+      Triplets list(std::vector<size_t>& offsets) const
       {
         std::vector<Segment> segments;
         std::vector<size_t> counts;
@@ -2541,7 +2540,7 @@ namespace Rodin::Assembly::Internal
       {
         Lifted res;
         const size_t extra = constraints.rows.size();
-        expandMatrix(m_execution, triplets, constraints.expansions, extra, res);
+        expand(m_execution, triplets, constraints.expansions, extra, res);
         const size_t count = res.triplets.size - extra;
         const auto range = std::make_pair(count, res.triplets.size);
         ::Kokkos::deep_copy(m_execution,
@@ -2594,15 +2593,15 @@ namespace Rodin::Assembly::Internal
        * @param x Expansions on the masters, or null.
        * @param rhs Device right-hand side, incremented.
        */
-      void addEntries(const Array<Index>& indices, const Array<Real>& values,
-        const Ranks& ranks, const Expansions* x, const Array<Real>& rhs)
+      void add(const Array<Index>& indices, const Array<Real>& values, const Ranks& ranks,
+        const Expansions* x, const Array<Real>& rhs)
       {
         if (x)
         {
           Array<Index> ei;
           Array<Real> ev;
-          expandVector(m_execution, indices, values, ranks, *x, ei, ev);
-          addEntries(ei, ev, Ranks(), nullptr, rhs);
+          expand(m_execution, indices, values, ranks, *x, ei, ev);
+          add(ei, ev, Ranks(), nullptr, rhs);
           return;
         }
         const auto sorted = ranks.sorting(m_rows);
@@ -2624,7 +2623,7 @@ namespace Rodin::Assembly::Internal
        * @param lift Sums the values lifted by a number of first matrices.
        */
       template <class Lift>
-      void sumVectors(const Array<Real>& rhs, const Expansions* x, const Lift& lift)
+      void sum(const Array<Real>& rhs, const Expansions* x, const Lift& lift)
       {
         for (size_t begin = 0; begin < m_vectors.size();)
         {
@@ -2638,9 +2637,9 @@ namespace Rodin::Assembly::Internal
               ? v.backend->getView()
               : upload(v.vec->data(), count, "Rodin preassembled vector");
             if (x)
-              addEntries(sequence(m_execution, count, v.row), values, Ranks(), x, rhs);
+              add(sequence(m_execution, count, v.row), values, Ranks(), x, rhs);
             else
-              addDense(m_execution, values, v.row, rhs);
+              add(m_execution, values, v.row, rhs);
             continue;
           }
           size_t end = begin;
@@ -2673,7 +2672,7 @@ namespace Rodin::Assembly::Internal
               shift(m_execution, offset, count, v.row, 0, indices, Array<Index>());
             offset += count;
           }
-          addEntries(indices, values, rank(segments, "Rodin vector segments"), x, rhs);
+          add(indices, values, rank(segments, "Rodin vector segments"), x, rhs);
           begin = end;
         }
       }

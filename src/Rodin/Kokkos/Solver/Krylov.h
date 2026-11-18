@@ -24,7 +24,7 @@
 
 #include "Rodin/Kokkos/Math/SparseMatrix.h"
 
-namespace Rodin::Solver::Internal
+namespace Rodin::Kokkos::Solver
 {
   /**
    * @brief Device vectors and kernels of a Jacobi preconditioned Krylov
@@ -37,7 +37,7 @@ namespace Rodin::Solver::Internal
    * @tparam Backend Kokkos backend of the matrix.
    */
   template <class Backend>
-  struct KokkosKrylov
+  struct Krylov
   {
     /// @brief Matrix type.
     using MatrixType = ::Rodin::Kokkos::Math::SparseMatrix<Real, Backend>;
@@ -94,7 +94,7 @@ namespace Rodin::Solver::Internal
      * @param host Host vector.
      * @param device Device vector of the same size.
      */
-    static void upload(const ::Rodin::Math::Vector<Real>& host, Vector& device)
+    static void bind(const ::Rodin::Math::Vector<Real>& host, Vector& device)
     {
       const ::Kokkos::View<const Real*, ::Kokkos::HostSpace, ::Kokkos::MemoryUnmanaged>
         h(host.data(), static_cast<size_t>(host.size()));
@@ -106,7 +106,7 @@ namespace Rodin::Solver::Internal
      * @param device Device vector.
      * @param host Host vector, resized.
      */
-    static void download(const Vector& device, ::Rodin::Math::Vector<Real>& host)
+    static void copy(const Vector& device, ::Rodin::Math::Vector<Real>& host)
     {
       host.resize(static_cast<Eigen::Index>(device.extent(0)));
       const ::Kokkos::View<Real*, ::Kokkos::HostSpace, ::Kokkos::MemoryUnmanaged> h(
@@ -118,7 +118,7 @@ namespace Rodin::Solver::Internal
      * @brief Borrows a backend vector without staging through host memory.
      * @param source Backend coefficients. @param destination Receives their view.
      */
-    static void upload(
+    static void bind(
       const ::Rodin::Kokkos::Math::Vector<Real, Backend>& source, Vector& destination)
     {
       destination = source.getView();
@@ -128,7 +128,7 @@ namespace Rodin::Solver::Internal
      * @brief Copies an iterate into backend solution storage when not already shared.
      * @param source Backend iterate. @param destination Backend solution owner.
      */
-    static void download(
+    static void copy(
       const Vector& source, ::Rodin::Kokkos::Math::Vector<Real, Backend>& destination)
     {
       if (source.data() == destination.data())
@@ -271,7 +271,7 @@ namespace Rodin::Solver::Internal
   };
 
   /// @brief Outcome of a Krylov solve on the device.
-  struct KokkosKrylovResult
+  struct KrylovResult
   {
     /// @brief Whether the tolerance was reached.
     bool converged = false;

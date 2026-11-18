@@ -81,7 +81,7 @@ namespace Rodin::Geometry
       {
         m_entityOffsets = upload(IndexVector{0, 0}, "entity offsets");
         m_vertexOffsets = upload(IndexVector{0}, "vertex offsets");
-        publishRelations();
+        publish();
         m_onChange = std::move(onChange);
       }
 
@@ -206,7 +206,7 @@ namespace Rodin::Geometry
             relation.present = true;
           }
         }
-        publishRelations();
+        publish();
         m_onChange = std::move(onChange);
       }
 
@@ -239,7 +239,7 @@ namespace Rodin::Geometry
             relation.indices = Rodin::Kokkos::Internal::clone(execution, source.indices);
           }
         }
-        publishRelations();
+        publish();
         m_onChange = std::move(onChange);
       }
 
@@ -409,7 +409,7 @@ namespace Rodin::Geometry
       /// @param d Source dimension. @param dp Target dimension. @returns Host relation, materialized on demand.
       const Incidence& getIncidence(size_t d, size_t dp) const override
       {
-        checkDimensions(d, dp);
+        check(d, dp);
         std::lock_guard<std::mutex> lock(m_mutex);
         const auto pair = std::make_pair(d, dp);
         auto it = m_relations.find(pair);
@@ -452,7 +452,7 @@ namespace Rodin::Geometry
       {
         if (!getCount(0))
           return *this;
-        checkDimensions(d, dp);
+        check(d, dp);
         const size_t D = getDimension();
         if (d == D && dp == 0)
           return *this;
@@ -490,21 +490,21 @@ namespace Rodin::Geometry
       /// @param d Source dimension. @param dp Target dimension. @returns Whether resident incidence arrays are materialized.
       bool hasIncidence(size_t d, size_t dp) const
       {
-        checkDimensions(d, dp);
+        check(d, dp);
         return m_incidence[d][dp].present;
       }
 
       /// @param d Source dimension. @param dp Target dimension. @returns Whether recomputation is required.
       bool isDirty(size_t d, size_t dp) const
       {
-        checkDimensions(d, dp);
+        check(d, dp);
         return m_incidence[d][dp].dirty;
       }
 
       /// @param d Source dimension. @param dp Target dimension. @param dirty New dirty state. @returns This connectivity.
       Connectivity& setDirty(size_t d, size_t dp, bool dirty = true)
       {
-        checkDimensions(d, dp);
+        check(d, dp);
         auto& relation = m_incidence[d][dp];
         if (relation.dirty != dirty)
         {
@@ -517,12 +517,12 @@ namespace Rodin::Geometry
       /// @param d Source dimension. @param dp Target dimension. @returns This connectivity after clearing the relation.
       Connectivity& clear(size_t d, size_t dp)
       {
-        checkDimensions(d, dp);
+        check(d, dp);
         if (m_incidence[d][dp].present || !m_incidence[d][dp].dirty)
         {
           m_incidence[d][dp] = Relation{};
           m_relations.erase({d, dp});
-          publishRelations();
+          publish();
         }
         return *this;
       }
@@ -1110,7 +1110,7 @@ namespace Rodin::Geometry
       }
 
       /// @param d First dimension. @param dp Second dimension.
-      void checkDimensions(size_t d, size_t dp) const
+      void check(size_t d, size_t dp) const
       {
         if (d > m_dimension || dp > m_dimension)
         {
@@ -1120,7 +1120,7 @@ namespace Rodin::Geometry
       }
 
       /// @brief Publishes the small resident descriptor table after relation replacement.
-      void publishRelations()
+      void publish()
       {
         std::vector<Descriptor> descriptors;
         for (size_t d = 0; d <= m_dimension; ++d)
@@ -1165,16 +1165,13 @@ namespace Rodin::Geometry
       Index scan(const Array<Index>& counts, Array<Index>& offsets) const;
 
       /// @param d Source dimension. @param dp Target dimension. @param entries Candidate incidences. @param ordered Preserve original traversal order, rather than sorted target order.
-      void finishRelation(size_t d, size_t dp, const Array<Entry>& entries, bool ordered);
+      void finish(size_t d, size_t dp, const Array<Entry>& entries, bool ordered);
 
       /// @brief Initializes reference-cell constants without examining resident mesh data.
-      void initializeReference();
+      void initialize();
 
       /// @param d Growing dimension. @param entities New entities in discovery order.
       void appendEntities(size_t d, const Array<Entity>& entities);
-
-      /// @param d Entity dimension. @brief Materializes ordered entity-to-vertex incidence.
-      void vertexRelation(size_t d);
 
       ContextType m_context;
       std::function<void()> m_onChange;
@@ -1206,8 +1203,7 @@ namespace Rodin::Geometry
   }
 
   template <class Backend>
-  void
-  Connectivity<Rodin::Context::Kokkos<Rodin::Context::Local, Backend>>::finishRelation(
+  void Connectivity<Rodin::Context::Kokkos<Rodin::Context::Local, Backend>>::finish(
     size_t d, size_t dp, const Array<Entry>& entries, bool ordered)
   {
     const auto& execution = m_context.getExecutionSpace();
@@ -1231,20 +1227,20 @@ namespace Rodin::Geometry
     next.dirty = false;
     m_incidence[d][dp] = std::move(next);
     m_relations.erase({d, dp});
-    publishRelations();
+    publish();
   }
 
   template <class Backend>
   auto Connectivity<Rodin::Context::Kokkos<Rodin::Context::Local, Backend>>::transpose(
     size_t d, size_t dp) -> Connectivity&
   {
-    checkDimensions(d, dp);
+    check(d, dp);
     assert(d < dp);
     auto entries =
       allocate<Entry>(m_incidence[dp][d].indices.extent(0), "transpose pairs");
     ::Kokkos::parallel_for("Rodin transpose emit", policy(getCount(dp)),
       TransposeEntries{relation(dp, d), entries});
-    finishRelation(d, dp, entries, false);
+    finish(d, dp, entries, false);
     return *this;
   }
 
@@ -1252,8 +1248,8 @@ namespace Rodin::Geometry
   auto Connectivity<Rodin::Context::Kokkos<Rodin::Context::Local, Backend>>::intersection(
     size_t d, size_t dp, size_t pivot) -> Connectivity&
   {
-    checkDimensions(d, dp);
-    checkDimensions(d, pivot);
+    check(d, dp);
+    check(d, pivot);
     assert(d >= dp);
     ComposeEntries work{getView(), relation(d, pivot), relation(pivot, dp),
       allocate<Index>(getCount(d), "composition counts"), {}, {}, d, dp, false};
@@ -1262,13 +1258,12 @@ namespace Rodin::Geometry
     work.entries = allocate<Entry>(total, "composition pairs");
     work.fill = true;
     ::Kokkos::parallel_for("Rodin composition emit", policy(getCount(d)), work);
-    finishRelation(d, dp, work.entries, true);
+    finish(d, dp, work.entries, true);
     return *this;
   }
 
   template <class Backend>
-  void Connectivity<
-    Rodin::Context::Kokkos<Rodin::Context::Local, Backend>>::initializeReference()
+  void Connectivity<Rodin::Context::Kokkos<Rodin::Context::Local, Backend>>::initialize()
   {
     if (m_reference.extent(0))
       return;
@@ -1317,7 +1312,7 @@ namespace Rodin::Geometry
     size_t d, Mode mode) -> Connectivity&
   {
     assert(d > 0 && d < m_dimension);
-    initializeReference();
+    initialize();
     const auto& execution = m_context.getExecutionSpace();
     Discovery work;
     work.topology = getView();
@@ -1391,8 +1386,22 @@ namespace Rodin::Geometry
     auto& r = m_incidence[m_dimension][d];
     r = Relation{work.rowOffsets, work.rowIndices, true, false};
     m_relations.erase({m_dimension, d});
-    vertexRelation(d);
-    publishRelations();
+    // Materialize the discovered entities' ordered vertex incidence.
+    {
+      VertexEntries vertices{getView(), d,
+        allocate<Index>(getCount(d), "vertex incidence counts"), {}, {}, false};
+      ::Kokkos::parallel_for(
+        "Rodin vertex incidence count", policy(getCount(d)), vertices);
+      const Index total = scan(vertices.counts, vertices.offsets);
+      vertices.indices = allocate<Index>(total, "vertex incidence indices");
+      vertices.fill = true;
+      ::Kokkos::parallel_for(
+        "Rodin vertex incidence fill", policy(getCount(d)), vertices);
+      m_context.getExecutionSpace().fence("Rodin vertex incidence");
+      m_incidence[d][0] = Relation{vertices.offsets, vertices.indices, true, false};
+      m_relations.erase({d, 0});
+    }
+    publish();
     return *this;
   }
 
@@ -1438,23 +1447,6 @@ namespace Rodin::Geometry
     }
     m_keys.clear();
     m_types.clear();
-  }
-
-  template <class Backend>
-  void
-  Connectivity<Rodin::Context::Kokkos<Rodin::Context::Local, Backend>>::vertexRelation(
-    size_t d)
-  {
-    VertexEntries work{getView(), d,
-      allocate<Index>(getCount(d), "vertex incidence counts"), {}, {}, false};
-    ::Kokkos::parallel_for("Rodin vertex incidence count", policy(getCount(d)), work);
-    const Index total = scan(work.counts, work.offsets);
-    work.indices = allocate<Index>(total, "vertex incidence indices");
-    work.fill = true;
-    ::Kokkos::parallel_for("Rodin vertex incidence fill", policy(getCount(d)), work);
-    m_context.getExecutionSpace().fence("Rodin vertex incidence");
-    m_incidence[d][0] = Relation{work.offsets, work.indices, true, false};
-    m_relations.erase({d, 0});
   }
 
 }

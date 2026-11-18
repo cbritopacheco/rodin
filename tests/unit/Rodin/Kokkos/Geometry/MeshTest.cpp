@@ -28,6 +28,42 @@ namespace Rodin::Tests::Unit
   using Polytope = Geometry::Polytope;
   static_assert(std::is_same_v<DeviceMesh::Context, TestContext>);
 
+  /// @brief Mesh transfers replace topology and geometry with independent snapshots.
+  TEST(Kokkos_Mesh, UploadDownloadSnapshots)
+  {
+    auto source = HostMesh::UniformGrid(Polytope::Type::Triangle, {3, 3});
+    source.getConnectivity().compute(2, 1);
+    source.setAttribute({2, 0}, Geometry::Attribute(7));
+    const auto original = source.getVertexCoordinates(0);
+    DeviceMesh backend(TestContext{});
+    EXPECT_EQ(&backend.upload(source), &backend);
+    auto moved = original;
+    for (Index i = 0; i < moved.size(); ++i)
+      moved(i) += 1;
+    source.setVertexCoordinates(0, moved);
+    EXPECT_EQ((backend.getVertexCoordinates(0) - original).norm(), 0);
+    const auto& read = backend;
+    auto snapshot = read.download();
+    EXPECT_EQ(snapshot.getCellCount(), source.getCellCount());
+    EXPECT_EQ(snapshot.getFaceCount(), source.getFaceCount());
+    EXPECT_EQ(snapshot.getAttribute(2, 0), Geometry::Attribute(7));
+    EXPECT_EQ((snapshot.getVertexCoordinates(0) - original).norm(), 0);
+    snapshot.setVertexCoordinates(0, moved);
+    EXPECT_EQ((backend.getVertexCoordinates(0) - original).norm(), 0);
+    auto destination = HostMesh::UniformGrid(Polytope::Type::Segment, {2});
+    read.download(destination);
+    EXPECT_EQ(destination.getDimension(), 2u);
+    EXPECT_EQ(destination.getFaceCount(), source.getFaceCount());
+    EXPECT_EQ(destination.getAttribute(2, 0), Geometry::Attribute(7));
+    const auto replacement = HostMesh::UniformGrid(Polytope::Type::Segment, {4});
+    backend.upload(replacement);
+    read.download(destination);
+    EXPECT_EQ(destination.getDimension(), 1u);
+    EXPECT_EQ(destination.getVertexCount(), replacement.getVertexCount());
+    EXPECT_EQ(destination.getCellCount(), replacement.getCellCount());
+    EXPECT_EQ(source.getDimension(), 2u);
+  }
+
   /// @brief Observes entity preparation without reading or materializing a mesh.
   class EntityPreparationTrace
   {

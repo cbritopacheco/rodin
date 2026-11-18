@@ -33,6 +33,76 @@
 
 #include "Rodin/Configure.h"
 
+#include <limits>
+#include <Kokkos_Core.hpp>
+#include "Rodin/Kokkos/Utility.h"
+
+namespace Rodin::Kokkos::Solver
+{
+  /**
+   * @brief Certifies that all factor pivots are finite and nonzero.
+   *
+   * ## Architecture
+   * A Kokkos reduction counts invalid gathered pivots in their memory space.
+   * Only that scalar count returns to the host. The same kernel runs with a
+   * host execution space in tests and with HIP in rocSOLVER. No tolerance or
+   * norm is used, so every finite nonzero pivot is accepted.
+   */
+  struct RocSolverRFPivots
+  {
+    /**
+     * @brief Tests a pivot without introducing a numerical tolerance.
+     * @param value Pivot value.
+     * @return Whether the pivot is finite and nonzero.
+     */
+    KOKKOS_INLINE_FUNCTION static bool valid(double value)
+    {
+      constexpr double Maximum = std::numeric_limits<double>::max();
+      return value != 0 && value >= -Maximum && value <= Maximum;
+    }
+
+    /**
+     * @brief Checks every pivot on the supplied execution space.
+     * @tparam Execution Execution space accessing the pivot view.
+     * @tparam View One-dimensional view of factor pivots.
+     * @param execution Execution instance on which the pivots are ready.
+     * @param values Gathered pivots, which may be empty.
+     * @return Whether every pivot is finite and nonzero, after reduction completion.
+     */
+    template <class Execution, class View>
+    static bool check(const Execution& execution, const View& values)
+    {
+      static_assert(::Kokkos::SpaceAccessibility<Execution,
+        typename View::memory_space>::accessible);
+      size_t invalid = 0;
+      ::Kokkos::parallel_reduce("Rodin rocSOLVER check pivots",
+        ::Kokkos::RangePolicy<Execution, ::Kokkos::IndexType<size_t>>(
+          execution, 0, values.extent(0)),
+        Check<View>{values}, invalid);
+      ::Rodin::Kokkos::Internal::checkLaunches("Rodin rocSOLVER check pivots");
+      return invalid == 0;
+    }
+
+    /// @brief Counts invalid pivots without copying their values to the host.
+    template <class View>
+    struct Check
+    {
+      /// @brief Device pivots to inspect.
+      View values;
+
+      /**
+       * @param i Pivot index.
+       * @param invalid Number of invalid pivots in the reduction.
+       */
+      KOKKOS_INLINE_FUNCTION void operator()(size_t i, size_t& invalid) const
+      {
+        if (!valid(values(i)))
+          ++invalid;
+      }
+    };
+  };
+}
+
 #ifdef RODIN_USE_ROCSOLVER
 
 #include <algorithm>
@@ -56,11 +126,12 @@
 #include "Rodin/Math/SparseMatrix.h"
 #include "Rodin/Math/Vector.h"
 
-#include "Rodin/Solver/CuDSSOperator.h"
+#include "CuDSSOperator.h"
+#include "CuDSSVector.h"
 #include "Rodin/Solver/ForwardDecls.h"
 #include "Rodin/Solver/Info.h"
 #include "Rodin/Solver/LinearSolver.h"
-#include "RocSolverRFPivots.h"
+#include "CompressedPattern.h"
 #include "Rodin/Kokkos/Math/SparseMatrix.h"
 
 namespace Rodin::FormLanguage
@@ -71,233 +142,6 @@ namespace Rodin::FormLanguage
     /// @brief Linear system type.
     using LinearSystemType = LinearSystem;
   };
-}
-
-namespace Rodin::Solver::Internal
-{
-  /// @brief Compressed pattern of a square matrix, without values.
-  struct CompressedPattern
-  {
-    /// @brief Start of every compressed line, followed by the entry count.
-    std::vector<Math::SparseIndex> starts;
-
-    /// @brief Index of every entry in its compressed line.
-    std::vector<Math::SparseIndex> indices;
-  };
-
-  /**
-   * @brief Transposes the pattern of a square matrix.
-   *
-   * The indices of every line of the result are sorted.
-   *
-   * @param n Order of the matrix.
-   * @param starts Line starts of the compressed arrays.
-   * @param indices Indices of the compressed arrays.
-   * @param[out] positions Position in @p indices of every entry of the result.
-   * @returns Pattern of the transpose.
-   */
-  inline CompressedPattern transpose(Index n, const Math::SparseIndex* starts,
-    const Math::SparseIndex* indices, std::vector<Math::SparseIndex>& positions)
-  {
-    const Index nonzeros = static_cast<Index>(starts[n]);
-    CompressedPattern res;
-    res.starts.assign(n + 1, 0);
-    res.indices.resize(nonzeros);
-    positions.resize(nonzeros);
-    for (Index k = 0; k < nonzeros; ++k)
-      ++res.starts[indices[k] + 1];
-    for (Index i = 0; i < n; ++i)
-      res.starts[i + 1] += res.starts[i];
-    std::vector<Math::SparseIndex> next(res.starts.begin(), res.starts.end() - 1);
-    for (Index line = 0; line < n; ++line)
-    {
-      for (Math::SparseIndex k = starts[line]; k < starts[line + 1]; ++k)
-      {
-        const Math::SparseIndex at = next[indices[k]]++;
-        res.indices[at] = static_cast<Math::SparseIndex>(line);
-        positions[at] = k;
-      }
-    }
-    return res;
-  }
-
-  /**
-   * @brief Computes the CSR pattern of the Cholesky factor of
-   * @f$ Q^T (A + A^T) Q @f$.
-   *
-   * The elimination tree is built first, and the pattern of every row is
-   * then the set of nodes reached by climbing the tree from the entries of
-   * the row below the diagonal. The cost is proportional to the number of
-   * entries of the factor. The diagonal closes every row.
-   *
-   * @param n Order of the matrix.
-   * @param starts Line starts of the compressed arrays of @f$ A @f$ or @f$ A^T @f$.
-   * @param indices Indices of the compressed arrays.
-   * @param q Original index of every position of the ordering.
-   * @returns Pattern of the lower triangular factor, rows sorted.
-   */
-  inline CompressedPattern choleskyPattern(Index n, const Math::SparseIndex* starts,
-    const Math::SparseIndex* indices, const std::vector<Math::SparseIndex>& q)
-  {
-    std::vector<Math::SparseIndex> position(n);
-    for (Index k = 0; k < n; ++k)
-      position[q[k]] = static_cast<Math::SparseIndex>(k);
-
-    // Strictly lower rows of the permuted symmetric pattern.
-    CompressedPattern lower;
-    lower.starts.assign(n + 1, 0);
-    for (Index line = 0; line < n; ++line)
-    {
-      for (Math::SparseIndex k = starts[line]; k < starts[line + 1]; ++k)
-      {
-        const Math::SparseIndex a = position[line];
-        const Math::SparseIndex b = position[indices[k]];
-        if (a != b)
-          ++lower.starts[std::max(a, b) + 1];
-      }
-    }
-    for (Index i = 0; i < n; ++i)
-      lower.starts[i + 1] += lower.starts[i];
-    lower.indices.resize(lower.starts[n]);
-    std::vector<Math::SparseIndex> next(lower.starts.begin(), lower.starts.end() - 1);
-    for (Index line = 0; line < n; ++line)
-    {
-      for (Math::SparseIndex k = starts[line]; k < starts[line + 1]; ++k)
-      {
-        const Math::SparseIndex a = position[line];
-        const Math::SparseIndex b = position[indices[k]];
-        if (a != b)
-          lower.indices[next[std::max(a, b)]++] = std::min(a, b);
-      }
-    }
-
-    // Elimination tree, with path compression through the ancestors.
-    std::vector<Math::SparseIndex> parent(n, -1);
-    std::vector<Math::SparseIndex> ancestor(n, -1);
-    for (Index row = 0; row < n; ++row)
-    {
-      for (Math::SparseIndex k = lower.starts[row]; k < lower.starts[row + 1]; ++k)
-      {
-        Math::SparseIndex node = lower.indices[k];
-        while (node != -1 && node < static_cast<Math::SparseIndex>(row))
-        {
-          const Math::SparseIndex up = ancestor[node];
-          ancestor[node] = static_cast<Math::SparseIndex>(row);
-          if (up == -1)
-            parent[node] = static_cast<Math::SparseIndex>(row);
-          node = up;
-        }
-      }
-    }
-
-    // Row patterns, as the subtrees reached from the entries of each row.
-    CompressedPattern res;
-    res.starts.reserve(n + 1);
-    res.starts.push_back(0);
-    std::vector<Math::SparseIndex> mark(n, -1);
-    for (Index row = 0; row < n; ++row)
-    {
-      const Math::SparseIndex r = static_cast<Math::SparseIndex>(row);
-      const size_t first = res.indices.size();
-      mark[row] = r;
-      for (Math::SparseIndex k = lower.starts[row]; k < lower.starts[row + 1]; ++k)
-      {
-        for (Math::SparseIndex node = lower.indices[k]; node != -1 && mark[node] != r;
-             node = parent[node])
-        {
-          mark[node] = r;
-          res.indices.push_back(node);
-        }
-      }
-      std::sort(res.indices.begin() + first, res.indices.end());
-      res.indices.push_back(r);
-      res.starts.push_back(static_cast<Math::SparseIndex>(res.indices.size()));
-    }
-    return res;
-  }
-
-  /**
-   * @brief Computes the CSR pattern of @f$ (L - I) + U @f$ for the LU
-   * factorization of @f$ PAQ @f$ without further pivoting.
-   *
-   * Every column of the factors is the set of rows reached in the graph of
-   * the previous columns of @f$ L @f$ from the entries of the column of
-   * @f$ PAQ @f$, as in the left-looking algorithm of Gilbert and Peierls.
-   * The cost is that of the reachability searches, bounded by the number of
-   * operations of the factorization. The diagonal is always kept.
-   *
-   * @param n Order of the matrix.
-   * @param starts Column starts of the CSC arrays of @f$ A @f$.
-   * @param indices Row indices of the CSC arrays of @f$ A @f$.
-   * @param p Original row of every pivot row.
-   * @param q Original column of every pivot column.
-   * @returns Pattern of the bundled factors, rows sorted.
-   */
-  inline CompressedPattern luPattern(Index n, const Math::SparseIndex* starts,
-    const Math::SparseIndex* indices, const std::vector<Math::SparseIndex>& p,
-    const std::vector<Math::SparseIndex>& q)
-  {
-    std::vector<Math::SparseIndex> pivot(n);
-    for (Index k = 0; k < n; ++k)
-      pivot[p[k]] = static_cast<Math::SparseIndex>(k);
-
-    // Strictly lower part of the columns of L computed so far.
-    CompressedPattern l;
-    l.starts.reserve(n + 1);
-    l.starts.push_back(0);
-
-    // Every column of the bundle, rows unsorted.
-    CompressedPattern t;
-    t.starts.reserve(n + 1);
-    t.starts.push_back(0);
-
-    std::vector<Math::SparseIndex> mark(n, -1);
-    std::vector<Math::SparseIndex> stack;
-    for (Index column = 0; column < n; ++column)
-    {
-      const Math::SparseIndex j = static_cast<Math::SparseIndex>(column);
-      mark[j] = j;
-      t.indices.push_back(j);
-      for (Math::SparseIndex k = starts[q[column]]; k < starts[q[column] + 1]; ++k)
-      {
-        const Math::SparseIndex row = pivot[indices[k]];
-        if (mark[row] != j)
-        {
-          mark[row] = j;
-          stack.push_back(row);
-        }
-      }
-      while (!stack.empty())
-      {
-        const Math::SparseIndex node = stack.back();
-        stack.pop_back();
-        t.indices.push_back(node);
-        if (node < j)
-        {
-          for (Math::SparseIndex k = l.starts[node]; k < l.starts[node + 1]; ++k)
-          {
-            const Math::SparseIndex row = l.indices[k];
-            if (mark[row] != j)
-            {
-              mark[row] = j;
-              stack.push_back(row);
-            }
-          }
-        }
-      }
-      for (size_t k = t.starts.back(); k < t.indices.size(); ++k)
-      {
-        if (t.indices[k] > j)
-          l.indices.push_back(t.indices[k]);
-      }
-      l.starts.push_back(static_cast<Math::SparseIndex>(l.indices.size()));
-      t.starts.push_back(static_cast<Math::SparseIndex>(t.indices.size()));
-    }
-
-    // The columns are visited in order, so the transpose has sorted rows.
-    std::vector<Math::SparseIndex> positions;
-    return transpose(n, t.starts.data(), t.indices.data(), positions);
-  }
 }
 
 namespace Rodin::Solver
@@ -377,7 +221,7 @@ namespace Rodin::Solver
    *
    * | Specialization | Description |
    * |----------------|-------------|
-   * | @ref RocSolverRF "RocSolverRF<Math::LinearSystem<Matrix, Math::Vector<Real>>>" | Real double-precision sparse systems whose matrix has an Internal::CuDSSOperator. |
+   * | @ref RocSolverRF "RocSolverRF<Math::LinearSystem<Matrix, Math::Vector<Real>>>" | Real double-precision sparse systems whose matrix has a CuDSSOperator. |
    *
    * @tparam Matrix Math::SparseMatrix<Real> or Kokkos::Math::SparseMatrix<Real, Backend>.
    */
@@ -386,7 +230,7 @@ namespace Rodin::Solver
     : public LinearSolverBase<Math::LinearSystem<Matrix, VectorType_>>
   {
     /// @brief Access to the compressed arrays of the matrix.
-    using Arrays = Internal::CuDSSOperator<Matrix>;
+    using Arrays = CuDSSOperator<Matrix>;
 
     static_assert(!(Arrays::Resident && Arrays::Transposed),
       "A device matrix must hold the CSR arrays of the matrix itself.");
@@ -793,7 +637,7 @@ namespace Rodin::Solver
 
         auto& res = m_resources;
         copy(res.b.data, axb.getVector().data(), res.rows,
-          Internal::CuDSSVector<VectorType>::Resident ? hipMemcpyDeviceToDevice
+          CuDSSVector<VectorType>::Resident ? hipMemcpyDeviceToDevice
                                                       : hipMemcpyHostToDevice);
         const rocblas_status status =
           rocsolver_dcsrrf_solve(res.handle, res.rows, 1, res.factorNonzeros,
@@ -803,7 +647,7 @@ namespace Rodin::Solver
           return;
         VectorType x(res.rows);
         copy(x.data(), res.b.data, res.rows,
-          Internal::CuDSSVector<VectorType>::Resident ? hipMemcpyDeviceToDevice
+          CuDSSVector<VectorType>::Resident ? hipMemcpyDeviceToDevice
                                                       : hipMemcpyDeviceToHost);
         if (!x.allFinite())
         {
@@ -867,7 +711,7 @@ namespace Rodin::Solver
         using Pivots = ::Kokkos::View<const ScalarType*, ::Kokkos::HIPSpace,
           ::Kokkos::MemoryTraits<::Kokkos::Unmanaged>>;
         const ::Kokkos::HIP execution(stream);
-        if (!Internal::RocSolverRFPivots::check(
+        if (!::Rodin::Kokkos::Solver::RocSolverRFPivots::check(
               execution, Pivots(res.pivots.data, res.rows)))
         {
           record(Breakdown, Factorization::Symbolic);
@@ -909,9 +753,10 @@ namespace Rodin::Solver
         }
 
         // CSR arrays for rocSOLVER and CSC arrays for UMFPACK.
-        Internal::CompressedPattern other;
+        ::Rodin::Kokkos::Solver::CompressedPattern other;
         std::vector<Math::SparseIndex> positions;
-        other = Internal::transpose(rows, starts, indices, positions);
+        other = ::Rodin::Kokkos::Solver::CompressedPattern::Transpose(
+          rows, starts, indices, positions);
         std::vector<ScalarType> otherValues(nonzeros);
         for (Index k = 0; k < nonzeros; ++k)
           otherValues[k] = values[positions[k]];
@@ -931,7 +776,7 @@ namespace Rodin::Solver
         // Pivot order and pattern of the factors.
         std::vector<Math::SparseIndex> p(rows);
         std::vector<Math::SparseIndex> q(rows);
-        Internal::CompressedPattern factors;
+        ::Rodin::Kokkos::Solver::CompressedPattern factors;
         if (m_symmetry == Symmetry::PositiveDefinite)
         {
           // AMD orders the pattern of A + A^T, which it builds from a matrix
@@ -946,7 +791,8 @@ namespace Rodin::Solver
           for (Index k = 0; k < rows; ++k)
             q[k] = ordering.indices()[k];
           p = q;
-          factors = Internal::choleskyPattern(rows, cscStarts, cscIndices, q);
+          factors = ::Rodin::Kokkos::Solver::CompressedPattern::Cholesky(
+            rows, cscStarts, cscIndices, q);
         }
         else
         {
@@ -956,7 +802,8 @@ namespace Rodin::Solver
             record(static_cast<Integer>(status), Optional<Factorization>{});
             return false;
           }
-          factors = Internal::luPattern(rows, cscStarts, cscIndices, p, q);
+          factors = ::Rodin::Kokkos::Solver::CompressedPattern::LU(
+            rows, cscStarts, cscIndices, p, q);
         }
 
         // Device arrays.

@@ -85,7 +85,7 @@ namespace Rodin::Variational
        */
       P1(const MeshType& mesh) requires std::is_same_v<RangeType, Real>
         : m_mesh(mesh), m_host(mesh.getHost()), m_local(mesh.getLocal()),
-          m_numberingRevision(::Rodin::Kokkos::Internal::GhostedPositions<
+          m_revision(::Rodin::Kokkos::Internal::GhostedPositions<
             typename MeshType::MemorySpace>::nextRevision())
       {}
 
@@ -98,7 +98,7 @@ namespace Rodin::Variational
         : m_mesh(mesh),
           m_host(mesh.getHost(), vdim),
           m_local(mesh.getLocal(), vdim),
-          m_numberingRevision(::Rodin::Kokkos::Internal::GhostedPositions<
+          m_revision(::Rodin::Kokkos::Internal::GhostedPositions<
             typename MeshType::MemorySpace>::nextRevision())
       {}
       // clang-format on
@@ -112,7 +112,7 @@ namespace Rodin::Variational
           m_mesh(other.m_mesh),
           m_host(other.m_host),
           m_local(other.m_local),
-          m_numberingRevision(::Rodin::Kokkos::Internal::GhostedPositions<
+          m_revision(::Rodin::Kokkos::Internal::GhostedPositions<
             typename MeshType::MemorySpace>::nextRevision())
       {}
 
@@ -125,7 +125,7 @@ namespace Rodin::Variational
           m_mesh(std::move(other.m_mesh)),
           m_host(std::move(other.m_host)),
           m_local(std::move(other.m_local)),
-          m_numberingRevision(::Rodin::Kokkos::Internal::GhostedPositions<
+          m_revision(::Rodin::Kokkos::Internal::GhostedPositions<
             typename MeshType::MemorySpace>::nextRevision())
       {}
 
@@ -249,16 +249,16 @@ namespace Rodin::Variational
        * @brief Identifies this space's fixed distributed numbering.
        * @returns Revision distinct from other constructed, copied or moved spaces.
        */
-      std::uint64_t getNumberingRevision() const
+      std::uint64_t getRevision() const
       {
-        return m_numberingRevision;
+        return m_revision;
       }
 
     private:
       std::reference_wrapper<const MeshType> m_mesh;
       HostType m_host;
       LocalType m_local;
-      const std::uint64_t m_numberingRevision;
+      const std::uint64_t m_revision;
   };
 }
 

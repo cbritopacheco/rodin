@@ -65,7 +65,7 @@ from the system type.
   device as the CSR arrays of the transpose and solves with the transpose,
   so a general matrix needs no conversion. On a `Kokkos::Math::SparseMatrix` in
   device memory it reads the CSR arrays in place and only copies the
-  right-hand side and the solution; `Internal::CuDSSOperator` describes
+  right-hand side and the solution; `CuDSSOperator` describes
   both layouts. Like `MUMPS`, it retains the analysis
   and the factors: `solve` reuses them, `factorize(axb)` refactorizes after
   the values change and keeps the analysis, and a changed pattern automatically
@@ -312,10 +312,13 @@ The PETSc bridge is implemented under `PETSc/Kokkos`: `Assembly/Distribution.h`
 translates FEM indices to PETSc ownership, `COOCache.h` owns symbolic state,
 `COOAssembly.h` keeps the COO algorithm and its numerical submission together,
 and `Assembly/Kokkos.h` contains the existing assembly policy specializations.
-`Variational/GridFunctionCoefficients.h` owns PETSc vector access independently
+`Variational/GridFunctionData.h` owns PETSc vector access independently
 of matrix assembly. The public Kokkos PETSc headers forward to this bridge.
 `Rodin::Kokkos::MPI` and its mesh/space umbrella do not depend on PETSc.
-Borrowed host meshes must outlive distributed Kokkos meshes. Coefficient ghost
+Distributed Kokkos meshes own independent host metadata snapshots; geometry
+and attribute mutations update both owned representations without communication.
+Topology replacement requires explicit ownership preparation and space rebuilding.
+Coefficient ghost
 updates remain the caller's responsibility; the bridge consumes borrowed
 PETSc arrays before restoring access and caches owned local gathers by state.
 

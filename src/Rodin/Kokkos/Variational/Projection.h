@@ -142,14 +142,13 @@ namespace Rodin::Variational
              "interface."
           << Alert::Raise;
       }
-      const size_t d =
-        ::Rodin::Kokkos::Variational::Internal::getRegionDimension(dimension, region);
+      const size_t d = ::Rodin::Kokkos::Geometry::getRegionDimension(dimension, region);
       const auto& execution = mesh.getContext().getExecutionSpace();
       const auto dofs = fes.getDOFsView();
       const Index stride = dofs.getStride();
       const Index vdim = fes.getVectorDimension();
       const auto attributes =
-        ::Rodin::Kokkos::Variational::Internal::uploadAttributes(execution, attrs);
+        ::Rodin::Kokkos::Geometry::uploadAttributes(execution, attrs);
       // Zero marks the degrees of freedom outside the selection.
       ::Kokkos::View<Index*, MemorySpace> owners(
         ::Kokkos::view_alloc(execution, std::string("Rodin projection owners")),
@@ -314,7 +313,7 @@ namespace Rodin::Variational
       KOKKOS_INLINE_FUNCTION void operator()(Index i) const
       {
         const auto polytope = view.getPolytope(d, i);
-        if (!::Rodin::Kokkos::Variational::isIntegrated(
+        if (!::Rodin::Kokkos::Geometry::isIntegrated(
               view, region, polytope, attributes) ||
           !select(polytope))
           return;
@@ -380,7 +379,7 @@ namespace Rodin::Variational
       KOKKOS_INLINE_FUNCTION void operator()(Index i) const
       {
         const auto polytope = view.getPolytope(d, i);
-        if (!::Rodin::Kokkos::Variational::isIntegrated(
+        if (!::Rodin::Kokkos::Geometry::isIntegrated(
               view, region, polytope, attributes) ||
           !select(polytope))
           return;

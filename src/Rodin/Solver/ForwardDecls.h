@@ -381,26 +381,23 @@ namespace Rodin::Solver
   class RocSolverRF;
 #endif
 
-  namespace Internal
-  {
-    /**
-     * @brief How the GPU direct solvers, CuDSS and RocSolverRF, read the
-     * compressed arrays of a matrix type.
-     * @tparam Matrix Operator type of the linear system.
-     *
-     * A specialization provides the compressed arrays as the CSR arrays of
-     * the matrix, or of its transpose, and tells whether they are in device
-     * memory. It needs no GPU header, so that the module defining the
-     * matrix type defines it.
-     *
-     * | Specialization | Description |
-     * |----------------|-------------|
-     * | CuDSSOperator<Math::SparseMatrix<Real>> | Host CSC arrays, the CSR arrays of the transpose. |
-     * | CuDSSOperator<Kokkos::Math::SparseMatrix<Real, Backend>> | CSR arrays in the memory of a Kokkos backend. |
-     */
-    template <class Matrix>
-    struct CuDSSOperator;
-  }
+  /**
+   * @brief How the GPU direct solvers, CuDSS and RocSolverRF, read the
+   * compressed arrays of a matrix type.
+   * @tparam Matrix Operator type of the linear system.
+   *
+   * A specialization provides the compressed arrays as the CSR arrays of
+   * the matrix, or of its transpose, and tells whether they are in device
+   * memory. It needs no GPU header, so that the module defining the
+   * matrix type defines it.
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | CuDSSOperator<Math::SparseMatrix<Real>> | Host CSC arrays, the CSR arrays of the transpose. |
+   * | CuDSSOperator<Kokkos::Math::SparseMatrix<Real, Backend>> | CSR arrays in the memory of a Kokkos backend. |
+   */
+  template <class Matrix>
+  struct CuDSSOperator;
 
 #ifdef RODIN_USE_CHOLMOD
   /**
@@ -422,7 +419,7 @@ namespace Rodin::Solver
 #endif
 }
 
-namespace Rodin::Solver::Internal
+namespace Rodin::Solver
 {
   /**
    * @brief Whether coefficient storage can be read directly by GPU solvers.

@@ -321,9 +321,9 @@ namespace Rodin::Solver
           if (static_cast<size_t>(system.getSolution().size()) != n)
             system.getSolution().setZero(n);
         }
-        upload(system.getVector(), b);
+        bind(system.getVector(), b);
         if (static_cast<size_t>(system.getSolution().size()) == n)
-          upload(system.getSolution(), x);
+          bind(system.getSolution(), x);
         else
           ::Kokkos::deep_copy(x, Real(0));
         // hypre runs on its own streams.
@@ -378,7 +378,7 @@ namespace Rodin::Solver
                 objects.x, static_cast<HYPRE_Int>(n), nullptr, x.data()),
           "HYPRE_IJVectorGetValues");
         ::Kokkos::fence();
-        download(x, system.getSolution());
+        copy(x, system.getSolution());
       }
 
       /**
@@ -728,14 +728,14 @@ namespace Rodin::Solver
       }
 
       /// @param source Backend coefficients. @param destination Borrowed backend view.
-      static void upload(const ::Rodin::Kokkos::Math::Vector<Real, Backend>& source,
+      static void bind(const ::Rodin::Kokkos::Math::Vector<Real, Backend>& source,
         Array<Real>& destination)
       {
         destination = source.getView();
       }
 
       /// @param source Backend iterate. @param destination Backend solution owner.
-      static void download(const Array<Real>& source,
+      static void copy(const Array<Real>& source,
         ::Rodin::Kokkos::Math::Vector<Real, Backend>& destination)
       {
         if (source.data() == destination.data())
@@ -749,8 +749,7 @@ namespace Rodin::Solver
        * @param host Host vector.
        * @param device Array of the same size.
        */
-      static void upload(
-        const ::Rodin::Math::Vector<Real>& host, const Array<Real>& device)
+      static void bind(const ::Rodin::Math::Vector<Real>& host, const Array<Real>& device)
       {
         const ::Kokkos::View<const Real*, ::Kokkos::HostSpace, ::Kokkos::MemoryUnmanaged>
           h(host.data(), static_cast<size_t>(host.size()));
@@ -762,7 +761,7 @@ namespace Rodin::Solver
        * @param device Array.
        * @param host Host vector, resized.
        */
-      static void download(const Array<Real>& device, ::Rodin::Math::Vector<Real>& host)
+      static void copy(const Array<Real>& device, ::Rodin::Math::Vector<Real>& host)
       {
         host.resize(static_cast<Eigen::Index>(device.extent(0)));
         const ::Kokkos::View<Real*, ::Kokkos::HostSpace, ::Kokkos::MemoryUnmanaged> h(

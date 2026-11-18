@@ -39,7 +39,8 @@
 #include "Rodin/Math/SparseMatrix.h"
 #include "Rodin/Math/Vector.h"
 
-#include "Rodin/Solver/CuDSSOperator.h"
+#include "CuDSSOperator.h"
+#include "CuDSSVector.h"
 #include "Rodin/Solver/ForwardDecls.h"
 #include "Rodin/Solver/Info.h"
 #include "Rodin/Solver/LinearSolver.h"
@@ -118,7 +119,7 @@ namespace Rodin::Solver
    *
    * | Specialization | Description |
    * |----------------|-------------|
-   * | @ref CuDSS "CuDSS<Math::LinearSystem<Matrix, Math::Vector<Real>>>" | Real double-precision sparse systems whose matrix has an Internal::CuDSSOperator. |
+   * | @ref CuDSS "CuDSS<Math::LinearSystem<Matrix, Math::Vector<Real>>>" | Real double-precision sparse systems whose matrix has a CuDSSOperator. |
    *
    * @tparam Matrix Math::SparseMatrix<Real> or Kokkos::Math::SparseMatrix<Real, Backend>.
    */
@@ -127,7 +128,7 @@ namespace Rodin::Solver
     : public LinearSolverBase<Math::LinearSystem<Matrix, VectorType_>>
   {
     /// @brief Access to the compressed arrays of the matrix.
-    using Arrays = Internal::CuDSSOperator<Matrix>;
+    using Arrays = CuDSSOperator<Matrix>;
 
     public:
       using ScalarType = Real;
@@ -544,7 +545,7 @@ namespace Rodin::Solver
 
         auto& res = m_resources;
         configure();
-        if constexpr (Internal::CuDSSVector<VectorType>::Resident)
+        if constexpr (CuDSSVector<VectorType>::Resident)
         {
           check(cudaMemcpy(res.b.data, axb.getVector().data(),
                   res.rows * sizeof(ScalarType), cudaMemcpyDeviceToDevice),
@@ -557,7 +558,7 @@ namespace Rodin::Solver
         VectorType& x = axb.getSolution();
         x.resize(res.rows);
         check(cudaMemcpy(x.data(), res.x.data, res.rows * sizeof(ScalarType),
-                Internal::CuDSSVector<VectorType>::Resident ? cudaMemcpyDeviceToDevice
+                CuDSSVector<VectorType>::Resident ? cudaMemcpyDeviceToDevice
                                                             : cudaMemcpyDeviceToHost),
           "copy the solution");
         record(0, Factorization::Numeric);

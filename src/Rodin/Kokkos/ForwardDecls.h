@@ -67,11 +67,20 @@ namespace Rodin::Kokkos::Math
   class SparseMatrix;
 }
 
+namespace Rodin::Kokkos::Math
+{
+  class SpatialVector;
+
+  class SpatialMatrix;
+}
+
 namespace Rodin::Kokkos::Geometry
 {
-  class Vector;
+  /// @brief Compatibility name of the device-callable spatial vector.
+  using Vector = ::Rodin::Kokkos::Math::SpatialVector;
 
-  class Matrix;
+  /// @brief Compatibility name of the device-callable spatial matrix.
+  using Matrix = ::Rodin::Kokkos::Math::SpatialMatrix;
 
   struct IncidenceDescriptor;
 

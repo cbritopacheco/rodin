@@ -128,9 +128,9 @@ namespace Rodin::Assembly
           input.getTrialFES().getMesh().getContext().getExecutionSpace(),
           input.getTestFES().getSize(), input.getTrialFES().getSize(), &m_symbolic);
         for (auto& lbfi : input.getLocalBFIs())
-          system.addMatrix(lbfi, 0, 0);
+          system.add(lbfi, 0, 0);
         for (auto& gbfi : input.getGlobalBFIs())
-          system.addMatrix(gbfi, 0, 0);
+          system.add(gbfi, 0, 0);
         system.finish(&res, static_cast<::Rodin::Math::Vector<Real>*>(nullptr));
       }
 
@@ -230,7 +230,7 @@ namespace Rodin::Assembly
           input.getFES().getMesh().getContext().getExecutionSpace(),
           input.getFES().getSize(), 0, &m_symbolic);
         for (auto& lfi : input.getLFIs())
-          system.addVector(lfi, 0, Real(1));
+          system.add(lfi, 0, Real(1));
         system.finish(nullptr, &res);
       }
 
@@ -398,18 +398,18 @@ namespace Rodin::Assembly
             system.identify(pbc, 0);
         }
         for (auto& lbfi : pb.getLocalBFIs())
-          system.addMatrix(lbfi, 0, 0);
+          system.add(lbfi, 0, 0);
         for (auto& gbfi : pb.getGlobalBFIs())
-          system.addMatrix(gbfi, 0, 0);
+          system.add(gbfi, 0, 0);
         {
           for (const auto& bf : pb.getBFs())
-            system.addMatrix(bf.getOperator(), 0, 0);
+            system.add(bf.getOperator(), 0, 0);
         }
         // The problem reads a(u, v) + l(v) = 0, so b = -l.
         for (auto& lfi : pb.getLFIs())
-          system.addVector(lfi, 0, Real(-1));
+          system.add(lfi, 0, Real(-1));
         for (const auto& lf : pb.getLFs())
-          system.addVector(lf.getVector(), 0);
+          system.add(lf.getVector(), 0);
         Internal::finish(system, axb);
       }
 
@@ -556,28 +556,28 @@ namespace Rodin::Assembly
           system.identify(pbc, trialOffset(pbc.getOperand().getUUID()));
         for (auto& lbfi : pb.getLocalBFIs())
         {
-          system.addMatrix(lbfi, testOffset(lbfi.getTestFunction().getUUID()),
+          system.add(lbfi, testOffset(lbfi.getTestFunction().getUUID()),
             trialOffset(lbfi.getTrialFunction().getUUID()));
         }
         for (auto& gbfi : pb.getGlobalBFIs())
         {
-          system.addMatrix(gbfi, testOffset(gbfi.getTestFunction().getUUID()),
+          system.add(gbfi, testOffset(gbfi.getTestFunction().getUUID()),
             trialOffset(gbfi.getTrialFunction().getUUID()));
         }
         // The problem reads a(u, v) + l(v) = 0, so b = -l. The host adds the
         // linear integrators before the preassembled forms, which matters
         // for the values they lift.
         for (auto& lfi : pb.getLFIs())
-          system.addVector(lfi, testOffset(lfi.getTestFunction().getUUID()), Real(-1));
+          system.add(lfi, testOffset(lfi.getTestFunction().getUUID()), Real(-1));
         {
           for (const auto& bf : pb.getBFs())
           {
-            system.addMatrix(bf.getOperator(), testOffset(bf.getTestFunction().getUUID()),
+            system.add(bf.getOperator(), testOffset(bf.getTestFunction().getUUID()),
               trialOffset(bf.getTrialFunction().getUUID()));
           }
         }
         for (const auto& lf : pb.getLFs())
-          system.addVector(lf.getVector(), testOffset(lf.getTestFunction().getUUID()));
+          system.add(lf.getVector(), testOffset(lf.getTestFunction().getUUID()));
         Internal::finish(system, axb);
       }
 
@@ -715,8 +715,7 @@ namespace Rodin::Assembly
         // waits for the device.
         if (!m_boundary || *m_boundary != essBdr)
         {
-          m_attributes =
-            ::Rodin::Kokkos::Variational::Internal::uploadAttributes(execution, essBdr);
+          m_attributes = ::Rodin::Kokkos::Geometry::uploadAttributes(execution, essBdr);
           m_boundary = essBdr;
         }
         const auto attributes = m_attributes;
@@ -1043,7 +1042,7 @@ namespace Rodin::Assembly
             view.getConnectivity().getIncidence(d - 1, d, f).size() == 1;
         }
         const auto face = view.getPolytope(d - 1, f);
-        return ::Rodin::Kokkos::Variational::isSelected(face, attributes);
+        return ::Rodin::Kokkos::Geometry::isSelected(face, attributes);
       }
 
       /**

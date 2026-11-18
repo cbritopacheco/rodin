@@ -20,7 +20,7 @@ namespace Rodin::Tests::Unit
     static_assert(requires(const Cache& adapter) { adapter.getView(); });
     static_assert(
       !requires(const Cache& adapter, const FES& space) { adapter.setSpace(space); });
-    using Coefficients = ::Rodin::Kokkos::Variational::GridFunctionCoefficients<::Vec>;
+    using DataAccess = ::Rodin::Kokkos::Variational::GridFunctionData<::Vec>;
     PETSc::Variational::GridFunction field(fes);
     field = Real(2);
     field.sync();
@@ -39,14 +39,14 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(prepared.getView().positions.data(), table.positions.data());
     EXPECT_EQ(
       Cache::of(data).setSpace(fes).getView().positions.data(), table.positions.data());
-    const auto original = Coefficients::getView(fes, data);
-    EXPECT_EQ(Coefficients::getView(fes, data).data(), original.data());
+    const auto original = DataAccess::prepare(fes, data);
+    EXPECT_EQ(DataAccess::prepare(fes, data).data(), original.data());
     field = Real(3);
     field.sync();
     EXPECT_EQ(prepared.getView().positions.data(), table.positions.data());
     EXPECT_EQ(
       Cache::of(data).setSpace(fes).getView().positions.data(), table.positions.data());
-    const auto updated = Coefficients::getView(fes, data);
+    const auto updated = DataAccess::prepare(fes, data);
     const auto updatedHost =
       ::Kokkos::create_mirror_view_and_copy(::Kokkos::HostSpace{}, updated);
     for (size_t i = 0; i < updatedHost.extent(0); ++i)
@@ -60,17 +60,17 @@ namespace Rodin::Tests::Unit
     PETSc::Variational::GridFunction another(fes);
     another = Real(4);
     another.sync();
-    const auto fresh = Coefficients::getView(fes, another.getData());
-    EXPECT_EQ(Coefficients::getView(fes, another.getData()).data(), fresh.data());
+    const auto fresh = DataAccess::prepare(fes, another.getData());
+    EXPECT_EQ(DataAccess::prepare(fes, another.getData()).data(), fresh.data());
     const auto separate = Cache::of(another.getData()).setSpace(fes).getView();
     EXPECT_NE(separate.positions.data(), table.positions.data());
 
     FES copied(fes);
-    EXPECT_NE(copied.getNumberingRevision(), fes.getNumberingRevision());
+    EXPECT_NE(copied.getRevision(), fes.getRevision());
     const auto copiedTable = Cache::of(data).setSpace(copied).getView();
     EXPECT_NE(copiedTable.positions.data(), table.positions.data());
     FES moved(std::move(copied));
-    EXPECT_NE(moved.getNumberingRevision(), copied.getNumberingRevision());
+    EXPECT_NE(moved.getRevision(), copied.getRevision());
     const auto movedTable = Cache::of(data).setSpace(moved).getView();
     EXPECT_NE(movedTable.positions.data(), copiedTable.positions.data());
 
@@ -78,16 +78,16 @@ namespace Rodin::Tests::Unit
     // Coefficient copies must not be keyed by the address of this space.
     Optional<FES> reused(std::in_place, fes);
     const auto* address = &*reused;
-    const auto revision = reused->getNumberingRevision();
+    const auto revision = reused->getRevision();
     const auto firstTable = Cache::of(data).setSpace(*reused).getView();
-    const auto firstValues = Coefficients::getView(*reused, data);
+    const auto firstValues = DataAccess::prepare(*reused, data);
     reused.reset();
     reused.emplace(fes);
     EXPECT_EQ(&*reused, address);
-    EXPECT_NE(reused->getNumberingRevision(), revision);
+    EXPECT_NE(reused->getRevision(), revision);
     const auto nextTable = Cache::of(data).setSpace(*reused).getView();
     EXPECT_NE(firstTable.positions.data(), nextTable.positions.data());
-    const auto nextValues = Coefficients::getView(*reused, data);
+    const auto nextValues = DataAccess::prepare(*reused, data);
     EXPECT_NE(firstValues.data(), nextValues.data());
 
     typename Cache::Table retained{};

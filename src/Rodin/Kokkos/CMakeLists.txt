@@ -33,8 +33,7 @@ if (RODIN_USE_ROCSOLVER)
   target_link_libraries(RodinKokkos INTERFACE
     roc::rocsolver roc::rocsparse roc::rocblas hip::host Rodin::Solver)
   target_sources(RodinKokkos INTERFACE
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Solver/RocSolverRF.h>
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Solver/RocSolverRFPivots.h>)
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Solver/RocSolverRF.h>)
 endif()
 
 # IGC gives a thread 128 registers by default on the Arc Pro B70, and the
@@ -58,6 +57,32 @@ if (Kokkos_ENABLE_CUDA AND Kokkos_CXX_COMPILER_ID STREQUAL "NVIDIA")
 endif()
 
 target_sources(RodinKokkos INTERFACE
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Assembly/Polytopes.h>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Geometry/IncidenceDescriptor.h>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Geometry/Region.h>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Math/Entries.h>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Math/SpatialMatrix.h>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Math/SpatialVector.h>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Math/Triplets.h>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Solver/CompressedPattern.h>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Solver/CuDSSOperator.h>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Solver/CuDSSVector.h>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Variational/BilinearForm.h>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Variational/BilinearIntegral.h>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Variational/GridFunctionData.h>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Variational/Integral/Traits.h>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Variational/Layout.h>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Variational/LinearForm.h>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Variational/LinearIntegral.h>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Variational/Problem.h>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Variational/Quadrature.h>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Variational/TrialFunction.h>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Variational/View/Common.h>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Variational/View/FiniteElementSpace.h>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Variational/View/Function.h>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Variational/View/GridFunction.h>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Variational/View/IntegrationPoint.h>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Variational/View/ShapeFunction.h>
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/ForwardDecls.h>
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/View.h>
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Context.h>
@@ -142,7 +167,7 @@ if (RODIN_USE_PETSC)
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../PETSc/Kokkos/Assembly/COOCache.h>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../PETSc/Kokkos/Assembly/Distribution.h>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../PETSc/Kokkos/Assembly/Kokkos.h>
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../PETSc/Kokkos/Variational/GridFunctionCoefficients.h>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../PETSc/Kokkos/Variational/GridFunctionData.h>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../PETSc/Kokkos/Variational/GhostedPositions.h>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../PETSc/Kokkos.h>
   )

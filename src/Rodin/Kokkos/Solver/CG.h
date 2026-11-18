@@ -23,20 +23,20 @@
 
 #include "Krylov.h"
 
-namespace Rodin::Solver::Internal
+namespace Rodin::Kokkos::Solver
 {
   /// @brief Writes @f$ p = D^{-1} r @f$ and sums @f$ r \cdot p @f$.
   template <class Backend>
-  struct KokkosCGPrecondition
+  struct CGPrecondition
   {
     /// @brief Inverse of the diagonal of the matrix.
-    typename KokkosKrylov<Backend>::Vector inverse;
+    typename Krylov<Backend>::Vector inverse;
 
     /// @brief Residual.
-    typename KokkosKrylov<Backend>::Vector r;
+    typename Krylov<Backend>::Vector r;
 
     /// @brief Preconditioned residual, written as the first search direction.
-    typename KokkosKrylov<Backend>::Vector p;
+    typename Krylov<Backend>::Vector p;
 
     /**
      * @brief Preconditions one entry and accumulates its contribution to
@@ -58,25 +58,25 @@ namespace Rodin::Solver::Internal
    * @f$ r \cdot z @f$.
    */
   template <class Backend>
-  struct KokkosCGUpdate
+  struct CGUpdate
   {
     /// @brief Iterate, updated in place.
-    typename KokkosKrylov<Backend>::Vector x;
+    typename Krylov<Backend>::Vector x;
 
     /// @brief Search direction.
-    typename KokkosKrylov<Backend>::Vector p;
+    typename Krylov<Backend>::Vector p;
 
     /// @brief Residual, updated in place.
-    typename KokkosKrylov<Backend>::Vector r;
+    typename Krylov<Backend>::Vector r;
 
     /// @brief Product @f$ q = A p @f$.
-    typename KokkosKrylov<Backend>::Vector q;
+    typename Krylov<Backend>::Vector q;
 
     /// @brief Inverse of the diagonal of the matrix.
-    typename KokkosKrylov<Backend>::Vector inverse;
+    typename Krylov<Backend>::Vector inverse;
 
     /// @brief Preconditioned residual, written by the step.
-    typename KokkosKrylov<Backend>::Vector z;
+    typename Krylov<Backend>::Vector z;
 
     /// @brief Step length along the search direction.
     Real alpha;
@@ -102,13 +102,13 @@ namespace Rodin::Solver::Internal
 
   /// @brief Writes the next search direction @f$ p = z + \beta p @f$.
   template <class Backend>
-  struct KokkosCGDirection
+  struct CGDirection
   {
     /// @brief Search direction, updated in place.
-    typename KokkosKrylov<Backend>::Vector p;
+    typename Krylov<Backend>::Vector p;
 
     /// @brief Preconditioned residual.
-    typename KokkosKrylov<Backend>::Vector z;
+    typename Krylov<Backend>::Vector z;
 
     /// @brief Ratio of the successive values of @f$ r \cdot z @f$.
     Real beta;
@@ -148,7 +148,7 @@ namespace Rodin::Solver
     final : public LinearSolverBase<::Rodin::Math::LinearSystem<
               ::Rodin::Kokkos::Math::SparseMatrix<Real, Backend>, VectorType_>>
   {
-    using Krylov = Internal::KokkosKrylov<Backend>;
+    using Krylov = ::Rodin::Kokkos::Solver::Krylov<Backend>;
 
     public:
       /// @brief Scalar type.
@@ -255,9 +255,9 @@ namespace Rodin::Solver
         Krylov::reserve(m_z, n, "Rodin::Solver::CG::z");
         Krylov::reserve(m_p, n, "Rodin::Solver::CG::p");
         Krylov::reserve(m_q, n, "Rodin::Solver::CG::q");
-        Krylov::upload(axb.getVector(), m_b);
+        Krylov::bind(axb.getVector(), m_b);
         if (static_cast<size_t>(axb.getSolution().size()) == n)
-          Krylov::upload(axb.getSolution(), m_x);
+          Krylov::bind(axb.getSolution(), m_x);
         else
           ::Kokkos::deep_copy(m_x, Real(0));
         if (n == 0)
@@ -269,7 +269,7 @@ namespace Rodin::Solver
         Krylov::invertDiagonal(execution, matrix, m_inverse);
         const auto A = Krylov::wrap(matrix);
         m_result = iterate(execution, A, m_maxIterations ? *m_maxIterations : 2 * n);
-        Krylov::download(m_x, axb.getSolution());
+        Krylov::copy(m_x, axb.getSolution());
       }
 
       /**
@@ -316,14 +316,14 @@ namespace Rodin::Solver
        * @param maxIterations Iteration limit.
        * @returns Convergence flag, iteration count and relative residual.
        */
-      Internal::KokkosKrylovResult iterate(
+      ::Rodin::Kokkos::Solver::KrylovResult iterate(
         const typename Krylov::ExecutionSpace& execution,
         const typename Krylov::CrsMatrix& A, size_t maxIterations)
       {
         using ExecutionSpace = typename Krylov::ExecutionSpace;
         using Policy = ::Kokkos::RangePolicy<ExecutionSpace>;
         const size_t n = m_b.extent(0);
-        Internal::KokkosKrylovResult res;
+        ::Rodin::Kokkos::Solver::KrylovResult res;
         typename Krylov::SpMV product;
 
         const Real rhsNorm2 = Krylov::dot(execution, m_b, m_b);
@@ -351,7 +351,7 @@ namespace Rodin::Solver
         Real absNew = 0;
         ::Kokkos::parallel_reduce("Rodin::Solver::CG::precondition",
           Policy(execution, 0, n),
-          Internal::KokkosCGPrecondition<Backend>{m_inverse, m_r, m_p}, absNew);
+          ::Rodin::Kokkos::Solver::CGPrecondition<Backend>{m_inverse, m_r, m_p}, absNew);
 
         size_t i = 0;
         while (i < maxIterations)
@@ -362,7 +362,8 @@ namespace Rodin::Solver
           // m_x += alpha m_p, m_r -= alpha m_q, m_z = D^{-1} m_r, with |m_r|^2 and m_r.m_z.
           Real rz = 0;
           ::Kokkos::parallel_reduce("Rodin::Solver::CG::update", Policy(execution, 0, n),
-            Internal::KokkosCGUpdate<Backend>{m_x, m_p, m_r, m_q, m_inverse, m_z, alpha},
+            ::Rodin::Kokkos::Solver::CGUpdate<Backend>{
+              m_x, m_p, m_r, m_q, m_inverse, m_z, alpha},
             ::Kokkos::Sum<Real>(residualNorm2), ::Kokkos::Sum<Real>(rz));
           if (residualNorm2 < threshold)
             break;
@@ -370,7 +371,7 @@ namespace Rodin::Solver
           const Real beta = rz / absNew;
           absNew = rz;
           ::Kokkos::parallel_for("Rodin::Solver::CG::direction", Policy(execution, 0, n),
-            Internal::KokkosCGDirection<Backend>{m_p, m_z, beta});
+            ::Rodin::Kokkos::Solver::CGDirection<Backend>{m_p, m_z, beta});
           ++i;
         }
         res.iterations = i;
@@ -381,7 +382,7 @@ namespace Rodin::Solver
 
       Real m_tolerance = std::numeric_limits<Real>::epsilon();
       Optional<size_t> m_maxIterations;
-      Internal::KokkosKrylovResult m_result;
+      ::Rodin::Kokkos::Solver::KrylovResult m_result;
       typename Krylov::Vector m_inverse, m_b, m_x, m_r, m_z, m_p, m_q;
   };
 }

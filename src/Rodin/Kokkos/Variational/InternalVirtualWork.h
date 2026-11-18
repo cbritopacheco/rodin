@@ -181,10 +181,10 @@ namespace Rodin::Solid
       using TestDOFsType = typename TestFESType::DOFsType;
 
       /// @brief Device quadrature tables.
-      using QuadratureType = Kokkos::Variational::Internal::Quadrature<MeshType>;
+      using QuadratureType = Kokkos::Variational::Quadrature<MeshType>;
 
       /// @brief Integrated polytopes.
-      using PolytopesType = Kokkos::Variational::Internal::Polytopes<MeshType>;
+      using PolytopesType = Assembly::Polytopes<MeshType>;
 
       /// @brief Device coefficients of the displacement.
       using StateViewType = Kokkos::Variational::GridFunctionView<StateFESType>;
@@ -685,7 +685,7 @@ namespace Rodin::Solid
         KOKKOS_INLINE_FUNCTION void operator()(Index p) const
         {
           const auto polytope = view.getPolytope(dimension, p);
-          if (!Rodin::Kokkos::Variational::isIntegrated(
+          if (!Rodin::Kokkos::Geometry::isIntegrated(
                 view, region, polytope, attributes))
             return;
           KOKKOS_ASSERT(polytope.getVertices().size() <= Vertices);
@@ -924,7 +924,7 @@ namespace Rodin::Solid
         {
           const Index p = team.league_rank();
           const auto polytope = view.getPolytope(dimension, p);
-          if (!Rodin::Kokkos::Variational::isIntegrated(
+          if (!Rodin::Kokkos::Geometry::isIntegrated(
                 view, region, polytope, attributes))
             return;
           KOKKOS_ASSERT(polytope.getVertices().size() <= Vertices);
@@ -1226,10 +1226,10 @@ namespace Rodin::Solid
       using DOFsType = typename TestFESType::DOFsType;
 
       /// @brief Device quadrature tables.
-      using QuadratureType = Kokkos::Variational::Internal::Quadrature<MeshType>;
+      using QuadratureType = Kokkos::Variational::Quadrature<MeshType>;
 
       /// @brief Integrated polytopes.
-      using PolytopesType = Kokkos::Variational::Internal::Polytopes<MeshType>;
+      using PolytopesType = Assembly::Polytopes<MeshType>;
 
       /// @brief Device coefficients of the displacement.
       using StateViewType = Kokkos::Variational::GridFunctionView<StateFESType>;
@@ -1565,7 +1565,7 @@ namespace Rodin::Solid
         KOKKOS_INLINE_FUNCTION void operator()(Index p) const
         {
           const auto polytope = view.getPolytope(dimension, p);
-          if (!Rodin::Kokkos::Variational::isIntegrated(
+          if (!Rodin::Kokkos::Geometry::isIntegrated(
                 view, region, polytope, attributes))
             return;
           KOKKOS_ASSERT(polytope.getVertices().size() <= Vertices);
@@ -1689,10 +1689,10 @@ namespace Rodin::Solid
       using TestDOFsType = typename TestFESType::DOFsType;
 
       /// @brief Device quadrature tables.
-      using QuadratureType = Kokkos::Variational::Internal::Quadrature<MeshType>;
+      using QuadratureType = Kokkos::Variational::Quadrature<MeshType>;
 
       /// @brief Integrated polytopes.
-      using PolytopesType = Kokkos::Variational::Internal::Polytopes<MeshType>;
+      using PolytopesType = Assembly::Polytopes<MeshType>;
 
       /// @brief Device coefficients of the displacement.
       using StateViewType = Kokkos::Variational::GridFunctionView<StateFESType>;
@@ -2195,7 +2195,7 @@ namespace Rodin::Solid
         KOKKOS_INLINE_FUNCTION void operator()(Index p) const
         {
           const auto polytope = view.getPolytope(dimension, p);
-          if (!Rodin::Kokkos::Variational::isIntegrated(
+          if (!Rodin::Kokkos::Geometry::isIntegrated(
                 view, region, polytope, attributes))
             return;
           KOKKOS_ASSERT(polytope.getVertices().size() <= Vertices);
@@ -2441,7 +2441,7 @@ namespace Rodin::Solid
         {
           const Index p = team.league_rank();
           const auto polytope = view.getPolytope(dimension, p);
-          if (!Rodin::Kokkos::Variational::isIntegrated(
+          if (!Rodin::Kokkos::Geometry::isIntegrated(
                 view, region, polytope, attributes))
             return;
           KOKKOS_ASSERT(polytope.getVertices().size() <= Vertices);
@@ -2736,10 +2736,10 @@ namespace Rodin::Solid
       using DOFsType = typename TestFESType::DOFsType;
 
       /// @brief Device quadrature tables.
-      using QuadratureType = Kokkos::Variational::Internal::Quadrature<MeshType>;
+      using QuadratureType = Kokkos::Variational::Quadrature<MeshType>;
 
       /// @brief Integrated polytopes.
-      using PolytopesType = Kokkos::Variational::Internal::Polytopes<MeshType>;
+      using PolytopesType = Assembly::Polytopes<MeshType>;
 
       /// @brief Device coefficients of the displacement.
       using StateViewType = Kokkos::Variational::GridFunctionView<StateFESType>;
@@ -3074,7 +3074,7 @@ namespace Rodin::Solid
         KOKKOS_INLINE_FUNCTION void operator()(Index p) const
         {
           const auto polytope = view.getPolytope(dimension, p);
-          if (!Rodin::Kokkos::Variational::isIntegrated(
+          if (!Rodin::Kokkos::Geometry::isIntegrated(
                 view, region, polytope, attributes))
             return;
           KOKKOS_ASSERT(polytope.getVertices().size() <= Vertices);

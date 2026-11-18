@@ -285,7 +285,7 @@ namespace Rodin::Tests::Unit::Solver
   /// @brief Kokkos borrows the rocSPARSE stream to reduce the gathered pivots.
   TEST(Rodin_Solver_RocSolverRF, ChecksPivotsOnDevice)
   {
-    using Pivots = Rodin::Solver::Internal::RocSolverRFPivots;
+    using Pivots = Rodin::Kokkos::Solver::RocSolverRFPivots;
     constexpr size_t Count = 4097;
     RocSolverRFSolver::Array<Real> values;
     ASSERT_EQ(values.resize(Count), hipSuccess);

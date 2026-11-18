@@ -42,7 +42,8 @@
   Rodin MPI owns mesh entity ownership and finite-element numbering. PETSc
   owns its matrix-row layout; the adapter translates between them. Local
   integration kernels consume only device views and local indices. The
-  distributed device mesh borrows its host MPI mesh, which must outlive it.
+  distributed device mesh owns an independent host metadata snapshot together
+  with its device shard. Its input host mesh need not outlive it.
 
   | Stage | Execution and transfer policy |
   |-------|-------------------------------|
@@ -307,11 +308,35 @@
   forms are supported. Reassembly with unchanged sizes reuses the output arrays.
 
   Vector owns its coefficients independently. getView() borrows their Kokkos
-  view for kernels; toHost() creates an independent host snapshot. Scalar host
+  view for kernels; download() creates an independent host snapshot. Scalar host
   indexing transfers the accessed entry, so bulk changes should use vector
   arithmetic, projection or a kernel. File-format adapters stage coefficients
   on the host only for the duration of input or output. Explicitly requested
   host matrix and vector types remain available for host solver paths.
+
+  @subsection guides-kokkos-transfers Explicit transfers
+
+  The backend object is the fixed reference point of every transfer. For
+  vectors, sparse matrices and meshes, @c backend.upload(host) replaces the
+  backend contents with an independent copy of the host representation.
+  @c backend.download(host) replaces the host destination, and
+  @c backend.download() constructs an independent host snapshot. Upload is
+  non-const; download is const. Destinations are resized or rebuilt as required.
+  These operations complete before returning, preserve their sources and
+  introduce no automatic coherence between the resulting objects. Sparse
+  transfers convert the host CSC and backend CRS storage while preserving the
+  mathematical operator. Existing @c toHost() calls forward to @c download().
+
+  @c getView() shares existing backend storage. Backend-to-backend assignment
+  retains copy semantics. Transfers on a distributed mesh are rank-local;
+  partitioning, ownership reconciliation and ghost exchange remain separate
+  stages. Grid-function Data transfers preserve coefficient numbering and do
+  not interpolate between spaces. On Serial and OpenMP backends, both sides
+  occupy host memory and the ownership contract remains the same.
+
+  Internal construction transfers taking an explicit execution instance and
+  retained transfer-cache fills keep their documented ordering and lifetime
+  contracts; no additional fence is introduced into repeated assembly.
 
   On an NVIDIA GPU, `Solver::CuDSS` (`RODIN_USE_CUDSS`, requiring CUDA-enabled
   Kokkos) reads backend CSR arrays directly. Include `Rodin/Kokkos/Solver.h`
@@ -387,11 +412,19 @@
 
   `Mesh<Context::Kokkos<Context::MPI, Backend>>` makes the shard of a
   distributed mesh resident on the device. It is built from a
-  `Mesh<Context::MPI>`, which must outlive it, and answers every query in the
+  `Mesh<Context::MPI>` snapshot and answers every query in the
   local numbering of the shard, ghosts included. The boundary, the interface
   and the measures are those of the distributed mesh. The device view marks
   the entities the process owns, so that integrators visit each polytope on
   one process only.
+
+  Coordinate, attribute and transformation setters update the device shard
+  and its owned host metadata without communication. Shared vertices must
+  receive consistent updates on their holding ranks. The input mesh remains
+  unchanged. Per-rank @c load() is collective, as for the host MPI loader.
+  Changes that create distributed entities require host ownership reconciliation,
+  an explicit @c upload(), and reconstruction of dependent finite-element
+  spaces. A view rejects topology whose ownership has not been prepared.
 
   @code{.cpp}
   #include <Rodin/Kokkos/MPI.h>

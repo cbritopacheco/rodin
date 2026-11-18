@@ -683,13 +683,25 @@ namespace Rodin::Geometry
       }
 
       /**
-       * @brief Copies the mesh back to the host.
+       * @brief Replaces this backend mesh with an independent host snapshot.
+       * @param source Host mesh, unchanged by this operation.
+       * @returns This mesh, after all construction transfers complete.
+       */
+      Mesh& upload(const Mesh<Rodin::Context::Local>& source)
+      {
+        Mesh next(m_context, source);
+        *this = std::move(next);
+        return *this;
+      }
+
+      /**
+       * @brief Copies the mesh back to the host, completing before returning.
        *
        * The copy carries the vertices, every polytope, the attributes, the
        * transformations, the computed incidences and the name.
        * @returns Local mesh equal to this one.
        */
-      Mesh<Rodin::Context::Local> toHost() const
+      Mesh<Rodin::Context::Local> download() const
       {
         // One transfer per resident table: reading entity by entity costs a
         // copy and a synchronization per value.
@@ -765,6 +777,21 @@ namespace Rodin::Geometry
         if (const auto name = getName())
           output.setName(std::string(*name));
         return output;
+      }
+
+      /**
+       * @brief Replaces a host mesh with an independent backend snapshot.
+       * @param destination Host mesh, rebuilt with this mesh's numbering and data.
+       */
+      void download(Mesh<Rodin::Context::Local>& destination) const
+      {
+        destination = download();
+      }
+
+      /// @returns Independent host snapshot; compatibility spelling of download().
+      Mesh<Rodin::Context::Local> toHost() const
+      {
+        return download();
       }
 
       /// @param path Output path. @param format Existing Rodin file format.

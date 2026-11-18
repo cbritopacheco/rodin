@@ -13,7 +13,7 @@
  */
 
 #include "COOAssembly.h"
-#include "Rodin/PETSc/Kokkos/Variational/GridFunctionCoefficients.h"
+#include "Rodin/PETSc/Kokkos/Variational/GridFunctionData.h"
 
 #ifndef PETSC_HAVE_KOKKOS
 #error "Device assembly of PETSc problems requires PETSc configured with Kokkos."
@@ -170,9 +170,9 @@ namespace Rodin::Assembly
             Internal::COODistribution::of(test), Internal::COODistribution::of(trial));
         }
         for (auto& lbfi : input.getLocalBFIs())
-          system.addMatrix(lbfi, 0, 0);
+          system.add(lbfi, 0, 0);
         for (auto& gbfi : input.getGlobalBFIs())
-          system.addMatrix(gbfi, 0, 0);
+          system.add(gbfi, 0, 0);
         system.finish(m_cache, res, nullptr);
       }
 
@@ -286,7 +286,7 @@ namespace Rodin::Assembly
         if constexpr (distributed)
           system.distribute(Internal::COODistribution::of(fes));
         for (auto& lfi : input.getLFIs())
-          system.addVector(lfi, 0, Real(1));
+          system.add(lfi, 0, Real(1));
         PetscErrorCode ierr =
           PETSc::Assembly::VectorSetup(res).prepare({n, N, VECKOKKOS, false, false});
         assert(ierr == PETSC_SUCCESS);
@@ -479,19 +479,19 @@ namespace Rodin::Assembly
         if (doMatrix || system.hasConstraints())
         {
           for (auto& lbfi : pb.getLocalBFIs())
-            system.addMatrix(lbfi, 0, 0);
+            system.add(lbfi, 0, 0);
           for (auto& gbfi : pb.getGlobalBFIs())
-            system.addMatrix(gbfi, 0, 0);
+            system.add(gbfi, 0, 0);
           for (const auto& bf : pb.getBFs())
-            system.addMatrix(bf.getOperator(), 0, 0);
+            system.add(bf.getOperator(), 0, 0);
         }
         // The problem reads a(u, v) + l(v) = 0, so b = -l.
         if (doVector)
         {
           for (auto& lfi : pb.getLFIs())
-            system.addVector(lfi, 0, Real(-1));
+            system.add(lfi, 0, Real(-1));
           for (const auto& lf : pb.getLFs())
-            system.addVector(lf.getVector(), 0);
+            system.add(lf.getVector(), 0);
         }
         if constexpr (IsDistributed)
         {
@@ -717,17 +717,17 @@ namespace Rodin::Assembly
         {
           for (auto& lbfi : pb.getLocalBFIs())
           {
-            system.addMatrix(lbfi, testOffset(lbfi.getTestFunction().getUUID()),
+            system.add(lbfi, testOffset(lbfi.getTestFunction().getUUID()),
               trialOffset(lbfi.getTrialFunction().getUUID()));
           }
           for (auto& gbfi : pb.getGlobalBFIs())
           {
-            system.addMatrix(gbfi, testOffset(gbfi.getTestFunction().getUUID()),
+            system.add(gbfi, testOffset(gbfi.getTestFunction().getUUID()),
               trialOffset(gbfi.getTrialFunction().getUUID()));
           }
           for (const auto& bf : pb.getBFs())
           {
-            system.addMatrix(bf.getOperator(), testOffset(bf.getTestFunction().getUUID()),
+            system.add(bf.getOperator(), testOffset(bf.getTestFunction().getUUID()),
               trialOffset(bf.getTrialFunction().getUUID()));
           }
         }
@@ -735,9 +735,9 @@ namespace Rodin::Assembly
         if (doVector)
         {
           for (auto& lfi : pb.getLFIs())
-            system.addVector(lfi, testOffset(lfi.getTestFunction().getUUID()), Real(-1));
+            system.add(lfi, testOffset(lfi.getTestFunction().getUUID()), Real(-1));
           for (const auto& lf : pb.getLFs())
-            system.addVector(lf.getVector(), testOffset(lf.getTestFunction().getUUID()));
+            system.add(lf.getVector(), testOffset(lf.getTestFunction().getUUID()));
         }
         if constexpr (IsDistributed)
         {

@@ -19,7 +19,6 @@
 #include <KokkosBlas1_dot.hpp>
 #include <KokkosBlas1_nrm2.hpp>
 #include "Rodin/Math/Vector.h"
-#include "Rodin/Solver/ForwardDecls.h"
 #include "Rodin/Kokkos/Context/Kokkos.h"
 
 namespace Rodin::Kokkos::Math
@@ -33,7 +32,8 @@ namespace Rodin::Kokkos::Math
    * The owner retains one Kokkos allocation. Copies are deep; getView() borrows
    * its allocation for kernels. Arithmetic, reductions and segment copies run
    * in the execution space. Scalar host access transfers only the requested
-   * entry through a proxy; bulk host access is explicit through toHost().
+   * entry through a proxy; upload() and download() copy independent values
+   * across the host/backend boundary and complete before returning.
    * Resizing invalidates borrowed views. The Kokkos runtime must outlive owners.
    */
   template <class Scalar, class Backend>
@@ -184,12 +184,32 @@ namespace Rodin::Kokkos::Math
       template <class Derived>
       Vector& operator=(const Eigen::MatrixBase<Derived>& rhs)
       {
-        resize(rhs.size());
-        auto host = ::Kokkos::create_mirror(m_values);
-        for (Index i = 0; i < size(); ++i)
+        return upload(rhs);
+      }
+
+      /**
+       * @brief Replaces this backend vector with an independent host snapshot.
+       * @param rhs Host expression, evaluated before backend storage is resized.
+       * @returns This vector, after the copy completes.
+       */
+      template <class Derived>
+      Vector& upload(const Eigen::MatrixBase<Derived>& rhs)
+      {
+        ::Kokkos::View<Scalar*, ::Kokkos::HostSpace> host(
+          ::Kokkos::view_alloc(::Kokkos::WithoutInitializing, "Rodin vector upload"),
+          rhs.size());
+        for (Index i = 0; i < host.extent(0); ++i)
           host(i) = rhs.derived().coeff(i);
+        resize(rhs.size());
         ::Kokkos::deep_copy(m_values, host);
         return *this;
+      }
+
+      /// @param rhs Host array expression. @returns This vector, after copying.
+      template <class Derived>
+      Vector& upload(const Eigen::ArrayBase<Derived>& rhs)
+      {
+        return upload(rhs.matrix());
       }
 
       /// @return Number of coefficients.
@@ -327,15 +347,32 @@ namespace Rodin::Kokkos::Math
         return copy(::Kokkos::subview(m_values, std::make_pair(first, first + count)));
       }
 
-      /// @return Host vector containing an independent copy.
-      ::Rodin::Math::Vector<Scalar> toHost() const
+      /**
+       * @brief Replaces a host vector with an independent backend snapshot.
+       * @param result Host destination, resized as required.
+       * The backend is unchanged and the copy completes before returning.
+       */
+      void download(::Rodin::Math::Vector<Scalar>& result) const
       {
         const auto host =
           ::Kokkos::create_mirror_view_and_copy(::Kokkos::HostSpace{}, m_values);
-        ::Rodin::Math::Vector<Scalar> result(size());
+        result.resize(size());
         for (Index i = 0; i < size(); ++i)
           result(i) = host(i);
+      }
+
+      /// @return Independent host snapshot, ready to read on return.
+      ::Rodin::Math::Vector<Scalar> download() const
+      {
+        ::Rodin::Math::Vector<Scalar> result;
+        download(result);
         return result;
+      }
+
+      /// @return Independent host snapshot; compatibility spelling of download().
+      ::Rodin::Math::Vector<Scalar> toHost() const
+      {
+        return download();
       }
 
       /// @return Independent host coefficients for a host algebra destination.
@@ -622,18 +659,6 @@ namespace Rodin::FormLanguage
   {
     /// @brief Coefficient scalar type.
     using ScalarType = Scalar;
-  };
-}
-
-namespace Rodin::Solver::Internal
-{
-  /// @brief Backend vectors are read directly when host access is unavailable.
-  template <class Scalar, class Backend>
-  struct CuDSSVector<::Rodin::Kokkos::Math::Vector<Scalar, Backend>>
-  {
-    /// @brief Whether the allocation requires backend access.
-    static constexpr bool Resident = !::Kokkos::SpaceAccessibility<::Kokkos::HostSpace,
-      typename ::Rodin::Kokkos::Math::Vector<Scalar, Backend>::MemorySpace>::accessible;
   };
 }
 

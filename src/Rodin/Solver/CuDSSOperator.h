@@ -21,7 +21,7 @@
 
 #include "ForwardDecls.h"
 
-namespace Rodin::Solver::Internal
+namespace Rodin::Solver
 {
   /// @brief Host CSC arrays, read as the CSR arrays of the transpose.
   template <>

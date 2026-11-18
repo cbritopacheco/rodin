@@ -4,8 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_PETSC_KOKKOS_VARIATIONAL_GRIDFUNCTIONCOEFFICIENTS_H
-#define RODIN_PETSC_KOKKOS_VARIATIONAL_GRIDFUNCTIONCOEFFICIENTS_H
+#ifndef RODIN_PETSC_KOKKOS_VARIATIONAL_GRIDFUNCTIONDATA_H
+#define RODIN_PETSC_KOKKOS_VARIATIONAL_GRIDFUNCTIONDATA_H
 
 /**
  * @file
@@ -57,7 +57,7 @@ namespace Rodin::Kokkos::Variational
    * freedom, as PETSc::Variational::GridFunction lays them out.
    */
   template <>
-  struct GridFunctionCoefficients<::Vec>
+  struct GridFunctionData<::Vec>
   {
     /**
      * @param fes Device space of the grid function.
@@ -70,7 +70,7 @@ namespace Rodin::Kokkos::Variational
      * vector again.
      */
     template <class FES>
-    static ::Kokkos::View<Real*, typename FES::MeshType::MemorySpace> getView(
+    static ::Kokkos::View<Real*, typename FES::MeshType::MemorySpace> prepare(
       const FES& fes, ::Vec data)
     {
       using MemorySpace = typename FES::MeshType::MemorySpace;
@@ -117,8 +117,8 @@ namespace Rodin::Kokkos::Variational
         static_cast<std::uint64_t>(dataId), static_cast<std::uint64_t>(dataState),
         static_cast<std::uint64_t>(formId), static_cast<std::uint64_t>(formState),
         static_cast<std::uint64_t>(reinterpret_cast<std::uintptr_t>(&fes))};
-      if constexpr (distributed && requires { fes.getNumberingRevision(); })
-        key.push_back(fes.getNumberingRevision());
+      if constexpr (distributed && requires { fes.getRevision(); })
+        key.push_back(fes.getRevision());
 
       const auto fill = [&](const Array& res) {
         const PetscScalar* array = nullptr;
