@@ -40,6 +40,31 @@
  *   Sets the maximum number of reductions attempted for one accepted time
  *   step. The default is `8`.
  *
+ * - `-coronary_outlet_closure <rmu|plateau|rest>` and
+ *   `-coronary_outlet_constant_scale <s>`
+ *   Reduced outlet closure: shear dependent (default), constant at the
+ *   high-shear plateau (`-coronary_constant_outlet` is an alias), or constant
+ *   at the resting operating point of the running rheology; the constant
+ *   closures are multiplied by `s` (default 1).
+ * - `-coronary_cy_{mu0,muinf,lambda,n,a} <value>`
+ *   Carreau-Yasuda parameters of the blood (SI units).
+ * - `-coronary_calibration <newtonian|reference>`,
+ *   `-coronary_calibration_viscosity <Pa s>`, `-coronary_cal_cy_* <value>`
+ *   Viscosity at which the bed resistances are calibrated: `mu_N`, or the
+ *   apparent viscosity of the reference rheology (healthy fit by default) at
+ *   its resting operating point.
+ * - `-coronary_calibration_pressure <Pa>`, `-coronary_pra <Pa>`,
+ *   `-coronary_target_flow <m^3/s>`, `-coronary_venular_fraction <f>`
+ *   Resting pressure budget and target flow of the calibration.
+ * - `-coronary_arteriolar_tree r:v:f,...`, `-coronary_venular_tree r:v:f,...`
+ *   Generations of each limb (m, m/s, pressure share).
+ * - `-coronary_calibration_out <csv>`, `-coronary_calibration_in <csv>`
+ *   Write, or read instead of deriving, the per-outlet calibration.
+ * - `-coronary_mesh <path>`
+ *   Input mesh.
+ * - `-coronary_output_every <steps>`
+ *   XDMF snapshot period (default 1; 0 disables the XDMF output).
+ *
  * Unless the user overrides them on the command line, the executable installs
  * the following PETSc defaults:
  * - `-ksp_type preonly`
@@ -91,6 +116,9 @@
 #include <cctype>
 #include <exception>
 #include <iostream>
+#include <sstream>
+#include <stdexcept>
+#include <vector>
 #include <string>
 
 #include <boost/mpi/communicator.hpp>
@@ -282,19 +310,144 @@ int main(int argc, char** argv)
         cfg.coronaryComplianceTotal = complianceTotal;
       }
 
+      using Simulation = Rodin::Examples::Heart::CoupledLV0DCoronary3D;
+
+      const auto getReal = [](const char* name, Rodin::Real& out) {
+        PetscBool set = PETSC_FALSE;
+        PetscReal value = 0.0;
+        const PetscErrorCode e =
+          PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, name, &value, &set);
+        assert(e == PETSC_SUCCESS);
+        (void)e;
+        if (set)
+          out = value;
+        return set == PETSC_TRUE;
+      };
+
+      const auto getString = [](const char* name, std::string& out) {
+        char buffer[4096] = {};
+        PetscBool set = PETSC_FALSE;
+        const PetscErrorCode e = PetscOptionsGetString(
+          PETSC_NULLPTR, PETSC_NULLPTR, name, buffer, sizeof(buffer), &set);
+        assert(e == PETSC_SUCCESS);
+        (void)e;
+        if (set)
+          out = buffer;
+        return set == PETSC_TRUE;
+      };
+
+      // "r:v:f,r:v:f,..." in SI units (m, m/s, pressure share).
+      const auto parseTree = [](const std::string& text) {
+        std::vector<Simulation::Generation> tree;
+        std::stringstream items(text);
+        std::string item;
+        while (std::getline(items, item, ','))
+        {
+          if (item.empty())
+            continue;
+          std::stringstream fields(item);
+          std::string r, v, f;
+          if (!std::getline(fields, r, ':') || !std::getline(fields, v, ':'))
+          {
+            throw std::runtime_error(
+              "A generation is r:v[:f] (m, m/s, pressure share): " + item);
+          }
+          if (!std::getline(fields, f, ':'))
+            f = "1";
+          tree.push_back(
+            Simulation::Generation{std::stod(r), std::stod(v), std::stod(f)});
+        }
+        return tree;
+      };
+
       // Constant-resistance outlet closure (the mu_inf comparison run): the
       // reduced outlets lose their shear dependence while the 3D Carreau-Yasuda
       // field is left untouched, so the pair of runs isolates the closure.
+      // Kept as an alias of -coronary_outlet_closure plateau.
       PetscBool constantOutlet = PETSC_FALSE;
       PetscBool constantOutletSet = PETSC_FALSE;
       ierr = PetscOptionsGetBool(PETSC_NULLPTR, PETSC_NULLPTR,
         "-coronary_constant_outlet", &constantOutlet, &constantOutletSet);
       assert(ierr == PETSC_SUCCESS);
-      if (constantOutletSet)
-        cfg.constantOutletResistance = (constantOutlet == PETSC_TRUE);
+      if (constantOutletSet && constantOutlet == PETSC_TRUE)
+        cfg.outletClosure = Simulation::OutletClosure::Plateau;
+
+      // Outlet closure: rmu (shear dependent), plateau (mu_inf) or rest
+      // (frozen at the resting operating point of the running rheology).
+      std::string closure;
+      if (getString("-coronary_outlet_closure", closure))
+      {
+        if (closure == "rmu")
+          cfg.outletClosure = Simulation::OutletClosure::ShearDependent;
+        else if (closure == "plateau")
+          cfg.outletClosure = Simulation::OutletClosure::Plateau;
+        else if (closure == "rest")
+          cfg.outletClosure = Simulation::OutletClosure::OperatingPoint;
+        else
+        {
+          throw std::runtime_error(
+            "Invalid -coronary_outlet_closure. Expected rmu, plateau or rest.");
+        }
+      }
+      getReal("-coronary_outlet_constant_scale", cfg.outletConstantScale);
+
+      // Carreau-Yasuda parameters of the blood (3D field and 0D closure).
+      getReal("-coronary_cy_mu0", cfg.viscosity.mu0);
+      getReal("-coronary_cy_muinf", cfg.viscosity.muInf);
+      getReal("-coronary_cy_lambda", cfg.viscosity.lambda);
+      getReal("-coronary_cy_n", cfg.viscosity.n);
+      getReal("-coronary_cy_a", cfg.viscosity.yasuda);
+
+      // Calibration: newtonian (R at mu_N) or reference (R of the reference
+      // rheology, by default the healthy fit, at its resting operating point).
+      std::string calibration;
+      if (getString("-coronary_calibration", calibration))
+      {
+        if (calibration == "newtonian")
+          cfg.calibrationMode = Simulation::CalibrationMode::Newtonian;
+        else if (calibration == "reference")
+          cfg.calibrationMode = Simulation::CalibrationMode::ReferenceRheology;
+        else
+        {
+          throw std::runtime_error(
+            "Invalid -coronary_calibration. Expected newtonian or reference.");
+        }
+      }
+      getReal("-coronary_calibration_viscosity", cfg.newtonianCalibrationViscosity);
+      getReal("-coronary_cal_cy_mu0", cfg.calibrationViscosity.mu0);
+      getReal("-coronary_cal_cy_muinf", cfg.calibrationViscosity.muInf);
+      getReal("-coronary_cal_cy_lambda", cfg.calibrationViscosity.lambda);
+      getReal("-coronary_cal_cy_n", cfg.calibrationViscosity.n);
+      getReal("-coronary_cal_cy_a", cfg.calibrationViscosity.yasuda);
+      getReal("-coronary_calibration_pressure", cfg.calibrationArterialPressure);
+      getReal("-coronary_pra", cfg.rightAtrialPressure);
+      getReal("-coronary_target_flow", cfg.lcaTargetFlow);
+      getReal("-coronary_venular_fraction", cfg.venularPressureFraction);
+
+      std::string tree;
+      if (getString("-coronary_arteriolar_tree", tree))
+        cfg.arteriolarTree = parseTree(tree);
+      if (getString("-coronary_venular_tree", tree))
+        cfg.venularTree = parseTree(tree);
+
+      getString("-coronary_calibration_out", cfg.calibrationOutputPath);
+      getString("-coronary_calibration_in", cfg.calibrationInputPath);
+      getString("-coronary_mesh", cfg.meshPath);
+
+      PetscInt outputEvery = static_cast<PetscInt>(cfg.outputEvery);
+      PetscBool outputEverySet = PETSC_FALSE;
+      ierr = PetscOptionsGetInt(PETSC_NULLPTR, PETSC_NULLPTR, "-coronary_output_every",
+        &outputEvery, &outputEverySet);
+      assert(ierr == PETSC_SUCCESS);
+      if (outputEverySet)
+      {
+        if (outputEvery < 0)
+          throw std::runtime_error("-coronary_output_every must be nonnegative.");
+        cfg.outputEvery = static_cast<size_t>(outputEvery);
+      }
 
       // Per-scenario output directory: <prefix>/CoronaryArtery.{xdmf,csv}.
-      char outPrefix[256] = {};
+      char outPrefix[4096] = {};
       PetscBool outPrefixSet = PETSC_FALSE;
       ierr = PetscOptionsGetString(PETSC_NULLPTR, PETSC_NULLPTR,
         "-coronary_output_prefix", outPrefix, sizeof(outPrefix), &outPrefixSet);

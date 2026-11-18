@@ -332,7 +332,7 @@ namespace Rodin::Examples::Heart
   }
 
   CoupledLV0DCoronary3D::WRMSTable CoupledLV0DCoronary3D::buildWRMSTable(
-    const Config& cfg, const CarreauYasuda& visc)
+    const Config& cfg, const CarreauYasuda& visc, bool plateau)
   {
     // Universal WRMS apparent viscosity.
     //
@@ -411,7 +411,7 @@ namespace Rodin::Examples::Heart
       : muInf;
 
     auto mu = [&](Real g) -> Real {
-      if (cfg.constantOutletResistance)
+      if (plateau)
         return muPlateau;
       if (quemada)
         return muQ(g);
@@ -420,7 +420,7 @@ namespace Rodin::Examples::Heart
     };
 
     auto dmu = [&](Real g) -> Real {
-      if (cfg.constantOutletResistance)
+      if (plateau)
         return 0.0;
       if (quemada)
       {
@@ -535,6 +535,166 @@ namespace Rodin::Examples::Heart
     return table;
   }
 
+  CoupledLV0DCoronary3D::Real CoupledLV0DCoronary3D::limbFactor(
+    const Config& cfg, const WRMSTable& wrms, const Limb& limb, Real q, Real q0)
+  {
+    // Phi(Q) = sum_k f_k mu_ap(g_k |Q|/q_0) / muCal_k. Every generation of the
+    // limb carries the limb flow, so its apparent shear rate scales with
+    // |Q|/q_0 from its own resting value. The constant closures read the same
+    // expression at the resting ratio; for OutletClosure::Plateau the table is
+    // itself constant (mu_inf), so the ratio is immaterial there.
+    const auto& law = cfg.outletFlowLaw;
+    const bool constant = cfg.outletClosure != OutletClosure::ShearDependent;
+    const Real aq = std::abs(q);
+    const Real ratio = constant ? 1.0 : aq / std::max<Real>(std::abs(q0), 1e-300);
+
+    Real phi = 0.0;
+    for (std::size_t k = 0; k < limb.gamma.size(); ++k)
+    {
+      const Real g = (constant || aq >= law.zeroFlowTolerance) ? limb.gamma[k] * ratio
+                                                               : law.zeroFlowTolerance;
+      phi += limb.fraction[k] * wrms(g) / std::max<Real>(limb.muCal[k], 1e-300);
+    }
+
+    return constant ? cfg.outletConstantScale * phi : phi;
+  }
+
+  CoupledLV0DCoronary3D::Limb CoupledLV0DCoronary3D::makeLimb(
+    const std::vector<Generation>& tree, Real fShear) const
+  {
+    // Resting apparent shear rate g_k = 4 v_k / r_k of every generation, its
+    // share of the limb's pressure drop (normalised) and the viscosity at
+    // which the calibrated resistance is defined: mu_N, or mu_ap of the
+    // reference rheology at the undilated resting rate.
+    Real total = 0.0;
+    for (const auto& g : tree)
+      total += std::max<Real>(g.fraction, 0.0);
+
+    if (!(total > 0.0))
+    {
+      Alert::MemberFunctionException(*this, __func__)
+        << "the generation pressure shares must have a positive sum." << Alert::Raise;
+    }
+
+    Limb limb;
+    limb.gamma.reserve(tree.size());
+    limb.fraction.reserve(tree.size());
+    limb.muCal.reserve(tree.size());
+
+    for (const auto& g : tree)
+    {
+      const Real r = std::max<Real>(g.radius, 1e-12);
+      const Real v = std::max<Real>(g.velocity, 1e-12);
+      const Real gamma0 = 4.0 * v / r;
+
+      limb.gamma.push_back(gamma0 * fShear);
+      limb.fraction.push_back(std::max<Real>(g.fraction, 0.0) / total);
+      limb.muCal.push_back(m_cfg.calibrationMode == CalibrationMode::ReferenceRheology
+          ? m_wrmsReference(gamma0)
+          : m_cfg.newtonianCalibrationViscosity);
+    }
+
+    return limb;
+  }
+
+  void CoupledLV0DCoronary3D::writeCalibration() const
+  {
+    if (!isRoot())
+      return;
+
+    std::ofstream out(m_cfg.calibrationOutputPath);
+    if (!out)
+    {
+      Alert::MemberFunctionException(*this, __func__)
+        << "cannot open " << m_cfg.calibrationOutputPath << Alert::Raise;
+    }
+
+    out.precision(17);
+    out << "tag,area,q0,Ra,Rv,C,ptm,pc,qd,gammaA,gammaV,Na,Nv\n";
+    for (const Attribute tag : m_cfg.outlets)
+    {
+      const auto& bc = m_wk.at(tag);
+      out << tag << ',' << bc.area << ',' << bc.q0 << ',' << bc.Ra << ',' << bc.Rv << ','
+          << bc.C << ',' << bc.ptm << ',' << bc.pc << ',' << bc.qd << ',' << bc.gammaA
+          << ',' << bc.gammaV << ',' << bc.Na << ',' << bc.Nv << '\n';
+    }
+  }
+
+  void CoupledLV0DCoronary3D::readCalibration()
+  {
+    std::ifstream in(m_cfg.calibrationInputPath);
+    if (!in)
+    {
+      Alert::MemberFunctionException(*this, __func__)
+        << "cannot open " << m_cfg.calibrationInputPath << Alert::Raise;
+    }
+
+    std::string line;
+    std::getline(in, line); // header
+
+    std::size_t read = 0;
+    while (std::getline(in, line))
+    {
+      if (line.empty())
+        continue;
+
+      std::vector<Real> v;
+      std::size_t start = 0;
+      while (start <= line.size())
+      {
+        const std::size_t comma = line.find(',', start);
+        const std::size_t end = (comma == std::string::npos) ? line.size() : comma;
+        v.push_back(std::stod(line.substr(start, end - start)));
+        if (comma == std::string::npos)
+          break;
+        start = comma + 1;
+      }
+
+      constexpr std::size_t columns = 13;
+      if (v.size() < columns)
+      {
+        Alert::MemberFunctionException(*this, __func__)
+          << "malformed row in " << m_cfg.calibrationInputPath << ": " << line
+          << Alert::Raise;
+      }
+
+      const auto tag = static_cast<Attribute>(v[0]);
+      const auto it = m_wk.find(tag);
+      if (it == m_wk.end())
+        continue;
+
+      // The area is not read: the implicit outlet term needs the area of the
+      // face of this mesh, so that its mean traction remains R_a Phi_a Q.
+      auto& bc = it->second;
+      bc.q0 = v[2];
+      bc.Ra = v[3];
+      bc.Rv = v[4];
+      bc.C = v[5];
+      bc.ptm = v[6];
+      bc.pc = v[7];
+      bc.pout = v[7];
+      bc.qd = v[8];
+      bc.vol0 = bc.C * std::max<Real>(bc.ptm, 0.0);
+      bc.vol = bc.vol0;
+      bc.muA = limbFactor(m_cfg, m_wrms, bc.arteriolar, bc.q0, bc.q0);
+      bc.muV = limbFactor(m_cfg, m_wrms, bc.venular, bc.q0, bc.q0);
+      ++read;
+    }
+
+    if (read != m_wk.size())
+    {
+      Alert::MemberFunctionException(*this, __func__)
+        << m_cfg.calibrationInputPath << " defines " << read << " of the " << m_wk.size()
+        << " outlets." << Alert::Raise;
+    }
+
+    if (isRoot())
+    {
+      Alert::Info() << "  [calib] calibracion leida de " << m_cfg.calibrationInputPath
+                    << " (areas medidas en esta malla)" << Alert::Raise;
+    }
+  }
+
   void CoupledLV0DCoronary3D::updateOutlet0D(const Config& cfg, const WRMSTable& wrms,
     const Model& model, RCR& bc, Real Q, Real dt)
   {
@@ -624,23 +784,19 @@ namespace Rodin::Examples::Heart
     const Real q0 = std::max<Real>(std::abs(bc.q0), 1e-300);
 
     // Rheological modulation. The apparent viscosity is the universal WRMS
-    // curve evaluated at the nominal shear rate of the limb, which scales with
-    // the flow through the calibrated operating point.
+    // curve evaluated at the nominal shear rate of each generation of the
+    // limb, which scales with the flow through the calibrated operating point.
     //
-    // The normalization is the *fixed* Newtonian calibration viscosity, never
-    // the running rheology. That distinction is the whole point: R_a and R_v
-    // are the Newtonian resistances of the pressure budget at mu_N, so a change
-    // of blood properties moves Phi and therefore the flow. Normalizing by the
-    // running rheology instead would make the calibration absorb the change and
-    // leave the mean flow identical between a healthy and a hyperviscous run --
-    // which is precisely the insensitivity the previous formulation showed.
-    const Real muN = std::max<Real>(cfg.newtonianCalibrationViscosity, 1e-300);
-
+    // The normalization is the *fixed* calibration viscosity of the bed
+    // (mu_N, or mu_ap of the reference rheology at rest), never the running
+    // rheology. That distinction is the whole point: R_a and R_v are the
+    // resistances of the pressure budget for the calibration fluid, so a
+    // change of blood properties moves Phi and therefore the flow.
+    // Normalizing by the running rheology instead would make the calibration
+    // absorb the change and leave the mean flow identical between a healthy
+    // and a hyperviscous run. See limbFactor().
     auto viscosityFactorV = [&](Real q) -> Real {
-      const Real aq = std::abs(q);
-      const Real g =
-        (aq < law.zeroFlowTolerance) ? law.zeroFlowTolerance : bc.gammaV * aq / q0;
-      return wrms(g) / muN;
+      return limbFactor(cfg, wrms, bc.venular, q, q0);
     };
 
     // Implicit Euler, scalar Newton on p_tm. dq_v/dp_tm >= 0 everywhere, so
@@ -729,10 +885,7 @@ namespace Rodin::Examples::Heart
 
     // Arteriolar modulation. R_a Phi_a is assembled on the 3D outlet boundary,
     // so the factor is exported here and consumed by the next 3D solve.
-    const Real aQ = std::abs(Q);
-    const Real gammaA =
-      (aQ < law.zeroFlowTolerance) ? law.zeroFlowTolerance : bc.gammaA * aQ / q0;
-    bc.muA = wrms(gammaA) / muN;
+    bc.muA = limbFactor(cfg, wrms, bc.arteriolar, Q, q0);
 
     // Pressure applied to the 3D outlet as a Neumann traction. The resistive
     // part, R_a Phi_a Q, is *not* included here: it is assembled implicitly as
@@ -917,7 +1070,13 @@ namespace Rodin::Examples::Heart
     // Universal WRMS apparent-viscosity table. Built once, shared by every
     // outlet and both limbs: mu_ap depends only on the wall shear stress, not
     // on radius, length or branch.
-    m_wrms = buildWRMSTable(m_cfg, m_cfg.viscosity);
+    m_wrms = buildWRMSTable(
+      m_cfg, m_cfg.viscosity, m_cfg.outletClosure == OutletClosure::Plateau);
+
+    // Reference rheology of the calibration: the bed resistances are those of
+    // this blood at its resting operating point (CalibrationMode).
+    if (m_cfg.calibrationMode == CalibrationMode::ReferenceRheology)
+      m_wrmsReference = buildWRMSTable(m_cfg, m_cfg.calibrationViscosity, false);
 
     // ---- Outlet calibration -------------------------------------------------
     //
@@ -953,7 +1112,9 @@ namespace Rodin::Examples::Heart
       // vanishes and the network drains to the right atrium: the tissue
       // pressure is the reference of the compartment, not a source, so it does
       // not appear in the steady pressure path.
-      const Real par0 = m_model.getState().par;
+      const Real par0 = (m_cfg.calibrationArterialPressure > 0.0)
+        ? m_cfg.calibrationArterialPressure
+        : m_model.getState().par;
       const Real dP = std::max<Real>(par0 - m_cfg.rightAtrialPressure, 1.0);
 
       // Anatomical outlet areas and Murray-law flow split, r = sqrt(A/pi).
@@ -976,8 +1137,6 @@ namespace Rodin::Examples::Heart
       const Real dPa = std::max<Real>((1.0 - fv) * dP, 1.0);
 
       const Real pimRest = m_cfg.intramyocardialFraction * m_model.getState().pv;
-
-      const Real muN = std::max<Real>(m_cfg.newtonianCalibrationViscosity, 1e-300);
 
       // ---- Anatomical rheological operating point -------------------------
       //
@@ -1008,19 +1167,55 @@ namespace Rodin::Examples::Heart
       // not exist at rest anywhere in the bed; it is reached only in low-flow
       // states. That is why a Carreau-Yasuda pair sharing mu_inf cannot express
       // itself here, and why the haematocrit axis (Quemada) is the one that can.
-      const Real ra = std::max<Real>(m_cfg.arteriolarRadius, 1e-12);
-      const Real va = std::max<Real>(m_cfg.arteriolarVelocity, 1e-12);
-      const Real rv = std::max<Real>(m_cfg.venularRadius, 1e-12);
-      const Real vv = std::max<Real>(m_cfg.venularVelocity, 1e-12);
+      //
+      // Each limb may be a series of generations (Config::arteriolarTree,
+      // Config::venularTree); without one it is the single generation
+      // (arteriolarRadius, arteriolarVelocity) or (venularRadius,
+      // venularVelocity). The terminal arteriole and the first venule fix the
+      // multiplicities reported below; the effective length and the transit
+      // time of a limb are sums over its generations.
+      const std::vector<Generation> arteriolarTree = m_cfg.arteriolarTree.empty()
+        ? std::vector<Generation>{Generation{
+            m_cfg.arteriolarRadius, m_cfg.arteriolarVelocity, 1.0}}
+        : m_cfg.arteriolarTree;
+      const std::vector<Generation> venularTree = m_cfg.venularTree.empty()
+        ? std::vector<Generation>{Generation{
+            m_cfg.venularRadius, m_cfg.venularVelocity, 1.0}}
+        : m_cfg.venularTree;
+
+      const Real ra = std::max<Real>(arteriolarTree.back().radius, 1e-12);
+      const Real va = std::max<Real>(arteriolarTree.back().velocity, 1e-12);
+      const Real rv = std::max<Real>(venularTree.front().radius, 1e-12);
+      const Real vv = std::max<Real>(venularTree.front().velocity, 1e-12);
 
       const Real gammaA0 = 4.0 * va / ra;
       const Real gammaV0 = 4.0 * vv / rv;
 
-      const Real La = ra * dPa / (2.0 * muN * gammaA0);
-      const Real Lv = rv * dPv / (2.0 * muN * gammaV0);
+      const Limb arteriolarRest = makeLimb(arteriolarTree, 1.0);
+      const Limb venularRest = makeLimb(venularTree, 1.0);
 
-      const Real Ta = La / va;
-      const Real Tv = Lv / vv;
+      // L_k = r_k f_k dP / (2 muCal_k g_k): the pressure budget of generation
+      // k read at its calibration viscosity; T_k = L_k / v_k.
+      const auto pathLength = [](const std::vector<Generation>& tree, const Limb& limb,
+                                Real dPlimb, Real& transit) {
+        Real length = 0.0;
+        transit = 0.0;
+        for (std::size_t k = 0; k < tree.size(); ++k)
+        {
+          const Real r = std::max<Real>(tree[k].radius, 1e-12);
+          const Real v = std::max<Real>(tree[k].velocity, 1e-12);
+          const Real Lk = r * limb.fraction[k] * dPlimb /
+            (2.0 * std::max<Real>(limb.muCal[k], 1e-300) * limb.gamma[k]);
+          length += Lk;
+          transit += Lk / v;
+        }
+        return length;
+      };
+
+      Real Ta = 0.0;
+      Real Tv = 0.0;
+      const Real La = pathLength(arteriolarTree, arteriolarRest, dPa, Ta);
+      const Real Lv = pathLength(venularTree, venularRest, dPv, Tv);
 
       // Tone of the distal bed.  fVaso = 1 is the resting calibration; a
       // hyperaemic study (adenosine, exercise) is fVaso > 1, which divides the
@@ -1051,11 +1246,14 @@ namespace Rodin::Examples::Heart
       const Real gammaA = gammaA0 * fShear;
       const Real gammaV = gammaV0 * fShear;
 
-      // R_a and R_v remain the Newtonian resistances of the budget, so a change
-      // of blood properties moves Phi and therefore the flow. The
-      // normalization is mu_N and never the running rheology.
-      const Real phiA0 = m_wrms(gammaA) / muN;
-      const Real phiV0 = m_wrms(gammaV) / muN;
+      const Limb arteriolar = makeLimb(arteriolarTree, fShear);
+      const Limb venular = makeLimb(venularTree, fShear);
+
+      // R_a and R_v remain the resistances of the budget for the calibration
+      // fluid, so a change of blood properties moves Phi and therefore the
+      // flow. The normalization is muCal and never the running rheology.
+      const Real phiA0 = limbFactor(m_cfg, m_wrms, arteriolar, 1.0, 1.0);
+      const Real phiV0 = limbFactor(m_cfg, m_wrms, venular, 1.0, 1.0);
 
       // Initial condition: steady state of the *actual* (non-Newtonian)
       // network, so the run does not open with a spurious transient.  The
@@ -1111,6 +1309,8 @@ namespace Rodin::Examples::Heart
         // Derived operating point and bed multiplicities (predictions).
         bc.gammaA = gammaA;
         bc.gammaV = gammaV;
+        bc.arteriolar = arteriolar;
+        bc.venular = venular;
         bc.Na = Qi / (PI * ra * ra * va);
         bc.Nv = Qi / (PI * rv * rv * vv);
 
@@ -1184,14 +1384,26 @@ namespace Rodin::Examples::Heart
                       << "  mu_ap(" << gammaA << ")=" << m_wrms(gammaA) << "  mu_ap("
                       << gammaV << ")=" << m_wrms(gammaV)
                       << "  (g_0 en reposo=" << gammaA0 << "/" << gammaV0
-                      << ", f_shear=" << fShear << ")"
-                      << "  (mu_N=" << muN << ", mu_inf=" << m_cfg.viscosity.muInf
-                      << ", mu_0=" << m_cfg.viscosity.mu0 << ")"
-                      << (m_cfg.constantOutletResistance
+                      << ", f_shear=" << fShear << ")" << "  (calibracion="
+                      << (m_cfg.calibrationMode == CalibrationMode::ReferenceRheology
+                             ? "reologia de referencia"
+                             : "newtoniana")
+                      << ", muCal_a=" << arteriolar.muCal.back()
+                      << ", muCal_v=" << venular.muCal.front()
+                      << ", mu_inf=" << m_cfg.viscosity.muInf
+                      << ", mu_0=" << m_cfg.viscosity.mu0
+                      << ", generaciones a/v=" << arteriolar.gamma.size() << "/"
+                      << venular.gamma.size() << ")"
+                      << (m_cfg.outletClosure == OutletClosure::Plateau
                              ? "  [CONSTANT outlet closure: mu_ap frozen at the "
                                "high-shear plateau; 3D rheology unchanged]"
                              : "")
-                      << "  Phi_a0=" << phiA0 << "  Phi_v0=" << phiV0
+                      << (m_cfg.outletClosure == OutletClosure::OperatingPoint
+                             ? "  [CONSTANT outlet closure: mu_ap frozen at the "
+                               "resting operating point; 3D rheology unchanged]"
+                             : "")
+                      << "  s=" << m_cfg.outletConstantScale << "  Phi_a0=" << phiA0
+                      << "  Phi_v0=" << phiV0
                       << "  |  outlet resistance is assembled implicitly: the "
                       << "coupling is unconditionally stable in dt" << Alert::Raise;
 
@@ -1234,8 +1446,20 @@ namespace Rodin::Examples::Heart
         bc.C = m_cfg.coronaryComplianceTotal / static_cast<Real>(m_cfg.outlets.size());
         bc.vol0 = bc.C * std::max<Real>(bc.ptm, 0.0);
         bc.vol = bc.vol0;
+
+        const Real muN = m_cfg.newtonianCalibrationViscosity;
+        bc.arteriolar = Limb{{bc.gammaA}, {1.0}, {muN}};
+        bc.venular = Limb{{bc.gammaV}, {1.0}, {muN}};
       }
     }
+
+    // A calibration read from file replaces the derived one (mesh studies at
+    // fixed terminal parameters); the outlet areas stay those of this mesh.
+    if (!m_cfg.calibrationInputPath.empty())
+      readCalibration();
+
+    if (!m_cfg.calibrationOutputPath.empty())
+      writeCalibration();
 
     m_flowSolver.setTolerances(1e-10, 1e-8, 1e-10, 50, 10000)
       .setStateUpdate([this](const PETSc::Math::Vector& x) {
@@ -2130,7 +2354,68 @@ namespace Rodin::Examples::Heart
 
     computeWallShear();
 
-    m_xdmf.write(m_model.getState().t - m_cfg.dt).flush();
+    writeFieldDiagnostics(mu, symU);
+
+    // The field diagnostics above are taken every step; the XDMF snapshot
+    // only every Config::outputEvery accepted steps.
+    if (m_cfg.outputEvery > 0 && m_outputCounter % m_cfg.outputEvery == 0)
+      m_xdmf.write(m_model.getState().t - m_cfg.dt).flush();
+    ++m_outputCounter;
+  }
+
+  template <class Mu, class Sym>
+  void CoupledLV0DCoronary3D::writeFieldDiagnostics(const Mu& mu, const Sym& symU)
+  {
+    // Integral measures of the resolved field, written every step so that
+    // cycle averages can be formed: the total viscous dissipation
+    // int 2 mu D:D (W), the wall-area mean of |tau_w| (Pa) and the
+    // area-mean pressure of the inlet and of each outlet (Pa), from which the
+    // pressure drops driving the flow follow.
+    m_flux = Integral(2.0 * mu * Dot(symU, symU), m_qFlux);
+    m_flux.assemble();
+    const Real dissipation = m_flux(m_one);
+
+    m_flux =
+      BoundaryIntegral(Sqrt(Dot(m_shearWall, m_shearWall)), m_qFlux).over(m_cfg.wall);
+    m_flux.assemble();
+    const Real wssIntegral = m_flux(m_one);
+    m_flux = BoundaryIntegral(m_one, m_qFlux).over(m_cfg.wall);
+    m_flux.assemble();
+    const Real wallArea = std::max<Real>(m_flux(m_one), 1e-300);
+
+    const auto meanPressure = [this](Attribute tag) {
+      m_flux = BoundaryIntegral(m_p.getSolution(), m_qFlux).over(tag);
+      m_flux.assemble();
+      const Real integral = m_flux(m_one);
+      m_flux = BoundaryIntegral(m_one, m_qFlux).over(tag);
+      m_flux.assemble();
+      return integral / std::max<Real>(m_flux(m_one), 1e-300);
+    };
+
+    const Real pIn = meanPressure(m_cfg.inlet);
+    std::vector<Real> pOut;
+    for (const Attribute tag : m_cfg.outlets)
+      pOut.push_back(meanPressure(tag));
+
+    if (!isRoot())
+      return;
+
+    if (!m_fieldsCsv.is_open())
+    {
+      m_fieldsCsv.open(m_cfg.csvPath.substr(0, m_cfg.csvPath.rfind('.')) + "_fields.csv");
+      m_fieldsCsv.precision(12);
+      m_fieldsCsv << "t,dissipation,meanAbsWSS,wallArea,inletPressure";
+      for (const Attribute tag : m_cfg.outlets)
+        m_fieldsCsv << ",outlet" << tag << "Pressure";
+      m_fieldsCsv << '\n';
+    }
+
+    m_fieldsCsv << (m_model.getState().t - m_cfg.dt) << ',' << dissipation << ','
+                << (wssIntegral / wallArea) << ',' << wallArea << ',' << pIn;
+    for (const Real p : pOut)
+      m_fieldsCsv << ',' << p;
+    m_fieldsCsv << '\n';
+    m_fieldsCsv.flush();
   }
 
   CoupledLV0DCoronary3D::StepData CoupledLV0DCoronary3D::collectStepData() const

@@ -123,6 +123,59 @@ namespace Rodin::Examples::Heart
        *          non-negativity penalty are needed: they all existed to bound
        *          a variable that is now bounded by construction.
        */
+      /**
+       * @brief One generation of a reduced limb: N identical parallel tubes of
+       *        radius r carrying a mean velocity v at rest, and a share f of the
+       *        resting pressure drop of the limb.
+       *
+       * @details A symmetric tree is a series of generations, and the WRMS
+       *          closure applies to each of them because identical tubes in
+       *          parallel share the wall stress. With the flow distribution
+       *          frozen (every segment scales with the limb flow Q), the limb
+       *          resistance relative to its resting value is
+       *
+       *            R(Q)/R(Q_0) = sum_k f_k mu_ap(g_k Q/Q_0) / mu_ap,cal(g_k),
+       *            g_k = 4 v_k / r_k,
+       *
+       *          a resistance-weighted spectrum of resting apparent shear
+       *          rates. One generation (f = 1) is the single parallel-tube
+       *          compartment of the previous calibration.
+       */
+      struct Generation
+      {
+        /// @brief Representative radius of the generation (m).
+        Real radius = 0.0;
+
+        /// @brief Mean velocity in the generation at rest (m/s).
+        Real velocity = 0.0;
+
+        /// @brief Share of the limb's resting pressure drop; the shares of
+        ///        a limb are normalised to sum to one.
+        Real fraction = 1.0;
+      };
+
+      /**
+       * @brief Calibrated rheological data of one reduced limb.
+       *
+       * @details Per generation: the resting apparent shear rate, the share of
+       *          the resting pressure drop and the viscosity that normalises
+       *          the modulation, so that the limb factor is
+       *          Phi(Q) = sum_k fraction_k mu_ap(gamma_k |Q|/q_0) / muCal_k.
+       */
+      struct Limb
+      {
+        /// @brief Resting apparent shear rate g_k = 4 v_k / r_k (1/s),
+        ///        including the vasodilation factor f^{1/4}.
+        std::vector<Real> gamma;
+
+        /// @brief Share of the resting pressure drop of the limb.
+        std::vector<Real> fraction;
+
+        /// @brief Viscosity at which the calibrated resistance is defined
+        ///        (Pa s): mu_N, or mu_ap of the reference rheology at g_k.
+        std::vector<Real> muCal;
+      };
+
       struct RCR
       {
           /// @brief Microvascular transmural pressure p_tm = p_c - p_im. THE state.
@@ -169,6 +222,55 @@ namespace Rodin::Examples::Heart
           Real vol = 0.0;
           /// @brief Diagnostic: resting stored volume.
           Real vol0 = 0.0;
+
+        /// @brief Rheological data of the arteriolar limb.
+        Limb arteriolar;
+
+        /// @brief Rheological data of the venular limb.
+        Limb venular;
+      };
+
+      /**
+       * @brief Rheological closure of the reduced outlet resistances.
+       *
+       * @details Only the 0D closure changes; Config::viscosity still drives
+       *          the 3D Carreau-Yasuda field, so runs that differ only in this
+       *          setting isolate the reduced closure.
+       */
+      enum class OutletClosure
+      {
+        /// @brief R_mu: the limb factor follows the operating point,
+        ///        Phi(Q) = sum_k f_k mu_ap(g_k |Q|/q_0)/muCal_k.
+        ShearDependent,
+        /// @brief Constant resistance at the high-shear plateau of the active
+        ///        law, Phi = s sum_k f_k mu_inf/muCal_k (the mu_inf comparison
+        ///        of the first submission).
+        Plateau,
+        /// @brief Constant resistance frozen at the calibrated resting
+        ///        operating point of the active rheology,
+        ///        Phi = s sum_k f_k mu_ap(g_k)/muCal_k. It coincides with R_mu
+        ///        at rest by construction, so any difference is produced by the
+        ///        displacement of the operating point. The scale s
+        ///        (Config::outletConstantScale) allows a constant resistance
+        ///        matched to the mean inflow of the R_mu run.
+        OperatingPoint
+      };
+
+      /**
+       * @brief Viscosity at which the resting bed resistances are defined.
+       */
+      enum class CalibrationMode
+      {
+        /// @brief R_a, R_v are Newtonian resistances at
+        ///        Config::newtonianCalibrationViscosity (first submission).
+        Newtonian,
+        /// @brief R_a, R_v are the resistances of the reference rheology
+        ///        (Config::calibrationViscosity, the healthy state) at its
+        ///        resting operating point: muCal_k = mu_ap,ref(g_k). The
+        ///        reference blood then reproduces the prescribed resting flow
+        ///        exactly (Phi = 1), and another blood perfusing the same bed
+        ///        sees Phi = mu_ap(g_k)/mu_ap,ref(g_k).
+        ReferenceRheology
       };
 
       /**
@@ -587,6 +689,43 @@ namespace Rodin::Examples::Heart
           CarreauYasuda viscosity;
 
           Real newtonianCalibrationViscosity = 0.0035;
+
+        /// @brief Viscosity at which the bed resistances are calibrated.
+        CalibrationMode calibrationMode = CalibrationMode::Newtonian;
+
+        /// @brief Reference rheology of CalibrationMode::ReferenceRheology.
+        /// @details Defaults to the healthy Carreau-Yasuda fit of the
+        ///          manuscript (table 1). Only the law parameters are read;
+        ///          with RheologyModel::Quemada the reference is the active
+        ///          Quemada law.
+        CarreauYasuda calibrationViscosity{.mu0 = 0.0712616,
+          .muInf = 0.0041,
+          .lambda = 9.2780,
+          .n = 0.3572,
+          .yasuda = 1.8873};
+
+        /// @brief Mean arterial pressure of the resting pressure budget (Pa).
+        /// @details <= 0 keeps the initial arterial pressure of the 0D model,
+        ///          lv.initialPar, as the budget dP = p_ar - P_RA.
+        Real calibrationArterialPressure = 0.0;
+
+        /// @brief Generations of the arteriolar limb. Empty means one
+        ///        generation (arteriolarRadius, arteriolarVelocity, 1).
+        std::vector<Generation> arteriolarTree;
+
+        /// @brief Generations of the venular limb. Empty means one
+        ///        generation (venularRadius, venularVelocity, 1).
+        std::vector<Generation> venularTree;
+
+        /// @brief Write the per-outlet calibration to this CSV (root rank).
+        std::string calibrationOutputPath;
+
+        /// @brief Read the per-outlet calibration (q_0, R_a, R_v, C and the
+        ///        resting state) from this CSV instead of deriving it from
+        ///        the mesh. Outlet areas are still measured on the mesh, so a
+        ///        mesh study can keep the terminal parameters fixed.
+        std::string calibrationInputPath;
+
           /// @brief Non-Newtonian outlet flow-law parameters.
           OutletFlowLaw outletFlowLaw;
           /// @brief Prescribed LV activation waveform parameters.
@@ -739,29 +878,30 @@ namespace Rodin::Examples::Heart
           ///          them as usual.
           Real operatingRightAtrialPressure = 0.0;
 
-          /// @brief Freeze the reduced outlet closure at its high-shear
-          ///        plateau, giving a CONSTANT outlet resistance.
-          /// @details The comparison the paper reports at fixed haematological
-          ///          state: R_mu is replaced by
-          ///          R_inf = 8 mu_inf L / (N pi R^4), i.e. the WRMS table is
-          ///          built with mu(gammadot) == mu_inf so Phi = mu_inf/mu_N is
-          ///          constant and the pressure-flow relation of every outlet
-          ///          becomes linear. The plateau is taken from the ACTIVE law
-          ///          (mu_inf for Carreau-Yasuda; mu_F (1 - k_inf phi/2)^-2 for
-          ///          Quemada), so setting this is exactly "same mu_inf, zero
-          ///          shear-thinning".
-          ///
+        /// @brief Rheological closure of the reduced outlets.
+        /// @details OutletClosure::Plateau is the former
+        ///          constantOutletResistance flag: the WRMS table is built
+        ///          with mu(gammadot) == mu_inf of the ACTIVE law (mu_inf for
+        ///          Carreau-Yasuda; mu_F (1 - k_inf phi/2)^-2 for Quemada).
+        ///          OutletClosure::OperatingPoint freezes the closure at the
+        ///          resting operating point of the active rheology instead.
           ///          Only the 0D closure changes: Config::viscosity still
-          ///          drives the 3D Carreau-Yasuda field, so a run with this
-          ///          flag differs from its R_mu twin ONLY in the reduced
-          ///          outlet model. That is what isolates the closure, and it
-          ///          is why the flag exists instead of setting
-          ///          viscosity.mu0 = viscosity.muInf, which would make the
-          ///          resolved domain Newtonian as well.
-          bool constantOutletResistance = false;
+        ///          drives the 3D Carreau-Yasuda field, so runs that differ
+        ///          only here isolate the reduced closure.
+        OutletClosure outletClosure = OutletClosure::ShearDependent;
+
+        /// @brief Scale s of the constant closures (Plateau, OperatingPoint).
+        /// @details 1 keeps the closure as defined; a secant iteration on s
+        ///          gives the constant resistance that reproduces the mean
+        ///          inflow of the R_mu run.
+        Real outletConstantScale = 1.0;
 
           Real inletTangentialDamping = 1e3;
           Real inletVelocityDamping = 0.0;
+
+        /// @brief XDMF snapshot period in accepted steps; 1 writes every
+        ///        step, 0 none. The CSV diagnostics are written every step.
+        size_t outputEvery = 1;
       };
 
       explicit CoupledLV0DCoronary3D(const Rodin::Context::MPI& context);
@@ -856,7 +996,26 @@ namespace Rodin::Examples::Heart
       /// @details mu_ap(tau_w) = tau_w^4 / (4 I(tau_w)) with
       ///          I(tau_w) = int_0^{tau_w} tau^2 gammadot(tau) dtau. Independent
       ///          of radius, length and branch, so it is built once.
-      static WRMSTable buildWRMSTable(const Config& cfg, const CarreauYasuda& visc);
+      static WRMSTable buildWRMSTable(
+        const Config& cfg, const CarreauYasuda& visc, bool plateau);
+
+      /// @brief Viscosity factor of a limb at the flow ratio |Q|/q_0.
+      /// @details Phi = sum_k f_k mu_ap(g_k |Q|/q_0)/muCal_k for the
+      ///          shear-dependent closure; the constant closures evaluate it
+      ///          at the resting ratio 1 and multiply by
+      ///          Config::outletConstantScale.
+      static Real limbFactor(
+        const Config& cfg, const WRMSTable& wrms, const Limb& limb, Real q, Real q0);
+
+      /// @brief Limb data from its generations: resting shear rates, shares
+      ///        and calibration viscosities.
+      Limb makeLimb(const std::vector<Generation>& tree, Real fShear) const;
+
+      /// @brief Writes the per-outlet calibration (root rank).
+      void writeCalibration() const;
+
+      /// @brief Overrides the per-outlet calibration from a CSV.
+      void readCalibration();
 
       static Real periodic_activation(const Activation& cfg, Real t);
       static Real atrial_pressure(const AtrialPressure& cfg, Real t);
@@ -875,6 +1034,12 @@ namespace Rodin::Examples::Heart
       void computeWallShear();
       void updateHistory();
       void writeOutputs();
+
+      /// @brief Appends the integral field measures of the step (total
+      ///        dissipation, mean |WSS|, mean boundary pressures) to
+      ///        <csv stem>_fields.csv.
+      template <class Mu, class Sym>
+      void writeFieldDiagnostics(const Mu& mu, const Sym& symU);
       void writeCSVHeader();
       void writeCSVRow();
       StepData collectStepData() const;
@@ -951,11 +1116,17 @@ namespace Rodin::Examples::Heart
       ///        calibration and shared by every outlet and both limbs.
       WRMSTable m_wrms;
 
+      /// @brief WRMS table of the reference rheology
+      ///        (CalibrationMode::ReferenceRheology).
+      WRMSTable m_wrmsReference;
+
       mutable StepData m_stepData;
       std::ofstream m_csv;
+      std::ofstream m_fieldsCsv;
       StepTiming m_stepTiming;
       bool m_flowFieldSplitsSet = false;
       bool m_initialized = false;
+      size_t m_outputCounter = 0;
   };
 } // namespace Rodin::Examples::Heart
 

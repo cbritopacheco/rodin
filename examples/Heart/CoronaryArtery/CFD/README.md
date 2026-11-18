@@ -71,3 +71,51 @@ resources with `git lfs pull` before running.
 ## Input and configuration
 
 The default mesh is `resources/examples/Heart/CoronaryArtery/Output3D.mesh`. See `CoronaryArtery.cpp` for the PETSc options, including `-coronary_dt`, `-coronary_nsteps`, and `-coronary_output_prefix`.
+
+## Outlet closures and calibration
+
+The bed resistances of every outlet are calibrated once, at rest, from the
+Murray split of `lcaTargetFlow` and the pressure budget. The viscosity at which
+they are defined is set with `-coronary_calibration`:
+
+- `newtonian` (default) defines them at `-coronary_calibration_viscosity`
+  ($\mu_N$, 3.5 mPa s).
+- `reference` defines them for the reference blood at its resting operating
+  point. The reference blood is the healthy Carreau–Yasuda fit (override with
+  `-coronary_cal_cy_*`), and the normalisation is
+  $\mu_{\mathrm{cal},k}=\mu_{\mathrm{ap,ref}}(4v_k/r_k)$. The reference blood
+  then reproduces the prescribed resting flow ($\Phi=1$), and any other blood
+  perfuses the same bed.
+
+Each limb may be a series of generations, set with
+`-coronary_arteriolar_tree` or `-coronary_venular_tree` as `r:v:f,...` (m,
+m/s, share of the limb's pressure drop). Its factor is
+
+$$
+\Phi(Q)=\sum_k f_k\,\mu_{\mathrm{ap}}(g_k\lvert Q\rvert/q_0)/\mu_{\mathrm{cal},k},
+\qquad g_k = 4v_k/r_k .
+$$
+
+This is a resistance-weighted spectrum of resting shear rates. A single
+generation recovers the single parallel-tube compartment.
+
+`-coronary_outlet_closure` selects the reduced closure:
+
+- `rmu` is the shear-dependent closure $\Phi(Q)$.
+- `rest` freezes $\Phi$ at the resting operating point of the running blood, so
+  it coincides with `rmu` at rest.
+- `plateau` uses $\mu_\infty$ for every generation.
+
+Both constant closures are multiplied by `-coronary_outlet_constant_scale`.
+
+The calibration can be written with `-coronary_calibration_out` and read back
+with `-coronary_calibration_in`. Outlet areas are always measured on the mesh,
+so a mesh study can hold the terminal parameters fixed.
+
+Every step also appends the total dissipation, the wall-mean $\lvert\tau_w\rvert$
+and the mean inlet and outlet pressures to `CoronaryArtery_fields.csv`.
+`run_coronary_closures.sh` runs the closure comparison for the three blood
+fits, with optional time-step, mesh, drainage-pressure and multi-generation
+studies, and with a secant-matched constant resistance. Its last step,
+`compare_coronary_closures.py`, reduces the last cycle of each run.
+
