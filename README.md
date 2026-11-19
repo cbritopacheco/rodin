@@ -63,10 +63,12 @@ Rodin can be easily installed from source on Linux and macOS systems.
 - C++20 compatible compiler (GCC 12+, Clang 14+, or AppleClang)
 - Boost 1.74+
 - Eigen3
+- HDF5 (C library)
 - Git LFS, required for the resource tree
 
 **Optional:**
-- OpenMP (for parallel execution)
+- OpenMP (required with the default `RODIN_MULTITHREADED=ON`)
+- PETSc (required with the default `RODIN_USE_PETSC=ON`)
 - SuiteSparse (for additional linear solvers)
 - MPI (for distributed computing)
 
@@ -93,6 +95,9 @@ sudo make install
 
 For a library-and-headers installation, configure resource handling with
 `-DRODIN_INSTALL_RESOURCES=OFF`.
+
+For an Eigen-only installation without PETSc or OpenMP, also use
+`-DRODIN_USE_PETSC=OFF -DRODIN_MULTITHREADED=OFF`.
 
 All files under `resources/` are tracked through Git LFS, including test and
 benchmark fixtures. If an example or resource-dependent test fails while
@@ -121,7 +126,7 @@ The following test project checks the installed headers, library and CMake
 **CMakeLists.txt**
 ```cmake
 cmake_minimum_required(VERSION 3.16)
-project(MyRodinProject CXX)
+project(MyRodinProject LANGUAGES C CXX)
 set(CMAKE_CXX_STANDARD 20)
 
 find_package(Rodin REQUIRED)
@@ -160,13 +165,13 @@ make
 
 **Ubuntu/Debian**
 ```bash
-sudo apt-get install cmake libboost-all-dev libeigen3-dev libomp-dev
+sudo apt-get install cmake libboost-all-dev libeigen3-dev libhdf5-dev libomp-dev petsc-dev
 sudo apt-get install git-lfs  # needed for resources
 ```
 
 **macOS (Homebrew)**
 ```bash
-brew install cmake boost eigen libomp
+brew install cmake boost boost-mpi eigen libomp petsc hdf5-mpi
 brew install git-lfs  # needed for resources
 ```
 

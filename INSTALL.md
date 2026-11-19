@@ -15,19 +15,19 @@ This guide provides instructions for building and installing the Rodin finite el
 ### Required Dependencies
 
 - **CMake 3.16.0+** - Build system generator
-- **C++20 compatible compiler** - GCC 10+, Clang 10+, or MSVC 2019+
+- **C++20 compatible compiler** - GCC 12+, Clang 14+, or AppleClang
 - **Boost 1.74+** - Required components: `filesystem`, `serialization`
 - **Eigen3 3.4+** - Linear algebra library
+- **HDF5** - Required C library for HDF5/XDMF input and output
 - **Git LFS** - Required when cloning or installing resources
 
 ### Optional Dependencies
 
-- **OpenMP** - For parallel computations (recommended)
+- **OpenMP** - Required by the default `RODIN_MULTITHREADED=ON` configuration
 - **MPI** - For distributed computing
-- **PETSc** - For advanced solvers
+- **PETSc** - Required by the default `RODIN_USE_PETSC=ON` configuration
 - **Scotch** - For graph partitioning
 - **SuiteSparse** - For direct solvers (UMFPACK, CHOLMOD, SPQR, KLU)
-- **VTK** - For visualization
 
 ## Building from Source
 
@@ -38,7 +38,7 @@ git clone --recursive https://github.com/cbritopacheco/rodin.git
 cd rodin
 ```
 
-**Important:** Use `--recursive` to initialize git submodules (eigen, googletest, etc.).
+Use `--recursive` to initialize the bundled dependencies, including MMG and GoogleTest.
 All files under `resources/` are Git LFS objects. Install Git LFS and hydrate
 them after cloning when building or installing resources:
 
@@ -78,6 +78,15 @@ cmake .. \
   -DCMAKE_INSTALL_PREFIX=/usr/local \
   -DRODIN_BUILD_EXAMPLES=ON \
   -DRODIN_MULTITHREADED=ON
+```
+
+For a library and headers installation using Eigen solvers, with no PETSc,
+OpenMP or resource-tree requirement:
+
+```bash
+cmake .. -DCMAKE_BUILD_TYPE=Release \
+  -DRODIN_USE_PETSC=OFF -DRODIN_MULTITHREADED=OFF \
+  -DRODIN_BUILD_EXAMPLES=OFF -DRODIN_INSTALL_RESOURCES=OFF
 ```
 
 ### 4. Build
@@ -131,7 +140,7 @@ Create a `CMakeLists.txt` file:
 
 ```cmake
 cmake_minimum_required(VERSION 3.16)
-project(MyProject CXX)
+project(MyProject LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -211,7 +220,6 @@ cmake .. -DCMAKE_PREFIX_PATH=/path/to/rodin/install
 | `RODIN_USE_OPENMP` | Enable OpenMP support | `OFF` (auto `ON` with `RODIN_MULTITHREADED`) |
 | `RODIN_MULTITHREADED` | Enable multithreading capabilities | `ON` |
 | `RODIN_THREAD_SAFE` | Enforce thread-safety | `OFF` (auto `ON` with `RODIN_MULTITHREADED`) |
-| `RODIN_WITH_PLOT` | Build the Rodin::Plot module | `OFF` |
 | `RODIN_WITH_PY` | Build Python bindings | `OFF` |
 
 ### Solver Options
@@ -219,7 +227,7 @@ cmake .. -DCMAKE_PREFIX_PATH=/path/to/rodin/install
 | Option | Description | Default |
 |--------|-------------|---------|
 | `RODIN_USE_MPI` | Enable MPI support | `OFF` |
-| `RODIN_USE_PETSC` | Enable PETSc support | `OFF` |
+| `RODIN_USE_PETSC` | Enable PETSc support | `ON` |
 | `RODIN_USE_UMFPACK` | Enable UMFPACK solver | `OFF` |
 | `RODIN_USE_CHOLMOD` | Enable CHOLMOD solver | `OFF` |
 | `RODIN_USE_SPQR` | Enable SPQR solver | `OFF` |
@@ -263,11 +271,10 @@ When you `find_package(Rodin)`, the following targets become available:
 - `Rodin::Test` - Testing utilities
 
 ### Model Targets
-- `Rodin::Models::Eikonal` - Eikonal equation models
-- `Rodin::Models::Advection` - Advection models
+- `Rodin::Eikonal` - Eikonal equation models
+- `Rodin::Advection` - Advection models
 
 ### Optional Targets (when enabled)
-- `Rodin::Plot` - Plotting (requires `RODIN_WITH_PLOT=ON`)
 - `Rodin::PETSc` - PETSc integration (requires `RODIN_USE_PETSC=ON`)
 - `Rodin::Scotch` - Scotch integration (requires `RODIN_USE_SCOTCH=ON`)
 - `Rodin::MPI` - MPI support (requires `RODIN_USE_MPI=ON`)

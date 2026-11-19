@@ -1,260 +1,106 @@
-# Release Checklist for Rodin v0.0.1
+# Rodin 1.0.0 release checklist
 
-This checklist outlines the steps needed to prepare and publish the first release of Rodin.
+This checklist tracks preparation of the 1.0.0 release. An unchecked item is
+pending verification. The historical 0.0.1 installation report is not evidence
+for this release.
 
-## Pre-Release Preparation
+## Release contents
 
-### Code Quality & Testing
+- [x] Set the CMake, Python package and citation versions to 1.0.0.
+- [x] Prepare [release notes](RELEASE_NOTES.md) and a changelog entry.
+- [x] Document current dependencies, defaults and installation limitations.
+- [x] Retain the Boost Software License in [LICENSE](LICENSE).
+- [ ] Confirm the release date in `CITATION.cff` and replace `Unreleased` in
+  `CHANGELOG.md` with the publication date.
 
-- [ ] Run full test suite and ensure all tests pass
-  ```bash
-  cmake .. -DRODIN_BUILD_UNIT_TESTS=ON
-  make -j4
-  ctest --output-on-failure
-  ```
+## Local verification
 
-- [ ] Run benchmarks to establish baseline performance
-  ```bash
-  cmake .. -DRODIN_BUILD_BENCHMARKS=ON
-  make -j4
-  # Run benchmarks
-  ```
-
-- [ ] Build documentation and verify it renders correctly
-  ```bash
-  cmake .. -DRODIN_BUILD_DOC=ON
-  make doc
-  ```
-
-- [ ] Verify code coverage is reasonable (optional)
-  ```bash
-  cmake .. -DRODIN_CODE_COVERAGE=ON
-  make -j4
-  make RodinCoverage
-  ```
-
-### Installation Testing
-
-- [ ] Test installation on clean system (Ubuntu/Debian)
-  ```bash
-  mkdir build && cd build
-  cmake .. -DCMAKE_INSTALL_PREFIX=/tmp/rodin-test
-  make -j4
-  make install
-  ```
-
-- [ ] Verify all headers are installed correctly
-  ```bash
-  find /tmp/rodin-test/include -name "*.h" -o -name "*.hpp" | wc -l
-  ```
-
-- [ ] Test linking against installed library
-  ```bash
-  # Create test project and verify it builds
-  mkdir /tmp/test-rodin && cd /tmp/test-rodin
-  # Create CMakeLists.txt and main.cpp
-  cmake . -DCMAKE_PREFIX_PATH=/tmp/rodin-test
-  make
-  ./test_app
-  ```
-
-- [ ] Verify CMake config files work correctly
-  ```bash
-  cmake --find-package -DNAME=Rodin -DCOMPILER_ID=GNU -DLANGUAGE=CXX -DMODE=EXIST
-  ```
-
-### Documentation
-
-- [x] Create INSTALL.md with comprehensive installation instructions
-- [ ] Update README.md with installation instructions link
-- [ ] Create CHANGELOG.md documenting all features in v0.0.1
-- [ ] Ensure LICENSE file is present and correct
-- [ ] Update CITATION.cff with correct version and date
-- [ ] Verify all examples have documentation/comments
-
-### Version Management
-
-- [ ] Update version number in CMakeLists.txt (currently 0.0.1)
-- [ ] Update version in CITATION.cff
-- [ ] Tag release in git
-  ```bash
-  git tag -a v0.0.1 -m "First release of Rodin"
-  git push origin v0.0.1
-  ```
-
-## GitHub Release Process
-
-### Preparing the Release
-
-- [ ] Create release notes summarizing:
-  - Main features
-  - Dependencies
-  - Installation instructions
-  - Known limitations
-  - Breaking changes (N/A for first release)
-
-- [ ] Prepare binary artifacts (optional):
-  - [ ] Ubuntu .deb package
-  - [ ] macOS .pkg package
-  - [ ] Windows installer
-  - [ ] Source tarball
-
-### Creating the Release
-
-1. [ ] Go to GitHub repository → Releases → "Draft a new release"
-2. [ ] Choose tag: `v0.0.1` (create new tag if not exists)
-3. [ ] Release title: "Rodin v0.0.1 - First Release"
-4. [ ] Add release description (use template below)
-5. [ ] Attach binary artifacts if available
-6. [ ] Mark as pre-release if unstable
-7. [ ] Publish release
-
-### Release Description Template
-
-```markdown
-# Rodin v0.0.1 - First Release
-
-We are excited to announce the first release of **Rodin**, a lightweight and modular finite element framework for shape and topology optimization.
-
-## ✨ Features
-
-- **Embedded Form Language**: Native C++20 form language for assembling and solving variational formulations
-- **Mesh Management**: Full mesh access with iterators and connectivity computation
-- **Finite Elements**: Support for P0, P1 elements
-- **Solvers**: Integration with Eigen solvers, optional PETSc, SuiteSparse
-- **I/O Support**: MFEM, MEDIT, EnSight6 file formats
-- **Quadrature**: Multiple quadrature formulas (Grundmann-Moeller, etc.)
-- **Third-Party Integration**: MMG for remeshing, Scotch for partitioning
-
-## 📦 Installation
-
-### Quick Start
+Run builds outside the source tree. The minimal configuration below disables
+PETSc, OpenMP, examples and resource installation. Resource-dependent tests
+still require hydrated Git LFS files.
 
 ```bash
-git clone --recursive https://github.com/cbritopacheco/rodin.git
-cd rodin
-mkdir build && cd build
-cmake ..
-make -j4
-sudo make install
+git submodule update --init --recursive
+cmake -S . -B build/release -DCMAKE_BUILD_TYPE=Release \
+  -DRODIN_USE_PETSC=OFF -DRODIN_MULTITHREADED=OFF \
+  -DRODIN_BUILD_EXAMPLES=OFF -DRODIN_INSTALL_RESOURCES=OFF \
+  -DRODIN_BUILD_UNIT_TESTS=ON -DRODIN_BUILD_MANUFACTURED_TESTS=ON
+cmake --build build/release --parallel 4
+ctest --test-dir build/release/tests -L unit -LE 'slow|distributed' --output-on-failure
+ctest --test-dir build/release/tests -L manufactured -LE 'slow|distributed' --output-on-failure
 ```
 
-For detailed installation instructions, see [INSTALL.md](INSTALL.md).
+The existing [scoped runner](dev/ci-testing.md) can build and execute selected
+directories without discovering unbuilt siblings. Record exactly which tests
+were run; a selected suite does not certify the complete matrix.
 
-### Requirements
+- [x] Build and install the library, then compile and run the installed-package
+  Poisson test, including its package/header version checks.
+- [x] Run representative unit and manufactured-solution tests.
+- [x] Verify rejection of the previous octal version encoding.
+- [x] Review the final diff and run `git diff --check`.
 
-- CMake 3.16+
-- C++20 compatible compiler
-- Boost 1.74+
-- Eigen3 3.4+
+Local checks on 2026-11-19 used macOS arm64, Clang 19, Boost 1.88, Eigen3
+and HDF5, with PETSc and Rodin MPI support disabled and OpenMP enabled.
+MPI compiler wrappers supplied the parallel HDF5 installation's include/link
+requirements. The following selected executables passed:
 
-## 📚 Documentation
+- `RodinUtilityOptionalReferenceTest`: 4 tests.
+- `RodinMathVectorTest`: 37 tests.
+- `RodinManufacturedPoisson`: 72 tests.
 
-- **Installation Guide**: [INSTALL.md](INSTALL.md)
-- **API Documentation**: https://cbritopacheco.github.io/rodin/docs/
-- **Examples**: See the `examples/` directory
+The installed-package Poisson consumer compiled and ran. Reintroducing the old
+padded version code in a scratch installation made its static assertion fail;
+restoring the decimal code restored a passing build and run. CMake package
+checks accepted requests for 1.0 and 1.0.0 and rejected 0.0.1, 1.0.1 and 2.0.0.
+Changed-line formatting, the installation-test style check and whitespace
+checks passed. These selected local results leave the complete CI gates below
+pending.
 
-## 🔧 Usage Example
+The MMG wrapper also built after setting the local toolchain option
+`CMAKE_CXX_FLAGS=-include cmath`. Without that option, MMG's C-header include
+order triggered missing `NAN`/`INFINITY` diagnostics in this host's Clang 19
+standard library. This workaround changed no tracked source or submodule.
 
-```cpp
-#include <Rodin/Geometry.h>
-#include <Rodin/Variational.h>
+The automated installation matrix uses:
 
-using namespace Rodin;
-
-int main() {
-  Geometry::Mesh mesh;
-  mesh = mesh.UniformGrid(Geometry::Polytope::Type::Triangle, {16, 16});
-  
-  Variational::P1 Vh(mesh);
-  Variational::TrialFunction u(Vh);
-  Variational::TestFunction v(Vh);
-  
-  // Define and solve your variational problem
-  // ...
-}
+```bash
+RODIN_INSTALL_RESOURCES=OFF bash tests/installation/test_installation.sh
 ```
 
-## ⚠️ Known Limitations
+It covers native, MPI and PETSc installs on Linux and macOS through
+[Tests.yml](.github/workflows/Tests.yml). Local toolchain paths and dependency
+prefixes may need to be supplied for the host system.
 
-- RodinExternal::MMG is not available in installed version (must build from source for MMG support)
-- Some optional features require building from source with specific CMake flags
-- Documentation is work in progress
+## Required current-commit CI evidence
 
-## 🐛 Bug Reports
+- [ ] All build and test configurations pass, including MPI/PETSc,
+  manufactured solutions, convergence, slow tests and sanitizers.
+- [ ] Installation matrix passes, including downstream compilation and execution.
+- [ ] Style, formatting, clang-tidy and Doxygen checks pass.
+- [ ] Documentation builds and its generated pages render correctly.
+- [ ] Benchmarks complete; inspect the published results for regressions.
+- [ ] `Coverage / Finalize` succeeds for the release commit and the complete
+  current-commit report satisfies the 95% production-line floor.
+- [ ] Verify stable finalization checks are required by branch protection.
 
-Please report any issues on our [GitHub Issues](https://github.com/cbritopacheco/rodin/issues) page.
+See [the workflow guide](.github/workflows/README.md) for required finalization
+receipts. Partial uploads and previous-commit results cannot satisfy these gates.
 
-## 📄 License
+## Publication
 
-Rodin is distributed under the Boost Software License, Version 1.0. See [LICENSE](LICENSE) for details.
+Publish only after the PR is reviewed and all release gates pass.
 
-## 🙏 Acknowledgments
+- [ ] Merge the release PR into `master` and verify the final commit's checks.
+- [ ] Tag that reviewed commit `v1.0.0` and push the tag.
+- [ ] Prepare a source distribution containing initialized submodules. If it
+  includes resources, hydrate Git LFS objects and verify there are no pointers.
+  GitHub's automatic source archives do not include submodule contents.
+- [ ] Test a fresh build and downstream install from the extracted distribution.
+- [ ] Publish the GitHub release with [RELEASE_NOTES.md](RELEASE_NOTES.md),
+  the tested distribution and its checksum.
+- [ ] Verify the release download, documentation links and citation date.
 
-This library was developed as part of Carlos Brito-Pacheco's PhD research.
-
-## 📊 Project Stats
-
-- Lines of Code: [TBD]
-- Test Coverage: [TBD]
-- Documentation Coverage: [TBD]
-```
-
-## Post-Release Tasks
-
-### Verification
-
-- [ ] Verify release appears on GitHub
-- [ ] Test download and installation from release tarball
-- [ ] Check that links in release notes work
-- [ ] Verify documentation site is updated
-
-### Communication
-
-- [ ] Announce release on project website
-- [ ] Post announcement on relevant forums/communities
-- [ ] Update project status badges
-- [ ] Share on social media (optional)
-
-### Repository Updates
-
-- [ ] Update main branch README with installation instructions
-- [ ] Add "Installation" section to README.md
-- [ ] Update badges to show latest release version
-- [ ] Close milestone for v0.0.1
-- [ ] Create milestone for v0.1.0 (next release)
-
-## Optional Packaging
-
-### Distribution Packages
-
-- [ ] Submit to Ubuntu PPA
-- [ ] Submit to Homebrew
-- [ ] Submit to vcpkg
-- [ ] Submit to Conan Center
-- [ ] Submit to Spack
-
-### Container Images
-
-- [ ] Create Docker image
-- [ ] Publish to Docker Hub
-- [ ] Create Singularity image
-
-## Future Considerations
-
-### For Next Release (v0.1.0)
-
-- [ ] Add more finite element types (P2, P0)
-- [ ] Improve MPI support
-- [ ] Add more examples
-- [ ] Improve documentation
-- [ ] Add CI/CD for automated releases
-- [ ] Consider adding Python bindings to PyPI
-
-### Long-term Goals
-
-- [ ] Establish regular release schedule
-- [ ] Set up automatic package building
-- [ ] Create user mailing list
-- [ ] Develop contributor guidelines
-- [ ] Create roadmap document
+Python bindings remain experimental; this checklist does not authorize a
+PyPI upload or certify Python wheels. Native binary packages are not part of
+this source-release preparation.

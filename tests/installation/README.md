@@ -11,6 +11,8 @@ The installation test ensures that:
 4. Downstream projects can find the library using `find_package(Rodin REQUIRED)`
 5. Projects can link against Rodin targets
 6. The installed library can solve a simple Poisson equation
+7. The installed version header agrees with the CMake package version and
+   encodes the version as a decimal integer
 
 ## Files
 
@@ -51,7 +53,9 @@ CLEANUP=no bash tests/installation/test_installation.sh
 
 ## GitHub Workflow
 
-The installation test is also run automatically via GitHub Actions on every push and pull request. See `.github/workflows/Installation.yml` for details.
+The installation matrix runs through [Tests.yml](../../.github/workflows/Tests.yml)
+on pushes to `master` and `develop` and on ready pull requests targeting those
+branches. It covers Linux and macOS with native, MPI and PETSc configurations.
 
 ## What Gets Tested
 

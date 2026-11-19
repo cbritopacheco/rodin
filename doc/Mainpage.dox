@@ -211,12 +211,12 @@
   make Rodin's use visible and support its continued development.
 
   @code{.bib}
-  @misc{BritoPacheco2024Rodin,
+  @misc{BritoPacheco2026Rodin,
     author       = {Brito-Pacheco, Carlos},
     title        = {{Rodin}: A modern C++ finite element framework for shape and topology optimization},
-    year         = {2024},
+    year         = {2026},
     howpublished = {Computer software},
-    version      = {0.0.1},
+    version      = {1.0.0},
     url          = {https://github.com/cbritopacheco/rodin},
     note         = {Open-source finite element framework}
   }
