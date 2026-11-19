@@ -21,9 +21,10 @@
  * diffusion: its stabilisation acts on the orthogonal projection of its
  * residual. README.md of this folder states what was checked.
  *
- * Domain. The cells of material Config::Labels::fluidMaterial of the combined
- * Atrium mesh (fluid 1, solid 4), extracted on each rank from the partitioned
- * parent as in Atrium/Fluid; a mesh without solid cells is used whole.
+ * Domain. The atrial volume of the PTAG atrium (Coarse.mesh), or the cells of
+ * material Config::Labels::fluidMaterial of a combined Atrium mesh (fluid 1,
+ * solid 4), extracted on each rank from the partitioned parent as in
+ * Atrium/Fluid. A mesh with no cell of that material is used whole.
  * Coordinates are scaled by Config::meshScale (mm to m).
  *
  * Boundary conditions, those of Atrium/Fluid on a fixed domain:
@@ -476,11 +477,11 @@ namespace Rodin::Examples::ViscoelasticFluids
         Real etaRef = 0.0;
 
         /**
-         * @brief Combined Atrium mesh (MEDIT, mm; fluid 1, solid 4), or a
-         *        mesh of the fluid alone with the same boundary labels.
+         * @brief MEDIT mesh in mm: the atrial volume of the PTAG atrium
+         *        (Coarse.mesh, fluid only, used whole), or a combined Atrium
+         *        mesh (fluid 1, solid 4), with the same boundary labels.
          */
-        std::string meshPath =
-          "../resources/examples/Heart/Atrium/AtriumFine_FluidSolid_1mm.mesh";
+        std::string meshPath = "../resources/examples/Heart/Atrium/Coarse.mesh";
 
         /// @brief Output paths; missing directories are created.
         std::string xdmfBasename = "results/AtriumViscoelastic";

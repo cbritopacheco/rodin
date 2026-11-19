@@ -85,9 +85,12 @@ The driver prints both tables for the constants of the run.
 
 ## Domain and openings
 
-The combined mesh (mm; fluid cells 1, solid cells 4) is partitioned once and
-the owned fluid cells are extracted on each rank, as in Atrium/Fluid; a mesh of
-the fluid alone with the same boundary labels is used whole. The conditions are
+The default mesh is `Coarse.mesh`, the atrial volume of the PTAG atrium (mm,
+fluid only), used whole. A combined Atrium mesh (fluid cells 1, solid cells 4)
+also works: it is partitioned once and the owned fluid cells are extracted on
+each rank, as in Atrium/Fluid. The driver reports the boundary area that
+carries none of the labels below, since such faces would be traction-free
+openings. The conditions are
 those of Atrium/Fluid on a fixed domain: traction $-p_{pv}(t)\,n$ on the veins
 (labels 1, 2, 3, 5) with their normal impedance and tangential damping,
 traction $-(p_{out}+Z\,u\cdot n)\,n$ on the mitral plane (label 6), no slip on
@@ -250,11 +253,11 @@ mpirun -n 2 build/examples/Heart/Atrium/Viscoelastic/AtriumViscoelastic \
   -av_mesh /tmp/la_test.mesh -av_fluid owens -av_cycles 2 -av_steps_per_cycle 85 \
   -av_time_order 2 -av_appendage_center 0.034,0,0 -av_appendage_radius 0.012
 # The campaign, 60 ranks per case:
-MESH=/path/to/AtriumFine_FluidSolid_1mm.mesh LAA_CENTER=x,y,z LAA_RADIUS=r \
+MESH=/path/to/Coarse.mesh LAA_CENTER=x,y,z LAA_RADIUS=r \
   bash examples/Heart/Atrium/Viscoelastic/run_atrium_rheology.sh
 ```
 
-The Atrium meshes are Git LFS objects. A pointer file is rejected by the
+`Coarse.mesh` and the Atrium meshes are Git LFS objects. A pointer file is rejected by the
 driver and by the script.
 
 ## Status
@@ -262,7 +265,7 @@ driver and by the script.
 The driver was compiled against this branch (GCC 13, PETSc 3.19) and run on the
 test mesh with two ranks for N, CY, VE and TVE over two cycles with the lumped
 ventricle, through `run_atrium_rheology.sh` and `postprocess_atrium.py`; no
-step was rejected. It was not run on the Atrium meshes, and the arterial driver's
+step was rejected. It was not run on `Coarse.mesh` or the Atrium meshes, and the arterial driver's
 verification cases (steady sPTT and pulsatile Oldroyd-B pipe flow) were not
 repeated on this branch. The library changes of `model/viscoelasticFluid` that
 cache coefficients during assembly (commit `c3e252e680`) are not on this

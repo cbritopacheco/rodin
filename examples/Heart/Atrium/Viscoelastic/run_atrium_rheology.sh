@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # =============================================================================
 #  run_atrium_rheology.sh -- blood rheology in the left atrium (fixed fluid
-#  domain of the Atrium FSI mesh): the same geometry, openings and numerics
+#  domain, the atrial volume of the PTAG atrium): the same geometry, openings and numerics
 #  for four fluids that differ by one ingredient each.
 #
 #     N    Newtonian, eta = eta_inf of the Carreau-Yasuda law          (u, p)
@@ -34,10 +34,12 @@
 #
 #  Environment (defaults):
 #     OUT=$HOME/Results/atrium_rheology   BUILD=build-gcc12   NP=60   JOBS=1
-#     MESH=resources/examples/Heart/Atrium/AtriumFine_FluidSolid_1mm.mesh
-#                    the fluid mesh of the FSI case (mm; fluid 1, solid 4). It
-#                    is stored in Git LFS: on pc9 copy the real file and point
-#                    MESH at it (a pointer file is rejected below).
+#     MESH=resources/examples/Heart/Atrium/Coarse.mesh
+#                    the atrial volume of AtriumPTAG (mm, fluid only; labels
+#                    1, 2, 3, 5 veins, 6 mitral plane, 4 wall). A combined
+#                    FSI mesh (fluid 1, solid 4) also works. It is stored in
+#                    Git LFS: on pc9 copy the real file and point MESH at it
+#                    (a pointer file is rejected below).
 #     FLUIDS="TVE VE CY N"     the longest first; add R for the gsPTT
 #     CYCLES=6  CYCLES_TVE=8   cycles (the first with the pressure ramp)
 #     STEPS=850                steps per cycle (dt = 1 ms at T = 0.85 s)
@@ -74,7 +76,7 @@ BUILD="${BUILD:-build-gcc12}"
 NP="${NP:-60}"
 JOBS="${JOBS:-1}"
 MPIRUN="${MPIRUN:-mpirun}"
-MESH="${MESH:-$REPO/resources/examples/Heart/Atrium/AtriumFine_FluidSolid_1mm.mesh}"
+MESH="${MESH:-$REPO/resources/examples/Heart/Atrium/Coarse.mesh}"
 FLUIDS="${FLUIDS:-TVE VE CY N}"
 CYCLES="${CYCLES:-6}"
 CYCLES_TVE="${CYCLES_TVE:-8}"

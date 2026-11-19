@@ -12,7 +12,7 @@
  *
  * Run (from the build directory):
  *   mpirun -n 60 ./examples/Heart/Atrium/Viscoelastic/AtriumViscoelastic \
- *     -av_mesh ../resources/examples/Heart/Atrium/AtriumFine_FluidSolid_1mm.mesh \
+ *     -av_mesh ../resources/examples/Heart/Atrium/Coarse.mesh \
  *     -av_fluid owens -av_cycles 6 -av_steps_per_cycle 850 -av_time_order 2
  *
  * Options (all prefixed -av_):
@@ -1777,22 +1777,48 @@ namespace Rodin::Examples::ViscoelasticFluids
     const MeshType& parent, const Config& cfg)
   {
     // The owned cells of the fluid material, as in Atrium/Fluid: the submesh
-    // keeps the partition and the boundary attributes of the parent.
+    // keeps the partition and the boundary attributes of the parent. A mesh
+    // with no cell of that material is a mesh of the fluid alone (Coarse.mesh,
+    // the volume of the PTAG atrium) and is used whole.
+    const auto& comm = parent.getContext().getCommunicator();
     const Attribute material = cfg.labels.fluidMaterial;
+    size_t owned = 0, ownedFluid = 0;
+    for (auto cell = parent.getCell(); cell; ++cell)
+    {
+      if (!parent.getShard().isOwned(3, cell->getIndex()))
+        continue;
+      ++owned;
+      if (cell->getAttribute() == material)
+        ++ownedFluid;
+    }
+    const size_t total = boost::mpi::all_reduce(comm, owned, std::plus<size_t>());
+    const size_t fluid = boost::mpi::all_reduce(comm, ownedFluid, std::plus<size_t>());
+    if (total == 0)
+      throw std::runtime_error("No cells in " + cfg.meshPath + ".");
+    const bool whole = fluid == 0;
+    if (comm.rank() == RootRank)
+    {
+      if (whole)
+      {
+        Alert::Info() << "[mesh] no cell of material " << material
+                      << ": the whole mesh is the fluid (" << total << " cells)"
+                      << Alert::Raise;
+      }
+      else
+      {
+        Alert::Info() << "[mesh] fluid material " << material << ": " << fluid << " of "
+                      << total << " cells" << Alert::Raise;
+      }
+    }
     FluidMeshType::Builder builder;
     builder.initialize(parent);
     for (auto cell = parent.getCell(); cell; ++cell)
     {
       if (parent.getShard().isOwned(3, cell->getIndex()) &&
-        cell->getAttribute() == material)
+        (whole || cell->getAttribute() == material))
         builder.include(3, cell->getIndex());
     }
     auto mesh = builder.finalize();
-    if (mesh.getCellCount() == 0)
-    {
-      throw std::runtime_error("No cells of the fluid material " +
-        std::to_string(material) + " in " + cfg.meshPath + ".");
-    }
     size_t invalid = 0;
     for (auto cell = mesh.getCell(); cell; ++cell)
     {
@@ -2524,6 +2550,27 @@ namespace Rodin::Examples::ViscoelasticFluids
       throw std::runtime_error(
         "No venous or mitral faces: check the labels of the mesh "
         "(veins 1, 2, 3, 5; mitral plane 6; wall 4) and -av_mesh_scale.");
+    }
+    {
+      // A boundary face with none of these labels would be a traction-free
+      // opening: the area of such faces is reported.
+      const Real wallMeasure = boundaryMeasure(m_wallSet);
+      m_flux = BoundaryIntegral(m_one, m_qFlux);
+      m_flux.assemble();
+      const Real boundary = m_flux(m_one);
+      const Real other = boundary - m_inletMeasure - m_outletMeasure - wallMeasure;
+      if (isRoot())
+      {
+        Alert::Info() << "[boundary] wall area = " << wallMeasure
+                      << " m^2  total boundary = " << boundary << " m^2" << Alert::Raise;
+        if (std::abs(other) > 1.0e-6 * boundary)
+        {
+          Alert::Warning() << "[boundary] " << other
+                           << " m^2 of the boundary carries none of the labels 1, 2, 3, "
+                              "5, 6, 4: those faces are traction-free openings"
+                           << Alert::Raise;
+        }
+      }
     }
     setupProbes();
   }
