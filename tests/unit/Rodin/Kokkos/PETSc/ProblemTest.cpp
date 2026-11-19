@@ -945,9 +945,12 @@ namespace Rodin::Tests::Unit
 int main(int argc, char** argv)
 {
   ::testing::InitGoogleTest(&argc, argv);
-  ::Kokkos::ScopeGuard runtime(argc, argv);
-  PetscInitialize(&argc, &argv, nullptr, nullptr);
-  const int res = RUN_ALL_TESTS();
-  PetscFinalize();
-  return res;
+  int res = 0;
+  {
+    ::Kokkos::ScopeGuard runtime(argc, argv);
+    PetscInitialize(&argc, &argv, nullptr, nullptr);
+    res = RUN_ALL_TESTS();
+    PetscFinalize();
+  }
+  Rodin::Tests::Unit::exitTestProcess(res);
 }

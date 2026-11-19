@@ -7,6 +7,8 @@
 #include <gtest/gtest.h>
 #include <Kokkos_Core.hpp>
 
+#include "TestContext.h"
+
 /**
  * @brief Runs tests within the lifetime of the Kokkos runtime.
  * @param argc Number of command-line arguments.
@@ -16,6 +18,10 @@
 int main(int argc, char** argv)
 {
   ::testing::InitGoogleTest(&argc, argv);
-  ::Kokkos::ScopeGuard runtime(argc, argv);
-  return RUN_ALL_TESTS();
+  int status = 0;
+  {
+    ::Kokkos::ScopeGuard runtime(argc, argv);
+    status = RUN_ALL_TESTS();
+  }
+  Rodin::Tests::Unit::exitTestProcess(status);
 }

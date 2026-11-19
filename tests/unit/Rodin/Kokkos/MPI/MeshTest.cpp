@@ -155,11 +155,15 @@ namespace Rodin::Tests::Unit
 /// @brief Runs MPI/Kokkos tests without initializing or linking PETSc.
 int main(int argc, char** argv)
 {
-  boost::mpi::environment environment(argc, argv);
-  boost::mpi::communicator world;
-  Rodin::Tests::Unit::meshEnvironment = &environment;
-  Rodin::Tests::Unit::meshWorld = &world;
-  ::testing::InitGoogleTest(&argc, argv);
-  ::Kokkos::ScopeGuard runtime(argc, argv);
-  return RUN_ALL_TESTS();
+  int status = 0;
+  {
+    boost::mpi::environment environment(argc, argv);
+    boost::mpi::communicator world;
+    Rodin::Tests::Unit::meshEnvironment = &environment;
+    Rodin::Tests::Unit::meshWorld = &world;
+    ::testing::InitGoogleTest(&argc, argv);
+    ::Kokkos::ScopeGuard runtime(argc, argv);
+    status = RUN_ALL_TESTS();
+  }
+  Rodin::Tests::Unit::exitTestProcess(status);
 }

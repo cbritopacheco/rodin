@@ -24,17 +24,17 @@
  */
 int main(int argc, char** argv)
 {
-  boost::mpi::environment env(argc, argv);
-  boost::mpi::communicator world;
-  Rodin::Tests::Unit::g_env = &env;
-  Rodin::Tests::Unit::g_world = &world;
-  ::testing::InitGoogleTest(&argc, argv);
   int res = 0;
   {
+    boost::mpi::environment env(argc, argv);
+    boost::mpi::communicator world;
+    Rodin::Tests::Unit::g_env = &env;
+    Rodin::Tests::Unit::g_world = &world;
+    ::testing::InitGoogleTest(&argc, argv);
     ::Kokkos::ScopeGuard runtime(argc, argv);
     PetscInitialize(&argc, &argv, nullptr, nullptr);
     res = RUN_ALL_TESTS();
     PetscFinalize();
   }
-  return res;
+  Rodin::Tests::Unit::exitTestProcess(res);
 }

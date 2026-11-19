@@ -9,8 +9,13 @@
 
 /**
  * @file
- * @brief Selects the real CUDA or HIP backend when enabled and explicit host validation otherwise.
+ * @brief Selects the real CUDA or HIP backend when enabled and explicit host validation otherwise,
+ * and ends the test processes.
  */
+
+#include <cstdio>
+#include <cstdlib>
+#include <iostream>
 
 #include <Rodin/Kokkos/Context.h>
 #include <Rodin/Types.h>
@@ -30,6 +35,28 @@ namespace Rodin::Tests::Unit
   using TestContext = Context::Kokkos<Context::Local, TestBackend>;
   using TestExecutionSpace = TestContext::ExecutionSpaceType;
   using TestMemorySpace = TestContext::MemorySpaceType;
+
+  /**
+   * @brief Ends a test process whose Kokkos, PETSc and MPI runtimes are
+   * finalized.
+   *
+   * When several processes share an AMD GPU, the static destructors of the
+   * HIP runtime library sometimes block forever after main has returned,
+   * with or without Rodin code on the stack. With HIP, the output is
+   * flushed and the process ends without running them.
+   * @param status Exit status of the process.
+   */
+  [[noreturn]] inline void exitTestProcess(int status)
+  {
+    std::cout.flush();
+    std::cerr.flush();
+    std::fflush(nullptr);
+#ifdef KOKKOS_ENABLE_HIP
+    std::_Exit(status);
+#else
+    std::exit(status);
+#endif
+  }
 }
 
 #endif
