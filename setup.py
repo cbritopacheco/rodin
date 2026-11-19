@@ -15,7 +15,7 @@ from setuptools import find_packages
 
 setup(
     name="rodin",
-    version="0.0.1",
+    version="1.0.0",
     description="Rodin Python bindings",
     author="Carlos Brito-Pacheco",
     license="Boost",

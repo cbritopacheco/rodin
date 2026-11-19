@@ -1,5 +1,9 @@
 # Installation Testing Report for Rodin v0.0.1
 
+> Historical report for the 0.0.1 preparation. These results do not certify
+> 1.0.0. Current release requirements and verification status are maintained
+> in [RELEASE_CHECKLIST.md](RELEASE_CHECKLIST.md).
+
 ## Executive Summary
 
 The Rodin finite element library has been successfully tested and prepared for its first official release (v0.0.1). All installation workflows have been verified, issues have been resolved, and comprehensive documentation has been added.

@@ -1,4 +1,11 @@
 /*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2026.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
+
+/*
  * Installation Test - Poisson Equation Solver
  * 
  * This test verifies that the installed Rodin library can be:
@@ -12,11 +19,16 @@
 #include <Rodin/Assembly.h>
 #include <Rodin/Variational.h>
 #include <iostream>
+#include <string_view>
 
 using namespace Rodin;
 using namespace Rodin::Solver;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
+
+static_assert(RODIN_VERSION_CODE ==
+  RODIN_VERSION_MAJOR * 10000 + RODIN_VERSION_MINOR * 100 + RODIN_VERSION_PATCH);
+static_assert(std::string_view(RODIN_VERSION) == EXPECTED_RODIN_VERSION);
 
 int main()
 {

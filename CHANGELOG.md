@@ -5,6 +5,41 @@ All notable changes to the Rodin project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.0] - Unreleased
+
+### Added
+
+- High-order H1 finite element spaces, curved/isoparametric geometry, and
+  h-, p- and hp-convergence studies alongside P0 and P1 spaces.
+- Discontinuous Galerkin facet operators, identification constraints, and
+  preassembled mixed formulations.
+- Distributed MPI meshes, finite element spaces, assembly and I/O, with
+  PETSc-backed variational problems and solvers.
+- Solid mechanics, heart models, distance and eikonal solvers, advection,
+  mesh optimization and adaptation tools.
+- HDF5/XDMF field output and geometric point-location facilities.
+- Manufactured-solution, convergence, sanitizer and installation CI matrices,
+  published benchmarks, and production coverage finalization.
+- Installation and first-problem tutorials, module guides, and API documentation.
+
+### Changed
+
+- CMake, Python package and citation metadata now identify Rodin 1.0.0.
+- CMake package version matching requires the same major version, consistent
+  with semantic versioning.
+- Installation documentation states the HDF5 requirement and the default
+  PETSc and OpenMP dependencies, with an explicit Eigen-only configuration.
+- The public API has evolved since 0.0.1. Existing applications should be
+  rebuilt and checked against the current tutorials and module examples.
+  See [the release notes](RELEASE_NOTES.md) for scope and limitations.
+
+### Fixed
+
+- Generated version codes use decimal integer literals; padding with leading
+  zeroes previously made C++ interpret them as octal.
+- The downstream installation test checks agreement between the generated
+  version header and the installed CMake package and enables C for HDF5 discovery.
+
 ## [0.0.1] - 2024-11-11
 
 ### Overview
@@ -157,11 +192,4 @@ This library was developed as part of Carlos Brito-Pacheco's PhD research at Uni
 
 ---
 
-## Future Releases
-
-### Planned for v0.1.0
-- Additional finite element types (P2, Nedelec, Raviart-Thomas)
-- Improved MPI support
-- Additional examples and tutorials
-- Enhanced documentation
-- Performance optimizations
+Current release preparation is tracked in [RELEASE_CHECKLIST.md](RELEASE_CHECKLIST.md).

@@ -15,7 +15,7 @@ if ("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
   message(FATAL_ERROR "In-source builds are prohibited.")
 endif ("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
 
-project(Rodin VERSION 0.0.1 LANGUAGES CXX C)
+project(Rodin VERSION 1.0.0 LANGUAGES CXX C)
 
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 include(RodinUtilities)
@@ -40,20 +40,9 @@ set(RODIN_INSTALL_INCLUDE_PATH  ${CMAKE_INSTALL_INCLUDEDIR} CACHE PATH
 set(RODIN_INSTALL_SHARE_PATH    ${CMAKE_INSTALL_DATADIR}  CACHE PATH
     "Installation directory for read-only architecture-independent data")
 
-# Compute version code: major * 10000 + minor * 100 + patch
+# Compute version code: major * 10000 + minor * 100 + patch.
+# Keep the generated C++ integer decimal: leading zeroes make it octal.
 math(EXPR RODIN_VERSION_CODE "${PROJECT_VERSION_MAJOR} * 10000 + ${PROJECT_VERSION_MINOR} * 100 + ${PROJECT_VERSION_PATCH}")
-# Pad to 6 digits manually
-if(RODIN_VERSION_CODE LESS 10)
-  set(RODIN_VERSION_CODE "00000${RODIN_VERSION_CODE}")
-elseif(RODIN_VERSION_CODE LESS 100)
-  set(RODIN_VERSION_CODE "0000${RODIN_VERSION_CODE}")
-elseif(RODIN_VERSION_CODE LESS 1000)
-  set(RODIN_VERSION_CODE "000${RODIN_VERSION_CODE}")
-elseif(RODIN_VERSION_CODE LESS 10000)
-  set(RODIN_VERSION_CODE "00${RODIN_VERSION_CODE}")
-elseif(RODIN_VERSION_CODE LESS 100000)
-  set(RODIN_VERSION_CODE "0${RODIN_VERSION_CODE}")
-endif()
 
 
 # ---- Options ---------------------------------------------------------------
@@ -408,7 +397,7 @@ endif()
 write_basic_package_version_file(
   "${CMAKE_CURRENT_BINARY_DIR}/RodinConfigVersion.cmake"
   VERSION       ${PROJECT_VERSION}
-  COMPATIBILITY AnyNewerVersion
+  COMPATIBILITY SameMajorVersion
 )
 
 configure_package_config_file(
