@@ -111,7 +111,7 @@
 // inlet (velocity|pressure), umean, q (m^3/s, overrides umean), profile (auto|laminar|turbulent|uniform), pin, pout,
 // ramp, tangential (inlet penalty, kg/(m^2 s)), total_pressure (bool), dt,
 // dtmin, dtmax, tend, adaptive_dt (bool), grow, shrink, easy, hard, maxit,
-// tol, tau_dt (bool), bdf (1|2), extrapolate (bool), lumped (bool), refactor_every, refactor_its, picard_monitor (bool), tavg, steady_tol, steady_window, output_every, scale,
+// tol, tau_dt (bool), tau_p_dt_factor, bdf (1|2), extrapolate (bool), lumped (bool), refactor_every, refactor_its, picard_monitor (bool), tavg, steady_tol, steady_window, output_every, scale,
 // solver (direct|iterative).
 // Solvers: -kv_flow_ (GMRES + MUMPS LU by default; -kv_solver iterative:
 // FGMRES + Schur field split with BoomerAMG, or ILU + GAMG without hypre,
@@ -243,6 +243,12 @@ namespace Rodin::Examples::Valve
         /// weight tau/dt >> 1: the pressure lags the flow and Picard stalls
         /// (see examples/Heat/ForcedConvection.cpp). With it, tau_M <= dt/2.
         bool tauDt = true;
+        /// tau_M of the pressure (PSPG) term only: 2/dt is replaced by
+        /// 2/(tauPDtFactor dt), i.e. tau_p <= tauPDtFactor dt/2 (0: no dt
+        /// term). With tau_p ~ dt/2 << h/2|u| (fine dt on the coarse cells of
+        /// the inlet pipe, CFL ~ 0.1) the pressure stabilisation is too weak
+        /// and P1/P1 pressure wiggles show up next to the velocity inlet.
+        Real tauPDtFactor = 1.0;
         int maxRetries = 4;
         bool picardMonitor = false;
         int bdf = 2;                  ///< 1: backward Euler; 2: BDF2 (variable step), BDF1 on the first step
@@ -963,18 +969,19 @@ namespace Rodin::Examples::Valve
         const auto J = Jacobian(m_uIt);
         const Real rho = m_cfg.rho;
         const auto muAt = [this, &J](const Point& p) { return viscosity(shearRate(J.getValue(p))); };
-        const auto tauAt = [this, &muAt, rho](const Point& p) {
+        const auto tauWith = [this, &muAt, rho](const Point& p, Real factor) {
           const Real h = cellSize(p);
           const auto u = m_uIt.getValue(p);
-          const Real a = m_cfg.tauDt ? 2.0 / m_dt : 0.0;
+          const Real a = (m_cfg.tauDt && factor > 0.0) ? 2.0 / (factor * m_dt) : 0.0;
           const Real b = 2.0 * std::sqrt(Math::dot(u, u)) / h;
           const Real c = 4.0 * muAt(p) / (rho * h * h);
           return 1.0 / std::sqrt(a * a + b * b + c * c);
         };
+        const Real pf = m_cfg.tauPDtFactor;
         updateAdvection();
         m_muGF.project(RealFunction(muAt));
-        m_tauMGF.project(RealFunction(tauAt));
-        m_tauMRhoGF.project(RealFunction([&tauAt, rho](const Point& p) { return tauAt(p) / rho; }));
+        m_tauMGF.project(RealFunction([&tauWith](const Point& p) { return tauWith(p, 1.0); }));
+        m_tauMRhoGF.project(RealFunction([&tauWith, rho, pf](const Point& p) { return tauWith(p, pf) / rho; }));
         m_tauCGF.project(RealFunction([this, &muAt, rho](const Point& p) {
           const auto u = m_uIt.getValue(p);
           return muAt(p) + 0.5 * rho * std::sqrt(Math::dot(u, u)) * cellSize(p); }));
@@ -1508,6 +1515,7 @@ int main(int argc, char** argv)
     integer("-kv_maxit", cfg.maxIterations);
     real("-kv_tol", cfg.tolerance);
     boolean("-kv_tau_dt", cfg.tauDt);
+    real("-kv_tau_p_dt_factor", cfg.tauPDtFactor);
     integer("-kv_retries", cfg.maxRetries);
     boolean("-kv_picard_monitor", cfg.picardMonitor);
     integer("-kv_bdf", cfg.bdf);

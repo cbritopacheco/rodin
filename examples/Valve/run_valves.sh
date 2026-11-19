@@ -90,6 +90,7 @@ T_AVG_CONV_P="${T_AVG_CONV_P:-15}"    # start of the average, units of D/U_jet
 DT_CONV_P="${DT_CONV_P:-0.025}"       # initial dt, units of D/U_jet
 DTMAX_CONV_P="${DTMAX_CONV_P:-0.05}"  # largest dt (0.3 ms: CFL ~ 5 in the jet on 2 mm cells)
 SOLVER="${SOLVER:-direct}"            # direct (MUMPS LU) | iterative (Schur field split + AMG, far less memory)
+TAU_P_DT_FACTOR="${TAU_P_DT_FACTOR:-}" # PSPG tau: 2/dt -> 2/(F dt); 0: no dt term (smooth p at the inlet)
 EXTRA="${EXTRA:-}"                    # any other -kv_* or PETSc options
 
 MPIRUN="${MPIRUN:-mpirun}"
@@ -140,6 +141,7 @@ run_case() {  # tag dir log bc...
       "$@" \
       -kv_steady_tol 0 \
       -kv_output_every "$OUTPUT_EVERY" \
+      ${TAU_P_DT_FACTOR:+-kv_tau_p_dt_factor "$TAU_P_DT_FACTOR"} \
       $EXTRA
   ) > "$log" 2>&1
   local status=$?
