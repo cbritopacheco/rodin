@@ -3,7 +3,8 @@ target_link_libraries(RodinKokkosMPIMeshTest
   PRIVATE GTest::gtest Rodin::Kokkos::MPI Rodin::IO)
 set(_RODIN_KOKKOS_MPI_TESTS RodinKokkosMPIMeshTest)
 if (RODIN_USE_PETSC)
-  add_executable(RodinKokkosMPITest Main.cpp PoissonTest.cpp ConstraintTest.cpp FixedDOFTest.cpp GhostedPositionsTest.cpp)
+  add_executable(RodinKokkosMPITest Main.cpp PoissonTest.cpp ConstraintTest.cpp FixedDOFTest.cpp GhostedPositionsTest.cpp
+    XDMFTest.cpp)
   target_link_libraries(RodinKokkosMPITest
     PRIVATE GTest::gtest Rodin::Kokkos::MPI Rodin::Kokkos::PETSc Rodin::IO)
   list(APPEND _RODIN_KOKKOS_MPI_TESTS RodinKokkosMPITest)

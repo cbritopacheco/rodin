@@ -930,9 +930,38 @@ namespace Rodin::IO
     }();
     rec.write = [&gf, visMesh, owner = m_owner, index = m_index](
                   const boost::filesystem::path& path, Center center) {
+      using SourceMesh =
+        std::remove_cvref_t<decltype(gf.getFiniteElementSpace().getMesh())>;
+      constexpr bool distributed =
+        requires(const SourceMesh& source) { source.getShard(); };
+      if constexpr (distributed &&
+                    requires { gf.getFiniteElementSpace().getHost(); })
+      {
+        // A distributed device field cannot be evaluated on the host. Its
+        // coefficients are copied into the host space it was built from,
+        // which has the same global numbering and whose shard is visMesh.
+        static_cast<void>(owner);
+        static_cast<void>(index);
+        const auto& fes = gf.getFiniteElementSpace().getHost();
+        using HostSpace = std::remove_cvref_t<decltype(fes)>;
+        using Data = std::remove_cvref_t<decltype(gf.getData())>;
+        Variational::GridFunction<HostSpace, Data> host(fes);
+        host.setData(gf.getData());
+        switch (center)
+        {
+          case Center::Node:
+            HDF5::writeXDMFNodeAttribute(host, *visMesh, path);
+            return;
+          case Center::Cell:
+            HDF5::writeXDMFCellAttribute(host, *visMesh, path);
+            return;
+        }
+        return;
+      }
       // A device field is copied onto the host copy of its mesh, which
       // write() builds since the field's mesh is the mesh of the grid.
-      if constexpr (requires { gf.getFiniteElementSpace().getMesh().toHost(); })
+      else if constexpr (
+        !distributed && requires(const SourceMesh& source) { source.toHost(); })
       {
         const auto& mesh =
           static_cast<const Geometry::Mesh<Context::Local>&>(*owner->m_grids[index].mesh);
