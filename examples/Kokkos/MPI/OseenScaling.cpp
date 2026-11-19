@@ -44,7 +44,9 @@
  * preconditioner, and every solve starts from zero. -mesh_save_shards prefix
  * writes prefix-rank.h5 files; -mesh_shards prefix reloads those files directly
  * on each rank. Keep the same process count and grid/atrium positional source
- * convention; saved shards retain geometry, not time-step parameters. With -log_view, the first
+ * convention. The refinement level of saved shards is written to prefix.refine
+ * and sets the time step and the label of a run that reloads them, which
+ * takes no -oseen_refine. With -log_view, the first
  * repetition and the next ones are reported in two stages.
  */
 
@@ -54,6 +56,7 @@
 #include <chrono>
 #include <cmath>
 #include <cstdlib>
+#include <fstream>
 #include <iostream>
 #include <optional>
 #include <string>
@@ -306,9 +309,11 @@ namespace Rodin::Examples
    * @param source MEDIT path, or the number of cells per side of a grid.
    * @param renumber Whether to order the mesh along space first.
    * @param cells Set to the global number of cells.
+   * @param levels Set to the number of refinements of the mesh, read from
+   * the saved shards when they are reloaded.
    */
-  HostMesh distribute(
-    const Context::MPI& ctx, const std::string& source, bool renumber, size_t& cells)
+  HostMesh distribute(const Context::MPI& ctx, const std::string& source,
+    bool renumber, size_t& cells, PetscInt& levels)
   {
     const auto& comm = ctx.getCommunicator();
     [[maybe_unused]] PetscErrorCode ierr;
@@ -321,20 +326,37 @@ namespace Rodin::Examples
       nullptr, nullptr, "-mesh_save_shards", output, sizeof(output), nullptr);
     assert(ierr == PETSC_SUCCESS);
     HostMesh mesh(ctx);
+    levels = 0;
     if (input[0])
     {
-      PetscInt levels = 0;
+      PetscBool refineSet = PETSC_FALSE;
       PetscBool scaleSet = PETSC_FALSE;
-      ierr = PetscOptionsGetInt(nullptr, nullptr, "-oseen_refine", &levels, nullptr);
+      ierr = PetscOptionsHasName(nullptr, nullptr, "-oseen_refine", &refineSet);
       assert(ierr == PETSC_SUCCESS);
       ierr = PetscOptionsHasName(nullptr, nullptr, "-oseen_scale", &scaleSet);
       assert(ierr == PETSC_SUCCESS);
-      if (renumber || levels != 0 || scaleSet)
+      if (renumber || refineSet || scaleSet)
       {
         Alert::Exception()
           << "Saved mesh shards already contain geometry and ordering. "
              "Do not combine -mesh_shards with refinement, scaling or renumbering."
           << Alert::Raise;
+      }
+      // The time step depends on the refinement level of the shards, which
+      // their geometry does not record.
+      bool found = false;
+      if (comm.rank() == 0)
+      {
+        std::ifstream file(std::string(input) + ".refine");
+        found = static_cast<bool>(file >> levels);
+      }
+      boost::mpi::broadcast(comm, found, 0);
+      boost::mpi::broadcast(comm, levels, 0);
+      if (!found)
+      {
+        Alert::Exception() << "Missing or invalid " << input
+                           << ".refine, the refinement level of the shards."
+                           << Alert::Raise;
       }
       mesh.load(
         [&](int rank) { return std::string(input) + "-" + std::to_string(rank) + ".h5"; },
@@ -343,6 +365,7 @@ namespace Rodin::Examples
     }
     else
     {
+      PetscOptionsGetInt(nullptr, nullptr, "-oseen_refine", &levels, nullptr);
       Geometry::Sharder<Context::MPI> sharder(ctx);
       if (comm.rank() == 0)
       {
@@ -360,8 +383,6 @@ namespace Rodin::Examples
           PetscOptionsGetReal(nullptr, nullptr, "-oseen_scale", &scale, nullptr);
           mesh.scale(scale);
         }
-        PetscInt levels = 0;
-        PetscOptionsGetInt(nullptr, nullptr, "-oseen_refine", &levels, nullptr);
         for (PetscInt l = 0; l < levels; ++l)
           mesh = refine(mesh);
         if (mesh.getPolytopeCount(Geometry::Polytope::Type::Tetrahedron) !=
@@ -410,6 +431,8 @@ namespace Rodin::Examples
         [&](
           int rank) { return std::string(output) + "-" + std::to_string(rank) + ".h5"; },
         IO::FileFormat::HDF5);
+      if (comm.rank() == 0)
+        std::ofstream(std::string(output) + ".refine") << levels << std::endl;
     }
     return mesh;
   }
@@ -456,17 +479,17 @@ namespace Rodin::Examples
    * @param grid Whether the mesh is the grid, whose whole boundary is a wall.
    * @param prefix Leading keys of the printed lines.
    * @param repeat Number of repetitions.
+   * @param levels Number of refinements of the mesh.
    */
   void run(const boost::mpi::communicator& comm, const HostMesh& host, VelocitySpace& vh,
-    PressureSpace& qh, bool grid, const std::string& prefix, size_t repeat)
+    PressureSpace& qh, bool grid, const std::string& prefix, size_t repeat,
+    PetscInt levels)
   {
     using namespace Rodin::Variational;
     Parameters P;
     PetscOptionsGetReal(nullptr, nullptr, "-oseen_eps", &P.eps, nullptr);
     // Each refinement halves the cells, and the step with them, so the CFL
     // number of the advection stays the same.
-    PetscInt levels = 0;
-    PetscOptionsGetInt(nullptr, nullptr, "-oseen_refine", &levels, nullptr);
     P.dt = std::ldexp(P.dt, -static_cast<int>(levels));
     PetscOptionsGetReal(nullptr, nullptr, "-oseen_dt", &P.dt, nullptr);
 
@@ -565,7 +588,9 @@ int main(int argc, char** argv)
       Stopwatch time(world);
       HostMesh host(ctx);
       size_t cells = 0;
-      const double tmesh = time([&] { host = distribute(ctx, source, renumber, cells); });
+      PetscInt levels = 0;
+      const double tmesh =
+        time([&] { host = distribute(ctx, source, renumber, cells, levels); });
       // A first copy warms the device up; the second one is timed.
       {
         const DeviceMesh warmup(DeviceContext(ctx), host);
@@ -583,8 +608,6 @@ int main(int argc, char** argv)
       const size_t dofs = vh->getSize() + qh->getSize();
       const std::string name =
         isGrid(source) ? "grid" + source : source.substr(source.find_last_of('/') + 1);
-      PetscInt levels = 0;
-      PetscOptionsGetInt(nullptr, nullptr, "-oseen_refine", &levels, nullptr);
       const std::string prefix = "np=" + std::to_string(world.size()) + " mesh=" + name +
         (levels > 0 ? "+refine" + std::to_string(levels) : "") +
         (renumber ? "+renumber" : "") + " cells=" + std::to_string(cells) +
@@ -594,7 +617,7 @@ int main(int argc, char** argv)
         std::cout << prefix << " load=" << tmesh << " device=" << tdevice
                   << " fes=" << tfes << std::endl;
       }
-      run(world, host, *vh, *qh, isGrid(source), prefix, repeat);
+      run(world, host, *vh, *qh, isGrid(source), prefix, repeat, levels);
     }
     catch (const std::exception& e)
     {
