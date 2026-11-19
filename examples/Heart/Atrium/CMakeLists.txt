@@ -5,6 +5,7 @@ endif()
 add_subdirectory(Solid)
 add_subdirectory(Fluid)
 add_subdirectory(FSI)
+add_subdirectory(Viscoelastic)
 
 add_library(AtriumModels STATIC Atrium.cpp CavityVolume.cpp Parameters.cpp)
 target_include_directories(AtriumModels PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

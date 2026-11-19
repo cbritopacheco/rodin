@@ -34,6 +34,7 @@ budget exhaustion.
 | [FSI](FSI/README.md) | Robin–Robin transmission and harmonic ALE motion |
 | `CavityVolume.h/.cpp` | Cavity volume from the reference mesh and displaced interface |
 | [Visualization](Visualization/README.md) | ParaView volume rendering and scene generation |
+| [Viscoelastic](Viscoelastic/README.md) | Separate executable `AtriumViscoelastic`: viscoelastic and thixotropic blood on the fixed fluid domain |
 | `Tests/` | Fluid, coupled, and configuration checks |
 
 Active contraction is part of the solid constitutive model, rather than a
