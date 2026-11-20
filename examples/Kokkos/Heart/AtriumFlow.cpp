@@ -48,8 +48,19 @@
  * z_in (1000), lv (1), p_out (0), output (AtriumFlow), output_every (17),
  * tolerance (1e-8), restart (200), scale (1e-3).
  * Output: <output>.xdmf (velocity, pressure) and <output>.csv, one row per step.
- * With cuDSS (RODIN_USE_CUDSS) or RocSolverRF the step is solved by a sparse
- * direct solver on the device; otherwise by GMRES.
+ *
+ * Linear solver. KokkosAtriumFlowPETSc (this file with RODIN_ATRIUM_PETSC)
+ * assembles the step into a PETSc matrix of the Kokkos type, with the COO
+ * assembly of the Kokkos PETSc module, and solves it with a PETSc KSP on the
+ * device: BiCGStab with Jacobi by default, as KokkosMPIOseenScaling, and
+ * every PETSc option on the command line, e.g. a Schur field split with
+ *   -ksp_type fgmres -pc_type fieldsplit -pc_fieldsplit_type schur
+ *   -pc_fieldsplit_schur_fact_type full -pc_fieldsplit_schur_precondition selfp
+ *   -fieldsplit_u_ksp_type preonly -fieldsplit_u_pc_type gamg
+ *   -fieldsplit_p_ksp_type preonly -fieldsplit_p_pc_type jacobi
+ * Each solve starts from the previous step. KokkosAtriumFlow uses the native
+ * Kokkos assembly: cuDSS (RODIN_USE_CUDSS) or RocSolverRF when available,
+ * GMRES with Jacobi otherwise.
  */
 #include <array>
 #include <chrono>
@@ -69,6 +80,10 @@
 #include <Rodin/Kokkos/Solver.h>
 #include <Rodin/Solver.h>
 #include <Rodin/Variational.h>
+#ifdef RODIN_ATRIUM_PETSC
+#include <Rodin/PETSc.h>
+#include <Rodin/Kokkos/PETSc.h>
+#endif
 
 #if defined(KOKKOS_ENABLE_CUDA)
 using Backend = Rodin::Context::CUDA;
@@ -107,6 +122,7 @@ namespace
     size_t outputEvery = 17;
     Real tolerance = 1e-8;
     size_t restart = 200;
+    size_t maxIterations = 5000;
   };
 
   /// @brief Smooth step on [0, 1].
@@ -239,6 +255,7 @@ namespace
     real("p_out", P.outletPressure);
     real("tolerance", P.tolerance);
     count("restart", P.restart);
+    count("max_iterations", P.maxIterations);
     count("output_every", P.outputEvery);
     if (kv.count("lv"))
       P.ventricle = kv["lv"] != "0";
@@ -246,6 +263,24 @@ namespace
       P.output = kv["output"];
     return P;
   }
+
+#ifdef RODIN_ATRIUM_PETSC
+  /**
+   * @brief Copies a sequential PETSc vector into a host vector.
+   * @param[in] x PETSc vector.
+   * @return Host copy of @p x.
+   */
+  Rodin::Math::Vector<Real> toHost(::Vec x)
+  {
+    PetscInt n;
+    PetscCallAbort(PETSC_COMM_SELF, VecGetLocalSize(x, &n));
+    const PetscScalar* data;
+    PetscCallAbort(PETSC_COMM_SELF, VecGetArrayRead(x, &data));
+    Rodin::Math::Vector<Real> res = Eigen::Map<const Rodin::Math::Vector<Real>>(data, n);
+    PetscCallAbort(PETSC_COMM_SELF, VecRestoreArrayRead(x, &data));
+    return res;
+  }
+#endif
 }
 
 int main(int argc, char** argv)
@@ -260,117 +295,151 @@ int main(int argc, char** argv)
     return EXIT_FAILURE;
   }
   ::Kokkos::ScopeGuard runtime(argc, argv);
-  const Parameters P = parse(argc, argv);
-
-  // Labels of the Atrium meshes.
-  constexpr Attribute wall = 4;
-  constexpr Attribute mitral = 6;
-  constexpr std::array<Attribute, 4> veins{1, 2, 3, 5};
-
-  Mesh host;
-  host.load(argv[1], IO::FileFormat::MEDIT);
-  if (host.getDimension() != 3 || host.getCellCount() == 0 ||
-    host.getPolytopeCount(Polytope::Type::Tetrahedron) != host.getCellCount())
+#ifdef RODIN_ATRIUM_PETSC
+  PetscInitialize(&argc, &argv, PETSC_NULLPTR, PETSC_NULLPTR);
   {
-    std::cerr << argv[1] << " is not a tetrahedral mesh of the fluid (a Git LFS pointer, "
-              << "or a combined fluid-solid mesh?)." << std::endl;
-    return EXIT_FAILURE;
-  }
-  host.scale(P.scale);
-  // Face to cell incidence for the boundary; the remaining incidences for the
-  // host space of the XDMF output.
-  for (size_t d = 1; d <= 3; ++d)
-  {
-    for (size_t e = 0; e < d; ++e)
+#endif
+    const Parameters P = parse(argc, argv);
+
+    // Labels of the Atrium meshes.
+    constexpr Attribute wall = 4;
+    constexpr Attribute mitral = 6;
+    constexpr std::array<Attribute, 4> veins{1, 2, 3, 5};
+
+    Mesh host;
+    host.load(argv[1], IO::FileFormat::MEDIT);
+    if (host.getDimension() != 3 || host.getCellCount() == 0 ||
+      host.getPolytopeCount(Polytope::Type::Tetrahedron) != host.getCellCount())
     {
-      host.getConnectivity().compute(d, e);
-      host.getConnectivity().compute(e, d);
+      std::cerr << argv[1]
+                << " is not a tetrahedral mesh of the fluid (a Git LFS pointer, "
+                << "or a combined fluid-solid mesh?)." << std::endl;
+      return EXIT_FAILURE;
     }
-  }
-  const Mesh<DeviceContext> mesh(DeviceContext{}, host);
+    host.scale(P.scale);
+    // Face to cell incidence for the boundary; the remaining incidences for the
+    // host space of the XDMF output.
+    for (size_t d = 1; d <= 3; ++d)
+    {
+      for (size_t e = 0; e < d; ++e)
+      {
+        host.getConnectivity().compute(d, e);
+        host.getConnectivity().compute(e, d);
+      }
+    }
+    const Mesh<DeviceContext> mesh(DeviceContext{}, host);
 
-  H1 vh(std::integral_constant<size_t, 1>{}, mesh, 3);
-  H1 qh(std::integral_constant<size_t, 1>{}, mesh);
+    H1 vh(std::integral_constant<size_t, 1>{}, mesh, 3);
+    H1 qh(std::integral_constant<size_t, 1>{}, mesh);
+#ifdef RODIN_ATRIUM_PETSC
+    PETSc::Variational::TrialFunction u(vh);
+    PETSc::Variational::TrialFunction p(qh);
+    PETSc::Variational::TestFunction v(vh);
+    PETSc::Variational::TestFunction q(qh);
+    u.setName("u");
+    p.setName("p");
+    // Device test functions of the diagnostic forms, kept on the host.
+    TestFunction vk(vh);
+    TestFunction qk(qh);
+#else
   TrialFunction u(vh);
   TrialFunction p(qh);
   TestFunction v(vh);
   TestFunction q(qh);
-  GridFunction velocity(vh);
-  GridFunction pressure(qh);
-  velocity = Zero(3);
-  pressure = 0.0;
-  std::cout << "[mesh] " << argv[1] << "  cells=" << host.getCellCount()
-            << " vertices=" << host.getVertexCount()
-            << " unknowns=" << (vh.getSize() + qh.getSize()) << std::endl;
+  auto& vk = v;
+  auto& qk = q;
+#endif
+    GridFunction velocity(vh);
+    GridFunction pressure(qh);
+    velocity = Zero(3);
+    pressure = 0.0;
+    std::cout << "[mesh] " << argv[1] << "  cells=" << host.getCellCount()
+              << " vertices=" << host.getVertexCount()
+              << " unknowns=" << (vh.getSize() + qh.getSize()) << std::endl;
 
-  // Areas of the openings, and the functionals that give the flow rates and
-  // the mean pressure of the mitral plane: int_G phi n and int_G psi, assembled
-  // once on the device and kept on the host.
-  const BoundaryNormal normal(mesh);
-  LinearForm veinFlux(v);
-  LinearForm mitralFlux(v);
-  LinearForm veinMean(q);
-  LinearForm mitralMean(q);
-  veinFlux = BoundaryIntegral(normal, v).over(veins[0], veins[1], veins[2], veins[3]);
-  mitralFlux = BoundaryIntegral(normal, v).over(mitral);
-  veinMean =
-    BoundaryIntegral(RealFunction(1), q).over(veins[0], veins[1], veins[2], veins[3]);
-  mitralMean = BoundaryIntegral(RealFunction(1), q).over(mitral);
-  veinFlux.assemble();
-  mitralFlux.assemble();
-  veinMean.assemble();
-  mitralMean.assemble();
-  const auto veinFluxHost = veinFlux.getVector().toHost();
-  const auto mitralFluxHost = mitralFlux.getVector().toHost();
-  const auto veinMeanHost = veinMean.getVector().toHost();
-  const auto mitralMeanHost = mitralMean.getVector().toHost();
-  const Real veinArea = veinMeanHost.sum();
-  const Real mitralArea = mitralMeanHost.sum();
-  const Real volume = host.getVolume();
-  const Real h = std::cbrt(volume / static_cast<Real>(host.getCellCount()));
-  std::cout << "[boundary] venous area = " << veinArea
-            << " m^2  mitral area = " << mitralArea << " m^2  volume = " << 1e6 * volume
-            << " mL  mean cell size = " << 1e3 * h << " mm" << std::endl;
-  if (!(veinArea > 0) || !(mitralArea > 0))
-  {
-    std::cerr << "No venous or mitral faces: labels 1, 2, 3, 5 and 6 are expected."
-              << std::endl;
-    return EXIT_FAILURE;
-  }
+    // Areas of the openings, and the functionals that give the flow rates and
+    // the mean pressure of the mitral plane: int_G phi n and int_G psi, assembled
+    // once on the device and kept on the host.
+    const BoundaryNormal normal(mesh);
+    LinearForm veinFlux(vk);
+    LinearForm mitralFlux(vk);
+    LinearForm veinMean(qk);
+    LinearForm mitralMean(qk);
+    veinFlux = BoundaryIntegral(normal, vk).over(veins[0], veins[1], veins[2], veins[3]);
+    mitralFlux = BoundaryIntegral(normal, vk).over(mitral);
+    veinMean =
+      BoundaryIntegral(RealFunction(1), qk).over(veins[0], veins[1], veins[2], veins[3]);
+    mitralMean = BoundaryIntegral(RealFunction(1), qk).over(mitral);
+    veinFlux.assemble();
+    mitralFlux.assemble();
+    veinMean.assemble();
+    mitralMean.assemble();
+    const auto veinFluxHost = veinFlux.getVector().toHost();
+    const auto mitralFluxHost = mitralFlux.getVector().toHost();
+    const auto veinMeanHost = veinMean.getVector().toHost();
+    const auto mitralMeanHost = mitralMean.getVector().toHost();
+    const Real veinArea = veinMeanHost.sum();
+    const Real mitralArea = mitralMeanHost.sum();
+    const Real volume = host.getVolume();
+    const Real h = std::cbrt(volume / static_cast<Real>(host.getCellCount()));
+    std::cout << "[boundary] venous area = " << veinArea
+              << " m^2  mitral area = " << mitralArea << " m^2  volume = " << 1e6 * volume
+              << " mL  mean cell size = " << 1e3 * h << " mm" << std::endl;
+    if (!(veinArea > 0) || !(mitralArea > 0))
+    {
+      std::cerr << "No venous or mitral faces: labels 1, 2, 3, 5 and 6 are expected."
+                << std::endl;
+      return EXIT_FAILURE;
+    }
 
-  // Lumped ventricle, on the host. It reads the mean pressure of the mitral
-  // plane at the last step as its atrial pressure.
-  Real atrialPressure = P.rampCycles > 0 ? Real(0) : P.inletPressureMean;
-  Ventricle::Input input = ventricleInput(P.period, &atrialPressure);
-  Ventricle ventricle(input);
-  {
-    Ventricle::State s0;
-    s0.t = 0.0;
-    s0.y = 0.0;
-    s0.v = 0.0;
-    s0.pv = atrialPressure - 100.0;
-    s0.par = 11000.0;
-    s0.pd = 10000.0;
-    s0.w = input.m0(s0.ec);
-    ventricle.setMaxIterations(200)
-      .setAbsoluteTolerance(1.0e-8)
-      .setRelativeTolerance(1.0e-8)
-      .setStepTolerance(1.0e-10)
-      .setDampingFactor(1.0);
-    ventricle.initialize(s0);
-  }
+    // Lumped ventricle, on the host. It reads the mean pressure of the mitral
+    // plane at the last step as its atrial pressure.
+    Real atrialPressure = P.rampCycles > 0 ? Real(0) : P.inletPressureMean;
+    Ventricle::Input input = ventricleInput(P.period, &atrialPressure);
+    Ventricle ventricle(input);
+    {
+      Ventricle::State s0;
+      s0.t = 0.0;
+      s0.y = 0.0;
+      s0.v = 0.0;
+      s0.pv = atrialPressure - 100.0;
+      s0.par = 11000.0;
+      s0.pd = 10000.0;
+      s0.w = input.m0(s0.ec);
+      ventricle.setMaxIterations(200)
+        .setAbsoluteTolerance(1.0e-8)
+        .setRelativeTolerance(1.0e-8)
+        .setStepTolerance(1.0e-10)
+        .setDampingFactor(1.0);
+      ventricle.initialize(s0);
+    }
 
-  IO::XDMF xdmf(P.output);
-  xdmf.grid().setMesh(mesh).add("velocity", velocity).add("pressure", pressure);
-  xdmf.write(0).flush();
-  std::ofstream csv(P.output + ".csv");
-  csv
-    << "t,cycle,pVenous,pOut,valveOpen,qIn,qOut,pInletMean,pOutletMean,maxSpeedComponent,"
-       "assembly,solve\n";
+    IO::XDMF xdmf(P.output);
+    xdmf.grid().setMesh(mesh).add("velocity", velocity).add("pressure", pressure);
+    xdmf.write(0).flush();
+    std::ofstream csv(P.output + ".csv");
+    csv << "t,cycle,pVenous,pOut,valveOpen,qIn,qOut,pInletMean,pOutletMean,"
+           "maxSpeedComponent,"
+           "assembly,solve,iterations\n";
 
-  // The problem and the solver outlive the time loop: the sparsity pattern is
-  // the same at every step, so a direct device solver keeps its analysis.
-#if defined(RODIN_USE_CUDSS) || defined(RODIN_USE_ROCSOLVER)
+    // The problem and the solver outlive the time loop: the sparsity pattern is
+    // the same at every step, so a direct device solver keeps its analysis.
+#if defined(RODIN_ATRIUM_PETSC)
+    Problem flow(u, p, v, q);
+    PETSc::Solver::KSP solver(flow);
+    solver.setType(KSPBCGS);
+    solver.setTolerances(
+      P.tolerance, Real(1e-50), Real(1e5), static_cast<PetscInt>(P.maxIterations));
+    {
+      ::PC pc;
+      PetscCallAbort(PETSC_COMM_SELF, KSPGetPC(solver.getHandle(), &pc));
+      PetscCallAbort(PETSC_COMM_SELF, PCSetType(pc, PCJACOBI));
+      // Each step starts from the solution of the previous one.
+      PetscCallAbort(
+        PETSC_COMM_SELF, KSPSetInitialGuessNonzero(solver.getHandle(), PETSC_TRUE));
+    }
+    bool fieldSplits = false;
+#elif defined(RODIN_USE_CUDSS) || defined(RODIN_USE_ROCSOLVER)
 #define DEVICE_SOLVER
   using System = Math::LinearSystem<Rodin::Kokkos::Math::SparseMatrix<Real, Backend>,
     Rodin::Kokkos::Math::Vector<Real, Backend>>;
@@ -386,95 +455,124 @@ int main(int argc, char** argv)
   solver.setTolerance(P.tolerance).setRestart(P.restart);
 #endif
 
-  const Real dt = P.period / static_cast<Real>(P.steps);
-  const Real rho = P.rho;
-  const Real mu = P.mu;
-  const Real nu = mu / rho;
-  const Real pi = Math::Constants::pi();
-  const size_t total = P.cycles * P.steps;
-  std::chrono::duration<double> assembly{0}, solve{0};
-  for (size_t step = 1; step <= total; ++step)
-  {
-    const Real time = step * dt;
-    const Real rampTime = P.rampCycles * P.period;
-    const Real ramp = rampTime > 0 && time < rampTime
-      ? 0.5 * (1 - std::cos(pi * time / rampTime))
-      : Real(1);
-    const Real pIn = ramp *
-      (P.inletPressureMean +
-        P.inletPressureAmplitude * std::sin(2 * pi * time / P.period));
-
-    // Mitral plane: ventricular pressure and valve law, or a prescribed pressure.
-    Real pOut = ramp * P.outletPressure;
-    Real mitralImpedance = 0;
-    bool valveOpen = true;
-    if (P.ventricle)
+    const Real dt = P.period / static_cast<Real>(P.steps);
+    const Real rho = P.rho;
+    const Real mu = P.mu;
+    const Real nu = mu / rho;
+    const Real pi = Math::Constants::pi();
+    const size_t total = P.cycles * P.steps;
+    std::chrono::duration<double> assembly{0}, solve{0};
+    for (size_t step = 1; step <= total; ++step)
     {
-      if (!ventricle.step(dt).converged)
+      const Real time = step * dt;
+      const Real rampTime = P.rampCycles * P.period;
+      const Real ramp = rampTime > 0 && time < rampTime
+        ? 0.5 * (1 - std::cos(pi * time / rampTime))
+        : Real(1);
+      const Real pIn = ramp *
+        (P.inletPressureMean +
+          P.inletPressureAmplitude * std::sin(2 * pi * time / P.period));
+
+      // Mitral plane: ventricular pressure and valve law, or a prescribed pressure.
+      Real pOut = ramp * P.outletPressure;
+      Real mitralImpedance = 0;
+      bool valveOpen = true;
+      if (P.ventricle)
       {
-        std::cerr << "The lumped ventricle did not converge at t = " << time << std::endl;
+        if (!ventricle.step(dt).converged)
+        {
+          std::cerr << "The lumped ventricle did not converge at t = " << time
+                    << std::endl;
+          return EXIT_FAILURE;
+        }
+        pOut = ventricle.getState().pv;
+        valveOpen = atrialPressure > pOut;
+        mitralImpedance = mitralArea / (valveOpen ? input.Kat : input.Kp);
+      }
+
+      // tau by cell, from w = u^n and the cell volume |det J|/6 of a tetrahedron.
+      const ::Rodin::Kokkos::Variational::View<std::decay_t<decltype(velocity)>> w(
+        velocity);
+      RealFunction tau(
+        KOKKOS_LAMBDA(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& point)
+          ->Real {
+            const auto wp = w.getValue(point);
+            Real speed2 = 0;
+            for (Index i = 0; i < 3; ++i)
+              speed2 += wp(i) * wp(i);
+            const Real hk = ::Kokkos::cbrt(point.getDistortion() / 6);
+            const Real a = 2 / dt;
+            const Real b2 = 4 * speed2 / (hk * hk);
+            const Real c = 4 * nu / (hk * hk);
+            return 1 / ::Kokkos::sqrt(a * a + b2 + c * c);
+          });
+      RealFunction pressureTau(
+        KOKKOS_LAMBDA(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& point)
+          ->Real {
+            const auto wp = w.getValue(point);
+            Real speed2 = 0;
+            for (Index i = 0; i < 3; ++i)
+              speed2 += wp(i) * wp(i);
+            const Real hk = ::Kokkos::cbrt(point.getDistortion() / 6);
+            const Real a = 2 / dt;
+            const Real b2 = 4 * speed2 / (hk * hk);
+            const Real c = 4 * nu / (hk * hk);
+            return 1 / (rho * ::Kokkos::sqrt(a * a + b2 + c * c));
+          });
+
+      flow = (rho / dt) * Integral(u, v) +
+        (0.5 * rho) * Integral(Dot(Mult(Jacobian(u), velocity), v)) -
+        (0.5 * rho) * Integral(Dot(u, Mult(Jacobian(v), velocity))) +
+        mu * Integral(Jacobian(u), Jacobian(v)) - Integral(p, Div(v)) +
+        Integral(Div(u), q) +
+        rho *
+          Integral(
+            Dot(Mult(tau, Mult(Jacobian(u), velocity)), Mult(Jacobian(v), velocity))) +
+        Integral(Dot(Mult(pressureTau, Grad(p)), Grad(q))) +
+        pIn * BoundaryIntegral(normal, v).over(veins[0], veins[1], veins[2], veins[3]) +
+        pOut * BoundaryIntegral(normal, v).over(mitral) +
+        P.inletImpedance *
+          BoundaryIntegral(u, v).over(veins[0], veins[1], veins[2], veins[3]) +
+        mitralImpedance * BoundaryIntegral(Dot(normal, u), Dot(normal, v)).over(mitral) -
+        (rho / dt) * Integral(velocity, v) + DirichletBC(u, Zero(3)).on(wall);
+
+      auto t0 = std::chrono::steady_clock::now();
+      flow.assemble();
+#ifdef RODIN_ATRIUM_PETSC
+      if (!fieldSplits)
+      {
+        // Named splits u and p for -pc_type fieldsplit; harmless otherwise.
+        flow.setFieldSplits();
+        fieldSplits = true;
+      }
+#endif
+      auto t1 = std::chrono::steady_clock::now();
+#ifdef DEVICE_SOLVER
+      solver.factorize(flow.getLinearSystem());
+      if (!solver.success())
+      {
+        std::cerr << "Factorisation failed at step " << step << std::endl;
         return EXIT_FAILURE;
       }
-      pOut = ventricle.getState().pv;
-      valveOpen = atrialPressure > pOut;
-      mitralImpedance = mitralArea / (valveOpen ? input.Kat : input.Kp);
-    }
-
-    // tau by cell, from w = u^n and the cell volume |det J|/6 of a tetrahedron.
-    const ::Rodin::Kokkos::Variational::View<std::decay_t<decltype(velocity)>> w(
-      velocity);
-    RealFunction tau(
-      KOKKOS_LAMBDA(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& point)->Real {
-        const auto wp = w.getValue(point);
-        Real speed2 = 0;
-        for (Index i = 0; i < 3; ++i)
-          speed2 += wp(i) * wp(i);
-        const Real hk = ::Kokkos::cbrt(point.getDistortion() / 6);
-        const Real a = 2 / dt;
-        const Real b2 = 4 * speed2 / (hk * hk);
-        const Real c = 4 * nu / (hk * hk);
-        return 1 / ::Kokkos::sqrt(a * a + b2 + c * c);
-      });
-    RealFunction pressureTau(
-      KOKKOS_LAMBDA(const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& point)->Real {
-        const auto wp = w.getValue(point);
-        Real speed2 = 0;
-        for (Index i = 0; i < 3; ++i)
-          speed2 += wp(i) * wp(i);
-        const Real hk = ::Kokkos::cbrt(point.getDistortion() / 6);
-        const Real a = 2 / dt;
-        const Real b2 = 4 * speed2 / (hk * hk);
-        const Real c = 4 * nu / (hk * hk);
-        return 1 / (rho * ::Kokkos::sqrt(a * a + b2 + c * c));
-      });
-
-    flow = (rho / dt) * Integral(u, v) +
-      (0.5 * rho) * Integral(Dot(Mult(Jacobian(u), velocity), v)) -
-      (0.5 * rho) * Integral(Dot(u, Mult(Jacobian(v), velocity))) +
-      mu * Integral(Jacobian(u), Jacobian(v)) - Integral(p, Div(v)) +
-      Integral(Div(u), q) +
-      rho *
-        Integral(
-          Dot(Mult(tau, Mult(Jacobian(u), velocity)), Mult(Jacobian(v), velocity))) +
-      Integral(Dot(Mult(pressureTau, Grad(p)), Grad(q))) +
-      pIn * BoundaryIntegral(normal, v).over(veins[0], veins[1], veins[2], veins[3]) +
-      pOut * BoundaryIntegral(normal, v).over(mitral) +
-      P.inletImpedance *
-        BoundaryIntegral(u, v).over(veins[0], veins[1], veins[2], veins[3]) +
-      mitralImpedance * BoundaryIntegral(Dot(normal, u), Dot(normal, v)).over(mitral) -
-      (rho / dt) * Integral(velocity, v) + DirichletBC(u, Zero(3)).on(wall);
-
-    auto t0 = std::chrono::steady_clock::now();
-    flow.assemble();
-    auto t1 = std::chrono::steady_clock::now();
-#ifdef DEVICE_SOLVER
-    solver.factorize(flow.getLinearSystem());
-    if (!solver.success())
-    {
-      std::cerr << "Factorisation failed at step " << step << std::endl;
-      return EXIT_FAILURE;
-    }
 #endif
+#ifdef RODIN_ATRIUM_PETSC
+      flow.solve(solver);
+      auto t2 = std::chrono::steady_clock::now();
+      PetscInt iterations = 0;
+      KSPConvergedReason reason;
+      PetscCallAbort(
+        PETSC_COMM_SELF, KSPGetIterationNumber(solver.getHandle(), &iterations));
+      PetscCallAbort(PETSC_COMM_SELF, KSPGetConvergedReason(solver.getHandle(), &reason));
+      if (reason < 0)
+      {
+        std::cerr << "The linear solver failed at step " << step << ": "
+                  << KSPConvergedReasons[reason] << " after " << iterations
+                  << " iterations" << std::endl;
+        return EXIT_FAILURE;
+      }
+      velocity.setData(toHost(u.getSolution().getData()));
+      pressure.setData(toHost(p.getSolution().getData()));
+#else
     solver.solve();
     auto t2 = std::chrono::steady_clock::now();
     if (!solver.success())
@@ -482,44 +580,52 @@ int main(int argc, char** argv)
       std::cerr << "The linear solver failed at step " << step << std::endl;
       return EXIT_FAILURE;
     }
-    assembly += t1 - t0;
-    solve += t2 - t1;
+    const long iterations = -1;
     velocity.setData(u.getSolution().getData());
     pressure.setData(p.getSolution().getData());
+#endif
+      assembly += t1 - t0;
+      solve += t2 - t1;
 
-    // Diagnostics on the host copies of the solution. n is outward: the
-    // venous flux is negated to read as the inflow.
-    const auto uh = velocity.getData().toHost();
-    const auto ph = pressure.getData().toHost();
-    const Real qIn = -veinFluxHost.dot(uh);
-    const Real qOut = mitralFluxHost.dot(uh);
-    const Real pVein = veinMeanHost.dot(ph) / veinArea;
-    atrialPressure = mitralMeanHost.dot(ph) / mitralArea;
-    const Real speed = uh.cwiseAbs().maxCoeff();
-    if (!std::isfinite(speed) || speed > 50)
-    {
-      std::cerr << "Diverged at step " << step << ": max |u_i| = " << speed << " m/s"
-                << std::endl;
-      return EXIT_FAILURE;
+      // Diagnostics on the host copies of the solution. n is outward: the
+      // venous flux is negated to read as the inflow.
+      const auto uh = velocity.getData().toHost();
+      const auto ph = pressure.getData().toHost();
+      const Real qIn = -veinFluxHost.dot(uh);
+      const Real qOut = mitralFluxHost.dot(uh);
+      const Real pVein = veinMeanHost.dot(ph) / veinArea;
+      atrialPressure = mitralMeanHost.dot(ph) / mitralArea;
+      const Real speed = uh.cwiseAbs().maxCoeff();
+      if (!std::isfinite(speed) || speed > 50)
+      {
+        std::cerr << "Diverged at step " << step << ": max |u_i| = " << speed << " m/s"
+                  << std::endl;
+        return EXIT_FAILURE;
+      }
+      const size_t cycle = (step - 1) / P.steps + 1;
+      csv << time << ',' << cycle << ',' << pIn << ',' << pOut << ','
+          << (valveOpen ? 1 : 0) << ',' << qIn << ',' << qOut << ',' << pVein << ','
+          << atrialPressure << ',' << speed << ','
+          << std::chrono::duration<double>(t1 - t0).count() << ','
+          << std::chrono::duration<double>(t2 - t1).count() << ',' << iterations << '\n';
+      if (step % P.outputEvery == 0 || step == total)
+      {
+        xdmf.write(time).flush();
+        csv.flush();
+        std::cout << "Step " << step << " / " << total << "  t=" << time
+                  << " s  p_pv=" << pIn << "  p_out=" << pOut << " Pa  valve "
+                  << (valveOpen ? "open" : "closed") << "  qIn=" << qIn
+                  << "  qOut=" << qOut << " m^3/s  max|u_i|=" << speed
+                  << " m/s  assembly " << std::chrono::duration<double>(t1 - t0).count()
+                  << " s  solve " << std::chrono::duration<double>(t2 - t1).count()
+                  << " s  its=" << iterations << std::endl;
+      }
     }
-    const size_t cycle = (step - 1) / P.steps + 1;
-    csv << time << ',' << cycle << ',' << pIn << ',' << pOut << ',' << (valveOpen ? 1 : 0)
-        << ',' << qIn << ',' << qOut << ',' << pVein << ',' << atrialPressure << ','
-        << speed << ',' << std::chrono::duration<double>(t1 - t0).count() << ','
-        << std::chrono::duration<double>(t2 - t1).count() << '\n';
-    if (step % P.outputEvery == 0 || step == total)
-    {
-      xdmf.write(time).flush();
-      csv.flush();
-      std::cout << "Step " << step << " / " << total << "  t=" << time
-                << " s  p_pv=" << pIn << "  p_out=" << pOut << " Pa  valve "
-                << (valveOpen ? "open" : "closed") << "  qIn=" << qIn << "  qOut=" << qOut
-                << " m^3/s  max|u_i|=" << speed << " m/s  assembly "
-                << std::chrono::duration<double>(t1 - t0).count() << " s  solve "
-                << std::chrono::duration<double>(t2 - t1).count() << " s" << std::endl;
-    }
+    std::cout << "Assembly " << assembly.count() << " s, solve " << solve.count()
+              << " s in " << total << " steps" << std::endl;
+#ifdef RODIN_ATRIUM_PETSC
   }
-  std::cout << "Assembly " << assembly.count() << " s, solve " << solve.count()
-            << " s in " << total << " steps" << std::endl;
+  PetscFinalize();
+#endif
   return 0;
 }

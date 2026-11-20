@@ -5,6 +5,16 @@
 module. It advances a Newtonian fluid in the fixed atrial volume over cardiac
 cycles, with the assembly and the linear solve on the device and one process.
 
+The same source builds two executables that differ only in the linear algebra:
+
+| Executable | Assembly | Linear solver |
+|---|---|---|
+| `KokkosAtriumFlow` | native Kokkos sparse matrix | cuDSS (`RODIN_USE_CUDSS`), else Kokkos-Kernels GMRES with Jacobi |
+| `KokkosAtriumFlowPETSc` | COO assembly into a PETSc matrix of the Kokkos type | PETSc KSP on the device: BiCGStab with Jacobi by default, any PETSc option on the command line |
+
+`KokkosAtriumFlowPETSc` is built when Rodin finds a PETSc configured with
+Kokkos (`Rodin::Kokkos::PETSc`). Each solve starts from the previous step.
+
 ## Ported
 
 - The domain: a tetrahedral MEDIT mesh of the fluid in millimetres
@@ -53,15 +63,33 @@ What each needs from the Kokkos module, in order of effort:
    subscale of $\psi$. None exists on the device.
 4. **Several devices.** The PETSc-Kokkos path of `KokkosMPIOseenScaling`.
 
+## Memory
+
+On an RTX 3060 (12 GB) the native path ran meshes of up to 113 104
+unknowns (4.9 GB with GMRES, 5.6 GB with cuDSS) and ran out of memory on
+`Coarse.mesh` (561 036 unknowns) in its symbolic assembly
+(`"Rodin symbolic ranks"`), with either solver: about 43 kB per unknown. The
+PETSc path assembles through the COO pattern of the Kokkos PETSc module,
+which is sorted by ranges of rows to bound its memory; its footprint on
+`Coarse.mesh` has not been measured.
+
 ## Status
 
-Compiled with Kokkos 5.2.2, Serial backend, and run on a 3983-cell test mesh
-with the labels above for one cycle of 85 steps: the flow rates through the
-veins and the mitral plane agree to within 0.5 % at every step, the valve
-closes and reopens with the ventricular pressure, and areas and volume equal
-those of the CPU driver. It was not compiled with CUDA and not run on a GPU
-or on `Coarse.mesh`. The GMRES path has no preconditioner; on a mesh of that
-size the sparse direct device solver (`RODIN_USE_CUDSS`) is the intended one.
+`KokkosAtriumFlowPETSc` was compiled with Kokkos 5.2.2 (Serial) and PETSc
+3.26.0 configured with Kokkos, and run on the same test mesh: with BiCGStab
+and Jacobi (80-130 iterations per step at a relative tolerance of 1e-8) it
+reproduces the native run to six digits at the end of the cycle. A Schur
+field split (FGMRES, `selfp`, GAMG on the velocity, Jacobi on the pressure)
+did not converge on that mesh with the options tried; it needs tuning.
+
+`KokkosAtriumFlow` was compiled with Kokkos 5.2.2, Serial backend, and run on
+a 3983-cell test mesh with the labels above for one cycle of 85 steps: the
+flow rates through the veins and the mitral plane agree to within 0.5 % with
+GMRES at every step, the valve closes and reopens with the ventricular
+pressure, and areas and volume equal those of the CPU driver. With CUDA, on
+an RTX 3060, it ran test meshes of 8 908 to 113 104 unknowns with cuDSS (flow
+rates equal to all digits) and with GMRES and Jacobi; see Memory for
+`Coarse.mesh`. `KokkosAtriumFlowPETSc` has not been compiled with CUDA.
 
 ## Run
 
@@ -73,4 +101,9 @@ build-cuda/examples/Kokkos/Heart/KokkosAtriumFlow /path/to/Coarse.mesh \
 
 Keys: `cycles`, `steps` (per cycle), `period`, `rho`, `mu`, `p_in`,
 `p_in_amplitude`, `ramp`, `z_in`, `lv` (0: prescribed `p_out`), `output`,
-`output_every`, `tolerance`, `restart`, `scale`.
+`output_every`, `tolerance`, `restart`, `max_iterations`, `scale`.
+
+```sh
+build-cuda/examples/Kokkos/Heart/KokkosAtriumFlowPETSc /path/to/Coarse.mesh \
+  cycles=2 steps=850 output=atrium -ksp_converged_reason
+```
