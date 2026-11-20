@@ -12,6 +12,10 @@ of those saved if the run has not reached it yet (marked "provisional").
 Usage:
   python3 seat_streamlines.py runs_seat [-o streamlines] [--designs "cad rampup"]
                               [--openings "5 10 25 100"] [--zoom-z 40] [--zoom-y 25]
+                              [--seal-z 12] [--seal-y 4] [--res 0.05] [--dpi 220]
+Each figure has the zoom on the seat and, below, a closer detail of the
+seal (finer grid, denser lines, and extra lines in pink seeded inside the
+pocket). --res sets the grid of the plots in mm (the detail uses res/2).
 Writes OUT/streamlines.pdf and OUT/<case>.png. Needs numpy, matplotlib, h5py.
 """
 import argparse
@@ -74,20 +78,32 @@ def plane(V, T, U):
     return P, tri, [F[first] for F in out]
 
 
-def draw(ax, case, zoom, cbar=True):
+def draw(ax, case, zoom, res=0.05e-3, density=1.4, nseed=40, cbar=True):
     P, tri, (uz, uy, um), R, label = case
     (z0, z1), (y0, y1) = zoom
     tr = Triangulation(P[:, 0], P[:, 1], tri)
     s = (P[:, 0] > z0) & (P[:, 0] < z1) & (P[:, 1] > y0) & (P[:, 1] < y1)
     vmax = max(np.nanmax(um[s]), 1e-6) if s.any() else 1.0
-    zg = np.linspace(z0, z1, 400); yg = np.linspace(y0, y1, int(400 * (y1 - y0) / (z1 - z0)))
+    # grid of res [m] (the streamlines and the background are drawn on it)
+    zg = np.linspace(z0, z1, int(round((z1 - z0) / res)) + 1)
+    yg = np.linspace(y0, y1, int(round((y1 - y0) / res)) + 1)
     Z, Y = np.meshgrid(zg, yg)
     gz = LinearTriInterpolator(tr, uz)(Z, Y); gy = LinearTriInterpolator(tr, uy)(Z, Y)
     gm = LinearTriInterpolator(tr, um)(Z, Y)
     im = ax.pcolormesh(Z, Y, np.ma.masked_invalid(np.clip(gm, vmax * 1e-3, None)), shading="gouraud",
                        cmap="viridis", norm=LogNorm(vmin=vmax * 1e-3, vmax=vmax), rasterized=True)
-    ax.streamplot(Z, Y, gz.filled(np.nan), gy.filled(np.nan), color="w", linewidth=0.6,
-                  density=1.4, arrowsize=0.6)
+    GZ, GY = gz.filled(np.nan), gy.filled(np.nan)
+    ax.streamplot(Z, Y, GZ, GY, color="w", linewidth=0.6, density=density, arrowsize=0.6)
+    # extra lines seeded in the seat pocket (below the bore line), where the
+    # flow is slow and the even seeding of streamplot leaves it nearly empty
+    R = case[3]
+    pk = np.isfinite(GZ) & (Y < -R - 0.3e-3)
+    if nseed and pk.sum() > 0:
+        idx = np.flatnonzero(pk.ravel())
+        pick = idx[np.linspace(0, len(idx) - 1, min(nseed, len(idx))).astype(int)]
+        seeds = np.c_[Z.ravel()[pick], Y.ravel()[pick]]
+        ax.streamplot(Z, Y, GZ, GY, color="#ffd0d0", linewidth=0.5, start_points=seeds,
+                      arrowsize=0.5, integration_direction="both", broken_streamlines=False)
     ax.axhline(-R, color="r", lw=0.6, ls="--")
     ax.axvline(0, color="0.6", lw=0.4, ls=":")
     ax.set_xlim(z0, z1); ax.set_ylim(y0, y1); ax.set_aspect("equal")
@@ -107,11 +123,17 @@ def main():
     ap.add_argument("--valve", default="FPC8")
     ap.add_argument("--zoom-z", type=float, default=40.0, help="half-width of the zoom along the pipe, mm")
     ap.add_argument("--zoom-y", type=float, default=25.0, help="height of the zoom above the bore bottom, mm")
+    ap.add_argument("--seal-z", type=float, default=12.0, help="half-width of the seal detail, mm")
+    ap.add_argument("--seal-y", type=float, default=4.0, help="height of the seal detail above the bore bottom, mm")
+    ap.add_argument("--res", type=float, default=0.05, help="grid of the plots, mm (seal detail: res/2)")
+    ap.add_argument("--dpi", type=int, default=220)
     a = ap.parse_args()
     os.makedirs(a.out, exist_ok=True)
     designs = a.designs.split(); openings = [int(o) for o in a.openings.split()]
     R = BORE[a.valve]
     zoom = ((-a.zoom_z * 1e-3, a.zoom_z * 1e-3), (-R - 0.006, -R + a.zoom_y * 1e-3))
+    seal = ((-a.seal_z * 1e-3, a.seal_z * 1e-3), (-R - 0.006, -R + a.seal_y * 1e-3))
+    res, sres = a.res * 1e-3, 0.5 * a.res * 1e-3
 
     cases = {}
     for d_ in designs:
@@ -135,10 +157,12 @@ def main():
             label = "%s, %d %% (%d snapshots, t = %.3g–%.3g s)%s" % (
                 d_, o, len(steps), steps[0][0], steps[-1][0], " — provisorio" if prov else "")
             cases[(d_, o)] = (P, tri, F, R, label)
-            fig, ax = plt.subplots(figsize=(8, 5.5))
-            draw(ax, cases[(d_, o)], zoom)
+            fig, axs = plt.subplots(2, 1, figsize=(9, 9))
+            draw(axs[0], cases[(d_, o)], zoom, res, nseed=0)
+            draw(axs[1], cases[(d_, o)], seal, sres, density=2.5, nseed=60)
+            axs[1].set_title("detalle del sello", fontsize=9)
             fig.suptitle("%s — plano x = 0, líneas de corriente del flujo medio en el asiento" % tag, fontsize=10)
-            fig.tight_layout(); fig.savefig(os.path.join(a.out, tag + ".png"), dpi=160); plt.close(fig)
+            fig.tight_layout(); fig.savefig(os.path.join(a.out, tag + ".png"), dpi=a.dpi); plt.close(fig)
             print("  %s ok%s" % (tag, " (provisional)" if prov else ""))
     if not cases:
         sys.exit("no case found in " + a.runs)
@@ -148,9 +172,11 @@ def main():
         ops = [o for o in openings if (d_, o) in cases]
         if not ops:
             continue
-        fig, axs = plt.subplots(1, len(ops), figsize=(4.6 * len(ops), 4.4), squeeze=False)
-        for ax, o in zip(axs[0], ops):
-            draw(ax, cases[(d_, o)], zoom)
+        fig, axs = plt.subplots(2, len(ops), figsize=(4.6 * len(ops), 7.6), squeeze=False)
+        for j, o in enumerate(ops):
+            draw(axs[0, j], cases[(d_, o)], zoom, res, nseed=0)
+            draw(axs[1, j], cases[(d_, o)], seal, sres, density=2.5, nseed=60)
+            axs[1, j].set_title("detalle del sello", fontsize=8)
         fig.suptitle("Asiento %s — plano x = 0, líneas de corriente del flujo medio (fondo: |ū|, línea roja: diámetro)"
                      % d_, fontsize=11)
         fig.tight_layout(); pdf.savefig(fig); plt.close(fig)
@@ -158,9 +184,11 @@ def main():
         ds = [d_ for d_ in designs if (d_, o) in cases]
         if len(ds) < 2:
             continue
-        fig, axs = plt.subplots(1, len(ds), figsize=(4.6 * len(ds), 4.4), squeeze=False)
-        for ax, d_ in zip(axs[0], ds):
-            draw(ax, cases[(d_, o)], zoom)
+        fig, axs = plt.subplots(2, len(ds), figsize=(4.6 * len(ds), 7.6), squeeze=False)
+        for j, d_ in enumerate(ds):
+            draw(axs[0, j], cases[(d_, o)], zoom, res, nseed=0)
+            draw(axs[1, j], cases[(d_, o)], seal, sres, density=2.5, nseed=60)
+            axs[1, j].set_title("%s — detalle del sello" % d_, fontsize=8)
         fig.suptitle("%d %% de apertura — diseños del asiento, plano x = 0" % o, fontsize=11)
         fig.tight_layout(); pdf.savefig(fig); plt.close(fig)
     pdf.close()
