@@ -5,6 +5,7 @@ endif()
 
 add_subdirectory(PDEs)
 add_subdirectory(Solid)
+add_subdirectory(Heart)
 
 if (TARGET Rodin::Kokkos::MPI AND TARGET Rodin::Kokkos::PETSc)
   add_subdirectory(MPI)
