@@ -422,12 +422,19 @@ class EnvironmentTest(unittest.TestCase):
         self.assertFalse(any('AllowUnauthenticated' in x or 'allow-unauthenticated' in x for x in command))
 
     def test_fallback_resolves_ubuntu_mirror_file_indirection(self):
+        for hosted in ('http://azure.archive.ubuntu.com/ubuntu/',
+                       'http://us-east-2.ec2.archive.ubuntu.com/ubuntu/'):
+            with self.subTest(hosted=hosted):
+                self.check_fallback_resolves_ubuntu_mirror_file_indirection(hosted)
+
+    def check_fallback_resolves_ubuntu_mirror_file_indirection(self, hosted):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp); system = root / 'etc'; parts = system / 'sources.list.d'
             parts.mkdir(parents=True)
             mirror_list = root / 'apt-mirrors.txt'
-            mirror_list.write_text('http://azure.archive.ubuntu.com/ubuntu/ priority:1\n'
-                                   'http://archive.ubuntu.com/ubuntu/ priority:2\n')
+            mirror_list.write_text(hosted + ' priority:1\n'
+                                   'http://archive.ubuntu.com/ubuntu/ priority:2\n'
+                                   'http://security.ubuntu.com/ubuntu/ priority:3\n')
             vendor_list = root / 'vendor-mirrors.txt'
             vendor_list.write_text('https://vendor.example/packages\n')
             original = ('Types: deb\nURIs: mirror+file:' + str(mirror_list) + '\n'

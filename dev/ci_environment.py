@@ -44,8 +44,10 @@ MIRRORS = (None, 'https://archive.ubuntu.com/ubuntu',
 # Spread retries beyond short 502/503 bursts and desynchronize matrix runners.
 APT_RETRY_DELAYS = (30, 120)
 APT_RETRY_JITTER = 30
-UBUNTU_URI = re.compile(r'https?://(?:(?:azure\.archive|archive|security)\.ubuntu\.com|'
-                       r'mirrors\.edge\.kernel\.org)/ubuntu/?')
+# Hosted runners take their archive from the Azure mirror or from a regional
+# EC2 mirror such as us-east-2.ec2.archive.ubuntu.com.
+UBUNTU_URI = re.compile(r'https?://(?:(?:azure\.archive|[a-z0-9-]+\.ec2\.archive|archive|security)'
+                       r'\.ubuntu\.com|mirrors\.edge\.kernel\.org)/ubuntu/?')
 YAML_VERSION = '6.0.2'
 # Shared build campaigns must not cross a live archive security update. Refresh
 # this signed Ubuntu snapshot deliberately for producers and consumers together.
@@ -216,7 +218,7 @@ def sources(directory, mirror, system=Path('/etc/apt')):
         if mirror or snapshot:
             # Hosted images can hide the selected archive behind APT's local
             # mirror-list transport. Replacing direct URLs alone leaves those
-            # definitions downloading from the same stalled Azure endpoint.
+            # definitions downloading from the same stalled cloud mirror.
             for reference in re.findall(r'mirror\+file:(/[^\s]+)', text):
                 mirror_file = Path(reference)
                 if not mirror_file.is_file():
