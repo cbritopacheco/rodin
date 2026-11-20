@@ -312,8 +312,8 @@ namespace Rodin::Examples
    * @param levels Set to the number of refinements of the mesh, read from
    * the saved shards when they are reloaded.
    */
-  HostMesh distribute(const Context::MPI& ctx, const std::string& source,
-    bool renumber, size_t& cells, PetscInt& levels)
+  HostMesh distribute(const Context::MPI& ctx, const std::string& source, bool renumber,
+    size_t& cells, PetscInt& levels)
   {
     const auto& comm = ctx.getCommunicator();
     [[maybe_unused]] PetscErrorCode ierr;
