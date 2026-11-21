@@ -187,14 +187,14 @@ class TestPlanTest(unittest.TestCase):
         self.assertEqual(set(cases), expected)
 
     def test_petsc_pressure_partitions_select_every_split_case_once(self):
+        import subprocess
         import yaml
         from ci_tests import ROOT
         workflow = yaml.safe_load((ROOT / ".github/ci/targeted-lanes.yml").read_text())
         job = workflow["jobs"]["PETScConvergence"]
         command = next(step["run"] for step in job["steps"]
                        if "geometry_pattern" in step.get("run", ""))
-        patterns = re.findall(r'pattern="([^"\n]+StokesStability_[^"\n]+)"', command)
-        self.assertEqual(len(patterns), 2)
+        selector = command.split('# Record existing placement', 1)[0]
         geometries = ["Triangle", "Quadrilateral", "Tetrahedron", "Pyramid", "Hexahedron", "Wedge"]
         points = [f"Rates_{mapping}N{n}" for mapping in ["Affine", "Curved"] for n in [3, 4, 5]] + ["Controls"]
         expected = set()
@@ -206,18 +206,24 @@ class TestPlanTest(unittest.TestCase):
                             for point in points for geometry in geometries)
             expected.add(prefix + "Utility" + (f"_np{rank}" if rank else ""))
         rows = job["strategy"]["matrix"]["include"]
+        partitions = {row['study'] for row in rows if (row['multithreaded'], row['suite'], row['context']) ==
+                      ('ON', 'pressure_pyramid', 'np3')}
+        self.assertEqual(partitions, {'CoarseAndControls', 'AffineN5', 'CurvedN5'})
         for mt in ["ON", "OFF"]:
             selected = []
             for row in rows:
                 if row["multithreaded"] != mt or not row["suite"].startswith("pressure_"):
                     continue
-                local = row["context"] == "local"
-                geometry = {"pressure_light": "(Triangle|Quadrilateral|Hexahedron|Wedge)",
-                            "pressure_tetrahedron": "Tetrahedron", "pressure_pyramid": "Pyramid"}[row["suite"]]
-                rank = row["context"].removeprefix("np")
-                utility = ("|Utility" + ("" if local else "_np" + rank)) if row["suite"] == "pressure_light" else ""
-                pattern = patterns[0 if local else 1].replace("${geometry_pattern}", geometry).replace("${utility_pattern}", utility).replace("${rank}", rank)
-                selected.extend(name for name in expected if re.fullmatch(pattern, name))
+                script = selector
+                for name, value in row.items():
+                    script = script.replace('${{ matrix.' + name + ' }}', value)
+                pattern = subprocess.check_output(['bash', '-eu', '-c', script + 'printf "%s\\n" "$pattern"\n'],
+                                                  text=True).strip()
+                matched = {name for name in expected if re.fullmatch(pattern, name)}
+                self.assertTrue(matched, row)
+                if row['study'] in ['AffineN5', 'CurvedN5']:
+                    self.assertEqual(matched, {f'RodinConvergenceHPETScMPIStokesStability_P4P3_np3_Rates_{row["study"]}_Pyramid'})
+                selected.extend(matched)
             self.assertEqual(len(selected), len(expected))
             self.assertEqual(set(selected), expected)
 
@@ -248,8 +254,8 @@ class TestPlanTest(unittest.TestCase):
                 shapes = [g for g in geometries if g not in ['Tetrahedron', 'Pyramid']] if row['geometry'] == 'light' else [row['geometry'].capitalize()]
                 # Names reflect PETScRefinement.cmake's RATE_CASES and Controls
                 # registrations. Local selection must not capture an MPI rank.
-                ranks = [None, 1, 2, 3, 4] if row['selection'] == 'all' else [
-                    None if row['selection'] == 'local' else int(row['selection'].removeprefix('np'))]
+                ranks = {'all': [None, 1, 2, 3, 4], 'mpi': [1, 2, 3, 4], 'local': [None]}
+                ranks = ranks[row['selection']] if row['selection'] in ranks else [int(row['selection'].removeprefix('np'))]
                 prefix = 'RodinConvergenceIsoparametricPETSc' + row['physics'] + 'Boundary_'
                 names = {prefix + ('' if rank is None else 'MPI_np' + str(rank) + '_') +
                          (case + '_' if case else '') + geometry
@@ -265,6 +271,11 @@ class TestPlanTest(unittest.TestCase):
                 self.assertEqual(actual, expected, row)
                 counts[row['multithreaded']].update(actual)
             self.assertTrue(all(count == 1 for c in counts.values() for count in c.values()))
+            for counts_by_name in counts.values():
+                for rank in [None, 1, 2, 3, 4]:
+                    context = '' if rank is None else f'MPI_np{rank}_'
+                    for study in degrees['LinearElasticity']:
+                        self.assertEqual(counts_by_name[f'RodinConvergenceIsoparametricPETScLinearElasticityBoundary_{context}{study}_Pyramid'], 1)
 
 
 if __name__ == "__main__":

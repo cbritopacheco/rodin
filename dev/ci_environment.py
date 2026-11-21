@@ -37,6 +37,10 @@ INDEX_TIMEOUT = 90
 # separately and the privileged process group is still terminated on timeout.
 INDEX_REFRESH_TIMEOUT = 180
 DOWNLOAD_TIMEOUT = 300
+# Cold MatrixRanges downloads of roughly 200 MB were still progressing at
+# 100–170 kB/s when the five-minute watchdog killed each snapshot attempt.
+# Completed archives survive between the three bounded attempts.
+SNAPSHOT_DOWNLOAD_TIMEOUT = 900
 INSTALL_TIMEOUT = 900
 MIRRORS = (None, 'https://archive.ubuntu.com/ubuntu',
            'https://mirrors.edge.kernel.org/ubuntu')
@@ -213,27 +217,28 @@ def sources(directory, mirror, system=Path('/etc/apt')):
     entries += sorted((system / 'sources.list.d').glob('*.list'))
     entries += sorted((system / 'sources.list.d').glob('*.sources'))
     ubuntu = False
+    hosted = (os.environ.get('GITHUB_ACTIONS') == 'true' and
+              os.environ.get('RUNNER_ENVIRONMENT') == 'github-hosted')
     for source in entries:
         text = source.read_text()
-        if mirror or snapshot:
-            # Hosted images can hide the selected archive behind APT's local
-            # mirror-list transport. Replacing direct URLs alone leaves those
-            # definitions downloading from the same stalled cloud mirror.
-            for reference in re.findall(r'mirror\+file:(/[^\s]+)', text):
-                mirror_file = Path(reference)
-                if not mirror_file.is_file():
-                    continue
-                urls = [line.split()[0] for line in mirror_file.read_text().splitlines()
-                        if line.strip() and not line.lstrip().startswith('#')]
-                if urls and all(UBUNTU_URI.fullmatch(url) for url in urls):
-                    text = text.replace('mirror+file:' + reference, (mirror or urls[0]).rstrip('/') + '/')
-            if mirror:
-                text = UBUNTU_URI.sub(mirror.rstrip('/') + '/', text)
-        if snapshot:
-            # APT::Snapshot alone schedules live indexes as well. Use the
-            # timestamped signed archive directly and disable snapshot discovery
-            # for these sources, so an unrelated live mirror cannot stall them.
-            uri = 'https://snapshot.ubuntu.com/ubuntu/' + snapshot + '/'
+        # Read hosted mirror lists for source detection. Preserve the runner's
+        # transport on the first live attempt, and resolve it for fallback or
+        # snapshot selection so those attempts do not reuse the same mirror.
+        original = text
+        for reference in re.findall(r'mirror\+file:(/[^\s]+)', text):
+            mirror_file = Path(reference)
+            if not mirror_file.is_file():
+                continue
+            urls = [line.split()[0] for line in mirror_file.read_text().splitlines()
+                    if line.strip() and not line.lstrip().startswith('#')]
+            if urls and all(UBUNTU_URI.fullmatch(url) for url in urls):
+                text = text.replace('mirror+file:' + reference, (mirror or urls[0]).rstrip('/') + '/')
+        if mirror:
+            text = UBUNTU_URI.sub(mirror.rstrip('/') + '/', text)
+        if snapshot or hosted:
+            # APT::Snapshot alone schedules live indexes as well. Point the
+            # Ubuntu definitions directly at the signed snapshot in that mode.
+            snapshot_uri = 'https://snapshot.ubuntu.com/ubuntu/' + snapshot + '/'
             if source.suffix == '.sources':
                 paragraphs = re.split(r'(\n[ \t]*\n)', text)
                 for index, paragraph in enumerate(paragraphs):
@@ -241,8 +246,13 @@ def sources(directory, mirror, system=Path('/etc/apt')):
                                       paragraph, re.M | re.I)
                     if not field or not any(UBUNTU_URI.fullmatch(value) for value in field[1].split()):
                         continue
+                    binary = re.search(r'^Types:[ \t]*([^\n]+)', paragraph, re.M | re.I)
+                    disabled = re.search(r'^Enabled:[ \t]*no[ \t]*$', paragraph, re.M | re.I)
+                    ubuntu = ubuntu or bool(binary and 'deb' in binary[1].split() and not disabled)
+                    if not snapshot:
+                        continue
                     paragraph = (paragraph[:field.start(1)] +
-                                 re.sub(r'\S+', lambda value: uri if UBUNTU_URI.fullmatch(value[0])
+                                 re.sub(r'\S+', lambda value: snapshot_uri if UBUNTU_URI.fullmatch(value[0])
                                         else value[0], field[1]) + paragraph[field.end(1):])
                     option = re.compile(r'^Snapshot:[^\n]*(?:\n[ \t]+[^\n]*)*', re.M | re.I)
                     if option.search(paragraph):
@@ -250,9 +260,6 @@ def sources(directory, mirror, system=Path('/etc/apt')):
                     else:
                         ending = '\n' if paragraph.endswith('\n') else ''
                         paragraph = paragraph.rstrip('\n') + '\nSnapshot: no' + ending
-                    binary = re.search(r'^Types:[ \t]*([^\n]+)', paragraph, re.M | re.I)
-                    disabled = re.search(r'^Enabled:[ \t]*no[ \t]*$', paragraph, re.M | re.I)
-                    ubuntu = ubuntu or bool(binary and 'deb' in binary[1].split() and not disabled)
                     paragraphs[index] = paragraph
                 text = ''.join(paragraphs)
             else:
@@ -261,32 +268,34 @@ def sources(directory, mirror, system=Path('/etc/apt')):
                     entry = re.match(r'^(\s*deb(?:-src)?\s+)(\[[^]\n]*\]\s+)?(\S+)(.*)', line)
                     if entry and UBUNTU_URI.fullmatch(entry[3]):
                         ubuntu = ubuntu or bool(re.match(r'^\s*deb\s', line))
-                        flags = entry[2].strip()[1:-1].split() if entry[2] else []
-                        flags = [value for value in flags if not value.lower().startswith('snapshot=')]
-                        flags.append('snapshot=no')
-                        line = (entry[1] + '[' + ' '.join(flags) + '] ' + uri + entry[4] +
-                                line[len(entry[0]):])
+                        if snapshot:
+                            flags = entry[2].strip()[1:-1].split() if entry[2] else []
+                            flags = [value for value in flags if not value.lower().startswith('snapshot=')]
+                            flags.append('snapshot=no')
+                            line = (entry[1] + '[' + ' '.join(flags) + '] ' + snapshot_uri + entry[4] +
+                                    line[len(entry[0]):])
                     lines.append(line)
                 text = ''.join(lines)
         target = directory / 'sources.list' if source == main else parts / source.name
-        target.write_text(text)
-    if snapshot and not ubuntu:
-        # APT update succeeds on an empty source set but cannot supply lcov
-        # or other uninstalled packages. Repair only explicit Ubuntu snapshot
-        # environments, using the runner's existing Ubuntu archive trust root.
+        target.write_text(text if mirror or snapshot else original)
+    if (snapshot or hosted) and not ubuntu:
+        # APT can refresh an empty binary source set successfully. Recover in
+        # the disposable copy using the existing Ubuntu archive trust root.
         release = dict(re.findall(r'^([A-Z_]+)=(.*)$', Path('/etc/os-release').read_text(), re.M))
         codename = release.get('VERSION_CODENAME', '').strip('"')
         if release.get('ID', '').strip('"') != 'ubuntu' or not re.fullmatch(r'[a-z][a-z0-9]*', codename):
-            raise RuntimeError('Cannot recover snapshot sources without an Ubuntu codename')
+            raise RuntimeError('Cannot recover APT sources without an Ubuntu codename')
         if not UBUNTU_KEYRING.is_file():
-            raise RuntimeError('Cannot recover snapshot sources without the Ubuntu archive keyring')
+            raise RuntimeError('Cannot recover APT sources without the Ubuntu archive keyring')
+        uri = ('https://snapshot.ubuntu.com/ubuntu/' + snapshot if snapshot
+               else mirror or MIRRORS[1])
         fallback = parts / 'rodin-ubuntu.sources'
         fallback.write_text(
-            'Types: deb\nURIs: https://snapshot.ubuntu.com/ubuntu/' + snapshot + '/\n'
+            'Types: deb\nURIs: ' + uri.rstrip('/') + '/\n'
             'Suites: ' + ' '.join(codename + pocket for pocket in ['', '-updates', '-backports', '-security']) + '\n'
             'Components: main restricted universe multiverse\n'
-            'Signed-By: ' + str(UBUNTU_KEYRING) + '\nSnapshot: no\n')
-        print('No active Ubuntu binary sources copied; using signed snapshot sources for ' + codename, flush=True)
+            'Signed-By: ' + str(UBUNTU_KEYRING) + '\n' + ('Snapshot: no\n' if snapshot else ''))
+        print('No active Ubuntu binary sources copied; using signed Ubuntu sources for ' + codename, flush=True)
     print(f'APT source copy: {len(entries)} source files; Ubuntu snapshot source available: {bool(snapshot)}', flush=True)
     (directory / 'sources.list').touch(exist_ok=True)
     options = ['-o', 'Dir::Etc::sourcelist=' + str(directory / 'sources.list'),
@@ -440,13 +449,15 @@ def install(archives, state):
     last_error = None
     for index in range(plan['source_index'], len(MIRRORS)):
         options = sources(state / str(index), MIRRORS[index])
+        timeout = (SNAPSHOT_DOWNLOAD_TIMEOUT if any(option.startswith('APT::Snapshot=') for option in options)
+                   else DOWNLOAD_TIMEOUT)
         try:
             if index != plan['source_index']:
                 apt(['update'], options, archives, INDEX_REFRESH_TIMEOUT)
             # Bound the whole transfer, not only idle sockets: slow downloads
             # can otherwise run for almost an hour while still making progress.
             apt(['--yes', '--no-remove', '--download-only', 'install', *pinned],
-                options, archives, DOWNLOAD_TIMEOUT)
+                options, archives, timeout)
             break
         except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as error:
             last_error = error

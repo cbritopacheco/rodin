@@ -443,13 +443,16 @@ class EnvironmentTest(unittest.TestCase):
             (parts / 'ubuntu.sources').write_text(original)
             vendor = 'deb mirror+file:' + str(vendor_list) + ' stable main\n'
             (parts / 'vendor.list').write_text(vendor)
-            for i, mirror in enumerate(environment.MIRRORS):
-                destination = root / ('attempt-' + str(i))
-                environment.sources(destination, mirror, system)
-                text = (destination / 'sources.list.d/ubuntu.sources').read_text()
-                self.assertEqual(text, original if mirror is None else original.replace(
-                    'mirror+file:' + str(mirror_list), mirror + '/'))
-                self.assertEqual((destination / 'sources.list.d/vendor.list').read_text(), vendor)
+            with patch.dict(os.environ, RODIN_APT_SNAPSHOT='', GITHUB_ACTIONS='true',
+                            RUNNER_ENVIRONMENT='github-hosted'):
+                for i, mirror in enumerate(environment.MIRRORS):
+                    destination = root / ('attempt-' + str(i))
+                    environment.sources(destination, mirror, system)
+                    text = (destination / 'sources.list.d/ubuntu.sources').read_text()
+                    self.assertEqual(text, original if mirror is None else original.replace(
+                        'mirror+file:' + str(mirror_list), mirror + '/'))
+                    self.assertEqual((destination / 'sources.list.d/vendor.list').read_text(), vendor)
+                    self.assertFalse((destination / 'sources.list.d/rodin-ubuntu.sources').exists())
             self.assertEqual((parts / 'ubuntu.sources').read_text(), original)
 
     def test_dependency_closure_excludes_virtual_edges_and_preserves_exact_requests(self):
@@ -638,6 +641,33 @@ class EnvironmentTest(unittest.TestCase):
                 self.assertNotIn('--allow-unauthenticated', command)
             self.assertIn('APT::Update::Error-Mode=any', commands[0])
 
+    def test_hosted_live_apt_recovers_an_empty_binary_source_set(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            system = root / 'etc'
+            parts = system / 'sources.list.d'
+            parts.mkdir(parents=True)
+            keyring = root / 'ubuntu.gpg'
+            keyring.touch()
+            (parts / 'ubuntu.sources').write_text(
+                'Types: deb\nURIs: https://archive.ubuntu.com/ubuntu\n'
+                'Suites: noble\nComponents: main\nEnabled: no\n'
+                '\nTypes: deb-src\nURIs: https://archive.ubuntu.com/ubuntu\n'
+                'Suites: noble\nComponents: universe\nSigned-By: ' + str(keyring) + '\n')
+            with patch.dict(os.environ, RODIN_APT_SNAPSHOT='', GITHUB_ACTIONS='true',
+                            RUNNER_ENVIRONMENT='github-hosted'), \
+                    patch.object(environment, 'UBUNTU_KEYRING', keyring):
+                for i, mirror in enumerate(environment.MIRRORS):
+                    destination = root / str(i)
+                    options = environment.sources(destination, mirror, system)
+                    generated = (destination / 'sources.list.d/rodin-ubuntu.sources').read_text()
+                    archive = mirror or environment.MIRRORS[1]
+                    self.assertIn('URIs: ' + archive + '/\n', generated)
+                    self.assertIn('Components: main restricted universe multiverse', generated)
+                    self.assertIn('Signed-By: ' + str(keyring), generated)
+                    self.assertNotIn('Trusted:', generated)
+                    self.assertFalse(any(option.startswith('APT::Snapshot=') for option in options))
+
     def test_snapshot_recovery_requires_the_existing_ubuntu_trust_root(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -765,6 +795,25 @@ class EnvironmentTest(unittest.TestCase):
                 environment.install(root / 'cache', root)
             self.assertEqual(apt.call_count, 2)
             self.retry_sleep.assert_not_called()
+
+    def test_slow_snapshot_download_has_a_bounded_larger_budget(self):
+        with tempfile.TemporaryDirectory() as tmp, \
+                patch.object(environment, 'sources', return_value=['-o', 'APT::Snapshot=20261113T000000Z']), \
+                patch.object(environment, 'apt') as apt:
+            root = Path(tmp)
+            (root / 'plan.json').write_text(json.dumps({'source_index': 0, 'versions': {'petsc-dev': '1'}}))
+
+            def transfer(arguments, options, cache, timeout):
+                if '--download-only' in arguments and timeout < 540:
+                    raise subprocess.CalledProcessError(124, 'timeout')
+
+            apt.side_effect = transfer
+            environment.install(root / 'cache', root)
+            self.assertEqual(apt.call_count, 2)
+            download, install = apt.call_args_list
+            self.assertEqual(download.args[3], 900)
+            self.assertIn('petsc-dev=1', download.args[0])
+            self.assertIn('--no-download', install.args[0])
 
     def test_all_download_sources_failing_fails_the_job(self):
         with tempfile.TemporaryDirectory() as tmp, \

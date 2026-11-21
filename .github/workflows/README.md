@@ -101,14 +101,22 @@ definition; they do not maintain separate compiler or package setup steps.
 
 Index refresh attempts have a 180-second budget; local APT policy and plan
 queries retain a 90-second budget. Complete package-download attempts have a
-300-second budget. GNU `timeout` terminates the privileged APT process group
-before fallback. After the runner's original sources, fallback uses the official
+300-second live-mirror budget and a 900-second signed-snapshot budget. The
+MatrixRanges cold cache needed roughly 200 MB and timed out while still
+receiving about 100–170 kB/s. Completed archives carry over to the next attempt.
+GNU `timeout` terminates the privileged APT process group before fallback.
+After the runner's original sources, fallback uses the official
 Ubuntu archive and then its kernel.org mirror, retaining suites, components,
 signing keys and exact resolved versions. Ubuntu `mirror+file:` source indirection
 is resolved to the selected fallback transport; otherwise all attempts would
 keep consulting the original failing mirror list. Candidate-version discovery
 and installation-plan simulation use those same selected source definitions.
 Mirror fallback leaves the remaining third-party source definitions unchanged.
+When a hosted runner has no active Ubuntu binary sources, the copied
+configuration supplies the runner release's standard Ubuntu pockets and
+components using the existing Ubuntu archive keyring. This also covers live
+installs where an empty update otherwise leaves packages such as `lcov`
+without candidates.
 Snapshot environments resolve Ubuntu mirror lists and point copied Ubuntu
 sources directly at the timestamped signed snapshot archive. Their source-local
 `Snapshot: no` / `snapshot=no` setting disables additional discovery of live
@@ -797,9 +805,17 @@ coverage instrumentation and numerical acceptance thresholds are unchanged.
 
 The local curved P3 mixed-traction hexahedron history retains all three
 refinements and numerical requirements. Coverage runs have a 3,600-second
-allowance, matching the existing local P3 pyramid allowance. Its first two
-hosted levels took 25 and 194 seconds before the final level exhausted the
+allowance. Its first two hosted levels took 25 and 194 seconds before the final level exhausted the
 former 1,800-second limit. MPI cases and non-coverage watchdogs remain unchanged.
+The threaded local P3 pyramid history timed out at 3,600 seconds during its
+finest refinement in both the `master` run of the PR's base commit and PR CI.
+The `develop` run of the same commit passed. The test has a 7,200-second coverage
+allowance in a job separate from the MPI histories. The threaded, three-rank
+PETSc Stokes pyramid pressure spectrum runs the finest affine and curved
+studies in separate jobs from the coarser points and controls. On one PR runner
+the affine study took 9,806 seconds and the combined job ran out of time during
+the finest curved study. Both studies retain their existing test watchdogs,
+MPI ranks and two independent order evaluations.
 
 Linux jobs and shared-build runner identities pin `ubuntu-24.04`. This preserves
 the validated Python 3.12.0 and Boost 1.74 environment after `ubuntu-latest`
