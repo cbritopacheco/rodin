@@ -56,19 +56,27 @@
  *  4. The second half step of 2 (Strang splitting).
  *  5. Momentum and continuity for (u^{n+1}, p^{n+1}), P1/P1, BDF2, with the
  *     elastic stress of t^{n+1} from 2-4 and balanced by a viscosity
- *     eta_a = G lambda on both sides (Guenette & Fortin, JNNFM 60, 1995; the
+ *     eta_a = G lambda max(1, tr(c)/3) on both sides (the factor, key
+ *     bsd_stretch, makes eta_a follow the stiffness of stretched dumbbells:
+ *     without it VE and TVE diverged on Coarse.mesh, the stress first) (Guenette & Fortin, JNNFM 60, 1995; the
  *     "both sides diffusion" of finite volume log-conformation codes):
  *       rho (3 u - 4 u^n + u^{n-1})/(2 dt) + rho u*.grad u
  *         - div((eta + eta_a) grad u) + grad p = div E,
- *       E = tau_p - eta_a L*,   eta = eta_plasma,
- *     L* the recovered gradient of u*. The added term is
- *     eta_a (grad u^{n+1} - L*): of order dt^2 and of the mesh size, a
- *     projection-type stabilisation of the velocity gradient. For CY the same
+ *       E = tau_p - eta_a L^n,   eta = eta_plasma,
+ *     L^n the recovered gradient of u^n. The added term is
+ *     eta_a (grad u^{n+1} - L^n): of order dt and of the mesh size, a
+ *     projection-type stabilisation of the velocity gradient. With L* of u*
+ *     (bsd_extrapolate=1) it is of order dt^2 but unstable: for a Fourier
+ *     mode of wavenumber k, once eta_a k^2 dt/rho exceeds about one (cells
+ *     below 0.5 mm at lambda = 0.09 s, dt = 1 ms) the explicit side, with
+ *     weight 2 eta_a/(eta + eta_a) ~ 2, grows with the elastic stress (VE and
+ *     TVE diverged on Coarse.mesh at t = 0.05 s). For CY the same
  *     form carries the transposed part of 2 eta D explicitly: eta = eta_CY(gd*)
  *     and E = eta (L*^T - tr(L*) I), whose divergence is grad eta . L*^T.
  *
  * Every piece is second order in dt with stab=asgs and tau_dt=0: the
- * extrapolations, the Strang splitting, Crank-Nicolson and BDF2. Not with:
+ * extrapolations, the Strang splitting, Crank-Nicolson and BDF2, but for the
+ * explicit side of the both-sides diffusion of VE and TVE. Not with:
  * stab=split, whose two terms are not consistent and of order tau ~ dt;
  * ptt > 0, whose factor takes the trace at the start of each half step; the
  * ventricle, which reads the atrial pressure of t^n (lv_extrapolate=1 reads
@@ -124,7 +132,7 @@
  * (850, per cycle), period (0.85), rho (1060), mu (0.0049, fluid N), p_in
  * (1200), p_in_amplitude (200), ramp (0.25, cycles), z_in (1000), lv (1),
  * order (2; 1), theta (0.5, transport), t_end (stop at that time), tau_dt (0),
- * lv_extrapolate (0),
+ * lv_extrapolate (0), bsd_extrapolate (0), bsd_stretch (1),
  * p_out (0), n_in (1.5, aggregate size entering), n_init (-1: n_st(0)),
  * bsd (1, factor of eta_a), ptt (0; linear PTT factor, see below), eta_plasma
  * (0.0012), lambda_h (0.005), output
@@ -213,6 +221,8 @@ namespace
       int order = 2;
       bool tauTime = false;
       bool extrapolateAtrium = false;
+      bool extrapolateBothSides = false;
+      bool stretchBothSides = true;
       Real theta = 0.5;
       Real endTime = -1;
       Real ptt = 0;
@@ -815,10 +825,11 @@ namespace
    * @param fluid Fluid model.
    * @param mu Viscosity of the Newtonian fluid.
    * @param bothSides Factor of eta_a.
+   * @param scaleWithStretch Whether eta_a is multiplied by max(1, tr(c)/3).
    * @return Volume integrals and maxima.
    */
-  Diagnostics evaluateStress(
-    const Nodal& d, const Rheology& model, Fluid fluid, Real mu, Real bothSides)
+  Diagnostics evaluateStress(const Nodal& d, const Rheology& model, Fluid fluid, Real mu,
+    Real bothSides, bool scaleWithStretch)
   {
     const int nodes = d.nodes;
     const auto gradient = d.gradient;
@@ -836,6 +847,7 @@ namespace
     const auto volume = d.volume;
     const bool elastic = fluid == Fluid::Viscoelastic || fluid == Fluid::Thixotropic;
     const bool shearThinning = fluid == Fluid::CarreauYasuda;
+    const bool scaled = scaleWithStretch;
     ::Kokkos::parallel_for(
       "AtriumRheology::evaluateStress", ::Kokkos::RangePolicy<Exec>(0, nodes),
       KOKKOS_LAMBDA(const int i) {
@@ -866,7 +878,12 @@ namespace
           for (int k = 0; k < 6; ++k)
             s[k] = psi(i + k * nodes);
           const Tensor c = conformation(s);
-          const Real etaA = bothSides * model.modulus * relaxation(i);
+          // G lambda is the response of relaxed dumbbells; stretched ones respond
+          // tr(c)/3 times faster, and an explicit stress with a smaller
+          // balancing viscosity is under-damped (Coarse.mesh, VE and TVE).
+          const Real trace0 = c.a[0][0] + c.a[1][1] + c.a[2][2];
+          const Real stretch = scaled && trace0 > 3 ? trace0 / 3 : Real(1);
+          const Real etaA = bothSides * stretch * model.modulus * relaxation(i);
           eta = model.etaPlasma;
           for (int a = 0; a < 3; ++a)
           {
@@ -1070,6 +1087,10 @@ namespace
     real("bsd", P.bothSides);
     real("theta", P.theta);
     real("t_end", P.endTime);
+    if (kv.count("bsd_stretch"))
+      P.stretchBothSides = kv["bsd_stretch"] != "0";
+    if (kv.count("bsd_extrapolate"))
+      P.extrapolateBothSides = kv["bsd_extrapolate"] != "0";
     if (kv.count("lv_extrapolate"))
       P.extrapolateAtrium = kv["lv_extrapolate"] != "0";
     if (kv.count("tau_dt"))
@@ -1774,14 +1795,21 @@ int main(int argc, char** argv)
       const auto r2 = std::chrono::steady_clock::now();
       if (elastic && second)
         advanceStructure(nodal, model, thixotropic, dt / 2, P.ptt, true);
-      if (second)
+      if (second && (!elastic || P.extrapolateBothSides))
       {
-        // The stress balance and the viscosity of CY at t^{n+1}, from u*.
+        // The viscosity and stress of CY at t^{n+1}, from u*. The elastic
+        // fluids keep the gradient of u^n for the explicit side of the
+        // both-sides diffusion: from u* it is unstable (see header).
         toDevice(uStar.data(), nodal.velocity);
         recoverGradient(nodal);
       }
+      else if (second)
+      {
+        toDevice(un.data(), nodal.velocity);
+        recoverGradient(nodal);
+      }
       const Diagnostics diagnostics =
-        evaluateStress(nodal, model, fluid, P.mu, P.bothSides);
+        evaluateStress(nodal, model, fluid, P.mu, P.bothSides, P.stretchBothSides);
       viscosity.setData(toHost(nodal.viscosity));
       extra0.setData(toHost(nodal.extra0));
       extra1.setData(toHost(nodal.extra1));

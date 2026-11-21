@@ -131,6 +131,18 @@ digits). Not run with CUDA, nor on `Coarse.mesh`: `stab=asgs` adds velocity
 pressure matrices to the assembly, so its memory there is not known;
 `stab=split` has the footprint of `KokkosAtriumFlowPETSc`.
 
+**Coupling of the stress on fine meshes.** On `Coarse.mesh` (cells near
+0.45 mm) VE and TVE diverged at $t\approx0.05$ s with both orders, the stress
+first ($\mathrm{tr}\,c$ from 4 to 500 in 20 steps while $|u|$ was 0.04 m/s).
+The explicit stress was balanced by $G\lambda$, the response of relaxed
+dumbbells; stretched ones respond $\mathrm{tr}(c)/3$ times faster. The
+balancing viscosity is now $G\lambda\max(1,\mathrm{tr}\,c/3)$
+(`bsd_stretch=1`, the default); on the test mesh this changes the cycle by
+less than 1 %. Its explicit side takes the gradient of $u^n$, not of the
+extrapolated $u^*$ (`bsd_extrapolate=1`), which changes the errors of the
+convergence test by less than 1 %. Whether this cures `Coarse.mesh` has not
+been checked.
+
 Owens' dumbbells are Hookean and their stress is unbounded at a stagnation
 point with strong extension (`tr(c)_max` in the log); `ptt=0.01`, say, bounds
 it with a linear Phan-Thien-Tanner factor that is not part of Owens' model.
@@ -196,7 +208,8 @@ build-cuda/examples/Kokkos/Heart/KokkosAtriumRheologyPETSc /path/to/Coarse.mesh 
 ```
 
 Keys of `KokkosAtriumRheologyPETSc`, besides those above: `fluid`, `stab`,
-`order`, `theta`, `tau_dt`, `lv_extrapolate`, `t_end`, `n_in`, `n_init`,
+`order`, `theta`, `tau_dt`, `lv_extrapolate`, `bsd_extrapolate`,
+`bsd_stretch`, `t_end`, `n_in`, `n_init`,
 `bsd`, `ptt`, `eta_plasma`, `lambda_h`. Its flow solver is
 BiCGStab(4) with Jacobi unless PETSc options say otherwise; the transport
 solver takes options with the prefix `transport_`.
