@@ -140,8 +140,23 @@ balancing viscosity is now $G\lambda\max(1,\mathrm{tr}\,c/3)$
 (`bsd_stretch=1`, the default); on the test mesh this changes the cycle by
 less than 1 %. Its explicit side takes the gradient of $u^n$, not of the
 extrapolated $u^*$ (`bsd_extrapolate=1`), which changes the errors of the
-convergence test by less than 1 %. Whether this cures `Coarse.mesh` has not
-been checked.
+convergence test by less than 1 %. That alone did not cure `Coarse.mesh`:
+the velocity stayed bounded but $\mathrm{tr}\,c$ still grew from 744 to
+4.4e5 between $t$ = 0.08 and 0.10 s.
+
+The CPU driver on the same mesh, with the same $\Delta t$ and the same
+(Hookean) model, also builds stress at the rims of the veins, but slowly
+($\max\sigma$ 0.8 Pa at $t$ = 0.03 s, 143 Pa at 0.10 s, 690 Pa at 0.15 s;
+Wi up to 92; no step rejected, 1-2 Newton iterations). It differs in two
+ways that act there: u, p and $\psi$ are solved together, so the stress
+slows the extension that feeds it within the step; and its $\tau_\psi$ is
+about eight times larger where convection dominates. So the default is now
+two outer iterations per step (`picard=2`: steps 1-5 again from $\psi^n$, $n^n$
+with the kinematics of the last velocity iterate) and the $\tau_\psi$ of the
+CPU driver (`tau_psi=cpu`), for VE and TVE; N and CY are unchanged. On the
+test mesh: same ventricular pressure and volume, stress 7-15 % higher, twice
+the time per step. `picard=1 tau_psi=supg` reproduces the former version to
+all digits. Not yet run on `Coarse.mesh`.
 
 Owens' dumbbells are Hookean and their stress is unbounded at a stagnation
 point with strong extension (`tr(c)_max` in the log); `ptt=0.01`, say, bounds
@@ -209,7 +224,7 @@ build-cuda/examples/Kokkos/Heart/KokkosAtriumRheologyPETSc /path/to/Coarse.mesh 
 
 Keys of `KokkosAtriumRheologyPETSc`, besides those above: `fluid`, `stab`,
 `order`, `theta`, `tau_dt`, `lv_extrapolate`, `bsd_extrapolate`,
-`bsd_stretch`, `t_end`, `n_in`, `n_init`,
+`bsd_stretch`, `picard`, `tau_psi`, `t_end`, `n_in`, `n_init`,
 `bsd`, `ptt`, `eta_plasma`, `lambda_h`. Its flow solver is
 BiCGStab(4) with Jacobi unless PETSc options say otherwise; the transport
 solver takes options with the prefix `transport_`.

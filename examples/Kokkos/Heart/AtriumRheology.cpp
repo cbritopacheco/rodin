@@ -95,6 +95,16 @@
  * (rho/(2 dt) |u^{n+1} - u^n|^2 with order=1), to be set against the viscous
  * and polymer dissipation.
  *
+ * Outer iterations (key picard, VE and TVE): steps 1-5 are repeated from
+ * psi^n, n^n with the kinematics of the last iterate u^{n+1,k}: u^{n+1/2} =
+ * (u^n + u^{n+1,k})/2 and the explicit side of the both-sides diffusion from
+ * u^{n+1,k}. The CPU driver solves u, p and psi in one Newton system; one
+ * segregated step lags the effect of the stress on the flow by one step,
+ * which on Coarse.mesh let the stress at the rims of the veins run away.
+ * Step 3 uses the tau_psi of the CPU driver,
+ *   tau_psi = 1/(c3/lambda + c4 |u|/h + 2 c4 |grad u|),  c3 = 4, c4 = 0.25
+ * (tau_psi=supg: the former [(2|u|/h)^2 + (1/lambda)^2]^(-1/2)).
+ *
  * Stabilisation of step 5 (key stab). "asgs", the default: the algebraic
  * subgrid scale method with the residual of the momentum equation, i.e.
  * SUPG and PSPG, with quasi-static subscales:
@@ -132,7 +142,8 @@
  * (850, per cycle), period (0.85), rho (1060), mu (0.0049, fluid N), p_in
  * (1200), p_in_amplitude (200), ramp (0.25, cycles), z_in (1000), lv (1),
  * order (2; 1), theta (0.5, transport), t_end (stop at that time), tau_dt (0),
- * lv_extrapolate (0), bsd_extrapolate (0), bsd_stretch (1),
+ * lv_extrapolate (0), bsd_extrapolate (0), bsd_stretch (1), picard (2),
+ * tau_psi (cpu; supg),
  * p_out (0), n_in (1.5, aggregate size entering), n_init (-1: n_st(0)),
  * bsd (1, factor of eta_a), ptt (0; linear PTT factor, see below), eta_plasma
  * (0.0012), lambda_h (0.005), output
@@ -223,6 +234,8 @@ namespace
       bool extrapolateAtrium = false;
       bool extrapolateBothSides = false;
       bool stretchBothSides = true;
+      bool cpuTau = true;
+      size_t picard = 2;
       Real theta = 0.5;
       Real endTime = -1;
       Real ptt = 0;
@@ -1087,6 +1100,13 @@ namespace
     real("bsd", P.bothSides);
     real("theta", P.theta);
     real("t_end", P.endTime);
+    count("picard", P.picard);
+    if (kv.count("tau_psi"))
+    {
+      if (kv["tau_psi"] != "cpu" && kv["tau_psi"] != "supg")
+        throw std::invalid_argument("tau_psi is cpu or supg.");
+      P.cpuTau = kv["tau_psi"] == "cpu";
+    }
     if (kv.count("bsd_stretch"))
       P.stretchBothSides = kv["bsd_stretch"] != "0";
     if (kv.count("bsd_extrapolate"))
@@ -1588,6 +1608,7 @@ int main(int argc, char** argv)
     const Real theta = second ? P.theta : Real(1);
     const Real dtEff = second ? 2 * dt / 3 : dt; // BDF2: (3/2)(u - past)/dt
     const bool tauTime = P.tauTime;
+    const bool cpuTau = P.cpuTau && !tauTime;
     // Time derivative in the residual of the subscales only with tau ~ dt.
     const Real inertia = P.residual && tauTime ? Real(1) : Real(0);
     HostVector previousVelocity = HostVector::Zero(3 * nodes); // u^{n-1}
@@ -1640,64 +1661,126 @@ int main(int argc, char** argv)
       past.setData(uPast);
       const ::Rodin::Kokkos::Variational::View<std::decay_t<decltype(advecting)>> w(
         advecting);
-      const ::Rodin::Kokkos::Variational::View<std::decay_t<decltype(midpoint)>> wt(
-        midpoint);
-
-      // Steps 1 to 3: velocity gradient, local update and transport of psi and
-      // n; order 2 splits the local update in two halves around the transport
-      // (Strang), with the gradient of u^{n+1/2}.
-      const auto r0 = std::chrono::steady_clock::now();
-      toDevice(uHalf.data(), nodal.velocity);
-      recoverGradient(nodal);
-      if (elastic)
+      // Outer iterations (key picard, elastic fluids): the structure and the
+      // stress are computed again from the start of the step with the
+      // kinematics of the last velocity iterate, which restores the feedback
+      // of the stress on the flow that a segregated step lags by one step.
+      const size_t outer = elastic ? std::max<size_t>(P.picard, 1) : 1;
+      HostVector psiStart, sizeStart, uIterate;
+      if (outer > 1)
       {
-        advanceStructure(nodal, model, thixotropic, second ? dt / 2 : dt, P.ptt, second);
-        relaxation.setData(toHost(nodal.relaxation));
+        psiStart = toHost(nodal.psi);
+        sizeStart = toHost(nodal.size);
       }
-      const ::Rodin::Kokkos::Variational::View<std::decay_t<decltype(relaxation)>>
-        lambdaView(relaxation);
-      const auto r1 = std::chrono::steady_clock::now();
-      PetscInt transportIterations = 0;
-      if (elastic)
+      Diagnostics diagnostics;
+      PetscInt iterations = 0, transportIterations = 0;
+      double rheologySeconds = 0, transportSeconds = 0, assemblySeconds = 0,
+             solveSeconds = 0;
+      for (size_t pass = 0; pass < outer; ++pass)
       {
-        const ::Rodin::Kokkos::Variational::View<BoundaryNormal> outward(normal);
-        RealFunction tauS(KOKKOS_LAMBDA(const PointView& point)->Real {
-          const auto wp = wt.getValue(point);
-          Real speed2 = 0;
-          for (Index i = 0; i < 3; ++i)
-            speed2 += wp(i) * wp(i);
-          const Real hk = ::Kokkos::cbrt(point.getDistortion() / 6);
-          const Real a = tauTime ? 2 / dt : Real(0);
-          const Real k = tauTime ? Real(0) : 1 / lambdaView.getValue(point);
-          return 1 / ::Kokkos::sqrt(a * a + 4 * speed2 / (hk * hk) + k * k);
-        });
-        RealFunction inflow(KOKKOS_LAMBDA(const PointView& point)->Real {
-          const auto wp = wt.getValue(point);
-          const auto n = outward.getValue(point);
-          Real flux = 0;
-          for (Index i = 0; i < 3; ++i)
-            flux += wp(i) * n(i);
-          return flux < 0 ? -flux : Real(0);
-        });
-        // One volume integral per matrix: the triplets of every integral
-        // stay in device memory. theta-scheme, Crank-Nicolson for order 2.
-        if (!tauTime)
+        if (pass > 0)
         {
-          // Quasi-static SUPG: the time derivative is tested by r only, so
-          // tau need not scale with dt (theta-scheme, Crank-Nicolson for
-          // order 2).
-          transport = (1 / dt) * Integral(s, r) +
-            theta *
-              Integral(Dot(midpoint, Grad(s)), r + Mult(tauS, Dot(midpoint, Grad(r)))) +
-            theta *
-              BoundaryIntegral(Mult(inflow, s), r)
-                .over(veins[0], veins[1], veins[2], veins[3], mitral) -
-            Integral(zero, r);
-          if (theta < 1)
+          toDevice(psiStart.data(), nodal.psi);
+          toDevice(sizeStart.data(), nodal.size);
+          midpoint.setData(second ? HostVector(0.5 * (un + uIterate)) : uIterate);
+        }
+        const HostVector uMid = midpoint.getData().toHost();
+        const ::Rodin::Kokkos::Variational::View<std::decay_t<decltype(midpoint)>> wt(
+          midpoint);
+
+        // Steps 1 to 3: velocity gradient, local update and transport of psi and
+        // n; order 2 splits the local update in two halves around the transport
+        // (Strang), with the gradient of u^{n+1/2}.
+        const auto r0 = std::chrono::steady_clock::now();
+        toDevice(uMid.data(), nodal.velocity);
+        recoverGradient(nodal);
+        if (elastic)
+        {
+          advanceStructure(
+            nodal, model, thixotropic, second ? dt / 2 : dt, P.ptt, second);
+          relaxation.setData(toHost(nodal.relaxation));
+        }
+        const ::Rodin::Kokkos::Variational::View<std::decay_t<decltype(relaxation)>>
+          lambdaView(relaxation);
+        const auto r1 = std::chrono::steady_clock::now();
+        if (elastic)
+        {
+          const ::Rodin::Kokkos::Variational::View<BoundaryNormal> outward(normal);
+          RealFunction tauS(KOKKOS_LAMBDA(const PointView& point)->Real {
+            const auto wp = wt.getValue(point);
+            Real speed2 = 0;
+            for (Index i = 0; i < 3; ++i)
+              speed2 += wp(i) * wp(i);
+            const Real hk = ::Kokkos::cbrt(point.getDistortion() / 6);
+            if (cpuTau)
+            {
+              // tau_psi of the CPU driver (Moreno et al. 2019, c3 = 4,
+              // c4 = 0.25): 1/(c3/lambda + c4 |u|/h + 2 c4 |grad u|).
+              const auto J = wt.u.interpolateJacobian(point);
+              Real g2 = 0;
+              for (Index i = 0; i < 3; ++i)
+              {
+                for (Index j = 0; j < 3; ++j)
+                  g2 += J(i, j) * J(i, j);
+              }
+              return 1 /
+                (4 / lambdaView.getValue(point) + 0.25 * ::Kokkos::sqrt(speed2) / hk +
+                  0.5 * ::Kokkos::sqrt(g2));
+            }
+            const Real a = tauTime ? 2 / dt : Real(0);
+            const Real k = tauTime ? Real(0) : 1 / lambdaView.getValue(point);
+            return 1 / ::Kokkos::sqrt(a * a + 4 * speed2 / (hk * hk) + k * k);
+          });
+          RealFunction inflow(KOKKOS_LAMBDA(const PointView& point)->Real {
+            const auto wp = wt.getValue(point);
+            const auto n = outward.getValue(point);
+            Real flux = 0;
+            for (Index i = 0; i < 3; ++i)
+              flux += wp(i) * n(i);
+            return flux < 0 ? -flux : Real(0);
+          });
+          // One volume integral per matrix: the triplets of every integral
+          // stay in device memory. theta-scheme, Crank-Nicolson for order 2.
+          if (!tauTime)
           {
-            history = (1 / dt) * Integral(sOld, rOld) +
-              (theta - 1) *
-                Integral(Dot(midpoint, Grad(sOld)),
+            // Quasi-static SUPG: the time derivative is tested by r only, so
+            // tau need not scale with dt (theta-scheme, Crank-Nicolson for
+            // order 2).
+            transport = (1 / dt) * Integral(s, r) +
+              theta *
+                Integral(Dot(midpoint, Grad(s)), r + Mult(tauS, Dot(midpoint, Grad(r)))) +
+              theta *
+                BoundaryIntegral(Mult(inflow, s), r)
+                  .over(veins[0], veins[1], veins[2], veins[3], mitral) -
+              Integral(zero, r);
+            if (theta < 1)
+            {
+              history = (1 / dt) * Integral(sOld, rOld) +
+                (theta - 1) *
+                  Integral(Dot(midpoint, Grad(sOld)),
+                    rOld + Mult(tauS, Dot(midpoint, Grad(rOld)))) +
+                (theta - 1) *
+                  BoundaryIntegral(Mult(inflow, sOld), rOld)
+                    .over(veins[0], veins[1], veins[2], veins[3], mitral) -
+                Integral(zero, rOld);
+            }
+            else
+            {
+              history = (1 / dt) * Integral(sOld, rOld) - Integral(zero, rOld);
+            }
+          }
+          else if (theta < 1)
+          {
+            transport = (1 / dt) *
+                Integral(s + Mult(RealFunction(theta * dt), Dot(midpoint, Grad(s))),
+                  r + Mult(tauS, Dot(midpoint, Grad(r)))) +
+              theta *
+                BoundaryIntegral(Mult(inflow, s), r)
+                  .over(veins[0], veins[1], veins[2], veins[3], mitral) -
+              Integral(zero, r);
+            history = (1 / dt) *
+                Integral(
+                  sOld + Mult(RealFunction((theta - 1) * dt), Dot(midpoint, Grad(sOld))),
                   rOld + Mult(tauS, Dot(midpoint, Grad(rOld)))) +
               (theta - 1) *
                 BoundaryIntegral(Mult(inflow, sOld), rOld)
@@ -1706,314 +1789,310 @@ int main(int argc, char** argv)
           }
           else
           {
-            history = (1 / dt) * Integral(sOld, rOld) - Integral(zero, rOld);
-          }
-        }
-        else if (theta < 1)
-        {
-          transport = (1 / dt) *
-              Integral(s + Mult(RealFunction(theta * dt), Dot(midpoint, Grad(s))),
-                r + Mult(tauS, Dot(midpoint, Grad(r)))) +
-            theta *
+            transport = (1 / dt) *
+                Integral(s + Mult(RealFunction(dt), Dot(midpoint, Grad(s))),
+                  r + Mult(tauS, Dot(midpoint, Grad(r)))) +
               BoundaryIntegral(Mult(inflow, s), r)
                 .over(veins[0], veins[1], veins[2], veins[3], mitral) -
-            Integral(zero, r);
-          history = (1 / dt) *
-              Integral(
-                sOld + Mult(RealFunction((theta - 1) * dt), Dot(midpoint, Grad(sOld))),
-                rOld + Mult(tauS, Dot(midpoint, Grad(rOld)))) +
-            (theta - 1) *
-              BoundaryIntegral(Mult(inflow, sOld), rOld)
-                .over(veins[0], veins[1], veins[2], veins[3], mitral) -
-            Integral(zero, rOld);
-        }
-        else
-        {
-          transport = (1 / dt) *
-              Integral(s + Mult(RealFunction(dt), Dot(midpoint, Grad(s))),
-                r + Mult(tauS, Dot(midpoint, Grad(r)))) +
-            BoundaryIntegral(Mult(inflow, s), r)
-              .over(veins[0], veins[1], veins[2], veins[3], mitral) -
-            Integral(zero, r);
-          history =
-            (1 / dt) * Integral(sOld, rOld + Mult(tauS, Dot(midpoint, Grad(rOld)))) -
-            Integral(zero, rOld);
-        }
-        transport.assemble();
-        history.assemble();
-        ::Mat& A = transport.getLinearSystem().getOperator();
-        ::Mat& B = history.getLinearSystem().getOperator();
-        if (!transported)
-        {
-          PetscCallAbort(PETSC_COMM_SELF, MatCreateVecs(A, &transported, &load));
-          PetscCallAbort(PETSC_COMM_SELF, VecDuplicate(transported, &previous));
+              Integral(zero, r);
+            history =
+              (1 / dt) * Integral(sOld, rOld + Mult(tauS, Dot(midpoint, Grad(rOld)))) -
+              Integral(zero, rOld);
+          }
+          transport.assemble();
+          history.assemble();
+          ::Mat& A = transport.getLinearSystem().getOperator();
+          ::Mat& B = history.getLinearSystem().getOperator();
+          if (!transported)
+          {
+            PetscCallAbort(PETSC_COMM_SELF, MatCreateVecs(A, &transported, &load));
+            PetscCallAbort(PETSC_COMM_SELF, VecDuplicate(transported, &previous));
+            PetscCallAbort(PETSC_COMM_SELF, KSPSetOperators(transportSolver, A, A));
+            PetscCallAbort(PETSC_COMM_SELF, KSPSetFromOptions(transportSolver));
+          }
           PetscCallAbort(PETSC_COMM_SELF, KSPSetOperators(transportSolver, A, A));
-          PetscCallAbort(PETSC_COMM_SELF, KSPSetFromOptions(transportSolver));
+          HostVector psi = toHost(nodal.psi);
+          HostVector size = toHost(nodal.size);
+          for (size_t k = 0; k < fields; ++k)
+          {
+            // n is transported as n - n_in, which enters with the value zero.
+            PetscScalar* values;
+            PetscCallAbort(PETSC_COMM_SELF, VecGetArrayWrite(previous, &values));
+            for (size_t i = 0; i < nodes; ++i)
+              values[i] = k < 6 ? psi(i + k * nodes) : size(i) - inletSize;
+            PetscCallAbort(PETSC_COMM_SELF, VecRestoreArrayWrite(previous, &values));
+            PetscCallAbort(PETSC_COMM_SELF, MatMult(B, previous, load));
+            PetscCallAbort(PETSC_COMM_SELF, VecCopy(previous, transported));
+            PetscCallAbort(PETSC_COMM_SELF, KSPSolve(transportSolver, load, transported));
+            KSPConvergedReason reason;
+            PetscInt its = 0;
+            PetscCallAbort(
+              PETSC_COMM_SELF, KSPGetConvergedReason(transportSolver, &reason));
+            PetscCallAbort(PETSC_COMM_SELF, KSPGetIterationNumber(transportSolver, &its));
+            if (reason < 0)
+            {
+              std::cerr << "The transport solver failed at step " << step << ", field "
+                        << k << ": " << KSPConvergedReasons[reason] << " after " << its
+                        << " iterations" << std::endl;
+              return EXIT_FAILURE;
+            }
+            transportIterations += its;
+            const PetscScalar* solution;
+            PetscCallAbort(PETSC_COMM_SELF, VecGetArrayRead(transported, &solution));
+            for (size_t i = 0; i < nodes; ++i)
+            {
+              if (k < 6)
+                psi(i + k * nodes) = solution[i];
+              else
+                size(i) = std::max<Real>(solution[i] + inletSize, 1);
+            }
+            PetscCallAbort(PETSC_COMM_SELF, VecRestoreArrayRead(transported, &solution));
+          }
+          toDevice(psi.data(), nodal.psi);
+          if (thixotropic)
+            toDevice(size.data(), nodal.size);
         }
-        PetscCallAbort(PETSC_COMM_SELF, KSPSetOperators(transportSolver, A, A));
-        HostVector psi = toHost(nodal.psi);
-        HostVector size = toHost(nodal.size);
-        for (size_t k = 0; k < fields; ++k)
+        const auto r2 = std::chrono::steady_clock::now();
+        if (elastic && second)
+          advanceStructure(nodal, model, thixotropic, dt / 2, P.ptt, true);
+        if (pass > 0)
         {
-          // n is transported as n - n_in, which enters with the value zero.
-          PetscScalar* values;
-          PetscCallAbort(PETSC_COMM_SELF, VecGetArrayWrite(previous, &values));
-          for (size_t i = 0; i < nodes; ++i)
-            values[i] = k < 6 ? psi(i + k * nodes) : size(i) - inletSize;
-          PetscCallAbort(PETSC_COMM_SELF, VecRestoreArrayWrite(previous, &values));
-          PetscCallAbort(PETSC_COMM_SELF, MatMult(B, previous, load));
-          PetscCallAbort(PETSC_COMM_SELF, VecCopy(previous, transported));
-          PetscCallAbort(PETSC_COMM_SELF, KSPSolve(transportSolver, load, transported));
-          KSPConvergedReason reason;
-          PetscInt its = 0;
-          PetscCallAbort(
-            PETSC_COMM_SELF, KSPGetConvergedReason(transportSolver, &reason));
-          PetscCallAbort(PETSC_COMM_SELF, KSPGetIterationNumber(transportSolver, &its));
-          if (reason < 0)
-          {
-            std::cerr << "The transport solver failed at step " << step << ", field " << k
-                      << ": " << KSPConvergedReasons[reason] << " after " << its
-                      << " iterations" << std::endl;
-            return EXIT_FAILURE;
-          }
-          transportIterations += its;
-          const PetscScalar* solution;
-          PetscCallAbort(PETSC_COMM_SELF, VecGetArrayRead(transported, &solution));
-          for (size_t i = 0; i < nodes; ++i)
-          {
-            if (k < 6)
-              psi(i + k * nodes) = solution[i];
-            else
-              size(i) = std::max<Real>(solution[i] + inletSize, 1);
-          }
-          PetscCallAbort(PETSC_COMM_SELF, VecRestoreArrayRead(transported, &solution));
+          // The explicit side of the both-sides diffusion from the last
+          // iterate: it cancels the implicit side as the iterations converge.
+          toDevice(uIterate.data(), nodal.velocity);
+          recoverGradient(nodal);
         }
-        toDevice(psi.data(), nodal.psi);
-        if (thixotropic)
-          toDevice(size.data(), nodal.size);
-      }
-      const auto r2 = std::chrono::steady_clock::now();
-      if (elastic && second)
-        advanceStructure(nodal, model, thixotropic, dt / 2, P.ptt, true);
-      if (second && (!elastic || P.extrapolateBothSides))
-      {
-        // The viscosity and stress of CY at t^{n+1}, from u*. The elastic
-        // fluids keep the gradient of u^n for the explicit side of the
-        // both-sides diffusion: from u* it is unstable (see header).
-        toDevice(uStar.data(), nodal.velocity);
-        recoverGradient(nodal);
-      }
-      else if (second)
-      {
-        toDevice(un.data(), nodal.velocity);
-        recoverGradient(nodal);
-      }
-      const Diagnostics diagnostics =
-        evaluateStress(nodal, model, fluid, P.mu, P.bothSides, P.stretchBothSides);
-      viscosity.setData(toHost(nodal.viscosity));
-      extra0.setData(toHost(nodal.extra0));
-      extra1.setData(toHost(nodal.extra1));
-      extra2.setData(toHost(nodal.extra2));
-      const auto r3 = std::chrono::steady_clock::now();
+        else if (second && (!elastic || P.extrapolateBothSides))
+        {
+          // The viscosity and stress of CY at t^{n+1}, from u*. The elastic
+          // fluids keep the gradient of u^n for the explicit side of the
+          // both-sides diffusion: from u* it is unstable (see header).
+          toDevice(uStar.data(), nodal.velocity);
+          recoverGradient(nodal);
+        }
+        else if (second)
+        {
+          toDevice(un.data(), nodal.velocity);
+          recoverGradient(nodal);
+        }
+        diagnostics =
+          evaluateStress(nodal, model, fluid, P.mu, P.bothSides, P.stretchBothSides);
+        viscosity.setData(toHost(nodal.viscosity));
+        extra0.setData(toHost(nodal.extra0));
+        extra1.setData(toHost(nodal.extra1));
+        extra2.setData(toHost(nodal.extra2));
+        const auto r3 = std::chrono::steady_clock::now();
 
-      // Step 5. tau by cell, from w = u*, the viscosity and the cell volume
-      // |det J|/6 of a tetrahedron.
-      const ::Rodin::Kokkos::Variational::View<std::decay_t<decltype(viscosity)>> eta(
-        viscosity);
-      const ::Rodin::Kokkos::Variational::View<std::decay_t<decltype(extra0)>> row0(
-        extra0);
-      const ::Rodin::Kokkos::Variational::View<std::decay_t<decltype(extra1)>> row1(
-        extra1);
-      const ::Rodin::Kokkos::Variational::View<std::decay_t<decltype(extra2)>> row2(
-        extra2);
-      RealFunction tau(KOKKOS_LAMBDA(const PointView& point)->Real {
-        const auto wp = w.getValue(point);
-        Real speed2 = 0;
-        for (Index i = 0; i < 3; ++i)
-          speed2 += wp(i) * wp(i);
-        const Real hk = ::Kokkos::cbrt(point.getDistortion() / 6);
-        const Real a = tauTime ? 2 / dt : Real(0);
-        const Real b2 = 4 * speed2 / (hk * hk);
-        const Real c = 4 * eta.getValue(point) / (rho * hk * hk);
-        return 1 / ::Kokkos::sqrt(a * a + b2 + c * c);
-      });
-      RealFunction pressureTau(KOKKOS_LAMBDA(const PointView& point)->Real {
-        const auto wp = w.getValue(point);
-        Real speed2 = 0;
-        for (Index i = 0; i < 3; ++i)
-          speed2 += wp(i) * wp(i);
-        const Real hk = ::Kokkos::cbrt(point.getDistortion() / 6);
-        const Real a = tauTime ? 2 / dt : Real(0);
-        const Real b2 = 4 * speed2 / (hk * hk);
-        const Real c = 4 * eta.getValue(point) / (rho * hk * hk);
-        return 1 / (rho * ::Kokkos::sqrt(a * a + b2 + c * c));
-      });
-      // (cross tau rho/dt - rho/2) u against w.grad v: the skew-symmetric
-      // convection and the time derivative of the residual, in one matrix.
-      RealFunction streamlineMass(KOKKOS_LAMBDA(const PointView& point)->Real {
-        const auto wp = w.getValue(point);
-        Real speed2 = 0;
-        for (Index i = 0; i < 3; ++i)
-          speed2 += wp(i) * wp(i);
-        const Real hk = ::Kokkos::cbrt(point.getDistortion() / 6);
-        const Real a = tauTime ? 2 / dt : Real(0);
-        const Real b2 = 4 * speed2 / (hk * hk);
-        const Real c = 4 * eta.getValue(point) / (rho * hk * hk);
-        return inertia * rho / (dtEff * ::Kokkos::sqrt(a * a + b2 + c * c)) - 0.5 * rho;
-      });
-      // div E, constant by cell.
-      VectorFunction force(
-        KOKKOS_LAMBDA(const PointView& point)->Real {
-          return row0.u.interpolateDivergence(point);
-        },
-        KOKKOS_LAMBDA(const PointView& point)->Real {
-          return row1.u.interpolateDivergence(point);
-        },
-        KOKKOS_LAMBDA(const PointView& point)->Real {
-          return row2.u.interpolateDivergence(point);
+        // Step 5. tau by cell, from w = u*, the viscosity and the cell volume
+        // |det J|/6 of a tetrahedron.
+        const ::Rodin::Kokkos::Variational::View<std::decay_t<decltype(viscosity)>> eta(
+          viscosity);
+        const ::Rodin::Kokkos::Variational::View<std::decay_t<decltype(extra0)>> row0(
+          extra0);
+        const ::Rodin::Kokkos::Variational::View<std::decay_t<decltype(extra1)>> row1(
+          extra1);
+        const ::Rodin::Kokkos::Variational::View<std::decay_t<decltype(extra2)>> row2(
+          extra2);
+        RealFunction tau(KOKKOS_LAMBDA(const PointView& point)->Real {
+          const auto wp = w.getValue(point);
+          Real speed2 = 0;
+          for (Index i = 0; i < 3; ++i)
+            speed2 += wp(i) * wp(i);
+          const Real hk = ::Kokkos::cbrt(point.getDistortion() / 6);
+          const Real a = tauTime ? 2 / dt : Real(0);
+          const Real b2 = 4 * speed2 / (hk * hk);
+          const Real c = 4 * eta.getValue(point) / (rho * hk * hk);
+          return 1 / ::Kokkos::sqrt(a * a + b2 + c * c);
         });
+        RealFunction pressureTau(KOKKOS_LAMBDA(const PointView& point)->Real {
+          const auto wp = w.getValue(point);
+          Real speed2 = 0;
+          for (Index i = 0; i < 3; ++i)
+            speed2 += wp(i) * wp(i);
+          const Real hk = ::Kokkos::cbrt(point.getDistortion() / 6);
+          const Real a = tauTime ? 2 / dt : Real(0);
+          const Real b2 = 4 * speed2 / (hk * hk);
+          const Real c = 4 * eta.getValue(point) / (rho * hk * hk);
+          return 1 / (rho * ::Kokkos::sqrt(a * a + b2 + c * c));
+        });
+        // (cross tau rho/dt - rho/2) u against w.grad v: the skew-symmetric
+        // convection and the time derivative of the residual, in one matrix.
+        RealFunction streamlineMass(KOKKOS_LAMBDA(const PointView& point)->Real {
+          const auto wp = w.getValue(point);
+          Real speed2 = 0;
+          for (Index i = 0; i < 3; ++i)
+            speed2 += wp(i) * wp(i);
+          const Real hk = ::Kokkos::cbrt(point.getDistortion() / 6);
+          const Real a = tauTime ? 2 / dt : Real(0);
+          const Real b2 = 4 * speed2 / (hk * hk);
+          const Real c = 4 * eta.getValue(point) / (rho * hk * hk);
+          return inertia * rho / (dtEff * ::Kokkos::sqrt(a * a + b2 + c * c)) - 0.5 * rho;
+        });
+        // div E, constant by cell.
+        VectorFunction force(
+          KOKKOS_LAMBDA(const PointView& point)->Real {
+            return row0.u.interpolateDivergence(point);
+          },
+          KOKKOS_LAMBDA(const PointView& point)->Real {
+            return row1.u.interpolateDivergence(point);
+          },
+          KOKKOS_LAMBDA(const PointView& point)->Real {
+            return row2.u.interpolateDivergence(point);
+          });
 
-      if (P.residual && !tauTime)
-      {
-        // Quasi-static subscales: residual without the time derivative.
-        flow = (rho / dtEff) * Integral(u, v) +
-          (0.5 * rho) * Integral(Dot(Mult(Jacobian(u), advecting), v)) +
-          Integral(Dot(Mult(streamlineMass, u), Mult(Jacobian(v), advecting))) +
-          Integral(Mult(viscosity, Jacobian(u)), Jacobian(v)) - Integral(p, Div(v)) +
-          Integral(Div(u), q) +
-          rho *
-            Integral(Dot(
-              Mult(tau, Mult(Jacobian(u), advecting)), Mult(Jacobian(v), advecting))) +
-          Integral(Dot(Mult(pressureTau, Grad(p)), Grad(q))) +
-          Integral(Dot(Mult(tau, Grad(p)), Mult(Jacobian(v), advecting))) +
-          Integral(Dot(Mult(tau, Mult(Jacobian(u), advecting)), Grad(q))) +
-          pIn * BoundaryIntegral(normal, v).over(veins[0], veins[1], veins[2], veins[3]) +
-          pOut * BoundaryIntegral(normal, v).over(mitral) +
-          P.inletImpedance *
-            BoundaryIntegral(u, v).over(veins[0], veins[1], veins[2], veins[3]) +
-          mitralImpedance *
-            BoundaryIntegral(Dot(normal, u), Dot(normal, v)).over(mitral) -
-          (rho / dtEff) * Integral(past, v) - Integral(force, v) -
-          Integral(Dot(Mult(tau, force), Mult(Jacobian(v), advecting))) -
-          Integral(Dot(Mult(pressureTau, force), Grad(q))) +
-          DirichletBC(u, Zero(3)).on(wall);
-      }
-      else if (P.residual)
-      {
-        flow = (rho / dtEff) * Integral(u, v) +
-          (0.5 * rho) * Integral(Dot(Mult(Jacobian(u), advecting), v)) +
-          Integral(Dot(Mult(streamlineMass, u), Mult(Jacobian(v), advecting))) +
-          Integral(Mult(viscosity, Jacobian(u)), Jacobian(v)) - Integral(p, Div(v)) +
-          Integral(Div(u), q) +
-          rho *
-            Integral(Dot(
-              Mult(tau, Mult(Jacobian(u), advecting)), Mult(Jacobian(v), advecting))) +
-          Integral(Dot(Mult(pressureTau, Grad(p)), Grad(q))) +
-          Integral(Dot(Mult(tau, Grad(p)), Mult(Jacobian(v), advecting))) +
-          Integral(Dot(Mult(tau, Mult(Jacobian(u), advecting)), Grad(q))) +
-          (1 / dtEff) * Integral(Dot(Mult(tau, u), Grad(q))) +
-          pIn * BoundaryIntegral(normal, v).over(veins[0], veins[1], veins[2], veins[3]) +
-          pOut * BoundaryIntegral(normal, v).over(mitral) +
-          P.inletImpedance *
-            BoundaryIntegral(u, v).over(veins[0], veins[1], veins[2], veins[3]) +
-          mitralImpedance *
-            BoundaryIntegral(Dot(normal, u), Dot(normal, v)).over(mitral) -
-          (rho / dtEff) * Integral(past, v) - Integral(force, v) -
-          (rho / dtEff) * Integral(Dot(Mult(tau, past), Mult(Jacobian(v), advecting))) -
-          Integral(Dot(Mult(tau, force), Mult(Jacobian(v), advecting))) -
-          (1 / dtEff) * Integral(Dot(Mult(tau, past), Grad(q))) -
-          Integral(Dot(Mult(pressureTau, force), Grad(q))) +
-          DirichletBC(u, Zero(3)).on(wall);
-      }
-      else
-      {
-        flow = (rho / dtEff) * Integral(u, v) +
-          (0.5 * rho) * Integral(Dot(Mult(Jacobian(u), advecting), v)) +
-          Integral(Dot(Mult(streamlineMass, u), Mult(Jacobian(v), advecting))) +
-          Integral(Mult(viscosity, Jacobian(u)), Jacobian(v)) - Integral(p, Div(v)) +
-          Integral(Div(u), q) +
-          rho *
-            Integral(Dot(
-              Mult(tau, Mult(Jacobian(u), advecting)), Mult(Jacobian(v), advecting))) +
-          Integral(Dot(Mult(pressureTau, Grad(p)), Grad(q))) +
-          pIn * BoundaryIntegral(normal, v).over(veins[0], veins[1], veins[2], veins[3]) +
-          pOut * BoundaryIntegral(normal, v).over(mitral) +
-          P.inletImpedance *
-            BoundaryIntegral(u, v).over(veins[0], veins[1], veins[2], veins[3]) +
-          mitralImpedance *
-            BoundaryIntegral(Dot(normal, u), Dot(normal, v)).over(mitral) -
-          (rho / dtEff) * Integral(past, v) - Integral(force, v) +
-          DirichletBC(u, Zero(3)).on(wall);
-      }
-
-      const auto t0 = std::chrono::steady_clock::now();
-      flow.assemble();
-      if (!fieldSplits)
-      {
-        // Named splits u and p for -pc_type fieldsplit; harmless otherwise.
-        flow.setFieldSplits();
-        fieldSplits = true;
-      }
-      const auto t1 = std::chrono::steady_clock::now();
-      flow.solve(solver);
-      PetscInt iterations = 0;
-      KSPConvergedReason reason;
-      PetscCallAbort(PETSC_COMM_SELF, KSPGetConvergedReason(solver.getHandle(), &reason));
-      if (reason < 0)
-      {
-        // BiCGStab(l) can break down: one more attempt, GMRES from a zero guess.
-        char type[64] = "";
-        PetscBool given = PETSC_FALSE;
-        PetscCallAbort(PETSC_COMM_SELF,
-          PetscOptionsGetString(
-            PETSC_NULLPTR, PETSC_NULLPTR, "-ksp_type", type, sizeof(type), &given));
-        std::cerr << "Step " << step << ": " << KSPConvergedReasons[reason]
-                  << ", solving again with GMRES" << std::endl;
-        PetscCallAbort(
-          PETSC_COMM_SELF, PetscOptionsSetValue(PETSC_NULLPTR, "-ksp_type", KSPGMRES));
-        PetscBool restart = PETSC_FALSE;
-        PetscCallAbort(PETSC_COMM_SELF,
-          PetscOptionsHasName(
-            PETSC_NULLPTR, PETSC_NULLPTR, "-ksp_gmres_restart", &restart));
-        if (!restart)
+        if (P.residual && !tauTime)
         {
-          PetscCallAbort(PETSC_COMM_SELF,
-            PetscOptionsSetValue(PETSC_NULLPTR, "-ksp_gmres_restart", "100"));
+          // Quasi-static subscales: residual without the time derivative.
+          flow = (rho / dtEff) * Integral(u, v) +
+            (0.5 * rho) * Integral(Dot(Mult(Jacobian(u), advecting), v)) +
+            Integral(Dot(Mult(streamlineMass, u), Mult(Jacobian(v), advecting))) +
+            Integral(Mult(viscosity, Jacobian(u)), Jacobian(v)) - Integral(p, Div(v)) +
+            Integral(Div(u), q) +
+            rho *
+              Integral(Dot(
+                Mult(tau, Mult(Jacobian(u), advecting)), Mult(Jacobian(v), advecting))) +
+            Integral(Dot(Mult(pressureTau, Grad(p)), Grad(q))) +
+            Integral(Dot(Mult(tau, Grad(p)), Mult(Jacobian(v), advecting))) +
+            Integral(Dot(Mult(tau, Mult(Jacobian(u), advecting)), Grad(q))) +
+            pIn *
+              BoundaryIntegral(normal, v).over(veins[0], veins[1], veins[2], veins[3]) +
+            pOut * BoundaryIntegral(normal, v).over(mitral) +
+            P.inletImpedance *
+              BoundaryIntegral(u, v).over(veins[0], veins[1], veins[2], veins[3]) +
+            mitralImpedance *
+              BoundaryIntegral(Dot(normal, u), Dot(normal, v)).over(mitral) -
+            (rho / dtEff) * Integral(past, v) - Integral(force, v) -
+            Integral(Dot(Mult(tau, force), Mult(Jacobian(v), advecting))) -
+            Integral(Dot(Mult(pressureTau, force), Grad(q))) +
+            DirichletBC(u, Zero(3)).on(wall);
         }
-        PetscCallAbort(PETSC_COMM_SELF, VecSet(flow.getLinearSystem().getSolution(), 0));
-        solver.setType(KSPGMRES);
-        flow.solve(solver);
-        solver.setType(KSPBCGSL);
-        if (given)
+        else if (P.residual)
         {
-          PetscCallAbort(
-            PETSC_COMM_SELF, PetscOptionsSetValue(PETSC_NULLPTR, "-ksp_type", type));
+          flow = (rho / dtEff) * Integral(u, v) +
+            (0.5 * rho) * Integral(Dot(Mult(Jacobian(u), advecting), v)) +
+            Integral(Dot(Mult(streamlineMass, u), Mult(Jacobian(v), advecting))) +
+            Integral(Mult(viscosity, Jacobian(u)), Jacobian(v)) - Integral(p, Div(v)) +
+            Integral(Div(u), q) +
+            rho *
+              Integral(Dot(
+                Mult(tau, Mult(Jacobian(u), advecting)), Mult(Jacobian(v), advecting))) +
+            Integral(Dot(Mult(pressureTau, Grad(p)), Grad(q))) +
+            Integral(Dot(Mult(tau, Grad(p)), Mult(Jacobian(v), advecting))) +
+            Integral(Dot(Mult(tau, Mult(Jacobian(u), advecting)), Grad(q))) +
+            (1 / dtEff) * Integral(Dot(Mult(tau, u), Grad(q))) +
+            pIn *
+              BoundaryIntegral(normal, v).over(veins[0], veins[1], veins[2], veins[3]) +
+            pOut * BoundaryIntegral(normal, v).over(mitral) +
+            P.inletImpedance *
+              BoundaryIntegral(u, v).over(veins[0], veins[1], veins[2], veins[3]) +
+            mitralImpedance *
+              BoundaryIntegral(Dot(normal, u), Dot(normal, v)).over(mitral) -
+            (rho / dtEff) * Integral(past, v) - Integral(force, v) -
+            (rho / dtEff) * Integral(Dot(Mult(tau, past), Mult(Jacobian(v), advecting))) -
+            Integral(Dot(Mult(tau, force), Mult(Jacobian(v), advecting))) -
+            (1 / dtEff) * Integral(Dot(Mult(tau, past), Grad(q))) -
+            Integral(Dot(Mult(pressureTau, force), Grad(q))) +
+            DirichletBC(u, Zero(3)).on(wall);
         }
         else
         {
-          PetscCallAbort(
-            PETSC_COMM_SELF, PetscOptionsClearValue(PETSC_NULLPTR, "-ksp_type"));
+          flow = (rho / dtEff) * Integral(u, v) +
+            (0.5 * rho) * Integral(Dot(Mult(Jacobian(u), advecting), v)) +
+            Integral(Dot(Mult(streamlineMass, u), Mult(Jacobian(v), advecting))) +
+            Integral(Mult(viscosity, Jacobian(u)), Jacobian(v)) - Integral(p, Div(v)) +
+            Integral(Div(u), q) +
+            rho *
+              Integral(Dot(
+                Mult(tau, Mult(Jacobian(u), advecting)), Mult(Jacobian(v), advecting))) +
+            Integral(Dot(Mult(pressureTau, Grad(p)), Grad(q))) +
+            pIn *
+              BoundaryIntegral(normal, v).over(veins[0], veins[1], veins[2], veins[3]) +
+            pOut * BoundaryIntegral(normal, v).over(mitral) +
+            P.inletImpedance *
+              BoundaryIntegral(u, v).over(veins[0], veins[1], veins[2], veins[3]) +
+            mitralImpedance *
+              BoundaryIntegral(Dot(normal, u), Dot(normal, v)).over(mitral) -
+            (rho / dtEff) * Integral(past, v) - Integral(force, v) +
+            DirichletBC(u, Zero(3)).on(wall);
         }
+
+        const auto t0 = std::chrono::steady_clock::now();
+        flow.assemble();
+        if (!fieldSplits)
+        {
+          // Named splits u and p for -pc_type fieldsplit; harmless otherwise.
+          flow.setFieldSplits();
+          fieldSplits = true;
+        }
+        const auto t1 = std::chrono::steady_clock::now();
+        flow.solve(solver);
+        PetscInt its = 0;
+        KSPConvergedReason reason;
         PetscCallAbort(
           PETSC_COMM_SELF, KSPGetConvergedReason(solver.getHandle(), &reason));
-        ++fallbacks;
+        if (reason < 0)
+        {
+          // BiCGStab(l) can break down: one more attempt, GMRES from a zero guess.
+          char type[64] = "";
+          PetscBool given = PETSC_FALSE;
+          PetscCallAbort(PETSC_COMM_SELF,
+            PetscOptionsGetString(
+              PETSC_NULLPTR, PETSC_NULLPTR, "-ksp_type", type, sizeof(type), &given));
+          std::cerr << "Step " << step << ": " << KSPConvergedReasons[reason]
+                    << ", solving again with GMRES" << std::endl;
+          PetscCallAbort(
+            PETSC_COMM_SELF, PetscOptionsSetValue(PETSC_NULLPTR, "-ksp_type", KSPGMRES));
+          PetscBool restart = PETSC_FALSE;
+          PetscCallAbort(PETSC_COMM_SELF,
+            PetscOptionsHasName(
+              PETSC_NULLPTR, PETSC_NULLPTR, "-ksp_gmres_restart", &restart));
+          if (!restart)
+          {
+            PetscCallAbort(PETSC_COMM_SELF,
+              PetscOptionsSetValue(PETSC_NULLPTR, "-ksp_gmres_restart", "100"));
+          }
+          PetscCallAbort(
+            PETSC_COMM_SELF, VecSet(flow.getLinearSystem().getSolution(), 0));
+          solver.setType(KSPGMRES);
+          flow.solve(solver);
+          solver.setType(KSPBCGSL);
+          if (given)
+          {
+            PetscCallAbort(
+              PETSC_COMM_SELF, PetscOptionsSetValue(PETSC_NULLPTR, "-ksp_type", type));
+          }
+          else
+          {
+            PetscCallAbort(
+              PETSC_COMM_SELF, PetscOptionsClearValue(PETSC_NULLPTR, "-ksp_type"));
+          }
+          PetscCallAbort(
+            PETSC_COMM_SELF, KSPGetConvergedReason(solver.getHandle(), &reason));
+          ++fallbacks;
+        }
+        const auto t2 = std::chrono::steady_clock::now();
+        PetscCallAbort(PETSC_COMM_SELF, KSPGetIterationNumber(solver.getHandle(), &its));
+        iterations += its;
+        if (reason < 0)
+        {
+          std::cerr << "The linear solver failed at step " << step << ": "
+                    << KSPConvergedReasons[reason] << " after " << its << " iterations"
+                    << std::endl;
+          return EXIT_FAILURE;
+        }
+        velocity.setData(toHost(u.getSolution().getData()));
+        pressure.setData(toHost(p.getSolution().getData()));
+        rheologyTime += (r1 - r0) + (r3 - r2);
+        transportTime += r2 - r1;
+        assembly += t1 - t0;
+        solve += t2 - t1;
+        rheologySeconds += std::chrono::duration<double>((r1 - r0) + (r3 - r2)).count();
+        transportSeconds += std::chrono::duration<double>(r2 - r1).count();
+        assemblySeconds += std::chrono::duration<double>(t1 - t0).count();
+        solveSeconds += std::chrono::duration<double>(t2 - t1).count();
+        if (outer > 1)
+          uIterate = velocity.getData().toHost();
       }
-      const auto t2 = std::chrono::steady_clock::now();
-      PetscCallAbort(
-        PETSC_COMM_SELF, KSPGetIterationNumber(solver.getHandle(), &iterations));
-      if (reason < 0)
-      {
-        std::cerr << "The linear solver failed at step " << step << ": "
-                  << KSPConvergedReasons[reason] << " after " << iterations
-                  << " iterations" << std::endl;
-        return EXIT_FAILURE;
-      }
-      velocity.setData(toHost(u.getSolution().getData()));
-      pressure.setData(toHost(p.getSolution().getData()));
-      rheologyTime += (r1 - r0) + (r3 - r2);
-      transportTime += r2 - r1;
-      assembly += t1 - t0;
-      solve += t2 - t1;
 
       // Diagnostics on the host copies of the solution. n is outward: the
       // venous flux is negated to read as the inflow.
@@ -2055,19 +2134,15 @@ int main(int argc, char** argv)
       timeDissipation *= rho / ((second ? 4 : 2) * dt);
       previousVelocity = un;
       const size_t cycle = (step - 1) / P.steps + 1;
-      const double rheologySeconds =
-        std::chrono::duration<double>((r1 - r0) + (r3 - r2)).count();
-      const double transportSeconds = std::chrono::duration<double>(r2 - r1).count();
+
       csv << time << ',' << cycle << ',' << pIn << ',' << pOut << ','
           << (valveOpen ? 1 : 0) << ',' << qIn << ',' << qOut << ',' << pVein << ','
           << planePressure << ',' << speed << ',' << kinetic << ',' << timeDissipation
           << ',' << diagnostics.solventDissipation << ',' << diagnostics.polymerPower
           << ',' << diagnostics.elasticEnergy << ',' << diagnostics.maxWeissenberg << ','
           << diagnostics.maxTrace << ',' << diagnostics.meanSize << ',' << rheologySeconds
-          << ',' << transportSeconds << ','
-          << std::chrono::duration<double>(t1 - t0).count() << ','
-          << std::chrono::duration<double>(t2 - t1).count() << ',' << iterations << ','
-          << transportIterations << '\n';
+          << ',' << transportSeconds << ',' << assemblySeconds << ',' << solveSeconds
+          << ',' << iterations << ',' << transportIterations << '\n';
       if (step % P.outputEvery == 0 || step == total)
       {
         shearRate.setData(toHost(nodal.shearRate));
@@ -2095,8 +2170,7 @@ int main(int argc, char** argv)
         }
         std::cout << "  rheology " << rheologySeconds << " s  transport "
                   << transportSeconds << " s (its=" << transportIterations
-                  << ")  assembly " << std::chrono::duration<double>(t1 - t0).count()
-                  << " s  solve " << std::chrono::duration<double>(t2 - t1).count()
+                  << ")  assembly " << assemblySeconds << " s  solve " << solveSeconds
                   << " s  its=" << iterations << std::endl;
       }
     }
