@@ -1,0 +1,11 @@
+--- a/config/BuildSystem/config/packages/SYCL.py
++++ b/config/BuildSystem/config/packages/SYCL.py
+@@ -81,7 +81,7 @@
+         if self.syclArch == 'x86_64':
+           compFlags = ' -fsycl-targets=spir64_x86_64 '
+           self.targets = 'spir64_x86_64'
+-        elif self.syclArch in ['gen','gen9','gen11','gen12lp','dg1','xehp','pvc']:
++        elif self.syclArch in ['gen','gen9','gen11','gen12lp','dg1','xehp','pvc','bmg']:
+           # https://en.wikipedia.org/wiki/List_of_Intel_graphics_processing_units
+           if self.syclArch == 'gen':
+             devArg = 'gen9-' # compile for all targets of gen9 and up

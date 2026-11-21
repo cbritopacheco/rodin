@@ -1015,6 +1015,16 @@ namespace Rodin::Variational
       }
 
       /**
+       * @brief Borrows the owned integrator for assembly preparation.
+       * @returns Mutable reference to the owned integrator.
+       */
+      RHSType& getRHS()
+      {
+        assert(m_rhs);
+        return *m_rhs;
+      }
+
+      /**
        * @brief Gets the right-hand side operand.
        * @returns The right-hand side operand.
        */
@@ -1153,6 +1163,16 @@ namespace Rodin::Variational
       const LHSType& getLHS() const
       {
         return m_lhs;
+      }
+
+      /**
+       * @brief Borrows the owned integrator for assembly preparation.
+       * @returns Mutable reference to the owned integrator.
+       */
+      RHSType& getRHS()
+      {
+        assert(m_rhs);
+        return *m_rhs;
       }
 
       /**

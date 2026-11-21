@@ -449,6 +449,57 @@ namespace Rodin::Tests::Unit::Solver
     EXPECT_EQ(system.getSolution()(2), 7.0);
   }
 
+  /// @brief A matrix with another pattern is analyzed again.
+  TEST(Rodin_Solver_MUMPS, FactorizationAnalyzesNewPattern)
+  {
+    Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Segment, {2});
+    P1 vh(mesh);
+    TrialFunction u(vh);
+    TestFunction v(vh);
+    Problem problem(u, v);
+
+    MUMPSSolver solver(problem);
+    Math::Vector<Real> expected(3);
+    expected << 1.0, 2.0, 3.0;
+    LinearSystemType system = makeUnsymmetricSystem();
+    solver.factorize(system);
+    ASSERT_TRUE(solver.success());
+    solver.solve(system);
+    expectSolution(system, expected);
+
+    // As many entries as the analyzed matrix, but (2, 0) instead of (1, 0).
+    LinearSystemType moved;
+    moved.getOperator().resize(3, 3);
+    moved.getOperator().insert(0, 0) = 4.0;
+    moved.getOperator().insert(2, 0) = 2.0;
+    moved.getOperator().insert(0, 1) = 1.0;
+    moved.getOperator().insert(1, 1) = 5.0;
+    moved.getOperator().insert(2, 1) = 3.0;
+    moved.getOperator().insert(1, 2) = 1.0;
+    moved.getOperator().insert(2, 2) = 6.0;
+    moved.getVector().resize(3);
+    moved.getVector() << 6.0, 13.0, 26.0;
+    solver.factorize(moved);
+    ASSERT_TRUE(solver.success());
+    expectResourceState(solver, true, true, true, Factorization::Numeric);
+    solver.solve(moved);
+    ASSERT_TRUE(solver.success());
+    expectSolution(moved, expected);
+
+    // Fewer entries, then the first pattern again.
+    LinearSystemType fewer = makeSymmetricSystem();
+    solver.factorize(fewer);
+    ASSERT_TRUE(solver.success());
+    solver.solve(fewer);
+    expectSolution(fewer, expected);
+    system.getSolution().setZero();
+    solver.factorize(system);
+    ASSERT_TRUE(solver.success());
+    solver.solve(system);
+    expectSolution(system, expected);
+  }
+
   TEST(Rodin_Solver_MUMPS, ReportsUnusableRequests)
   {
     Mesh mesh;

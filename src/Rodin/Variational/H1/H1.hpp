@@ -816,7 +816,7 @@ namespace Rodin::Variational
 
           assert(
             false && "Could not match triangle local edge to incident segment entity.");
-          return -1;
+          return static_cast<Index>(-1);
         };
 
         // --- Edge 0: canonical (0->1), "bottom edge" -----------------------
@@ -955,7 +955,7 @@ namespace Rodin::Variational
           }
 
           assert(false && "Could not match quad local edge to incident segment.");
-          return -1;
+          return static_cast<Index>(-1);
         };
 
         // Map all four edges, correcting orientation via a small local buffer.
@@ -1077,7 +1077,7 @@ namespace Rodin::Variational
           }
 
           assert(false && "Could not match tetra face to incident triangle entity.");
-          return -1;
+          return static_cast<Index>(-1);
         };
 
         // Build a face DOF array in *canonical* FeketeTriangle<K> ordering
@@ -1403,7 +1403,7 @@ namespace Rodin::Variational
 
           assert(false &&
             "Could not match pyramid triangular face to incident triangle entity.");
-          return -1;
+          return static_cast<Index>(-1);
         };
 
         auto buildCanonicalTriFace = [&](Index fIdx, const std::array<int, 3>& canonToTri,
@@ -1476,7 +1476,7 @@ namespace Rodin::Variational
           assert(false &&
             "Could not match pyramid quadrilateral base to incident quadrilateral "
             "entity.");
-          return -1;
+          return static_cast<Index>(-1);
         };
 
         auto vertCornerCoords = [](int vidx) -> std::pair<size_t, size_t> {
@@ -1719,7 +1719,7 @@ namespace Rodin::Variational
 
           assert(false &&
             "Could not match wedge triangular face to incident triangle entity.");
-          return -1;
+          return static_cast<Index>(-1);
         };
 
         auto buildCanonicalTriFace = [&](Index fIdx, const std::array<int, 3>& canonToTri,
@@ -1794,7 +1794,7 @@ namespace Rodin::Variational
 
           assert(false &&
             "Could not match wedge quadrilateral face to incident quadrilateral entity.");
-          return -1;
+          return static_cast<Index>(-1);
         };
 
         auto vertCornerCoords = [](int vidx) -> std::pair<size_t, size_t> {

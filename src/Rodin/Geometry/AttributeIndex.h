@@ -633,7 +633,7 @@ namespace Rodin::Geometry
 
     private:
       /// Storage for each dimension (size fixed after initialize()).
-      mutable std::vector<Dimension> m_dimensions;
+      std::vector<Dimension> m_dimensions;
   };
 }
 #endif

@@ -25,10 +25,15 @@ jobs:
       OPENBLAS_NUM_THREADS: 1
       RODIN_PROFILE_STABILITY: ${{ startsWith(matrix.suite, 'pressure_') && '1' || '0' }}
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
       with:
-        submodules: recursive
+        submodules: false
         lfs: false
+    - name: Start resource monitor
+      continue-on-error: true
+      run: python3 dev/ci_resource_monitor.py start
+    - name: Initialize pinned submodules
+      run: python3 dev/ci_submodules.py
     - uses: ./.github/actions/test-build
       with:
         job: ConvergenceBaseline
@@ -61,4 +66,8 @@ jobs:
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         definition: '{"job":"${{ github.job }}","matrix":${{ toJSON(matrix) }}}'
+    - name: Summarize resource usage
+      if: always()
+      continue-on-error: true
+      run: python3 dev/ci_resource_monitor.py finish
     name: ${{ matrix.path }} (MT=${{ matrix.multithreaded }}, Suite=${{ matrix.suite }})

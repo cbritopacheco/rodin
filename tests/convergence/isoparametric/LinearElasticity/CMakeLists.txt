@@ -108,6 +108,14 @@ if (RODIN_USE_PETSC AND NOT RODIN_CONVERGENCE_PETSC_COMPLEX)
         RodinConvergenceIsoparametricPETScLinearElasticityBoundary_MixedTractionP3Rates_${geometry}
         PROPERTIES TIMEOUT 3600)
     endforeach()
+    if(RODIN_MULTITHREADED)
+      # The threaded local pyramid exhausted one hour at its final n=9
+      # refinement on both the base revision and PR CI. Its local job retains
+      # all three refinements and has a separate budget from the MPI studies.
+      set_tests_properties(
+        RodinConvergenceIsoparametricPETScLinearElasticityBoundary_MixedTractionP3Rates_Pyramid
+        PROPERTIES TIMEOUT 7200)
+    endif()
   endif()
   add_executable(RodinConvergenceIsoparametricPETScLinearElasticity LinearElasticity.cpp)
   target_compile_definitions(RodinConvergenceIsoparametricPETScLinearElasticity

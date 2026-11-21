@@ -295,48 +295,47 @@ namespace Rodin::Variational
         {
           case Geometry::Polytope::Type::Point:
           {
-            static constexpr ElementType sElement(Geometry::Polytope::Type::Point);
+            static const ElementType sElement(Geometry::Polytope::Type::Point);
             return sElement;
           }
           case Geometry::Polytope::Type::Segment:
           {
-            static constexpr ElementType sElement(Geometry::Polytope::Type::Segment);
+            static const ElementType sElement(Geometry::Polytope::Type::Segment);
             return sElement;
           }
           case Geometry::Polytope::Type::Triangle:
           {
-            static constexpr ElementType sElement(Geometry::Polytope::Type::Triangle);
+            static const ElementType sElement(Geometry::Polytope::Type::Triangle);
             return sElement;
           }
           case Geometry::Polytope::Type::Quadrilateral:
           {
-            static constexpr ElementType sElement(
-              Geometry::Polytope::Type::Quadrilateral);
+            static const ElementType sElement(Geometry::Polytope::Type::Quadrilateral);
             return sElement;
           }
           case Geometry::Polytope::Type::Tetrahedron:
           {
-            static constexpr ElementType sElement(Geometry::Polytope::Type::Tetrahedron);
+            static const ElementType sElement(Geometry::Polytope::Type::Tetrahedron);
             return sElement;
           }
           case Geometry::Polytope::Type::Pyramid:
           {
-            static constexpr ElementType sElement(Geometry::Polytope::Type::Pyramid);
+            static const ElementType sElement(Geometry::Polytope::Type::Pyramid);
             return sElement;
           }
           case Geometry::Polytope::Type::Wedge:
           {
-            static constexpr ElementType sElement(Geometry::Polytope::Type::Wedge);
+            static const ElementType sElement(Geometry::Polytope::Type::Wedge);
             return sElement;
           }
           case Geometry::Polytope::Type::Hexahedron:
           {
-            static constexpr ElementType sElement(Geometry::Polytope::Type::Hexahedron);
+            static const ElementType sElement(Geometry::Polytope::Type::Hexahedron);
             return sElement;
           }
         }
         assert(false);
-        static constexpr ElementType sNull;
+        static const ElementType sNull;
         return sNull;
       }
 

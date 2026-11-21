@@ -81,6 +81,12 @@ if(TARGET SWIFT_ReconstructionP1)
       endif()
       set(output_dir "${CMAKE_CURRENT_BINARY_DIR}/swift-output-p${degree}-d${dimension}")
       file(MAKE_DIRECTORY "${output_dir}")
+      # The fixture producer belongs to this test group even though its source
+      # is also a runnable example. Include it in build and runtime inventories.
+      set_property(TARGET SWIFT_ReconstructionP${degree} PROPERTY
+        RODIN_TEST_OWNER "tests/unit/Rodin/Adaptation")
+      set_property(TARGET SWIFT_ReconstructionP${degree} PROPERTY
+        RODIN_TEST_PROFILES unit)
       set(fixture "SWIFT.Output.P${degree}.D${dimension}")
       add_test(NAME ${fixture}.Generate
         COMMAND $<TARGET_FILE:SWIFT_ReconstructionP${degree}>

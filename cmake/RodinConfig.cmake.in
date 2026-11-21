@@ -1,63 +1,64 @@
 @PACKAGE_INIT@
 
-# Use modern Boost finding mechanism (CMake 3.30+)
-if(POLICY CMP0167)
-  cmake_policy(SET CMP0167 NEW)
-endif()
-
-include(CMakeFindDependencyMacro)
-
-set(_RODIN_CONFIG_MODULE_PATH_SAVED "${CMAKE_MODULE_PATH}")
-list(PREPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}")
-
-# Eigen3 - We originally developed with 3.4, but newer versions (e.g., 5.x) are compatible
-# Note: Not specifying version to allow flexibility with system installations
-find_dependency(Boost 1.74 REQUIRED COMPONENTS filesystem serialization)
-find_dependency(HDF5 REQUIRED COMPONENTS C)
-find_dependency(Threads REQUIRED)
-find_dependency(Eigen3 REQUIRED)
-
-# Find optional dependencies if they were used during build
-if(@RODIN_MULTITHREADED@)
-  find_dependency(Threads REQUIRED)
-endif()
-
-if(@RODIN_USE_OPENMP@)
-  find_dependency(OpenMP REQUIRED)
-endif()
-
-if(@RODIN_USE_MPI@)
-  find_dependency(Boost 1.74 REQUIRED COMPONENTS mpi)
-endif()
-
-if(@RODIN_USE_PETSC@)
-  find_dependency(PETSc REQUIRED)
-endif()
-
-if(@RODIN_USE_MUMPS@)
-  find_dependency(MUMPS REQUIRED)
-endif()
-
-set(_RODIN_SUITESPARSE_COMPONENTS)
-if(@RODIN_USE_UMFPACK@)
-  list(APPEND _RODIN_SUITESPARSE_COMPONENTS UMFPACK)
-endif()
-if(@RODIN_USE_PARU@)
-  list(APPEND _RODIN_SUITESPARSE_COMPONENTS ParU)
-endif()
-if(@RODIN_USE_SPQR@)
-  list(APPEND _RODIN_SUITESPARSE_COMPONENTS SPQR)
-endif()
-if(@RODIN_USE_CHOLMOD@)
-  list(APPEND _RODIN_SUITESPARSE_COMPONENTS CHOLMOD)
-endif()
-if(_RODIN_SUITESPARSE_COMPONENTS)
-  find_dependency(SuiteSparse REQUIRED
-    COMPONENTS ${_RODIN_SUITESPARSE_COMPONENTS})
-endif()
-unset(_RODIN_SUITESPARSE_COMPONENTS)
-
-set(CMAKE_MODULE_PATH "${_RODIN_CONFIG_MODULE_PATH_SAVED}")
-unset(_RODIN_CONFIG_MODULE_PATH_SAVED)
-
+# Import Rodin targets first so component dependencies follow the installed
+# target graph rather than a second, manually maintained module graph.
 include("${CMAKE_CURRENT_LIST_DIR}/RodinTargets.cmake")
+
+# A function scopes dependency variables and CMAKE_MODULE_PATH. The included
+# dependency file may return early through find_dependency; this function still
+# propagates its result and leaves the consumer's search paths unchanged.
+function(_rodin_load_component _RODIN_COMPONENT)
+  set(_RODIN_TARGETS)
+  set(_RODIN_LINKS)
+  set(_RODIN_PENDING "Rodin::${_RODIN_COMPONENT}")
+  while(_RODIN_PENDING)
+    list(POP_FRONT _RODIN_PENDING _target)
+    if(_target IN_LIST _RODIN_TARGETS)
+      continue()
+    endif()
+    list(APPEND _RODIN_TARGETS "${_target}")
+    get_target_property(_links "${_target}" INTERFACE_LINK_LIBRARIES)
+    list(APPEND _RODIN_LINKS ${_links})
+    # Imported link interfaces can wrap dependencies in LINK_ONLY and other
+    # generator expressions. Follow only Rodin targets; external packages
+    # are discovered by the dependency file below.
+    string(REGEX MATCHALL "Rodin::[A-Za-z0-9_:]+" _dependencies "${_links}")
+    list(APPEND _RODIN_PENDING ${_dependencies})
+  endwhile()
+  set(Rodin_FOUND TRUE)
+  set(Rodin_FIND_REQUIRED FALSE)
+  include("${CMAKE_CURRENT_LIST_DIR}/RodinDependencies.cmake")
+  set("Rodin_${_RODIN_COMPONENT}_FOUND" "${Rodin_FOUND}" PARENT_SCOPE)
+  if(NOT Rodin_FOUND)
+    set(Rodin_NOT_FOUND_MESSAGE "${Rodin_NOT_FOUND_MESSAGE}" PARENT_SCOPE)
+  endif()
+endfunction()
+
+set(Rodin_FOUND TRUE)
+unset(Rodin_NOT_FOUND_MESSAGE)
+if(NOT Rodin_FIND_COMPONENTS)
+  # Keep the legacy dependency variables visible to existing consumers.
+  set(_RODIN_COMPONENT "")
+  set(_RODIN_SAVED_MODULE_PATH "${CMAKE_MODULE_PATH}")
+  include("${CMAKE_CURRENT_LIST_DIR}/RodinDependencies.cmake")
+  set(CMAKE_MODULE_PATH "${_RODIN_SAVED_MODULE_PATH}")
+  unset(_RODIN_SAVED_MODULE_PATH)
+else()
+  foreach(_component IN LISTS Rodin_FIND_COMPONENTS)
+    if(TARGET "Rodin::${_component}")
+      _rodin_load_component("${_component}")
+    else()
+      set("Rodin_${_component}_FOUND" FALSE)
+      if(Rodin_FIND_REQUIRED_${_component})
+        set(Rodin_NOT_FOUND_MESSAGE "Rodin component '${_component}' is not installed.")
+      endif()
+    endif()
+    if(NOT Rodin_${_component}_FOUND AND Rodin_FIND_REQUIRED_${_component})
+      set(Rodin_FOUND FALSE)
+      return()
+    endif()
+  endforeach()
+endif()
+if(Rodin_FOUND)
+  unset(Rodin_NOT_FOUND_MESSAGE)
+endif()

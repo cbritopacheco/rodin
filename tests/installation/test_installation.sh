@@ -15,6 +15,7 @@ INSTALL_DIR="${BUILD_DIR}/install-test"
 TEST_PROJECT_DIR="${BUILD_DIR}/test-installation-project"
 RODIN_USE_MPI="${RODIN_USE_MPI:-OFF}"
 RODIN_USE_PETSC="${RODIN_USE_PETSC:-OFF}"
+RODIN_USE_KOKKOS="${RODIN_USE_KOKKOS:-OFF}"
 RODIN_INSTALL_RESOURCES="${RODIN_INSTALL_RESOURCES:-ON}"
 
 echo "Repository root: ${REPO_ROOT}"
@@ -23,6 +24,7 @@ echo "Install directory: ${INSTALL_DIR}"
 echo "Test project directory: ${TEST_PROJECT_DIR}"
 echo "MPI support: ${RODIN_USE_MPI}"
 echo "PETSc support: ${RODIN_USE_PETSC}"
+echo "Kokkos support: ${RODIN_USE_KOKKOS}"
 echo "Install resources: ${RODIN_INSTALL_RESOURCES}"
 echo ""
 
@@ -64,6 +66,7 @@ cmake .. \
   -DCMAKE_BUILD_TYPE=Release \
   -DRODIN_USE_MPI="${RODIN_USE_MPI}" \
   -DRODIN_USE_PETSC="${RODIN_USE_PETSC}" \
+  -DRODIN_USE_KOKKOS="${RODIN_USE_KOKKOS}" \
   -DRODIN_INSTALL_RESOURCES="${RODIN_INSTALL_RESOURCES}" \
   -DRODIN_BUILD_EXAMPLES=OFF \
   -DRODIN_BUILD_UNIT_TESTS=OFF \
@@ -199,6 +202,19 @@ fi
 
 echo "✓ Execution successful"
 echo ""
+
+COMPONENTS=(Geometry)
+if [[ "${RODIN_USE_KOKKOS}" == "ON" ]]; then
+  COMPONENTS+=(Kokkos)
+  if [[ "${RODIN_USE_MPI}" == "ON" ]]; then
+    COMPONENTS+=(Kokkos::MPI)
+  fi
+  if [[ "${RODIN_USE_PETSC}" == "ON" ]]; then
+    COMPONENTS+=(Kokkos::PETSc)
+  fi
+fi
+python3 "${SCRIPT_DIR}/test_components.py" \
+  --prefix "${INSTALL_DIR}" --components "${COMPONENTS[@]}"
 
 # Step 8: Cleanup (optional)
 echo "=========================================="

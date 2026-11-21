@@ -166,6 +166,15 @@ namespace Rodin::Variational
       {}
 
       /**
+       * @brief Gets the number of components.
+       * @returns Dimension of the zero vector.
+       */
+      constexpr size_t getDimension() const noexcept
+      {
+        return m_d;
+      }
+
+      /**
        * @brief Evaluates the zero vector function at a point
        * @returns Zero SpatialVector of dimension m_d
        * @param point Reference coordinates of the evaluation point.

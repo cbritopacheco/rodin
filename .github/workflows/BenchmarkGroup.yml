@@ -20,12 +20,17 @@ jobs:
     outputs:
       lanes: ${{ steps.build.outputs.lanes }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         id: checkout
         with:
-          submodules: recursive
+          submodules: false
           lfs: false
-      - uses: actions/setup-python@v5
+      - name: Start resource monitor
+        continue-on-error: true
+        run: python3 dev/ci_resource_monitor.py start
+      - name: Initialize pinned submodules
+        run: python3 dev/ci_submodules.py
+      - uses: actions/setup-python@v6
         id: python
         with:
           python-version: '3.12'
@@ -58,6 +63,10 @@ jobs:
           name: benchmark-plan-group-${{ inputs.group }}
           path: benchmark-group/execution.json
           if-no-files-found: error
+      - name: Summarize resource usage
+        if: always()
+        continue-on-error: true
+        run: python3 dev/ci_resource_monitor.py finish
   Run:
     name: ${{ matrix.lane.label }}
     needs: Build
@@ -73,12 +82,17 @@ jobs:
       MKL_NUM_THREADS: '1'
       OMPI_MCA_rmaps_base_oversubscribe: '1'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         id: checkout
         with:
-          submodules: recursive
+          submodules: false
           lfs: false
-      - uses: actions/setup-python@v5
+      - name: Start resource monitor
+        continue-on-error: true
+        run: python3 dev/ci_resource_monitor.py start
+      - name: Initialize pinned submodules
+        run: python3 dev/ci_submodules.py
+      - uses: actions/setup-python@v6
         id: python
         with:
           python-version: '3.12'
@@ -134,3 +148,7 @@ jobs:
             benchmark-diagnostics/
             benchmark-result/
           if-no-files-found: warn
+      - name: Summarize resource usage
+        if: always()
+        continue-on-error: true
+        run: python3 dev/ci_resource_monitor.py finish

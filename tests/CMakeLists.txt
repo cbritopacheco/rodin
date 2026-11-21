@@ -77,6 +77,12 @@ foreach(_cache_mode OFF ON)
     PROPERTIES LABELS unit)
 endforeach()
 
+add_test(NAME CMake.ThirdPartyIsolation.KokkosDependencies
+  COMMAND ${CMAKE_COMMAND}
+    -S ${PROJECT_SOURCE_DIR}/tests/cmake/KokkosDependencies
+    -B ${CMAKE_CURRENT_BINARY_DIR}/KokkosDependencies)
+set_tests_properties(CMake.ThirdPartyIsolation.KokkosDependencies PROPERTIES LABELS unit)
+
 rodin_add_compile_options(
   LANG C CXX
   OPTIONS
@@ -101,6 +107,14 @@ rodin_add_compile_options(
   -Wno-error=deprecated-builtins
   -Wno-error=array-bounds
   )
+
+# GCC 13 flags the persistent quadrature factory as dangling whenever its
+# arguments are temporaries, and only GCC 14 has the gnu::no_dangling
+# attribute that QuadratureFormula::get uses to silence it.
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU"
+    AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 14)
+  rodin_add_compile_options(LANG CXX OPTIONS -Wno-dangling-reference)
+endif()
 
 if (RODIN_BUILD_UNIT_TESTS)
   add_subdirectory(unit)

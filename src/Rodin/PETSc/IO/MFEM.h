@@ -55,6 +55,8 @@ namespace Rodin::IO
       /// @brief Format-specific printer interface.
       using Parent = GridFunctionPrinterBase<FileFormat::MFEM, FESType, DataType>;
 
+      using Parent::print;
+
       /// @brief Scalar field of the finite element space.
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 

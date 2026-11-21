@@ -25,6 +25,7 @@ runs:
     - uses: ./.github/actions/apt-dependencies
       with:
         packages: ${{ steps.packages.outputs.packages }}
+        snapshot: shared
     - name: Select and verify benchmark compiler
       shell: bash
       run: python3 dev/ci_environment.py compiler --compiler gcc-14

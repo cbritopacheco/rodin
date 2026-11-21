@@ -187,6 +187,54 @@ include(assembly.cmake)
 
 
 class ScopedCTestTest(unittest.TestCase):
+    def test_example_fixture_producer_is_built_and_retained_in_its_test_group(self):
+        with tempfile.TemporaryDirectory() as directory:
+            source = Path(directory) / 'source'
+            build = Path(directory) / 'build'
+            example = source / 'examples/Fixture'
+            owner = source / 'tests/unit/Rodin/Math'
+            example.mkdir(parents=True)
+            owner.mkdir(parents=True)
+            (example / 'main.cpp').write_text('''#include <fstream>
+#include <string>
+int main(int argc, char** argv) {
+  if(argc == 2 && std::string(argv[1]) == "generate") {
+    std::ofstream("fixture.txt") << "prepared";
+    return 0;
+  }
+  return !std::ifstream("fixture.txt").good();
+}
+''')
+            (example / 'CMakeLists.txt').write_text('add_executable(Producer main.cpp)\n')
+            (source / 'CMakeLists.txt').write_text(f'''cmake_minimum_required(VERSION 3.16)
+project(FixtureOwnership LANGUAGES CXX)
+enable_testing()
+add_subdirectory(examples/Fixture)
+add_subdirectory(tests/unit/Rodin/Math)
+include("{ci.ROOT / 'cmake/RodinTestManifest.cmake'}")
+''')
+            (owner / 'CMakeLists.txt').write_text('''set_property(TARGET Producer PROPERTY RODIN_TEST_OWNER tests/unit/Rodin/Math)
+set_property(TARGET Producer PROPERTY RODIN_TEST_PROFILES unit)
+add_test(NAME Fixture.Generate COMMAND $<TARGET_FILE:Producer> generate)
+set_tests_properties(Fixture.Generate PROPERTIES LABELS unit FIXTURES_SETUP field TIMEOUT 17)
+add_test(NAME Fixture.Verify COMMAND $<TARGET_FILE:Producer> verify)
+set_tests_properties(Fixture.Verify PROPERTIES LABELS unit FIXTURES_REQUIRED field TIMEOUT 19)
+''')
+            subprocess.run(['cmake', '-S', str(source), '-B', str(build)], check=True, capture_output=True)
+            with patch.object(ci, 'ROOT', source):
+                ci.configured_profiles.cache_clear()
+                self.addCleanup(ci.configured_profiles.cache_clear)
+                rows = ci.selected_targets(build, 'unit/Rodin/Math', profile='unit')
+                self.assertEqual([r['target'] for r in rows], ['Producer'])
+                subprocess.run(['cmake', '--build', str(build), '--target', rows[0]['target']],
+                               check=True, capture_output=True)
+                stage, report = ci.prepare(build, 'unit/Rodin/Math', profile='unit')
+                registered = {test['name']: test for test in report['tests']}
+                self.assertEqual(set(registered), {'Fixture.Generate', 'Fixture.Verify'})
+                self.assertEqual(ci.properties(registered['Fixture.Generate'])['FIXTURES_SETUP'], ['field'])
+                self.assertEqual(ci.properties(registered['Fixture.Verify'])['TIMEOUT'], 19)
+                self.assertEqual(ci.run_group(build, 'unit/Rodin/Math', 'unit'), 0)
+
     def test_unbuilt_discovery_and_invocation_preservation(self):
         with tempfile.TemporaryDirectory(prefix="rodin-ci-test-") as directory:
             root = Path(directory)

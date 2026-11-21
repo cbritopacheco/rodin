@@ -182,7 +182,8 @@ namespace Rodin::Variational
       template <class A1, class A2, class ... As>
       LinearFormIntegratorBase& over(const A1& a1, const A2& a2, const As&... attrs)
       {
-        return over(FlatSet<Geometry::Attribute>{a1, a2, attrs...});
+        return over(FlatSet<Geometry::Attribute>{Geometry::Attribute(a1),
+          Geometry::Attribute(a2), Geometry::Attribute(attrs)...});
       }
 
       /**

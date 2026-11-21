@@ -190,14 +190,7 @@ namespace Rodin::Solver
        * @param[in,out] axb The linear system to solve. The solution is stored
        *                    in the system's solution vector.
        */
-      void solve(LinearSystemType& axb) override
-      {
-        m_solver.compute(axb.getOperator());
-        if (axb.getSolution().size() == axb.getVector().size())
-          axb.getSolution() = m_solver.solveWithGuess(axb.getVector(), axb.getSolution());
-        else
-          axb.getSolution() = m_solver.solve(axb.getVector());
-      }
+      void solve(LinearSystemType& axb) override;
 
       /**
        * @brief Checks if the solver converged successfully.
@@ -239,6 +232,26 @@ namespace Rodin::Solver
       /// Underlying Eigen conjugate gradient solver
       Eigen::ConjugateGradient<OperatorType, Eigen::Lower | Eigen::Upper> m_solver;
   };
+
+  // Defined out of class so that it is not inline, which lets RodinSolver
+  // compile it once with the host compiler. See CG.cpp.
+  template <class Scalar>
+  void CG<Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>>::solve(
+    LinearSystemType& axb)
+  {
+    m_solver.compute(axb.getOperator());
+    if (axb.getSolution().size() == axb.getVector().size())
+      axb.getSolution() = m_solver.solveWithGuess(axb.getVector(), axb.getSolution());
+    else
+      axb.getSolution() = m_solver.solve(axb.getVector());
+  }
+
+#ifdef RODIN_SOLVER_EXTERN_TEMPLATES
+  extern template class CG<
+    Math::LinearSystem<Math::SparseMatrix<Real>, Math::Vector<Real>>>;
+  extern template class CG<
+    Math::LinearSystem<Math::SparseMatrix<Complex>, Math::Vector<Complex>>>;
+#endif
 
   /**
    * @ingroup CGSpecializations

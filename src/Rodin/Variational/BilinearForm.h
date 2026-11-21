@@ -238,27 +238,58 @@ namespace Rodin::Variational
       }
 
       /**
-       * @brief Builds the bilinear form the given bilinear integrator
-       * @param[in] bfi Bilinear integrator which will be used to
-       * build the bilinear form.
-       * @returns Reference to this (for method chaining)
+       * @brief Replaces the integrators of the bilinear form by a local
+       * integrator.
+       * @param[in] bfi Local bilinear integrator.
+       * @returns Reference to this bilinear form.
        */
       BilinearFormBase& operator=(const LocalBilinearFormIntegratorBaseType& bfi)
       {
         m_lbfis.clear();
+        m_gbfis.clear();
         m_lbfis.add(bfi);
         return *this;
       }
 
       /**
-       * @brief Replaces the local integrator list.
-       * @param[in] bfi List of local bilinear integrators
-       * @returns Reference to this bilinear form
+       * @brief Replaces the integrators of the bilinear form by local
+       * integrators.
+       * @param[in] bfis Local bilinear integrators.
+       * @returns Reference to this bilinear form.
        */
-      BilinearFormBase& operator=(const LocalBilinearFormIntegratorBaseListType& bfi)
+      BilinearFormBase& operator=(const LocalBilinearFormIntegratorBaseListType& bfis)
       {
         m_lbfis.clear();
-        m_lbfis.add(bfi);
+        m_gbfis.clear();
+        m_lbfis.add(bfis);
+        return *this;
+      }
+
+      /**
+       * @brief Replaces the integrators of the bilinear form by a global
+       * integrator.
+       * @param[in] bfi Global bilinear integrator.
+       * @returns Reference to this bilinear form.
+       */
+      BilinearFormBase& operator=(const GlobalBilinearFormIntegratorBaseType& bfi)
+      {
+        m_lbfis.clear();
+        m_gbfis.clear();
+        m_gbfis.add(bfi);
+        return *this;
+      }
+
+      /**
+       * @brief Replaces the integrators of the bilinear form by global
+       * integrators.
+       * @param[in] bfis Global bilinear integrators.
+       * @returns Reference to this bilinear form.
+       */
+      BilinearFormBase& operator=(const GlobalBilinearFormIntegratorBaseListType& bfis)
+      {
+        m_lbfis.clear();
+        m_gbfis.clear();
+        m_gbfis.add(bfis);
         return *this;
       }
 
@@ -410,16 +441,15 @@ namespace Rodin::Variational
 
   /**
    * @ingroup BilinearFormSpecializations
-   * @brief Speciallization of BilinearForm for a matrix type.
+   * @brief Bilinear form owning its operator in the selected matrix container.
    *
    * This specialization aids in the construction of a @f$ m \times n @f$
    * matrix @f$ A @f$, which is associated to the bilinear form. Here, @f$ n
    * @f$ represents the size (total number of degrees-of-freedom) of the trial
    * space, and @f$ m @f$ represents the size of the test space.
    */
-  template <class Solution, class TrialFES, class TestFES, class Scalar>
-  class BilinearForm<Solution, TrialFES, TestFES, Math::SparseMatrix<Scalar>> final
-    : public BilinearFormBase<Math::SparseMatrix<Scalar>>
+  template <class Solution, class TrialFES, class TestFES, class Operator>
+  class BilinearForm final : public BilinearFormBase<Operator>
   {
     using TrialFESMeshType =
       typename FormLanguage::Traits<TrialFES>::MeshType;
@@ -439,12 +469,10 @@ namespace Rodin::Variational
         Solution;
 
       /// @brief Scalar value type.
-      using ScalarType =
-        Scalar;
+      using ScalarType = typename FormLanguage::Traits<Operator>::ScalarType;
 
       /// @brief Type of operator associated to the bilinear form.
-      using OperatorType =
-        Math::SparseMatrix<ScalarType>;
+      using OperatorType = Operator;
 
       /// @brief Default assembly backend selected from the trial/test contexts.
       using DefaultAssemblyType =

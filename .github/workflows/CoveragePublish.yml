@@ -23,7 +23,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 90
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           lfs: false
       - uses: ./.github/actions/download-artifacts
@@ -50,7 +50,7 @@ jobs:
         run: python3 dev/ci_coverage_publish.py collect --kind "$KIND" --family "$FAMILY" --common "$COMMON"
       - name: Upload incremental coverage union
         id: upload
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v6
         with:
           files: ci-publication/CombinedCoverage.info
           disable_search: true

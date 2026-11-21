@@ -18,6 +18,7 @@ set(RodinPETSc_HEADERS
   Math/Matrix.h
   Math/LinearSystem.h
   Assembly/ConstraintMap.h
+  Assembly/FieldLayout.h
   Assembly/MPI.h
   Assembly/Sequential.h
   Variational/GridFunction.h

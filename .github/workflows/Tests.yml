@@ -32,12 +32,12 @@ jobs:
       configurations_ranges_complex: ${{ steps.common.outputs.configurations_ranges_complex }}
       configurations_ranges_real: ${{ steps.common.outputs.configurations_ranges_real }}
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
       with:
         lfs: false
     - name: Install CI planning dependency
       run: python3 dev/ci_environment.py python
-    - uses: actions/setup-node@v4
+    - uses: actions/setup-node@v5
       with:
         node-version: '24'
     - name: Verify pinned artifact client handles interrupted streams
@@ -238,10 +238,15 @@ jobs:
       RODIN_INSTALL_RESOURCES: 'OFF'
     steps:
     - name: Checkout repository and submodules
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
       with:
-        submodules: recursive
+        submodules: false
         lfs: false
+    - name: Start resource monitor
+      continue-on-error: true
+      run: python3 dev/ci_resource_monitor.py start
+    - name: Initialize pinned submodules
+      run: python3 dev/ci_submodules.py
     - uses: ./.github/actions/prepare-apt
     - name: Setup Cpp (C++ / C)
       uses: aminya/setup-cpp@v1
@@ -270,6 +275,10 @@ jobs:
 
           '
         retention-days: 7
+    - name: Summarize resource usage
+      if: always()
+      continue-on-error: true
+      run: python3 dev/ci_resource_monitor.py finish
     name: Installation / Ubuntu (OS=${{ matrix.os }}, Compiler=${{ matrix.compiler }}, MPI=${{ matrix.mpi }}, PETSc=${{ matrix.petsc
       }})
   InstallationMacOS:
@@ -293,10 +302,12 @@ jobs:
       RODIN_INSTALL_RESOURCES: 'OFF'
     steps:
     - name: Checkout repository and submodules
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
       with:
-        submodules: recursive
+        submodules: false
         lfs: false
+    - name: Initialize pinned submodules
+      run: python3 dev/ci_submodules.py
     - name: Setup Python
       run: 'brew list -1 | grep python | while read formula; do brew unlink $formula; brew link --overwrite $formula; done
         || true
@@ -356,7 +367,7 @@ jobs:
     - InstallationMacOS
     runs-on: ubuntu-24.04
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
       with:
         lfs: false
     - name: Download expected plan
@@ -391,7 +402,7 @@ jobs:
         path: coverage-summary.json
         if-no-files-found: error
     - name: Finalize Codecov status
-      uses: codecov/codecov-action@v5
+      uses: codecov/codecov-action@v6
       with:
         run_command: send-notifications
         token: ${{ secrets.CODECOV_TOKEN }}

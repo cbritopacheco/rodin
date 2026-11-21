@@ -19,12 +19,15 @@ namespace Rodin::Geometry
   /**
    * @brief Partitioner that creates balanced, spatially compact partitions.
    *
-   * This partitioning strategy divides the mesh into partitions of
-   * approximately equal size while maintaining spatial locality. The
-   * algorithm aims to minimize the interface between partitions.
+   * The partitions are made by recursive bisection. A set of polytopes for k
+   * partitions splits into a region for the first k / 2 partitions and the
+   * rest for the others. The region starts from a polytope at the periphery
+   * of the set and grows through the adjacency, lowest first along the axis
+   * to the polytope furthest from it, until it has its exact share of the set.
    *
-   * @note This is particularly useful for parallel computing where
-   * minimizing communication between processors is important.
+   * The sizes of the partitions differ by at most one polytope, and the
+   * region of a bisection is connected on a connected set. A partition is
+   * thus usually connected, though the rest of a bisection is not always.
    *
    * @see <a href="class_rodin_1_1_geometry_1_1_partitioner.html">Partitioner</a>
    * @see <a href="class_rodin_1_1_geometry_1_1_greedy_partitioner.html">GreedyPartitioner</a>
@@ -52,24 +55,21 @@ namespace Rodin::Geometry
 
       /**
        * @brief Partitions the mesh polytopes of dimension @p d.
-       * @param[in] maxPartitionSize Maximum number of polytopes per partition
+       * @param[in] count Number of partitions
        * @param[in] d Dimension of polytopes to partition
        *
-       * Creates partitions such that no partition contains more than
-       * @p maxPartitionSize polytopes, while maintaining spatial compactness.
+       * Requires the incidence (d, d). When @p count exceeds the number of
+       * polytopes, some partitions are empty.
        */
-      virtual void partition(size_t maxPartitionSize, size_t d) override;
+      virtual void partition(size_t count, size_t d) override;
 
       /**
        * @brief Partitions the mesh cells.
-       * @param[in] maxPartitionSize Maximum number of cells per partition
-       *
-       * Convenience method that partitions the highest-dimensional polytopes
-       * (cells) of the mesh.
+       * @param[in] count Number of partitions
        */
-      void partition(size_t maxPartitionSize)
+      void partition(size_t count)
       {
-        this->partition(maxPartitionSize, getMesh().getDimension());
+        this->partition(count, getMesh().getDimension());
       }
 
       /**

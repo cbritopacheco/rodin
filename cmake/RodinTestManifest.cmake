@@ -6,6 +6,11 @@ function(rodin_collect_test_targets directory)
     get_target_property(_type "${_target}" TYPE)
     get_target_property(_source "${_target}" SOURCE_DIR)
     file(RELATIVE_PATH _owner "${PROJECT_SOURCE_DIR}" "${_source}")
+    # Explicit CTest fixtures may execute a producer declared under examples/.
+    get_property(_test_owner TARGET "${_target}" PROPERTY RODIN_TEST_OWNER)
+    if(_test_owner)
+      set(_owner "${_test_owner}")
+    endif()
     if(_owner MATCHES "^tests/" AND NOT _owner MATCHES "^tests/benchmarks(/|$)"
         AND _type STREQUAL "EXECUTABLE")
       get_property(_profiles TARGET "${_target}" PROPERTY RODIN_TEST_PROFILES)

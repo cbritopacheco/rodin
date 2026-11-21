@@ -33,7 +33,7 @@ for tests and brown for developer tools:
 | :--- | :----------- | :----- |
 | Core modules | Blue | Core, Geometry, Math, QF, FormLanguage, Variational, Assembly, Solver and IO |
 | Models | Green | Adaptation, Advection, Distance, Eikonal, Heart, Hilbert, Solid and linear elasticity |
-| Integrations and dependencies | Yellow-gold | MFEM, MMG, MPI, PETSc, Scotch, dependencies and Python bindings |
+| Integrations and dependencies | Yellow-gold | Kokkos, MFEM, MMG, MPI, PETSc, Scotch, dependencies and Python bindings |
 | Shared services | Muted purple | Alert, Context, Utility, Location and Serialization |
 | Tests and validation | Grey | Unit, manufactured, convergence, installation, NAFEMS, benchmarks and Test helpers |
 | Developer tooling | Brown | CI, CMake, developer tooling, resources and Codex |

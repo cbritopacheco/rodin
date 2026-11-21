@@ -1999,11 +1999,15 @@ int main(int argc, char** argv)
           // Inject (rho/dt)(u^n, v)|_{Omega^n} into the velocity block.
           {
             ::Vec b = flow.getLinearSystem().getVector();
-            const PetscInt vOff =
-              static_cast<PetscInt>(flow.getTestOffsets()[0]); // velocity block
             const ::Vec& mOld = massOld.getVector();
             PetscInt lo = 0, hi = 0;
             VecGetOwnershipRange(mOld, &lo, &hi);
+            // The owned rows of the velocity block start at its field start
+            // on the process.
+            const auto& starts = flow.getLinearSystem().getFieldStarts();
+            const PetscInt vOff = starts.empty()
+              ? static_cast<PetscInt>(flow.getTestOffsets()[0])
+              : starts[0] - lo;
             const PetscScalar* arr = nullptr;
             VecGetArrayRead(mOld, &arr);
             for (PetscInt i = lo; i < hi; ++i)
