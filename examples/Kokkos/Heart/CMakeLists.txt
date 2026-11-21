@@ -26,4 +26,18 @@ if (TARGET Rodin::Kokkos::PETSc)
     Rodin::Variational
     Rodin::IO
     )
+
+  # Newtonian, Carreau-Yasuda and Owens (log-conformation) blood, PETSc only.
+  add_executable(KokkosAtriumRheologyPETSc AtriumRheology.cpp)
+  target_link_libraries(KokkosAtriumRheologyPETSc
+    PUBLIC
+    Rodin::Kokkos::PETSc
+    Rodin::Kokkos::Kernels
+    Rodin::Heart
+    Rodin::Solver
+    Rodin::Geometry
+    Rodin::Assembly
+    Rodin::Variational
+    Rodin::IO
+    )
 endif()

@@ -34,9 +34,10 @@
  * Openings, as in Atrium/Fluid (labels of the Atrium meshes): veins 1, 2, 3,
  * 5 with p_pv = mean + amplitude sin(2 pi t/T) and impedance Z_pv; mitral
  * plane 6 with the lumped ventricle Rodin::Heart::CCMLC2014, p_out = p_v and
- * Z_m = |Gamma|/K, K the conductance of its valve law, open while the mean
- * pressure of the plane exceeds p_v; wall 4. The ventricle runs on the host:
- * it is a system of five scalar equations.
+ * Z_m = |Gamma|/K, K the conductance of its valve law; the ventricle reads
+ * p_v + Q/K as its atrial pressure, Q the flow rate of the plane, so the valve
+ * is open while the flow leaves the atrium; wall 4. The ventricle runs on the
+ * host: it is a system of five scalar equations.
  *
  * The mesh is a tetrahedral MEDIT mesh of the fluid in millimetres
  * (resources/examples/Heart/Atrium/Coarse.mesh), scaled to metres.
@@ -428,8 +429,10 @@ int main(int argc, char** argv)
     Problem flow(u, p, v, q);
     PETSc::Solver::KSP solver(flow);
     solver.setType(KSPBCGS);
+    // No divergence tolerance: PETSc tests the intermediate residuals of
+    // -ksp_type bcgsl, which spike in solves that converge.
     solver.setTolerances(
-      P.tolerance, Real(1e-50), Real(1e5), static_cast<PetscInt>(P.maxIterations));
+      P.tolerance, Real(1e-50), Real(1e30), static_cast<PetscInt>(P.maxIterations));
     {
       ::PC pc;
       PetscCallAbort(PETSC_COMM_SELF, KSPGetPC(solver.getHandle(), &pc));
@@ -594,7 +597,14 @@ int main(int argc, char** argv)
       const Real qIn = -veinFluxHost.dot(uh);
       const Real qOut = mitralFluxHost.dot(uh);
       const Real pVein = veinMeanHost.dot(ph) / veinArea;
-      atrialPressure = mitralMeanHost.dot(ph) / mitralArea;
+      const Real planePressure = mitralMeanHost.dot(ph) / mitralArea;
+      // With the skew-symmetric convection, the natural condition of the mitral
+      // plane balances p + rho (u.n)^2/2, not p, against p_out + Z u.n. The
+      // ventricle reads the mean of that balance, p_out + Q/K: its inflow
+      // K (p_at - p_v) is then the flow rate of the plane, and the valve
+      // closes when the flow reverses rather than when the jet lowers p.
+      atrialPressure =
+        P.ventricle ? pOut + mitralImpedance * qOut / mitralArea : planePressure;
       const Real speed = uh.cwiseAbs().maxCoeff();
       if (!std::isfinite(speed) || speed > 50)
       {
@@ -605,7 +615,7 @@ int main(int argc, char** argv)
       const size_t cycle = (step - 1) / P.steps + 1;
       csv << time << ',' << cycle << ',' << pIn << ',' << pOut << ','
           << (valveOpen ? 1 : 0) << ',' << qIn << ',' << qOut << ',' << pVein << ','
-          << atrialPressure << ',' << speed << ','
+          << planePressure << ',' << speed << ','
           << std::chrono::duration<double>(t1 - t0).count() << ','
           << std::chrono::duration<double>(t2 - t1).count() << ',' << iterations << '\n';
       if (step % P.outputEvery == 0 || step == total)
