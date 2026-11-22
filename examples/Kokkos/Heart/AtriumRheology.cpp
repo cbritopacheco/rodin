@@ -50,9 +50,21 @@
  *     seven fields:
  *       (s - s^n, r + tau w.grad r)/dt + (w.grad s^th, r + tau w.grad r)
  *       + <max(-w.n, 0) s^th, r>_openings = 0,   s^th = (s + s^n)/2,
- *     the boundary term setting psi = 0 and n = n_in on the faces where the
- *     flow enters (Marchal & Crochet streamline upwinding in its consistent
- *     form; no discontinuity capturing).
+ *     the boundary term setting psi = psi_in and n = n_in on the faces where
+ *     the flow enters: on the veins developed blood, the steady conformation
+ *     and aggregate size of the shear of the axial velocity across the
+ *     section (key inlet=developed; inlet=relaxed imposes psi = 0 and the
+ *     constant n_in, as before), and on the mitral plane the values found
+ *     there. Relaxed blood entering at the ring where the vein meets the
+ *     wall is sheared at once by the wall, a stress that blood coming from a
+ *     vein has built over centimetres; n_in is used by inlet=relaxed only.
+ *     (Marchal & Crochet streamline upwinding in its consistent form; no
+ *     discontinuity capturing.) The Galerkin advection is
+ *     skew-symmetric, w.grad s + (1/2)(div w) s (key skew; as in the CPU
+ *     driver): the discrete div w of P1/P1 is not zero, and without the term
+ *     the advection itself amplifies psi at the rate |div w|/2 where
+ *     div w < 0. On Coarse.mesh that ran the stress away on the wall, in
+ *     the boundary layers where div w is largest.
  *  4. The second half step of 2 (Strang splitting).
  *  5. Momentum and continuity for (u^{n+1}, p^{n+1}), P1/P1, BDF2, with the
  *     elastic stress of t^{n+1} from 2-4 and balanced by a viscosity
@@ -143,7 +155,7 @@
  * (1200), p_in_amplitude (200), ramp (0.25, cycles), z_in (1000), lv (1),
  * order (2; 1), theta (0.5, transport), t_end (stop at that time), tau_dt (0),
  * lv_extrapolate (0), bsd_extrapolate (0), bsd_stretch (1), picard (2),
- * tau_psi (cpu; supg),
+ * tau_psi (cpu; supg), skew (1), inlet (developed; relaxed),
  * p_out (0), n_in (1.5, aggregate size entering), n_init (-1: n_st(0)),
  * bsd (1, factor of eta_a), ptt (0; linear PTT factor, see below), eta_plasma
  * (0.0012), lambda_h (0.005), output
@@ -235,6 +247,8 @@ namespace
       bool extrapolateBothSides = false;
       bool stretchBothSides = true;
       bool cpuTau = true;
+      bool skew = true;
+      bool developedInlet = true;
       size_t picard = 2;
       Real theta = 0.5;
       Real endTime = -1;
@@ -577,6 +591,9 @@ namespace
       IntView nodeCells;
       RealView volume;       ///< Lumped volume of a vertex.
       RealView wallNormal; ///< Unit normal at the vertices of the wall, zero elsewhere.
+      RealView veinNormal; ///< Unit normal at the vertices of the veins, zero elsewhere.
+      RealView psiIn; ///< Inflow psi of the transport (developed on the veins).
+      RealView sizeIn; ///< Inflow aggregate size of the transport.
       RealView cellGradient; ///< By cell, L_ij at 3 i + j and the volume at 9.
       RealView velocity;
       RealView gradient; ///< By vertex, L_ij at 3 i + j.
@@ -827,6 +844,85 @@ namespace
         advance(s, L, lambda, dt, epsilon);
         for (int k = 0; k < 6; ++k)
           psi(i + k * nodes) = s[k];
+      });
+  }
+
+  /**
+   * @brief Inflow values of the transport: developed blood on the veins.
+   *
+   * At a vertex of a vein with unit normal n, the shear of the axial velocity
+   * across the section, S = n n^T L (I - n n^T) = n g^T with g = (I - n n^T)
+   * L^T n, has the shear rate |g|, and for it the steady Oldroyd-B
+   * conformation is c = I + lambda (S + S^T) + 2 lambda^2 S S^T, with lambda
+   * and the aggregate size n_st at that shear rate. Elsewhere the inflow
+   * values are the current ones, so that a backflow on the mitral plane
+   * carries the psi found there (as the CPU driver does).
+   *
+   * @param d Vertex data, with the gradient of recoverGradient(); psiIn and
+   *        sizeIn are written.
+   * @param model Fluid constants.
+   * @param thixotropic Whether lambda is that of n_st (TVE) or of eta_CY (VE).
+   */
+  void developedInflow(const Nodal& d, const Rheology& model, bool thixotropic)
+  {
+    const int nodes = d.nodes;
+    const auto gradient = d.gradient;
+    const auto normal = d.veinNormal;
+    const auto psi = d.psi;
+    const auto size = d.size;
+    const auto psiIn = d.psiIn;
+    const auto sizeIn = d.sizeIn;
+    ::Kokkos::parallel_for(
+      "AtriumRheology::developedInflow", ::Kokkos::RangePolicy<Exec>(0, nodes),
+      KOKKOS_LAMBDA(const int i) {
+        const Real n[3] = {normal(i), normal(i + nodes), normal(i + 2 * nodes)};
+        if (n[0] * n[0] + n[1] * n[1] + n[2] * n[2] < 0.5)
+        {
+          for (int k = 0; k < 6; ++k)
+            psiIn(i + k * nodes) = psi(i + k * nodes);
+          sizeIn(i) = size(i);
+          return;
+        }
+        Real q[3], qn = 0;
+        for (int j = 0; j < 3; ++j)
+        {
+          q[j] = n[0] * gradient(9 * i + j) + n[1] * gradient(9 * i + 3 + j) +
+            n[2] * gradient(9 * i + 6 + j);
+          qn += q[j] * n[j];
+        }
+        Real g[3], gd2 = 0;
+        for (int j = 0; j < 3; ++j)
+        {
+          g[j] = q[j] - qn * n[j];
+          gd2 += g[j] * g[j];
+        }
+        const Real gd = ::Kokkos::sqrt(gd2);
+        const Real nst = model.steadySize(gd);
+        const Real lambda =
+          thixotropic ? model.relaxation(nst, gd) : model.steadyRelaxation(gd);
+        Tensor c;
+        for (int a = 0; a < 3; ++a)
+        {
+          for (int b = 0; b < 3; ++b)
+          {
+            c.a[a][b] = (a == b ? Real(1) : Real(0)) +
+              lambda * (n[a] * g[b] + g[a] * n[b]) +
+              2 * lambda * lambda * gd2 * n[a] * n[b];
+          }
+        }
+        Real w[3];
+        Tensor r;
+        eigen(c, w, r);
+        for (int k = 0; k < 3; ++k)
+          w[k] = ::Kokkos::log(w[k] > 1e-300 ? w[k] : Real(1e-300));
+        const Tensor l = spectral(w, r);
+        psiIn(i) = l.a[0][0];
+        psiIn(i + nodes) = l.a[1][1];
+        psiIn(i + 2 * nodes) = l.a[2][2];
+        psiIn(i + 3 * nodes) = l.a[0][1];
+        psiIn(i + 4 * nodes) = l.a[0][2];
+        psiIn(i + 5 * nodes) = l.a[1][2];
+        sizeIn(i) = thixotropic ? nst : size(i);
       });
   }
 
@@ -1101,6 +1197,14 @@ namespace
     real("theta", P.theta);
     real("t_end", P.endTime);
     count("picard", P.picard);
+    if (kv.count("inlet"))
+    {
+      if (kv["inlet"] != "developed" && kv["inlet"] != "relaxed")
+        throw std::invalid_argument("inlet is developed or relaxed.");
+      P.developedInlet = kv["inlet"] == "developed";
+    }
+    if (kv.count("skew"))
+      P.skew = kv["skew"] != "0";
     if (kv.count("tau_psi"))
     {
       if (kv["tau_psi"] != "cpu" && kv["tau_psi"] != "supg")
@@ -1386,66 +1490,82 @@ int main(int argc, char** argv)
       nodal.nodeCells =
         upload("AtriumRheology::nodeCells", incident.data(), incident.size());
       nodal.volume = upload("AtriumRheology::volume", lumpedVolume.data(), nodes);
-      // Normal of the wall at its vertices: the dominant direction of the sum
-      // of |f| n n^T over the wall faces of the vertex, which needs no
+      // Normal of a boundary at its vertices: the dominant direction of the
+      // sum of |f| n n^T over its faces at the vertex, which needs no
       // orientation of the faces.
-      std::vector<Real> spread(6 * nodes, 0);
-      for (Index f = 0; f < host.getFaceCount(); ++f)
-      {
-        if (!host.isBoundary(f))
-          continue;
-        const auto attribute = host.getAttribute(2, f);
-        if (!attribute || *attribute != wall)
-          continue;
-        const auto& key = host.getConnectivity().getPolytope(2, f);
-        Real a[3], b[3];
-        for (int k = 0; k < 3; ++k)
+      const auto vertexNormals = [&](auto&& selected, size_t& count) {
+        std::vector<Real> spread(6 * nodes, 0);
+        for (Index f = 0; f < host.getFaceCount(); ++f)
         {
-          a[k] = x[key(1) + k * nodes] - x[key(0) + k * nodes];
-          b[k] = x[key(2) + k * nodes] - x[key(0) + k * nodes];
+          if (!host.isBoundary(f))
+            continue;
+          const auto attribute = host.getAttribute(2, f);
+          if (!attribute || !selected(*attribute))
+            continue;
+          const auto& key = host.getConnectivity().getPolytope(2, f);
+          Real a[3], b[3];
+          for (int k = 0; k < 3; ++k)
+          {
+            a[k] = x[key(1) + k * nodes] - x[key(0) + k * nodes];
+            b[k] = x[key(2) + k * nodes] - x[key(0) + k * nodes];
+          }
+          const Real n[3] = {a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2],
+            a[0] * b[1] - a[1] * b[0]};
+          const Real twice = std::sqrt(n[0] * n[0] + n[1] * n[1] + n[2] * n[2]);
+          if (!(twice > 0))
+            continue;
+          for (std::uint8_t c = 0; c < 3; ++c)
+          {
+            Real* t = &spread[6 * key(c)];
+            t[0] += n[0] * n[0] / twice;
+            t[1] += n[1] * n[1] / twice;
+            t[2] += n[2] * n[2] / twice;
+            t[3] += n[0] * n[1] / twice;
+            t[4] += n[0] * n[2] / twice;
+            t[5] += n[1] * n[2] / twice;
+          }
         }
-        const Real n[3] = {a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2],
-          a[0] * b[1] - a[1] * b[0]};
-        const Real twice = std::sqrt(n[0] * n[0] + n[1] * n[1] + n[2] * n[2]);
-        if (!(twice > 0))
-          continue;
-        for (std::uint8_t c = 0; c < 3; ++c)
+        std::vector<Real> normals(3 * nodes, 0);
+        count = 0;
+        for (size_t i = 0; i < nodes; ++i)
         {
-          Real* t = &spread[6 * key(c)];
-          t[0] += n[0] * n[0] / twice;
-          t[1] += n[1] * n[1] / twice;
-          t[2] += n[2] * n[2] / twice;
-          t[3] += n[0] * n[1] / twice;
-          t[4] += n[0] * n[2] / twice;
-          t[5] += n[1] * n[2] / twice;
+          const Real* t = &spread[6 * i];
+          if (!(t[0] + t[1] + t[2] > 0))
+            continue;
+          Tensor m, vectors;
+          m.a[0][0] = t[0];
+          m.a[1][1] = t[1];
+          m.a[2][2] = t[2];
+          m.a[0][1] = m.a[1][0] = t[3];
+          m.a[0][2] = m.a[2][0] = t[4];
+          m.a[1][2] = m.a[2][1] = t[5];
+          Real values[3];
+          eigen(m, values, vectors);
+          const int k = values[0] >= values[1] && values[0] >= values[2]
+            ? 0
+            : (values[1] >= values[2] ? 1 : 2);
+          for (int c = 0; c < 3; ++c)
+            normals[i + c * nodes] = vectors.a[c][k];
+          ++count;
         }
-      }
-      std::vector<Real> wallNormal(3 * nodes, 0);
-      size_t wallNodes = 0;
-      for (size_t i = 0; i < nodes; ++i)
-      {
-        const Real* t = &spread[6 * i];
-        if (!(t[0] + t[1] + t[2] > 0))
-          continue;
-        Tensor m, vectors;
-        m.a[0][0] = t[0];
-        m.a[1][1] = t[1];
-        m.a[2][2] = t[2];
-        m.a[0][1] = m.a[1][0] = t[3];
-        m.a[0][2] = m.a[2][0] = t[4];
-        m.a[1][2] = m.a[2][1] = t[5];
-        Real values[3];
-        eigen(m, values, vectors);
-        const int k = values[0] >= values[1] && values[0] >= values[2]
-          ? 0
-          : (values[1] >= values[2] ? 1 : 2);
-        for (int c = 0; c < 3; ++c)
-          wallNormal[i + c * nodes] = vectors.a[c][k];
-        ++wallNodes;
-      }
+        return normals;
+      };
+      size_t wallNodes = 0, veinNodes = 0;
+      const auto wallNormal =
+        vertexNormals([&](Attribute attribute) { return attribute == wall; }, wallNodes);
+      const auto veinNormal = vertexNormals(
+        [&](Attribute attribute) {
+          return std::find(veins.begin(), veins.end(), attribute) != veins.end();
+        },
+        veinNodes);
       nodal.wallNormal =
         upload("AtriumRheology::wallNormal", wallNormal.data(), wallNormal.size());
-      std::cout << "[mesh] wall vertices = " << wallNodes << std::endl;
+      nodal.veinNormal =
+        upload("AtriumRheology::veinNormal", veinNormal.data(), veinNormal.size());
+      nodal.psiIn = RealView("AtriumRheology::psiIn", 6 * nodes);
+      nodal.sizeIn = RealView("AtriumRheology::sizeIn", nodes);
+      std::cout << "[mesh] wall vertices = " << wallNodes
+                << "  vein vertices = " << veinNodes << std::endl;
       nodal.cellGradient = RealView("AtriumRheology::cellGradient", 10 * cells);
       nodal.velocity = RealView("AtriumRheology::velocity", 3 * nodes);
       nodal.gradient = RealView("AtriumRheology::gradient", 9 * nodes);
@@ -1581,8 +1701,13 @@ int main(int argc, char** argv)
     // side, and a PETSc solver of its own (options prefix transport_).
     Problem transport(s, r);
     Problem history(sOld, rOld);
+    // <max(-w.n, 0) s, r> on the openings, times the inflow values.
+    PETSc::Variational::TrialFunction sIn(qh);
+    PETSc::Variational::TestFunction rIn(qh);
+    Problem inflowMatrix(sIn, rIn);
     ::KSP transportSolver = PETSC_NULLPTR;
-    ::Vec transported = PETSC_NULLPTR, previous = PETSC_NULLPTR, load = PETSC_NULLPTR;
+    ::Vec transported = PETSC_NULLPTR, previous = PETSC_NULLPTR, load = PETSC_NULLPTR,
+          inflowValue = PETSC_NULLPTR;
     if (elastic)
     {
       ::PC pc;
@@ -1731,6 +1856,15 @@ int main(int argc, char** argv)
             const Real k = tauTime ? Real(0) : 1 / lambdaView.getValue(point);
             return 1 / ::Kokkos::sqrt(a * a + 4 * speed2 / (hk * hk) + k * k);
           });
+          // Skew-symmetric advection, + (1/2)(div w) s: the discrete div w of
+          // P1/P1 is not zero, and without this term the advection amplifies
+          // psi where div w < 0 at the rate |div w|/2 (the stress ran away on
+          // the wall of Coarse.mesh, where div w is largest). As in the CPU
+          // driver.
+          const Real skewFactor = P.skew ? Real(0.5) : Real(0);
+          RealFunction halfDivergence(KOKKOS_LAMBDA(const PointView& point)->Real {
+            return skewFactor * wt.u.interpolateDivergence(point);
+          });
           RealFunction inflow(KOKKOS_LAMBDA(const PointView& point)->Real {
             const auto wp = wt.getValue(point);
             const auto n = outward.getValue(point);
@@ -1749,6 +1883,7 @@ int main(int argc, char** argv)
             transport = (1 / dt) * Integral(s, r) +
               theta *
                 Integral(Dot(midpoint, Grad(s)), r + Mult(tauS, Dot(midpoint, Grad(r)))) +
+              theta * Integral(Mult(halfDivergence, s), r) +
               theta *
                 BoundaryIntegral(Mult(inflow, s), r)
                   .over(veins[0], veins[1], veins[2], veins[3], mitral) -
@@ -1759,6 +1894,7 @@ int main(int argc, char** argv)
                 (theta - 1) *
                   Integral(Dot(midpoint, Grad(sOld)),
                     rOld + Mult(tauS, Dot(midpoint, Grad(rOld)))) +
+                (theta - 1) * Integral(Mult(halfDivergence, sOld), rOld) +
                 (theta - 1) *
                   BoundaryIntegral(Mult(inflow, sOld), rOld)
                     .over(veins[0], veins[1], veins[2], veins[3], mitral) -
@@ -1801,12 +1937,24 @@ int main(int argc, char** argv)
           }
           transport.assemble();
           history.assemble();
+          HostVector psiInHost, sizeInHost;
+          if (P.developedInlet)
+          {
+            inflowMatrix = BoundaryIntegral(Mult(inflow, sIn), rIn)
+                             .over(veins[0], veins[1], veins[2], veins[3], mitral) -
+              Integral(zero, rIn);
+            inflowMatrix.assemble();
+            developedInflow(nodal, model, thixotropic);
+            psiInHost = toHost(nodal.psiIn);
+            sizeInHost = toHost(nodal.sizeIn);
+          }
           ::Mat& A = transport.getLinearSystem().getOperator();
           ::Mat& B = history.getLinearSystem().getOperator();
           if (!transported)
           {
             PetscCallAbort(PETSC_COMM_SELF, MatCreateVecs(A, &transported, &load));
             PetscCallAbort(PETSC_COMM_SELF, VecDuplicate(transported, &previous));
+            PetscCallAbort(PETSC_COMM_SELF, VecDuplicate(transported, &inflowValue));
             PetscCallAbort(PETSC_COMM_SELF, KSPSetOperators(transportSolver, A, A));
             PetscCallAbort(PETSC_COMM_SELF, KSPSetFromOptions(transportSolver));
           }
@@ -1822,6 +1970,23 @@ int main(int argc, char** argv)
               values[i] = k < 6 ? psi(i + k * nodes) : size(i) - inletSize;
             PetscCallAbort(PETSC_COMM_SELF, VecRestoreArrayWrite(previous, &values));
             PetscCallAbort(PETSC_COMM_SELF, MatMult(B, previous, load));
+            if (P.developedInlet)
+            {
+              // + <max(-w.n, 0) s_in, r>: the inflow term then sets s = s_in.
+              PetscScalar* inflowValues;
+              PetscCallAbort(
+                PETSC_COMM_SELF, VecGetArrayWrite(inflowValue, &inflowValues));
+              for (size_t i = 0; i < nodes; ++i)
+              {
+                inflowValues[i] =
+                  k < 6 ? psiInHost(i + k * nodes) : sizeInHost(i) - inletSize;
+              }
+              PetscCallAbort(
+                PETSC_COMM_SELF, VecRestoreArrayWrite(inflowValue, &inflowValues));
+              PetscCallAbort(PETSC_COMM_SELF,
+                MatMultAdd(
+                  inflowMatrix.getLinearSystem().getOperator(), inflowValue, load, load));
+            }
             PetscCallAbort(PETSC_COMM_SELF, VecCopy(previous, transported));
             PetscCallAbort(PETSC_COMM_SELF, KSPSolve(transportSolver, load, transported));
             KSPConvergedReason reason;
@@ -2184,6 +2349,7 @@ int main(int argc, char** argv)
       PetscCallAbort(PETSC_COMM_SELF, VecDestroy(&transported));
       PetscCallAbort(PETSC_COMM_SELF, VecDestroy(&previous));
       PetscCallAbort(PETSC_COMM_SELF, VecDestroy(&load));
+      PetscCallAbort(PETSC_COMM_SELF, VecDestroy(&inflowValue));
     }
   }
   PetscFinalize();

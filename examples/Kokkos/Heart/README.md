@@ -156,7 +156,28 @@ with the kinematics of the last velocity iterate) and the $\tau_\psi$ of the
 CPU driver (`tau_psi=cpu`), for VE and TVE; N and CY are unchanged. On the
 test mesh: same ventricular pressure and volume, stress 7-15 % higher, twice
 the time per step. `picard=1 tau_psi=supg` reproduces the former version to
-all digits. Not yet run on `Coarse.mesh`.
+all digits. That did not cure `Coarse.mesh` either: with the same Wi_max
+as the CPU driver at $t$ = 0.10 s (42 against 41), $\mathrm{tr}\,c$ reached
+1.1e7 there, and 7 of the 8 largest values were on wall vertices 13-35 mm
+from any opening, not at the veins.
+
+Two more differences with the CPU driver are now removed:
+
+- **Skew-symmetric advection of $\psi$ and $n$** (`skew=1`):
+  $w\cdot\nabla s+\tfrac12(\nabla\cdot w)s$. The discrete divergence of
+  P1/P1 is not zero, and without the term the advection amplifies $\psi$ at
+  the rate $|\nabla\cdot w|/2$ where $\nabla\cdot w<0$: largest in the
+  boundary layers of the wall on a fine mesh.
+- **Developed inflow** (`inlet=developed`): blood enters the veins with the
+  steady conformation and aggregate size of the shear of its axial velocity
+  across the section, not relaxed ($\psi=0$, $n=n_{in}$), and backflow on the
+  mitral plane carries the $\psi$ found there. Relaxed blood entering at the
+  ring where a vein meets the wall is sheared at once, the stress that both
+  drivers show at the annulus of the veins.
+
+On the test mesh: same ventricular pressure and volume, stress 10-35 %
+higher; `skew=0 inlet=relaxed picard=1 tau_psi=supg` reproduces the version
+before the outer iterations to all digits. Not yet run on `Coarse.mesh`.
 
 Owens' dumbbells are Hookean and their stress is unbounded at a stagnation
 point with strong extension (`tr(c)_max` in the log); `ptt=0.01`, say, bounds
@@ -224,7 +245,7 @@ build-cuda/examples/Kokkos/Heart/KokkosAtriumRheologyPETSc /path/to/Coarse.mesh 
 
 Keys of `KokkosAtriumRheologyPETSc`, besides those above: `fluid`, `stab`,
 `order`, `theta`, `tau_dt`, `lv_extrapolate`, `bsd_extrapolate`,
-`bsd_stretch`, `picard`, `tau_psi`, `t_end`, `n_in`, `n_init`,
+`bsd_stretch`, `picard`, `tau_psi`, `skew`, `inlet`, `t_end`, `n_in`, `n_init`,
 `bsd`, `ptt`, `eta_plasma`, `lambda_h`. Its flow solver is
 BiCGStab(4) with Jacobi unless PETSc options say otherwise; the transport
 solver takes options with the prefix `transport_`.
