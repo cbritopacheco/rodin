@@ -60,128 +60,92 @@ fluids of the CPU driver: see [Rheology](#rheology).
 of the CPU driver, which share the steady shear viscosity of Carreau-Yasuda:
 Newtonian, Carreau-Yasuda, Owens with the aggregate size at equilibrium (VE)
 and Owens with transported aggregate size (TVE). The file header states the
-scheme; in short, per time step, with the extrapolations
-$u^{n+1/2}=(3u^n-u^{n-1})/2$ and $u^*=2u^n-u^{n-1}$:
+scheme and its references. For the elastic fluids, $\tau_p=G(c-I)$ and
+$\psi=\log c$ is stored at the vertices; per time step:
 
-1. velocity gradient of $u^{n+1/2}$ at the vertices (mean of the cell
-   gradients, trace free, and $(\partial_n u)\,n^T$ on the wall);
-2. half a step at every vertex: the aggregate size by the exact solution of
-   its Riccati equation, the conformation $c$ by the exact solution of its
-   equation with the gradient frozen; $\psi=\log c$ is the stored and
-   transported unknown;
-3. $\psi$ (six components) and $n$ advected over the step by one scalar
-   Crank-Nicolson SUPG matrix, with the inflow values imposed weakly on the
-   faces where the flow enters;
-4. the second half step of 2 (Strang splitting);
-5. momentum and continuity by BDF2, with convection by $u^*$, $\tau_p=G(c-I)$
-   of $t^{n+1}$ explicit and balanced by the viscosity $G\lambda$ on both sides,
-   stabilised by the algebraic subgrid scale method with quasi-static
-   subscales (`stab=asgs`: SUPG and PSPG with the residual of the momentum
-   equation without its time derivative) or by the two terms of
-   `KokkosAtriumFlow` (`stab=split`).
+1. velocity gradient $L^n$ of $u^n$ at the vertices: mean of the cell
+   gradients, trace free, and $(\partial_n u)\,n^T$ on the wall;
+2. $\psi$ and $n$ at the feet of the characteristics, $x-\Delta t\,u^{n+1/2}$,
+   located by a walk through the cells and interpolated linearly: monotone,
+   no linear system; developed blood enters by the veins;
+3. prediction at every vertex with $L^n$: $n$ by the exact solution of its
+   Riccati equation, $c$ by the exact solution of its equation with the
+   gradient frozen;
+4. momentum and continuity (BDF2, convection by $u^*=2u^n-u^{n-1}$, algebraic
+   subgrid scales with quasi-static subscales) with the predicted stress in
+   weak form and two terms that vanish for a resolved steady flow:
+   $\eta_a(\nabla u^{n+1}-L^n)$, $\eta_a=G\lambda$ (DEVSS-G), and
+   $\eta_d(\nabla u^{n+1}-\nabla u^n)$,
+   $\eta_d=2G\lambda(1-e^{-\Delta t/\lambda})\lambda_{\max}(c)$, the implicit
+   response of the stress to the velocity of the step;
+5. correction: step 3 again with the gradient of $(u^n+u^{n+1})/2$.
 
-Steps 1, 2 and 4 are Kokkos kernels of the example; 3 and 5 are PETSc
-matrices of the Kokkos type. `order=1` gives the first order version
-(backward Euler throughout, one local step).
+Steps 1-3 and 5 are Kokkos kernels of the example; step 4 is one PETSc
+matrix of the Kokkos type. There is no transport matrix. N and CY assemble
+only their own terms. The elastic part is first order in time and space.
 
-**Stabilisation parameters.** Neither $\tau$ has the $(2/\Delta t)^2$ term of
-`KokkosAtriumFlow`. With it $\tau\to\Delta t/2$, the stabilised problem
-changes with the time step, and on the test mesh neither order converged in
-time (Bochev, Gunzburger & Shadid 2004). Without it, the time derivative
-cannot stay in the residual of the subscales, since its term $\tau/\Delta t$
-is destabilising for $\Delta t<\tau$ (John & Novo 2011; the run blew up). So
-the subscales are quasi-static: consistency error of order $\tau$, spatial.
-`tau_dt=1` restores the former version. Dynamic subscales, as in the CPU
-driver, would remove both compromises; they need a subscale stored by cell.
+**Numbering.** The data of a P1 grid function are indexed by degree of
+freedom, which the space numbers by cell: on the test mesh 1099 of 1100
+vertices have a degree of freedom that is not their index. The vertex
+kernels up to commit 2702be8 indexed the velocity by vertex, so the
+gradients of CY, VE and TVE were those of a permuted velocity: of the right
+size on a mesh of 2 mm, where they went unnoticed, and of order $U/h$ on
+small cells, which is the divergence of VE and TVE on `Coarse.mesh`. The
+tables of the kernels are now built by degree of freedom, and the run stops
+if the numbering is not the expected one. Results of CY, VE and TVE of
+earlier commits are void; N has no vertex kernel and is not affected.
 
-**Time convergence**, test mesh, `lv=0`, $t=0.1$ s, against $\Delta t=0.125$ ms,
-relative $L^2$ errors at $\Delta t$ = 2, 1, 0.5, 0.25 ms:
+**Checks**, all on the 3983-cell test mesh (2.2 mm) or scaled copies of it,
+Kokkos Serial:
 
-| | velocity | rate | $\psi$ | rate |
-|---|---|---|---|---|
-| N, order 2 | 3.9e-3 ... 4.7e-5 | 2.0 | | |
-| VE, order 2 | 1.4e-3 ... 8.3e-5 | 1.2-1.5 | 3.1e-3 ... 9.5e-5 | 1.6-1.8 |
-| TVE, order 2 | 1.2e-3 ... 6.1e-5 | 1.3-1.6 | 2.3e-3 ... 1.5e-4 | 1.2-1.5 |
-| TVE, order 1 | 1.0e-2 ... 1.3e-3 | 1.0 | 2.4e-2 ... 3.0e-3 | 1.0 |
+| check | result |
+|---|---|
+| steady flow at Wi 0.2 (`scale=1e-4 lv=0 p_in=5`), VE against CY | flow rate -1.4 %; +20 % with `devss=0` |
+| the same without the wall form of the gradient | +1.9 %, and $\mathrm{tr}\,c$ to 3e5 on the wall in the test below |
+| small cells, `scale=1e-4 lv=0` (0.22 mm, Wi to 28), 200 steps | VE and TVE run, velocity within 20 % of N; $\mathrm{tr}\,c$ peaks at 5.4e6 (VE, one transient) and 1.8e4 (TVE); `implicit=0` diverges at step 194 |
+| `scale=5e-5 lv=0` (0.11 mm, Wi to 33), 200 steps | VE and TVE run, $\mathrm{tr}\,c$ to 2.1e3; `implicit=0` diverges at step 145 |
+| 1.1 mm refinement (31 864 cells), TVE to 0.25 s | runs, $\mathrm{tr}\,c$ to 39 |
+| one cycle with the ventricle, VE and TVE | run; valve closes and reopens as with N |
+| time step, TVE, `lv=0`, 0.1 s, 2, 1, 0.5 ms against 0.25 ms | flow rate 3.0e-3, 1.3e-3, 4.3e-4: first order |
+| N and CY before and after the split of the forms | equal digits |
 
-The elastic fluids miss rate 2 for a reason not identified, possibly the
-inflow condition, which switches with the direction of the flow on parts of
-the openings. With the ventricle the atrial pressure it reads is that of
-$t^n$ (first order at the coupling); extrapolating it (`lv_extrapolate=1`)
-made the valve chatter and $p_v$ diverge.
+Against the CPU driver on the test mesh (BDF2 at 10 ms, orthogonal
+subscales), at $t$ = 0.15 s: flow rate 1.01e-4 against 0.95e-4 m^3/s for the
+three fluids; Wi 1.6 against 1.8 (VE) and 2.3 against 3.1 (TVE); stress
+$G(\mathrm{tr}\,c-3)$ 3.1 against 3.7 Pa (VE) and 7.1 against 8.1 Pa (TVE).
+
+Not run with CUDA, nor on `Coarse.mesh`.
+
+**Stabilisation parameters.** $\tau$ has no $(2/\Delta t)^2$ term: with it
+the stabilised problem changes with the time step and the time
+discretisation does not converge on a mesh that needs the stabilisation
+(Bochev, Gunzburger & Shadid 2004). Without it the time derivative cannot
+stay in the residual of the subscales (John & Novo 2011), so they are
+quasi-static: consistency error of order $\tau$, spatial. `stab=split` keeps
+the two diagonal terms alone.
 
 **Time-scheme dissipation.** The CSV column `timeDissipation` is the kinetic
 energy removed by the time scheme per unit time,
-$\rho/(4\Delta t)\,\lVert u^{n+1}-2u^n+u^{n-1}\rVert^2$ for BDF2. Against the
-solvent and polymer dissipation, on that test: order 1, 3.3, 1.6 and 0.8 at
-2, 1 and 0.5 ms (the scheme removed more energy than the fluid); order 2,
-3e-3, 4e-4 and 5e-5. Over a full cycle at 1 ms with the ventricle, order 2:
-about 1e-5 of the solvent and polymer dissipation in the E-wave.
+$\rho/(4\Delta t)\,\lVert u^{n+1}-2u^n+u^{n-1}\rVert^2$ for BDF2.
 
-**Against the CPU driver**, TVE, test mesh, one cycle: $p_v$ at the end 202 Pa
-(CPU, BDF2 at 10 ms with orthogonal subscales: 218 Pa); in the E-wave,
-polymer power 0.32 mW and elastic energy 1.4 uJ (CPU: 1.1-1.3 mW and
-7.2-8.0 uJ). The stress is four to six times smaller on this 2.2 mm mesh:
-nodal P1 stress from a recovered gradient, and SUPG diffusion of $\psi$, where
-the CPU driver has orthogonal subscales. Compare on `Coarse.mesh` before
-using the stress magnitudes. Checked besides: the vertex update against the
-exact Oldroyd-B stress in steady shear, extension and start-up of shear;
-`order=1 tau_dt=1 stab=split fluid=N` against `KokkosAtriumFlowPETSc` (equal
-digits). Not run with CUDA, nor on `Coarse.mesh`: `stab=asgs` adds velocity
-pressure matrices to the assembly, so its memory there is not known;
-`stab=split` has the footprint of `KokkosAtriumFlowPETSc`.
+**Unbounded stress.** Owens' dumbbells are Hookean and their stress is
+unbounded where $\lambda$ times the extension rate exceeds 1/2 (`tr(c)_max`
+in the log); `ptt=0.01`, say, bounds it with a linear Phan-Thien-Tanner
+factor that is not part of Owens' model.
 
-**Coupling of the stress on fine meshes.** On `Coarse.mesh` (cells near
-0.45 mm) VE and TVE diverged at $t\approx0.05$ s with both orders, the stress
-first ($\mathrm{tr}\,c$ from 4 to 500 in 20 steps while $|u|$ was 0.04 m/s).
-The explicit stress was balanced by $G\lambda$, the response of relaxed
-dumbbells; stretched ones respond $\mathrm{tr}(c)/3$ times faster. The
-balancing viscosity is now $G\lambda\max(1,\mathrm{tr}\,c/3)$
-(`bsd_stretch=1`, the default); on the test mesh this changes the cycle by
-less than 1 %. Its explicit side takes the gradient of $u^n$, not of the
-extrapolated $u^*$ (`bsd_extrapolate=1`), which changes the errors of the
-convergence test by less than 1 %. That alone did not cure `Coarse.mesh`:
-the velocity stayed bounded but $\mathrm{tr}\,c$ still grew from 744 to
-4.4e5 between $t$ = 0.08 and 0.10 s.
+**Linear solver.** BiCGStab(4) with Jacobi by default. On the 1.1 mm mesh
+(Serial), a Schur field split with an algebraic multigrid on the pressure,
+set up every ten steps and when the valve switches,
 
-The CPU driver on the same mesh, with the same $\Delta t$ and the same
-(Hookean) model, also builds stress at the rims of the veins, but slowly
-($\max\sigma$ 0.8 Pa at $t$ = 0.03 s, 143 Pa at 0.10 s, 690 Pa at 0.15 s;
-Wi up to 92; no step rejected, 1-2 Newton iterations). It differs in two
-ways that act there: u, p and $\psi$ are solved together, so the stress
-slows the extension that feeds it within the step; and its $\tau_\psi$ is
-about eight times larger where convection dominates. So the default is now
-two outer iterations per step (`picard=2`: steps 1-5 again from $\psi^n$, $n^n$
-with the kinematics of the last velocity iterate) and the $\tau_\psi$ of the
-CPU driver (`tau_psi=cpu`), for VE and TVE; N and CY are unchanged. On the
-test mesh: same ventricular pressure and volume, stress 7-15 % higher, twice
-the time per step. `picard=1 tau_psi=supg` reproduces the former version to
-all digits. That did not cure `Coarse.mesh` either: with the same Wi_max
-as the CPU driver at $t$ = 0.10 s (42 against 41), $\mathrm{tr}\,c$ reached
-1.1e7 there, and 7 of the 8 largest values were on wall vertices 13-35 mm
-from any opening, not at the veins.
+```
+pc_lag=10 -ksp_type fgmres -pc_type fieldsplit -pc_fieldsplit_type schur
+  -pc_fieldsplit_schur_fact_type lower -pc_fieldsplit_schur_precondition selfp
+  -fieldsplit_u_ksp_type preonly -fieldsplit_u_pc_type jacobi
+  -fieldsplit_p_ksp_type preonly -fieldsplit_p_pc_type gamg
+```
 
-Two more differences with the CPU driver are now removed:
-
-- **Skew-symmetric advection of $\psi$ and $n$** (`skew=1`):
-  $w\cdot\nabla s+\tfrac12(\nabla\cdot w)s$. The discrete divergence of
-  P1/P1 is not zero, and without the term the advection amplifies $\psi$ at
-  the rate $|\nabla\cdot w|/2$ where $\nabla\cdot w<0$: largest in the
-  boundary layers of the wall on a fine mesh.
-- **Developed inflow** (`inlet=developed`): blood enters the veins with the
-  steady conformation and aggregate size of the shear of its axial velocity
-  across the section, not relaxed ($\psi=0$, $n=n_{in}$), and backflow on the
-  mitral plane carries the $\psi$ found there. Relaxed blood entering at the
-  ring where a vein meets the wall is sheared at once, the stress that both
-  drivers show at the annulus of the veins.
-
-On the test mesh: same ventricular pressure and volume, stress 10-35 %
-higher; `skew=0 inlet=relaxed picard=1 tau_psi=supg` reproduces the version
-before the outer iterations to all digits. Not yet run on `Coarse.mesh`.
-
-Owens' dumbbells are Hookean and their stress is unbounded at a stagnation
-point with strong extension (`tr(c)_max` in the log); `ptt=0.01`, say, bounds
-it with a linear Phan-Thien-Tanner factor that is not part of Owens' model.
+took 17-38 iterations against 150-160 and half the time. Not tried with
+CUDA.
 
 ## Not ported
 
@@ -204,9 +168,7 @@ peaked at 6.3 GB on `Coarse.mesh` on that card (6.7 GB with ILU(0)).
 `KokkosAtriumFlowPETSc` was compiled with Kokkos 5.2.2 (Serial) and PETSc
 3.26.0 configured with Kokkos, and run on the same test mesh: with BiCGStab
 and Jacobi (80-130 iterations per step at a relative tolerance of 1e-8) it
-reproduces the native run to six digits at the end of the cycle. A Schur
-field split (FGMRES, `selfp`, GAMG on the velocity, Jacobi on the pressure)
-did not converge on that mesh with the options tried; it needs tuning.
+reproduces the native run to six digits at the end of the cycle.
 
 `KokkosAtriumFlow` was compiled with Kokkos 5.2.2, Serial backend, and run on
 a 3983-cell test mesh with the labels above for one cycle of 85 steps: the
@@ -244,8 +206,6 @@ build-cuda/examples/Kokkos/Heart/KokkosAtriumRheologyPETSc /path/to/Coarse.mesh 
 ```
 
 Keys of `KokkosAtriumRheologyPETSc`, besides those above: `fluid`, `stab`,
-`order`, `theta`, `tau_dt`, `lv_extrapolate`, `bsd_extrapolate`,
-`bsd_stretch`, `picard`, `tau_psi`, `skew`, `inlet`, `t_end`, `n_in`, `n_init`,
-`bsd`, `ptt`, `eta_plasma`, `lambda_h`. Its flow solver is
-BiCGStab(4) with Jacobi unless PETSc options say otherwise; the transport
-solver takes options with the prefix `transport_`.
+`order`, `inlet`, `t_end`, `n_in`, `n_init`, `devss`, `implicit`, `ptt`,
+`eta_plasma`, `lambda_h`, `pc_lag`. Its flow solver is BiCGStab(4) with
+Jacobi unless PETSc options say otherwise.

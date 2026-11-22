@@ -26,144 +26,106 @@
  *         with a(gd), b(gd), n_st(gd), G = (eta_inf - eta_plasma)/lambda_H as
  *         in the CPU driver, so that G lambda(n_st) = eta_CY - eta_plasma.
  *
- * Elastic stress, log-conformation. tau_p = G (c - I) and psi = log c (Fattal
- * & Kupferman, JNNFM 123, 2004) is the transported unknown, so c stays
- * positive definite. The scheme is segregated. Each step, from u^{n-1},
- * u^n, psi^n, n^n, with the extrapolations u^{n+1/2} = (3 u^n - u^{n-1})/2
- * and u* = 2 u^n - u^{n-1}:
+ * Momentum and continuity: P1/P1, BDF2 (order=1: backward Euler), convection
+ * by u* = 2 u^n - u^{n-1} in skew-symmetric form, stabilised by the algebraic
+ * subgrid scale method with quasi-static subscales (stab=asgs: SUPG and PSPG
+ * with the residual of the momentum equation without its time derivative),
+ *   tau (rho u*.grad u + grad p - div E, rho u*.grad v + grad q)/rho,
+ *   tau = [(2|u*|/h)^2 + (4 nu/h^2)^2]^(-1/2) by cell,
+ * or by its two diagonal terms alone (stab=split: three matrices less, not
+ * consistent). tau has no (2/dt)^2 term: with it the stabilised problem
+ * changes with the time step and the time discretisation does not converge
+ * on a mesh that needs the stabilisation (Bochev, Gunzburger & Shadid, CMAME
+ * 193, 2004). For CY, eta = eta_CY(gd*) and the transposed part of 2 eta D is
+ * explicit, E = eta (L*^T - tr(L*) I) with L* the gradient of u* at the
+ * vertices.
  *
- *  1. L = grad u^{n+1/2} at the vertices, the volume-weighted mean of the
- *     cell gradients, and gd = sqrt(2 D:D). The mean is not divergence free
- *     and, on the wall, has components that a no-slip wall excludes; a
- *     Hookean dumbbell stretches without bound in them, since a wall vertex is
- *     not advected. L is made trace free inside, and (du/dn) n^T with du/dn
- *     tangent on the wall, which is what grad u is there.
- *  2. Half a step at every vertex: n by the exact solution of its Riccati
- *     equation with b and n_st frozen, and c by the exact solution of
+ * Elastic stress (VE, TVE). tau_p = G (c - I), and psi = log c is stored at
+ * the vertices (Fattal & Kupferman, JNNFM 123, 2004), so c stays positive
+ * definite. Each step, from u^{n-1}, u^n, psi^n, n^n:
+ *
+ *  1. L^n, the gradient of u^n at the vertices: the volume-weighted mean of
+ *     the cell gradients, made trace free, because the divergence of a
+ *     stabilised P1 velocity is not zero and would pump the isotropic part
+ *     of c. At a vertex of the wall it is reduced to (du/dn) n^T with du/dn
+ *     tangent, which is what the gradient is on a no-slip wall: a simple
+ *     shear, for which c is bounded. The mean of the cells of a wall vertex
+ *     has an extensional part, and that vertex is not transported: c would
+ *     grow there without bound.
+ *  2. Advection: psi and n are taken at the foot of the characteristic of
+ *     every vertex, X = x - dt u^{n+1/2}, found by walking through the cells
+ *     and interpolated linearly there (Lee & Xu, CMAME 195, 2006). The new
+ *     value is a convex combination of old ones: no over- or undershoot of
+ *     psi to be exponentiated, the vertices of the wall (u = 0) are not
+ *     transported, and there is no linear system. A foot beyond an opening
+ *     takes the inflow value there: on the veins developed blood, the steady
+ *     conformation and aggregate size of the shear of the axial velocity
+ *     across the section (inlet=relaxed: psi = 0, n = n_in); on the mitral
+ *     plane the value found there. A foot beyond the wall takes the value on
+ *     the wall. First order in space, as upwinding.
+ *  3. Prediction with L^n, at every vertex: n by the exact solution of its
+ *     Riccati equation with b and n_st frozen, c by the exact solution of
  *       dc/dt = L c + c L^T - (c - I)/lambda
- *     with L frozen and lambda at the n of the middle of the half step
- *     (matrix exponential of L, Simpson for the source), then psi = log c.
- *     This is the Fattal-Kupferman source of psi integrated exactly: no bound
- *     on dt/lambda or dt |L|.
- *  3. psi (six components) and n advected over the whole step with
- *     w = u^{n+1/2}, Crank-Nicolson and SUPG, by one scalar P1 matrix for the
- *     seven fields:
- *       (s - s^n, r + tau w.grad r)/dt + (w.grad s^th, r + tau w.grad r)
- *       + <max(-w.n, 0) s^th, r>_openings = 0,   s^th = (s + s^n)/2,
- *     the boundary term setting psi = psi_in and n = n_in on the faces where
- *     the flow enters: on the veins developed blood, the steady conformation
- *     and aggregate size of the shear of the axial velocity across the
- *     section (key inlet=developed; inlet=relaxed imposes psi = 0 and the
- *     constant n_in, as before), and on the mitral plane the values found
- *     there. Relaxed blood entering at the ring where the vein meets the
- *     wall is sheared at once by the wall, a stress that blood coming from a
- *     vein has built over centimetres; n_in is used by inlet=relaxed only.
- *     (Marchal & Crochet streamline upwinding in its consistent form; no
- *     discontinuity capturing.) The Galerkin advection is
- *     skew-symmetric, w.grad s + (1/2)(div w) s (key skew; as in the CPU
- *     driver): the discrete div w of P1/P1 is not zero, and without the term
- *     the advection itself amplifies psi at the rate |div w|/2 where
- *     div w < 0. On Coarse.mesh that ran the stress away on the wall, in
- *     the boundary layers where div w is largest.
- *  4. The second half step of 2 (Strang splitting).
- *  5. Momentum and continuity for (u^{n+1}, p^{n+1}), P1/P1, BDF2, with the
- *     elastic stress of t^{n+1} from 2-4 and balanced by a viscosity
- *     eta_a = G lambda max(1, tr(c)/3) on both sides (the factor, key
- *     bsd_stretch, makes eta_a follow the stiffness of stretched dumbbells:
- *     without it VE and TVE diverged on Coarse.mesh, the stress first) (Guenette & Fortin, JNNFM 60, 1995; the
- *     "both sides diffusion" of finite volume log-conformation codes):
- *       rho (3 u - 4 u^n + u^{n-1})/(2 dt) + rho u*.grad u
- *         - div((eta + eta_a) grad u) + grad p = div E,
- *       E = tau_p - eta_a L^n,   eta = eta_plasma,
- *     L^n the recovered gradient of u^n. The added term is
- *     eta_a (grad u^{n+1} - L^n): of order dt and of the mesh size, a
- *     projection-type stabilisation of the velocity gradient. With L* of u*
- *     (bsd_extrapolate=1) it is of order dt^2 but unstable: for a Fourier
- *     mode of wavenumber k, once eta_a k^2 dt/rho exceeds about one (cells
- *     below 0.5 mm at lambda = 0.09 s, dt = 1 ms) the explicit side, with
- *     weight 2 eta_a/(eta + eta_a) ~ 2, grows with the elastic stress (VE and
- *     TVE diverged on Coarse.mesh at t = 0.05 s). For CY the same
- *     form carries the transposed part of 2 eta D explicitly: eta = eta_CY(gd*)
- *     and E = eta (L*^T - tr(L*) I), whose divergence is grad eta . L*^T.
+ *     over dt (matrix exponential of L, Simpson for the source), psi = log c:
+ *     no bound on dt/lambda or dt |L|.
+ *  4. Momentum and continuity for (u^{n+1}, p^{n+1}), with the predicted
+ *     stress in weak form and two terms that vanish for a resolved steady
+ *     flow:
+ *       ... + (eta_plasma grad u + tau_pred, grad v)
+ *           + (eta_a (grad u - L^n), grad v) + (eta_d (grad u - grad u^n), grad v).
+ *     eta_a = alpha G lambda, with L^n the vertex gradient of step 1, is
+ *     DEVSS-G (Guenette & Fortin, JNNFM 60, 1995; Liu, Bornside, Armstrong &
+ *     Brown, JNNFM 77, 1998; the both-sides diffusion of finite volumes). A
+ *     stress built at the vertices from mean gradients does not see the
+ *     velocity modes whose mean gradient is zero, which only the plasma
+ *     viscosity would resist; the term gives them the polymer viscosity. At
+ *     low Weissenberg number tau_pred - eta_a L^n = G lambda L^T, and the
+ *     discrete problem is that of CY. alpha is the key devss (1).
+ *     eta_d = beta G dt_e lambda_max(c_pred), dt_e = lambda (1 - exp(-dt/lambda)),
+ *     with the cell gradient of u^n, is the response of the stress to the
+ *     change of velocity within the step, taken implicitly (D'Avino & Hulsen,
+ *     JNNFM 165, 2010): G dt_e (L c + c L^T) is the change of the stress for
+ *     a change L of the gradient, and eta_d bounds it. Without it the
+ *     stress is explicit, and stable only while G lambda_max(c) (pi dt/h)^2
+ *     /rho < 1: tr(c) < 30 for cells of 0.45 mm at dt = 1 ms, and not even
+ *     c = I for cells of 0.06 mm (Coarse.mesh has both). beta is the key
+ *     implicit (2).
+ *  5. Correction: step 3 again from the advected state, with the gradient of
+ *     (u^n + u^{n+1})/2.
  *
- * Every piece is second order in dt with stab=asgs and tau_dt=0: the
- * extrapolations, the Strang splitting, Crank-Nicolson and BDF2, but for the
- * explicit side of the both-sides diffusion of VE and TVE. Not with:
- * stab=split, whose two terms are not consistent and of order tau ~ dt;
- * ptt > 0, whose factor takes the trace at the start of each half step; the
- * ventricle, which reads the atrial pressure of t^n (lv_extrapolate=1 reads
- * 2 p^n - p^{n-1}, second order but unstable: the valve chattered and p_v
- * diverged on the test mesh); the valve, whose law switches. On the test mesh
- * with lv=0, up to t = 0.1 s: N converges at rate 2, VE and TVE at 1.2-1.7
- * (not identified; possibly the inflow condition, which switches with the
- * direction of the flow on the openings), with errors a tenth of those of
- * order 1 at 1 ms.
- * The first step starts from u^{-1} = u^0, the fluid at rest. order=1 gives
- * the first order scheme: L of u^n, one local step with backward Euler for n,
- * transport by backward Euler, momentum by backward Euler with w = u^n.
- * theta < 1/2 is not stable; theta > 1/2 damps the transport and is first
- * order. The CSV column timeDissipation is the kinetic energy that the time
- * scheme removes per unit time, rho/(4 dt) |u^{n+1} - 2 u^n + u^{n-1}|^2
- * (rho/(2 dt) |u^{n+1} - u^n|^2 with order=1), to be set against the viscous
- * and polymer dissipation.
+ * The elastic part is first order in time (the splitting of steps 2 and 3)
+ * and in space (step 2); it is not the monolithic Newton solve with
+ * orthogonal subscales of the CPU driver. Owens' dumbbells are Hookean: at a
+ * stagnation point where lambda times the extension rate exceeds 1/2 their
+ * stress grows without bound (tr(c)_max in the log); ptt > 0 divides lambda
+ * by 1 + ptt (tr c - 3) (linear Phan-Thien-Tanner), which bounds it and is
+ * not part of Owens' model.
  *
- * Outer iterations (key picard, VE and TVE): steps 1-5 are repeated from
- * psi^n, n^n with the kinematics of the last iterate u^{n+1,k}: u^{n+1/2} =
- * (u^n + u^{n+1,k})/2 and the explicit side of the both-sides diffusion from
- * u^{n+1,k}. The CPU driver solves u, p and psi in one Newton system; one
- * segregated step lags the effect of the stress on the flow by one step,
- * which on Coarse.mesh let the stress at the rims of the veins run away.
- * Step 3 uses the tau_psi of the CPU driver,
- *   tau_psi = 1/(c3/lambda + c4 |u|/h + 2 c4 |grad u|),  c3 = 4, c4 = 0.25
- * (tau_psi=supg: the former [(2|u|/h)^2 + (1/lambda)^2]^(-1/2)).
- *
- * Stabilisation of step 5 (key stab). "asgs", the default: the algebraic
- * subgrid scale method with the residual of the momentum equation, i.e.
- * SUPG and PSPG, with quasi-static subscales:
- *   tau (rho w.grad u + grad p - div E, rho w.grad v + grad q)/rho,  w = u*,
- * tau = [(2|w|/h)^2 + (4 nu/h^2)^2]^(-1/2) by cell, nu = (eta + eta_a)/rho, and
- * tau = [(2|w|/h)^2 + (1/lambda)^2]^(-1/2) for the SUPG of step 3. Neither
- * has the term (2/dt)^2 of AtriumFlow.cpp (key tau_dt=1 adds it): with it
- * tau -> dt/2 as dt -> 0, the stabilised problem changes with the time step
- * and the time discretisation does not converge on a mesh that needs the
- * stabilisation (Bochev, Gunzburger & Shadid, CMAME 193, 2004). Without it,
- * the time derivative cannot stay in the residual: its term tau/dt is
- * destabilising once dt < tau (John & Novo, SINUM 49, 2011; here tau ~ 2 ms),
- * so the residuals of the subscales leave it out (quasi-static subscales, for
- * the transport too). The consistency error is then of order tau, of the
- * mesh and not of the time step. tau_dt=1 restores the time derivative with
- * the (2/dt)^2 term. The CPU driver avoids both with dynamic subscales.
- * "split": the
- * two terms of AtriumFlow.cpp, (tau rho w.grad u, w.grad v) and (tau/rho
- * grad p, grad q), which is not consistent but needs three matrices less.
- * Neither is the orthogonal subscale method with dynamic subscales of the CPU
- * driver. The convection of the Galerkin part is skew-symmetric.
- *
- * Owens' dumbbells are Hookean: at a stagnation point where lambda times the
- * extension rate exceeds 1/2 their stress grows without bound, and tr(c)_max
- * of the log shows it. ptt > 0 divides lambda by 1 + ptt (tr c - 3) in step 2
- * (linear Phan-Thien-Tanner), which bounds it; it is not part of Owens' model.
+ * The CSV column timeDissipation is the kinetic energy that the time scheme
+ * removes per unit time, rho/(4 dt) |u^{n+1} - 2 u^n + u^{n-1}|^2 (order=1:
+ * rho/(2 dt) |u^{n+1} - u^n|^2), to be set against the viscous and polymer
+ * dissipation.
  *
  * Openings, lumped ventricle and mesh: as AtriumFlow.cpp. The vertex kernels
- * (steps 1, 2 and the stresses) are Kokkos kernels of this file; the forms
- * are assembled into PETSc matrices of the Kokkos type and solved by PETSc.
+ * (steps 1-3, 5 and the stresses) are Kokkos kernels of this file; the flow
+ * problem is a PETSc matrix of the Kokkos type solved by PETSc.
  *
  * Usage:
  *   KokkosAtriumRheologyPETSc mesh.mesh [key=value ...] [PETSc options]
- * Keys: fluid (TVE; N, CY, VE, TVE), stab (asgs; split), cycles (2), steps
- * (850, per cycle), period (0.85), rho (1060), mu (0.0049, fluid N), p_in
- * (1200), p_in_amplitude (200), ramp (0.25, cycles), z_in (1000), lv (1),
- * order (2; 1), theta (0.5, transport), t_end (stop at that time), tau_dt (0),
- * lv_extrapolate (0), bsd_extrapolate (0), bsd_stretch (1), picard (2),
- * tau_psi (cpu; supg), skew (1), inlet (developed; relaxed),
- * p_out (0), n_in (1.5, aggregate size entering), n_init (-1: n_st(0)),
- * bsd (1, factor of eta_a), ptt (0; linear PTT factor, see below), eta_plasma
- * (0.0012), lambda_h (0.005), output
- * (AtriumRheology), output_every (17), tolerance (1e-8), max_iterations (5000).
- * PETSc options: the flow solver has no prefix (BiCGStab(4) with Jacobi by
- * default; a step whose solve fails is solved again with GMRES(100) before
- * the run stops), the transport solver the prefix transport_ (GMRES with
- * Jacobi).
+ * Keys: fluid (TVE; N, CY, VE, TVE), stab (asgs; split), order (2; 1), cycles
+ * (2), steps (850, per cycle), t_end (stop at that time), period (0.85), rho
+ * (1060), mu (0.0049, fluid N), p_in (1200), p_in_amplitude (200), ramp
+ * (0.25, cycles), z_in (1000), lv (1), p_out (0), inlet (developed; relaxed),
+ * n_in (1.5, with inlet=relaxed), n_init (-1: n_st(0)), devss (1), implicit
+ * (2), ptt (0), eta_plasma (0.0012), lambda_h (0.005), output (AtriumRheology),
+ * output_every (17), tolerance (1e-8), max_iterations (5000), pc_lag (1:
+ * steps between two set-ups of the preconditioner).
+ * PETSc options: the flow solver has no prefix; BiCGStab(4) with Jacobi by
+ * default, and a step whose solve fails is solved again with GMRES(100)
+ * before the run stops. The unknowns are split in u and p for -pc_type
+ * fieldsplit; with a preconditioner that costs to set up (an algebraic
+ * multigrid on the pressure Schur complement), pc_lag keeps it for that
+ * number of steps.
  * Output: <output>.xdmf and <output>.csv, one row per step.
  */
 #include <algorithm>
@@ -176,6 +138,7 @@
 #include <map>
 #include <stdexcept>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include <Rodin/Assembly.h>
@@ -226,10 +189,12 @@ namespace
       Fluid fluid = Fluid::Thixotropic;
       std::string fluidName = "TVE";
       bool residual = true; ///< stab=asgs
+      int order = 2;
       Real scale = 1e-3;
       Real period = 0.85;
       size_t cycles = 2;
       size_t steps = 850;
+      Real endTime = -1;
       Real rho = 1060;
       Real mu = 0.0049;
       Real inletPressureMean = 1200;
@@ -238,20 +203,11 @@ namespace
       Real inletImpedance = 1000;
       bool ventricle = true;
       Real outletPressure = 0;
+      bool developedInlet = true;
       Real inletSize = 1.5;
       Real initialSize = -1;
-      Real bothSides = 1;
-      int order = 2;
-      bool tauTime = false;
-      bool extrapolateAtrium = false;
-      bool extrapolateBothSides = false;
-      bool stretchBothSides = true;
-      bool cpuTau = true;
-      bool skew = true;
-      bool developedInlet = true;
-      size_t picard = 2;
-      Real theta = 0.5;
-      Real endTime = -1;
+      Real devss = 1;
+      Real implicit = 2;
       Real ptt = 0;
       Real etaPlasma = 1.2e-3;
       Real lambdaH = 0.005;
@@ -259,6 +215,7 @@ namespace
       size_t outputEvery = 17;
       Real tolerance = 1e-8;
       size_t maxIterations = 5000;
+      size_t preconditionerLag = 1;
   };
 
   /**
@@ -479,8 +436,9 @@ namespace
     return s;
   }
 
-  /// @param psi Components xx, yy, zz, xy, xz, yz. @return exp(psi).
-  KOKKOS_INLINE_FUNCTION Tensor conformation(const Real psi[6])
+  /// @param psi Components xx, yy, zz, xy, xz, yz. @param largest Largest
+  /// eigenvalue of exp(psi). @return exp(psi).
+  KOKKOS_INLINE_FUNCTION Tensor conformation(const Real psi[6], Real& largest)
   {
     Tensor s;
     s.a[0][0] = psi[0];
@@ -494,7 +452,15 @@ namespace
     eigen(s, w, r);
     for (int k = 0; k < 3; ++k)
       w[k] = ::Kokkos::exp(w[k]);
+    largest = w[0] > w[1] ? (w[0] > w[2] ? w[0] : w[2]) : (w[1] > w[2] ? w[1] : w[2]);
     return spectral(w, r);
+  }
+
+  /// @param psi Components xx, yy, zz, xy, xz, yz. @return exp(psi).
+  KOKKOS_INLINE_FUNCTION Tensor conformation(const Real psi[6])
+  {
+    Real largest;
+    return conformation(psi, largest);
   }
 
   /**
@@ -577,34 +543,41 @@ namespace
   }
 
   /**
-   * @brief Vertex data of the rheology, in device memory. Vector fields are
-   *        stored as the P1 spaces of Rodin, component r of vertex i at
-   *        i + r nodes.
+   * @brief Vertex and cell data of the rheology, in device memory. Vector
+   *        fields are stored as the P1 spaces of Rodin, component r of vertex
+   *        i at i + r nodes.
    */
   struct Nodal
   {
       int nodes = 0;
       int cells = 0;
-      IntView cellVertices; ///< Four vertices per cell.
+      IntView cellVertices;   ///< Four vertices per cell.
+      IntView cellNeighbours; ///< Cell across the face opposite to each vertex;
+                              ///< -1 beyond the wall, -2 beyond an opening.
       RealView coordinates;
-      IntView nodeOffsets;  ///< Cells of a vertex, compressed rows.
+      IntView nodeOffsets; ///< Cells of a vertex, compressed rows.
       IntView nodeCells;
-      RealView volume;       ///< Lumped volume of a vertex.
+      RealView volume;     ///< Lumped volume of a vertex.
       RealView wallNormal; ///< Unit normal at the vertices of the wall, zero elsewhere.
       RealView veinNormal; ///< Unit normal at the vertices of the veins, zero elsewhere.
-      RealView psiIn; ///< Inflow psi of the transport (developed on the veins).
-      RealView sizeIn; ///< Inflow aggregate size of the transport.
       RealView cellGradient; ///< By cell, L_ij at 3 i + j and the volume at 9.
-      RealView velocity;
+      RealView velocity; ///< Velocity read by recoverGradient() and advect().
       RealView gradient; ///< By vertex, L_ij at 3 i + j.
       RealView shearRate;
       RealView viscosity; ///< Implicit viscosity of the momentum equation.
+      RealView increment; ///< eta_d, the part of it that acts on u^{n+1} - u^n.
       RealView relaxation;
-      RealView size;
+      RealView size; ///< Aggregate size n.
       RealView psi; ///< Components xx, yy, zz, xy, xz, yz.
+      RealView sizeAdvected; ///< n and psi at the feet of the characteristics.
+      RealView psiAdvected;
+      RealView sizePredicted; ///< n and psi predicted with the gradient of u^n.
+      RealView psiPredicted;
+      RealView sizeIn; ///< Values taken by a foot beyond an opening.
+      RealView psiIn;
       RealView trace;
       RealView stress; ///< Frobenius norm of tau_p.
-      RealView extra0, extra1, extra2; ///< Rows of E.
+      RealView extra0, extra1, extra2; ///< Rows of the explicit stress E.
       RealView density; ///< Four diagnostic densities per vertex.
   };
 
@@ -649,7 +622,14 @@ namespace
     return res;
   }
 
-  /// @brief Step 1: velocity gradient at the vertices, from Nodal::velocity.
+  /**
+   * @brief Step 1: velocity gradient at the vertices, from Nodal::velocity.
+   *
+   * The volume-weighted mean of the cell gradients, made trace free; at the
+   * vertices of the wall, (du/dn) n^T with du/dn tangent.
+   *
+   * @param d Vertex data; cellGradient, gradient and shearRate are written.
+   */
   void recoverGradient(const Nodal& d)
   {
     const int nodes = d.nodes;
@@ -779,56 +759,42 @@ namespace
   }
 
   /**
-   * @brief Step 2: aggregate size and psi of every vertex over dt, with the
-   *        velocity gradient of recoverGradient().
-   * @param d Vertex data; size, relaxation and psi are updated.
+   * @brief Aggregate size and psi of every vertex over dt from the advected
+   *        state, with the velocity gradient of recoverGradient() frozen.
+   * @param d Vertex data; psiAdvected and sizeAdvected are read, relaxation
+   *        is written.
+   * @param psiTo Receives psi. @param sizeTo Receives the aggregate size.
    * @param model Fluid constants.
    * @param thixotropic Whether n is transported (TVE) or n = n_st (VE).
    * @param dt Time step.
    * @param epsilon Linear PTT factor of advance().
-   * @param exact Second order: n by aggregateSize(), and c with lambda at the
-   *        n of the middle of the step. Otherwise backward Euler for n and
-   *        lambda at the end of the step.
    */
-  void advanceStructure(const Nodal& d, const Rheology& model, bool thixotropic, Real dt,
-    Real epsilon, bool exact)
+  void advanceStructure(const Nodal& d, const RealView& psiTo, const RealView& sizeTo,
+    const Rheology& model, bool thixotropic, Real dt, Real epsilon)
   {
     const int nodes = d.nodes;
     const auto gradient = d.gradient;
     const auto shearRate = d.shearRate;
-    const auto size = d.size;
     const auto relaxation = d.relaxation;
-    const auto psi = d.psi;
+    const auto psiFrom = d.psiAdvected;
+    const auto sizeFrom = d.sizeAdvected;
     ::Kokkos::parallel_for(
       "AtriumRheology::advanceStructure", ::Kokkos::RangePolicy<Exec>(0, nodes),
       KOKKOS_LAMBDA(const int i) {
         const Real gd = shearRate(i);
         Real lambda;
-        if (thixotropic && exact)
+        if (thixotropic)
         {
           const Real nst = model.steadySize(gd);
           const Real b = model.fragmentation(gd);
-          const Real n0 = size(i) < 1 ? Real(1) : size(i);
+          const Real n0 = sizeFrom(i) < 1 ? Real(1) : sizeFrom(i);
           lambda = model.relaxation(aggregateSize(n0, nst, b, 0.5 * dt), gd);
-          Real n = aggregateSize(n0, nst, b, dt);
-          size(i) = n < 1 ? Real(1) : n;
-        }
-        else if (thixotropic)
-        {
-          // Backward Euler of dn/dt = -(b/2)(n^2 - n - n_st (n_st - 1)):
-          // the positive root of k x^2 + (1 - k) x - q = 0.
-          const Real nst = model.steadySize(gd);
-          const Real k = 0.5 * dt * model.fragmentation(gd);
-          const Real q = size(i) + k * nst * (nst - 1);
-          Real n = 2 * q / ((1 - k) + ::Kokkos::sqrt((1 - k) * (1 - k) + 4 * k * q));
-          if (n < 1)
-            n = 1;
-          size(i) = n;
-          lambda = model.relaxation(n, gd);
+          const Real n = aggregateSize(n0, nst, b, dt);
+          sizeTo(i) = n < 1 ? Real(1) : n;
         }
         else
         {
-          size(i) = model.steadySize(gd);
+          sizeTo(i) = model.steadySize(gd);
           lambda = model.steadyRelaxation(gd);
         }
         relaxation(i) = lambda;
@@ -840,21 +806,24 @@ namespace
         }
         Real s[6];
         for (int k = 0; k < 6; ++k)
-          s[k] = psi(i + k * nodes);
+          s[k] = psiFrom(i + k * nodes);
         advance(s, L, lambda, dt, epsilon);
         for (int k = 0; k < 6; ++k)
-          psi(i + k * nodes) = s[k];
+          psiTo(i + k * nodes) = s[k];
       });
   }
 
   /**
-   * @brief Inflow values of the transport: developed blood on the veins.
+   * @brief Values taken by the characteristics that come from beyond an
+   *        opening: developed blood on the veins.
    *
    * At a vertex of a vein with unit normal n, the shear of the axial velocity
-   * across the section, S = n n^T L (I - n n^T) = n g^T with g = (I - n n^T)
-   * L^T n, has the shear rate |g|, and for it the steady Oldroyd-B
-   * conformation is c = I + lambda (S + S^T) + 2 lambda^2 S S^T, with lambda
-   * and the aggregate size n_st at that shear rate. Elsewhere the inflow
+   * across the section, S = n g^T with g = (I - n n^T) L^T n, has the shear
+   * rate |g|, and for it the steady conformation of the model is
+   * c = I + lambda (S + S^T) + 2 lambda^2 S S^T, with lambda and the aggregate
+   * size n_st at that shear rate. Relaxed blood entering at the ring where a
+   * vein meets the wall is sheared at once by the wall, a stress that blood
+   * coming from a vein has built over centimetres. At the other vertices the
    * values are the current ones, so that a backflow on the mitral plane
    * carries the psi found there (as the CPU driver does).
    *
@@ -862,8 +831,12 @@ namespace
    *        sizeIn are written.
    * @param model Fluid constants.
    * @param thixotropic Whether lambda is that of n_st (TVE) or of eta_CY (VE).
+   * @param developed Whether the veins carry developed blood; otherwise
+   *        psi = 0 and the aggregate size @p relaxedSize.
+   * @param relaxedSize Aggregate size on the veins without @p developed.
    */
-  void developedInflow(const Nodal& d, const Rheology& model, bool thixotropic)
+  void inflowValues(const Nodal& d, const Rheology& model, bool thixotropic,
+    bool developed, Real relaxedSize)
   {
     const int nodes = d.nodes;
     const auto gradient = d.gradient;
@@ -873,7 +846,7 @@ namespace
     const auto psiIn = d.psiIn;
     const auto sizeIn = d.sizeIn;
     ::Kokkos::parallel_for(
-      "AtriumRheology::developedInflow", ::Kokkos::RangePolicy<Exec>(0, nodes),
+      "AtriumRheology::inflowValues", ::Kokkos::RangePolicy<Exec>(0, nodes),
       KOKKOS_LAMBDA(const int i) {
         const Real n[3] = {normal(i), normal(i + nodes), normal(i + 2 * nodes)};
         if (n[0] * n[0] + n[1] * n[1] + n[2] * n[2] < 0.5)
@@ -881,6 +854,13 @@ namespace
           for (int k = 0; k < 6; ++k)
             psiIn(i + k * nodes) = psi(i + k * nodes);
           sizeIn(i) = size(i);
+          return;
+        }
+        if (!developed)
+        {
+          for (int k = 0; k < 6; ++k)
+            psiIn(i + k * nodes) = 0;
+          sizeIn(i) = thixotropic ? relaxedSize : size(i);
           return;
         }
         Real q[3], qn = 0;
@@ -927,18 +907,226 @@ namespace
   }
 
   /**
-   * @brief Viscosity and explicit stress E of the momentum equation, and the
-   *        diagnostics, from the gradient of recoverGradient() and psi.
-   * @param d Vertex data; viscosity, extra0..2, trace, stress are written.
+   * @brief Step 2: psi and n at the feet of the characteristics.
+   *
+   * For every vertex the foot X = x - dt u, u the velocity of Nodal::velocity
+   * at the vertex, is located by walking from a cell of the vertex across the
+   * face of the most negative barycentric coordinate. Inside the mesh the
+   * values of the four vertices of the cell are interpolated; when the walk
+   * meets the boundary the foot is brought back to that face, and the values
+   * are those of the inflow (an opening) or the current ones (the wall).
+   *
+   * @param d Vertex data; psi, size, psiIn, sizeIn are read, psiAdvected and
+   *        sizeAdvected are written.
+   * @param dt Time step.
+   */
+  void advect(const Nodal& d, Real dt)
+  {
+    const int nodes = d.nodes;
+    const auto cv = d.cellVertices;
+    const auto neighbours = d.cellNeighbours;
+    const auto x = d.coordinates;
+    const auto offsets = d.nodeOffsets;
+    const auto incident = d.nodeCells;
+    const auto u = d.velocity;
+    const auto psi = d.psi;
+    const auto size = d.size;
+    const auto psiIn = d.psiIn;
+    const auto sizeIn = d.sizeIn;
+    const auto psiTo = d.psiAdvected;
+    const auto sizeTo = d.sizeAdvected;
+    ::Kokkos::parallel_for(
+      "AtriumRheology::advect", ::Kokkos::RangePolicy<Exec>(0, nodes),
+      KOKKOS_LAMBDA(const int i) {
+        Real X[3], move2 = 0;
+        for (int k = 0; k < 3; ++k)
+        {
+          const Real step = dt * u(i + k * nodes);
+          X[k] = x(i + k * nodes) - step;
+          move2 += step * step;
+        }
+        if (move2 == 0)
+        {
+          for (int k = 0; k < 6; ++k)
+            psiTo(i + k * nodes) = psi(i + k * nodes);
+          sizeTo(i) = size(i);
+          return;
+        }
+        int c = incident(offsets(i));
+        Real b[4];
+        bool opening = false;
+        for (int walk = 0; walk < 512; ++walk)
+        {
+          // Barycentric coordinates of X in the cell c.
+          Real P[4][3];
+          for (int a = 0; a < 4; ++a)
+          {
+            for (int k = 0; k < 3; ++k)
+              P[a][k] = x(cv(4 * c + a) + k * nodes);
+          }
+          Real J[3][3], r[3];
+          for (int k = 0; k < 3; ++k)
+          {
+            for (int a = 1; a < 4; ++a)
+              J[k][a - 1] = P[a][k] - P[0][k];
+            r[k] = X[k] - P[0][k];
+          }
+          const Real det = J[0][0] * (J[1][1] * J[2][2] - J[1][2] * J[2][1]) -
+            J[0][1] * (J[1][0] * J[2][2] - J[1][2] * J[2][0]) +
+            J[0][2] * (J[1][0] * J[2][1] - J[1][1] * J[2][0]);
+          b[1] = (r[0] * (J[1][1] * J[2][2] - J[1][2] * J[2][1]) -
+                   J[0][1] * (r[1] * J[2][2] - J[1][2] * r[2]) +
+                   J[0][2] * (r[1] * J[2][1] - J[1][1] * r[2])) /
+            det;
+          b[2] = (J[0][0] * (r[1] * J[2][2] - J[1][2] * r[2]) -
+                   r[0] * (J[1][0] * J[2][2] - J[1][2] * J[2][0]) +
+                   J[0][2] * (J[1][0] * r[2] - r[1] * J[2][0])) /
+            det;
+          b[3] = (J[0][0] * (J[1][1] * r[2] - r[1] * J[2][1]) -
+                   J[0][1] * (J[1][0] * r[2] - r[1] * J[2][0]) +
+                   r[0] * (J[1][0] * J[2][1] - J[1][1] * J[2][0])) /
+            det;
+          b[0] = 1 - b[1] - b[2] - b[3];
+          int out = 0;
+          for (int a = 1; a < 4; ++a)
+          {
+            if (b[a] < b[out])
+              out = a;
+          }
+          if (b[out] >= -1e-12)
+            break;
+          const int next = neighbours(4 * c + out);
+          if (next >= 0 && walk < 511)
+          {
+            c = next;
+            continue;
+          }
+          // Beyond the boundary (or a walk that does not end): back to the cell.
+          opening = next == -2;
+          Real sum = 0;
+          for (int a = 0; a < 4; ++a)
+          {
+            if (b[a] < 0)
+              b[a] = 0;
+            sum += b[a];
+          }
+          for (int a = 0; a < 4; ++a)
+            b[a] /= sum;
+          break;
+        }
+        int v[4];
+        for (int a = 0; a < 4; ++a)
+          v[a] = cv(4 * c + a);
+        for (int k = 0; k < 6; ++k)
+        {
+          Real value = 0;
+          for (int a = 0; a < 4; ++a)
+          {
+            value += b[a] * (opening ? psiIn(v[a] + k * nodes) : psi(v[a] + k * nodes));
+          }
+          psiTo(i + k * nodes) = value;
+        }
+        Real value = 0;
+        for (int a = 0; a < 4; ++a)
+          value += b[a] * (opening ? sizeIn(v[a]) : size(v[a]));
+        sizeTo(i) = value;
+      });
+  }
+
+  /**
+   * @brief Viscosity and explicit stress E of the momentum equation, from
+   *        the gradient of recoverGradient() and psi.
+   *
+   * N: the viscosity mu. CY: eta_CY(gd) and E = eta (L^T - tr(L) I). VE and
+   * TVE: E = G (c - I) - eta_a L and the viscosity eta_plasma + eta_a + eta_d,
+   * with eta_a = alpha G lambda and eta_d = beta G dt_e lambda_max(c),
+   * dt_e = lambda (1 - exp(-dt/lambda)).
+   *
+   * @param d Vertex data; viscosity, increment, extra0..2 are written.
+   * @param psi psi of the stress (elastic fluids).
    * @param model Fluid constants.
    * @param fluid Fluid model.
    * @param mu Viscosity of the Newtonian fluid.
-   * @param bothSides Factor of eta_a.
-   * @param scaleWithStretch Whether eta_a is multiplied by max(1, tr(c)/3).
+   * @param dt Time step.
+   * @param alpha Factor of eta_a.
+   * @param beta Factor of eta_d.
+   */
+  void momentumStress(const Nodal& d, const RealView& psi, const Rheology& model,
+    Fluid fluid, Real mu, Real dt, Real alpha, Real beta)
+  {
+    const int nodes = d.nodes;
+    const auto gradient = d.gradient;
+    const auto shearRate = d.shearRate;
+    const auto viscosity = d.viscosity;
+    const auto increment = d.increment;
+    const auto relaxation = d.relaxation;
+    const auto e0 = d.extra0;
+    const auto e1 = d.extra1;
+    const auto e2 = d.extra2;
+    const bool elastic = fluid == Fluid::Viscoelastic || fluid == Fluid::Thixotropic;
+    const bool shearThinning = fluid == Fluid::CarreauYasuda;
+    ::Kokkos::parallel_for(
+      "AtriumRheology::momentumStress", ::Kokkos::RangePolicy<Exec>(0, nodes),
+      KOKKOS_LAMBDA(const int i) {
+        Real E[3][3] = {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}};
+        Real eta = mu, etaD = 0;
+        if (shearThinning)
+        {
+          Real L[3][3];
+          for (int a = 0; a < 3; ++a)
+          {
+            for (int b = 0; b < 3; ++b)
+              L[a][b] = gradient(9 * i + 3 * a + b);
+          }
+          eta = model.viscosity(shearRate(i));
+          const Real divergence = L[0][0] + L[1][1] + L[2][2];
+          for (int a = 0; a < 3; ++a)
+          {
+            for (int b = 0; b < 3; ++b)
+              E[a][b] = eta * (L[b][a] - (a == b ? divergence : Real(0)));
+          }
+        }
+        else if (elastic)
+        {
+          Real s[6];
+          for (int k = 0; k < 6; ++k)
+            s[k] = psi(i + k * nodes);
+          Real largest;
+          const Tensor c = conformation(s, largest);
+          const Real lambda = relaxation(i);
+          const Real etaA = alpha * model.modulus * lambda;
+          etaD =
+            beta * model.modulus * lambda * (1 - ::Kokkos::exp(-dt / lambda)) * largest;
+          eta = model.etaPlasma + etaA + etaD;
+          for (int a = 0; a < 3; ++a)
+          {
+            for (int b = 0; b < 3; ++b)
+            {
+              E[a][b] = model.modulus * (c.a[a][b] - (a == b ? Real(1) : Real(0))) -
+                etaA * gradient(9 * i + 3 * a + b);
+            }
+          }
+        }
+        viscosity(i) = eta;
+        increment(i) = etaD;
+        for (int b = 0; b < 3; ++b)
+        {
+          e0(i + b * nodes) = E[0][b];
+          e1(i + b * nodes) = E[1][b];
+          e2(i + b * nodes) = E[2][b];
+        }
+      });
+  }
+
+  /**
+   * @brief Volume integrals and maxima of the vertex fields, with the
+   *        gradient of recoverGradient().
+   * @param d Vertex data; trace, stress are written.
+   * @param model Fluid constants.
+   * @param elastic Whether the fluid has an elastic stress (psi, relaxation).
    * @return Volume integrals and maxima.
    */
-  Diagnostics evaluateStress(const Nodal& d, const Rheology& model, Fluid fluid, Real mu,
-    Real bothSides, bool scaleWithStretch)
+  Diagnostics diagnose(const Nodal& d, const Rheology& model, bool elastic)
   {
     const int nodes = d.nodes;
     const auto gradient = d.gradient;
@@ -949,78 +1137,36 @@ namespace
     const auto psi = d.psi;
     const auto trace = d.trace;
     const auto stress = d.stress;
-    const auto e0 = d.extra0;
-    const auto e1 = d.extra1;
-    const auto e2 = d.extra2;
     const auto density = d.density;
     const auto volume = d.volume;
-    const bool elastic = fluid == Fluid::Viscoelastic || fluid == Fluid::Thixotropic;
-    const bool shearThinning = fluid == Fluid::CarreauYasuda;
-    const bool scaled = scaleWithStretch;
     ::Kokkos::parallel_for(
-      "AtriumRheology::evaluateStress", ::Kokkos::RangePolicy<Exec>(0, nodes),
+      "AtriumRheology::diagnose", ::Kokkos::RangePolicy<Exec>(0, nodes),
       KOKKOS_LAMBDA(const int i) {
-        Real L[3][3];
-        for (int a = 0; a < 3; ++a)
-        {
-          for (int b = 0; b < 3; ++b)
-            L[a][b] = gradient(9 * i + 3 * a + b);
-        }
         const Real gd = shearRate(i);
-        Real E[3][3] = {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}};
-        Real eta = mu;
         Real power = 0, energy = 0, tr = 3, norm = 0;
-        if (shearThinning)
-        {
-          eta = model.viscosity(gd);
-          const Real divergence = L[0][0] + L[1][1] + L[2][2];
-          for (int a = 0; a < 3; ++a)
-          {
-            for (int b = 0; b < 3; ++b)
-              E[a][b] = eta * (L[b][a] - (a == b ? divergence : Real(0)));
-          }
-          viscosity(i) = eta;
-        }
-        else if (elastic)
+        if (elastic)
         {
           Real s[6];
           for (int k = 0; k < 6; ++k)
             s[k] = psi(i + k * nodes);
           const Tensor c = conformation(s);
-          // G lambda is the response of relaxed dumbbells; stretched ones respond
-          // tr(c)/3 times faster, and an explicit stress with a smaller
-          // balancing viscosity is under-damped (Coarse.mesh, VE and TVE).
-          const Real trace0 = c.a[0][0] + c.a[1][1] + c.a[2][2];
-          const Real stretch = scaled && trace0 > 3 ? trace0 / 3 : Real(1);
-          const Real etaA = bothSides * stretch * model.modulus * relaxation(i);
-          eta = model.etaPlasma;
           for (int a = 0; a < 3; ++a)
           {
             for (int b = 0; b < 3; ++b)
             {
               const Real t = model.modulus * (c.a[a][b] - (a == b ? Real(1) : Real(0)));
-              E[a][b] = t - etaA * L[a][b];
-              power += t * 0.5 * (L[a][b] + L[b][a]);
+              power +=
+                t * 0.5 * (gradient(9 * i + 3 * a + b) + gradient(9 * i + 3 * b + a));
               norm += t * t;
             }
           }
           tr = c.a[0][0] + c.a[1][1] + c.a[2][2];
           energy = 0.5 * model.modulus * (tr - 3 - (s[0] + s[1] + s[2]));
-          viscosity(i) = eta + etaA;
-        }
-        else
-        {
-          viscosity(i) = eta;
-        }
-        for (int b = 0; b < 3; ++b)
-        {
-          e0(i + b * nodes) = E[0][b];
-          e1(i + b * nodes) = E[1][b];
-          e2(i + b * nodes) = E[2][b];
         }
         trace(i) = tr;
         stress(i) = ::Kokkos::sqrt(norm);
-        density(4 * i) = eta * gd * gd; // 2 eta D:D
+        // 2 eta D:D, eta the viscosity of the solvent for the elastic fluids.
+        density(4 * i) = (elastic ? model.etaPlasma : viscosity(i)) * gd * gd;
         density(4 * i + 1) = power;
         density(4 * i + 2) = energy;
         density(4 * i + 3) = size(i);
@@ -1180,10 +1326,20 @@ namespace
       if (kv.count(key))
         out = std::stoul(kv[key]);
     };
+    const auto choice = [&](const char* key, const char* yes, const char* no, bool& out) {
+      if (!kv.count(key))
+        return;
+      if (kv[key] != yes && kv[key] != no)
+      {
+        throw std::invalid_argument(std::string(key) + " is " + yes + " or " + no + ".");
+      }
+      out = kv[key] == yes;
+    };
     real("scale", P.scale);
     real("period", P.period);
     count("cycles", P.cycles);
     count("steps", P.steps);
+    real("t_end", P.endTime);
     real("rho", P.rho);
     real("mu", P.mu);
     real("p_in", P.inletPressureMean);
@@ -1193,53 +1349,26 @@ namespace
     real("p_out", P.outletPressure);
     real("n_in", P.inletSize);
     real("n_init", P.initialSize);
-    real("bsd", P.bothSides);
-    real("theta", P.theta);
-    real("t_end", P.endTime);
-    count("picard", P.picard);
-    if (kv.count("inlet"))
-    {
-      if (kv["inlet"] != "developed" && kv["inlet"] != "relaxed")
-        throw std::invalid_argument("inlet is developed or relaxed.");
-      P.developedInlet = kv["inlet"] == "developed";
-    }
-    if (kv.count("skew"))
-      P.skew = kv["skew"] != "0";
-    if (kv.count("tau_psi"))
-    {
-      if (kv["tau_psi"] != "cpu" && kv["tau_psi"] != "supg")
-        throw std::invalid_argument("tau_psi is cpu or supg.");
-      P.cpuTau = kv["tau_psi"] == "cpu";
-    }
-    if (kv.count("bsd_stretch"))
-      P.stretchBothSides = kv["bsd_stretch"] != "0";
-    if (kv.count("bsd_extrapolate"))
-      P.extrapolateBothSides = kv["bsd_extrapolate"] != "0";
-    if (kv.count("lv_extrapolate"))
-      P.extrapolateAtrium = kv["lv_extrapolate"] != "0";
-    if (kv.count("tau_dt"))
-      P.tauTime = kv["tau_dt"] != "0";
-    if (kv.count("order"))
-    {
-      P.order = std::stoi(kv["order"]);
-      if (P.order != 1 && P.order != 2)
-        throw std::invalid_argument("order is 1 or 2.");
-    }
+    real("devss", P.devss);
+    real("implicit", P.implicit);
     real("ptt", P.ptt);
     real("eta_plasma", P.etaPlasma);
     real("lambda_h", P.lambdaH);
     real("tolerance", P.tolerance);
     count("max_iterations", P.maxIterations);
+    count("pc_lag", P.preconditionerLag);
     count("output_every", P.outputEvery);
+    choice("stab", "asgs", "split", P.residual);
+    choice("inlet", "developed", "relaxed", P.developedInlet);
     if (kv.count("lv"))
       P.ventricle = kv["lv"] != "0";
     if (kv.count("output"))
       P.output = kv["output"];
-    if (kv.count("stab"))
+    if (kv.count("order"))
     {
-      if (kv["stab"] != "asgs" && kv["stab"] != "split")
-        throw std::invalid_argument("stab is asgs or split.");
-      P.residual = kv["stab"] == "asgs";
+      P.order = std::stoi(kv["order"]);
+      if (P.order != 1 && P.order != 2)
+        throw std::invalid_argument("order is 1 or 2.");
     }
     if (kv.count("fluid"))
     {
@@ -1277,6 +1406,26 @@ namespace
     return res;
   }
 }
+
+/**
+   * @brief Entry (i, k) of E - eta_d grad u^n at a point: E from the vertex
+   *        values of its row i, grad u^n that of the cell.
+   */
+template <class VectorField, class ScalarField>
+struct StressEntry
+{
+    VectorField row; ///< Row i of E.
+    ScalarField etaD; ///< eta_d.
+    VectorField old; ///< u^n.
+    ::Rodin::Index i, k;
+
+    KOKKOS_INLINE_FUNCTION Real operator()(
+      const ::Rodin::Kokkos::View<::Rodin::Geometry::Point>& point) const
+    {
+      return row.getValue(point)(k) -
+        etaD.getValue(point) * old.u.interpolateJacobian(point)(i, k);
+    }
+};
 
 int main(int argc, char** argv)
 {
@@ -1384,11 +1533,6 @@ int main(int argc, char** argv)
     PETSc::Variational::TestFunction q(qh);
     u.setName("u");
     p.setName("p");
-    // Transport of psi and n, and the matrix of its right-hand side.
-    PETSc::Variational::TrialFunction s(qh);
-    PETSc::Variational::TestFunction r(qh);
-    PETSc::Variational::TrialFunction sOld(qh);
-    PETSc::Variational::TestFunction rOld(qh);
     // Device test functions of the diagnostic forms, kept on the host.
     TestFunction vk(vh);
     TestFunction qk(qh);
@@ -1409,20 +1553,18 @@ int main(int argc, char** argv)
     GridFunction aggregate(qh);
     GridFunction trace(qh);
     GridFunction stress(qh);
-    GridFunction zero(qh);
+    GridFunction increment(qh);
     GridFunction extra0(vh);
     GridFunction extra1(vh);
     GridFunction extra2(vh);
     GridFunction psiDiagonal(vh);
     GridFunction psiOffDiagonal(vh);
-    // u* = 2 u^n - u^{n-1} (convection, stress), u^{n+1/2} = (3 u^n - u^{n-1})/2
-    // (transport) and (4 u^n - u^{n-1})/3 (BDF2 history); all u^n for order 1.
+    // Convecting velocity u* and history of the time derivative.
     GridFunction advecting(vh);
-    GridFunction midpoint(vh);
     GridFunction past(vh);
     velocity = Zero(3);
     pressure = 0.0;
-    zero = 0.0;
+    increment.setData(HostVector(HostVector::Zero(nodes)));
     viscosity.setData(HostVector(HostVector::Constant(
       nodes, fluid == Fluid::Newtonian ? P.mu : model.viscosity(0))));
     shearRate.setData(HostVector(HostVector::Zero(nodes)));
@@ -1439,10 +1581,33 @@ int main(int argc, char** argv)
     std::cout << "[mesh] " << argv[1] << "  cells=" << cells << " vertices=" << nodes
               << " unknowns=" << (vh.getSize() + qh.getSize()) << std::endl;
 
-    // Vertex data of the rheology kernels.
+    // Vertex data of the rheology kernels, indexed as the data of the grid
+    // functions: by the degree of freedom of the vertex in the scalar space,
+    // which is numbered by cell and is not the index of the vertex.
     Nodal nodal;
     HostVector lumpedVolume = HostVector::Zero(nodes);
     {
+      std::vector<int> dof(nodes);
+      {
+        std::vector<char> taken(nodes, 0);
+        for (size_t i = 0; i < nodes; ++i)
+        {
+          const auto& scalar = qh.getDOFs(0, i);
+          const auto& vector = vh.getDOFs(0, i);
+          const size_t d = static_cast<size_t>(scalar(0));
+          bool valid = scalar.size() == 1 && vector.size() == 3 && d < nodes && !taken[d];
+          for (size_t r = 0; valid && r < 3; ++r)
+            valid = static_cast<size_t>(vector(r)) == d + r * nodes;
+          if (!valid)
+          {
+            std::cerr << "Unexpected numbering of the P1 spaces at vertex " << i
+                      << std::endl;
+            return EXIT_FAILURE;
+          }
+          taken[d] = 1;
+          dof[i] = static_cast<int>(d);
+        }
+      }
       std::vector<int> cv(4 * cells);
       std::vector<Real> x(3 * nodes);
       std::vector<int> offsets(nodes + 1, 0);
@@ -1451,15 +1616,15 @@ int main(int argc, char** argv)
         const auto& key = host.getConnectivity().getPolytope(3, c);
         for (std::uint8_t a = 0; a < 4; ++a)
         {
-          cv[4 * c + a] = static_cast<int>(key(a));
-          ++offsets[key(a) + 1];
+          cv[4 * c + a] = dof[key(a)];
+          ++offsets[dof[key(a)] + 1];
         }
       }
       for (size_t i = 0; i < nodes; ++i)
       {
         const auto X = host.getVertexCoordinates(i);
         for (size_t k = 0; k < 3; ++k)
-          x[i + k * nodes] = X(k);
+          x[dof[i] + k * nodes] = X(k);
         offsets[i + 1] += offsets[i];
       }
       std::vector<int> incident(4 * cells);
@@ -1490,6 +1655,58 @@ int main(int argc, char** argv)
       nodal.nodeCells =
         upload("AtriumRheology::nodeCells", incident.data(), incident.size());
       nodal.volume = upload("AtriumRheology::volume", lumpedVolume.data(), nodes);
+      // Cell across each face, for the walk of advect(): faces are matched by
+      // their sorted vertices; the unmatched ones are on the boundary.
+      if (nodes >= (size_t(1) << 21))
+      {
+        std::cerr << "More than 2^21 vertices." << std::endl;
+        return EXIT_FAILURE;
+      }
+      const auto faceKey = [](std::uint64_t a, std::uint64_t b, std::uint64_t c) {
+        if (a > b)
+          std::swap(a, b);
+        if (b > c)
+          std::swap(b, c);
+        if (a > b)
+          std::swap(a, b);
+        return (a << 42) | (b << 21) | c;
+      };
+      std::vector<int> neighbours(4 * cells, -1);
+      {
+        std::unordered_map<std::uint64_t, int> open;
+        open.reserve(2 * cells);
+        for (size_t c = 0; c < cells; ++c)
+        {
+          for (int a = 0; a < 4; ++a)
+          {
+            const std::uint64_t key = faceKey(
+              cv[4 * c + (a + 1) % 4], cv[4 * c + (a + 2) % 4], cv[4 * c + (a + 3) % 4]);
+            const auto found = open.find(key);
+            if (found == open.end())
+              open.emplace(key, static_cast<int>(4 * c + a));
+            else
+            {
+              neighbours[4 * c + a] = found->second / 4;
+              neighbours[found->second] = static_cast<int>(c);
+              open.erase(found);
+            }
+          }
+        }
+        for (Index f = 0; f < host.getFaceCount(); ++f)
+        {
+          if (!host.isBoundary(f))
+            continue;
+          const auto attribute = host.getAttribute(2, f);
+          if (!attribute || *attribute == wall)
+            continue;
+          const auto& key = host.getConnectivity().getPolytope(2, f);
+          const auto found = open.find(faceKey(dof[key(0)], dof[key(1)], dof[key(2)]));
+          if (found != open.end())
+            neighbours[found->second] = -2;
+        }
+      }
+      nodal.cellNeighbours =
+        upload("AtriumRheology::cellNeighbours", neighbours.data(), neighbours.size());
       // Normal of a boundary at its vertices: the dominant direction of the
       // sum of |f| n n^T over its faces at the vertex, which needs no
       // orientation of the faces.
@@ -1506,8 +1723,8 @@ int main(int argc, char** argv)
           Real a[3], b[3];
           for (int k = 0; k < 3; ++k)
           {
-            a[k] = x[key(1) + k * nodes] - x[key(0) + k * nodes];
-            b[k] = x[key(2) + k * nodes] - x[key(0) + k * nodes];
+            a[k] = x[dof[key(1)] + k * nodes] - x[dof[key(0)] + k * nodes];
+            b[k] = x[dof[key(2)] + k * nodes] - x[dof[key(0)] + k * nodes];
           }
           const Real n[3] = {a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2],
             a[0] * b[1] - a[1] * b[0]};
@@ -1516,7 +1733,7 @@ int main(int argc, char** argv)
             continue;
           for (std::uint8_t c = 0; c < 3; ++c)
           {
-            Real* t = &spread[6 * key(c)];
+            Real* t = &spread[6 * dof[key(c)]];
             t[0] += n[0] * n[0] / twice;
             t[1] += n[1] * n[1] / twice;
             t[2] += n[2] * n[2] / twice;
@@ -1571,6 +1788,11 @@ int main(int argc, char** argv)
       nodal.gradient = RealView("AtriumRheology::gradient", 9 * nodes);
       nodal.shearRate = RealView("AtriumRheology::shearRate", nodes);
       nodal.viscosity = RealView("AtriumRheology::viscosity", nodes);
+      nodal.increment = RealView("AtriumRheology::increment", nodes);
+      nodal.sizeAdvected = RealView("AtriumRheology::sizeAdvected", nodes);
+      nodal.psiAdvected = RealView("AtriumRheology::psiAdvected", 6 * nodes);
+      nodal.sizePredicted = RealView("AtriumRheology::sizePredicted", nodes);
+      nodal.psiPredicted = RealView("AtriumRheology::psiPredicted", 6 * nodes);
       nodal.relaxation = RealView("AtriumRheology::relaxation", nodes);
       nodal.size = RealView("AtriumRheology::size", nodes);
       nodal.psi = RealView("AtriumRheology::psi", 6 * nodes);
@@ -1662,7 +1884,7 @@ int main(int argc, char** argv)
            "maxSpeedComponent,kineticEnergy,timeDissipation,viscousDissipation,"
            "polymerPower,"
            "elasticEnergy,maxWeissenberg,maxTraceConformation,meanAggregateSize,"
-           "rheology,transport,assembly,solve,iterations,transportIterations\n";
+           "rheology,assembly,solve,iterations\n";
 
     // Flow problem and solver; the sparsity pattern is the same at every step.
     Problem flow(u, p, v, q);
@@ -1697,50 +1919,20 @@ int main(int argc, char** argv)
     bool fieldSplits = false;
     size_t fallbacks = 0;
 
-    // Transport problem of psi and n: its matrix, the matrix of its right-hand
-    // side, and a PETSc solver of its own (options prefix transport_).
-    Problem transport(s, r);
-    Problem history(sOld, rOld);
-    // <max(-w.n, 0) s, r> on the openings, times the inflow values.
-    PETSc::Variational::TrialFunction sIn(qh);
-    PETSc::Variational::TestFunction rIn(qh);
-    Problem inflowMatrix(sIn, rIn);
-    ::KSP transportSolver = PETSC_NULLPTR;
-    ::Vec transported = PETSC_NULLPTR, previous = PETSC_NULLPTR, load = PETSC_NULLPTR,
-          inflowValue = PETSC_NULLPTR;
-    if (elastic)
-    {
-      ::PC pc;
-      PetscCallAbort(PETSC_COMM_SELF, KSPCreate(PETSC_COMM_SELF, &transportSolver));
-      PetscCallAbort(PETSC_COMM_SELF, KSPSetOptionsPrefix(transportSolver, "transport_"));
-      PetscCallAbort(PETSC_COMM_SELF, KSPSetType(transportSolver, KSPGMRES));
-      PetscCallAbort(PETSC_COMM_SELF, KSPGetPC(transportSolver, &pc));
-      PetscCallAbort(PETSC_COMM_SELF, PCSetType(pc, PCJACOBI));
-      PetscCallAbort(PETSC_COMM_SELF,
-        KSPSetTolerances(transportSolver, P.tolerance, 1e-50, 1e5, 1000));
-      PetscCallAbort(
-        PETSC_COMM_SELF, KSPSetInitialGuessNonzero(transportSolver, PETSC_TRUE));
-    }
-
     const Real dt = P.period / static_cast<Real>(P.steps);
     const Real rho = P.rho;
     const Real pi = Math::Constants::pi();
-    const Real cross = P.residual ? Real(1) : Real(0);
     size_t total = P.cycles * P.steps;
     if (P.endTime > 0)
       total = std::min<size_t>(total, static_cast<size_t>(std::llround(P.endTime / dt)));
     const bool second = P.order == 2;
-    const Real theta = second ? P.theta : Real(1);
     const Real dtEff = second ? 2 * dt / 3 : dt; // BDF2: (3/2)(u - past)/dt
-    const bool tauTime = P.tauTime;
-    const bool cpuTau = P.cpuTau && !tauTime;
-    // Time derivative in the residual of the subscales only with tau ~ dt.
-    const Real inertia = P.residual && tauTime ? Real(1) : Real(0);
+    const VectorFunction axis0{Real(1), Real(0), Real(0)};
+    const VectorFunction axis1{Real(0), Real(1), Real(0)};
+    const VectorFunction axis2{Real(0), Real(0), Real(1)};
     HostVector previousVelocity = HostVector::Zero(3 * nodes); // u^{n-1}
-    Real previousAtrialPressure = atrialPressure;
-    const size_t fields = thixotropic ? 7 : 6;
-    std::chrono::duration<double> rheologyTime{0}, transportTime{0}, assembly{0},
-      solve{0};
+    std::chrono::duration<double> rheologyTime{0}, assembly{0}, solve{0};
+    bool valveWasOpen = true;
     for (size_t step = 1; step <= total; ++step)
     {
       const Real time = step * dt;
@@ -1758,12 +1950,6 @@ int main(int argc, char** argv)
       bool valveOpen = true;
       if (P.ventricle)
       {
-        // lv_extrapolate: the ventricle (BDF2) reads the atrial pressure
-        // extrapolated to t^{n+1}, not the one of t^n (unstable, see header).
-        const Real lastAtrialPressure = atrialPressure;
-        if (second && P.extrapolateAtrium)
-          atrialPressure = 2 * atrialPressure - previousAtrialPressure;
-        previousAtrialPressure = lastAtrialPressure;
         if (!ventricle.step(dt).converged)
         {
           std::cerr << "The lumped ventricle did not converge at t = " << time
@@ -1775,494 +1961,250 @@ int main(int argc, char** argv)
         mitralImpedance = mitralArea / (valveOpen ? input.Kat : input.Kp);
       }
 
-      // Time levels of the velocity.
+      // Time levels of the velocity: u* = 2 u^n - u^{n-1} convects,
+      // u^{n+1/2} = (3 u^n - u^{n-1})/2 carries psi and n, (4 u^n - u^{n-1})/3
+      // is the history of BDF2; all u^n for order 1.
       const HostVector un = velocity.getData().toHost();
       const HostVector uStar = second ? HostVector(2 * un - previousVelocity) : un;
-      const HostVector uHalf =
-        second ? HostVector(1.5 * un - 0.5 * previousVelocity) : un;
-      const HostVector uPast = second ? HostVector((4 * un - previousVelocity) / 3) : un;
       advecting.setData(uStar);
-      midpoint.setData(uHalf);
-      past.setData(uPast);
-      const ::Rodin::Kokkos::Variational::View<std::decay_t<decltype(advecting)>> w(
-        advecting);
-      // Outer iterations (key picard, elastic fluids): the structure and the
-      // stress are computed again from the start of the step with the
-      // kinematics of the last velocity iterate, which restores the feedback
-      // of the stress on the flow that a segregated step lags by one step.
-      const size_t outer = elastic ? std::max<size_t>(P.picard, 1) : 1;
-      HostVector psiStart, sizeStart, uIterate;
-      if (outer > 1)
-      {
-        psiStart = toHost(nodal.psi);
-        sizeStart = toHost(nodal.size);
-      }
+      past.setData(second ? HostVector((4 * un - previousVelocity) / 3) : un);
+
+      const auto r0 = std::chrono::steady_clock::now();
       Diagnostics diagnostics;
-      PetscInt iterations = 0, transportIterations = 0;
-      double rheologySeconds = 0, transportSeconds = 0, assemblySeconds = 0,
-             solveSeconds = 0;
-      for (size_t pass = 0; pass < outer; ++pass)
+      if (elastic)
       {
-        if (pass > 0)
-        {
-          toDevice(psiStart.data(), nodal.psi);
-          toDevice(sizeStart.data(), nodal.size);
-          midpoint.setData(second ? HostVector(0.5 * (un + uIterate)) : uIterate);
-        }
-        const HostVector uMid = midpoint.getData().toHost();
-        const ::Rodin::Kokkos::Variational::View<std::decay_t<decltype(midpoint)>> wt(
-          midpoint);
-
-        // Steps 1 to 3: velocity gradient, local update and transport of psi and
-        // n; order 2 splits the local update in two halves around the transport
-        // (Strang), with the gradient of u^{n+1/2}.
-        const auto r0 = std::chrono::steady_clock::now();
-        toDevice(uMid.data(), nodal.velocity);
+        // Steps 1 to 3: gradient of u^n, advection, prediction.
+        toDevice(un.data(), nodal.velocity);
         recoverGradient(nodal);
-        if (elastic)
+        inflowValues(nodal, model, thixotropic, P.developedInlet, inletSize);
+        if (second)
         {
-          advanceStructure(
-            nodal, model, thixotropic, second ? dt / 2 : dt, P.ptt, second);
-          relaxation.setData(toHost(nodal.relaxation));
+          const HostVector uHalf = 1.5 * un - 0.5 * previousVelocity;
+          toDevice(uHalf.data(), nodal.velocity);
         }
-        const ::Rodin::Kokkos::Variational::View<std::decay_t<decltype(relaxation)>>
-          lambdaView(relaxation);
-        const auto r1 = std::chrono::steady_clock::now();
-        if (elastic)
-        {
-          const ::Rodin::Kokkos::Variational::View<BoundaryNormal> outward(normal);
-          RealFunction tauS(KOKKOS_LAMBDA(const PointView& point)->Real {
-            const auto wp = wt.getValue(point);
-            Real speed2 = 0;
-            for (Index i = 0; i < 3; ++i)
-              speed2 += wp(i) * wp(i);
-            const Real hk = ::Kokkos::cbrt(point.getDistortion() / 6);
-            if (cpuTau)
-            {
-              // tau_psi of the CPU driver (Moreno et al. 2019, c3 = 4,
-              // c4 = 0.25): 1/(c3/lambda + c4 |u|/h + 2 c4 |grad u|).
-              const auto J = wt.u.interpolateJacobian(point);
-              Real g2 = 0;
-              for (Index i = 0; i < 3; ++i)
-              {
-                for (Index j = 0; j < 3; ++j)
-                  g2 += J(i, j) * J(i, j);
-              }
-              return 1 /
-                (4 / lambdaView.getValue(point) + 0.25 * ::Kokkos::sqrt(speed2) / hk +
-                  0.5 * ::Kokkos::sqrt(g2));
-            }
-            const Real a = tauTime ? 2 / dt : Real(0);
-            const Real k = tauTime ? Real(0) : 1 / lambdaView.getValue(point);
-            return 1 / ::Kokkos::sqrt(a * a + 4 * speed2 / (hk * hk) + k * k);
-          });
-          // Skew-symmetric advection, + (1/2)(div w) s: the discrete div w of
-          // P1/P1 is not zero, and without this term the advection amplifies
-          // psi where div w < 0 at the rate |div w|/2 (the stress ran away on
-          // the wall of Coarse.mesh, where div w is largest). As in the CPU
-          // driver.
-          const Real skewFactor = P.skew ? Real(0.5) : Real(0);
-          RealFunction halfDivergence(KOKKOS_LAMBDA(const PointView& point)->Real {
-            return skewFactor * wt.u.interpolateDivergence(point);
-          });
-          RealFunction inflow(KOKKOS_LAMBDA(const PointView& point)->Real {
-            const auto wp = wt.getValue(point);
-            const auto n = outward.getValue(point);
-            Real flux = 0;
-            for (Index i = 0; i < 3; ++i)
-              flux += wp(i) * n(i);
-            return flux < 0 ? -flux : Real(0);
-          });
-          // One volume integral per matrix: the triplets of every integral
-          // stay in device memory. theta-scheme, Crank-Nicolson for order 2.
-          if (!tauTime)
-          {
-            // Quasi-static SUPG: the time derivative is tested by r only, so
-            // tau need not scale with dt (theta-scheme, Crank-Nicolson for
-            // order 2).
-            transport = (1 / dt) * Integral(s, r) +
-              theta *
-                Integral(Dot(midpoint, Grad(s)), r + Mult(tauS, Dot(midpoint, Grad(r)))) +
-              theta * Integral(Mult(halfDivergence, s), r) +
-              theta *
-                BoundaryIntegral(Mult(inflow, s), r)
-                  .over(veins[0], veins[1], veins[2], veins[3], mitral) -
-              Integral(zero, r);
-            if (theta < 1)
-            {
-              history = (1 / dt) * Integral(sOld, rOld) +
-                (theta - 1) *
-                  Integral(Dot(midpoint, Grad(sOld)),
-                    rOld + Mult(tauS, Dot(midpoint, Grad(rOld)))) +
-                (theta - 1) * Integral(Mult(halfDivergence, sOld), rOld) +
-                (theta - 1) *
-                  BoundaryIntegral(Mult(inflow, sOld), rOld)
-                    .over(veins[0], veins[1], veins[2], veins[3], mitral) -
-                Integral(zero, rOld);
-            }
-            else
-            {
-              history = (1 / dt) * Integral(sOld, rOld) - Integral(zero, rOld);
-            }
-          }
-          else if (theta < 1)
-          {
-            transport = (1 / dt) *
-                Integral(s + Mult(RealFunction(theta * dt), Dot(midpoint, Grad(s))),
-                  r + Mult(tauS, Dot(midpoint, Grad(r)))) +
-              theta *
-                BoundaryIntegral(Mult(inflow, s), r)
-                  .over(veins[0], veins[1], veins[2], veins[3], mitral) -
-              Integral(zero, r);
-            history = (1 / dt) *
-                Integral(
-                  sOld + Mult(RealFunction((theta - 1) * dt), Dot(midpoint, Grad(sOld))),
-                  rOld + Mult(tauS, Dot(midpoint, Grad(rOld)))) +
-              (theta - 1) *
-                BoundaryIntegral(Mult(inflow, sOld), rOld)
-                  .over(veins[0], veins[1], veins[2], veins[3], mitral) -
-              Integral(zero, rOld);
-          }
-          else
-          {
-            transport = (1 / dt) *
-                Integral(s + Mult(RealFunction(dt), Dot(midpoint, Grad(s))),
-                  r + Mult(tauS, Dot(midpoint, Grad(r)))) +
-              BoundaryIntegral(Mult(inflow, s), r)
-                .over(veins[0], veins[1], veins[2], veins[3], mitral) -
-              Integral(zero, r);
-            history =
-              (1 / dt) * Integral(sOld, rOld + Mult(tauS, Dot(midpoint, Grad(rOld)))) -
-              Integral(zero, rOld);
-          }
-          transport.assemble();
-          history.assemble();
-          HostVector psiInHost, sizeInHost;
-          if (P.developedInlet)
-          {
-            inflowMatrix = BoundaryIntegral(Mult(inflow, sIn), rIn)
-                             .over(veins[0], veins[1], veins[2], veins[3], mitral) -
-              Integral(zero, rIn);
-            inflowMatrix.assemble();
-            developedInflow(nodal, model, thixotropic);
-            psiInHost = toHost(nodal.psiIn);
-            sizeInHost = toHost(nodal.sizeIn);
-          }
-          ::Mat& A = transport.getLinearSystem().getOperator();
-          ::Mat& B = history.getLinearSystem().getOperator();
-          if (!transported)
-          {
-            PetscCallAbort(PETSC_COMM_SELF, MatCreateVecs(A, &transported, &load));
-            PetscCallAbort(PETSC_COMM_SELF, VecDuplicate(transported, &previous));
-            PetscCallAbort(PETSC_COMM_SELF, VecDuplicate(transported, &inflowValue));
-            PetscCallAbort(PETSC_COMM_SELF, KSPSetOperators(transportSolver, A, A));
-            PetscCallAbort(PETSC_COMM_SELF, KSPSetFromOptions(transportSolver));
-          }
-          PetscCallAbort(PETSC_COMM_SELF, KSPSetOperators(transportSolver, A, A));
-          HostVector psi = toHost(nodal.psi);
-          HostVector size = toHost(nodal.size);
-          for (size_t k = 0; k < fields; ++k)
-          {
-            // n is transported as n - n_in, which enters with the value zero.
-            PetscScalar* values;
-            PetscCallAbort(PETSC_COMM_SELF, VecGetArrayWrite(previous, &values));
-            for (size_t i = 0; i < nodes; ++i)
-              values[i] = k < 6 ? psi(i + k * nodes) : size(i) - inletSize;
-            PetscCallAbort(PETSC_COMM_SELF, VecRestoreArrayWrite(previous, &values));
-            PetscCallAbort(PETSC_COMM_SELF, MatMult(B, previous, load));
-            if (P.developedInlet)
-            {
-              // + <max(-w.n, 0) s_in, r>: the inflow term then sets s = s_in.
-              PetscScalar* inflowValues;
-              PetscCallAbort(
-                PETSC_COMM_SELF, VecGetArrayWrite(inflowValue, &inflowValues));
-              for (size_t i = 0; i < nodes; ++i)
-              {
-                inflowValues[i] =
-                  k < 6 ? psiInHost(i + k * nodes) : sizeInHost(i) - inletSize;
-              }
-              PetscCallAbort(
-                PETSC_COMM_SELF, VecRestoreArrayWrite(inflowValue, &inflowValues));
-              PetscCallAbort(PETSC_COMM_SELF,
-                MatMultAdd(
-                  inflowMatrix.getLinearSystem().getOperator(), inflowValue, load, load));
-            }
-            PetscCallAbort(PETSC_COMM_SELF, VecCopy(previous, transported));
-            PetscCallAbort(PETSC_COMM_SELF, KSPSolve(transportSolver, load, transported));
-            KSPConvergedReason reason;
-            PetscInt its = 0;
-            PetscCallAbort(
-              PETSC_COMM_SELF, KSPGetConvergedReason(transportSolver, &reason));
-            PetscCallAbort(PETSC_COMM_SELF, KSPGetIterationNumber(transportSolver, &its));
-            if (reason < 0)
-            {
-              std::cerr << "The transport solver failed at step " << step << ", field "
-                        << k << ": " << KSPConvergedReasons[reason] << " after " << its
-                        << " iterations" << std::endl;
-              return EXIT_FAILURE;
-            }
-            transportIterations += its;
-            const PetscScalar* solution;
-            PetscCallAbort(PETSC_COMM_SELF, VecGetArrayRead(transported, &solution));
-            for (size_t i = 0; i < nodes; ++i)
-            {
-              if (k < 6)
-                psi(i + k * nodes) = solution[i];
-              else
-                size(i) = std::max<Real>(solution[i] + inletSize, 1);
-            }
-            PetscCallAbort(PETSC_COMM_SELF, VecRestoreArrayRead(transported, &solution));
-          }
-          toDevice(psi.data(), nodal.psi);
-          if (thixotropic)
-            toDevice(size.data(), nodal.size);
-        }
-        const auto r2 = std::chrono::steady_clock::now();
-        if (elastic && second)
-          advanceStructure(nodal, model, thixotropic, dt / 2, P.ptt, true);
-        if (pass > 0)
-        {
-          // The explicit side of the both-sides diffusion from the last
-          // iterate: it cancels the implicit side as the iterations converge.
-          toDevice(uIterate.data(), nodal.velocity);
-          recoverGradient(nodal);
-        }
-        else if (second && (!elastic || P.extrapolateBothSides))
-        {
-          // The viscosity and stress of CY at t^{n+1}, from u*. The elastic
-          // fluids keep the gradient of u^n for the explicit side of the
-          // both-sides diffusion: from u* it is unstable (see header).
-          toDevice(uStar.data(), nodal.velocity);
-          recoverGradient(nodal);
-        }
-        else if (second)
-        {
-          toDevice(un.data(), nodal.velocity);
-          recoverGradient(nodal);
-        }
-        diagnostics =
-          evaluateStress(nodal, model, fluid, P.mu, P.bothSides, P.stretchBothSides);
-        viscosity.setData(toHost(nodal.viscosity));
-        extra0.setData(toHost(nodal.extra0));
-        extra1.setData(toHost(nodal.extra1));
-        extra2.setData(toHost(nodal.extra2));
-        const auto r3 = std::chrono::steady_clock::now();
+        advect(nodal, dt);
+        advanceStructure(
+          nodal, nodal.psiPredicted, nodal.sizePredicted, model, thixotropic, dt, P.ptt);
+        momentumStress(
+          nodal, nodal.psiPredicted, model, fluid, P.mu, dt, P.devss, P.implicit);
+      }
+      else
+      {
+        // The viscosity and the stress of CY, from u*.
+        toDevice(uStar.data(), nodal.velocity);
+        recoverGradient(nodal);
+        momentumStress(nodal, nodal.psi, model, fluid, P.mu, dt, P.devss, P.implicit);
+        diagnostics = diagnose(nodal, model, false);
+      }
+      viscosity.setData(toHost(nodal.viscosity));
+      increment.setData(toHost(nodal.increment));
+      extra0.setData(toHost(nodal.extra0));
+      extra1.setData(toHost(nodal.extra1));
+      extra2.setData(toHost(nodal.extra2));
+      const auto r1 = std::chrono::steady_clock::now();
 
-        // Step 5. tau by cell, from w = u*, the viscosity and the cell volume
-        // |det J|/6 of a tetrahedron.
-        const ::Rodin::Kokkos::Variational::View<std::decay_t<decltype(viscosity)>> eta(
-          viscosity);
-        const ::Rodin::Kokkos::Variational::View<std::decay_t<decltype(extra0)>> row0(
-          extra0);
-        const ::Rodin::Kokkos::Variational::View<std::decay_t<decltype(extra1)>> row1(
-          extra1);
-        const ::Rodin::Kokkos::Variational::View<std::decay_t<decltype(extra2)>> row2(
-          extra2);
-        RealFunction tau(KOKKOS_LAMBDA(const PointView& point)->Real {
-          const auto wp = w.getValue(point);
-          Real speed2 = 0;
-          for (Index i = 0; i < 3; ++i)
-            speed2 += wp(i) * wp(i);
-          const Real hk = ::Kokkos::cbrt(point.getDistortion() / 6);
-          const Real a = tauTime ? 2 / dt : Real(0);
-          const Real b2 = 4 * speed2 / (hk * hk);
-          const Real c = 4 * eta.getValue(point) / (rho * hk * hk);
-          return 1 / ::Kokkos::sqrt(a * a + b2 + c * c);
+      // Step 4. tau by cell, from u*, the viscosity and the cell volume
+      // |det J|/6 of a tetrahedron.
+      using VectorView =
+        ::Rodin::Kokkos::Variational::View<std::decay_t<decltype(velocity)>>;
+      using ScalarView =
+        ::Rodin::Kokkos::Variational::View<std::decay_t<decltype(viscosity)>>;
+      const VectorView w(advecting);
+      const VectorView old(velocity);
+      const VectorView row0(extra0);
+      const VectorView row1(extra1);
+      const VectorView row2(extra2);
+      const ScalarView eta(viscosity);
+      const ScalarView etaD(increment);
+      RealFunction tau(KOKKOS_LAMBDA(const PointView& point)->Real {
+        const auto wp = w.getValue(point);
+        Real speed2 = 0;
+        for (Index i = 0; i < 3; ++i)
+          speed2 += wp(i) * wp(i);
+        const Real hk = ::Kokkos::cbrt(point.getDistortion() / 6);
+        const Real b2 = 4 * speed2 / (hk * hk);
+        const Real c = 4 * eta.getValue(point) / (rho * hk * hk);
+        return 1 / ::Kokkos::sqrt(b2 + c * c);
+      });
+      RealFunction pressureTau(KOKKOS_LAMBDA(const PointView& point)->Real {
+        const auto wp = w.getValue(point);
+        Real speed2 = 0;
+        for (Index i = 0; i < 3; ++i)
+          speed2 += wp(i) * wp(i);
+        const Real hk = ::Kokkos::cbrt(point.getDistortion() / 6);
+        const Real b2 = 4 * speed2 / (hk * hk);
+        const Real c = 4 * eta.getValue(point) / (rho * hk * hk);
+        return 1 / (rho * ::Kokkos::sqrt(b2 + c * c));
+      });
+      // div E, constant by cell: the force of the residual of the subscales.
+      VectorFunction force(
+        KOKKOS_LAMBDA(const PointView& point)->Real {
+          return row0.u.interpolateDivergence(point);
+        },
+        KOKKOS_LAMBDA(const PointView& point)->Real {
+          return row1.u.interpolateDivergence(point);
+        },
+        KOKKOS_LAMBDA(const PointView& point)->Real {
+          return row2.u.interpolateDivergence(point);
         });
-        RealFunction pressureTau(KOKKOS_LAMBDA(const PointView& point)->Real {
-          const auto wp = w.getValue(point);
-          Real speed2 = 0;
-          for (Index i = 0; i < 3; ++i)
-            speed2 += wp(i) * wp(i);
-          const Real hk = ::Kokkos::cbrt(point.getDistortion() / 6);
-          const Real a = tauTime ? 2 / dt : Real(0);
-          const Real b2 = 4 * speed2 / (hk * hk);
-          const Real c = 4 * eta.getValue(point) / (rho * hk * hk);
-          return 1 / (rho * ::Kokkos::sqrt(a * a + b2 + c * c));
-        });
-        // (cross tau rho/dt - rho/2) u against w.grad v: the skew-symmetric
-        // convection and the time derivative of the residual, in one matrix.
-        RealFunction streamlineMass(KOKKOS_LAMBDA(const PointView& point)->Real {
-          const auto wp = w.getValue(point);
-          Real speed2 = 0;
-          for (Index i = 0; i < 3; ++i)
-            speed2 += wp(i) * wp(i);
-          const Real hk = ::Kokkos::cbrt(point.getDistortion() / 6);
-          const Real a = tauTime ? 2 / dt : Real(0);
-          const Real b2 = 4 * speed2 / (hk * hk);
-          const Real c = 4 * eta.getValue(point) / (rho * hk * hk);
-          return inertia * rho / (dtEff * ::Kokkos::sqrt(a * a + b2 + c * c)) - 0.5 * rho;
-        });
-        // div E, constant by cell.
-        VectorFunction force(
-          KOKKOS_LAMBDA(const PointView& point)->Real {
-            return row0.u.interpolateDivergence(point);
-          },
-          KOKKOS_LAMBDA(const PointView& point)->Real {
-            return row1.u.interpolateDivergence(point);
-          },
-          KOKKOS_LAMBDA(const PointView& point)->Real {
-            return row2.u.interpolateDivergence(point);
-          });
+      // Column k of E - eta_d grad u^n, with the cell gradient of u^n.
+      using Entry = StressEntry<VectorView, ScalarView>;
+      VectorFunction column0(Entry{row0, etaD, old, 0, 0}, Entry{row1, etaD, old, 1, 0},
+        Entry{row2, etaD, old, 2, 0});
+      VectorFunction column1(Entry{row0, etaD, old, 0, 1}, Entry{row1, etaD, old, 1, 1},
+        Entry{row2, etaD, old, 2, 1});
+      VectorFunction column2(Entry{row0, etaD, old, 0, 2}, Entry{row1, etaD, old, 1, 2},
+        Entry{row2, etaD, old, 2, 2});
 
-        if (P.residual && !tauTime)
+      // Galerkin terms, openings and history; then the two diagonal terms of
+      // the stabilisation and the two that complete the residual; then the
+      // terms of the explicit stress, which each fluid assembles or not.
+      const auto galerkin = (rho / dtEff) * Integral(u, v) +
+        (0.5 * rho) * Integral(Dot(Mult(Jacobian(u), advecting), v)) -
+        (0.5 * rho) * Integral(Dot(u, Mult(Jacobian(v), advecting))) +
+        Integral(Mult(viscosity, Jacobian(u)), Jacobian(v)) - Integral(p, Div(v)) +
+        Integral(Div(u), q) +
+        pIn * BoundaryIntegral(normal, v).over(veins[0], veins[1], veins[2], veins[3]) +
+        pOut * BoundaryIntegral(normal, v).over(mitral) +
+        P.inletImpedance *
+          BoundaryIntegral(u, v).over(veins[0], veins[1], veins[2], veins[3]) +
+        mitralImpedance * BoundaryIntegral(Dot(normal, u), Dot(normal, v)).over(mitral) -
+        (rho / dtEff) * Integral(past, v);
+      const auto diagonal = rho *
+          Integral(
+            Dot(Mult(tau, Mult(Jacobian(u), advecting)), Mult(Jacobian(v), advecting))) +
+        Integral(Dot(Mult(pressureTau, Grad(p)), Grad(q)));
+      const auto cross = Integral(Dot(Mult(tau, Grad(p)), Mult(Jacobian(v), advecting))) +
+        Integral(Dot(Mult(tau, Mult(Jacobian(u), advecting)), Grad(q)));
+      const auto stressResidual =
+        Integral(Dot(Mult(tau, force), Mult(Jacobian(v), advecting))) +
+        Integral(Dot(Mult(pressureTau, force), Grad(q)));
+      const auto stressWeak = Integral(Dot(column0, Mult(Jacobian(v), axis0))) +
+        Integral(Dot(column1, Mult(Jacobian(v), axis1))) +
+        Integral(Dot(column2, Mult(Jacobian(v), axis2)));
+      const auto noSlip = DirichletBC(u, Zero(3)).on(wall);
+      if (fluid == Fluid::Newtonian)
+      {
+        if (P.residual)
+          flow = galerkin + diagonal + cross + noSlip;
+        else
+          flow = galerkin + diagonal + noSlip;
+      }
+      else if (elastic)
+      {
+        // E enters as int E : grad v, the adjoint of the vertex gradient.
+        if (P.residual)
+          flow = galerkin + diagonal + cross + stressWeak - stressResidual + noSlip;
+        else
+          flow = galerkin + diagonal + stressWeak + noSlip;
+      }
+      else
+      {
+        // CY: E enters as int div E . v.
+        if (P.residual)
+          flow =
+            galerkin + diagonal + cross - Integral(force, v) - stressResidual + noSlip;
+        else
+          flow = galerkin + diagonal - Integral(force, v) + noSlip;
+      }
+
+      const auto t0 = std::chrono::steady_clock::now();
+      flow.assemble();
+      if (!fieldSplits)
+      {
+        // Named splits u and p for -pc_type fieldsplit; harmless otherwise.
+        flow.setFieldSplits();
+        fieldSplits = true;
+      }
+      const auto t1 = std::chrono::steady_clock::now();
+      if (P.preconditionerLag > 1)
+      {
+        // Kept between two set-ups, except when the valve changes the matrix.
+        const bool keep =
+          (step - 1) % P.preconditionerLag != 0 && valveOpen == valveWasOpen;
+        PetscCallAbort(PETSC_COMM_SELF,
+          KSPSetReusePreconditioner(solver.getHandle(), keep ? PETSC_TRUE : PETSC_FALSE));
+        valveWasOpen = valveOpen;
+      }
+      flow.solve(solver);
+      PetscInt iterations = 0;
+      KSPConvergedReason reason;
+      PetscCallAbort(PETSC_COMM_SELF, KSPGetConvergedReason(solver.getHandle(), &reason));
+      if (reason < 0)
+      {
+        // BiCGStab(l) can break down: one more attempt, GMRES from a zero guess.
+        char type[64] = "";
+        PetscBool given = PETSC_FALSE;
+        PetscCallAbort(PETSC_COMM_SELF,
+          PetscOptionsGetString(
+            PETSC_NULLPTR, PETSC_NULLPTR, "-ksp_type", type, sizeof(type), &given));
+        std::cerr << "Step " << step << ": " << KSPConvergedReasons[reason]
+                  << ", solving again with GMRES" << std::endl;
+        PetscCallAbort(
+          PETSC_COMM_SELF, PetscOptionsSetValue(PETSC_NULLPTR, "-ksp_type", KSPGMRES));
+        PetscBool restart = PETSC_FALSE;
+        PetscCallAbort(PETSC_COMM_SELF,
+          PetscOptionsHasName(
+            PETSC_NULLPTR, PETSC_NULLPTR, "-ksp_gmres_restart", &restart));
+        if (!restart)
         {
-          // Quasi-static subscales: residual without the time derivative.
-          flow = (rho / dtEff) * Integral(u, v) +
-            (0.5 * rho) * Integral(Dot(Mult(Jacobian(u), advecting), v)) +
-            Integral(Dot(Mult(streamlineMass, u), Mult(Jacobian(v), advecting))) +
-            Integral(Mult(viscosity, Jacobian(u)), Jacobian(v)) - Integral(p, Div(v)) +
-            Integral(Div(u), q) +
-            rho *
-              Integral(Dot(
-                Mult(tau, Mult(Jacobian(u), advecting)), Mult(Jacobian(v), advecting))) +
-            Integral(Dot(Mult(pressureTau, Grad(p)), Grad(q))) +
-            Integral(Dot(Mult(tau, Grad(p)), Mult(Jacobian(v), advecting))) +
-            Integral(Dot(Mult(tau, Mult(Jacobian(u), advecting)), Grad(q))) +
-            pIn *
-              BoundaryIntegral(normal, v).over(veins[0], veins[1], veins[2], veins[3]) +
-            pOut * BoundaryIntegral(normal, v).over(mitral) +
-            P.inletImpedance *
-              BoundaryIntegral(u, v).over(veins[0], veins[1], veins[2], veins[3]) +
-            mitralImpedance *
-              BoundaryIntegral(Dot(normal, u), Dot(normal, v)).over(mitral) -
-            (rho / dtEff) * Integral(past, v) - Integral(force, v) -
-            Integral(Dot(Mult(tau, force), Mult(Jacobian(v), advecting))) -
-            Integral(Dot(Mult(pressureTau, force), Grad(q))) +
-            DirichletBC(u, Zero(3)).on(wall);
+          PetscCallAbort(PETSC_COMM_SELF,
+            PetscOptionsSetValue(PETSC_NULLPTR, "-ksp_gmres_restart", "100"));
         }
-        else if (P.residual)
+        PetscCallAbort(PETSC_COMM_SELF, VecSet(flow.getLinearSystem().getSolution(), 0));
+        solver.setType(KSPGMRES);
+        flow.solve(solver);
+        solver.setType(KSPBCGSL);
+        if (given)
         {
-          flow = (rho / dtEff) * Integral(u, v) +
-            (0.5 * rho) * Integral(Dot(Mult(Jacobian(u), advecting), v)) +
-            Integral(Dot(Mult(streamlineMass, u), Mult(Jacobian(v), advecting))) +
-            Integral(Mult(viscosity, Jacobian(u)), Jacobian(v)) - Integral(p, Div(v)) +
-            Integral(Div(u), q) +
-            rho *
-              Integral(Dot(
-                Mult(tau, Mult(Jacobian(u), advecting)), Mult(Jacobian(v), advecting))) +
-            Integral(Dot(Mult(pressureTau, Grad(p)), Grad(q))) +
-            Integral(Dot(Mult(tau, Grad(p)), Mult(Jacobian(v), advecting))) +
-            Integral(Dot(Mult(tau, Mult(Jacobian(u), advecting)), Grad(q))) +
-            (1 / dtEff) * Integral(Dot(Mult(tau, u), Grad(q))) +
-            pIn *
-              BoundaryIntegral(normal, v).over(veins[0], veins[1], veins[2], veins[3]) +
-            pOut * BoundaryIntegral(normal, v).over(mitral) +
-            P.inletImpedance *
-              BoundaryIntegral(u, v).over(veins[0], veins[1], veins[2], veins[3]) +
-            mitralImpedance *
-              BoundaryIntegral(Dot(normal, u), Dot(normal, v)).over(mitral) -
-            (rho / dtEff) * Integral(past, v) - Integral(force, v) -
-            (rho / dtEff) * Integral(Dot(Mult(tau, past), Mult(Jacobian(v), advecting))) -
-            Integral(Dot(Mult(tau, force), Mult(Jacobian(v), advecting))) -
-            (1 / dtEff) * Integral(Dot(Mult(tau, past), Grad(q))) -
-            Integral(Dot(Mult(pressureTau, force), Grad(q))) +
-            DirichletBC(u, Zero(3)).on(wall);
+          PetscCallAbort(
+            PETSC_COMM_SELF, PetscOptionsSetValue(PETSC_NULLPTR, "-ksp_type", type));
         }
         else
         {
-          flow = (rho / dtEff) * Integral(u, v) +
-            (0.5 * rho) * Integral(Dot(Mult(Jacobian(u), advecting), v)) +
-            Integral(Dot(Mult(streamlineMass, u), Mult(Jacobian(v), advecting))) +
-            Integral(Mult(viscosity, Jacobian(u)), Jacobian(v)) - Integral(p, Div(v)) +
-            Integral(Div(u), q) +
-            rho *
-              Integral(Dot(
-                Mult(tau, Mult(Jacobian(u), advecting)), Mult(Jacobian(v), advecting))) +
-            Integral(Dot(Mult(pressureTau, Grad(p)), Grad(q))) +
-            pIn *
-              BoundaryIntegral(normal, v).over(veins[0], veins[1], veins[2], veins[3]) +
-            pOut * BoundaryIntegral(normal, v).over(mitral) +
-            P.inletImpedance *
-              BoundaryIntegral(u, v).over(veins[0], veins[1], veins[2], veins[3]) +
-            mitralImpedance *
-              BoundaryIntegral(Dot(normal, u), Dot(normal, v)).over(mitral) -
-            (rho / dtEff) * Integral(past, v) - Integral(force, v) +
-            DirichletBC(u, Zero(3)).on(wall);
+          PetscCallAbort(
+            PETSC_COMM_SELF, PetscOptionsClearValue(PETSC_NULLPTR, "-ksp_type"));
         }
-
-        const auto t0 = std::chrono::steady_clock::now();
-        flow.assemble();
-        if (!fieldSplits)
-        {
-          // Named splits u and p for -pc_type fieldsplit; harmless otherwise.
-          flow.setFieldSplits();
-          fieldSplits = true;
-        }
-        const auto t1 = std::chrono::steady_clock::now();
-        flow.solve(solver);
-        PetscInt its = 0;
-        KSPConvergedReason reason;
         PetscCallAbort(
           PETSC_COMM_SELF, KSPGetConvergedReason(solver.getHandle(), &reason));
-        if (reason < 0)
-        {
-          // BiCGStab(l) can break down: one more attempt, GMRES from a zero guess.
-          char type[64] = "";
-          PetscBool given = PETSC_FALSE;
-          PetscCallAbort(PETSC_COMM_SELF,
-            PetscOptionsGetString(
-              PETSC_NULLPTR, PETSC_NULLPTR, "-ksp_type", type, sizeof(type), &given));
-          std::cerr << "Step " << step << ": " << KSPConvergedReasons[reason]
-                    << ", solving again with GMRES" << std::endl;
-          PetscCallAbort(
-            PETSC_COMM_SELF, PetscOptionsSetValue(PETSC_NULLPTR, "-ksp_type", KSPGMRES));
-          PetscBool restart = PETSC_FALSE;
-          PetscCallAbort(PETSC_COMM_SELF,
-            PetscOptionsHasName(
-              PETSC_NULLPTR, PETSC_NULLPTR, "-ksp_gmres_restart", &restart));
-          if (!restart)
-          {
-            PetscCallAbort(PETSC_COMM_SELF,
-              PetscOptionsSetValue(PETSC_NULLPTR, "-ksp_gmres_restart", "100"));
-          }
-          PetscCallAbort(
-            PETSC_COMM_SELF, VecSet(flow.getLinearSystem().getSolution(), 0));
-          solver.setType(KSPGMRES);
-          flow.solve(solver);
-          solver.setType(KSPBCGSL);
-          if (given)
-          {
-            PetscCallAbort(
-              PETSC_COMM_SELF, PetscOptionsSetValue(PETSC_NULLPTR, "-ksp_type", type));
-          }
-          else
-          {
-            PetscCallAbort(
-              PETSC_COMM_SELF, PetscOptionsClearValue(PETSC_NULLPTR, "-ksp_type"));
-          }
-          PetscCallAbort(
-            PETSC_COMM_SELF, KSPGetConvergedReason(solver.getHandle(), &reason));
-          ++fallbacks;
-        }
-        const auto t2 = std::chrono::steady_clock::now();
-        PetscCallAbort(PETSC_COMM_SELF, KSPGetIterationNumber(solver.getHandle(), &its));
-        iterations += its;
-        if (reason < 0)
-        {
-          std::cerr << "The linear solver failed at step " << step << ": "
-                    << KSPConvergedReasons[reason] << " after " << its << " iterations"
-                    << std::endl;
-          return EXIT_FAILURE;
-        }
-        velocity.setData(toHost(u.getSolution().getData()));
-        pressure.setData(toHost(p.getSolution().getData()));
-        rheologyTime += (r1 - r0) + (r3 - r2);
-        transportTime += r2 - r1;
-        assembly += t1 - t0;
-        solve += t2 - t1;
-        rheologySeconds += std::chrono::duration<double>((r1 - r0) + (r3 - r2)).count();
-        transportSeconds += std::chrono::duration<double>(r2 - r1).count();
-        assemblySeconds += std::chrono::duration<double>(t1 - t0).count();
-        solveSeconds += std::chrono::duration<double>(t2 - t1).count();
-        if (outer > 1)
-          uIterate = velocity.getData().toHost();
+        ++fallbacks;
       }
+      const auto t2 = std::chrono::steady_clock::now();
+      PetscCallAbort(
+        PETSC_COMM_SELF, KSPGetIterationNumber(solver.getHandle(), &iterations));
+      if (reason < 0)
+      {
+        std::cerr << "The linear solver failed at step " << step << ": "
+                  << KSPConvergedReasons[reason] << " after " << iterations
+                  << " iterations" << std::endl;
+        return EXIT_FAILURE;
+      }
+      velocity.setData(toHost(u.getSolution().getData()));
+      pressure.setData(toHost(p.getSolution().getData()));
+      const HostVector uh = velocity.getData().toHost();
+      const auto ph = pressure.getData().toHost();
+
+      // Step 5: correction of psi and n with the gradient of the midpoint.
+      const auto r2 = std::chrono::steady_clock::now();
+      if (elastic)
+      {
+        const HostVector uMid = second ? HostVector(0.5 * (un + uh)) : uh;
+        toDevice(uMid.data(), nodal.velocity);
+        recoverGradient(nodal);
+        advanceStructure(nodal, nodal.psi, nodal.size, model, thixotropic, dt, P.ptt);
+        diagnostics = diagnose(nodal, model, true);
+      }
+      const auto r3 = std::chrono::steady_clock::now();
+      const double rheologySeconds =
+        std::chrono::duration<double>((r1 - r0) + (r3 - r2)).count();
+      const double assemblySeconds = std::chrono::duration<double>(t1 - t0).count();
+      const double solveSeconds = std::chrono::duration<double>(t2 - t1).count();
+      rheologyTime += (r1 - r0) + (r3 - r2);
+      assembly += t1 - t0;
+      solve += t2 - t1;
 
       // Diagnostics on the host copies of the solution. n is outward: the
       // venous flux is negated to read as the inflow.
-      const auto uh = velocity.getData().toHost();
-      const auto ph = pressure.getData().toHost();
       const Real qIn = -veinFluxHost.dot(uh);
       const Real qOut = mitralFluxHost.dot(uh);
       const Real pVein = veinMeanHost.dot(ph) / veinArea;
@@ -2306,8 +2248,7 @@ int main(int argc, char** argv)
           << ',' << diagnostics.solventDissipation << ',' << diagnostics.polymerPower
           << ',' << diagnostics.elasticEnergy << ',' << diagnostics.maxWeissenberg << ','
           << diagnostics.maxTrace << ',' << diagnostics.meanSize << ',' << rheologySeconds
-          << ',' << transportSeconds << ',' << assemblySeconds << ',' << solveSeconds
-          << ',' << iterations << ',' << transportIterations << '\n';
+          << ',' << assemblySeconds << ',' << solveSeconds << ',' << iterations << '\n';
       if (step % P.outputEvery == 0 || step == total)
       {
         shearRate.setData(toHost(nodal.shearRate));
@@ -2333,24 +2274,14 @@ int main(int argc, char** argv)
                     << "  tr(c)_max=" << diagnostics.maxTrace
                     << "  n_mean=" << diagnostics.meanSize;
         }
-        std::cout << "  rheology " << rheologySeconds << " s  transport "
-                  << transportSeconds << " s (its=" << transportIterations
-                  << ")  assembly " << assemblySeconds << " s  solve " << solveSeconds
+        std::cout << "  rheology " << rheologySeconds << " s  assembly "
+                  << assemblySeconds << " s  solve " << solveSeconds
                   << " s  its=" << iterations << std::endl;
       }
     }
-    std::cout << "Rheology " << rheologyTime.count() << " s, transport "
-              << transportTime.count() << " s, assembly " << assembly.count()
-              << " s, solve " << solve.count() << " s in " << total << " steps, "
-              << fallbacks << " solved again with GMRES" << std::endl;
-    if (transportSolver)
-    {
-      PetscCallAbort(PETSC_COMM_SELF, KSPDestroy(&transportSolver));
-      PetscCallAbort(PETSC_COMM_SELF, VecDestroy(&transported));
-      PetscCallAbort(PETSC_COMM_SELF, VecDestroy(&previous));
-      PetscCallAbort(PETSC_COMM_SELF, VecDestroy(&load));
-      PetscCallAbort(PETSC_COMM_SELF, VecDestroy(&inflowValue));
-    }
+    std::cout << "Rheology " << rheologyTime.count() << " s, assembly "
+              << assembly.count() << " s, solve " << solve.count() << " s in " << total
+              << " steps, " << fallbacks << " solved again with GMRES" << std::endl;
   }
   PetscFinalize();
   return 0;
