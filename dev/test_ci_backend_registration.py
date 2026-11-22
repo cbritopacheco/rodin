@@ -516,18 +516,20 @@ class BackendRegistrationTest(unittest.TestCase):
             self.assertIn(str(rank), configurations[1][0][name])
             self.assertEqual(properties[1][name]["PROCESSORS"], str(rank))
 
-    def test_curved_stokes_hexahedron_watchdog_requires_threaded_coverage(self):
+    def test_curved_stokes_local_watchdogs_follow_coverage_and_threading(self):
         reference = None
-        selected = 'RodinConvergenceIsoparametricPETScStokesBoundary_P3P2Rates_Hexahedron'
+        prefix = 'RodinConvergenceIsoparametricPETScStokesBoundary_P3P2Rates_'
         for coverage, threaded in itertools.product([False, True], repeat=2):
             tests, build = self.configure('tests/convergence/isoparametric/Stokes',
                                           coverage=coverage, multithreaded=threaded)
             commands = {name: [arg.replace(str(build.parent), '<FIXTURE>') for arg in args]
                         for name, args in tests.items()}
             properties = self.properties(build)
-            self.assertEqual(properties[selected]['TIMEOUT'], '3600' if coverage and threaded else '1800')
-            for rank in range(1, 5):
-                name = f'RodinConvergenceIsoparametricPETScStokesBoundary_MPI_np{rank}_P3P2Rates_Hexahedron'
+            self.assertEqual(properties[prefix + 'Hexahedron']['TIMEOUT'], '3600' if coverage and threaded else '1800')
+            pyramid_timeout = '7200' if coverage and threaded else '3600' if coverage else '1800'
+            self.assertEqual(properties[prefix + 'Pyramid']['TIMEOUT'], pyramid_timeout)
+            for geometry, rank in itertools.product(['Hexahedron', 'Pyramid'], range(1, 5)):
+                name = f'RodinConvergenceIsoparametricPETScStokesBoundary_MPI_np{rank}_P3P2Rates_{geometry}'
                 self.assertEqual(properties[name]['TIMEOUT'], '1800')
                 self.assertEqual(properties[name]['PROCESSORS'], str(rank))
             if reference is None:

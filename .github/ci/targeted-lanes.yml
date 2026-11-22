@@ -4820,7 +4820,13 @@ jobs:
         - multithreaded: 'ON'
           physics: Stokes
           geometry: pyramid
-          selection: all
+          selection: local
+          path: Convergence / Isoparametric / Stokes / BoundaryConditions
+          study: all
+        - multithreaded: 'ON'
+          physics: Stokes
+          geometry: pyramid
+          selection: mpi
           path: Convergence / Isoparametric / Stokes / BoundaryConditions
           study: all
         - multithreaded: 'OFF'

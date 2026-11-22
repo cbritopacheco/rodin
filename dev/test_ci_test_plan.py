@@ -238,6 +238,7 @@ class TestPlanTest(unittest.TestCase):
         command = next(s['run'] for s in job['steps'] if s.get('name') == 'Run curved boundary convergence partition')
         geometries = ['Segment', 'Triangle', 'Quadrilateral', 'Tetrahedron', 'Pyramid', 'Hexahedron', 'Wedge']
         degrees = {'LinearElasticity': ['MixedTractionP' + str(k) + 'Rates' for k in [1, 2, 3]] + ['Controls'],
+                   'Stokes': ['P2P1Rates', 'P3P2Rates', 'Controls'],
                    'NonlinearPoisson': [b + 'P' + str(k) + 'Rates' for b in ['MixedNeumann', 'Robin', 'PureNeumann']
                                         for k in [1, 2, 3]] + ['Controls']}
         with tempfile.TemporaryDirectory() as temporary:
@@ -245,7 +246,11 @@ class TestPlanTest(unittest.TestCase):
             ctest.write_text('#!/bin/sh\nwhile [ "$1" != "-R" ]; do shift; done\nprintf "%s\\n" "$2"\n')
             ctest.chmod(0o755)
             counts = {mt: Counter() for mt in ['ON', 'OFF']}
-            for row in job['strategy']['matrix']['include']:
+            rows = job['strategy']['matrix']['include']
+            partitions = {row['selection'] for row in rows
+                          if (row['physics'], row['geometry'], row['multithreaded']) == ('Stokes', 'pyramid', 'ON')}
+            self.assertEqual(partitions, {'local', 'mpi'})
+            for row in rows:
                 script = command
                 for name, value in row.items():
                     script = script.replace('${{ matrix.' + name + ' }}', value)
@@ -272,10 +277,12 @@ class TestPlanTest(unittest.TestCase):
                 counts[row['multithreaded']].update(actual)
             self.assertTrue(all(count == 1 for c in counts.values() for count in c.values()))
             for counts_by_name in counts.values():
-                for rank in [None, 1, 2, 3, 4]:
-                    context = '' if rank is None else f'MPI_np{rank}_'
-                    for study in degrees['LinearElasticity']:
-                        self.assertEqual(counts_by_name[f'RodinConvergenceIsoparametricPETScLinearElasticityBoundary_{context}{study}_Pyramid'], 1)
+                for physics in ['LinearElasticity', 'Stokes']:
+                    for rank in [None, 1, 2, 3, 4]:
+                        context = '' if rank is None else f'MPI_np{rank}_'
+                        for study in degrees[physics]:
+                            name = f'RodinConvergenceIsoparametricPETSc{physics}Boundary_{context}{study}_Pyramid'
+                            self.assertEqual(counts_by_name[name], 1, name)
 
 
 if __name__ == "__main__":

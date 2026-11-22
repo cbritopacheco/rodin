@@ -404,11 +404,13 @@ lanes, not an average of their percentages. Tests and benchmarks may exercise
 production code but their own source lines are excluded from the denominator.
 Coverage describes compiled code and its instantiated templates.
 
-Coverage counters retain atomic updates for threaded execution. Instrumented
-processes can require a different watchdog from ordinary builds: the local
-curved cubic-pyramid Stokes rate test uses the existing one-hour high-order
-pyramid budget when coverage is enabled. Its refinement hierarchy, numerical
-criteria and distributed counterparts are unchanged.
+Coverage counters retain atomic updates for threaded execution. The local
+curved cubic-pyramid PETSc Stokes traction history uses a one-hour watchdog
+under serial coverage and a two-hour watchdog under threaded coverage. It
+finished in 1,997 seconds on `develop` and hit the one-hour limit in the PR
+campaign while all four MPI cases passed. The threaded local and MPI histories
+run in separate jobs so the local allowance does not consume the MPI budget.
+Both jobs retain the same refinement histories, numerical criteria and ranks.
 
 `dev/ci_artifacts.py` derives exact producer artifact names from the same plans
 used to schedule execution. A publisher downloads every required contribution
