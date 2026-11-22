@@ -26,7 +26,7 @@ STATES="${STATES:-healthy diabetic hyperviscous}"
 # Carreau-Yasuda fits of table 1 (SI): mu0 muinf lambda n a.
 cy_values() {
   case "$1" in
-    healthy)      echo "0.0712616 0.0041 9.2780 0.3572 1.8873" ;;
+    healthy)      echo "0.0712616 0.0041 9.2780 0.3572 1.8773" ;;
     diabetic)     echo "0.0973528 0.0049622 15.7825 0.2670 1.0829" ;;
     hyperviscous) echo "0.3467269 0.0053264 17.4172 0.2200 0.6957" ;;
     *) echo "unknown state $1" >&2; return 1 ;;
