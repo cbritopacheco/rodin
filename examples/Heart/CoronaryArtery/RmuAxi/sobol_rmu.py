@@ -282,7 +282,7 @@ def check(summaryPath, scale="1e-4"):
 LANDMARKS = [
     # Nagaoka & Yoshida 2006, IOVS: human retina, first-order branches
     # (108 and 147 um), laser Doppler velocimetry; RI ~ 0.7 in retinal arteries
-    # (Puyo et al. 2021, laser Doppler holography) gives A ~ 0.54.
+    # (Puyo et al. 2021, arXiv:2106.00634, laser Doppler holography) gives A ~ 0.54.
     ("retinal arterioles", 1539.0, ("healthy",), 0.7 / 1.3, "s"),
     ("retinal venules", 632.0, ("healthy",), None, "s"),
     # Khansari et al. 2017, Sci Rep: human conjunctiva, 18-21 um.
@@ -299,9 +299,12 @@ LANDMARKS = [
     # disease, 0.05-0.2 mm/s (normal 1.1-2.4 mm/s); 8 (0.9 v) / D with
     # D = 20 um assumed (Khansari et al. 2017 diameters).
     ("sickle-cell trickle flow", (18.0, 72.0), ("hyperviscous",), None, "b"),
-    # Edul et al. 2012, Crit Care Med: sublingual RBC velocity 830 um/s in
-    # septic shock (1332 um/s in controls); D = 10-20 um assumed.
-    ("septic shock, sublingual", (300.0, 600.0), ("healthy",), None, "b"),
+    # Edul et al. 2012, Crit Care Med 40:1443: sublingual RBC velocity in
+    # vessels < 20 um, 1332 +- 187 um/s in 25 controls and 830 +- 183 um/s in
+    # 25 patients in septic shock (22% of capillaries not perfused);
+    # 8 (0.9 v) / D with D = 10-20 um.
+    ("sublingual, controls", (480.0, 960.0), ("healthy",), None, "b"),
+    ("sublingual, septic shock", (300.0, 600.0), ("healthy",), None, "b"),
     # This work (calibration of the coronary outlets, flow reversal: A ~ 1).
     ("coronary arterioles", 800.0, ("healthy", "diabetic", "hyperviscous"), 1.0, "o"),
     ("coronary venules", 400.0, ("healthy", "diabetic", "hyperviscous"), 1.0, "o"),
@@ -372,7 +375,7 @@ def errorMap(out, nGamma=61, nAmp=41):
                 lo, hi = g
                 k = bandIndex.get(state, 0)
                 bandIndex[state] = k + 1
-                y = 1.30 - 0.13 * k
+                y = 1.34 - 0.10 * k
                 ax.plot([lo, hi], [y, y], color="#6a1b9a", lw=2.2, solid_capstyle="butt",
                         zorder=6)
                 ax.plot([lo, lo], [y - 0.03, y + 0.03], color="#6a1b9a", lw=0.8, zorder=6)
@@ -406,7 +409,7 @@ def errorMap(out, nGamma=61, nAmp=41):
                         Line2D([], [], color="#202020", lw=0.8, ls=":",
                                label="conjunctiva (Khansari et al. 2017)"),
                         Line2D([], [], color="#1b5e20", lw=0.8, ls="-.", marker="D", mfc="white",
-                               label="retina (Nagaoka & Yoshida 2006; Puyo et al.)"),
+                               label="retina (Nagaoka & Yoshida 2006; Puyo et al. 2021)"),
                         Line2D([], [], marker="o", ls="none", mfc="white", mec="#202020",
                                label="coronary, this work"),
                         Line2D([], [], color="#6a1b9a", lw=2.2,
