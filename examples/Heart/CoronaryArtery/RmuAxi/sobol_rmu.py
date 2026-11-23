@@ -290,6 +290,18 @@ LANDMARKS = [
     ("conjunctival venules", 183.0, ("healthy",), None, "c"),
     ("conjunctival arterioles", 193.0, ("diabetic",), None, "c"),
     ("conjunctival venules", 154.0, ("diabetic",), None, "c"),
+    # Bands (style "b"): ranges of resting shear rate; pulsatility not reported.
+    # Koutsiaris et al. 2007, Biorheology: human conjunctival capillaries and
+    # post-capillary venules (4-24 um), WSS 0.28-9.55 Pa, i.e. ~80-2700 1/s
+    # at 3.5 mPa s; the low end is the larger post-capillary venules.
+    ("post-capillary venules", (80.0, 440.0), ("healthy",), None, "b"),
+    # Cheung et al. 2001, Blood: conjunctival "trickle flow" in sickle cell
+    # disease, 0.05-0.2 mm/s (normal 1.1-2.4 mm/s); 8 (0.9 v) / D with
+    # D = 20 um assumed (Khansari et al. 2017 diameters).
+    ("sickle-cell trickle flow", (18.0, 72.0), ("hyperviscous",), None, "b"),
+    # Edul et al. 2012, Crit Care Med: sublingual RBC velocity 830 um/s in
+    # septic shock (1332 um/s in controls); D = 10-20 um assumed.
+    ("septic shock, sublingual", (300.0, 600.0), ("healthy",), None, "b"),
     # This work (calibration of the coronary outlets, flow reversal: A ~ 1).
     ("coronary arterioles", 800.0, ("healthy", "diabetic", "hyperviscous"), 1.0, "o"),
     ("coronary venules", 400.0, ("healthy", "diabetic", "hyperviscous"), 1.0, "o"),
@@ -335,6 +347,7 @@ def errorMap(out, nGamma=61, nAmp=41):
     import matplotlib.pyplot as plt
     from matplotlib.colors import LinearSegmentedColormap, BoundaryNorm
     from matplotlib.lines import Line2D
+    from matplotlib.patches import Patch
     plt.rcParams.update({"font.family": "serif", "mathtext.fontset": "cm", "font.size": 8.5,
                          "axes.labelsize": 8.5, "legend.fontsize": 7.5, "axes.linewidth": 0.6,
                          "xtick.direction": "out", "ytick.direction": "out"})
@@ -344,6 +357,7 @@ def errorMap(out, nGamma=61, nAmp=41):
     norm = BoundaryNorm(levels, cmap.N)
     names = {"healthy": "Healthy", "diabetic": "Type 2 diabetes", "hyperviscous": "Hyperviscous"}
     fig, axes = plt.subplots(1, 3, figsize=(7.4, 2.7), sharey=True)
+    bandIndex = {}
     for ax, (state, (rest, single)) in zip(axes, maps.items()):
         cf = ax.contourf(G, Aa, np.clip(rest, 0, 39.9), levels=levels, cmap=cmap, norm=norm)
         cs = ax.contour(G, Aa, rest, levels=[5, 10, 20], colors="#3a1a08", linewidths=0.6)
@@ -353,6 +367,19 @@ def errorMap(out, nGamma=61, nAmp=41):
         ax.clabel(cm, fmt="%g%%", fontsize=6.5, inline_spacing=2)
         for label, g, states, A, style in LANDMARKS:
             if state not in states:
+                continue
+            if style == "b":
+                lo, hi = g
+                k = bandIndex.get(state, 0)
+                bandIndex[state] = k + 1
+                y = 1.30 - 0.13 * k
+                ax.plot([lo, hi], [y, y], color="#6a1b9a", lw=2.2, solid_capstyle="butt",
+                        zorder=6)
+                ax.plot([lo, lo], [y - 0.03, y + 0.03], color="#6a1b9a", lw=0.8, zorder=6)
+                ax.plot([hi, hi], [y - 0.03, y + 0.03], color="#6a1b9a", lw=0.8, zorder=6)
+                ax.text(math.sqrt(lo * hi), y + 0.035, label, fontsize=6, ha="center",
+                        va="bottom", color="#4a148c", zorder=6,
+                        bbox=dict(facecolor="white", edgecolor="none", alpha=0.7, pad=0.4))
                 continue
             short = "art." if "arteriole" in label else "ven."
             col = {"s": "#1b5e20", "c": "#202020", "o": "#202020"}[style]
@@ -379,9 +406,11 @@ def errorMap(out, nGamma=61, nAmp=41):
                         Line2D([], [], color="#202020", lw=0.8, ls=":",
                                label="conjunctiva (Khansari et al. 2017)"),
                         Line2D([], [], color="#1b5e20", lw=0.8, ls="-.", marker="D", mfc="white",
-                               label="retina (Nagaoka & Yoshida 2006; Puyo et al. 2021)"),
+                               label="retina (Nagaoka & Yoshida 2006; Puyo et al.)"),
                         Line2D([], [], marker="o", ls="none", mfc="white", mec="#202020",
-                               label="coronary, this work")],
+                               label="coronary, this work"),
+                        Line2D([], [], color="#6a1b9a", lw=2.2,
+                               label="range estimated from velocity (see text)")],
                loc="lower center", ncol=3, frameon=False, bbox_to_anchor=(0.45, 1.0),
                columnspacing=1.2, handlelength=1.8)
     path = os.path.join(out, "fig_error_map.pdf")
