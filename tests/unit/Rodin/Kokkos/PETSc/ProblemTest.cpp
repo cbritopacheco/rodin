@@ -699,7 +699,7 @@ namespace Rodin::Tests::Unit
     sp =
       Integral(Grad(su), Grad(sv)) - Integral(f, sv) + DirichletBC(su, RealFunction(0));
     Solver::SparseLU(sp).solve();
-    const Math::Vector<Real> expected = su.getSolution().getData();
+    const auto expected = su.getSolution().getData().download();
 
     Problem pp(pu, pv);
     pp =
@@ -722,7 +722,7 @@ namespace Rodin::Tests::Unit
     // The PETSc solution enters a problem as a coefficient, through its
     // values and its gradient, as the same coefficients in an Eigen vector.
     GridFunction gs(fes);
-    gs.getData() = solution;
+    gs.getData().upload(solution);
     const auto& gp = pu.getSolution();
     Problem sq(su, sv);
     sq = Integral(Grad(su), Grad(sv)) + Integral(gs * su, sv) - Integral(gs, sv) -
@@ -735,7 +735,7 @@ namespace Rodin::Tests::Unit
     // Coefficients written again through PETSc are read again.
     ASSERT_EQ(VecScale(gp.getData(), 2), PETSC_SUCCESS);
     ASSERT_EQ(VecShift(gp.getData(), 1), PETSC_SUCCESS);
-    gs.getData() = (2 * solution).array() + 1;
+    gs.getData().upload((2 * solution).array() + 1);
     expectSameSystemAssembledFirst(sq, pq);
     PetscScalar* values = nullptr;
     ASSERT_EQ(VecGetArray(gp.getData(), &values), PETSC_SUCCESS);

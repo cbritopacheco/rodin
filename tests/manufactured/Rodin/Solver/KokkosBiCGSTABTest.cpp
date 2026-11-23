@@ -72,13 +72,13 @@ namespace Rodin::Tests::Manufactured
       ASSERT_TRUE(solver.success());
       GridFunction expected(fes);
       expected = exact;
-      const auto coefficients = expected.getData().toHost();
-      const auto actual = u.getSolution().getData().toHost();
+      const auto coefficients = expected.getData().download();
+      const auto actual = u.getSolution().getData().download();
       EXPECT_LE((actual - coefficients).norm() / coefficients.norm(), 1e-10);
       const auto& system = problem.getLinearSystem();
-      const auto a = system.getOperator().toHost();
-      const auto b = system.getVector().toHost();
-      const auto x = system.getSolution().toHost();
+      const auto a = system.getOperator().download();
+      const auto b = system.getVector().download();
+      const auto x = system.getSolution().download();
       const Real residual = (b - a * x).norm() / b.norm();
       EXPECT_LE(residual, 1e-12);
       EXPECT_NEAR(solver.getError(), residual, 1e-13);

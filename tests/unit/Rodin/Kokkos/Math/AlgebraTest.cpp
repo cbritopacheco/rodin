@@ -27,6 +27,9 @@ namespace Rodin::Tests::Unit
   static_assert(CanUpload<Matrix, Math::SparseMatrix<Real>>);
   static_assert(!CanUpload<const Matrix, Math::SparseMatrix<Real>>);
   static_assert(!CanUpload<Matrix, Matrix>);
+  static_assert(!std::is_convertible_v<Math::Vector<Real>, Coefficients>);
+  static_assert(!std::is_assignable_v<Coefficients&, Math::Vector<Real>>);
+  static_assert(!std::is_convertible_v<Coefficients, Math::Vector<Real>>);
 
   /// @brief Symbolic constructors preserve transposition maps and ordering-induced fill.
   TEST(Kokkos_Math, CompressedPatternConstructors)
@@ -93,7 +96,6 @@ namespace Rodin::Tests::Unit
     backend.upload(empty);
     read.download(destination);
     EXPECT_EQ(destination.size(), 0);
-    EXPECT_EQ(read.toHost().size(), 0);
   }
 
   /// @brief Sparse transfers preserve rectangular operators through CSC/CSR conversion.
@@ -210,7 +212,7 @@ namespace Rodin::Tests::Unit
       ::Kokkos::View<Real*, TestMemorySpace, ::Kokkos::MemoryTraits<::Kokkos::Unmanaged>>(
         Arrays::getValues(matrix), 3);
     ::Kokkos::deep_copy(borrowed, Real(7));
-    EXPECT_EQ(matrix.toHost().coeff(1, 1), Real(7));
+    EXPECT_EQ(matrix.download().coeff(1, 1), Real(7));
     EXPECT_EQ(Arrays::getStarts(matrix), starts);
     EXPECT_EQ(Arrays::getIndices(matrix), indices);
     EXPECT_EQ(Arrays::getValues(matrix), values);
@@ -245,7 +247,7 @@ namespace Rodin::Tests::Unit
     Direct<System> solver(pb);
     static_assert(Solver::CuDSSOperator<Matrix>::Resident);
     const auto check = [&](Real expected) {
-      const auto before = matrix.toHost();
+      const auto before = matrix.download();
       typename Solver::CuDSSOperator<Matrix>::Pattern pattern;
       pattern.assign(matrix);
       const auto* starts = matrix.getRowStarts().data();
@@ -256,8 +258,8 @@ namespace Rodin::Tests::Unit
       solver.solve(system);
       ASSERT_TRUE(solver.success());
       EXPECT_LT(
-        (system.getSolution().toHost().array() - expected).matrix().norm(), 1e-10);
-      EXPECT_EQ((matrix.toHost() - before).norm(), Real(0));
+        (system.getSolution().download().array() - expected).matrix().norm(), 1e-10);
+      EXPECT_EQ((matrix.download() - before).norm(), Real(0));
       EXPECT_TRUE(pattern.matches(matrix));
       EXPECT_EQ(matrix.getRowStarts().data(), starts);
       EXPECT_EQ(matrix.getColumns().data(), columns);
@@ -479,15 +481,16 @@ namespace Rodin::Tests::Unit
   {
     Math::Vector<Real> source(4);
     source << 1, 2, 3, 4;
-    Coefficients a(source);
+    Coefficients a;
+    a.upload(source);
     Coefficients b(a);
     EXPECT_NE(a.getView().data(), b.getView().data());
     ::Kokkos::deep_copy(b.getView(), Real(7));
-    EXPECT_EQ(a.toHost()(0), 1);
-    EXPECT_EQ(b.toHost()(0), 7);
+    EXPECT_EQ(a.download()(0), 1);
+    EXPECT_EQ(b.download()(0), 7);
     b.segment(1, 2) = static_cast<const Coefficients&>(a).segment(2, 2);
-    EXPECT_EQ(b.toHost()(1), 3);
-    EXPECT_EQ(b.toHost()(2), 4);
+    EXPECT_EQ(b.download()(1), 3);
+    EXPECT_EQ(b.download()(2), 4);
     a *= Real(2);
     EXPECT_NEAR(a.norm(), 2 * source.norm(), 1e-12);
     Index i = 0;
@@ -498,6 +501,26 @@ namespace Rodin::Tests::Unit
     EXPECT_TRUE(a.allFinite());
     Coefficients c(std::move(b));
     EXPECT_EQ(c.size(), 4);
+  }
+
+  TEST(Kokkos_Math, GridFunctionCopiesCrossBackendSlices)
+  {
+    const auto source = makeTriangleMesh();
+    const DeviceMesh mesh(TestContext{}, source);
+    P1 hostSpace(source);
+    P1 backendSpace(mesh);
+    GridFunction host(hostSpace);
+    GridFunction backend(backendSpace);
+    const auto size = backendSpace.getSize();
+    const Math::Vector<Real> values =
+      Math::Vector<Real>::LinSpaced(size + 2, 1, size + 2);
+    backend.setData(values, 1);
+    EXPECT_EQ((backend.getData().download() - values.segment(1, size)).norm(), Real(0));
+
+    Coefficients uploaded;
+    uploaded.upload(values);
+    host.setData(uploaded, 2);
+    EXPECT_EQ((host.getData() - values.segment(2, size)).norm(), Real(0));
   }
 
   TEST(Kokkos_Math, CoefficientsAndSolveStayInBackendStorage)
@@ -528,7 +551,7 @@ namespace Rodin::Tests::Unit
     Solver::CG solver(pb);
     solver.setTolerance(1e-12).setMaxIterations(1000).solve();
     ASSERT_TRUE(solver.success());
-    EXPECT_LE((u.getSolution().getData().toHost().array() - 1).matrix().norm(), 1e-10);
+    EXPECT_LE((u.getSolution().getData().download().array() - 1).matrix().norm(), 1e-10);
     const auto* rhs = system.getVector().data();
     const auto* solution = system.getSolution().data();
     ::Kokkos::deep_copy(native, Real(3));
@@ -538,19 +561,20 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(u.getSolution().getData().data(), fieldStorage);
     EXPECT_EQ(system.getVector().data(), rhs);
     EXPECT_EQ(system.getSolution().data(), solution);
-    EXPECT_LE((u.getSolution().getData().toHost().array() - 3).matrix().norm(), 1e-10);
-    const auto previous = system.getSolution().toHost();
+    EXPECT_LE((u.getSolution().getData().download().array() - 3).matrix().norm(), 1e-10);
+    const auto previous = system.getSolution().download();
     typename decltype(pb)::LinearSystemType other;
     other.getOperator() = system.getOperator();
     other.getVector() = system.getVector();
     solver.solve(other);
     ASSERT_TRUE(solver.success());
-    EXPECT_EQ((system.getSolution().toHost() - previous).norm(), 0);
-    EXPECT_LE((other.getSolution().toHost() - previous).norm(), 1e-10);
+    EXPECT_EQ((system.getSolution().download() - previous).norm(), 0);
+    EXPECT_LE((other.getSolution().download() - previous).norm(), 1e-10);
     Matrix independent(system.getOperator());
     EXPECT_NE(independent.getValues().data(), system.getOperator().getValues().data());
     independent *= Real(2);
-    EXPECT_LE((independent.toHost() - 2 * system.getOperator().toHost()).norm(), 1e-12);
+    EXPECT_LE(
+      (independent.download() - 2 * system.getOperator().download()).norm(), 1e-12);
   }
 
   TEST(Kokkos_Math, PreassembledFormsAndTargetedAssembly)
@@ -573,12 +597,12 @@ namespace Rodin::Tests::Unit
     auto& system = pb.getLinearSystem();
     expectSameOperator(a.getOperator(), system.getOperator());
     expectSameVector(b.getVector(), system.getVector());
-    const auto rhs = system.getVector().toHost();
+    const auto rhs = system.getVector().download();
     pb.assemble(AssemblyTarget::LHS);
-    EXPECT_EQ((system.getVector().toHost() - rhs).norm(), 0);
+    EXPECT_EQ((system.getVector().download() - rhs).norm(), 0);
     Solver::GMRES solver(pb);
     solver.setTolerance(1e-12).setMaxIterations(1000).solve();
     ASSERT_TRUE(solver.success());
-    EXPECT_LE((u.getSolution().getData().toHost().array() - 2).matrix().norm(), 1e-9);
+    EXPECT_LE((u.getSolution().getData().download().array() - 2).matrix().norm(), 1e-9);
   }
 }

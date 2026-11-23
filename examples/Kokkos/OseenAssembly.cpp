@@ -430,7 +430,7 @@ namespace Rodin::Examples
       P1 vh(mesh, 3);
       P1 qh(mesh);
       GridFunction w(vh);
-      w.getData() = hw.getData();
+      w.getData().upload(hw.getData());
       PETSc::Variational::TrialFunction u(vh);
       PETSc::Variational::TrialFunction p(qh);
       PETSc::Variational::TestFunction v(vh);

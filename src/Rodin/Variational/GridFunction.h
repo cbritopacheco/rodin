@@ -52,6 +52,7 @@
 
 #include <atomic>
 #include <algorithm>
+#include <concepts>
 #include <utility>
 #include <fstream>
 #include <functional>
@@ -1830,6 +1831,33 @@ namespace Rodin::Variational
         else
           this->getData() = data.segment(offset, sz);
         return *this;
+      }
+
+      /**
+       * @brief Copies a slice from coefficient storage on another backend.
+       * @tparam Source Source vector type.
+       * @param data Source coefficients.
+       * @param offset Starting offset in the source vector.
+       * @returns This grid function.
+       */
+      template <class Source>
+        requires requires(DataType& destination, const Source& source) {
+          destination.upload(source.segment(size_t{}, size_t{}));
+        } || requires(const Source& source) {
+          { source.download() } -> std::same_as<DataType>;
+        }
+      GridFunction& setData(const Source& data, size_t offset = 0)
+      {
+        const size_t size = this->getFiniteElementSpace().getSize();
+        if constexpr (requires { this->getData().upload(data.segment(offset, size)); })
+        {
+          assert(offset <= static_cast<size_t>(data.size()) &&
+            size <= static_cast<size_t>(data.size()) - offset);
+          this->getData().upload(data.segment(offset, size));
+          return *this;
+        }
+        else
+          return setData(data.download(), offset);
       }
 
       /**

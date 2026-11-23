@@ -955,7 +955,7 @@ namespace Rodin::Kokkos::Variational::Internal
         }
         // The incidences missing on the device only number the host
         // closure, the kernels never bind the polytopes they create.
-        HostMeshType host = mesh.toHost();
+        HostMeshType host = mesh.download();
         for (size_t d = host.getDimension(); d > 1; --d)
         {
           if (host.getConnectivity().getIncidence(d, d - 1).size() == 0)
@@ -978,7 +978,7 @@ namespace Rodin::Variational
    * @brief Real valued H1 Lagrange space on a resident Kokkos mesh.
    *
    * The space numbers its degrees of freedom as the host space of the same
-   * degree built on Geometry::Mesh::toHost(), so the two share their global
+   * degree built on Geometry::Mesh::download(), so the two share their global
    * numbering. The host space is kept for the form language queries, and
    * its numbering is copied to the device, where the basis is evaluated by
    * Rodin::Kokkos::Variational::LagrangeDOFs.
@@ -1133,10 +1133,10 @@ namespace Rodin::Variational
 
       /**
        * @brief Builds the host space with the same numbering.
-       * @param[in] mesh Host copy of the mesh, see Geometry::Mesh::toHost().
+       * @param[in] mesh Host copy of the mesh, see Geometry::Mesh::download().
        * @return Scalar H1 space on @p mesh.
        */
-      H1<K, RangeType, Geometry::Mesh<Context::Local>> toHost(
+      H1<K, RangeType, Geometry::Mesh<Context::Local>> download(
         const Geometry::Mesh<Context::Local>& mesh) const
       {
         return H1<K, RangeType, Geometry::Mesh<Context::Local>>(
@@ -1341,10 +1341,10 @@ namespace Rodin::Variational
 
       /**
        * @brief Builds the host space with the same numbering.
-       * @param[in] mesh Host copy of the mesh, see Geometry::Mesh::toHost().
+       * @param[in] mesh Host copy of the mesh, see Geometry::Mesh::download().
        * @return Vector H1 space on @p mesh.
        */
-      H1<K, RangeType, Geometry::Mesh<Context::Local>> toHost(
+      H1<K, RangeType, Geometry::Mesh<Context::Local>> download(
         const Geometry::Mesh<Context::Local>& mesh) const
       {
         return H1<K, RangeType, Geometry::Mesh<Context::Local>>(

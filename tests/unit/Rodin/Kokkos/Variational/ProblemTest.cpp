@@ -101,7 +101,7 @@ namespace Rodin::Tests::Unit
     GridFunction hg(hfes);
     fill(hg, source, 1);
     GridFunction dg(dfes);
-    dg.getData() = hg.getData();
+    dg.getData().upload(hg.getData());
 
     Problem hp(hu, hv);
     hp = Integral(Grad(hu), Grad(hv)) - Integral(hg, hv) + DirichletBC(hu, hg);

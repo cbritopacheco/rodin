@@ -54,14 +54,14 @@ namespace Rodin::IO
           HostField host(space);
           GridFunctionLoader<Format, HostFES, Math::Vector<Scalar>> loader(host);
           static_cast<Loader<HostField>&>(loader).load(target);
-          m_gf.setData(host.getData());
+          m_gf.getData().upload(host.getData());
           if (const auto name = host.getName())
             m_gf.setName(std::string(*name));
         };
-        if constexpr (requires { fes.toHost(fes.getMesh().toHost()); })
+        if constexpr (requires { fes.download(fes.getMesh().download()); })
         {
-          const auto mesh = fes.getMesh().toHost();
-          const auto space = fes.toHost(mesh);
+          const auto mesh = fes.getMesh().download();
+          const auto space = fes.download(mesh);
           transfer(space);
         }
         else
@@ -78,14 +78,14 @@ namespace Rodin::IO
           HostField host(space);
           GridFunctionLoader<Format, HostFES, Math::Vector<Scalar>> loader(host);
           static_cast<Loader<HostField>&>(loader).load(target);
-          m_gf.setData(host.getData());
+          m_gf.getData().upload(host.getData());
           if (const auto name = host.getName())
             m_gf.setName(std::string(*name));
         };
-        if constexpr (requires { fes.toHost(fes.getMesh().toHost()); })
+        if constexpr (requires { fes.download(fes.getMesh().download()); })
         {
-          const auto mesh = fes.getMesh().toHost();
-          const auto space = fes.toHost(mesh);
+          const auto mesh = fes.getMesh().download();
+          const auto space = fes.download(mesh);
           transfer(space);
         }
         else

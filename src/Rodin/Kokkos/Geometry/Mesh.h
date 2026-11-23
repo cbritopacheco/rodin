@@ -778,16 +778,10 @@ namespace Rodin::Geometry
         destination = download();
       }
 
-      /// @returns Independent host snapshot; compatibility spelling of download().
-      Mesh<Rodin::Context::Local> toHost() const
-      {
-        return download();
-      }
-
       /// @param path Output path. @param format Existing Rodin file format.
       void save(const boost::filesystem::path& path, IO::FileFormat format) const override
       {
-        toHost().save(path, format);
+        download().save(path, format);
       }
 
       /**

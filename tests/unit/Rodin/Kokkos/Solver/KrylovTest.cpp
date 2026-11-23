@@ -49,7 +49,7 @@ namespace Rodin::Tests::Unit
     host = Integral(Grad(u), Grad(v)) + Integral(u, v) - Integral(f, v) +
       DirichletBC(u, RealFunction(1));
     Solver::SparseLU(host).solve();
-    const Math::Vector<Real> reference = u.getSolution().getData();
+    const auto reference = u.getSolution().getData().download();
     // The assembly seeds the initial guess with the current solution.
     u.getSolution() = Real(0);
 
@@ -62,14 +62,14 @@ namespace Rodin::Tests::Unit
     ASSERT_TRUE(solver.success());
     EXPECT_GT(solver.getIterationNumber(), 0u);
     EXPECT_LE(solver.getError(), 1e-12);
-    EXPECT_LE(distance(u.getSolution().getData(), reference), 1e-10);
+    EXPECT_LE(distance(u.getSolution().getData().download(), reference), 1e-10);
 
     // The solution of the system is the initial guess of the next solve.
     auto& axb = device.getLinearSystem();
     solver.solve(axb);
     ASSERT_TRUE(solver.success());
     EXPECT_EQ(solver.getIterationNumber(), 0u);
-    EXPECT_LE(distance(axb.getSolution(), reference), 1e-10);
+    EXPECT_LE(distance(axb.getSolution().download(), reference), 1e-10);
 
     // An iteration limit that is too small fails without raising.
     axb.getSolution().resize(0);
@@ -98,7 +98,7 @@ namespace Rodin::Tests::Unit
     host = Integral(Grad(u), Grad(v)) + Integral(Dot(beta, Grad(u)), v) -
       Integral(RealFunction(1), v) + DirichletBC(u, RealFunction(0));
     Solver::SparseLU(host).solve();
-    const Math::Vector<Real> reference = u.getSolution().getData();
+    const auto reference = u.getSolution().getData().download();
     // The assembly seeds the initial guess with the current solution.
     u.getSolution() = Real(0);
 
@@ -111,7 +111,7 @@ namespace Rodin::Tests::Unit
     ASSERT_TRUE(solver.success());
     EXPECT_GT(solver.getIterationNumber(), 0u);
     EXPECT_LE(solver.getError(), 1e-12);
-    EXPECT_LE(distance(u.getSolution().getData(), reference), 1e-9);
+    EXPECT_LE(distance(u.getSolution().getData().download(), reference), 1e-9);
   }
 
   TEST(Kokkos_Solver_Krylov, CG)

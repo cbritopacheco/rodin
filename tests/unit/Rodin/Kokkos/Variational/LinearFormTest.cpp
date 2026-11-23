@@ -29,11 +29,11 @@ namespace Rodin::Tests::Unit
     GridFunction hg(hfes);
     fill(hg, source, 1);
     GridFunction dg(dfes);
-    dg.getData() = hg.getData();
+    dg.getData().upload(hg.getData());
     GridFunction hw(hvh);
     fill(hw, source, d);
     GridFunction dw(dvh);
-    dw.getData() = hw.getData();
+    dw.getData().upload(hw.getData());
 
     RealFunction hf([](const Geometry::Point& p) { return 2 + p.x() - p.y(); });
     RealFunction df(
@@ -72,11 +72,11 @@ namespace Rodin::Tests::Unit
     GridFunction hw(hvh);
     fill(hw, source, d);
     GridFunction dw(dvh);
-    dw.getData() = hw.getData();
+    dw.getData().upload(hw.getData());
     GridFunction hg(hsh);
     fill(hg, source, 1);
     GridFunction dg(dsh);
-    dg.getData() = hg.getData();
+    dg.getData().upload(hg.getData());
 
     expectSameLinearForm(hv, Integral(hw, hv), dv, Integral(dw, dv));
     expectSameLinearForm(

@@ -394,12 +394,6 @@ namespace Rodin::Geometry
         destination = download();
       }
 
-      /// @returns Independent host snapshot; compatibility spelling of download().
-      HostType toHost() const
-      {
-        return download();
-      }
-
       /// @param path Destination. @param format File format. Saves the distributed host mesh.
       void save(const boost::filesystem::path& path, IO::FileFormat format) const override
       {

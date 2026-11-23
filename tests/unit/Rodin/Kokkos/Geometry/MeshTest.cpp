@@ -648,7 +648,7 @@ namespace Rodin::Tests::Unit
     for (Index i = 0; i < source.getFaceCount(); ++i)
       source.setAttribute({1, i}, Geometry::Attribute(3 + i % 2));
     const DeviceMesh mesh(TestContext{}, source);
-    const HostMesh copy = mesh.toHost();
+    const HostMesh copy = mesh.download();
     ASSERT_EQ(copy.getDimension(), source.getDimension());
     ASSERT_EQ(copy.getSpaceDimension(), source.getSpaceDimension());
     for (Index v = 0; v < source.getVertexCount(); ++v)
@@ -704,7 +704,7 @@ namespace Rodin::Tests::Unit
       new Geometry::ParametricTransformation<Variational::RealP1Element>(
         std::move(controls), std::move(element)));
     const DeviceMesh mesh(TestContext{}, source);
-    const HostMesh copy = mesh.toHost();
+    const HostMesh copy = mesh.download();
     EXPECT_NE(dynamic_cast<const Geometry::IdentityTransformation*>(
                 &copy.getPolytopeTransformation(2, 0)),
       nullptr);

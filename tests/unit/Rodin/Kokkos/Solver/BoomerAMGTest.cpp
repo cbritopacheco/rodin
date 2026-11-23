@@ -62,7 +62,7 @@ namespace Rodin::Tests::Unit
     host = Integral(Grad(u), Grad(v)) + Integral(u, v) - Integral(f, v) +
       DirichletBC(u, RealFunction(1));
     Solver::SparseLU(host).solve();
-    const Math::Vector<Real> reference = u.getSolution().getData();
+    const auto reference = u.getSolution().getData().download();
     // The assembly seeds the initial guess with the current solution.
     u.getSolution() = Real(0);
 
@@ -78,7 +78,7 @@ namespace Rodin::Tests::Unit
     // Multigrid converges in far fewer iterations than Jacobi CG.
     EXPECT_LT(solver.getIterationNumber(), 30u);
     EXPECT_LE(solver.getError(), 1e-12);
-    EXPECT_LE(distance(u.getSolution().getData(), reference), 1e-10);
+    EXPECT_LE(distance(u.getSolution().getData().download(), reference), 1e-10);
 
     // The solution of the system is the initial guess of the next solve, which
     // hypre checks after one iteration.
@@ -86,7 +86,7 @@ namespace Rodin::Tests::Unit
     solver.solve(axb);
     ASSERT_TRUE(solver.success());
     EXPECT_EQ(solver.getIterationNumber(), 1u);
-    EXPECT_LE(distance(axb.getSolution(), reference), 1e-10);
+    EXPECT_LE(distance(axb.getSolution().download(), reference), 1e-10);
 
     // The retained hierarchy preconditions the conjugate gradient on a
     // matrix that changed since its setup. Doubling the values is exact, so
@@ -97,7 +97,7 @@ namespace Rodin::Tests::Unit
     solver.solve(axb);
     ASSERT_TRUE(solver.success());
     EXPECT_LT(solver.getIterationNumber(), 30u);
-    EXPECT_LE(distance(2 * axb.getSolution(), reference), 1e-10);
+    EXPECT_LE(distance(2 * axb.getSolution().download(), reference), 1e-10);
 
     // An explicit setup builds the hierarchy again from the current matrix.
     scale(axb, 0.5);
@@ -107,7 +107,7 @@ namespace Rodin::Tests::Unit
     solver.solve(axb);
     ASSERT_TRUE(solver.success());
     EXPECT_LT(solver.getIterationNumber(), 30u);
-    EXPECT_LE(distance(axb.getSolution(), reference), 1e-10);
+    EXPECT_LE(distance(axb.getSolution().download(), reference), 1e-10);
 
     // A copy leaves the hierarchy to the original, which releases it on
     // request.
@@ -131,7 +131,7 @@ namespace Rodin::Tests::Unit
     EXPECT_FALSE(solver.isSetup());
     solver.setAggressiveLevels(1).setMaxInterpolationElements(2).solve(axb);
     ASSERT_TRUE(solver.success());
-    EXPECT_LE(distance(axb.getSolution(), reference), 1e-10);
+    EXPECT_LE(distance(axb.getSolution().download(), reference), 1e-10);
 
     // A zero right-hand side gives a zero solution.
     axb.getVector().setZero();

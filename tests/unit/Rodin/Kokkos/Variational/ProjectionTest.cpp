@@ -32,7 +32,7 @@ namespace Rodin::Tests::Unit
     fillCoefficients(hg.getData());
     const Math::Vector<Real> initial = hg.getData();
     GridFunction dg(dfes);
-    dg.getData() = initial;
+    dg.getData().upload(initial);
     host(hg);
     device(dg);
     EXPECT_GT((hg.getData() - initial).norm(), Real(0));
@@ -55,7 +55,7 @@ namespace Rodin::Tests::Unit
     GridFunction hs(hsh);
     fill(hs, source, 1);
     GridFunction ds(dsh);
-    ds.getData() = hs.getData();
+    ds.getData().upload(hs.getData());
 
     const auto hf = [](const Geometry::Point& p) {
       return 1 + p.x() * p.y() - Real(0.3) * p.x() * p.y() * p.y();
@@ -143,7 +143,7 @@ namespace Rodin::Tests::Unit
     GridFunction hs(hvh);
     fill(hs, source, d);
     GridFunction ds(dvh);
-    ds.getData() = hs.getData();
+    ds.getData().upload(hs.getData());
 
     const auto hf0 = [](const Geometry::Point& p) { return 1 + p.x() * p.y() * p.y(); };
     const auto hf1 = [](const Geometry::Point& p) { return p.x() - Real(0.5) * p.y(); };

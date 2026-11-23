@@ -150,7 +150,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(hn.getReport().iterations, dn.getReport().iterations);
     ASSERT_GT(hw.getData().norm(), Real(0));
     EXPECT_LE(
-      (hw.getData() - dw.getData().toHost()).norm(), Real(1e-10) * hw.getData().norm());
+      (hw.getData() - dw.getData().download()).norm(), Real(1e-10) * hw.getData().norm());
   }
 
   TEST(Kokkos_Variational_InternalVirtualWork, FormsOnTriangles)

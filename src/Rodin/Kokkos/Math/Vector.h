@@ -166,27 +166,6 @@ namespace Rodin::Kokkos::Math
       /// @param rhs Vector whose allocation is moved. @return This vector.
       Vector& operator=(Vector&& rhs) noexcept = default;
 
-      /// @param rhs Host expression to copy to the backend.
-      template <class Derived>
-      Vector(const Eigen::MatrixBase<Derived>& rhs)
-      {
-        *this = rhs;
-      }
-
-      /// @param rhs Host array expression to copy to the backend. @return This vector.
-      template <class Derived>
-      Vector& operator=(const Eigen::ArrayBase<Derived>& rhs)
-      {
-        return *this = rhs.matrix();
-      }
-
-      /// @param rhs Host expression to copy to the backend. @return This vector.
-      template <class Derived>
-      Vector& operator=(const Eigen::MatrixBase<Derived>& rhs)
-      {
-        return upload(rhs);
-      }
-
       /**
        * @brief Replaces this backend vector with an independent host snapshot.
        * @param rhs Host expression, evaluated before backend storage is resized.
@@ -367,18 +346,6 @@ namespace Rodin::Kokkos::Math
         ::Rodin::Math::Vector<Scalar> result;
         download(result);
         return result;
-      }
-
-      /// @return Independent host snapshot; compatibility spelling of download().
-      ::Rodin::Math::Vector<Scalar> toHost() const
-      {
-        return download();
-      }
-
-      /// @return Independent host coefficients for a host algebra destination.
-      operator ::Rodin::Math::Vector<Scalar>() const
-      {
-        return toHost();
       }
 
       /// @return Whether every coefficient is finite.

@@ -45,7 +45,7 @@ namespace Rodin::Tests::Unit
     device.assemble();
     const auto& h = host.getLinearSystem();
     const auto& d = device.getLinearSystem();
-    const Math::SparseMatrix<Real> a = d.getOperator().toHost();
+    const Math::SparseMatrix<Real> a = d.getOperator().download();
     ASSERT_EQ(a.rows(), h.getOperator().rows());
     ASSERT_EQ(a.cols(), h.getOperator().cols());
     ASSERT_EQ(a.nonZeros(), h.getOperator().nonZeros());
@@ -54,7 +54,7 @@ namespace Rodin::Tests::Unit
     const Math::SparseMatrix<Real> difference = a - h.getOperator();
     EXPECT_EQ(difference.norm(), Real(0));
     ASSERT_EQ(d.getVector().size(), h.getVector().size());
-    EXPECT_EQ((d.getVector() - h.getVector()).norm(), Real(0));
+    EXPECT_EQ((d.getVector().download() - h.getVector()).norm(), Real(0));
 
     // The rows are sorted, and a second assembly keeps the arrays.
     const auto& m = d.getOperator();
@@ -154,7 +154,14 @@ namespace Rodin::Tests::Unit
     device = Integral(Jacobian(u), Jacobian(v)) - Integral(p, Div(v)) +
       Integral(Div(u), q) + Integral(eps * p, q) - Integral(VectorFunction{1, 0}, v) +
       DirichletBC(u, VectorFunction{0, 0}).on(1) + DirichletBC(p, RealFunction(1)).on(2);
+    u.getSolution().getData().setConstant(Real(2));
+    p.getSolution().getData().setConstant(Real(3));
     expectSameMatrix(host, device);
+    const auto& guess = host.getLinearSystem().getSolution();
+    EXPECT_EQ((guess.head(vh.getSize()).array() - Real(2)).matrix().norm(), Real(0));
+    EXPECT_EQ((guess.tail(qh.getSize()).array() - Real(3)).matrix().norm(), Real(0));
+    EXPECT_EQ(
+      (device.getLinearSystem().getSolution().download() - guess).norm(), Real(0));
   }
 
 #ifdef RODIN_USE_CUDSS
@@ -181,12 +188,12 @@ namespace Rodin::Tests::Unit
     Solver::CuDSS hs(host);
     hs.solve();
     ASSERT_TRUE(hs.success());
-    const Math::Vector<Real> reference = u.getSolution().getData();
+    const auto reference = u.getSolution().getData().download();
     Solver::CuDSS ds(device);
     static_assert(std::is_same_v<decltype(ds), Solver::CuDSS<DeviceLinearSystem>>);
     ds.solve();
     ASSERT_TRUE(ds.success());
-    const Math::Vector<Real> solution = u.getSolution().getData();
+    const auto solution = u.getSolution().getData().download();
     ASSERT_GT(reference.norm(), Real(0));
     EXPECT_LE((solution - reference).norm(), Real(1e-12) * reference.norm());
 
@@ -196,7 +203,7 @@ namespace Rodin::Tests::Unit
     ASSERT_TRUE(ds.success());
     ds.solve(device.getLinearSystem());
     ASSERT_TRUE(ds.success());
-    const auto& x = device.getLinearSystem().getSolution();
+    const auto x = device.getLinearSystem().getSolution().download();
     EXPECT_LE((x - reference).norm(), Real(1e-12) * reference.norm());
 
     // Exercise cuDSS invalidation against an independent host factorization.
@@ -213,11 +220,11 @@ namespace Rodin::Tests::Unit
     system.getOperator() = Matrix(3, 3, offsets, columns, values);
     Math::Vector<Real> rhs(3);
     rhs << 1, 2, 3;
-    system.getVector() = rhs;
+    system.getVector().upload(rhs);
     Solver::SparseLU referenceSolver(host);
     const auto check = [&]() {
       auto& referenceSystem = host.getLinearSystem();
-      referenceSystem.getOperator() = system.getOperator().toHost();
+      referenceSystem.getOperator() = system.getOperator().download();
       referenceSystem.getVector() = rhs;
       referenceSolver.solve(referenceSystem);
       ASSERT_TRUE(referenceSolver.success());
@@ -225,7 +232,7 @@ namespace Rodin::Tests::Unit
       ASSERT_TRUE(ds.success());
       ds.solve(system);
       ASSERT_TRUE(ds.success());
-      EXPECT_LE((system.getSolution().toHost() - referenceSystem.getSolution()).norm(),
+      EXPECT_LE((system.getSolution().download() - referenceSystem.getSolution()).norm(),
         Real(1e-12) * referenceSystem.getSolution().norm());
       EXPECT_TRUE(ds.getResources().pattern.matches(system.getOperator()));
     };
@@ -252,14 +259,14 @@ namespace Rodin::Tests::Unit
     check();
     // A new backend RHS reuses factors without staging vectors on the host.
     const auto retained = ds.getResources().data;
-    const auto baseline = system.getSolution().toHost();
+    const auto baseline = system.getSolution().download();
     system.getVector() *= Real(2);
     ds.solve(system);
     ASSERT_TRUE(ds.success());
     EXPECT_EQ(ds.getResources().data, retained);
-    EXPECT_LE((system.getSolution().toHost() - Real(2) * baseline).norm(),
+    EXPECT_LE((system.getSolution().download() - Real(2) * baseline).norm(),
       Real(1e-12) * baseline.norm());
-    system.getVector() = rhs;
+    system.getVector().upload(rhs);
 
     // A clone keeps configuration and owns an independent factorization.
     Solver::CuDSS cloned(ds);
@@ -269,7 +276,7 @@ namespace Rodin::Tests::Unit
     ASSERT_TRUE(cloned.success());
     EXPECT_NE(cloned.getResources().data, ds.getResources().data);
     EXPECT_LE(
-      (system.getSolution().toHost() - baseline).norm(), Real(1e-12) * baseline.norm());
+      (system.getSolution().download() - baseline).norm(), Real(1e-12) * baseline.norm());
     EXPECT_EQ(ds.getResources().data, retained);
     ds.clear(Solver::Factorization::Symbolic);
     EXPECT_FALSE(ds.getResources().pattern.matches(system.getOperator()));
@@ -301,12 +308,12 @@ namespace Rodin::Tests::Unit
     Solver::RocSolverRF hs(host);
     hs.solve();
     ASSERT_TRUE(hs.success());
-    const Math::Vector<Real> reference = u.getSolution().getData();
+    const auto reference = u.getSolution().getData().download();
     Solver::RocSolverRF ds(device);
     static_assert(std::is_same_v<decltype(ds), Solver::RocSolverRF<DeviceLinearSystem>>);
     ds.solve();
     ASSERT_TRUE(ds.success());
-    const Math::Vector<Real> solution = u.getSolution().getData();
+    const auto solution = u.getSolution().getData().download();
     ASSERT_GT(reference.norm(), Real(0));
     EXPECT_LE((solution - reference).norm(), Real(1e-12) * reference.norm());
 
@@ -316,7 +323,7 @@ namespace Rodin::Tests::Unit
     ASSERT_TRUE(ds.success());
     ds.solve(device.getLinearSystem());
     ASSERT_TRUE(ds.success());
-    const auto& x = device.getLinearSystem().getSolution();
+    const auto x = device.getLinearSystem().getSolution().download();
     EXPECT_LE((x - reference).norm(), Real(1e-12) * reference.norm());
 
     using Matrix = typename DeviceLinearSystem::MatrixType;
@@ -331,11 +338,11 @@ namespace Rodin::Tests::Unit
     system.getOperator() = Matrix(3, 3, offsets, columns, values);
     Math::Vector<Real> rhs(3);
     rhs << 1, 2, 3;
-    system.getVector() = rhs;
+    system.getVector().upload(rhs);
     Solver::SparseLU referenceSolver(host);
     const auto check = [&]() {
       auto& referenceSystem = host.getLinearSystem();
-      referenceSystem.getOperator() = system.getOperator().toHost();
+      referenceSystem.getOperator() = system.getOperator().download();
       referenceSystem.getVector() = rhs;
       referenceSolver.solve(referenceSystem);
       ASSERT_TRUE(referenceSolver.success());
@@ -343,7 +350,7 @@ namespace Rodin::Tests::Unit
       ASSERT_TRUE(ds.success());
       ds.solve(system);
       ASSERT_TRUE(ds.success());
-      EXPECT_LE((system.getSolution().toHost() - referenceSystem.getSolution()).norm(),
+      EXPECT_LE((system.getSolution().download() - referenceSystem.getSolution()).norm(),
         Real(1e-12) * referenceSystem.getSolution().norm());
       EXPECT_TRUE(ds.getResources().pattern.matches(system.getOperator()));
     };
@@ -372,7 +379,7 @@ namespace Rodin::Tests::Unit
     check();
 
     // Stored zeros keep the graph but must invalidate numeric factors.
-    const auto previous = system.getSolution().toHost();
+    const auto previous = system.getSolution().download();
     ::Kokkos::deep_copy(system.getOperator().getValues(), Real(0));
     ds.factorize(system);
     EXPECT_FALSE(ds.success());
@@ -382,7 +389,7 @@ namespace Rodin::Tests::Unit
     EXPECT_TRUE(ds.getResources().pattern.matches(system.getOperator()));
     ds.solve(system);
     EXPECT_FALSE(ds.success());
-    EXPECT_EQ((system.getSolution().toHost() - previous).norm(), Real(0));
+    EXPECT_EQ((system.getSolution().download() - previous).norm(), Real(0));
     // Recover using the retained analysis and the same graph.
     ::Kokkos::deep_copy(system.getOperator().getValues(), values);
     check();

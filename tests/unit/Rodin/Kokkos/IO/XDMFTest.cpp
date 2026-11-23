@@ -107,7 +107,7 @@ namespace Rodin::Tests::Unit
         GridFunction hg(hfes);
         fill(hg, source, vdim);
         GridFunction dg(dfes);
-        dg.getData() = hg.getData();
+        dg.getData().upload(hg.getData());
 
         write("host", source, hg);
         write("device", mesh, dg);
@@ -148,7 +148,7 @@ namespace Rodin::Tests::Unit
     GridFunction hg(hfes);
     fill(hg, source, 1);
     GridFunction dg(dfes);
-    dg.getData() = hg.getData();
+    dg.getData().upload(hg.getData());
 
     IO::XDMF writer(m_directory / "moving");
     IO::XDMF::FilePatterns patterns;

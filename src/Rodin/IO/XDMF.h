@@ -847,11 +847,11 @@ namespace Rodin::IO
     gr.mirrorMesh.reset();
     if constexpr (requires { mesh.getShard(); })
       gr.mesh = &mesh.getShard();
-    else if constexpr (requires { mesh.toHost(); })
+    else if constexpr (requires { mesh.download(); })
     {
       gr.mesh = nullptr;
       gr.mirror = [&mesh]() -> std::shared_ptr<const Geometry::MeshBase> {
-        return std::make_shared<const decltype(mesh.toHost())>(mesh.toHost());
+        return std::make_shared<const decltype(mesh.download())>(mesh.download());
       };
     }
     else
@@ -923,7 +923,7 @@ namespace Rodin::IO
       const auto& source = gf.getFiniteElementSpace().getMesh();
       if constexpr (requires { source.getShard(); })
         return &source.getShard();
-      else if constexpr (requires { source.toHost(); })
+      else if constexpr (requires { source.download(); })
         return nullptr;
       else
         return &source;
@@ -960,13 +960,16 @@ namespace Rodin::IO
       // A device field is copied onto the host copy of its mesh, which
       // write() builds since the field's mesh is the mesh of the grid.
       else if constexpr (!distributed &&
-        requires(const SourceMesh& source) { source.toHost(); })
+        requires(const SourceMesh& source) { source.download(); })
       {
         const auto& mesh =
           static_cast<const Geometry::Mesh<Context::Local>&>(*owner->m_grids[index].mesh);
-        const auto fes = gf.getFiniteElementSpace().toHost(mesh);
+        const auto fes = gf.getFiniteElementSpace().download(mesh);
         Variational::GridFunction host(fes);
-        host.getData() = gf.getData();
+        if constexpr (requires { gf.getData().download(host.getData()); })
+          gf.getData().download(host.getData());
+        else
+          host.getData() = gf.getData();
         switch (center)
         {
           case Center::Node:

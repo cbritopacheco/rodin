@@ -183,10 +183,10 @@ namespace Rodin::Variational
 
       /**
        * @brief Builds the host space with the same numbering.
-       * @param[in] mesh Host copy of the mesh, see Geometry::Mesh::toHost().
+       * @param[in] mesh Host copy of the mesh, see Geometry::Mesh::download().
        * @return P0g space on @p mesh.
        */
-      P0g<RangeType, Geometry::Mesh<Context::Local>> toHost(
+      P0g<RangeType, Geometry::Mesh<Context::Local>> download(
         const Geometry::Mesh<Context::Local>& mesh) const
       {
         return P0g<RangeType, Geometry::Mesh<Context::Local>>(mesh);

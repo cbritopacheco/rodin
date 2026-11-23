@@ -24,7 +24,7 @@ namespace Rodin::Tests::Unit
     GridFunction hg(hfes);
     fill(hg, source, 1);
     GridFunction dg(dfes);
-    dg.getData() = hg.getData();
+    dg.getData().upload(hg.getData());
 
     RealFunction hf([](const Geometry::Point& p) { return 2 + p.x() - p.y(); });
     RealFunction df(
@@ -66,16 +66,16 @@ namespace Rodin::Tests::Unit
       ::Rodin::Kokkos::Variational::Data<DeviceSpace>>;
     GridFunction<DeviceSpace, Coefficients> df(dfes);
     GridFunction<DeviceSpace, Coefficients> dg(dfes);
-    df.getData() = hf.getData();
-    dg.getData() = hg.getData();
+    df.setData(hf.getData());
+    dg.setData(hg.getData());
 
     BilinearForm ha(hu, hv);
     ha = Integral(hf * hu, hv) + Integral((hf * hg) * Grad(hu), Grad(hv));
     BilinearForm da(du, dv);
     da = Integral(df * du, dv) + Integral((df * dg) * Grad(du), Grad(dv));
     const auto check = [&]() {
-      df.getData() = hf.getData();
-      dg.getData() = hg.getData();
+      df.setData(hf.getData());
+      dg.setData(hg.getData());
       ha.assemble();
       da.assemble();
       expectSameOperator(ha.getOperator(), da.getOperator());

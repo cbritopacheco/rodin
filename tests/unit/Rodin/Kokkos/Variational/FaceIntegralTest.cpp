@@ -93,7 +93,7 @@ namespace Rodin::Tests::Unit
     GridFunction hg(hfes);
     fill(hg, source, 1);
     GridFunction dg(dfes);
-    dg.getData() = hg.getData();
+    dg.getData().upload(hg.getData());
 
     RealFunction hf([](const Geometry::Point& p) { return 2 + p.x() - p.y(); });
     RealFunction df(
@@ -129,7 +129,7 @@ namespace Rodin::Tests::Unit
     GridFunction hg(hfes);
     fill(hg, source, 1);
     GridFunction dg(dfes);
-    dg.getData() = hg.getData();
+    dg.getData().upload(hg.getData());
 
     auto hgrad = Grad(hg);
     hgrad.traceOf(FlatSet<Geometry::Attribute>{1, 2});

@@ -584,7 +584,14 @@ namespace Rodin::Variational
       {
         m_assembly.execute(
           m_axb, {m_pb, this->getTrialFunction(), this->getTestFunction()});
-        m_axb.getSolution() = this->getTrialFunction().getSolution().getData();
+        auto& guess = m_axb.getSolution();
+        const auto& data = this->getTrialFunction().getSolution().getData();
+        if constexpr (requires { guess.upload(data); })
+          guess.upload(data);
+        else if constexpr (requires { data.download(guess); })
+          data.download(guess);
+        else
+          guess = data;
         m_assembled = true;
         return *this;
       }
@@ -977,16 +984,24 @@ namespace Rodin::Variational
         guess.resize(static_cast<Eigen::Index>(cols));
         m_us.iapply([&](size_t i, auto& u) {
           const auto& data = u.get().getSolution().getData();
+          const auto offset = static_cast<Eigen::Index>(m_trialOffsets[i]);
           if constexpr (std::is_same_v<std::decay_t<decltype(data)>, VectorType>)
+            guess.segment(offset, data.size()) = data;
+          else if constexpr (requires(
+                               VectorType& coefficients) { coefficients.upload(data); })
           {
-            guess.segment(static_cast<Eigen::Index>(m_trialOffsets[i]), data.size()) =
-              data;
+            VectorType coefficients;
+            coefficients.upload(data);
+            guess.segment(offset, coefficients.size()) = coefficients;
           }
+          else if constexpr (requires {
+                               guess.segment(offset, data.size()) = data.download();
+                             })
+            guess.segment(offset, data.size()) = data.download();
           else
           {
             const VectorType coefficients = data;
-            guess.segment(static_cast<Eigen::Index>(m_trialOffsets[i]),
-              coefficients.size()) = coefficients;
+            guess.segment(offset, coefficients.size()) = coefficients;
           }
         });
 

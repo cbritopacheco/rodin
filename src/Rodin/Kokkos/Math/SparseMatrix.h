@@ -357,12 +357,6 @@ namespace Rodin::Kokkos::Math
         return res;
       }
 
-      /// @returns Independent host snapshot; compatibility spelling of download().
-      ::Rodin::Math::SparseMatrix<Scalar> toHost() const
-      {
-        return download();
-      }
-
     private:
       /**
        * @brief Deep copy of a device array, with the same label.

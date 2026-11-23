@@ -51,7 +51,7 @@ namespace Rodin::Tests::Unit
     GridFunction hg(hfes);
     fillCoefficients(hg.getData());
     GridFunction dg(dfes);
-    dg.getData() = hg.getData();
+    dg.getData().upload(hg.getData());
 
     expectSameForm(hu, hv, Integral(hu, hv), du, dv, Integral(du, dv));
     expectSameForm(
@@ -91,7 +91,7 @@ namespace Rodin::Tests::Unit
     GridFunction hg(hfes);
     fillCoefficients(hg.getData());
     GridFunction dg(dfes);
-    dg.getData() = hg.getData();
+    dg.getData().upload(hg.getData());
 
     expectSameForm(hu, hv, Integral(hu, hv), du, dv, Integral(du, dv));
     expectSameForm(hu, hv, Integral(Jacobian(hu), Jacobian(hv)), du, dv,
@@ -178,7 +178,7 @@ namespace Rodin::Tests::Unit
     GridFunction hg(hfes);
     fillCoefficients(hg.getData());
     GridFunction dg(dfes);
-    dg.getData() = hg.getData();
+    dg.getData().upload(hg.getData());
 
     expectSameForm(hu, hv, BoundaryIntegral(hu, hv), du, dv, BoundaryIntegral(du, dv));
     expectSameForm(
@@ -208,7 +208,7 @@ namespace Rodin::Tests::Unit
     GridFunction hw(hfes);
     fillCoefficients(hw.getData());
     GridFunction dw(dfes);
-    dw.getData() = hw.getData();
+    dw.getData().upload(hw.getData());
 
     Problem hp(hu, hv);
     const auto hgu = Grad(hu);

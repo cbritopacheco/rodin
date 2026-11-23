@@ -370,7 +370,7 @@ namespace Rodin::Tests::Unit
         GridFunction field(fes);
         Math::Vector<Real> coefficients(3);
         coefficients << 2, -3, 5;
-        field.getData() = coefficients;
+        field.getData().upload(coefficients);
         const ::Rodin::Kokkos::Variational::GridFunctionView<decltype(fes)> value(
           fes, field.getData());
         const auto meshView = mesh.getView();
@@ -498,7 +498,7 @@ namespace Rodin::Tests::Unit
               referenceMass(indices[i], indices[j]) += contribution(i, j);
           }
         }
-        const auto assembled = mass.getOperator().toHost();
+        const auto assembled = mass.getOperator().download();
         ASSERT_EQ(assembled.rows(), 3);
         ASSERT_EQ(assembled.cols(), 3);
         EXPECT_LE((Math::Matrix<Real>(assembled) - referenceMass).norm(), 1e-12);
@@ -508,7 +508,7 @@ namespace Rodin::Tests::Unit
         rhs = load;
         rhs.assemble();
         EXPECT_LE(
-          (rhs.getVector().toHost() - referenceMass * coefficients).norm(), 1e-12);
+          (rhs.getVector().download() - referenceMass * coefficients).norm(), 1e-12);
       }
     }
   }

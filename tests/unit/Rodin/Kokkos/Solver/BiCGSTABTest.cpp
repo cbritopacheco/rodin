@@ -51,8 +51,8 @@ namespace Rodin::Tests::Unit
   template <class Vector>
   Math::Vector<Real> biCGHost(const Vector& v)
   {
-    if constexpr (requires { v.toHost(); })
-      return v.toHost();
+    if constexpr (requires { v.download(); })
+      return v.download();
     else
       return v;
   }
@@ -66,9 +66,15 @@ namespace Rodin::Tests::Unit
     system.getOperator() = biCGNonsymmetric();
     Math::Vector<Real> exact(4);
     exact << 1, -2, 3, 0.5;
-    const auto a = system.getOperator().toHost();
+    const auto a = system.getOperator().download();
     Math::Vector<Real> b = a * exact;
-    system.getVector() = b;
+    const auto setRHS = [&](const Math::Vector<Real>& source) {
+      if constexpr (requires { system.getVector().upload(source); })
+        system.getVector().upload(source);
+      else
+        system.getVector() = source;
+    };
+    setRHS(b);
     Solver::BiCGSTAB solver(f.problem);
     static_assert(std::is_same_v<decltype(solver), Solver::BiCGSTAB<decltype(system)>>);
     EXPECT_FALSE(solver.success());
@@ -89,7 +95,7 @@ namespace Rodin::Tests::Unit
 
     system.getOperator() *= Real(3);
     b = Real(3) * a * exact;
-    system.getVector() = b;
+    setRHS(b);
     system.getSolution().setZero();
     solver.solve(system);
     ASSERT_TRUE(solver.success());
@@ -104,7 +110,7 @@ namespace Rodin::Tests::Unit
     system.getOperator() = biCGMatrix(2, 2, {0, 1, 2}, {0, 1}, {3, 4});
     Math::Vector<Real> smaller(2);
     smaller << 3, -8;
-    system.getVector() = smaller;
+    setRHS(smaller);
     solver.solve(system);
     ASSERT_TRUE(solver.success());
     EXPECT_EQ(system.getSolution().size(), 2u);
@@ -148,8 +154,9 @@ namespace Rodin::Tests::Unit
     s.getOperator() = biCGNonsymmetric();
     Math::Vector<Real> exact(4);
     exact << 1, 2, 3, 4;
-    s.getVector() = Math::Vector<Real>(s.getOperator().toHost() * exact);
-    s.getSolution() = exact;
+    const Math::Vector<Real> rhs = s.getOperator().download() * exact;
+    s.getVector().upload(rhs);
+    s.getSolution().upload(exact);
     Solver::BiCGSTAB solver(f.problem);
     solver.setTolerance(1e-12).setMaxIterations(0).solve(s);
     ASSERT_TRUE(solver.success());
@@ -162,9 +169,10 @@ namespace Rodin::Tests::Unit
     solver.setMaxIterations(1).solve(s);
     EXPECT_FALSE(solver.success());
     EXPECT_EQ(solver.getIterationNumber(), 1u);
-    const auto b = s.getVector().toHost();
+    const auto b = s.getVector().download();
     EXPECT_NEAR(solver.getError(),
-      (b - s.getOperator().toHost() * s.getSolution().toHost()).norm() / b.norm(), 1e-14);
+      (b - s.getOperator().download() * s.getSolution().download()).norm() / b.norm(),
+      1e-14);
   }
 
   TEST(Kokkos_Solver_BiCGSTAB, DiagonalHappyBreakdownAndEmptySystem)
@@ -175,14 +183,14 @@ namespace Rodin::Tests::Unit
     s.getOperator() = biCGMatrix(3, 3, {0, 1, 2, 3}, {0, 1, 2}, {2, 3, 4});
     Math::Vector<Real> b(3);
     b << 2, 6, 12;
-    s.getVector() = b;
+    s.getVector().upload(b);
     Solver::BiCGSTAB solver(f.problem);
     solver.setTolerance(1e-12).solve(s);
     ASSERT_TRUE(solver.success());
     EXPECT_EQ(solver.getIterationNumber(), 1u);
     Math::Vector<Real> exact(3);
     exact << 1, 2, 3;
-    EXPECT_LE((s.getSolution().toHost() - exact).norm(), 1e-12);
+    EXPECT_LE((s.getSolution().download() - exact).norm(), 1e-12);
     typename BiCGFixture<>::System empty;
     solver.solve(empty);
     EXPECT_TRUE(solver.success());
@@ -200,7 +208,7 @@ namespace Rodin::Tests::Unit
     s.getOperator() = biCGMatrix(1, 1, {0, 1}, {0}, {49});
     Math::Vector<Real> b(1);
     b << 3.3;
-    s.getVector() = b;
+    s.getVector().upload(b);
     Solver::BiCGSTAB solver(f.problem);
     solver.setTolerance(1e-30).setMaxIterations(6).solve(s);
     EXPECT_FALSE(solver.success());
@@ -217,7 +225,7 @@ namespace Rodin::Tests::Unit
     s.getOperator() = biCGMatrix(2, 2, {0, 1, 2}, {1, 0}, {1, -1});
     Math::Vector<Real> b(2);
     b << 1, 0;
-    s.getVector() = b;
+    s.getVector().upload(b);
     Solver::BiCGSTAB solver(f.problem);
     solver.solve(s);
     EXPECT_FALSE(solver.success());
@@ -227,7 +235,7 @@ namespace Rodin::Tests::Unit
     // A rank-one operator makes the stabilization product vanish.
     s.getOperator() = biCGMatrix(2, 2, {0, 2, 2}, {0, 1}, {1, 1});
     b << 1, 1;
-    s.getVector() = b;
+    s.getVector().upload(b);
     s.getSolution().setZero();
     solver.solve(s);
     EXPECT_FALSE(solver.success());
@@ -236,7 +244,7 @@ namespace Rodin::Tests::Unit
     // This nonsingular operator gives a zero omega despite a nonzero product.
     s.getOperator() = biCGMatrix(2, 2, {0, 2, 3}, {0, 1, 0}, {1, 1, 1});
     b << 1, 0;
-    s.getVector() = b;
+    s.getVector().upload(b);
     s.getSolution().setZero();
     solver.solve(s);
     EXPECT_FALSE(solver.success());
@@ -254,7 +262,7 @@ namespace Rodin::Tests::Unit
     EXPECT_TRUE(std::isinf(solver.getError()));
     s.getOperator() = biCGMatrix(2, 2, {0, 1, 2}, {0, 1}, {1, 1});
     b(0) = std::numeric_limits<Real>::infinity();
-    s.getVector() = b;
+    s.getVector().upload(b);
     solver.solve(s);
     EXPECT_FALSE(solver.success());
     EXPECT_TRUE(std::isinf(solver.getError()));
@@ -275,23 +283,23 @@ namespace Rodin::Tests::Unit
     EXPECT_ANY_THROW(solver.solve(s));
     Math::Vector<Real> b(4);
     b << 1, 2, 3, 4;
-    s.getVector() = b;
+    s.getVector().upload(b);
     solver.setTolerance(1e-12).setMaxIterations(0);
     Solver::BiCGSTAB copy(solver);
     solver.setMaxIterations(100).solve(s);
     ASSERT_TRUE(solver.success());
-    const auto previous = s.getSolution().toHost();
+    const auto previous = s.getSolution().download();
     typename BiCGFixture<>::System other;
     other.getOperator() = s.getOperator();
-    other.getVector() = b;
+    other.getVector().upload(b);
     copy.solve(other);
     EXPECT_FALSE(copy.success());
     EXPECT_EQ(copy.getIterationNumber(), 0u);
     Solver::BiCGSTAB moved(std::move(copy));
     moved.setMaxIterations(100).solve(other);
     ASSERT_TRUE(moved.success());
-    EXPECT_LE((other.getSolution().toHost() - previous).norm(), 1e-10);
-    EXPECT_EQ((s.getSolution().toHost() - previous).norm(), 0);
+    EXPECT_LE((other.getSolution().download() - previous).norm(), 1e-10);
+    EXPECT_EQ((s.getSolution().download() - previous).norm(), 0);
     std::unique_ptr<decltype(solver)> cloned(solver.copy());
     other.getSolution().setZero();
     cloned->solve(other);
@@ -317,9 +325,9 @@ namespace Rodin::Tests::Unit
     solver.setTolerance(1e-11).setMaxIterations(1000).solve();
     ASSERT_TRUE(solver.success());
     auto& s = pb.getLinearSystem();
-    const auto a = s.getOperator().toHost();
-    const auto b = s.getVector().toHost();
-    const auto x = s.getSolution().toHost();
+    const auto a = s.getOperator().download();
+    const auto b = s.getVector().download();
+    const auto x = s.getSolution().download();
     EXPECT_LE((b - a * x).norm() / b.norm(), 1e-11);
     using HostSystem = Math::LinearSystem<Math::SparseMatrix<Real>, Math::Vector<Real>>;
     Problem<HostSystem, decltype(u), decltype(v)> referenceProblem(u, v);
@@ -331,7 +339,7 @@ namespace Rodin::Tests::Unit
     ASSERT_TRUE(reference.success());
     const auto exact = referenceSystem.getSolution();
     EXPECT_LE((x - exact).norm() / exact.norm(), 1e-9);
-    EXPECT_LE((u.getSolution().getData().toHost() - exact).norm() / exact.norm(), 1e-9);
+    EXPECT_LE((u.getSolution().getData().download() - exact).norm() / exact.norm(), 1e-9);
     const auto* storage = s.getSolution().data();
     solver.solve(s);
     EXPECT_TRUE(solver.success());

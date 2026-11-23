@@ -322,7 +322,8 @@
   These operations complete before returning, preserve their sources and
   introduce no automatic coherence between the resulting objects. Sparse
   transfers convert the host CSC and backend CRS storage while preserving the
-  mathematical operator. Existing @c toHost() calls forward to @c download().
+  mathematical operator. To rebuild a finite element space on a matching host
+  mesh, use @c space.download(hostMesh). The host mesh must outlive that space.
 
   @c getView() shares existing backend storage. Backend-to-backend assignment
   retains copy semantics. Transfers on a distributed mesh are rank-local;

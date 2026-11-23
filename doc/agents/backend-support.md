@@ -67,7 +67,7 @@ borrow resident arrays and require completed kernels before mutation, owner
 replacement or destruction. Existing host iterators and caches remain host
 interfaces, with transfers as necessary. Each per-entity host query costs a
 copy and a device synchronization, so host code visiting a whole mesh goes
-through `toHost()` or `Connectivity::materialize(d)`, which copy each resident
+through `download()` or `Connectivity::materialize(d)`, which copy each resident
 table once. KokkosIteration follows the existing
 indexed assembly region contract and keeps device handles private. Boundary
 and Interface require explicit face-to-cell incidence; their counts include
@@ -174,7 +174,7 @@ assembly, mesh and solver contracts when reducing transfers:
   or shared storage would require lifetime, reallocation and failure-contract
   changes; these are distinct from host-transfer removal. A failed cuDSS
   solve currently leaves the public solution untouched.
-- Explicit `toHost`, file output, host coefficient containers and legacy
+- Explicit `download`, file output, host coefficient containers and legacy
   mesh/connectivity queries intentionally cross to host memory. GPU loops
   should use views instead of per-entity host queries. Prefer bulk
   materialization for host algorithms. Geometry counts, allocation sizes,

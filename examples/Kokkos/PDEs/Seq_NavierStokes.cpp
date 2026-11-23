@@ -70,23 +70,6 @@ static auto since(std::chrono::high_resolution_clock::time_point t0)
     .count();
 }
 
-/**
- * @brief Copies a PETSc vector into a host vector.
- * @param[in] x Sequential PETSc vector.
- * @return Host copy of @p x.
- */
-static Rodin::Math::Vector<Rodin::Real> toHost(::Vec x)
-{
-  PetscInt n;
-  PetscCallAbort(PETSC_COMM_SELF, VecGetLocalSize(x, &n));
-  const PetscScalar* data;
-  PetscCallAbort(PETSC_COMM_SELF, VecGetArrayRead(x, &data));
-  Rodin::Math::Vector<Rodin::Real> res =
-    Eigen::Map<const Rodin::Math::Vector<Rodin::Real>>(data, n);
-  PetscCallAbort(PETSC_COMM_SELF, VecRestoreArrayRead(x, &data));
-  return res;
-}
-
 int main(int argc, char** argv)
 {
   using namespace Rodin;
@@ -131,7 +114,7 @@ int main(int argc, char** argv)
     constexpr Real viscosity = 0.01; // Reynolds number 200 for unit cavity width.
     constexpr Real dt = 0.01;
     constexpr Real rampTime = 1;
-    GridFunction velocity(velocitySpace);
+    PETSc::Variational::GridFunction velocity(velocitySpace);
     velocity = Zero(2);
 
     size_t iterations = 0;
@@ -183,7 +166,7 @@ int main(int argc, char** argv)
       solver.setTolerances(1e-8, PETSC_DEFAULT, PETSC_DEFAULT, PETSC_DEFAULT).solve();
       solve += since(t0);
       iterations += solver.getIterationNumber();
-      velocity.setData(toHost(u.getSolution().getData()));
+      velocity.setData(u.getSolution().getData());
       Alert::Info() << "Step " << step << " / " << steps << ", "
                     << solver.getIterationNumber() << " iterations." << Alert::Raise;
     }

@@ -29,11 +29,11 @@ namespace Rodin::Tests::Unit
     GridFunction hw(hvh);
     fill(hw, source, d);
     GridFunction dw(dvh);
-    dw.getData() = hw.getData();
+    dw.getData().upload(hw.getData());
     GridFunction hg(hsh);
     fill(hg, source, 1);
     GridFunction dg(dsh);
-    dg.getData() = hg.getData();
+    dg.getData().upload(hg.getData());
 
     // Convection (grad u) w and its Newton counterpart (grad w) u.
     expectSameForm(

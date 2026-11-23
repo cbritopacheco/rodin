@@ -52,16 +52,16 @@ namespace Rodin::IO
           using HostFES = std::decay_t<decltype(space)>;
           using HostField = Variational::GridFunction<HostFES, Math::Vector<Scalar>>;
           HostField host(space);
-          host.setData(m_gf.getData().toHost());
+          host.setData(m_gf.getData().download());
           if (const auto name = m_gf.getName())
             host.setName(std::string(*name));
           GridFunctionPrinter<Format, HostFES, Math::Vector<Scalar>> printer(host);
           static_cast<Printer<HostField>&>(printer).print(target);
         };
-        if constexpr (requires { fes.toHost(fes.getMesh().toHost()); })
+        if constexpr (requires { fes.download(fes.getMesh().download()); })
         {
-          const auto mesh = fes.getMesh().toHost();
-          const auto space = fes.toHost(mesh);
+          const auto mesh = fes.getMesh().download();
+          const auto space = fes.download(mesh);
           transfer(space);
         }
         else
@@ -76,16 +76,16 @@ namespace Rodin::IO
           using HostFES = std::decay_t<decltype(space)>;
           using HostField = Variational::GridFunction<HostFES, Math::Vector<Scalar>>;
           HostField host(space);
-          host.setData(m_gf.getData().toHost());
+          host.setData(m_gf.getData().download());
           if (const auto name = m_gf.getName())
             host.setName(std::string(*name));
           GridFunctionPrinter<Format, HostFES, Math::Vector<Scalar>> printer(host);
           static_cast<Printer<HostField>&>(printer).print(target);
         };
-        if constexpr (requires { fes.toHost(fes.getMesh().toHost()); })
+        if constexpr (requires { fes.download(fes.getMesh().download()); })
         {
-          const auto mesh = fes.getMesh().toHost();
-          const auto space = fes.toHost(mesh);
+          const auto mesh = fes.getMesh().download();
+          const auto space = fes.download(mesh);
           transfer(space);
         }
         else

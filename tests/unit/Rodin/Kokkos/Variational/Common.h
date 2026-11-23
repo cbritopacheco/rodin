@@ -42,13 +42,14 @@ namespace Rodin::Tests::Unit
   /// @brief Compares backend operators through independent host snapshots.
   template <class Left, class Right>
     requires(
-      requires(const Left& a) { a.toHost(); } || requires(const Right& b) { b.toHost(); })
+      requires(const Left& a) { a.download(); } ||
+      requires(const Right& b) { b.download(); })
   void expectSameOperator(const Left& a, const Right& b)
   {
-    if constexpr (requires { a.toHost(); })
-      expectSameOperator(a.toHost(), b);
+    if constexpr (requires { a.download(); })
+      expectSameOperator(a.download(), b);
     else
-      expectSameOperator(a, b.toHost());
+      expectSameOperator(a, b.download());
   }
 
   /**
@@ -88,6 +89,19 @@ namespace Rodin::Tests::Unit
     ASSERT_EQ(host.size(), device.size());
     ASSERT_GT(host.norm(), Real(0));
     EXPECT_LE((host - device).norm(), Real(1e-12) * host.norm());
+  }
+
+  /// @brief Compares vectors through independent host snapshots.
+  template <class Left, class Right>
+    requires(
+      requires(const Left& a) { a.download(); } ||
+      requires(const Right& b) { b.download(); })
+  void expectSameVector(const Left& a, const Right& b)
+  {
+    if constexpr (requires { a.download(); })
+      expectSameVector(a.download(), b);
+    else
+      expectSameVector(a, b.download());
   }
 
   /**

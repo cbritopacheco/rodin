@@ -21,12 +21,12 @@ namespace Rodin::Tests::Unit
     ProblemType fresh(problem);
     fresh.assemble();
     problem.assemble();
-    const auto a = problem.getLinearSystem().getOperator().toHost();
-    const auto b = fresh.getLinearSystem().getOperator().toHost();
+    const auto a = problem.getLinearSystem().getOperator().download();
+    const auto b = fresh.getLinearSystem().getOperator().download();
     EXPECT_EQ(a.nonZeros(), b.nonZeros());
     EXPECT_EQ((a - b).norm(), Real(0));
-    EXPECT_EQ((problem.getLinearSystem().getVector().toHost() -
-                fresh.getLinearSystem().getVector().toHost())
+    EXPECT_EQ((problem.getLinearSystem().getVector().download() -
+                fresh.getLinearSystem().getVector().download())
                 .norm(),
       Real(0));
   }
@@ -84,7 +84,7 @@ namespace Rodin::Tests::Unit
     LinearForm expectedLoad(v);
     expectedLoad = Integral(RealFunction(2), v);
     expectedLoad.assemble();
-    expectSameVector(expectedLoad.getVector().toHost(), rhs.toHost());
+    expectSameVector(expectedLoad.getVector().download(), rhs.download());
     EXPECT_EQ(symbolic.patterns[1].ordered.data(), vectorOrder.data());
     coefficient = RealFunction(0);
     assemble();
@@ -142,12 +142,12 @@ namespace Rodin::Tests::Unit
     Problem problem(u, v);
     problem = Integral(u, v).over(1) - Integral(RealFunction(1), v);
     expectFreshAssembly(problem);
-    const auto previous = problem.getLinearSystem().getOperator().toHost();
+    const auto previous = problem.getLinearSystem().getOperator().download();
     for (Index i = 0; i < mesh.getCellCount(); ++i)
       mesh.setAttribute({2, i}, Geometry::Attribute(2 - i % 2));
     expectFreshAssembly(problem);
     EXPECT_GT(
-      (problem.getLinearSystem().getOperator().toHost() - previous).norm(), Real(0));
+      (problem.getLinearSystem().getOperator().download() - previous).norm(), Real(0));
     problem = Integral(Grad(u), Grad(v)) + Integral(u, v);
     expectFreshAssembly(problem);
     auto copied(problem);
@@ -173,8 +173,8 @@ namespace Rodin::Tests::Unit
     constexpr Real displacement = Real(0.025);
     for (const Index vertex : {Index(0), Index(mesh.getVertexCount() - 1)})
     {
-      const auto previous = reused.getLinearSystem().getOperator().toHost();
-      const auto previousRHS = reused.getLinearSystem().getVector().toHost();
+      const auto previous = reused.getLinearSystem().getOperator().download();
+      const auto previousRHS = reused.getLinearSystem().getVector().download();
       auto point = mesh.getVertexCoordinates(vertex);
       const Real direction = vertex == 0 ? Real(-1) : Real(1);
       for (size_t s = 0; s < mesh.getSpaceDimension(); ++s)
@@ -191,15 +191,15 @@ namespace Rodin::Tests::Unit
         Integral(RealFunction(1), freshV);
       fresh.assemble();
 
-      const auto actual = reused.getLinearSystem().getOperator().toHost();
-      const auto expected = fresh.getLinearSystem().getOperator().toHost();
-      const auto actualRHS = reused.getLinearSystem().getVector().toHost();
+      const auto actual = reused.getLinearSystem().getOperator().download();
+      const auto expected = fresh.getLinearSystem().getOperator().download();
+      const auto actualRHS = reused.getLinearSystem().getVector().download();
       ASSERT_EQ(actual.rows(), expected.rows());
       ASSERT_EQ(actual.cols(), expected.cols());
       EXPECT_EQ(actual.nonZeros(), expected.nonZeros());
       EXPECT_EQ((actual - expected).norm(), Real(0));
       EXPECT_EQ(
-        (actualRHS - fresh.getLinearSystem().getVector().toHost()).norm(), Real(0));
+        (actualRHS - fresh.getLinearSystem().getVector().download()).norm(), Real(0));
       EXPECT_GT((actual - previous).norm(), Real(0));
       EXPECT_GT((actualRHS - previousRHS).norm(), Real(0));
       ASSERT_EQ(actual.nonZeros(), previous.nonZeros());
@@ -240,11 +240,11 @@ namespace Rodin::Tests::Unit
     problem = Integral(Grad(u), Grad(v)) + Integral(u, v) - Integral(RealFunction(1), v) +
       DirichletBC(u, value).on(5);
     expectFreshAssembly(problem);
-    const auto previous = problem.getLinearSystem().getVector().toHost();
+    const auto previous = problem.getLinearSystem().getVector().download();
     value = RealFunction(3);
     expectFreshAssembly(problem);
     EXPECT_GT(
-      (problem.getLinearSystem().getVector().toHost() - previous).norm(), Real(0));
+      (problem.getLinearSystem().getVector().download() - previous).norm(), Real(0));
     mesh.setAttribute({1, faces.front()}, 0);
     mesh.setAttribute({1, faces.back()}, 5);
     expectFreshAssembly(problem);
