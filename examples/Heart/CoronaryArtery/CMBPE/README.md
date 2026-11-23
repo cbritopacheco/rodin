@@ -88,3 +88,13 @@ base run.
 
 The mesh coordinates are in mm. The labels are: wall 2, inlet 4, outlets 7,
 8, 9, 10, 14 and 15. `make_meshes.sh` regenerates the coarse and fine meshes.
+
+## Companion benchmarks and analysis
+
+- [Y-bifurcation truncation](../TruncationY/README.md) compares the split
+  between two daughter branches against a fully resolved reference in 2D
+  and 3D. The archived meshes, calibration and waveform data accompany the
+  solver, runner and figure scripts.
+- [Coronary outlet comparisons](analysis/README.md) contains a prescribed-pressure
+  0D replay and tools for comparing completed coronary runs on a common
+  cycle grid and wall mesh.
