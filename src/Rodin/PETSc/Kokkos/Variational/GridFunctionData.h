@@ -1,4 +1,5 @@
 /*
+ *          Copyright Carlos BRITO PACHECO 2026.
  *          Copyright Jean-Baptiste KECK 2026.
  * Distributed under the Boost Software License, Version 1.0.
  *       (See accompanying file LICENSE or copy at
@@ -9,190 +10,332 @@
 
 /**
  * @file
- * @brief State-aware PETSc coefficient access in local device numbering.
+ * @brief Assembly-scoped PETSc coefficient views and bounded gather reuse.
  */
 
-#include <petscvec.h>
-#include "GhostedPositions.h"
-// PETSc declares its object-state accessors in this implementation header.
-#include <petsc/private/petscimpl.h>
-#include "Rodin/Kokkos/Variational/GridFunction.h"
-#include "Rodin/Kokkos/Utility.h"
+#include <list>
+#include <utility>
+#include <vector>
+#include "GridFunctionAdapter.h"
+
+namespace Rodin::PETSc::Internal
+{
+  /**
+   * @brief PETSc assembler storage for reusable distributed coefficient gathers.
+   * @tparam Execution Kokkos execution space of the assembler.
+   *
+   * ## Architecture
+   * An assembler owns the idle gather allocations, in most-recently-used order.
+   * A scope owns borrows and temporarily prepared arrays until the kernels finish.
+   * The thread-local pointer connects host-side expression lowering to that scope;
+   * its storage, including all retained device allocations, belongs to the assembler.
+   */
+  template <class Execution>
+  class CoefficientCache
+  {
+    using Read = GridFunctionRead<Execution>;
+    using Array = typename Read::Array;
+    using View = typename Read::View;
+
+    struct Key
+    {
+      typename Read::State state; ///< PETSc vector and local-form state.
+      std::uint64_t revision; ///< Rodin numbering revision.
+      size_t size; ///< Rodin coefficient count.
+
+      /// @param other Key to compare. @returns Whether the snapshots match.
+      bool operator==(const Key& other) const = default;
+    };
+
+    struct Entry
+    {
+      Key key; ///< State of the retained values.
+      Array values; ///< Owned gather.
+    };
+
+    public:
+      /// @brief Default per-assembler retention allowance in bytes.
+      static constexpr size_t DefaultBudget = 32 * 1024 * 1024;
+
+      /// @brief Uses the default retention allowance.
+      CoefficientCache() = default;
+
+      /// @param budget Maximum retained coefficient bytes, excluding active temporary buffers.
+      explicit CoefficientCache(size_t budget)
+        : m_budget(budget)
+      {}
+
+      /// @returns Bytes held for reuse between assembly calls.
+      size_t getRetainedBytes() const
+      {
+        size_t bytes = 0;
+        for (const auto& entry : m_entries)
+          bytes += entry.key.size * sizeof(Real);
+        return bytes;
+      }
+
+      /**
+       * @brief Owns coefficient accesses for a single assembly.
+       *
+       * Expressions copy lightweight read-only views. Scope destruction restores
+       * PETSc arrays and discards temporary buffers after execution completes.
+       */
+      class Scope
+      {
+        public:
+          /**
+           * @param cache Assembler retention storage.
+           * @param execution Execution instance running the assembly kernels.
+           */
+          Scope(CoefficientCache& cache, const Execution& execution)
+            : m_cache(cache),
+              m_execution(execution),
+              m_previous(s_current)
+          {
+            if (!cache.m_execution || *cache.m_execution != execution)
+            {
+              cache.m_entries.clear();
+              cache.m_execution = execution;
+            }
+            s_current = this;
+          }
+
+          Scope(const Scope&) = delete;
+          Scope& operator=(const Scope&) = delete;
+
+          /// @brief Restores PETSc access on both normal and exceptional exits.
+          ~Scope()
+          {
+            if (s_current == this)
+            {
+              if (!m_local.empty() || !m_gathers.empty())
+                m_execution.fence("Rodin PETSc coefficient scope");
+              release();
+            }
+          }
+
+          /**
+           * @param execution Execution instance of the coefficient's mesh.
+           * @returns Active scope for that instance, or null for standalone lowering.
+           */
+          static Scope* current(const Execution& execution)
+          {
+            return s_current && s_current->m_execution == execution ? s_current : nullptr;
+          }
+
+          /**
+           * @param data Local PETSc vector with Rodin coefficient ordering.
+           * @returns A view valid until the scope is released.
+           */
+          View prepare(::Vec data)
+          {
+            for (const auto& entry : m_local)
+            {
+              if (entry.vector == data)
+                return entry.values;
+            }
+            auto read = std::make_unique<Read>(m_execution, data);
+            if (const auto borrowed = read->borrow())
+            {
+              m_local.push_back({data, *borrowed, std::move(read)});
+            }
+            else
+            {
+              Array staged(
+                ::Kokkos::view_alloc(m_execution, ::Kokkos::WithoutInitializing,
+                  "Rodin PETSc staged coefficients"),
+                read->getSize());
+              read->copy(staged);
+              m_local.push_back({data, staged, nullptr});
+            }
+            return m_local.back().values;
+          }
+
+          /**
+           * @param read Access to the ghosted local form.
+           * @param revision Immutable Rodin numbering revision, when available.
+           * @returns A gathered view valid until the scope is released.
+           */
+          View prepare(Read& read, Optional<std::uint64_t> revision)
+          {
+            Optional<Key> key;
+            if (revision)
+            {
+              key = Key{read.getState(), *revision, read.getSize()};
+              for (const auto& entry : m_gathers)
+              {
+                if (entry.key == key)
+                  return entry.values;
+              }
+            }
+            m_gathers.push_back({key, m_cache.prepare(m_execution, read, key)});
+            return m_gathers.back().values;
+          }
+
+          /**
+           * @brief Restores array access and resumes the enclosing scope.
+           * @pre All coefficient readers on the execution instance have completed.
+           */
+          void release()
+          {
+            assert(s_current == this);
+            s_current = m_previous;
+            m_local.clear();
+            m_gathers.clear();
+          }
+
+        private:
+          struct Local
+          {
+            ::Vec vector; ///< Vector consumed by this assembly.
+            View values; ///< Borrowed or staged values.
+            std::unique_ptr<Read> access; ///< Read interval for a borrowed array.
+          };
+
+          struct Gather
+          {
+            Optional<Key> key; ///< Reusable state, when the numbering has a revision.
+            View values; ///< Gather owned until the assembly finishes.
+          };
+
+          inline static thread_local Scope* s_current = nullptr;
+          CoefficientCache& m_cache;
+          const Execution& m_execution;
+          Scope* m_previous;
+          std::vector<Local> m_local;
+          std::vector<Gather> m_gathers;
+      };
+
+    private:
+      /**
+       * @param execution Execution instance consuming the gather.
+       * @param read Local-form access for a cache miss.
+       * @param key State of the requested gather, when reuse is valid.
+       * @returns An owned, prepared gather.
+       */
+      Array prepare(const Execution& execution, Read& read, const Optional<Key>& key)
+      {
+        Array result;
+        const size_t size = read.getSize();
+        const bool eligible = key && size > 0 && size <= m_budget / sizeof(Real);
+        if (eligible)
+        {
+          for (auto it = m_entries.begin(); it != m_entries.end(); ++it)
+          {
+            if (it->key == *key)
+            {
+              m_entries.splice(m_entries.begin(), m_entries, it);
+              return m_entries.front().values;
+            }
+            const auto& old = it->key;
+            if (old.state.vector == key->state.vector &&
+              old.state.form == key->state.form && old.revision == key->revision &&
+              old.size == size && it->values.use_count() == 1)
+            {
+              result = std::move(it->values);
+              m_entries.erase(it);
+              break;
+            }
+          }
+        }
+        bool retain = eligible;
+        if (retain)
+        {
+          const size_t bytes = size * sizeof(Real);
+          size_t retained = getRetainedBytes();
+          for (auto it = m_entries.end();
+            retained > m_budget - bytes && it != m_entries.begin();)
+          {
+            --it;
+            if (it->values.use_count() == 1)
+            {
+              retained -= it->key.size * sizeof(Real);
+              if (!result.data() && it->key.size == size)
+                result = std::move(it->values);
+              it = m_entries.erase(it);
+            }
+          }
+          retain = retained <= m_budget - bytes;
+        }
+        if (!result.data())
+        {
+          result = Array(::Kokkos::view_alloc(execution, ::Kokkos::WithoutInitializing,
+                           "Rodin PETSc gathered coefficients"),
+            size);
+        }
+        read.copy(result);
+        if (retain)
+          m_entries.push_front({*key, result});
+        return result;
+      }
+
+      size_t m_budget = DefaultBudget;
+      Optional<Execution> m_execution;
+      std::list<Entry> m_entries;
+  };
+}
 
 namespace Rodin::Kokkos::Variational
 {
-  /**
-   * @brief Gathers the local form of a ghosted PETSc vector in the local
-   * numbering of the device degrees of freedom.
-   *
-   * Kernel functor at namespace scope, as NVCC requires.
-   */
-  template <class MemorySpace>
-  struct GhostedCoefficientsGather
-  {
-    /// @brief Coefficients in the local numbering.
-    ::Kokkos::View<Real*, MemorySpace> res;
-
-    /// @brief Local form of the vector, owned entries then ghosts.
-    ::Kokkos::View<const Real*, MemorySpace> form;
-
-    /// @brief Position in the local form of each local degree of freedom.
-    ::Kokkos::View<const Index*, MemorySpace> position;
-
-    /// @param i Local degree of freedom.
-    KOKKOS_INLINE_FUNCTION void operator()(Index i) const
-    {
-      res(i) = form(position(i));
-    }
-  };
-
-  /**
-   * @brief Copies the coefficients of a PETSc grid function to the device.
-   *
-   * The values are read where PETSc keeps them, on the host or on the
-   * device. On a distributed mesh the ghosted local form is read, without
-   * communication: the collective writes of PETSc grid functions keep the
-   * ghosts up to date. Its owned entries are numbered from the first owned
-   * global index and its ghosts follow in the order of the local degrees of
-   * freedom, as PETSc::Variational::GridFunction lays them out.
-   */
+  /// @brief Prepares PETSc coefficients in the local numbering of a Kokkos space.
   template <>
   struct GridFunctionData<::Vec>
   {
     /**
+     * @tparam FES Finite element space.
      * @param fes Device space of the grid function.
-     * @param data Coefficients of the grid function.
-     * @returns Device coefficients in the local numbering, to be read only.
-     *
-     * The copy is kept in the transfer cache of the mesh under the PETSc
-     * states of the vector and of its local form, so that the integrators
-     * reading the same grid function share one copy until PETSc writes the
-     * vector again.
+     * @param data Coefficient vector.
+     * @returns Independent device coefficients for standalone evaluation.
      */
     template <class FES>
     static ::Kokkos::View<Real*, typename FES::MeshType::MemorySpace> prepare(
       const FES& fes, ::Vec data)
     {
-      using MemorySpace = typename FES::MeshType::MemorySpace;
-      using Unmanaged = ::Kokkos::MemoryTraits<::Kokkos::Unmanaged>;
-      using ContextType = typename FES::MeshType::ContextType;
-      using Array = ::Kokkos::View<Real*, MemorySpace>;
-      constexpr bool distributed = ::Rodin::Context::IsMPI<ContextType>::value;
+      using Execution = typename FES::MeshType::ContextType::ExecutionSpaceType;
+      using Read = ::Rodin::PETSc::Internal::GridFunctionRead<Execution>;
+      using Adapter = ::Rodin::PETSc::Internal::GridFunctionAdapter<Execution>;
       const auto& execution = fes.getMesh().getContext().getExecutionSpace();
+      Optional<typename Read::Table> table;
+      if constexpr (::Rodin::Context::IsMPI<typename FES::MeshType::ContextType>::value)
+        table = Adapter::of(data).setSpace(fes).getGhostedPositions();
+      Read read(execution, data, std::move(table));
+      typename Read::Array values(
+        ::Kokkos::view_alloc(
+          execution, ::Kokkos::WithoutInitializing, "Rodin PETSc coefficients"),
+        read.getSize());
+      read.copy(values);
+      return values;
+    }
 
-      ::Vec form = data;
-      PetscErrorCode ierr = PETSC_SUCCESS;
-      if constexpr (distributed)
+    /**
+     * @tparam FES Finite element space.
+     * @param fes Device space of the grid function.
+     * @param data Coefficient vector.
+     * @returns Scoped read-only coefficients, or an owned copy for standalone lowering.
+     */
+    template <class FES>
+    static ::Kokkos::View<const Real*, typename FES::MeshType::MemorySpace> prepareView(
+      const FES& fes, ::Vec data)
+    {
+      using Execution = typename FES::MeshType::ContextType::ExecutionSpaceType;
+      using Scope =
+        typename ::Rodin::PETSc::Internal::CoefficientCache<Execution>::Scope;
+      const auto& execution = fes.getMesh().getContext().getExecutionSpace();
+      if (auto* scope = Scope::current(execution))
       {
-        ierr = VecGhostGetLocalForm(data, &form);
-        assert(ierr == PETSC_SUCCESS);
-        if (!form)
+        if constexpr (::Rodin::Context::IsMPI<
+                        typename FES::MeshType::ContextType>::value)
         {
-          Alert::Exception()
-            << "The PETSc vector of a distributed grid function has no ghosts."
-            << Alert::Raise;
-        }
-      }
-      PetscInt count = 0;
-      ierr = VecGetLocalSize(form, &count);
-      assert(ierr == PETSC_SUCCESS);
-      size_t size = static_cast<size_t>(count);
-      if constexpr (distributed)
-        size = fes.getLocalSize();
-
-      // Writes through PETSc raise the state of the vector they write,
-      // the global vector for its owned entries and the local form for the
-      // ghost updates.
-      PetscObjectId dataId = 0, formId = 0;
-      PetscObjectState dataState = 0, formState = 0;
-      ierr = PetscObjectGetId(reinterpret_cast<::PetscObject>(data), &dataId);
-      assert(ierr == PETSC_SUCCESS);
-      ierr = PetscObjectStateGet(reinterpret_cast<::PetscObject>(data), &dataState);
-      assert(ierr == PETSC_SUCCESS);
-      ierr = PetscObjectGetId(reinterpret_cast<::PetscObject>(form), &formId);
-      assert(ierr == PETSC_SUCCESS);
-      ierr = PetscObjectStateGet(reinterpret_cast<::PetscObject>(form), &formState);
-      assert(ierr == PETSC_SUCCESS);
-      typename ::Rodin::Kokkos::Internal::TransferCache<MemorySpace>::Key key{
-        static_cast<std::uint64_t>(dataId), static_cast<std::uint64_t>(dataState),
-        static_cast<std::uint64_t>(formId), static_cast<std::uint64_t>(formState),
-        static_cast<std::uint64_t>(reinterpret_cast<std::uintptr_t>(&fes))};
-      if constexpr (distributed && requires { fes.getRevision(); })
-        key.push_back(fes.getRevision());
-
-      const auto fill = [&](const Array& res) {
-        const PetscScalar* array = nullptr;
-        PetscMemType type;
-        PetscErrorCode error = VecGetArrayReadAndMemType(form, &array, &type);
-        assert(error == PETSC_SUCCESS);
-        // The local form, resident: read in place when PETSc keeps it in the
-        // memory space of the mesh, copied otherwise.
-        using Device = ::Kokkos::DefaultExecutionSpace::memory_space;
-        ::Kokkos::View<const Real*, MemorySpace> values;
-        const auto read = [&](const auto& source) {
-          if constexpr (!distributed)
-          {
-            ::Kokkos::deep_copy(execution, res, source);
-          }
-          else if constexpr (std::is_same_v<
-                               typename std::decay_t<decltype(source)>::memory_space,
-                               MemorySpace>)
-          {
-            values = source;
-          }
-          else
-          {
-            ::Kokkos::View<Real*, MemorySpace> copy(
-              ::Kokkos::view_alloc(execution, ::Kokkos::WithoutInitializing,
-                std::string("Rodin PETSc grid function")),
-              count);
-            ::Kokkos::deep_copy(execution, copy, source);
-            values = copy;
-          }
-        };
-        if (PetscMemTypeHost(type))
-        {
-          read(::Kokkos::View<const PetscScalar*, ::Kokkos::HostSpace, Unmanaged>(
-            array, count));
+          using Read = ::Rodin::PETSc::Internal::GridFunctionRead<Execution>;
+          using Adapter = ::Rodin::PETSc::Internal::GridFunctionAdapter<Execution>;
+          const auto& adapter = Adapter::of(data).setSpace(fes);
+          Read read(execution, data, adapter.getGhostedPositions());
+          return scope->prepare(read, adapter.getRevision());
         }
         else
-          read(::Kokkos::View<const PetscScalar*, Device, Unmanaged>(array, count));
-        if constexpr (distributed)
-        {
-          // PETSc owns the cached map independently of coefficient state.
-          auto& positions =
-            ::Rodin::PETSc::Internal::GhostedPositions<MemorySpace>::of(data);
-          positions.setSpace(fes);
-          const auto table = positions.getView();
-          if (table.size != static_cast<size_t>(count))
-          {
-            error = VecRestoreArrayReadAndMemType(form, &array);
-            assert(error == PETSC_SUCCESS);
-            Alert::Exception()
-              << "The PETSc vector of a distributed grid function does not have "
-              << "the layout of its space." << Alert::Raise;
-          }
-          ::Kokkos::parallel_for("Rodin PETSc grid function gather",
-            ::Kokkos::RangePolicy<std::decay_t<decltype(execution)>>(
-              execution, 0, size),
-            GhostedCoefficientsGather<MemorySpace>{res, values, table.positions});
-        }
-        // PETSc may release the array once it is restored.
-        execution.fence("Rodin PETSc grid function transfer");
-        error = VecRestoreArrayReadAndMemType(form, &array);
-        assert(error == PETSC_SUCCESS);
-        (void)error;
-      };
-      const Array res = fes.getMesh().getTransferCache().upload(
-        execution, std::move(key), size, "Rodin grid function", fill);
-
-      if constexpr (distributed)
-      {
-        ierr = VecGhostRestoreLocalForm(data, &form);
-        assert(ierr == PETSC_SUCCESS);
+          return scope->prepare(data);
       }
-      (void)ierr;
-      return res;
+      return prepare(fes, data);
     }
   };
 }

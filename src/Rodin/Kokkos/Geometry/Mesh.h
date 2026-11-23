@@ -390,16 +390,6 @@ namespace Rodin::Geometry
         return m_revision;
       }
 
-      /**
-       * @brief Gets the resident copies of host arrays read by kernels on
-       * this mesh, such as the coefficients of grid functions.
-       * @returns Transfer cache, independent of the mesh content.
-       */
-      Rodin::Kokkos::Internal::TransferCache<MemorySpace>& getTransferCache() const
-      {
-        return m_transfers;
-      }
-
       /// @returns Borrowed resident data; kernels must finish before owner replacement.
       View getView() const
       {
@@ -1470,7 +1460,6 @@ namespace Rodin::Geometry
       std::uint64_t m_revision = 0;
       PolytopeTransformationIndex m_transformations;
       PolytopeQuadratureIndex m_quadratures;
-      mutable Rodin::Kokkos::Internal::TransferCache<MemorySpace> m_transfers;
   };
 }
 

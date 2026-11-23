@@ -13,7 +13,6 @@
  */
 
 #include "COOAssembly.h"
-#include "Rodin/PETSc/Kokkos/Variational/GridFunctionData.h"
 
 #ifndef PETSC_HAVE_KOKKOS
 #error "Device assembly of PETSc problems requires PETSc configured with Kokkos."
@@ -118,7 +117,8 @@ namespace Rodin::Assembly
        */
       Kokkos(Kokkos&& other)
         : Parent(std::move(other)),
-          m_cache(std::move(other.m_cache))
+          m_cache(std::move(other.m_cache)),
+          m_coefficients(std::move(other.m_coefficients))
       {}
 
       /**
@@ -130,6 +130,7 @@ namespace Rodin::Assembly
       {
         Parent::operator=(other);
         m_cache = {};
+        m_coefficients = {};
         return *this;
       }
 
@@ -173,7 +174,7 @@ namespace Rodin::Assembly
           system.add(lbfi, 0, 0);
         for (auto& gbfi : input.getGlobalBFIs())
           system.add(gbfi, 0, 0);
-        system.finish(m_cache, res, nullptr);
+        system.finish(m_cache, m_coefficients, res, nullptr);
       }
 
       /**
@@ -187,6 +188,7 @@ namespace Rodin::Assembly
 
     private:
       typename SystemType::CacheType m_cache;
+      typename SystemType::CoefficientCache m_coefficients;
   };
 
   /**
@@ -239,7 +241,8 @@ namespace Rodin::Assembly
        */
       Kokkos(Kokkos&& other)
         : Parent(std::move(other)),
-          m_cache(std::move(other.m_cache))
+          m_cache(std::move(other.m_cache)),
+          m_coefficients(std::move(other.m_coefficients))
       {}
 
       /**
@@ -251,6 +254,7 @@ namespace Rodin::Assembly
       {
         Parent::operator=(other);
         m_cache = {};
+        m_coefficients = {};
         return *this;
       }
 
@@ -291,7 +295,7 @@ namespace Rodin::Assembly
           PETSc::Assembly::VectorSetup(res).prepare({n, N, VECKOKKOS, false, false});
         assert(ierr == PETSC_SUCCESS);
         (void)ierr;
-        system.finish(m_cache, nullptr, res);
+        system.finish(m_cache, m_coefficients, nullptr, res);
       }
 
       /**
@@ -305,6 +309,7 @@ namespace Rodin::Assembly
 
     private:
       typename SystemType::CacheType m_cache;
+      typename SystemType::CoefficientCache m_coefficients;
   };
 
   /**
@@ -365,7 +370,8 @@ namespace Rodin::Assembly
        */
       Kokkos(Kokkos&& other)
         : Parent(std::move(other)),
-          m_cache(std::move(other.m_cache))
+          m_cache(std::move(other.m_cache)),
+          m_coefficients(std::move(other.m_coefficients))
       {}
 
       /**
@@ -377,6 +383,7 @@ namespace Rodin::Assembly
       {
         Parent::operator=(other);
         m_cache = {};
+        m_coefficients = {};
         return *this;
       }
 
@@ -505,11 +512,12 @@ namespace Rodin::Assembly
         {
           Internal::prepareSystem(axb, rows, cols, doVector);
         }
-        system.finish(m_cache, doMatrix ? axb.getOperator() : nullptr,
+        system.finish(m_cache, m_coefficients, doMatrix ? axb.getOperator() : nullptr,
           doVector ? axb.getVector() : nullptr);
       }
 
       typename SystemType::CacheType m_cache;
+      typename SystemType::CoefficientCache m_coefficients;
   };
 
   /**
@@ -562,7 +570,8 @@ namespace Rodin::Assembly
        */
       Kokkos(Kokkos&& other)
         : Parent(std::move(other)),
-          m_cache(std::move(other.m_cache))
+          m_cache(std::move(other.m_cache)),
+          m_coefficients(std::move(other.m_coefficients))
       {}
 
       /**
@@ -574,6 +583,7 @@ namespace Rodin::Assembly
       {
         Parent::operator=(other);
         m_cache = {};
+        m_coefficients = {};
         return *this;
       }
 
@@ -750,11 +760,12 @@ namespace Rodin::Assembly
         {
           Internal::prepareSystem(axb, rows, cols, doVector);
         }
-        system.finish(m_cache, doMatrix ? axb.getOperator() : nullptr,
+        system.finish(m_cache, m_coefficients, doMatrix ? axb.getOperator() : nullptr,
           doVector ? axb.getVector() : nullptr);
       }
 
       typename SystemType::CacheType m_cache;
+      typename SystemType::CoefficientCache m_coefficients;
   };
 }
 

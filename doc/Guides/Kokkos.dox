@@ -56,16 +56,13 @@
   | Assemble and solve | Device values remain in PETSc GPU matrices/vectors; communication may stage through host memory. |
   | Export | Download selected output; host orchestration alone does not require downloading numerical arrays. |
 
-  PETSc coefficient access lives in its own adapter header. It does not
-  update ghosts: callers must complete the required ghost updates before
-  assembly. Borrowed PETSc arrays are consumed before their access interval
-  is restored; retained gathers are owned by the mesh transfer cache and
-  keyed by the states of both the vector and its local form, together with
-  the immutable numbering revision of the space. Ghost-position maps are
-  owned by a PETSc container attached to the coefficient vector, independently
-  of coefficient values. Vector destruction releases the cache. MPI spaces
-  retain no mutable cache; their existing `getGhostedPositions()` accessor is
-  an uncached numbering query whose returned view owns its allocation.
+  The PETSc adapter uses read-only coefficient access during integration.
+  Accessible local vectors are borrowed until the integrators complete, and
+  incompatible local arrays are staged for that integration. Distributed
+  vectors are gathered into Rodin numbering. Callers complete the required
+  ghost updates before assembly. The assembler retains up to 32 MiB of gathered
+  coefficients per rank, independently of the MPI numbering maps held by the
+  PETSc vector adapters.
 
   The refactor retains the existing COO grouping, accumulation order,
   constraints and symbolic validation algorithms. Custom grouping bounds
@@ -334,9 +331,10 @@
   not interpolate between spaces. On Serial and OpenMP backends, both sides
   occupy host memory and the ownership contract remains the same.
 
-  Internal construction transfers taking an explicit execution instance and
-  retained transfer-cache fills keep their documented ordering and lifetime
-  contracts; no additional fence is introduced into repeated assembly.
+  Internal construction transfers complete on the specified execution instance.
+  A retained distributed PETSc gather can be reused while the vector state
+  and numbering match. Explicit host coefficient storage is staged when its
+  execution view is built.
 
   On an NVIDIA GPU, `Solver::CuDSS` (`RODIN_USE_CUDSS`, requiring CUDA-enabled
   Kokkos) reads backend CSR arrays directly. Include `Rodin/Kokkos/Solver.h`

@@ -835,6 +835,70 @@ namespace Rodin::Tests::Unit
     checkSolve(withFaces(makeTriangleMesh()));
   }
 
+  TEST(Kokkos_PETSc_Problem, LocalCoefficientsBorrowWithinAssembly)
+  {
+    using Cache = ::Rodin::PETSc::Internal::CoefficientCache<TestExecutionSpace>;
+    using Data = ::Rodin::Kokkos::Variational::GridFunctionData<::Vec>;
+    const DeviceMesh mesh(TestContext{}, makeTriangleMesh());
+    P1 fes(mesh);
+    const auto& execution = mesh.getContext().getExecutionSpace();
+    Cache cache;
+    PETSc::Variational::GridFunction field(fes);
+    const auto data = field.getData();
+    ASSERT_EQ(VecSet(data, 2), PETSC_SUCCESS);
+    const auto original = Data::prepare(fes, data);
+    const PetscScalar* pointer = nullptr;
+    ASSERT_EQ(VecGetArrayReadAndMemType(data, &pointer, nullptr), PETSC_SUCCESS);
+    const auto* storage = pointer;
+    ASSERT_EQ(VecRestoreArrayReadAndMemType(data, &pointer), PETSC_SUCCESS);
+    EXPECT_NE(original.data(), storage);
+    {
+      Cache::Scope scope(cache, execution);
+      const ::Rodin::Kokkos::Variational::GridFunctionView<decltype(fes)> view(fes, data);
+      EXPECT_EQ(view.getData().data(), storage);
+      EXPECT_EQ(Data::prepareView(fes, data).data(), storage);
+      EXPECT_EQ(::Rodin::Kokkos::Internal::read(execution, view.getData(), 0), Real(2));
+      execution.fence("Finish coefficient test readers");
+      scope.release();
+      EXPECT_EQ(Cache::Scope::current(execution), nullptr);
+    }
+    ASSERT_EQ(VecSet(data, 5), PETSC_SUCCESS);
+    {
+      Cache::Scope scope(cache, execution);
+      const auto view = Data::prepareView(fes, data);
+      EXPECT_EQ(::Rodin::Kokkos::Internal::read(execution, view, 0), Real(5));
+    }
+    EXPECT_EQ(Cache::Scope::current(execution), nullptr);
+    EXPECT_EQ(cache.getRetainedBytes(), 0);
+    EXPECT_EQ(::Rodin::Kokkos::Internal::read(execution, original, 0), Real(2));
+  }
+
+  TEST(Kokkos_PETSc_Problem, HostCoefficientAccessIsScoped)
+  {
+    using Cache = ::Rodin::PETSc::Internal::CoefficientCache<TestExecutionSpace>;
+    using Data = ::Rodin::Kokkos::Variational::GridFunctionData<::Vec>;
+    const DeviceMesh mesh(TestContext{}, makeTriangleMesh());
+    const P1 fes(mesh);
+    const auto& execution = mesh.getContext().getExecutionSpace();
+    Cache cache;
+    ::Vec data = nullptr;
+    ASSERT_EQ(VecCreateSeq(PETSC_COMM_SELF, fes.getSize(), &data), PETSC_SUCCESS);
+    EXPECT_EQ(VecSet(data, 3), PETSC_SUCCESS);
+    {
+      Cache::Scope scope(cache, execution);
+      const auto first = Data::prepareView(fes, data);
+      EXPECT_EQ(Data::prepareView(fes, data).data(), first.data());
+      EXPECT_EQ(::Rodin::Kokkos::Internal::read(execution, first, 0), Real(3));
+      if constexpr (!std::is_same_v<TestMemorySpace, ::Kokkos::HostSpace>)
+      {
+        EXPECT_EQ(first.use_count(), 2);
+      }
+    }
+    EXPECT_EQ(VecSet(data, 9), PETSC_SUCCESS);
+    EXPECT_EQ(VecDestroy(&data), PETSC_SUCCESS);
+    EXPECT_EQ(cache.getRetainedBytes(), 0);
+  }
+
   /// @brief COO duplicates follow integrator rank for every row bucket size and permutation width.
   template <class Position>
   void checkCOODuplicateOrder()

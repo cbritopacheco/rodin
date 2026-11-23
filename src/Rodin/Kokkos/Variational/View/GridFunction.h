@@ -106,8 +106,8 @@ namespace Rodin::Kokkos::Variational
    * memory.
    *
    * Backend coefficient vectors are borrowed directly. Explicit host coefficient
-   * vectors are transferred through the mesh transfer cache when the view is
-   * built, and PETSc vectors use their backend state-aware adapter. Values and
+   * vectors are staged when the view is built, and PETSc vectors retain their
+   * prepared coefficients through their state-aware adapter. Values and
    * derivatives are interpolated from the degrees of freedom of the polytope
    * holding the point, as on the host.
    *
@@ -130,14 +130,14 @@ namespace Rodin::Kokkos::Variational
       using MemorySpace = typename FESType::MeshType::MemorySpace;
 
       /**
-       * @brief Copies the coefficients of a grid function to the device.
+       * @brief Prepares the coefficients of a grid function for device evaluation.
        * @param fes Space of the grid function.
        * @param data Coefficients, numbered as by the space.
        */
       template <class Data>
       GridFunctionView(const FESType& fes, const Data& data)
         : m_dofs(fes),
-          m_data(GridFunctionData<std::decay_t<Data>>::prepare(fes, data))
+          m_data(prepareData(fes, data))
       {}
 
       /// @brief Gets the device degrees of freedom. @return Degrees of freedom.
@@ -147,7 +147,8 @@ namespace Rodin::Kokkos::Variational
       }
 
       /// @brief Gets the coefficients. @return Device coefficients.
-      KOKKOS_INLINE_FUNCTION const ::Kokkos::View<Real*, MemorySpace>& getData() const
+      KOKKOS_INLINE_FUNCTION const ::Kokkos::View<const Real*, MemorySpace>&
+      getData() const
       {
         return m_data;
       }
@@ -536,8 +537,25 @@ namespace Rodin::Kokkos::Variational
         }
         return result;
       }
+
+      /**
+       * @tparam Data Coefficient storage type.
+       * @param fes Space of the grid function.
+       * @param data Coefficients in the space's numbering.
+       * @returns Read-only coefficients prepared for execution.
+       */
+      template <class Data>
+      static auto prepareData(const FESType& fes, const Data& data)
+      {
+        using Access = GridFunctionData<std::decay_t<Data>>;
+        if constexpr (requires { Access::prepareView(fes, data); })
+          return Access::prepareView(fes, data);
+        else
+          return Access::prepare(fes, data);
+      }
+
       ElementType m_dofs;
-      ::Kokkos::View<Real*, MemorySpace> m_data;
+      ::Kokkos::View<const Real*, MemorySpace> m_data;
   };
 
   /// @brief Grid function of a device space.

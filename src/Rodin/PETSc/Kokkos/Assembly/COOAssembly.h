@@ -26,6 +26,7 @@
 #include <Kokkos_Core.hpp>
 #include <Kokkos_Sort.hpp>
 
+#include "Rodin/PETSc/Kokkos/Variational/GridFunctionData.h"
 #include "Rodin/Configure.h"
 #include "Rodin/PETSc/Assembly/VectorSetup.h"
 #ifdef RODIN_USE_MPI
@@ -77,6 +78,9 @@ namespace Rodin::Assembly::Internal
 
       /// @brief Cache type.
       using CacheType = COOCache<MemorySpace>;
+
+      /// @brief Storage for coefficient gathers retained by the assembler.
+      using CoefficientCache = ::Rodin::PETSc::Internal::CoefficientCache<ExecutionSpace>;
 
       /// @brief Constraints of the system.
       using ConstraintsType = Constraints<Backend>;
@@ -290,10 +294,11 @@ namespace Rodin::Assembly::Internal
        * @brief Integrates, eliminates the constraints and fills the PETSc
        * objects.
        * @param cache Buffers and pattern of the previous assemblies.
+       * @param coefficients Assembler storage for reusable coefficient gathers.
        * @param A Matrix, filled when not null.
        * @param b Right-hand side, filled when not null.
        */
-      void finish(CacheType& cache, ::Mat A, ::Vec b)
+      void finish(CacheType& cache, CoefficientCache& coefficients, ::Mat A, ::Vec b)
       {
         typename ConstraintsType::Resolved constraints;
         if (m_distribution && isFixed(m_constraints.isIdentified()))
@@ -328,6 +333,7 @@ namespace Rodin::Assembly::Internal
         ::Kokkos::deep_copy(m_execution, cache.rhs, Real(0));
         cache.contributions = 0;
 
+        typename CoefficientCache::Scope sources(coefficients, m_execution);
         if (A || !m_matrices.empty() || !m_operators.empty())
         {
           // The constraints are eliminated after the expansion.
@@ -356,6 +362,7 @@ namespace Rodin::Assembly::Internal
           impose(m_execution, m_rows, cache.fixed, cache.fixedValues, m_owned, cache.rhs);
         }
         m_execution.fence("Rodin PETSc system");
+        sources.release();
 
         if (A && expanded)
         {

@@ -43,12 +43,10 @@ namespace Rodin::Tests::Unit
 
   /**
    * @brief Coefficients changed between assemblies reach the device.
-   *
-   * Two grid functions of the same space enter one form, their device
-   * copies being reused while their coefficients do not change. The
-   * coefficients are then changed, swapped and restored between
-   * assemblies of the same form.
+   * @tparam HostCoefficients Whether to use explicit host storage on the Kokkos space.
+   * @param source Host mesh for the reference assembly.
    */
+  template <bool HostCoefficients = false>
   void checkGridFunctionChange(const HostMesh& source)
   {
     const DeviceMesh mesh(TestContext{}, source);
@@ -63,8 +61,11 @@ namespace Rodin::Tests::Unit
     GridFunction hg(hfes);
     fill(hf, source, 1);
     hg.getData() = hf.getData().array() * Real(-0.5) + Real(2);
-    GridFunction df(dfes);
-    GridFunction dg(dfes);
+    using DeviceSpace = decltype(dfes);
+    using Coefficients = std::conditional_t<HostCoefficients, Math::Vector<Real>,
+      ::Rodin::Kokkos::Variational::Data<DeviceSpace>>;
+    GridFunction<DeviceSpace, Coefficients> df(dfes);
+    GridFunction<DeviceSpace, Coefficients> dg(dfes);
     df.getData() = hf.getData();
     dg.getData() = hg.getData();
 
@@ -142,6 +143,11 @@ namespace Rodin::Tests::Unit
   TEST(Kokkos_Variational_CoefficientBilinearForm, GridFunctionChangeOnMixedMesh)
   {
     checkGridFunctionChange(makeMixedMesh());
+  }
+
+  TEST(Kokkos_Variational_CoefficientBilinearForm, ExplicitHostGridFunctionChange)
+  {
+    checkGridFunctionChange<true>(makeMixedMesh());
   }
 
   TEST(Kokkos_Variational_CoefficientBilinearForm, VectorFunctionOnTriangles)

@@ -13,9 +13,7 @@
  * @brief Prepared access to the Data container of a grid function.
  */
 
-#include <string>
 #include <type_traits>
-#include <vector>
 #include <Kokkos_Core.hpp>
 #include "Rodin/FormLanguage/Traits.h"
 #include "Rodin/Kokkos/Math/Vector.h"
@@ -53,30 +51,13 @@ namespace Rodin::Kokkos::Variational
     static ::Kokkos::View<Real*, typename FES::MeshType::MemorySpace> prepare(
       const FES& fes, const Data& data)
     {
-      const auto& mesh = fes.getMesh();
-      const auto& execution = mesh.getContext().getExecutionSpace();
+      const auto& execution = fes.getMesh().getContext().getExecutionSpace();
       const Index size = data.size();
-      if constexpr (requires { mesh.getTransferCache(); })
-      {
-        // Lowered at every assembly, so that the same coefficients stay
-        // resident instead of being reallocated and copied each time.
-        std::vector<Real> values(size);
-        for (Index i = 0; i < size; ++i)
-          values[i] = data.coeff(i);
-        return mesh.getTransferCache().upload(
-          execution, std::move(values), "Rodin grid function");
-      }
-      else
-      {
-        ::Kokkos::View<Real*, typename FES::MeshType::MemorySpace> res(
-          ::Kokkos::view_alloc(execution, std::string("Rodin grid function")), size);
-        auto host = ::Kokkos::create_mirror_view(res);
-        for (Index i = 0; i < size; ++i)
-          host(i) = data.coeff(i);
-        ::Kokkos::deep_copy(execution, res, host);
-        execution.fence("Rodin grid function transfer");
-        return res;
-      }
+      return ::Rodin::Kokkos::Internal::upload<Real>(
+        execution, size, "Rodin grid function", [&](Real* out) {
+          for (Index i = 0; i < size; ++i)
+            out[i] = data.coeff(i);
+        });
     }
   };
 

@@ -318,22 +318,25 @@ of matrix assembly. The public Kokkos PETSc headers forward to this bridge.
 Distributed Kokkos meshes own independent host metadata snapshots; geometry
 and attribute mutations update both owned representations without communication.
 Topology replacement requires explicit ownership preparation and space rebuilding.
-Coefficient ghost
-updates remain the caller's responsibility; the bridge consumes borrowed
-PETSc arrays before restoring access and caches owned local gathers by state.
+Coefficient ghost updates remain the caller's responsibility. During PETSc
+integration, a local vector already in accessible memory is borrowed once as
+read-only coefficients. The assembler restores its PETSc array after the
+integration fence and before handing matrix and vector results to PETSc.
+An incompatible memory placement is staged for the integration scope.
+Standalone evaluation prepares an independently owned array.
 
-Ghost-position reuse belongs to `PETSc/Kokkos/Variational/GhostedPositions.h`.
-A PETSc container attached to each coefficient vector owns one map per memory
-space. Numbering revisions, including new revisions for copied and moved
-spaces, invalidate both the map and the coefficient transfer-cache key. No
-space address is used as the sole validity check. MPI spaces hold only an
-immutable revision and keep `getGhostedPositions()` as an uncached query;
-there are no mutable members or PETSc dependencies in those spaces. The map
-cache follows the vector lifetime, and returned views keep old maps alive
-across replacement or vector destruction. As with PETSc vector access,
-cache access is serialized by the caller; no inter-rank collective is added.
+The PETSc vector adapter retains the ghosted numbering map and checks the
+owning vector identity because PETSc can copy composed containers during
+vector duplication. Numbering revisions invalidate the map independently of
+coefficient writes. `setSpace(fes)` binds execution and numbering, and
+`getGhostedPositions() const` reads the prepared map without allocating. MPI
+spaces retain only their immutable revision and their uncached numbering query.
 
-The ghost-position adapter uses `setSpace(fes)` as the non-const preparation
-stage and `getView() const` as a read-only query. Repeated const queries neither
-allocate nor update cache state. Changes of numbering are handled explicitly
-when binding the next space.
+The PETSc assembly policy retains distributed gathers under a per-rank,
+per-assembler allowance of 32 MiB. Vector identity, vector and local-form
+states, and the numbering revision validate each gather. An idle buffer can
+be refilled or evicted. An oversized gather, or one that cannot fit while the
+retained buffers are in use, is prepared for the current integration scope.
+The allowance covers retained coefficient arrays; numbering maps, active
+coefficient views and solver storage have their own lifetimes. The device
+kernel still reads distributed coefficients in Rodin's local numbering.

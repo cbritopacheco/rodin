@@ -167,8 +167,8 @@ if (RODIN_USE_PETSC)
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../PETSc/Kokkos/Assembly/COOCache.h>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../PETSc/Kokkos/Assembly/Distribution.h>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../PETSc/Kokkos/Assembly/Kokkos.h>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../PETSc/Kokkos/Variational/GridFunctionAdapter.h>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../PETSc/Kokkos/Variational/GridFunctionData.h>
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../PETSc/Kokkos/Variational/GhostedPositions.h>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../PETSc/Kokkos.h>
   )
 
