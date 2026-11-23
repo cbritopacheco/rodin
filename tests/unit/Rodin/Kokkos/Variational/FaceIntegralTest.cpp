@@ -225,6 +225,35 @@ namespace Rodin::Tests::Unit
     EXPECT_THROW(form.assemble(), Alert::Exception);
   }
 
+  /// @brief Dirty face incidence is rejected even when assembly has already cached a layout.
+  TEST(Kokkos_Variational_FaceIntegral, DirtyFaceIncidenceRequiresRecomputation)
+  {
+    const auto source = withFaces(makeTriangleMesh());
+    DeviceMesh mesh(TestContext{}, source);
+    P1 fes(mesh);
+    TrialFunction u(fes);
+    TestFunction v(fes);
+    BilinearForm form(u, v);
+    form = BoundaryIntegral(u, v);
+    form.assemble();
+    const auto original = form.getOperator().download();
+
+    auto& connectivity = mesh.getConnectivity();
+    connectivity.setDirty(1, 2);
+    EXPECT_TRUE(connectivity.hasIncidence(1, 2));
+    EXPECT_FALSE(connectivity.isPrepared(1, 2));
+    EXPECT_THROW(form.assemble(), Alert::Exception);
+    EXPECT_THROW(mesh.getBoundary(), Alert::Exception);
+    EXPECT_THROW(mesh.getPerimeter(), Alert::Exception);
+    const auto snapshot = mesh.download();
+    EXPECT_TRUE(snapshot.getConnectivity().getIncidence(1, 2).empty());
+
+    connectivity.compute(1, 2);
+    EXPECT_TRUE(connectivity.isPrepared(1, 2));
+    form.assemble();
+    expectSameOperator(original, form.getOperator());
+  }
+
   TEST(Kokkos_Variational_LinearElasticity, MatchesHostOnTriangles)
   {
     checkLinearElasticity(makeTriangleMesh());

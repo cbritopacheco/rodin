@@ -147,7 +147,10 @@ int main(int argc, char** argv)
                   << Alert::Raise;
 
     const size_t cellDim = host.getDimension();
-    host.getConnectivity().compute(cellDim - 1, cellDim);
+    auto& connectivity = host.getConnectivity();
+    for (size_t d = cellDim; d > 0; --d)
+      connectivity.compute(d, d - 1);
+    connectivity.compute(cellDim - 1, cellDim);
     const Mesh<DeviceContext> mesh(DeviceContext{}, host);
     if (degree == 3)
       run<3>(mesh, repetitions);

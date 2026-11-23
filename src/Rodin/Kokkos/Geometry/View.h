@@ -191,7 +191,7 @@ namespace Rodin::Kokkos
     }
 
     /**
-     * @brief Tests whether a relation was explicitly computed.
+     * @brief Tests whether storage for the relation is present.
      * @param d Source dimension.
      * @param dp Target dimension.
      * @return Whether the relation is present.
@@ -200,6 +200,13 @@ namespace Rodin::Kokkos
     {
       KOKKOS_ASSERT(d <= dimension && dp <= dimension);
       return incidenceDescriptors[d * (dimension + 1) + dp].present != 0;
+    }
+
+    /// @param d Source dimension. @param dp Target dimension. @return Whether the relation is present and current.
+    KOKKOS_INLINE_FUNCTION bool isPrepared(Index d, Index dp) const
+    {
+      KOKKOS_ASSERT(d <= dimension && dp <= dimension);
+      return incidenceDescriptors[d * (dimension + 1) + dp].prepared != 0;
     }
 
     /**
@@ -211,7 +218,7 @@ namespace Rodin::Kokkos
     KOKKOS_INLINE_FUNCTION View<::Rodin::Geometry::Incidence> getIncidence(
       Index d, Index dp) const
     {
-      KOKKOS_ASSERT(hasIncidence(d, dp));
+      KOKKOS_ASSERT(isPrepared(d, dp));
       const auto descriptor = incidenceDescriptors[d * (dimension + 1) + dp];
       return {descriptor.offsets, descriptor.indices, descriptor.count};
     }

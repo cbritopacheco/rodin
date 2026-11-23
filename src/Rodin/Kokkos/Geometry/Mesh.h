@@ -688,7 +688,7 @@ namespace Rodin::Geometry
        * @brief Copies the mesh back to the host, completing before returning.
        *
        * The copy carries the vertices, every polytope, the attributes, the
-       * transformations, the computed incidences and the name.
+       * transformations, the prepared incidences and the name.
        * @returns Local mesh equal to this one.
        */
       Mesh<Rodin::Context::Local> download() const
@@ -759,6 +759,8 @@ namespace Rodin::Geometry
         {
           for (size_t dp = 0; dp <= getDimension(); ++dp)
           {
+            if (!m_connectivity.isPrepared(d, dp))
+              continue;
             const auto& relation = m_connectivity.getIncidence(d, dp);
             if (!relation.empty())
               output.getConnectivity().setIncidence({d, dp}, Incidence(relation));
@@ -1373,7 +1375,12 @@ namespace Rodin::Geometry
           Alert::MemberFunctionException(*this, __func__)
             << "A zero-dimensional mesh has no faces." << Alert::Raise;
         }
-        RODIN_GEOMETRY_MESH_REQUIRE_INCIDENCE(d - 1, d);
+        if (!m_connectivity.isPrepared(d - 1, d))
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "Prepare face-to-cell incidence with mesh.getConnectivity().compute("
+            << d - 1 << ", " << d << ") before classifying faces." << Alert::Raise;
+        }
         return m_connectivity.getIncidence({d - 1, d}, face).size();
       }
 
@@ -1391,11 +1398,11 @@ namespace Rodin::Geometry
         if (boundary)
         {
           const size_t d = getDimension();
-          if (!m_connectivity.hasIncidence(d - 1, d))
+          if (!m_connectivity.isPrepared(d - 1, d))
           {
             Alert::MemberFunctionException(*this, __func__)
-              << "Compute face-to-cell incidence before measuring the boundary."
-              << Alert::Raise;
+              << "Prepare face-to-cell incidence with mesh.getConnectivity().compute("
+              << d - 1 << ", " << d << ") before measuring the boundary." << Alert::Raise;
           }
         }
         const auto view = getView();

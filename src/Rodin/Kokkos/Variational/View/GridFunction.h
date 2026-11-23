@@ -76,7 +76,6 @@ namespace Rodin::Kokkos::Variational
         const auto& face = p.getPolytope();
         const Index d = face.mesh.getDimension();
         const auto connectivity = face.mesh.getConnectivity();
-        KOKKOS_ASSERT(connectivity.hasIncidence(d - 1, d));
         const auto cells = connectivity.getIncidence(d - 1, d, face.getIndex());
         if (cells.size() == 1)
           return p.getCellPoint(cells[0]);

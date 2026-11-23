@@ -21,6 +21,7 @@
 #include <utility>
 #include <vector>
 
+#include "Rodin/Alert/Notation.h"
 #include "Rodin/Variational/H1/H1.h"
 #include "Rodin/Variational/H1/Div.h"
 #include "Rodin/Variational/H1/Grad.h"
@@ -894,12 +895,12 @@ namespace Rodin::Kokkos::Variational::Internal
 
       /**
        * @brief Builds the host spaces and copies the numbering to the device.
-       * @param mesh Resident mesh without pyramids. The incidences
-       * @f$ d \to d - 1 @f$ it lacks are computed on the host copy.
+       * @param mesh Resident mesh without pyramids and with the prepared
+       * incidences @f$ d \to d - 1 @f$.
        * @param vdim Vector dimension, zero for a scalar space only.
        */
       LagrangeMirror(const MeshType& mesh, size_t vdim)
-        : m_mesh(supported(mesh)),
+        : m_mesh(downloadMesh(mesh)),
           m_scalar(std::integral_constant<size_t, K>{}, m_mesh),
           m_dofs(m_scalar, mesh.getContext().getExecutionSpace())
       {
@@ -941,11 +942,13 @@ namespace Rodin::Kokkos::Variational::Internal
 
     private:
       /**
-       * @brief Copies a mesh to the host after checking its geometries.
+       * @brief Copies the prepared mesh to the host for numbering.
        * @param mesh Resident mesh.
-       * @return Host copy of @p mesh, with the incidences @f$ d \to d - 1 @f$.
+       * @return Host copy of @p mesh.
+       * @throws Alert::Exception If the mesh has pyramids or a required
+       * incidence is missing or dirty.
        */
-      static HostMeshType supported(const MeshType& mesh)
+      static HostMeshType downloadMesh(const MeshType& mesh)
       {
         using Type = ::Rodin::Geometry::Polytope::Type;
         if (mesh.getPolytopeCount(Type::Pyramid) > 0)
@@ -953,15 +956,19 @@ namespace Rodin::Kokkos::Variational::Internal
           Alert::Exception() << "Kokkos H1 spaces do not support pyramids."
                              << Alert::Raise;
         }
-        // The incidences missing on the device only number the host
-        // closure, the kernels never bind the polytopes they create.
-        HostMeshType host = mesh.download();
-        for (size_t d = host.getDimension(); d > 1; --d)
+        const auto& connectivity = mesh.getConnectivity();
+        for (size_t d = mesh.getDimension(); d > 0; --d)
         {
-          if (host.getConnectivity().getIncidence(d, d - 1).size() == 0)
-            host.getConnectivity().compute(d, d - 1);
+          if (!connectivity.isPrepared(d, d - 1))
+          {
+            Alert::Exception() << Alert::Notation::Incidence(d, d - 1)
+                               << " must be prepared with mesh.getConnectivity().compute("
+                               << d << ", " << d - 1
+                               << ") before constructing a Kokkos H1 space."
+                               << Alert::Raise;
+          }
         }
-        return host;
+        return mesh.download();
       }
 
       HostMeshType m_mesh;
@@ -1019,8 +1026,8 @@ namespace Rodin::Variational
       /**
        * @brief Constructs the space on a resident mesh.
        * @param[in] degree Polynomial degree.
-       * @param[in] mesh Mesh without pyramids supporting the space, which must
-       * outlive it.
+       * @param[in] mesh Mesh without pyramids and with the incidences
+       * @f$ d \to d - 1 @f$ prepared. It must outlive the space.
        */
       H1([[maybe_unused]] std::integral_constant<size_t, K> degree, const MeshType& mesh)
         : m_mesh(mesh),
@@ -1218,8 +1225,8 @@ namespace Rodin::Variational
       /**
        * @brief Constructs the vector space on a resident mesh.
        * @param[in] degree Polynomial degree.
-       * @param[in] mesh Mesh without pyramids supporting the space, which must
-       * outlive it.
+       * @param[in] mesh Mesh without pyramids and with the incidences
+       * @f$ d \to d - 1 @f$ prepared. It must outlive the space.
        * @param[in] vdim Vector dimension, at most three.
        */
       H1([[maybe_unused]] std::integral_constant<size_t, K> degree, const MeshType& mesh,

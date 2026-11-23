@@ -108,24 +108,42 @@ namespace Rodin::Assembly
         const TrialDOFs& trialDOFs, Index trialVDim, const TestDOFs& testDOFs,
         Index testVDim, const Order& order)
       {
-        const size_t meshDimension = mesh.getDimension();
+        const size_t localDimension = mesh.getDimension();
+        const size_t meshDimension = region == ::Rodin::Geometry::Region::Cells
+          ? localDimension
+          : ::Rodin::Kokkos::Geometry::getDomainDimension(mesh);
+        bool checkIncidence = localDimension == meshDimension;
+        if constexpr (requires { mesh.getGlobalDimension(); })
+          checkIncidence = checkIncidence && mesh.getCellCount() != 0;
         if ((region == ::Rodin::Geometry::Region::Boundary ||
               region == ::Rodin::Geometry::Region::Interface) &&
-          (meshDimension == 0 ||
-            !mesh.getConnectivity().hasIncidence(meshDimension - 1, meshDimension)))
+          checkIncidence)
         {
-          Alert::Exception()
-            << "Compute face-to-cell incidence before integrating over the "
-            << "boundary or the interface of a Kokkos mesh." << Alert::Raise;
+          if (meshDimension == 0)
+          {
+            Alert::Exception() << "A zero-dimensional mesh has no facets for integration."
+                               << Alert::Raise;
+          }
+          if (!mesh.getConnectivity().isPrepared(meshDimension - 1, meshDimension))
+          {
+            Alert::Exception()
+              << "Prepare face-to-cell incidence with mesh.getConnectivity().compute("
+              << meshDimension - 1 << ", " << meshDimension
+              << ") before integrating over the boundary or interface." << Alert::Raise;
+          }
         }
         const auto& execution = mesh.getContext().getExecutionSpace();
         const size_t dimension =
           ::Rodin::Kokkos::Geometry::getRegionDimension(meshDimension, region);
-        const Index count = mesh.getPolytopeCount(dimension);
+        const Index count =
+          ::Rodin::Kokkos::Geometry::getRegionPolytopeCount(mesh, region);
         if (m_mesh != &mesh || m_dimension != dimension || m_polytopeCount != count ||
           !m_quadrature || !m_quadrature->hasOrders(mesh, dimension, order))
         {
-          m_quadrature.emplace(mesh, dimension, order);
+          if (count == 0)
+            m_quadrature.emplace();
+          else
+            m_quadrature.emplace(mesh, dimension, order);
           m_offsets = ::Kokkos::View<Index*, MemorySpace>(
             ::Kokkos::view_alloc(execution, ::Kokkos::WithoutInitializing,
               std::string("Rodin entry offsets")),
@@ -347,6 +365,11 @@ namespace Rodin::Assembly
         const TrialDOFs& trialDOFs, Index trialVDim, const TestDOFs& testDOFs,
         Index testVDim, size_t& spacing)
       {
+        if (count == 0)
+        {
+          spacing = 1;
+          return 0;
+        }
         const EntryCount<TrialDOFs, TestDOFs> local{
           view, region, dimension, attributes, trialDOFs, trialVDim, testDOFs, testVDim};
         Index selected = 0;

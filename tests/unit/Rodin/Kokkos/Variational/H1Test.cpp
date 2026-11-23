@@ -356,13 +356,22 @@ namespace Rodin::Tests::Unit
     checkStokes(withClosure(makeTriangleMesh()));
   }
 
-  TEST(Kokkos_Variational_H1, MissingIncidencesAreComputed)
+  TEST(Kokkos_Variational_H1, RequiresPreparedIncidence)
   {
     const HostMesh source = makeTriangleMesh();
-    const DeviceMesh mesh(TestContext{}, source);
-    H1 dfes(Quadratic, mesh);
-    const HostMesh closed = withClosure(makeTriangleMesh());
-    H1 hfes(Quadratic, closed);
+    DeviceMesh mesh(TestContext{}, source);
+    auto& connectivity = mesh.getConnectivity();
+    EXPECT_THROW(H1(Quadratic, mesh), Alert::Exception);
+    EXPECT_FALSE(connectivity.hasIncidence(2, 1));
+
+    connectivity.compute(2, 1).setDirty(2, 1);
+    EXPECT_THROW(H1(Quadratic, mesh), Alert::Exception);
+    EXPECT_TRUE(connectivity.isDirty(2, 1));
+
+    connectivity.compute(2, 1);
+    const H1 dfes(Quadratic, mesh);
+    const HostMesh closed = withClosure(source);
+    const H1 hfes(Quadratic, closed);
     EXPECT_EQ(dfes.getSize(), hfes.getSize());
   }
 

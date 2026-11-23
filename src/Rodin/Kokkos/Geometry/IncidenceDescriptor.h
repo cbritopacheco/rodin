@@ -25,6 +25,7 @@ namespace Rodin::Kokkos::Geometry
   struct IncidenceDescriptor
   {
     std::uint8_t present; ///< Whether the relation is materialized.
+    std::uint8_t prepared; ///< Whether the materialized relation is current.
     const Index* offsets; ///< Row offsets, including the terminal offset.
     const Index* indices; ///< Dimension-local target indices.
     Index count; ///< Number of source rows.

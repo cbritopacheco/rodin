@@ -450,31 +450,63 @@ namespace Rodin::Geometry
        */
       Connectivity& compute(size_t d, size_t dp, Mode mode = Mode::Discover)
       {
+        return compute(d, dp, mode, true);
+      }
+
+      /**
+       * @param d Source dimension.
+       * @param dp Target dimension.
+       * @returns This connectivity after computing the complete relation.
+       * @throws Alert::Exception If the relation requires adding an entity.
+       */
+      Connectivity& computeExisting(size_t d, size_t dp)
+      {
+        return compute(d, dp, Mode::Discover, false);
+      }
+
+    private:
+      /**
+       * @param d Source dimension.
+       * @param dp Target dimension.
+       * @param mode Selects complete incidence or a subset of existing entities.
+       * @param allowGrowth Whether a complete relation can add missing entities.
+       * @returns This connectivity after resident computation completes.
+       */
+      Connectivity& compute(size_t d, size_t dp, Mode mode, bool allowGrowth)
+      {
         if (!getCount(0))
           return *this;
         check(d, dp);
         const size_t D = getDimension();
+        if (D && !isPrepared(D, 0))
+        {
+          buildVertexIncidence(D);
+          publish();
+        }
         if (d == D && dp == 0)
           return *this;
-        if (isDirty(D, D))
+        if (!isPrepared(D, D))
           transpose(0, D).intersection(D, D, 0);
-        if (d != D && d != 0 && (isDirty(D, d) || isDirty(d, 0)))
-          build(d, mode);
-        if (dp != D && dp != 0 && (isDirty(D, dp) || isDirty(dp, 0)))
-          build(dp, mode);
-        if (isDirty(d, dp))
+        if (d != D && d != 0 && (!isPrepared(D, d) || !isPrepared(d, 0)))
+          buildIncidence(d, mode, allowGrowth);
+        if (dp != D && dp != 0 && (!isPrepared(D, dp) || !isPrepared(dp, 0)))
+          buildIncidence(dp, mode, allowGrowth);
+        if (!isPrepared(d, dp))
         {
           if (d < dp)
-            compute(dp, d, mode).transpose(d, dp);
+            compute(dp, d, mode, allowGrowth).transpose(d, dp);
           else
           {
             const size_t pivot = d == 0 && dp == 0 ? D : 0;
-            compute(d, pivot).compute(pivot, dp, mode).intersection(d, dp, pivot);
+            compute(d, pivot, mode, allowGrowth)
+              .compute(pivot, dp, mode, allowGrowth)
+              .intersection(d, dp, pivot);
           }
         }
         return *this;
       }
 
+    public:
       /// @param d Source dimension. @param dp Target dimension. @returns This connectivity.
       Connectivity& discover(size_t d, size_t dp)
       {
@@ -494,6 +526,14 @@ namespace Rodin::Geometry
         return m_incidence[d][dp].present;
       }
 
+      /// @param d Source dimension. @param dp Target dimension. @returns Whether the relation is present and current.
+      bool isPrepared(size_t d, size_t dp) const
+      {
+        check(d, dp);
+        const auto& relation = m_incidence[d][dp];
+        return relation.present && !relation.dirty;
+      }
+
       /// @param d Source dimension. @param dp Target dimension. @returns Whether recomputation is required.
       bool isDirty(size_t d, size_t dp) const
       {
@@ -509,7 +549,7 @@ namespace Rodin::Geometry
         if (relation.dirty != dirty)
         {
           relation.dirty = dirty;
-          changed();
+          publish();
         }
         return *this;
       }
@@ -534,7 +574,10 @@ namespace Rodin::Geometry
       Connectivity& intersection(size_t d, size_t dp, size_t pivot);
 
       /// @param d Missing intermediate dimension. @param mode Discovery policy. @returns This connectivity after building cell-to-entity incidence.
-      Connectivity& build(size_t d, Mode mode = Mode::Discover);
+      Connectivity& build(size_t d, Mode mode = Mode::Discover)
+      {
+        return buildIncidence(d, mode, true);
+      }
 
     public:
       // Kernel functors and the value types they carry are public because
@@ -1078,6 +1121,17 @@ namespace Rodin::Geometry
       };
 
     private:
+      /**
+       * @param d Dimension of the subentities.
+       * @param mode Selects complete incidence or a subset of existing entities.
+       * @param allowGrowth Whether discovery may add missing entities.
+       * @returns This connectivity after building cell-to-entity incidence.
+       */
+      Connectivity& buildIncidence(size_t d, Mode mode, bool allowGrowth);
+
+      /// @param d Source dimension whose ordered vertex incidence is rebuilt.
+      void buildVertexIncidence(size_t d);
+
       /// @param count Number of work items. @returns Execution-instance policy.
       auto policy(Index count) const
       {
@@ -1119,7 +1173,7 @@ namespace Rodin::Geometry
         }
       }
 
-      /// @brief Publishes the small resident descriptor table after relation replacement.
+      /// @brief Publishes the small resident descriptor table after an incidence change.
       void publish()
       {
         std::vector<Descriptor> descriptors;
@@ -1129,6 +1183,7 @@ namespace Rodin::Geometry
           {
             const auto& relation = m_incidence[d][dp];
             descriptors.push_back({static_cast<std::uint8_t>(relation.present),
+              static_cast<std::uint8_t>(relation.present && !relation.dirty),
               relation.offsets.data(), relation.indices.data(),
               relation.offsets.extent(0) ? relation.offsets.extent(0) - 1 : 0});
           }
@@ -1308,8 +1363,9 @@ namespace Rodin::Geometry
   }
 
   template <class Backend>
-  auto Connectivity<Rodin::Context::Kokkos<Rodin::Context::Local, Backend>>::build(
-    size_t d, Mode mode) -> Connectivity&
+  auto
+  Connectivity<Rodin::Context::Kokkos<Rodin::Context::Local, Backend>>::buildIncidence(
+    size_t d, Mode mode, bool allowGrowth) -> Connectivity&
   {
     assert(d > 0 && d < m_dimension);
     initialize();
@@ -1352,6 +1408,12 @@ namespace Rodin::Geometry
         execution, 0, total),
       work);
     const Index newCount = scan(work.leaderFlags, work.leaderOffsets);
+    if (work.discover && newCount && !allowGrowth)
+    {
+      Alert::MemberFunctionException(*this, __func__)
+        << "Distributed incidence requires new entities of dimension " << d
+        << ". Compute and reconcile them on the host mesh before upload." << Alert::Raise;
+    }
     work.assigned = allocate<Index>(total, "stable entity IDs");
     work.ids = allocate<Index>(total, "resolved entity IDs");
     work.matched = allocate<unsigned char>(total, "entity membership");
@@ -1386,23 +1448,25 @@ namespace Rodin::Geometry
     auto& r = m_incidence[m_dimension][d];
     r = Relation{work.rowOffsets, work.rowIndices, true, false};
     m_relations.erase({m_dimension, d});
-    // Materialize the discovered entities' ordered vertex incidence.
-    {
-      VertexEntries vertices{getView(), d,
-        allocate<Index>(getCount(d), "vertex incidence counts"), {}, {}, false};
-      ::Kokkos::parallel_for(
-        "Rodin vertex incidence count", policy(getCount(d)), vertices);
-      const Index total = scan(vertices.counts, vertices.offsets);
-      vertices.indices = allocate<Index>(total, "vertex incidence indices");
-      vertices.fill = true;
-      ::Kokkos::parallel_for(
-        "Rodin vertex incidence fill", policy(getCount(d)), vertices);
-      m_context.getExecutionSpace().fence("Rodin vertex incidence");
-      m_incidence[d][0] = Relation{vertices.offsets, vertices.indices, true, false};
-      m_relations.erase({d, 0});
-    }
+    buildVertexIncidence(d);
     publish();
     return *this;
+  }
+
+  template <class Backend>
+  void Connectivity<Rodin::Context::Kokkos<Rodin::Context::Local,
+    Backend>>::buildVertexIncidence(size_t d)
+  {
+    VertexEntries vertices{getView(), d,
+      allocate<Index>(getCount(d), "vertex incidence counts"), {}, {}, false};
+    ::Kokkos::parallel_for("Rodin vertex incidence count", policy(getCount(d)), vertices);
+    const Index total = scan(vertices.counts, vertices.offsets);
+    vertices.indices = allocate<Index>(total, "vertex incidence indices");
+    vertices.fill = true;
+    ::Kokkos::parallel_for("Rodin vertex incidence fill", policy(getCount(d)), vertices);
+    m_context.getExecutionSpace().fence("Rodin vertex incidence");
+    m_incidence[d][0] = Relation{vertices.offsets, vertices.indices, true, false};
+    m_relations.erase({d, 0});
   }
 
   template <class Backend>

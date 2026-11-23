@@ -555,7 +555,8 @@ namespace Rodin::Tests::Unit
   /// @brief Scalar and vector P1/H1 spaces retain their existing coefficient numbering.
   TEST(Kokkos_Variational_Element, ComponentwiseNumberingIsPreserved)
   {
-    const DeviceMesh mesh(TestContext{}, makeTriangleMesh());
+    DeviceMesh mesh(TestContext{}, makeTriangleMesh());
+    mesh.getConnectivity().compute(2, 1);
     P1 scalar(mesh);
     P1 vector(mesh, 2);
     H1 quadratic(std::integral_constant<size_t, 2>{}, mesh);

@@ -62,6 +62,8 @@ namespace Rodin::Tests::Unit
     {
       for (size_t dp = 0; dp <= host.getDimension(); ++dp)
       {
+        if (!resident.isPrepared(d, dp))
+          continue;
         const auto& expected = host.getIncidence(d, dp);
         Index width = 1;
         for (const auto& row : expected)
@@ -292,6 +294,19 @@ namespace Rodin::Tests::Unit
     resident = std::move(copied);
     EXPECT_NE(resident.getRevision(), beforeAssignment);
     EXPECT_GT(notifications, beforeCopyEdit);
+  }
+
+  /// @brief Explicit computation restores ordered cell vertices after clearing the relation.
+  TEST(Kokkos_Connectivity, RecomputeCellVertices)
+  {
+    const auto host = sharedCells(GeometryType::Triangle);
+    ResidentConnectivity resident(TestContext{}, host);
+    EXPECT_TRUE(resident.isPrepared(2, 0));
+    resident.clear(2, 0);
+    EXPECT_FALSE(resident.isPrepared(2, 0));
+    resident.compute(2, 0);
+    EXPECT_TRUE(resident.isPrepared(2, 0));
+    EXPECT_EQ(resident.getIncidence(2, 0), host.getIncidence(2, 0));
   }
 
   /// @brief Empty resident connectivity needs no host topology or special discovery path.

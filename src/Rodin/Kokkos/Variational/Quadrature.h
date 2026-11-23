@@ -52,6 +52,9 @@ namespace Rodin::Kokkos::Variational
       /// @brief Stride of the flattened reference coordinates.
       static constexpr Index ReferenceStride = 3;
 
+      /// @brief Prepares an empty rule for a region with no candidate entities.
+      Quadrature() = default;
+
       /**
        * @brief Builds and uploads the tables of every geometry present.
        * @param mesh Resident mesh.

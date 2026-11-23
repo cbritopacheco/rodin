@@ -131,13 +131,18 @@ namespace Rodin::Variational
       const auto& fes = gf.getFiniteElementSpace();
       const auto& mesh = fes.getMesh();
       const size_t dimension = mesh.getDimension();
-      if ((region == Geometry::Region::Boundary ||
-            region == Geometry::Region::Interface) &&
-        !mesh.getConnectivity().hasIncidence(dimension - 1, dimension))
+      if (dimension == 0 && region != Geometry::Region::Cells)
       {
         Alert::MemberFunctionException(gf, __func__)
-          << "Compute face-to-cell incidence before projecting on the boundary or an "
-             "interface."
+          << "A zero-dimensional mesh has no facets for projection." << Alert::Raise;
+      }
+      if ((region == Geometry::Region::Boundary ||
+            region == Geometry::Region::Interface) &&
+        !mesh.getConnectivity().isPrepared(dimension - 1, dimension))
+      {
+        Alert::MemberFunctionException(gf, __func__)
+          << "Prepare face-to-cell incidence with mesh.getConnectivity().compute("
+          << dimension - 1 << ", " << dimension << ") before projecting on facets."
           << Alert::Raise;
       }
       const size_t d = ::Rodin::Kokkos::Geometry::getRegionDimension(dimension, region);

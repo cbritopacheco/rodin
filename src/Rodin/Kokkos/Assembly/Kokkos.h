@@ -698,12 +698,13 @@ namespace Rodin::Assembly
         const auto& essBdr = input.getEssentialBoundary();
         res.clear();
         const Index d = mesh.getDimension();
-        if (d == 0)
+        if (d == 0 || d != ::Rodin::Kokkos::Geometry::getDomainDimension(mesh))
           return;
-        if (essBdr.empty() && !mesh.getConnectivity().hasIncidence(d - 1, d))
+        if (essBdr.empty() && !mesh.getConnectivity().isPrepared(d - 1, d))
         {
           Alert::MemberFunctionException(*this, __func__)
-            << "Compute face-to-cell incidence before imposing a boundary condition."
+            << "Prepare face-to-cell incidence with mesh.getConnectivity().compute("
+            << d - 1 << ", " << d << ") before imposing a boundary condition."
             << Alert::Raise;
         }
         const auto& execution = mesh.getContext().getExecutionSpace();

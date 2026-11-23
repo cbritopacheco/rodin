@@ -94,11 +94,11 @@ namespace Rodin::Assembly
         if (m_count != 0 &&
           (region == Geometry::Region::Boundary ||
             region == Geometry::Region::Interface) &&
-          !mesh.getConnectivity().hasIncidence(m_dimension, dimension))
+          !mesh.getConnectivity().isPrepared(m_dimension, dimension))
         {
           Alert::MemberFunctionException(*this, __func__)
-            << "Face-to-cell incidence has not been computed and is required "
-               "to traverse this region."
+            << "Prepare face-to-cell incidence with mesh.getConnectivity().compute("
+            << m_dimension << ", " << dimension << ") before traversing this region."
             << Alert::Raise;
         }
         m_mesh = mesh.getView();

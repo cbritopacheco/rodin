@@ -12,15 +12,17 @@
  * @brief Resident Kokkos storage of a distributed mesh.
  */
 
-#include <algorithm>
 #include <cstdint>
 #include <functional>
 #include <memory>
 #include <vector>
 
+#include <boost/mpi/collectives/all_reduce.hpp>
+
 #include "Rodin/MPI/Geometry/Mesh.h"
 
 #include "Rodin/Kokkos/Geometry/Mesh.h"
+#include "Connectivity.h"
 
 namespace Rodin::Geometry
 {
@@ -33,9 +35,8 @@ namespace Rodin::Geometry
    * ownership of each of its entities, and an independent distributed
    * host mesh it was built from. Every query is answered in the local
    * numbering of the shard, which the kernels of a local resident mesh
-   * expect. The boundary, the interface and the measures are those of the
-   * distributed mesh: they are read from the host mesh, which owns the
-   * entities across processes.
+   * expect. Facet queries read the resident shard's prepared incidence and
+   * the distributed ownership recorded on the host.
    *
    * The device view marks the entities this process owns. Integrators skip
    * the others, so that each polytope is integrated once over the
@@ -73,7 +74,7 @@ namespace Rodin::Geometry
       using MemorySpace = typename ContextType::MemorySpaceType;
 
       /// @brief Resident connectivity of the shard.
-      using ConnectivityType = typename LocalType::ConnectivityType;
+      using ConnectivityType = Connectivity<ContextType>;
 
       /// @brief Borrowed device view.
       using View = ::Rodin::Kokkos::View<Mesh<ContextType>>;
@@ -94,7 +95,16 @@ namespace Rodin::Geometry
         std::vector<std::uint8_t> owned;
         for (size_t d = 0; d <= dimension; ++d)
         {
-          for (Index i = 0; i < shard.getPolytopeCount(d); ++i)
+          const size_t count = shard.getPolytopeCount(d);
+          if (count &&
+            (shard.getState(d).size() != count ||
+              shard.getPolytopeMap(d).left.size() != count))
+          {
+            Alert::MemberFunctionException(*this, __func__)
+              << "Reconcile host entities of dimension " << d << " before upload."
+              << Alert::Raise;
+          }
+          for (Index i = 0; i < count; ++i)
             owned.push_back(shard.isOwned(d, i) ? 1 : 0);
         }
         m_owned = ::Kokkos::View<std::uint8_t*, MemorySpace>(
@@ -111,13 +121,25 @@ namespace Rodin::Geometry
        * @brief Copies host metadata and resident data, sharing read-only ownership flags.
        * @param other Mesh to copy.
        */
-      Mesh(const Mesh& other) = default;
+      Mesh(const Mesh& other)
+        : MeshBase(other),
+          m_context(other.m_context),
+          m_host(other.m_host),
+          m_shard(other.m_shard),
+          m_owned(other.m_owned)
+      {}
 
       /**
        * @brief Moves the mesh.
        * @param other Mesh to move.
        */
-      Mesh(Mesh&& other) = default;
+      Mesh(Mesh&& other)
+        : MeshBase(std::move(other)),
+          m_context(std::move(other.m_context)),
+          m_host(std::move(other.m_host)),
+          m_shard(std::move(other.m_shard)),
+          m_owned(std::move(other.m_owned))
+      {}
 
       /// @param context Distribution and execution association of an empty mesh.
       explicit Mesh(ContextType context)
@@ -125,10 +147,29 @@ namespace Rodin::Geometry
       {}
 
       /// @param other Independent mesh snapshot. @returns This mesh.
-      Mesh& operator=(const Mesh& other) = default;
+      Mesh& operator=(const Mesh& other)
+      {
+        if (this != &other)
+        {
+          Mesh next(other);
+          *this = std::move(next);
+        }
+        return *this;
+      }
 
       /// @param other Mesh whose storage is moved. @returns This mesh.
-      Mesh& operator=(Mesh&& other) = default;
+      Mesh& operator=(Mesh&& other)
+      {
+        if (this != &other)
+        {
+          MeshBase::operator=(std::move(other));
+          m_context = std::move(other.m_context);
+          m_host = std::move(other.m_host);
+          m_shard = std::move(other.m_shard);
+          m_owned = std::move(other.m_owned);
+        }
+        return *this;
+      }
 
       /// @returns Distributed execution context.
       const ContextType& getContext() const override
@@ -139,7 +180,6 @@ namespace Rodin::Geometry
       /// @returns Distributed host mesh.
       const HostType& getHost() const
       {
-        checkTopology();
         return m_host;
       }
 
@@ -161,7 +201,6 @@ namespace Rodin::Geometry
        */
       View getView() const
       {
-        checkTopology();
         View res{};
         static_cast<::Rodin::Kokkos::View<MeshBase>&>(res) = m_shard.getView();
         res.owned = m_owned.data();
@@ -193,6 +232,12 @@ namespace Rodin::Geometry
         return m_shard.getDimension();
       }
 
+      /// @returns Topological dimension of the full distributed mesh.
+      size_t getGlobalDimension() const
+      {
+        return m_host.getDimension();
+      }
+
       /// @brief Gets the dimension of the ambient space. @returns Number of coordinates of each vertex.
       size_t getSpaceDimension() const override
       {
@@ -202,13 +247,13 @@ namespace Rodin::Geometry
       /// @brief Gets the connectivity of the shard. @returns Resident connectivity, in the local numbering.
       ConnectivityType& getConnectivity() override
       {
-        return m_shard.getConnectivity();
+        return m_connectivity;
       }
 
       /// @brief Gets the connectivity of the shard. @returns Read-only resident connectivity, in the local numbering.
       const ConnectivityType& getConnectivity() const override
       {
-        return m_shard.getConnectivity();
+        return m_connectivity;
       }
 
       /// @param d Entity dimension. @returns Local entity count, ghosts included.
@@ -257,7 +302,6 @@ namespace Rodin::Geometry
        */
       Mesh& scale(Real c) override
       {
-        checkTopology();
         m_shard.scale(c);
         m_host.scale(c);
         return *this;
@@ -283,7 +327,6 @@ namespace Rodin::Geometry
        */
       Mesh& setVertexCoordinates(Index idx, Real s, size_t i) override
       {
-        checkTopology();
         m_shard.setVertexCoordinates(idx, s, i);
         m_host.setVertexCoordinates(idx, s, i);
         return *this;
@@ -297,7 +340,6 @@ namespace Rodin::Geometry
       Mesh& setVertexCoordinates(
         Index idx, const ::Rodin::Math::SpatialPoint& coords) override
       {
-        checkTopology();
         m_shard.setVertexCoordinates(idx, coords);
         m_host.setVertexCoordinates(idx, coords);
         return *this;
@@ -317,7 +359,6 @@ namespace Rodin::Geometry
       Mesh& setAttribute(
         const std::pair<size_t, Index>& p, const Optional<Attribute>& attr) override
       {
-        checkTopology();
         m_shard.setAttribute(p, attr);
         m_host.setAttribute(p, attr);
         return *this;
@@ -332,7 +373,6 @@ namespace Rodin::Geometry
       Mesh& setPolytopeTransformation(
         const std::pair<size_t, Index> p, PolytopeTransformation* trans) override
       {
-        checkTopology();
         std::unique_ptr<PolytopeTransformation> hostMap(trans ? trans->copy() : nullptr);
         m_shard.setPolytopeTransformation(p, trans);
         m_host.setPolytopeTransformation(p, hostMap.release());
@@ -381,7 +421,6 @@ namespace Rodin::Geometry
       /// @returns Independent distributed host snapshot, without communication.
       HostType download() const
       {
-        checkTopology();
         HostType result(m_host);
         static_cast<Mesh<Rodin::Context::Local>&>(result.getShard()) = m_shard.download();
         result.flush();
@@ -403,13 +442,13 @@ namespace Rodin::Geometry
       /// @returns Owned boundary faces, in the local numbering.
       FaceIterator getBoundary() const override
       {
-        return getHost().getBoundary();
+        return getFacets(Region::Boundary);
       }
 
       /// @returns Owned interface faces, in the local numbering.
       FaceIterator getInterface() const override
       {
-        return getHost().getInterface();
+        return getFacets(Region::Interface);
       }
 
       /// @returns Iterator over the local cells, ghosts included.
@@ -463,13 +502,17 @@ namespace Rodin::Geometry
       /// @param face Local face index. @returns Whether the face lies between two cells of the distributed mesh.
       bool isInterface(Index face) const override
       {
-        return getHost().isInterface(face);
+        const size_t dimension = m_host.getDimension();
+        return dimension && getDimension() == dimension && isOwned(dimension - 1, face) &&
+          m_shard.isInterface(face);
       }
 
       /// @param face Local face index. @returns Whether the face lies on the boundary of the distributed mesh.
       bool isBoundary(Index face) const override
       {
-        return getHost().isBoundary(face);
+        const size_t dimension = m_host.getDimension();
+        return dimension && getDimension() == dimension && isOwned(dimension - 1, face) &&
+          m_shard.isBoundary(face);
       }
 
       /// @brief Gets the volume of the distributed mesh. @returns Measure of the three-dimensional entities over all processes.
@@ -529,47 +572,65 @@ namespace Rodin::Geometry
       /// @brief Gets the perimeter of the distributed mesh. @returns Measure of the boundary over all processes.
       Real getPerimeter() const override
       {
-        return getHost().getPerimeter();
+        return measureBoundary(nullptr);
       }
 
       /// @param attribute Attribute. @returns Measure of the boundary faces with that attribute over all processes.
       Real getPerimeter(Attribute attribute) const override
       {
-        return getHost().getPerimeter(attribute);
+        return getPerimeter(FlatSet<Attribute>{attribute});
       }
 
       /// @param attributes Attributes. @returns Measure of the boundary faces with one of the attributes over all processes.
       Real getPerimeter(const FlatSet<Attribute>& attributes) const override
       {
-        return getHost().getPerimeter(attributes);
+        return measureBoundary(&attributes);
       }
 
     private:
-      /**
-       * @brief Requires distributed ownership for every entity exposed to kernels.
-       * New distributed entities need an explicit host reconciliation and upload;
-       * incidence computation among already numbered entities remains rank-local.
-       */
-      void checkTopology() const
+      /// @param region Boundary or interface. @returns Owned facets of the region.
+      FaceIterator getFacets(Region region) const
       {
-        const auto& host = m_host.getShard();
-        for (size_t d = 0; d <= std::max(host.getDimension(), m_shard.getDimension());
-             ++d)
+        std::vector<Index> indices;
+        const size_t dimension = m_host.getDimension();
+        const size_t count =
+          dimension && getDimension() == dimension ? getFaceCount() : 0;
+        for (Index i = 0; i < count; ++i)
         {
-          if (host.getPolytopeCount(d) != m_shard.getPolytopeCount(d))
-          {
-            Alert::MemberFunctionException(*this, __func__)
-              << "Distributed entity changes require ownership reconciliation on "
-              << "the host mesh followed by upload and space reconstruction."
-              << Alert::Raise;
-          }
+          if (region == Region::Boundary ? isBoundary(i) : isInterface(i))
+            indices.push_back(i);
         }
+        return FaceIterator(*this, VectorIndexGenerator(std::move(indices)));
+      }
+
+      /**
+       * @param attributes Selected labels, or null for all boundary facets.
+       * @returns Boundary measure over all ranks.
+       */
+      Real measureBoundary(const FlatSet<Attribute>* attributes) const
+      {
+        Real local = 0;
+        const auto& host = m_host.getShard();
+        for (auto face = getBoundary(); face; ++face)
+        {
+          const auto facet = host.getFace(face->getIndex());
+          if (attributes)
+          {
+            const auto attr = facet->getAttribute();
+            if (!attr || !attributes->contains(*attr))
+              continue;
+          }
+          local += facet->getMeasure();
+        }
+        return boost::mpi::all_reduce(
+          m_context.getDistribution().getCommunicator(), local, std::plus<Real>());
       }
 
       ContextType m_context;
       HostType m_host;
       LocalType m_shard;
       ::Kokkos::View<std::uint8_t*, MemorySpace> m_owned;
+      ConnectivityType m_connectivity{m_shard.getConnectivity()};
   };
 
   /**

@@ -100,10 +100,43 @@ namespace Rodin::Kokkos::Geometry
    * @param dimension Mesh dimension.
    * @param region Integration region.
    * @return The mesh dimension for cells, the face dimension otherwise.
+   * A zero-dimensional mesh has no face candidates.
    */
   inline size_t getRegionDimension(size_t dimension, ::Rodin::Geometry::Region region)
   {
-    return region == ::Rodin::Geometry::Region::Cells ? dimension : dimension - 1;
+    return region == ::Rodin::Geometry::Region::Cells || dimension == 0 ? dimension
+                                                                        : dimension - 1;
+  }
+
+  /**
+   * @brief Gets the topological dimension defining the integration regions.
+   * @param mesh Local mesh or distributed shard.
+   * @return The dimension of the whole mesh, independent of the rank.
+   */
+  template <class Mesh>
+  size_t getDomainDimension(const Mesh& mesh)
+  {
+    if constexpr (requires { mesh.getGlobalDimension(); })
+      return mesh.getGlobalDimension();
+    else
+      return mesh.getDimension();
+  }
+
+  /**
+   * @brief Counts candidates of an integration region on this rank.
+   * @param mesh Local mesh or distributed shard.
+   * @param region Integration region.
+   * @return Candidate count before ownership and attribute filtering.
+   */
+  template <class Mesh>
+  size_t getRegionPolytopeCount(const Mesh& mesh, ::Rodin::Geometry::Region region)
+  {
+    if (region == ::Rodin::Geometry::Region::Cells)
+      return mesh.getCellCount();
+    const size_t dimension = getDomainDimension(mesh);
+    if (dimension == 0 || mesh.getDimension() != dimension)
+      return 0;
+    return mesh.getPolytopeCount(getRegionDimension(dimension, region));
   }
 
 }

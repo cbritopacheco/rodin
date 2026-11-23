@@ -5,6 +5,10 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 
+#include <cmath>
+#include <array>
+#include <cmath>
+#include <type_traits>
 #include <gtest/gtest.h>
 #include <boost/filesystem.hpp>
 #include <boost/mpi/collectives/all_reduce.hpp>
@@ -66,6 +70,8 @@ namespace Rodin::Tests::Unit
     host.getConnectivity().compute(1, 2);
     host.getConnectivity().compute(1, 0);
     host.reconcile(1);
+    const auto faceCells = host.getConnectivity().getIncidence(1, 2);
+    host.getConnectivity().clear(1, 2);
 
     using DistributedContext = Context::Kokkos<Context::MPI, TestBackend>;
     Geometry::Mesh<DistributedContext> mesh(DistributedContext(context), host);
@@ -76,6 +82,16 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(scalar.getSize(), 25u);
     EXPECT_EQ(quadratic.getSize(), 81u);
     EXPECT_EQ(constant.getSize(), 1u);
+    const auto cellDOFs = quadratic.getDOFs(2, 0);
+    EXPECT_FALSE(mesh.getConnectivity().hasIncidence(1, 2));
+    mesh.getConnectivity().compute(1, 2);
+    EXPECT_EQ(mesh.getConnectivity().getIncidence(1, 2), faceCells);
+    EXPECT_TRUE((quadratic.getDOFs(2, 0) == cellDOFs).all());
+    size_t localInterface = 0;
+    for (auto face = mesh.getInterface(); face; ++face)
+      ++localInterface;
+    EXPECT_EQ(
+      boost::mpi::all_reduce(*meshWorld, localInterface, std::plus<size_t>()), 40u);
     const auto query = scalar.getGhostedPositions();
     EXPECT_EQ(query.positions.extent(0), scalar.getLocalSize());
     const auto quadraticQuery = quadratic.getGhostedPositions();
@@ -132,15 +148,16 @@ namespace Rodin::Tests::Unit
       auto copy = mesh;
       copy.setAttribute({2, 0}, Geometry::Attribute(88));
       EXPECT_EQ(mesh.getHost().getAttribute(2, 0), Geometry::Attribute(77));
-      copy.upload(host);
-      EXPECT_EQ(copy.getAttribute(2, 0), attribute);
-      EXPECT_EQ((copy.getVertexCoordinates(0) - original).norm(), 0);
-      typename decltype(copy)::ConnectivityType emptyTopology(TestContext{});
-      copy.getConnectivity() = std::move(emptyTopology);
-      EXPECT_THROW(copy.getView(), Alert::Exception);
-      EXPECT_THROW(copy.getHost(), Alert::Exception);
-      copy.upload(host);
-      EXPECT_NO_THROW(copy.getView());
+      copy.getConnectivity().clear(1, 2);
+      EXPECT_TRUE(mesh.getConnectivity().hasIncidence(1, 2));
+      auto moved = std::move(copy);
+      EXPECT_FALSE(moved.getConnectivity().hasIncidence(1, 2));
+      EXPECT_EQ(moved.getAttribute(2, 0), Geometry::Attribute(88));
+      moved.upload(host);
+      EXPECT_EQ(moved.getAttribute(2, 0), attribute);
+      EXPECT_EQ((moved.getVertexCoordinates(0) - original).norm(), 0);
+      moved.getConnectivity().compute(1, 2);
+      EXPECT_EQ(moved.getConnectivity().getIncidence(1, 2), faceCells);
     }
     meshWorld->barrier();
     host.save(file, IO::FileFormat::HDF5);
@@ -149,6 +166,128 @@ namespace Rodin::Tests::Unit
     boost::filesystem::remove(file);
     EXPECT_EQ(loaded.getCellCount(), host.getShard().getCellCount());
     EXPECT_EQ((loaded.getVertexCoordinates(0) - original).norm(), 0);
+  }
+
+  /// @brief Discovery that needs new entities fails while a rank's existing ownership stays valid.
+  TEST(Kokkos_MPI_Mesh, ResidentConnectivityPreservesOwnership)
+  {
+    using namespace Geometry;
+    Context::MPI context(*meshEnvironment, *meshWorld);
+    const auto rank = static_cast<Index>(meshWorld->rank());
+    const auto x = static_cast<Real>(rank) * 2;
+    const auto owned = Shard::State::Owned;
+    Shard::Builder builder;
+    builder.initialize(2, 2);
+    IndexArray vertices(3);
+    vertices << builder.vertex(3 * rank, Math::SpatialPoint{x, 0}, owned),
+      builder.vertex(3 * rank + 1, Math::SpatialPoint{x + 1, 0}, owned),
+      builder.vertex(3 * rank + 2, Math::SpatialPoint{x, 1}, owned);
+    builder.polytope(2, rank, Polytope::Type::Triangle, vertices, owned);
+    auto host =
+      Mesh<Context::MPI>::Builder(context).initialize(builder.finalize()).finalize();
+    using DistributedContext = Context::Kokkos<Context::MPI, TestBackend>;
+    Mesh<DistributedContext> mesh(DistributedContext(context), host);
+    using ResidentConnectivity = typename decltype(mesh)::LocalType::ConnectivityType;
+    static_assert(
+      !std::is_assignable_v<decltype(mesh.getConnectivity()), ResidentConnectivity>);
+    static_assert(!std::is_move_assignable_v<typename decltype(mesh)::ConnectivityType>);
+    static_assert(
+      !std::is_move_constructible_v<typename decltype(mesh)::ConnectivityType>);
+    static_assert(
+      !std::is_convertible_v<decltype(mesh.getConnectivity()), ResidentConnectivity&>);
+
+    auto& connectivity = mesh.getConnectivity();
+    EXPECT_THROW(connectivity.compute(2, 1), Alert::Exception);
+    EXPECT_FALSE(connectivity.hasIncidence(2, 1));
+    EXPECT_EQ(mesh.getFaceCount(), 0u);
+    size_t ownedCells = 0;
+    ::Kokkos::parallel_reduce("Count cells after rejected discovery",
+      ::Kokkos::RangePolicy<TestExecutionSpace>(
+        mesh.getContext().getExecutionSpace(), 0, mesh.getCellCount()),
+      OwnedCells{mesh.getView()}, ownedCells);
+    EXPECT_EQ(ownedCells, 1u);
+    connectivity.restrict(2, 1);
+    EXPECT_TRUE(connectivity.getIncidence({2, 1}, 0).empty());
+
+    host.getConnectivity().compute(2, 1);
+    EXPECT_THROW(mesh.upload(host), Alert::Exception);
+    EXPECT_EQ(mesh.getFaceCount(), 0u);
+    host.reconcile(1);
+    mesh.upload(host);
+    EXPECT_EQ(mesh.getFaceCount(), 3u);
+    mesh.getConnectivity().compute(1, 2);
+    size_t boundary = 0;
+    for (auto face = mesh.getBoundary(); face; ++face)
+      ++boundary;
+    EXPECT_EQ(boundary, 3u);
+    EXPECT_FALSE(mesh.getInterface());
+    EXPECT_NEAR(mesh.getPerimeter(), meshWorld->size() * (2 + std::sqrt(Real(2))), 1e-13);
+  }
+
+  /// @brief Facet traversal and integration use the global dimension on every rank.
+  TEST(Kokkos_MPI_Mesh, FacetsUseDistributedDimension)
+  {
+    using namespace Geometry;
+    using namespace Variational;
+    Context::MPI context(*meshEnvironment, *meshWorld);
+    const auto rank = static_cast<Index>(meshWorld->rank());
+    const auto owned = Shard::State::Owned;
+    Shard::Builder builder;
+    builder.initialize(2, 2);
+    if (rank == 0)
+    {
+      const Index a = builder.vertex(0, Math::SpatialPoint{0, 0}, owned);
+      const Index b = builder.vertex(1, Math::SpatialPoint{1, 0}, owned);
+      const Index c = builder.vertex(2, Math::SpatialPoint{0, 1}, owned);
+      const Index d = builder.vertex(3, Math::SpatialPoint{1, 1}, owned);
+      IndexArray triangle(3), edge(2);
+      triangle << a, b, c;
+      builder.polytope(2, 0, Polytope::Type::Triangle, triangle, owned);
+      triangle << b, d, c;
+      builder.polytope(2, 1, Polytope::Type::Triangle, triangle, owned);
+      const std::array edges{std::pair{a, b}, std::pair{b, d}, std::pair{d, c},
+        std::pair{c, a}, std::pair{b, c}};
+      for (Index i = 0; i < edges.size(); ++i)
+      {
+        edge << edges[i].first, edges[i].second;
+        builder.polytope(1, i, Polytope::Type::Segment, edge, owned);
+      }
+    }
+    else if (rank == 1)
+    {
+      IndexArray segment(2);
+      segment << builder.vertex(4, Math::SpatialPoint{2, 0}, owned),
+        builder.vertex(5, Math::SpatialPoint{3, 0}, owned);
+      builder.polytope(1, 5, Polytope::Type::Segment, segment, owned);
+    }
+    const auto host =
+      Mesh<Context::MPI>::Builder(context).initialize(builder.finalize()).finalize();
+    using DistributedContext = Context::Kokkos<Context::MPI, TestBackend>;
+    Mesh<DistributedContext> mesh(DistributedContext(context), host);
+    EXPECT_EQ(mesh.getGlobalDimension(), 2u);
+    EXPECT_EQ(mesh.getDimension(), rank == 0 ? 2u : rank == 1 ? 1u : 0u);
+    if (rank == 0)
+      mesh.getConnectivity().compute(1, 2);
+    size_t localBoundary = 0;
+    for (auto face = mesh.getBoundary(); face; ++face)
+      ++localBoundary;
+    EXPECT_EQ(localBoundary, rank == 0 ? 4u : 0u);
+    EXPECT_NEAR(mesh.getPerimeter(), 4, 1e-13);
+
+    P1 fes(mesh);
+    TrialFunction u(fes);
+    TestFunction v(fes);
+    auto boundary = BoundaryIntegral(u, v);
+    if (rank == 0)
+    {
+      mesh.getConnectivity().setDirty(1, 2);
+      EXPECT_THROW(boundary.prepare(false), Alert::Exception);
+      mesh.getConnectivity().compute(1, 2);
+    }
+    // Each selected facet contributes a two-by-two P1 matrix.
+    EXPECT_EQ(boundary.assemble().values.extent(0), rank == 0 ? 16u : 0u);
+    EXPECT_EQ(InterfaceIntegral(u, v).assemble().values.extent(0), rank == 0 ? 4u : 0u);
+    EXPECT_EQ(FaceIntegral(u, v).assemble().values.extent(0), rank == 0 ? 20u : 0u);
   }
 }
 

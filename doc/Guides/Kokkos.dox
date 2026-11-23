@@ -152,11 +152,28 @@
   device kernels, sorting, duplicate removal and prefix sums. Each relation
   owns independent CSR arrays.
 
+  The resident mesh follows
+  @ref guides-meshes-connectivity-stages "explicit incidence preparation by stage".
+  `hasIncidence(d, dp)` reports whether the relation's CSR tables are materialized.
+  `isPrepared(d, dp)` also requires those tables to be current. A dirty relation
+  may retain its old tables. Call `compute(d, dp)` to rebuild a required dirty
+  relation before invoking a consumer.
+
   @code{.cpp}
   auto& connectivity = mesh.getConnectivity();
   connectivity.compute(1, 2); // Discover edges and compute edge-to-cell incidence.
   connectivity.compute(2, 1); // Reference-ordered cell-to-edge incidence.
   connectivity.clear(2, 1).restrict(2, 1); // Use existing edges only.
+  @endcode
+
+  Prepare the downward closure on the resident mesh before constructing a local
+  `H1` space. Its host copy supplies the degree-of-freedom numbering from the
+  same prepared topology.
+
+  @code{.cpp}
+  for (size_t d = mesh.getDimension(); d > 0; --d)
+    mesh.getConnectivity().compute(d, d - 1);
+  H1 space(std::integral_constant<size_t, 2>{}, mesh);
   @endcode
 
   Discovery emits reference-cell subentities in Rodin's local ordering.
@@ -216,9 +233,9 @@
   // Both counts equal mesh.getFaceCount(); filter(i) selects the region.
   @endcode
 
-  No incidence is discovered or computed by iteration. Nonempty filtered face
-  traversal diagnoses missing face-to-cell incidence during host construction.
-  Zero-dimensional meshes support Cells; face regions raise an exception.
+  Nonempty filtered face traversal requires prepared face-to-cell incidence.
+  Iteration checks this prerequisite during host construction. Local
+  zero-dimensional meshes support Cells and raise for face regions.
   getCount() and getDimension() use scalar metadata on either host or device.
   filter() and getPolytope() run in the selected execution space. Their entity
   results access resident geometry and optional labels without host callbacks.
@@ -412,18 +429,30 @@
   `Mesh<Context::Kokkos<Context::MPI, Backend>>` makes the shard of a
   distributed mesh resident on the device. It is built from a
   `Mesh<Context::MPI>` snapshot and answers every query in the
-  local numbering of the shard, ghosts included. The boundary, the interface
-  and the measures are those of the distributed mesh. The device view marks
-  the entities the process owns, so that integrators visit each polytope on
-  one process only.
+  local numbering of the shard, ghosts included. The device view marks the
+  entities the process owns, so that integrators visit each polytope on one
+  process only. Host-side boundary and interface queries combine the prepared
+  resident facet-to-cell relation with the same MPI ownership information.
+  Distributed facet traversal and assembly use the global mesh dimension to
+  identify facets. Empty shards and shards of lower dimension contribute zero
+  facets.
 
   Coordinate, attribute and transformation setters update the device shard
   and its owned host metadata without communication. Shared vertices must
   receive consistent updates on their holding ranks. The input mesh remains
   unchanged. Per-rank @c load() is collective, as for the host MPI loader.
-  Changes that create distributed entities require host ownership reconciliation,
-  an explicit @c upload(), and reconstruction of dependent finite-element
-  spaces. A view rejects topology whose ownership has not been prepared.
+
+  `getConnectivity()` provides incidence queries and preparation on the
+  numbered resident shard. When building a relation, `compute(d, dp)` raises
+  before changing the entity tables if it needs new entities. `restrict(d, dp)`
+  prepares incidence over the existing subset. Clear any restricted relations
+  used as prerequisites before rebuilding with discovery. To create entities,
+  compute them on the host MPI mesh, call `reconcile()` for their dimension,
+  then `upload()` the reconciled mesh and rebuild dependent finite-element
+  spaces.
+  `getHost()` exposes the host metadata snapshot, which can lack relations
+  prepared later on the resident shard. `download()` creates an independent
+  host mesh containing those relations.
 
   @code{.cpp}
   #include <Rodin/Kokkos/MPI.h>

@@ -156,7 +156,7 @@ namespace Rodin::Geometry
    * - @ref Rodin::Geometry::Shard "Shard": Mesh shard for distributed parallel computing
    *
    * ## Connectivity Management
-   * - Automatic computation of incidence relations @f$ d \rightarrow d' @f$
+   * - Explicit preparation of incidence relations @f$ d \rightarrow d' @f$
    * - Efficient storage using sparse data structures
    * - Support for arbitrary polytope dimensions
    *
@@ -754,14 +754,15 @@ namespace Rodin::Geometry
         const std::pair<size_t, Index>& p, const Optional<Attribute>& attr) = 0;
 
       /**
-       * @brief Gets reference to mesh connectivity.
-       * @returns Const reference to Connectivity object
+       * @brief Gets mutable mesh connectivity for explicit preparation.
+       * @returns Reference to the connectivity owned by this mesh.
+       * @see @ref guides-meshes-connectivity-stages
        */
       virtual ConnectivityBase& getConnectivity() = 0;
 
       /**
-       * @brief Gets a constant reference to the mesh connectivity.
-       * @returns A constant reference to the mesh connectivity.
+       * @brief Gets mesh connectivity for querying prepared relations.
+       * @returns Read-only reference to the connectivity owned by this mesh.
        */
       virtual const ConnectivityBase& getConnectivity() const = 0;
 
