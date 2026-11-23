@@ -8,6 +8,7 @@
 #define RODIN_TESTS_UNIT_KOKKOS_VARIATIONAL_COMMON_H
 
 #include <cmath>
+#include <initializer_list>
 
 #include <gtest/gtest.h>
 
@@ -237,11 +238,12 @@ namespace Rodin::Tests::Unit
 
   /**
    * @brief Distorted hexahedral grid.
+   * @param shape Number of vertices along each axis.
    * @return Uniform hexahedral grid with displaced vertices, so the maps are trilinear.
    */
-  inline HostMesh makeHexahedronMesh()
+  inline HostMesh makeHexahedronMesh(std::initializer_list<size_t> shape = {3, 4, 3})
   {
-    auto mesh = HostMesh::UniformGrid(Polytope::Type::Hexahedron, {3, 4, 3});
+    auto mesh = HostMesh::UniformGrid(Polytope::Type::Hexahedron, shape);
     mesh.scale(Real(1) / 3);
     for (Index i = 0; i < mesh.getVertexCount(); ++i)
     {

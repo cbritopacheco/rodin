@@ -54,7 +54,8 @@ namespace Rodin::Tests::Unit
 
   /// @brief The tangent and residual of a law match the host.
   template <class Law, class HostFES, class DeviceFES>
-  void checkForms(const Law& law, const HostFES& hfes, const DeviceFES& dfes)
+  void checkForms(const Law& law, const HostFES& hfes, const DeviceFES& dfes,
+    size_t quadratureOrder = 0)
   {
     GridFunction hw(hfes);
     GridFunction dw(dfes);
@@ -64,8 +65,10 @@ namespace Rodin::Tests::Unit
     TestFunction hv(hfes);
     TrialFunction du(dfes);
     TestFunction dv(dfes);
-    const auto hivw = Solid::InternalVirtualWork(law, hw);
-    const auto divw = Solid::InternalVirtualWork(law, dw);
+    auto hivw = Solid::InternalVirtualWork(law, hw);
+    auto divw = Solid::InternalVirtualWork(law, dw);
+    hivw.setQuadratureOrder(quadratureOrder);
+    divw.setQuadratureOrder(quadratureOrder);
     expectSameForm(hu, hv, hivw.Tangent(hu, hv), du, dv, divw.Tangent(du, dv));
     expectSameLinearForm(hv, hivw.Residual(hv), dv, divw.Residual(dv));
   }
@@ -171,10 +174,13 @@ namespace Rodin::Tests::Unit
   /// One team per cell holds the local matrices beyond the thread capacity.
   TEST(Kokkos_Variational_InternalVirtualWork, FormsOfDegreeThreeOnHexahedra)
   {
-    const auto source = withClosure(makeHexahedronMesh());
+    // Four Gauss points per axis sample the nonlinear forms with the same
+    // rule on both backends while keeping the full cubic tangent matrix.
+    constexpr size_t QuadratureOrder = 6;
+    const auto source = withClosure(makeHexahedronMesh({2, 3, 2}));
     const DeviceMesh mesh(TestContext{}, source);
     visitLaws([&](const auto& law) {
-      checkForms(law, H1(Cubic, source, 3), H1(Cubic, mesh, 3));
+      checkForms(law, H1(Cubic, source, 3), H1(Cubic, mesh, 3), QuadratureOrder);
     });
   }
 

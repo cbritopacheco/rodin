@@ -68,9 +68,9 @@ namespace Rodin::Tests::Unit
       hv, Integral(Dot(Grad(hg), Grad(hv))), dv, Integral(Dot(Grad(dg), Grad(dv))));
   }
 
-  /// @brief Vector quadratic forms match the host.
+  /// @brief Vector forms match the host, with an optional order for the divergence form.
   template <size_t K = 2>
-  void checkVectorForms(const HostMesh& source)
+  void checkVectorForms(const HostMesh& source, Optional<size_t> divergenceOrder = {})
   {
     constexpr std::integral_constant<size_t, K> degree{};
     const DeviceMesh mesh(TestContext{}, source);
@@ -98,8 +98,14 @@ namespace Rodin::Tests::Unit
       Integral(Jacobian(du), Jacobian(dv)));
     expectSameForm(hu, hv, Integral(hf * Jacobian(hu), Jacobian(hv)), du, dv,
       Integral(df * Jacobian(du), Jacobian(dv)));
-    expectSameForm(
-      hu, hv, Integral(Div(hu), Div(hv)), du, dv, Integral(Div(du), Div(dv)));
+    auto hostDivergence = Integral(Div(hu), Div(hv));
+    auto deviceDivergence = Integral(Div(du), Div(dv));
+    if (divergenceOrder)
+    {
+      hostDivergence.setOrder(*divergenceOrder);
+      deviceDivergence.setOrder(*divergenceOrder);
+    }
+    expectSameForm(hu, hv, hostDivergence, du, dv, deviceDivergence);
     expectSameForm(
       hu, hv, Integral(Jacobian(hu) * hg, hv), du, dv, Integral(Jacobian(du) * dg, dv));
 
@@ -418,7 +424,10 @@ namespace Rodin::Tests::Unit
 
   TEST(Kokkos_Variational_H1, VectorFormsOfDegreeThreeOnHexahedra)
   {
-    checkVectorForms<3>(withClosure(makeHexahedronMesh()));
+    // On these affine cells, a product of two cubic basis divergences has
+    // degree at most six in each reference coordinate.
+    constexpr size_t DivergenceOrder = 2 * 3;
+    checkVectorForms<3>(withClosure(makeHexahedronMesh({2, 3, 2})), DivergenceOrder);
   }
 
   TEST(Kokkos_Variational_H1, FaceFormsOnMixedMesh)
