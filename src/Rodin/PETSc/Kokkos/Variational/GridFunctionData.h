@@ -244,7 +244,7 @@ namespace Rodin::PETSc::Internal
           const size_t bytes = size * sizeof(Real);
           size_t retained = getRetainedBytes();
           for (auto it = m_entries.end();
-            retained > m_budget - bytes && it != m_entries.begin();)
+               retained > m_budget - bytes && it != m_entries.begin();)
           {
             --it;
             if (it->values.use_count() == 1)
