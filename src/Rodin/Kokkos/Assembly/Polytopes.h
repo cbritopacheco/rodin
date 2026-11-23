@@ -13,11 +13,11 @@
  * @brief Prepared entity selection, quadrature and finite-element entry offsets.
  */
 
-#include <cstdint>
 #include <memory>
 #include "Rodin/Alert/MemberFunctionException.h"
 #include "Rodin/Kokkos/Geometry/Region.h"
 #include "Rodin/Kokkos/Variational/Quadrature.h"
+#include "Rodin/Revision.h"
 
 namespace Rodin::Assembly
 {
@@ -392,7 +392,7 @@ namespace Rodin::Assembly
       /// @brief What the offsets of the last integration were computed for.
       struct Located
       {
-        std::uint64_t revision;
+        Revision revision;
         ::Rodin::Geometry::Region region;
         Index trialVDim;
         Index testVDim;

@@ -202,7 +202,10 @@
   Connectivity revisions advance on relation replacement, dirty-state changes
   and assignment, including edits made through a previously borrowed reference.
   Already prepared computations and accessor calls retain the revision. Mesh
-  revisions also account for attribute updates. Const mesh accessors neither
+  revisions also account for attribute updates. getRevision() returns a stamp
+  by value. After a mutation, the owner stores the fresh stamp issued by
+  getRevision().next(), so saved stamps remain valid for comparisons.
+  Const mesh accessors neither
   prepare entity storage nor change these revisions. Copies attach independent
   owner notifications; assignment retains the destination's notification.
 

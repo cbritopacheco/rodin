@@ -108,7 +108,7 @@ namespace Rodin::Geometry
       }
 
       /// @returns The resident connectivity revision.
-      std::uint64_t getRevision() const
+      Revision getRevision() const
       {
         return m_local.getRevision();
       }

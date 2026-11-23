@@ -146,7 +146,7 @@ namespace Rodin::PETSc::Internal
         {
           Optional<std::uint64_t> revision;
           if constexpr (requires { fes.getRevision(); })
-            revision = fes.getRevision();
+            revision = static_cast<std::uint64_t>(fes.getRevision());
           if (!revision || !m_positions || m_positions->revision != revision)
           {
             m_positions = PositionEntry{revision, fes.getGhostedPositions()};

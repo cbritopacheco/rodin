@@ -12,13 +12,12 @@
  * @brief Resident Kokkos specialization of MeshBase.
  */
 
-#include <atomic>
 #include <cmath>
-#include <cstdint>
 #include <memory>
 #include <typeinfo>
 #include <utility>
 #include "Rodin/Geometry/Mesh.h"
+#include "Rodin/Revision.h"
 #include "Rodin/Geometry/IdentityTransformation.h"
 #include "Rodin/Geometry/ParametricTransformation.h"
 #include "Rodin/Variational/P1/P1Element.h"
@@ -385,7 +384,7 @@ namespace Rodin::Geometry
        *
        * @returns Current revision, without preparing storage or changing state.
        */
-      std::uint64_t getRevision() const
+      Revision getRevision() const
       {
         return m_revision;
       }
@@ -533,7 +532,7 @@ namespace Rodin::Geometry
         ::Kokkos::deep_copy(execution, ::Kokkos::subview(m_attributePresent, index),
           static_cast<unsigned char>(attribute.has_value()));
         execution.fence("Rodin attribute update");
-        m_revision = nextRevision();
+        m_revision = getRevision().next();
         return *this;
       }
 
@@ -1301,19 +1300,10 @@ namespace Rodin::Geometry
           m_context.getExecutionSpace(), values, label);
       }
 
-      /**
-       * @brief Initializes host compatibility cache buckets.
-       * @returns Revision never handed out before, in any mesh.
-       */
-      static std::uint64_t nextRevision()
-      {
-        static std::atomic<std::uint64_t> counter{0};
-        return ++counter;
-      }
-
+      /// @brief Initializes host compatibility cache buckets.
       void initializeCaches()
       {
-        m_revision = nextRevision();
+        m_revision = getRevision().next();
         m_transformations.initialize(getDimension());
         m_quadratures.initialize(getDimension());
         m_layoutOffsets = {};
@@ -1458,7 +1448,7 @@ namespace Rodin::Geometry
       Array<GeometryKind> m_geometryKinds;
       Array<Index> m_controlOffsets;
       ::Kokkos::Array<Index, 5> m_layoutOffsets{};
-      std::uint64_t m_revision = 0;
+      Revision m_revision;
       PolytopeTransformationIndex m_transformations;
       PolytopeQuadratureIndex m_quadratures;
   };

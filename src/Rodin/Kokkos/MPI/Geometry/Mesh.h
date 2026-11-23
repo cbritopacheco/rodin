@@ -215,7 +215,7 @@ namespace Rodin::Geometry
        *
        * @returns Revision of the resident shard.
        */
-      std::uint64_t getRevision() const
+      Revision getRevision() const
       {
         return m_shard.getRevision();
       }

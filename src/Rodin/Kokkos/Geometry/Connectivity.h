@@ -25,6 +25,7 @@
 #include "Rodin/Geometry/Connectivity.h"
 #include "Rodin/Kokkos/Context/Kokkos.h"
 #include "Rodin/Kokkos/Utility.h"
+#include "Rodin/Revision.h"
 #include "View.h"
 
 namespace Rodin::Geometry
@@ -286,7 +287,7 @@ namespace Rodin::Geometry
        * @returns Revision changed by relation replacement, dirty-state changes
        * and assignment; cached reads and already prepared computations retain it.
        */
-      std::uint64_t getRevision() const
+      Revision getRevision() const
       {
         return m_revision;
       }
@@ -1195,16 +1196,9 @@ namespace Rodin::Geometry
       /// @brief Publishes a revision and completes the owning mesh's mutation stage.
       void changed()
       {
-        m_revision = nextRevision();
+        m_revision = getRevision().next();
         if (m_onChange)
           m_onChange();
-      }
-
-      /// @returns A revision distinct from every earlier connectivity revision.
-      static std::uint64_t nextRevision()
-      {
-        static std::atomic<std::uint64_t> revision{0};
-        return ++revision;
       }
 
       /// @param d Source dimension. @param dp Target dimension. @returns Materialized resident relation.
@@ -1230,7 +1224,7 @@ namespace Rodin::Geometry
 
       ContextType m_context;
       std::function<void()> m_onChange;
-      std::uint64_t m_revision = 0;
+      Revision m_revision;
       size_t m_dimension = 0;
       std::array<Index, 5> m_offsets{};
       std::array<size_t, 8> m_geometryCounts{};

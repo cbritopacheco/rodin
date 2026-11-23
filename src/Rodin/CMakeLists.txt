@@ -8,6 +8,7 @@ set(Rodin_HEADERS
   Heart.h
   Variational.h
   Location.h
+  Revision.h
 )
 
 set(Rodin_SRCS

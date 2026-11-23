@@ -12,7 +12,6 @@
  * @brief Transfers at Kokkos construction and host query boundaries.
  */
 
-#include <atomic>
 #include <cstdint>
 #include <string>
 #include <type_traits>
@@ -165,16 +164,6 @@ namespace Rodin::Kokkos::Internal
         /// @brief Number of owned entries followed by ghosts.
         size_t size;
       };
-
-      /**
-       * @brief Identifies a new immutable numbering, including copies and moves.
-       * @returns Process-local revision unique within this memory space.
-       */
-      static std::uint64_t nextRevision()
-      {
-        static std::atomic<std::uint64_t> revision{0};
-        return ++revision;
-      }
 
       /**
        * @brief Constructs a numbering map without modifying the space.

@@ -20,6 +20,7 @@
 #include "Rodin/Kokkos/Variational/P1.h"
 
 #include "Rodin/Kokkos/MPI/Geometry/Mesh.h"
+#include "Rodin/Revision.h"
 
 namespace Rodin::Variational
 {
@@ -85,8 +86,7 @@ namespace Rodin::Variational
        */
       P1(const MeshType& mesh) requires std::is_same_v<RangeType, Real>
         : m_mesh(mesh), m_host(mesh.getHost()), m_local(mesh.getLocal()),
-          m_revision(::Rodin::Kokkos::Internal::GhostedPositions<
-            typename MeshType::MemorySpace>::nextRevision())
+          m_revision(Revision{}.next())
       {}
 
       /**
@@ -98,8 +98,7 @@ namespace Rodin::Variational
         : m_mesh(mesh),
           m_host(mesh.getHost(), vdim),
           m_local(mesh.getLocal(), vdim),
-          m_revision(::Rodin::Kokkos::Internal::GhostedPositions<
-            typename MeshType::MemorySpace>::nextRevision())
+          m_revision(Revision{}.next())
       {}
       // clang-format on
 
@@ -112,8 +111,7 @@ namespace Rodin::Variational
           m_mesh(other.m_mesh),
           m_host(other.m_host),
           m_local(other.m_local),
-          m_revision(::Rodin::Kokkos::Internal::GhostedPositions<
-            typename MeshType::MemorySpace>::nextRevision())
+          m_revision(Revision{}.next())
       {}
 
       /**
@@ -125,8 +123,7 @@ namespace Rodin::Variational
           m_mesh(std::move(other.m_mesh)),
           m_host(std::move(other.m_host)),
           m_local(std::move(other.m_local)),
-          m_revision(::Rodin::Kokkos::Internal::GhostedPositions<
-            typename MeshType::MemorySpace>::nextRevision())
+          m_revision(Revision{}.next())
       {}
 
       /// @param[in] d Dimension of the polytope. @param[in] i Local index of the polytope. @return P1 element of its reference geometry.
@@ -249,7 +246,7 @@ namespace Rodin::Variational
        * @brief Identifies this space's fixed distributed numbering.
        * @returns Revision distinct from other constructed, copied or moved spaces.
        */
-      std::uint64_t getRevision() const
+      Revision getRevision() const
       {
         return m_revision;
       }
@@ -258,7 +255,7 @@ namespace Rodin::Variational
       std::reference_wrapper<const MeshType> m_mesh;
       HostType m_host;
       LocalType m_local;
-      const std::uint64_t m_revision;
+      const Revision m_revision;
   };
 }
 
