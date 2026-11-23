@@ -467,7 +467,7 @@ namespace Rodin::Kokkos::Geometry
    * @brief P1 basis of a reference geometry known at compile time.
    *
    * The values and reference gradients are those of
-   * View<::Rodin::Geometry::Point>::evaluateBasis, evaluated for every vertex at once with static
+   * View<::Rodin::Geometry::Point>::evaluate, evaluated for every vertex at once with static
    * bounds. Only the simplices, the quadrilateral and the hexahedron are
    * provided.
    *
@@ -592,7 +592,7 @@ namespace Rodin::Kokkos
           m_reference(reference)
       {
         KOKKOS_ASSERT(reference.size() == polytope.getDimension());
-        m_physical = computePhysicalCoordinates();
+        m_physical = map();
       }
 
       /**
@@ -703,7 +703,7 @@ namespace Rodin::Kokkos
         {
           Real value;
           Geometry::Vector gradient(m_reference.size());
-          evaluateBasis(a, value, gradient);
+          evaluate(a, value, gradient);
           for (Index c = 0; c < mesh.spatialDimension; ++c)
           {
             const Real control = vertexMap
@@ -819,7 +819,7 @@ namespace Rodin::Kokkos
        * The basis coincides with Rodin's host P1 Lagrange basis, so it serves
        * both as the geometric map of P1 meshes and as the P1 shape functions.
        */
-      KOKKOS_INLINE_FUNCTION void evaluateBasis(
+      KOKKOS_INLINE_FUNCTION void evaluate(
         Index a, Real& value, Geometry::Vector& gradient) const
       {
         using Type = ::Rodin::Geometry::Polytope::Type;
@@ -914,7 +914,7 @@ namespace Rodin::Kokkos
 
     private:
       /// @brief Evaluates the geometric map. @return @f$ F_K(r) @f$.
-      KOKKOS_INLINE_FUNCTION Geometry::Vector computePhysicalCoordinates() const
+      KOKKOS_INLINE_FUNCTION Geometry::Vector map() const
       {
         const auto& mesh = m_polytope.mesh;
         const Index entity = mesh.entityOffsets[m_polytope.dimension] + m_polytope.index;
@@ -931,7 +931,7 @@ namespace Rodin::Kokkos
         {
           Real value;
           Geometry::Vector gradient(m_reference.size());
-          evaluateBasis(a, value, gradient);
+          evaluate(a, value, gradient);
           for (Index c = 0; c < mesh.spatialDimension; ++c)
           {
             result(c) +=
@@ -1051,7 +1051,7 @@ namespace Rodin::Kokkos
       KOKKOS_ASSERT(local < cellVertices.size());
       Real value;
       Geometry::Vector gradient(m_reference.size());
-      evaluateBasis(a, value, gradient);
+      evaluate(a, value, gradient);
       for (Index d = 0; d < reference.size(); ++d)
         reference(d) += value * Geometry::getReferenceVertexCoordinate(type, local, d);
     }

@@ -1233,7 +1233,7 @@ namespace Rodin::Geometry
        * Existing attributes and maps remain resident and retain their entity IDs.
        * Mutation requires exclusive access; const accessors never call this stage.
        */
-      void synchronizeEntities()
+      void synchronize()
       {
         ::Kokkos::Array<Index, 5> offsets{};
         bool changed = false;
@@ -1275,7 +1275,7 @@ namespace Rodin::Geometry
       /// @brief Completes attached storage and invalidates host geometry after topology edits.
       void connectivityChanged()
       {
-        synchronizeEntities();
+        synchronize();
         m_transformations.clear();
         m_quadratures.clear();
         initializeCaches();

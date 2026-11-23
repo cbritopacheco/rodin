@@ -178,7 +178,7 @@ namespace Rodin::Kokkos::Variational
           for (Index a = 0; a < vertices.size(); ++a)
           {
             Real phi;
-            p.evaluateBasis(a, phi, reference);
+            p.evaluate(a, phi, reference);
             result += phi * m_data(vertices[a] + r * m_dofs.getStride());
           }
           return result;
@@ -417,7 +417,7 @@ namespace Rodin::Kokkos::Variational
           {
             Real phi;
             Geometry::Vector reference(rdim);
-            p.evaluateBasis(a, phi, reference);
+            p.evaluate(a, phi, reference);
             for (Index c = 0; c < sdim; ++c)
             {
               Real gradient = 0;
@@ -457,7 +457,7 @@ namespace Rodin::Kokkos::Variational
             {
               Real phi;
               Geometry::Vector reference(rdim);
-              p.evaluateBasis(a, phi, reference);
+              p.evaluate(a, phi, reference);
               Real gradient = 0;
               for (Index k = 0; k < rdim; ++k)
                 gradient += inverse(k, r) * reference(k);

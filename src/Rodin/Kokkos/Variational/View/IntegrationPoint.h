@@ -118,7 +118,7 @@ namespace Rodin::Kokkos::Variational
         }
         Geometry::Vector reference(point.getReferenceCoordinates().size());
         for (Index a = 0; a < m_count; ++a)
-          point.evaluateBasis(a, m_basis[a], reference);
+          point.evaluate(a, m_basis[a], reference);
       }
 
       /**
@@ -217,7 +217,7 @@ namespace Rodin::Kokkos::Variational
         for (Index a = 0; a < m_count; ++a)
         {
           Geometry::Vector reference(rdim);
-          point.evaluateBasis(a, m_basis[a], reference);
+          point.evaluate(a, m_basis[a], reference);
           Geometry::Vector gradient(sdim);
           for (Index c = 0; c < sdim; ++c)
           {

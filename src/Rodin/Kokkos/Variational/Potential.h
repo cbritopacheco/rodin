@@ -823,8 +823,8 @@ namespace Rodin::Kokkos::Variational
                       }
                       for (Index q = 0; q < 3; ++q)
                       {
-                        x.evaluateBasis(q, px[3 * i + q], gradient);
-                        z.evaluateBasis(q, pz[3 * i + q], gradient);
+                        x.evaluate(q, px[3 * i + q], gradient);
+                        z.evaluate(q, pz[3 * i + q], gradient);
                       }
                     }
                     for (Index l = 0; l < nte; ++l)
@@ -873,9 +873,9 @@ namespace Rodin::Kokkos::Variational
           ::Kokkos::Array<Real, RODIN_MAXIMUM_POLYTOPE_VERTICES> px;
           ::Kokkos::Array<Real, RODIN_MAXIMUM_POLYTOPE_VERTICES> py;
           for (Index q = 0; q < trialIndices.size(); ++q)
-            x.evaluateBasis(q, px[q], gradient);
+            x.evaluate(q, px[q], gradient);
           for (Index q = 0; q < testIndices.size(); ++q)
-            y.evaluateBasis(q, py[q], gradient);
+            y.evaluate(q, py[q], gradient);
           if constexpr (Scalar)
           {
             const Real sk = kernel(x, y);

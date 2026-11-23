@@ -488,9 +488,9 @@ namespace Rodin::Geometry
         if (!isPrepared(D, D))
           transpose(0, D).intersection(D, D, 0);
         if (d != D && d != 0 && (!isPrepared(D, d) || !isPrepared(d, 0)))
-          buildIncidence(d, mode, allowGrowth);
+          build(d, mode, allowGrowth);
         if (dp != D && dp != 0 && (!isPrepared(D, dp) || !isPrepared(dp, 0)))
-          buildIncidence(dp, mode, allowGrowth);
+          build(dp, mode, allowGrowth);
         if (!isPrepared(d, dp))
         {
           if (d < dp)
@@ -576,7 +576,7 @@ namespace Rodin::Geometry
       /// @param d Missing intermediate dimension. @param mode Discovery policy. @returns This connectivity after building cell-to-entity incidence.
       Connectivity& build(size_t d, Mode mode = Mode::Discover)
       {
-        return buildIncidence(d, mode, true);
+        return build(d, mode, true);
       }
 
     public:
@@ -1127,7 +1127,7 @@ namespace Rodin::Geometry
        * @param allowGrowth Whether discovery may add missing entities.
        * @returns This connectivity after building cell-to-entity incidence.
        */
-      Connectivity& buildIncidence(size_t d, Mode mode, bool allowGrowth);
+      auto build(size_t d, Mode mode, bool allowGrowth) -> Connectivity&;
 
       /// @param d Source dimension whose ordered vertex incidence is rebuilt.
       void buildVertexIncidence(size_t d);
@@ -1226,7 +1226,7 @@ namespace Rodin::Geometry
       void initialize();
 
       /// @param d Growing dimension. @param entities New entities in discovery order.
-      void appendEntities(size_t d, const Array<Entity>& entities);
+      void append(size_t d, const Array<Entity>& entities);
 
       ContextType m_context;
       std::function<void()> m_onChange;
@@ -1363,8 +1363,7 @@ namespace Rodin::Geometry
   }
 
   template <class Backend>
-  auto
-  Connectivity<Rodin::Context::Kokkos<Rodin::Context::Local, Backend>>::buildIncidence(
+  auto Connectivity<Rodin::Context::Kokkos<Rodin::Context::Local, Backend>>::build(
     size_t d, Mode mode, bool allowGrowth) -> Connectivity&
   {
     assert(d > 0 && d < m_dimension);
@@ -1432,7 +1431,7 @@ namespace Rodin::Geometry
         ::Kokkos::RangePolicy<ExecutionSpace, typename Discovery::NewEntities>(
           execution, 0, total),
         work);
-      appendEntities(d, work.added);
+      append(d, work.added);
     }
     ::Kokkos::parallel_for("Rodin discovery row counts",
       ::Kokkos::RangePolicy<ExecutionSpace, typename Discovery::CountRows>(
@@ -1470,8 +1469,7 @@ namespace Rodin::Geometry
   }
 
   template <class Backend>
-  void
-  Connectivity<Rodin::Context::Kokkos<Rodin::Context::Local, Backend>>::appendEntities(
+  void Connectivity<Rodin::Context::Kokkos<Rodin::Context::Local, Backend>>::append(
     size_t d, const Array<Entity>& entities)
   {
     const auto& execution = m_context.getExecutionSpace();
