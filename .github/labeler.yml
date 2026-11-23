@@ -78,7 +78,7 @@ resources:
 core:
 - changed-files:
   - any-glob-to-any-file:
-    - src/Rodin/{Array,Cast,Common,Configure,Copyable,FlatSet,ForwardDecls,Identifiable,Moveable,Pair,Threads,Tuple,Types}.*
+    - src/Rodin/{Array,Cast,Common,Configure,Copyable,FlatSet,ForwardDecls,Identifiable,Moveable,Pair,Revision,Threads,Tuple,Types}.*
     - tests/**/Rodin/*.*
     - tests/**/Rodin/{Core,Threads}/**
 adaptation:
