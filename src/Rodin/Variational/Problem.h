@@ -982,27 +982,32 @@ namespace Rodin::Variational
         // the solution vector at the trial offsets.
         auto& guess = axb.getSolution();
         guess.resize(static_cast<Eigen::Index>(cols));
-        m_us.iapply([&](size_t i, auto& u) {
-          const auto& data = u.get().getSolution().getData();
-          const auto offset = static_cast<Eigen::Index>(m_trialOffsets[i]);
-          if constexpr (std::is_same_v<std::decay_t<decltype(data)>, VectorType>)
-            guess.segment(offset, data.size()) = data;
-          else if constexpr (requires(
-                               VectorType& coefficients) { coefficients.upload(data); })
+
+        // Keep the destination type dependent when selecting the transfer.
+        const auto setGuessSegment = [](auto& destination, Eigen::Index offset,
+                                       const auto& data) {
+          using Destination = std::decay_t<decltype(destination)>;
+          if constexpr (std::is_same_v<std::decay_t<decltype(data)>, Destination>)
+            destination.segment(offset, data.size()) = data;
+          else if constexpr (requires { destination.upload(data); })
           {
-            VectorType coefficients;
+            Destination coefficients;
             coefficients.upload(data);
-            guess.segment(offset, coefficients.size()) = coefficients;
+            destination.segment(offset, coefficients.size()) = coefficients;
           }
           else if constexpr (requires {
-                               guess.segment(offset, data.size()) = data.download();
+                               destination.segment(offset, data.size()) = data.download();
                              })
-            guess.segment(offset, data.size()) = data.download();
+            destination.segment(offset, data.size()) = data.download();
           else
           {
-            const VectorType coefficients = data;
-            guess.segment(offset, coefficients.size()) = coefficients;
+            const Destination coefficients = data;
+            destination.segment(offset, coefficients.size()) = coefficients;
           }
+        };
+        m_us.iapply([&](size_t i, auto& u) {
+          setGuessSegment(guess, static_cast<Eigen::Index>(m_trialOffsets[i]),
+            u.get().getSolution().getData());
         });
 
         m_assembled = true;

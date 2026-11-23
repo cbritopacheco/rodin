@@ -292,8 +292,14 @@ namespace Rodin::PETSc::Internal
         }
       }
 
-      GridFunctionRead(const GridFunctionRead&) = delete;
-      GridFunctionRead& operator=(const GridFunctionRead&) = delete;
+      /// @param other Read access owned by another guard.
+      GridFunctionRead(const GridFunctionRead& other) = delete;
+
+      /**
+       * @param other Read access owned by another guard.
+       * @returns This guard.
+       */
+      GridFunctionRead& operator=(const GridFunctionRead& other) = delete;
 
       /// @brief Ends array and local-form access in reverse order.
       ~GridFunctionRead()

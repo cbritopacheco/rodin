@@ -100,8 +100,14 @@ namespace Rodin::PETSc::Internal
             s_current = this;
           }
 
-          Scope(const Scope&) = delete;
-          Scope& operator=(const Scope&) = delete;
+          /// @param other Coefficient accesses owned by another scope.
+          Scope(const Scope& other) = delete;
+
+          /**
+           * @param other Coefficient accesses owned by another scope.
+           * @returns This scope.
+           */
+          Scope& operator=(const Scope& other) = delete;
 
           /// @brief Restores PETSc access on both normal and exceptional exits.
           ~Scope()
