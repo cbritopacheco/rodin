@@ -27,6 +27,10 @@ Entre corridas:
 Escalares por ciclo: comparación pareada ciclo a ciclo (prueba t pareada): las
 corridas que parten del mismo estado comparten la deriva, que así se cancela.
 
+Una corrida retomada tras una falla queda en varias partes (prefijo, prefijo_r1,
+...), listadas en <prefijo>.parts: se leen juntas, y la parte posterior manda
+donde se superponen.
+
 Escribe <out>_summary.txt, <out>_phase.csv y, si hay matplotlib, <out>.png.
 """
 import csv
@@ -74,14 +78,25 @@ def label(a, b):
     return f"{a:>7s} vs {b:<7s}" + (f" ({WHAT[f'{a}/{b}']})" if f"{a}/{b}" in WHAT else "")
 
 
+def parts(p):
+    if os.path.exists(p + ".parts"):
+        return [x.strip() for x in open(p + ".parts") if x.strip()]
+    return [p]
+
+
 for m in MODELS:
-    if not os.path.exists(RUNS[m] + ".csv"):
-        sys.exit(f"No encuentro {RUNS[m]}.csv")
+    for q in parts(RUNS[m]):
+        if not os.path.exists(q + ".csv"):
+            sys.exit(f"No encuentro {q}.csv")
 
 # ---------------------------------------------------------------- series por ciclo
 S = {}
 for m in MODELS:
-    rows = list(csv.DictReader(open(RUNS[m] + ".csv")))
+    byt = {}
+    for q in parts(RUNS[m]):                     # la parte posterior manda
+        for r in csv.DictReader(open(q + ".csv")):
+            byt[round(float(r["t"]), 9)] = r
+    rows = [byt[t] for t in sorted(byt)]
     S[m] = {k: np.array([float(r.get(k) or 0) for r in rows]) for k in rows[0]}
 dt = np.median(np.diff(S[MODELS[0]]["t"]))
 steps = int(max(np.sum(S[MODELS[0]]["cycle"] == c) for c in np.unique(S[MODELS[0]]["cycle"])))
@@ -115,13 +130,14 @@ SC = {name: {m: per_cycle(m, f) for m in MODELS} for name, f in scalars.items()}
 
 # ---------------------------------------------------------------- campos por fase
 def frame_index(p):
-    times = [float(t) for t in re.findall(r'Time Value="([^"]+)"', open(p + ".xdmf").read())]
     out = {}
-    for k, t in enumerate(times):
-        if t <= 0 or not os.path.exists(f"{p}.velocity.{k:06d}.h5"):
-            continue
-        c = int(np.ceil(t / period - 1e-6))
-        out[(c, round(t - (c - 1) * period, 6))] = k
+    for q in parts(p):                           # la parte posterior manda
+        times = [float(t) for t in re.findall(r'Time Value="([^"]+)"', open(q + ".xdmf").read())]
+        for k, t in enumerate(times):
+            if t <= 0 or not os.path.exists(f"{q}.velocity.{k:06d}.h5"):
+                continue
+            c = int(np.ceil(t / period - 1e-6))
+            out[(c, round(t - (c - 1) * period, 6))] = f"{q}.velocity.{k:06d}.h5"
     return out
 
 
@@ -132,7 +148,7 @@ say(f"Fases con todos los ciclos y corridas: {len(phases)}")
 if not phases:
     sys.exit("No hay instantes comunes.")
 
-mesh = h5py.File(RUNS[MODELS[0]] + ".mesh.h5", "r")
+mesh = h5py.File(parts(RUNS[MODELS[0]])[0] + ".mesh.h5", "r")
 X = mesh["Mesh/Geometry/Vertices"][:]
 T = mesh["Mesh/XDMF/Topology"][:].reshape(-1, 5)[:, 1:].astype(np.int64)
 unit = 1e-3 if np.ptp(X, axis=0).max() > 1.0 else 1.0       # -> m
@@ -157,7 +173,7 @@ if "region" in args:
 
 
 def load(m, c, ph):
-    return h5py.File(f"{RUNS[m]}.velocity.{FI[m][(c, ph)]:06d}.h5", "r")["GridFunction/Values/Data"][:]
+    return h5py.File(FI[m][(c, ph)], "r")["GridFunction/Values/Data"][:]
 
 
 def sq(w, mask=None):

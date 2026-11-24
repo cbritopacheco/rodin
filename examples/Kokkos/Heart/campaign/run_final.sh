@@ -5,6 +5,9 @@
 #   3. desde ese mismo estado, N, CY, VE y TVE durante CYCLES ciclos, y los
 #      controles numéricos de TVE (devss=0.5, implicit=1) durante CTL ciclos;
 #   4. estadística pareada ciclo a ciclo.
+# Si una corrida se cae (p. ej. un Xid de la GPU), se retoma sola desde su último
+# punto de reinicio, hasta 3 veces, como <nombre>_r1, _r2...; <nombre>.parts lista
+# las partes y stats_models.py las lee juntas.
 # Se puede relanzar: salta lo hecho. Variables: SPIN (8), CYCLES (8), CTL (3),
 # TARGET (2600000), REGION ("x,y,z,r" en mm, p. ej. la orejuela; opcional).
 set -uo pipefail
@@ -25,6 +28,9 @@ MMG=$HOME/gpu/mmg/build/bin/mmg3d_O3
 BIN=$RODIN_BIN/KokkosAtriumRheologyPETSc
 mkdir -p "$DIR" && cd "$DIR" || exit 1
 log() { echo "[$(date '+%d %H:%M')] $*"; }
+export LC_ALL=C
+STEPS=$(echo "$EXTRA" | sed -n 's/.*steps=\([0-9]*\).*/\1/p'); STEPS=${STEPS:-850}
+ckstep() { od -An -t u8 -j 16 -N 8 "$1" | tr -d ' '; }   # paso guardado en un punto de reinicio
 
 # 0. Detener lo que esté corriendo.
 pkill -f run10.sh; pkill -f run_fine.sh; pkill -f run_fine2.sh
@@ -86,25 +92,52 @@ fi
 
 run() {
   local n=$1; shift
-  [ -f "$n.done" ] && return
-  log "$n"
-  # shellcheck disable=SC2086
-  if "$BIN" Fine2.mesh "$@" $EXTRA output="$n" > "$n.log" 2>&1; then touch "$n.done"; else log "$n FALLÓ"; fi
-  grep -E '^Rheology|Diverged' "$n.log" | tail -1 | cut -c1-160
+  [ -f "$n.done" ] && return 0
+  local base=() cycles=0 from="" at=0 a
+  for a in "$@"; do
+    case $a in
+      cycles=*) cycles=${a#cycles=} ;;
+      restart=*) from=${a#restart=}; at=$(ckstep "$from") ;;
+      *) base+=("$a") ;;
+    esac
+  done
+  local end=$((at + cycles * STEPS)) part=$n try=0
+  echo "$n" > "$n.parts"
+  while :; do
+    log "$part (pasos $((at + 1))-$end)"
+    # shellcheck disable=SC2086
+    if "$BIN" Fine2.mesh "${base[@]}" ${from:+restart=$from} cycles="$cycles" $EXTRA output="$part" > "$part.log" 2>&1; then
+      touch "$n.done"
+      grep -E '^Rheology' "$part.log" | tail -1 | cut -c1-160
+      return 0
+    fi
+    log "$part FALLÓ: $(grep -m1 -E 'Diverged|did not converge|PETSC ERROR: [A-Z]|what\(\)' "$part.log" | cut -c1-150)"
+    sudo -n dmesg -T 2> /dev/null | grep -i xid | tail -1
+    try=$((try + 1))
+    [ "$try" -le 3 ] || { log "$n: sin más reintentos"; return 1; }
+    if [ -f "$part.restart" ]; then from=$part.restart; at=$(ckstep "$from"); fi
+    cycles=$(((end - at) / STEPS))
+    [ "$cycles" -gt 0 ] || { touch "$n.done"; return 0; }
+    part=${n}_r$try
+    echo "$part" >> "$n.parts"
+    sleep 30
+  done
 }
 
 # 2. Arranque newtoniano (solo escribe el punto de reinicio).
-run spin_N fluid=N cycles="$SPIN" output_every=1000000
-[ -f spin_N.restart ] || { log "no hay spin_N.restart"; exit 1; }
-log "energía cinética media por ciclo del arranque (mJ): $(awk -F, 'NR > 1 {e[$2] += $11; n[$2]++} END {for (c = 1; c in n; c++) printf "%.3f ", 1e3 * e[c] / n[c]}' spin_N.csv)"
+run spin_N fluid=N cycles="$SPIN" output_every=1000000 || exit 1
+SPIN_RESTART=$(tail -1 spin_N.parts).restart
+[ "$(ckstep "$SPIN_RESTART")" -eq $((SPIN * STEPS)) ] || { log "el arranque no llegó al final"; exit 1; }
+cp "$SPIN_RESTART" spin.restart
+log "energía cinética media por ciclo del arranque (mJ): $(sed 's/$/.csv/' spin_N.parts | xargs cat | awk -F, 'NR == 1 {for (i = 1; i <= NF; i++) if ($i == "kineticEnergy") k = i} $1 != "t" {t[$1] = $2 SUBSEP $k} END {for (x in t) {split(t[x], v, SUBSEP); e[v[1]] += v[2]; n[v[1]]++} for (c = 1; c in n; c++) printf "%.3f ", 1e3 * e[c] / n[c]}')"
 
 # 3. Producción desde el mismo estado; TVE y sus controles primero.
-run prod_TVE fluid=TVE cycles="$CYCLES" restart=spin_N.restart output_every=50
-run ctl_TVE_devss05 fluid=TVE cycles="$CTL" devss=0.5 restart=spin_N.restart output_every=50
-run ctl_TVE_imp1 fluid=TVE cycles="$CTL" implicit=1 restart=spin_N.restart output_every=50
+run prod_TVE fluid=TVE cycles="$CYCLES" restart=spin.restart output_every=50
+run ctl_TVE_devss05 fluid=TVE cycles="$CTL" devss=0.5 restart=spin.restart output_every=50
+run ctl_TVE_imp1 fluid=TVE cycles="$CTL" implicit=1 restart=spin.restart output_every=50
 python3 "$RUNS/stats_models.py" runs=TVE:prod_TVE,devss05:ctl_TVE_devss05,imp1:ctl_TVE_imp1 \
   pairs=devss05/TVE,imp1/TVE skip=1 out=controles > controles.log 2>&1 && log "controles: $DIR/controles_summary.txt"
-for f in N CY VE; do run "prod_$f" fluid=$f cycles="$CYCLES" restart=spin_N.restart output_every=50; done
+for f in N CY VE; do run "prod_$f" fluid=$f cycles="$CYCLES" restart=spin.restart output_every=50; done
 
 # 4. Estadística.
 python3 "$RUNS/stats_models.py" skip=2 ${REGION:+region=$REGION} out=final > stats.log 2>&1 \
