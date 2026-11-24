@@ -116,6 +116,15 @@ $G(\mathrm{tr}\,c-3)$ 3.1 against 3.7 Pa (VE) and 7.1 against 8.1 Pa (TVE).
 
 Not run with CUDA, nor on `Coarse.mesh`.
 
+**Checkpoints.** At the end of every cycle a run writes `<output>.restart`
+($u^n$, $u^{n-1}$, $\psi$, $n$, the state of the ventricle and the step).
+`restart=<file>` continues from it on the same mesh and time step: time,
+cycle numbers and the ventricle go on, and `cycles`/`t_end` count from there.
+$\psi$ and $n$ come from the file only if the same fluid wrote it, otherwise
+they start from $c=I$ and `n_init`, so that the four fluids can start from
+one developed Newtonian flow. A run split at a checkpoint reproduces the
+continuous run to the last digit (test mesh, N and TVE, 100 steps).
+
 **Stabilisation parameters.** $\tau$ has no $(2/\Delta t)^2$ term: with it
 the stabilised problem changes with the time step and the time
 discretisation does not converge on a mesh that needs the stabilisation
@@ -207,5 +216,5 @@ build-cuda/examples/Kokkos/Heart/KokkosAtriumRheologyPETSc /path/to/Coarse.mesh 
 
 Keys of `KokkosAtriumRheologyPETSc`, besides those above: `fluid`, `stab`,
 `order`, `inlet`, `t_end`, `n_in`, `n_init`, `devss`, `implicit`, `ptt`,
-`eta_plasma`, `lambda_h`, `pc_lag`. Its flow solver is BiCGStab(4) with
+`eta_plasma`, `lambda_h`, `pc_lag`, `restart`. Its flow solver is BiCGStab(4) with
 Jacobi unless PETSc options say otherwise.

@@ -119,7 +119,15 @@
  * n_in (1.5, with inlet=relaxed), n_init (-1: n_st(0)), devss (1), implicit
  * (2), ptt (0), eta_plasma (0.0012), lambda_h (0.005), output (AtriumRheology),
  * output_every (17), tolerance (1e-8), max_iterations (5000), pc_lag (1:
- * steps between two set-ups of the preconditioner).
+ * steps between two set-ups of the preconditioner), restart (none).
+ *
+ * Checkpoints: at the end of every cycle the run writes <output>.restart
+ * (u^n, u^{n-1}, psi, n, the state of the ventricle and the step). A run with
+ * restart=<file> on the same mesh and time step continues from it: time, cycle
+ * numbers and the ventricle go on, and cycles / t_end count from there. psi and
+ * n are taken from the file only if it was written by the same fluid; otherwise
+ * they start from c = I and n_init, so that every fluid can start from one
+ * developed flow (e.g. a Newtonian spin-up).
  * PETSc options: the flow solver has no prefix; BiCGStab(4) with Jacobi by
  * default, and a step whose solve fails is solved again with GMRES(100)
  * before the run stops. The unknowns are split in u and p for -pc_type
@@ -138,6 +146,8 @@
 #include <map>
 #include <stdexcept>
 #include <string>
+#include <cstdint>
+#include <type_traits>
 #include <unordered_map>
 #include <vector>
 
@@ -212,6 +222,7 @@ namespace
       Real etaPlasma = 1.2e-3;
       Real lambdaH = 0.005;
       std::string output = "AtriumRheology";
+      std::string restart;
       size_t outputEvery = 17;
       Real tolerance = 1e-8;
       size_t maxIterations = 5000;
@@ -1364,6 +1375,8 @@ namespace
       P.ventricle = kv["lv"] != "0";
     if (kv.count("output"))
       P.output = kv["output"];
+    if (kv.count("restart"))
+      P.restart = kv["restart"];
     if (kv.count("order"))
     {
       P.order = std::stoi(kv["order"]);
@@ -1424,6 +1437,43 @@ struct StressEntry
     {
       return row.getValue(point)(k) -
         etaD.getValue(point) * old.u.interpolateJacobian(point)(i, k);
+    }
+};
+
+/// @brief Writes and reads the checkpoint of a run (see the file header).
+struct Checkpoint
+{
+    static constexpr char magic[8] = {'A', 'T', 'R', 'C', 'K', 'P', 'T', '1'};
+
+    template <class T>
+    static void put(std::ofstream& f, const T& x)
+    {
+      static_assert(std::is_trivially_copyable_v<T>);
+      f.write(reinterpret_cast<const char*>(&x), sizeof(T));
+    }
+
+    template <class T>
+    static void get(std::ifstream& f, T& x)
+    {
+      static_assert(std::is_trivially_copyable_v<T>);
+      f.read(reinterpret_cast<char*>(&x), sizeof(T));
+    }
+
+    static void putVector(std::ofstream& f, const Real* x, std::uint64_t n)
+    {
+      put(f, n);
+      f.write(
+        reinterpret_cast<const char*>(x), static_cast<std::streamsize>(n * sizeof(Real)));
+    }
+
+    static bool getVector(std::ifstream& f, Real* x, std::uint64_t n)
+    {
+      std::uint64_t m = 0;
+      get(f, m);
+      if (m != n)
+        return false;
+      f.read(reinterpret_cast<char*>(x), static_cast<std::streamsize>(n * sizeof(Real)));
+      return static_cast<bool>(f);
     }
 };
 
@@ -1863,6 +1913,112 @@ int main(int argc, char** argv)
       ventricle.initialize(s0);
     }
 
+    // Restart: flow, history, ventricle and, for the same fluid, psi and n.
+    const Real dt = P.period / static_cast<Real>(P.steps);
+    size_t stepOffset = 0;
+    HostVector previousVelocity = HostVector::Zero(3 * nodes); // u^{n-1}
+    if (!P.restart.empty())
+    {
+      std::ifstream f(P.restart, std::ios::binary);
+      char magic[8] = {};
+      f.read(magic, 8);
+      std::uint64_t savedNodes = 0, savedStep = 0;
+      std::int32_t savedFluid = -1;
+      Real savedDt = 0, savedPressure = 0;
+      Checkpoint::get(f, savedNodes);
+      Checkpoint::get(f, savedStep);
+      Checkpoint::get(f, savedFluid);
+      Checkpoint::get(f, savedDt);
+      Checkpoint::get(f, savedPressure);
+      if (!f || std::string(magic, 8) != std::string(Checkpoint::magic, 8))
+      {
+        std::cerr << "Cannot read the checkpoint " << P.restart << std::endl;
+        return EXIT_FAILURE;
+      }
+      if (savedNodes != nodes || std::abs(savedDt - dt) > 1e-12 * dt)
+      {
+        std::cerr << "The checkpoint " << P.restart
+                  << " is of another mesh or time step (" << savedNodes
+                  << " vertices, dt = " << savedDt << " s)" << std::endl;
+        return EXIT_FAILURE;
+      }
+      HostVector un(3 * nodes), psi(6 * nodes), size(nodes);
+      bool ok = Checkpoint::getVector(f, un.data(), 3 * nodes) &&
+        Checkpoint::getVector(f, previousVelocity.data(), 3 * nodes) &&
+        Checkpoint::getVector(f, psi.data(), 6 * nodes) &&
+        Checkpoint::getVector(f, size.data(), nodes);
+      Ventricle::State state;
+      Ventricle::History history;
+      std::uint8_t hasOlder = 0;
+      Checkpoint::get(f, state);
+      Checkpoint::get(f, history.n);
+      Checkpoint::get(f, history.nm1);
+      Checkpoint::get(f, hasOlder);
+      if (hasOlder)
+      {
+        Ventricle::State older;
+        Checkpoint::get(f, older);
+        history.nm2 = older;
+      }
+      std::uint64_t unknowns = 0;
+      Checkpoint::get(f, unknowns);
+      Ventricle::DenseVector x(static_cast<Eigen::Index>(unknowns));
+      f.read(reinterpret_cast<char*>(x.data()),
+        static_cast<std::streamsize>(unknowns * sizeof(Real)));
+      if (!ok || !f)
+      {
+        std::cerr << "The checkpoint " << P.restart << " is incomplete" << std::endl;
+        return EXIT_FAILURE;
+      }
+      velocity.setData(un);
+      ventricle.restore(state, history, x, ventricle.getReport());
+      atrialPressure = savedPressure;
+      stepOffset = savedStep;
+      const bool sameFluid = savedFluid == static_cast<std::int32_t>(fluid);
+      if (elastic && sameFluid)
+      {
+        toDevice(psi.data(), nodal.psi);
+        toDevice(size.data(), nodal.size);
+        aggregate.setData(size);
+      }
+      std::cout << "[restart] " << P.restart << ": step " << savedStep
+                << ", t = " << savedStep * dt << " s"
+                << (elastic ? (sameFluid ? ", psi and n from the file"
+                                         : ", psi = 0 and n = n_init (other fluid)")
+                            : "")
+                << std::endl;
+    }
+    const auto writeCheckpoint = [&](size_t step, const HostVector& un) {
+      const std::string name = P.output + ".restart";
+      {
+        std::ofstream f(name + ".tmp", std::ios::binary);
+        f.write(Checkpoint::magic, 8);
+        Checkpoint::put(f, static_cast<std::uint64_t>(nodes));
+        Checkpoint::put(f, static_cast<std::uint64_t>(step));
+        Checkpoint::put(f, static_cast<std::int32_t>(fluid));
+        Checkpoint::put(f, dt);
+        Checkpoint::put(f, atrialPressure);
+        const HostVector psi = toHost(nodal.psi), size = toHost(nodal.size);
+        Checkpoint::putVector(f, un.data(), 3 * nodes);
+        Checkpoint::putVector(f, previousVelocity.data(), 3 * nodes);
+        Checkpoint::putVector(f, psi.data(), 6 * nodes);
+        Checkpoint::putVector(f, size.data(), nodes);
+        const auto& history = ventricle.getHistory();
+        Checkpoint::put(f, ventricle.getState());
+        Checkpoint::put(f, history.n);
+        Checkpoint::put(f, history.nm1);
+        const std::uint8_t hasOlder = history.nm2.has_value() ? 1 : 0;
+        Checkpoint::put(f, hasOlder);
+        if (hasOlder)
+          Checkpoint::put(f, *history.nm2);
+        const auto& x = ventricle.getUnknowns();
+        Checkpoint::put(f, static_cast<std::uint64_t>(x.size()));
+        f.write(reinterpret_cast<const char*>(x.data()),
+          static_cast<std::streamsize>(x.size() * sizeof(Real)));
+      }
+      std::rename((name + ".tmp").c_str(), name.c_str());
+    };
+
     IO::XDMF xdmf(P.output);
     {
       auto grid = xdmf.grid();
@@ -1878,7 +2034,7 @@ int main(int argc, char** argv)
           .add("psi_off_diagonal", psiOffDiagonal);
       }
     }
-    xdmf.write(0).flush();
+    xdmf.write(stepOffset * dt).flush();
     std::ofstream csv(P.output + ".csv");
     csv << "t,cycle,pVenous,pOut,valveOpen,qIn,qOut,pInletMean,pOutletMean,"
            "maxSpeedComponent,kineticEnergy,timeDissipation,viscousDissipation,"
@@ -1919,7 +2075,6 @@ int main(int argc, char** argv)
     bool fieldSplits = false;
     size_t fallbacks = 0;
 
-    const Real dt = P.period / static_cast<Real>(P.steps);
     const Real rho = P.rho;
     const Real pi = Math::Constants::pi();
     size_t total = P.cycles * P.steps;
@@ -1930,10 +2085,10 @@ int main(int argc, char** argv)
     const VectorFunction axis0{Real(1), Real(0), Real(0)};
     const VectorFunction axis1{Real(0), Real(1), Real(0)};
     const VectorFunction axis2{Real(0), Real(0), Real(1)};
-    HostVector previousVelocity = HostVector::Zero(3 * nodes); // u^{n-1}
+    const size_t last = stepOffset + total;
     std::chrono::duration<double> rheologyTime{0}, assembly{0}, solve{0};
     bool valveWasOpen = true;
-    for (size_t step = 1; step <= total; ++step)
+    for (size_t step = stepOffset + 1; step <= last; ++step)
     {
       const Real time = step * dt;
       const Real rampTime = P.rampCycles * P.period;
@@ -2249,7 +2404,9 @@ int main(int argc, char** argv)
           << ',' << diagnostics.elasticEnergy << ',' << diagnostics.maxWeissenberg << ','
           << diagnostics.maxTrace << ',' << diagnostics.meanSize << ',' << rheologySeconds
           << ',' << assemblySeconds << ',' << solveSeconds << ',' << iterations << '\n';
-      if (step % P.outputEvery == 0 || step == total)
+      if (step % P.steps == 0 || step == last)
+        writeCheckpoint(step, uh);
+      if (step % P.outputEvery == 0 || step == last)
       {
         shearRate.setData(toHost(nodal.shearRate));
         if (elastic)
@@ -2264,7 +2421,7 @@ int main(int argc, char** argv)
         }
         xdmf.write(time).flush();
         csv.flush();
-        std::cout << "Step " << step << " / " << total << "  t=" << time
+        std::cout << "Step " << step << " / " << last << "  t=" << time
                   << " s  p_pv=" << pIn << "  p_out=" << pOut << " Pa  valve "
                   << (valveOpen ? "open" : "closed") << "  qIn=" << qIn
                   << "  qOut=" << qOut << " m^3/s  max|u_i|=" << speed << " m/s";
