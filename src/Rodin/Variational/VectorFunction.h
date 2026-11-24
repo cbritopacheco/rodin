@@ -540,6 +540,13 @@ namespace Rodin::Variational
         return new VectorFunction(*this);
       }
 
+      /// @brief Returns the component functions. @return Tuple of components.
+      const std::tuple<RealFunction<V>, RealFunction<Values>...>&
+      getFunctions() const noexcept
+      {
+        return m_fs;
+      }
+
     private:
       std::tuple<RealFunction<V>, RealFunction<Values>...> m_fs;
   };
@@ -551,9 +558,11 @@ namespace Rodin::Variational
    */
   template <class V, class... Values>
     requires((std::is_convertible_v<V, Real> ||
-               std::is_invocable_r_v<Real, V, const Geometry::Point&>) &&
+               std::is_invocable_r_v<Real, V, const Geometry::Point&> ||
+               FormLanguage::IsDevicePointCallable<V>::Value) &&
               ((std::is_convertible_v<Values, Real> ||
-                 std::is_invocable_r_v<Real, Values, const Geometry::Point&>) &&
+                 std::is_invocable_r_v<Real, Values, const Geometry::Point&> ||
+                 FormLanguage::IsDevicePointCallable<Values>::Value) &&
                 ...))
   VectorFunction(const V& v, const Values&... values) -> VectorFunction<V, Values...>;
 

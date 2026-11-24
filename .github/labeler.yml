@@ -78,7 +78,7 @@ resources:
 core:
 - changed-files:
   - any-glob-to-any-file:
-    - src/Rodin/{Array,Cast,Common,Configure,Copyable,FlatSet,ForwardDecls,Identifiable,Moveable,Pair,Threads,Tuple,Types}.*
+    - src/Rodin/{Array,Cast,Common,Configure,Copyable,FlatSet,ForwardDecls,Identifiable,Moveable,Pair,Revision,Threads,Tuple,Types}.*
     - tests/**/Rodin/*.*
     - tests/**/Rodin/{Core,Threads}/**
 adaptation:
@@ -154,6 +154,12 @@ io:
     - src/Rodin/IO/**
     - src/Rodin/IO.h
     - tests/**/Rodin/**/IO/**
+kokkos:
+- changed-files:
+  - any-glob-to-any-file:
+    - src/Rodin/Kokkos/**
+    - src/Rodin/Kokkos.h
+    - tests/**/Rodin/**/Kokkos/**
 location:
 - changed-files:
   - any-glob-to-any-file:

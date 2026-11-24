@@ -12,6 +12,7 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import random
 import re
 import shlex
 import shutil
@@ -31,12 +32,31 @@ CLEANUP_PATHS = ('/usr/share/dotnet', '/usr/local/lib/android', '/opt/ghc',
 # A healthy install took about 40 seconds in the measured campaign. These
 # budgets allow slower runners while bounding the observed 25–54 minute stalls.
 INDEX_TIMEOUT = 90
+# Slow but progressing signed snapshot refreshes exceeded 90 seconds in CI.
+# Allow three minutes per network refresh; local policy queries remain bounded
+# separately and the privileged process group is still terminated on timeout.
+INDEX_REFRESH_TIMEOUT = 180
 DOWNLOAD_TIMEOUT = 300
+# Cold MatrixRanges downloads of roughly 200 MB were still progressing at
+# 100–170 kB/s when the five-minute watchdog killed each snapshot attempt.
+# Completed archives survive between the three bounded attempts.
+SNAPSHOT_DOWNLOAD_TIMEOUT = 900
 INSTALL_TIMEOUT = 900
 MIRRORS = (None, 'https://archive.ubuntu.com/ubuntu',
            'https://mirrors.edge.kernel.org/ubuntu')
-UBUNTU_URI = re.compile(r'https?://(?:azure\.archive|archive|security)\.ubuntu\.com/ubuntu/?')
+# Snapshot normalization can send every mirror attempt to the same service.
+# Spread retries beyond short 502/503 bursts and desynchronize matrix runners.
+APT_RETRY_DELAYS = (30, 120)
+APT_RETRY_JITTER = 30
+# Hosted runners take their archive from the Azure mirror or from a regional
+# EC2 mirror such as us-east-2.ec2.archive.ubuntu.com.
+UBUNTU_URI = re.compile(r'https?://(?:(?:azure\.archive|[a-z0-9-]+\.ec2\.archive|archive|security)'
+                       r'\.ubuntu\.com|mirrors\.edge\.kernel\.org)/ubuntu/?')
 YAML_VERSION = '6.0.2'
+# Shared build campaigns must not cross a live archive security update. Refresh
+# this signed Ubuntu snapshot deliberately for producers and consumers together.
+SHARED_APT_SNAPSHOT = '20261113T000000Z'
+UBUNTU_KEYRING = Path('/usr/share/keyrings/ubuntu-archive-keyring.gpg')
 # A wheel install normally takes seconds. Bound network stalls to three minutes
 # per attempt and retry whole pip invocations, including malformed index JSON.
 PYTHON_INSTALL_TIMEOUT = 180
@@ -47,6 +67,10 @@ PYTHON_RETRY_DELAY = 2
 CMAKE_PROBE_TIMEOUT = 30
 CMAKE_PROBE_ATTEMPTS = 3
 CMAKE_PROBE_RETRY_DELAY = 2
+
+
+class MissingCandidate(ValueError):
+    """A refreshed index did not provide every requested package."""
 
 
 def install_python():
@@ -180,6 +204,11 @@ def setup_sources(system=Path('/etc/apt')):
 
 def sources(directory, mirror, system=Path('/etc/apt')):
     """Copy source definitions; change Ubuntu transport only, retaining trust rules."""
+    snapshot = os.environ.get('RODIN_APT_SNAPSHOT', '')
+    if snapshot == 'shared':
+        snapshot = SHARED_APT_SNAPSHOT
+    if snapshot and not re.fullmatch(r'[0-9]{8}T[0-9]{6}Z', snapshot):
+        raise ValueError('Invalid Ubuntu package snapshot: ' + snapshot)
     directory.mkdir(parents=True, exist_ok=True)
     parts = directory / 'sources.list.d'
     parts.mkdir(exist_ok=True)
@@ -187,26 +216,103 @@ def sources(directory, mirror, system=Path('/etc/apt')):
     entries = [main] if main.exists() else []
     entries += sorted((system / 'sources.list.d').glob('*.list'))
     entries += sorted((system / 'sources.list.d').glob('*.sources'))
+    ubuntu = False
+    hosted = (os.environ.get('GITHUB_ACTIONS') == 'true' and
+              os.environ.get('RUNNER_ENVIRONMENT') == 'github-hosted')
     for source in entries:
         text = source.read_text()
+        # Read hosted mirror lists for source detection. Preserve the runner's
+        # transport on the first live attempt, and resolve it for fallback or
+        # snapshot selection so those attempts do not reuse the same mirror.
+        original = text
+        for reference in re.findall(r'mirror\+file:(/[^\s]+)', text):
+            mirror_file = Path(reference)
+            if not mirror_file.is_file():
+                continue
+            urls = [line.split()[0] for line in mirror_file.read_text().splitlines()
+                    if line.strip() and not line.lstrip().startswith('#')]
+            if urls and all(UBUNTU_URI.fullmatch(url) for url in urls):
+                text = text.replace('mirror+file:' + reference, (mirror or urls[0]).rstrip('/') + '/')
         if mirror:
-            # Hosted images can hide the selected archive behind APT's local
-            # mirror-list transport. Replacing direct URLs alone leaves those
-            # definitions downloading from the same stalled Azure endpoint.
-            for reference in re.findall(r'mirror\+file:(/[^\s]+)', text):
-                mirror_file = Path(reference)
-                if not mirror_file.is_file():
-                    continue
-                urls = [line.split()[0] for line in mirror_file.read_text().splitlines()
-                        if line.strip() and not line.lstrip().startswith('#')]
-                if urls and all(UBUNTU_URI.fullmatch(url) for url in urls):
-                    text = text.replace('mirror+file:' + reference, mirror.rstrip('/') + '/')
             text = UBUNTU_URI.sub(mirror.rstrip('/') + '/', text)
+        if snapshot or hosted:
+            # APT::Snapshot alone schedules live indexes as well. Point the
+            # Ubuntu definitions directly at the signed snapshot in that mode.
+            snapshot_uri = 'https://snapshot.ubuntu.com/ubuntu/' + snapshot + '/'
+            if source.suffix == '.sources':
+                paragraphs = re.split(r'(\n[ \t]*\n)', text)
+                for index, paragraph in enumerate(paragraphs):
+                    field = re.search(r'^URIs:[ \t]*([^\n]*(?:\n[ \t]+[^\n]*)*)',
+                                      paragraph, re.M | re.I)
+                    if not field or not any(UBUNTU_URI.fullmatch(value) for value in field[1].split()):
+                        continue
+                    binary = re.search(r'^Types:[ \t]*([^\n]+)', paragraph, re.M | re.I)
+                    disabled = re.search(r'^Enabled:[ \t]*no[ \t]*$', paragraph, re.M | re.I)
+                    ubuntu = ubuntu or bool(binary and 'deb' in binary[1].split() and not disabled)
+                    if not snapshot:
+                        continue
+                    paragraph = (paragraph[:field.start(1)] +
+                                 re.sub(r'\S+', lambda value: snapshot_uri if UBUNTU_URI.fullmatch(value[0])
+                                        else value[0], field[1]) + paragraph[field.end(1):])
+                    option = re.compile(r'^Snapshot:[^\n]*(?:\n[ \t]+[^\n]*)*', re.M | re.I)
+                    if option.search(paragraph):
+                        paragraph = option.sub('Snapshot: no', paragraph)
+                    else:
+                        ending = '\n' if paragraph.endswith('\n') else ''
+                        paragraph = paragraph.rstrip('\n') + '\nSnapshot: no' + ending
+                    paragraphs[index] = paragraph
+                text = ''.join(paragraphs)
+            else:
+                lines = []
+                for line in text.splitlines(keepends=True):
+                    entry = re.match(r'^(\s*deb(?:-src)?\s+)(\[[^]\n]*\]\s+)?(\S+)(.*)', line)
+                    if entry and UBUNTU_URI.fullmatch(entry[3]):
+                        ubuntu = ubuntu or bool(re.match(r'^\s*deb\s', line))
+                        if snapshot:
+                            flags = entry[2].strip()[1:-1].split() if entry[2] else []
+                            flags = [value for value in flags if not value.lower().startswith('snapshot=')]
+                            flags.append('snapshot=no')
+                            line = (entry[1] + '[' + ' '.join(flags) + '] ' + snapshot_uri + entry[4] +
+                                    line[len(entry[0]):])
+                    lines.append(line)
+                text = ''.join(lines)
         target = directory / 'sources.list' if source == main else parts / source.name
-        target.write_text(text)
+        target.write_text(text if mirror or snapshot else original)
+    if (snapshot or hosted) and not ubuntu:
+        # APT can refresh an empty binary source set successfully. Recover in
+        # the disposable copy using the existing Ubuntu archive trust root.
+        release = dict(re.findall(r'^([A-Z_]+)=(.*)$', Path('/etc/os-release').read_text(), re.M))
+        codename = release.get('VERSION_CODENAME', '').strip('"')
+        if release.get('ID', '').strip('"') != 'ubuntu' or not re.fullmatch(r'[a-z][a-z0-9]*', codename):
+            raise RuntimeError('Cannot recover APT sources without an Ubuntu codename')
+        if not UBUNTU_KEYRING.is_file():
+            raise RuntimeError('Cannot recover APT sources without the Ubuntu archive keyring')
+        uri = ('https://snapshot.ubuntu.com/ubuntu/' + snapshot if snapshot
+               else mirror or MIRRORS[1])
+        fallback = parts / 'rodin-ubuntu.sources'
+        fallback.write_text(
+            'Types: deb\nURIs: ' + uri.rstrip('/') + '/\n'
+            'Suites: ' + ' '.join(codename + pocket for pocket in ['', '-updates', '-backports', '-security']) + '\n'
+            'Components: main restricted universe multiverse\n'
+            'Signed-By: ' + str(UBUNTU_KEYRING) + '\n' + ('Snapshot: no\n' if snapshot else ''))
+        print('No active Ubuntu binary sources copied; using signed Ubuntu sources for ' + codename, flush=True)
+    print(f'APT source copy: {len(entries)} source files; Ubuntu snapshot source available: {bool(snapshot)}', flush=True)
     (directory / 'sources.list').touch(exist_ok=True)
-    return ['-o', 'Dir::Etc::sourcelist=' + str(directory / 'sources.list'),
-            '-o', 'Dir::Etc::sourceparts=' + str(parts)]
+    options = ['-o', 'Dir::Etc::sourcelist=' + str(directory / 'sources.list'),
+               '-o', 'Dir::Etc::sourceparts=' + str(parts),
+               # apt-cache must see the same required binary indexes as
+               # apt-get, even when a runner disables the default target.
+               '-o', 'Acquire::IndexTargets::deb::Packages::DefaultEnabled=true']
+    if snapshot:
+        # Retain the snapshot marker for exact-version installation policy.
+        # Prefer its versions even over newer preinstalled runner packages.
+        preferences = directory / 'preferences'
+        original = system / 'preferences'
+        text = original.read_text() if original.is_file() else ''
+        preferences.write_text(text + '\nPackage: *\nPin: release o=Ubuntu\nPin-Priority: 1001\n')
+        options += ['-o', 'APT::Snapshot=' + snapshot,
+                    '-o', 'Dir::Etc::preferences=' + str(preferences)]
+    return options
 
 
 def apt(arguments, source_options, archives, timeout, capture=False):
@@ -217,8 +323,16 @@ def apt(arguments, source_options, archives, timeout, capture=False):
                'apt-get', '-o', 'Acquire::Retries=1',
                '-o', 'Acquire::http::Timeout=20', '-o', 'Acquire::https::Timeout=20',
                '-o', 'APT::Update::Error-Mode=any',
+               # Provisioning needs package indexes, not translated descriptions
+               # or command-not-found suggestions, within the same time budget.
+               '-o', 'Acquire::Languages=none',
+               '-o', 'Acquire::IndexTargets::deb::CNF::DefaultEnabled=false',
                '-o', 'APT::Keep-Downloaded-Packages=true',
-               '-o', 'Dir::Cache::archives=' + str(archives), *source_options, *arguments]
+               '-o', 'Dir::Cache::archives=' + str(archives), *source_options]
+    if 'install' in arguments and any(option.startswith('APT::Snapshot=') for option in source_options):
+        # Only disposable CI snapshot environments permit exact-version rollback.
+        command.append('--allow-downgrades')
+    command += arguments
     result = subprocess.run(command, check=True, text=True,
                             stdout=subprocess.PIPE if capture else None,
                             env=dict(os.environ, DEBIAN_FRONTEND='noninteractive', LC_ALL='C'))
@@ -240,7 +354,7 @@ def candidates(requested, source_options):
     for name in names:
         match = re.search(r'^\s*Candidate: (\S+)', records.get(name, records.get(name.split(':', 1)[0], '')), re.M)
         if not match or match[1] == '(none)':
-            raise ValueError('No APT candidate for ' + name)
+            raise MissingCandidate('No APT candidate for ' + name)
         result[name] = match[1]
     return result
 
@@ -268,6 +382,12 @@ def installed_dependencies(requested, source_options):
     return sorted(dependencies - explicit)
 
 
+def wait_for_apt_retry(attempt):
+    delay = APT_RETRY_DELAYS[attempt] + random.uniform(0, APT_RETRY_JITTER)
+    print(f'Waiting {delay:.1f}s before the next signed APT attempt.', flush=True)
+    time.sleep(delay)
+
+
 def prepare(requested, archives, state):
     archives.mkdir(parents=True, exist_ok=True)
     (archives / 'partial').mkdir(exist_ok=True)
@@ -276,14 +396,16 @@ def prepare(requested, archives, state):
     for index, mirror in enumerate(MIRRORS):
         options = sources(state / str(index), mirror)
         try:
-            apt(['update'], options, archives, INDEX_TIMEOUT)
+            apt(['update'], options, archives, INDEX_REFRESH_TIMEOUT)
+            versions = candidates(requested, options)
             break
-        except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as error:
+        except (subprocess.CalledProcessError, subprocess.TimeoutExpired, MissingCandidate) as error:
             last_error = error
-            print('APT index attempt failed:', mirror or 'runner sources', flush=True)
+            print('APT index attempt failed:', mirror or 'runner sources', str(error), flush=True)
+            if index < len(MIRRORS) - 1:
+                wait_for_apt_retry(index)
     else:
         raise RuntimeError('All signed APT index sources failed') from last_error
-    versions = candidates(requested, options)
     # APT omits satisfied installed dependencies from its Inst records, while
     # --installed traversal omits new intermediate dependencies. Combine both
     # views until the explicit plan stops growing; never remove pins or accept
@@ -311,7 +433,7 @@ def prepare(requested, archives, state):
     architecture = subprocess.check_output(['dpkg', '--print-architecture'], text=True).strip()
     # Image identity covers the preinstalled package baseline. Compiler flags,
     # MPI rank counts and test selections do not fragment dependency caches.
-    baseline = [system, architecture, os.environ.get('ImageOS'), os.environ.get('ImageVersion'), requested]
+    baseline = [system, architecture, os.environ.get('ImageOS'), os.environ.get('ImageVersion'), requested, os.environ.get('RODIN_APT_SNAPSHOT', '')]
     prefix = 'rodin-apt-v3-' + hashlib.sha256(json.dumps(baseline, sort_keys=True).encode()).hexdigest()[:24] + '-'
     key = prefix + hashlib.sha256(json.dumps(versions, sort_keys=True).encode()).hexdigest()[:24]
     if os.environ.get('GITHUB_OUTPUT'):
@@ -327,17 +449,21 @@ def install(archives, state):
     last_error = None
     for index in range(plan['source_index'], len(MIRRORS)):
         options = sources(state / str(index), MIRRORS[index])
+        timeout = (SNAPSHOT_DOWNLOAD_TIMEOUT if any(option.startswith('APT::Snapshot=') for option in options)
+                   else DOWNLOAD_TIMEOUT)
         try:
             if index != plan['source_index']:
-                apt(['update'], options, archives, INDEX_TIMEOUT)
+                apt(['update'], options, archives, INDEX_REFRESH_TIMEOUT)
             # Bound the whole transfer, not only idle sockets: slow downloads
             # can otherwise run for almost an hour while still making progress.
             apt(['--yes', '--no-remove', '--download-only', 'install', *pinned],
-                options, archives, DOWNLOAD_TIMEOUT)
+                options, archives, timeout)
             break
         except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as error:
             last_error = error
             print('APT download attempt failed:', MIRRORS[index] or 'runner sources', flush=True)
+            if index < len(MIRRORS) - 1:
+                wait_for_apt_retry(index - plan['source_index'])
     else:
         raise RuntimeError('All APT archive sources failed for the pinned package plan') from last_error
     # Only download/index errors trigger mirror fallback. Do not retry a failed

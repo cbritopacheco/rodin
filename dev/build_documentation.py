@@ -18,7 +18,7 @@ import shutil
 import xml.etree.ElementTree as ET
 
 from documentation_hierarchy import prepare_hierarchy, prepare_member_definitions, symbol_index
-from documentation_links import publish_enum_anchors, unlink_unpublished_references
+from documentation_links import CONCEPTS, publish_enum_anchors, set_aside_concepts, unlink_unpublished_references
 from documentation_highlighting import cpp_symbols
 from documentation_reference import prepare_reference_headers, render_references, render_admonition_notes
 from documentation_search import assemble_search, prepare_class_search
@@ -152,7 +152,7 @@ def clear_generated_pages(xml, html):
     Formula caches and copied assets are retained. m.css renders the complete
     site after Doxygen regenerates its XML.
     """
-    for directory, pattern in [(xml, '*.xml'), (html, '*.html')]:
+    for directory, pattern in [(xml, '*.xml'), (xml / CONCEPTS, '*.xml'), (html, '*.html')]:
         for page in directory.glob(pattern):
             page.unlink()
 
@@ -214,6 +214,7 @@ def build(configuration, renderer, templates):
     state.config['STYLESHEETS'] = version_stylesheets(stylesheets, output)
     if 'RODIN_CPP_HIGHLIGHTER' in config:
         state.config['M_CODE_FILTERS_POST']['C++'] = config['RODIN_CPP_HIGHLIGHTER'](*cpp_symbols(xml))
+    print('Set aside concepts:', set_aside_concepts(xml))
     # Render the full API and search index once. Modules is produced below,
     # after the module descriptions are available; search data is not replaced.
     mcss.run(state, templates=str(templates),

@@ -19,18 +19,18 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
     - name: Check out proposed rules and regression tests
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
       with:
         lfs: false
         persist-credentials: false
     - name: Check out the pinned labeler for offline API tests
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
       with:
         repository: actions/labeler
         ref: b8dd2d9be0f68b860e7dae5dae7d772984eacd6d
         path: .labeler-action
         persist-credentials: false
-    - uses: actions/setup-node@v4
+    - uses: actions/setup-node@v5
       with:
         node-version: '24'
     - name: Install workflow parser

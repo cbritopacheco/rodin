@@ -1,0 +1,100 @@
+# Use modern Boost finding mechanism (CMake 3.30+)
+if(POLICY CMP0167)
+  cmake_policy(SET CMP0167 NEW)
+endif()
+
+include(CMakeFindDependencyMacro)
+
+list(PREPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}")
+
+# Eigen3 - We originally developed with 3.4, but newer versions (e.g., 5.x) are compatible
+# Note: Not specifying version to allow flexibility with system installations
+find_dependency(Boost 1.74 COMPONENTS filesystem serialization)
+find_dependency(HDF5 COMPONENTS C)
+find_dependency(Threads)
+find_dependency(Eigen3)
+
+# Discover optional dependencies only along the requested target closure.
+# With no components, retain the existing whole-package discovery contract.
+if("@RODIN_USE_OPENMP@" AND (NOT _RODIN_COMPONENT OR _RODIN_LINKS MATCHES "OpenMP::"))
+  find_dependency(OpenMP)
+endif()
+
+if("@RODIN_USE_MPI@" AND (NOT _RODIN_COMPONENT OR "Rodin::MPI" IN_LIST _RODIN_TARGETS))
+  find_dependency(MPI COMPONENTS CXX)
+  find_dependency(Boost 1.74 COMPONENTS mpi)
+endif()
+
+if("@RODIN_USE_KOKKOS@" AND (NOT _RODIN_COMPONENT OR "Rodin::Kokkos" IN_LIST _RODIN_TARGETS))
+  find_dependency(Kokkos 4.2 CONFIG)
+  # Match the SYCL dependency setup used when building Rodin itself.
+  if(Kokkos_ENABLE_SYCL AND NOT TARGET MKL::MKL)
+    set(MKL_INTERFACE lp64 CACHE STRING "Integer interface of oneMKL")
+    find_package(MKL CONFIG QUIET)
+  endif()
+  find_dependency(KokkosKernels CONFIG)
+endif()
+
+if("@RODIN_USE_PETSC@" AND (NOT _RODIN_COMPONENT OR "Rodin::PETSc" IN_LIST _RODIN_TARGETS))
+  find_dependency(PETSc)
+endif()
+
+if("@RODIN_USE_SCOTCH@" AND (NOT _RODIN_COMPONENT OR "Rodin::Scotch" IN_LIST _RODIN_TARGETS))
+  find_dependency(Scotch)
+endif()
+
+if("@RODIN_USE_MUMPS@" AND (NOT _RODIN_COMPONENT OR "Rodin::Solver" IN_LIST _RODIN_TARGETS))
+  find_dependency(MUMPS)
+endif()
+
+if("@RODIN_USE_CUDSS@" AND (NOT _RODIN_COMPONENT OR "Rodin::Kokkos" IN_LIST _RODIN_TARGETS))
+  if(NOT Kokkos_ENABLE_CUDA)
+    set(Rodin_FOUND FALSE)
+    set(Rodin_NOT_FOUND_MESSAGE "Rodin's cuDSS integration requires CUDA-enabled Kokkos.")
+    return()
+  endif()
+  find_dependency(CUDAToolkit)
+  find_dependency(cudss CONFIG)
+endif()
+
+if("@RODIN_USE_ROCSOLVER@" AND (NOT _RODIN_COMPONENT OR "Rodin::Kokkos" IN_LIST _RODIN_TARGETS))
+  if(NOT Kokkos_ENABLE_HIP)
+    set(Rodin_FOUND FALSE)
+    set(Rodin_NOT_FOUND_MESSAGE "Rodin's rocSOLVER integration requires HIP-enabled Kokkos.")
+    return()
+  endif()
+  find_dependency(hip CONFIG)
+  find_dependency(rocblas CONFIG)
+  find_dependency(rocsparse CONFIG)
+  find_dependency(rocsolver CONFIG)
+endif()
+
+if("@RODIN_USE_HYPRE@" AND (NOT _RODIN_COMPONENT OR "Rodin::Kokkos::Hypre" IN_LIST _RODIN_TARGETS))
+  find_dependency(HYPRE)
+endif()
+
+set(_RODIN_SUITESPARSE_COMPONENTS)
+if("@RODIN_USE_UMFPACK@" AND (NOT _RODIN_COMPONENT OR "Rodin::Solver" IN_LIST _RODIN_TARGETS))
+  list(APPEND _RODIN_SUITESPARSE_COMPONENTS UMFPACK)
+endif()
+if("@RODIN_USE_PARU@" AND (NOT _RODIN_COMPONENT OR "Rodin::Solver" IN_LIST _RODIN_TARGETS))
+  list(APPEND _RODIN_SUITESPARSE_COMPONENTS ParU)
+endif()
+if("@RODIN_USE_SPQR@" AND (NOT _RODIN_COMPONENT OR "Rodin::Solver" IN_LIST _RODIN_TARGETS))
+  list(APPEND _RODIN_SUITESPARSE_COMPONENTS SPQR)
+endif()
+if("@RODIN_USE_CHOLMOD@" AND (NOT _RODIN_COMPONENT OR "Rodin::Solver" IN_LIST _RODIN_TARGETS))
+  list(APPEND _RODIN_SUITESPARSE_COMPONENTS CHOLMOD)
+endif()
+if(_RODIN_SUITESPARSE_COMPONENTS)
+  find_dependency(SuiteSparse
+    COMPONENTS ${_RODIN_SUITESPARSE_COMPONENTS})
+endif()
+unset(_RODIN_SUITESPARSE_COMPONENTS)
+
+# The OpenMP lowering of icpx miscompiles the assembly loops of Rodin, see the
+# top CMakeLists.txt of Rodin: the front end of Clang lowers them instead.
+if(TARGET OpenMP::OpenMP_CXX AND CMAKE_CXX_COMPILER_ID STREQUAL "IntelLLVM")
+  set_property(TARGET OpenMP::OpenMP_CXX PROPERTY INTERFACE_COMPILE_OPTIONS
+    $<$<COMPILE_LANGUAGE:CXX>:-fopenmp=libomp>)
+endif()

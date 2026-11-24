@@ -246,7 +246,11 @@ namespace
     auto mesh = distributeP2Tetrahedron(ctx, 9);
     // MPI Mesh::getFaceCount() is global, while facet indices are shard-local.
     // The previous affine-defect loop used the former as a local loop bound.
-    EXPECT_GT(mesh.getFaceCount(), mesh.getShard().getFaceCount());
+    // Both counts coincide on a single rank.
+    if (world.size() > 1)
+    {
+      EXPECT_GT(mesh.getFaceCount(), mesh.getShard().getFaceCount());
+    }
     H1<2, Real, Mesh<Context::MPI>> space(std::integral_constant<size_t, 2>{}, mesh);
     PETSc::Variational::TrialFunction uValue(space);
     PETSc::Variational::TestFunction vValue(space);
@@ -586,16 +590,23 @@ namespace
     problem.assemble(); // regression: this aborted under MPI
 
     // Recover each field from the seeded block solution vector using the same
-    // offset scatter that solve() uses, and confirm the guesses survived.
+    // scatter that solve() uses, and confirm the guesses survived. The owned
+    // rows of a field on a process start at its field start.
     Vec x = problem.getLinearSystem().getSolution();
-    const auto& offsets = problem.getTrialOffsets();
+    const auto& starts = problem.getLinearSystem().getFieldStarts();
+    ASSERT_EQ(starts.size(), 2u);
 
     PETSc::Variational::GridFunction uRecovered(fes);
     PETSc::Variational::GridFunction etaRecovered(fes);
     uRecovered = PetscScalar(0);
     etaRecovered = PetscScalar(0);
-    uRecovered.setData(x, offsets[0]);
-    etaRecovered.setData(x, offsets[1]);
+    const auto offset = [&](size_t k, const auto& gf) {
+      PetscInt begin = 0, end = 0;
+      VecGetOwnershipRange(gf.getData(), &begin, &end);
+      return static_cast<size_t>(starts[k] - begin);
+    };
+    uRecovered.setData(x, offset(0, uRecovered));
+    etaRecovered.setData(x, offset(1, etaRecovered));
 
     auto expectOwnedConstant = [](const Vec& data, PetscScalar expected) {
       PetscInt begin = 0;

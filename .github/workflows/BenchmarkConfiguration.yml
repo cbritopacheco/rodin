@@ -15,11 +15,16 @@ jobs:
     outputs:
       groups: ${{ steps.build.outputs.groups }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
-          submodules: recursive
+          submodules: false
           lfs: false
-      - uses: actions/setup-python@v5
+      - name: Start resource monitor
+        continue-on-error: true
+        run: python3 dev/ci_resource_monitor.py start
+      - name: Initialize pinned submodules
+        run: python3 dev/ci_submodules.py
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
       - run: pip install -r doc/requirements.txt
@@ -45,6 +50,10 @@ jobs:
           name: benchmark-plan-common-${{ inputs.configuration }}
           path: benchmark-common/plan.json
           if-no-files-found: error
+      - name: Summarize resource usage
+        if: always()
+        continue-on-error: true
+        run: python3 dev/ci_resource_monitor.py finish
   Groups:
     name: ${{ matrix.group.label }}
     needs: Common

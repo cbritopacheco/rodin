@@ -17,6 +17,7 @@
 
 #include <cstdint>
 
+#include <vector>
 #include <Eigen/Sparse>
 
 #include "Rodin/FormLanguage/Traits.h"
@@ -74,7 +75,8 @@ namespace Rodin::Math
    * @param[in] x Matrix to be scaled and added to y
    */
   template <class AScalarType, class YScalarType, class XScalarType>
-  void axpy(SparseMatrix<YScalarType>& y, AScalarType alpha, const SparseMatrix<XScalarType>& x)
+  void axpy(
+    SparseMatrix<YScalarType>& y, AScalarType alpha, const SparseMatrix<XScalarType>& x)
   {
     y += alpha * x;
   }
@@ -82,12 +84,20 @@ namespace Rodin::Math
 
 namespace Rodin::FormLanguage
 {
+  /// @brief Scalar traits for coordinate contributions used by sparse assembly.
+  template <class Scalar>
+  struct Traits<std::vector<Math::SparseTriplet<Scalar>>>
+  {
+    /// @brief Matrix entry scalar type.
+    using ScalarType = Scalar;
+  };
+
   /// @brief Type traits for a Math::SparseMatrix, exposing the scalar type.
   template <class Number>
   struct Traits<Math::SparseMatrix<Number>>
   {
-      /// @brief Scalar value type.
-      using ScalarType = Number;
+    /// @brief Scalar value type.
+    using ScalarType = Number;
   };
 }
 

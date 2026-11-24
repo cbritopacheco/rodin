@@ -288,6 +288,8 @@ namespace Rodin::Variational
   class ProblemUVBase : public ProblemBase<LinearSystem>
   {
     public:
+      using ProblemBase<LinearSystem>::assemble;
+
       /// @brief Trial function type.
       using TrialFunctionType = U;
 
@@ -582,7 +584,14 @@ namespace Rodin::Variational
       {
         m_assembly.execute(
           m_axb, {m_pb, this->getTrialFunction(), this->getTestFunction()});
-        m_axb.getSolution() = this->getTrialFunction().getSolution().getData();
+        auto& guess = m_axb.getSolution();
+        const auto& data = this->getTrialFunction().getSolution().getData();
+        if constexpr (requires { guess.upload(data); })
+          guess.upload(data);
+        else if constexpr (requires { data.download(guess); })
+          data.download(guess);
+        else
+          guess = data;
         m_assembled = true;
         return *this;
       }
@@ -973,9 +982,32 @@ namespace Rodin::Variational
         // the solution vector at the trial offsets.
         auto& guess = axb.getSolution();
         guess.resize(static_cast<Eigen::Index>(cols));
+
+        // Keep the destination type dependent when selecting the transfer.
+        const auto setGuessSegment = [](auto& destination, Eigen::Index offset,
+                                       const auto& data) {
+          using Destination = std::decay_t<decltype(destination)>;
+          if constexpr (std::is_same_v<std::decay_t<decltype(data)>, Destination>)
+            destination.segment(offset, data.size()) = data;
+          else if constexpr (requires { destination.upload(data); })
+          {
+            Destination coefficients;
+            coefficients.upload(data);
+            destination.segment(offset, coefficients.size()) = coefficients;
+          }
+          else if constexpr (requires {
+                               destination.segment(offset, data.size()) = data.download();
+                             })
+            destination.segment(offset, data.size()) = data.download();
+          else
+          {
+            const Destination coefficients = data;
+            destination.segment(offset, coefficients.size()) = coefficients;
+          }
+        };
         m_us.iapply([&](size_t i, auto& u) {
-          const auto& data = u.get().getSolution().getData();
-          guess.segment(static_cast<Eigen::Index>(m_trialOffsets[i]), data.size()) = data;
+          setGuessSegment(guess, static_cast<Eigen::Index>(m_trialOffsets[i]),
+            u.get().getSolution().getData());
         });
 
         m_assembled = true;

@@ -21,7 +21,7 @@ runs:
         GH_TOKEN: ${{ github.token }}
         CHECKOUT: ${{ inputs.checkout }}
       run: python3 dev/deploy_pages.py prepare --checkout "$CHECKOUT"
-    - uses: actions/upload-pages-artifact@v4
+    - uses: actions/upload-pages-artifact@v5
       id: artifact
       with:
         name: ${{ inputs.artifact-name }}-${{ github.run_attempt }}

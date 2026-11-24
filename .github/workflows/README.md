@@ -16,7 +16,7 @@ can share compilation without sharing runtime state.
 | Dedicated family workflows (for example [TestConvergence.yml](TestConvergence.yml)) | Generated single-family execution workflows, preserving numerical commands and rank partitions. |
 | [TestDirectoryBuild.yml](TestDirectoryBuild.yml) | Compile module/study-type groups using unchanged common objects. |
 | [CoveragePublish.yml](CoveragePublish.yml) | Validate every expected lane contribution and submit an incremental production line union to Codecov. |
-| [Build.yml](Build.yml) | Independent compilation checks across build types, threading and backend configurations. |
+| [Build.yml](Build.yml) | Independent CPU compilation checks across build types, threading and backend configurations, plus CUDA, HIP and SYCL compilation of Kokkos tests and examples in the images of `dev/docker/kokkos`. |
 | [Style.yml](Style.yml) | Formatting, house-style, naming and documentation-warning checks, including their tooling regressions. |
 | [Documentation.yml](Documentation.yml) | Independent documentation build and publication on master/develop pushes; build and checks only on pull requests. |
 | [Benchmarks.yml](Benchmarks.yml) | Validates performance benchmarks on ready PRs and main-branch pushes; publishes complete campaigns from master/develop. |
@@ -99,23 +99,84 @@ the configured compiler major version and all numerical test selections. All
 dedicated execution lanes request this same environment from the restored build
 definition; they do not maintain separate compiler or package setup steps.
 
-Index attempts have a 90-second budget and complete package-download attempts a
-300-second budget. GNU `timeout` terminates the privileged APT process group
-before fallback. After the runner's original sources, fallback uses the official
+Index refresh attempts have a 180-second budget; local APT policy and plan
+queries retain a 90-second budget. Complete package-download attempts have a
+300-second live-mirror budget and a 900-second signed-snapshot budget. The
+MatrixRanges cold cache needed roughly 200 MB and timed out while still
+receiving about 100–170 kB/s. Completed archives carry over to the next attempt.
+GNU `timeout` terminates the privileged APT process group before fallback.
+After the runner's original sources, fallback uses the official
 Ubuntu archive and then its kernel.org mirror, retaining suites, components,
 signing keys and exact resolved versions. Ubuntu `mirror+file:` source indirection
 is resolved to the selected fallback transport; otherwise all attempts would
 keep consulting the original failing mirror list. Candidate-version discovery
 and installation-plan simulation use those same selected source definitions.
 Mirror fallback leaves the remaining third-party source definitions unchanged.
+When a hosted runner has no active Ubuntu binary sources, the copied
+configuration supplies the runner release's standard Ubuntu pockets and
+components using the existing Ubuntu archive keyring. This also covers live
+installs where an empty update otherwise leaves packages such as `lcov`
+without candidates.
+Snapshot environments resolve Ubuntu mirror lists and point copied Ubuntu
+sources directly at the timestamped signed snapshot archive. Their source-local
+`Snapshot: no` / `snapshot=no` setting disables additional discovery of live
+indexes; it does not disable signature validation. This removes both redundant
+index downloads and the dependency on live mirror availability. Retries retain
+the same snapshot; non-snapshot environments retain the mirror sequence above.
+Index and download failures wait 30 and 120 seconds before the remaining
+attempts, each with up to 30 seconds of jitter. This spreads matrix requests
+across short service outages even when every source maps to the same snapshot.
+The network refresh budget accommodates the observed slow but progressing
+snapshot downloads while remaining bounded. Index refreshes omit translations
+and command-not-found metadata.
 Final installation is offline, allows no package removals and has a
 900-second budget; configuration failures are not retried as download failures.
 Exhausted mirrors fail the job rather than skip its tests.
+
+Test and benchmark jobs check out the root repository before running
+`dev/ci_submodules.py`. Recursive submodule hydration retains the recorded
+gitlink commits and retries only transient transport failures, with five
+300-second attempts and 15/30/60/120-second delays. Authentication, missing
+commits and unknown failures remain fatal. `dev/ci_lfs.py` applies the same
+retry schedule to selected resource paths, including temporary hosted DNS
+resolver failures.
+
+Linux Kokkos builds, shared test builds and executions, installation checks,
+and benchmark jobs sample runner resources from checkout to the final step.
+Their collapsed **Runner resource usage** summary reports elapsed observation
+time, average host CPU utilization, sampled peak host memory used and minimum
+available memory, the kernel cgroup memory high-water mark, and changes in
+cgroup OOM event/kill counters. CPU utilization is normalized to all logical
+CPUs; host measurements include containers and the runner itself. Host memory
+used is `MemTotal - MemAvailable`, sampled every 15 seconds, so short peaks can
+be missed. The cgroup high-water mark can include pre-sampling usage. Missing
+measurements are explicitly unavailable; reset counters are not reported as
+zero. Diagnostics never change build/test outcomes and require no extra
+artifact uploads. A lost runner can prevent the final summary from running.
+Benchmark failure summaries also include the existing process-scoped GNU time
+user/system CPU time, CPU percentage and peak RSS; that percentage can exceed
+100% and is distinct from normalized host utilization.
 
 Compiler selection verifies matching GCC/G++ versions before exporting them.
 If `cmake --version` stalls, it retries up to three 30-second attempts with
 2- and 4-second delays. A nonzero exit fails immediately; exhausted timeouts
 fail before compiler variables are exported.
+
+If a snapshot runner has no active Ubuntu binary source, provisioning writes a
+fallback into its private source directory using the runner's Ubuntu codename,
+the existing Ubuntu archive keyring, and the same pinned snapshot. Vendor
+sources and system configuration are retained. A missing keyring or unknown
+codename fails closed. Binary package indexes are explicitly enabled for both
+APT downloads and policy queries, even if an inherited setting disables them.
+Candidate resolution is part of each refresh attempt,
+so an apparently successful update with missing packages is not accepted as a
+valid plan. Source-copy diagnostics make this case visible in the job log.
+
+A timed-out submodule attempt may leave a repository without a current
+revision. Before retrying, the helper spends at most 60 seconds recovering
+only submodules without a valid HEAD, fetching and checking out the enclosing
+repository's exact gitlink. It does not force checkout, remove worktrees or
+advance to a branch tip; an untracked-file conflict remains fatal.
 
 Disk checks log available space and require **8 GiB of free headroom**. This is
 a conservative initial policy, not a measured peak for every hierarchy group.
@@ -343,11 +404,13 @@ lanes, not an average of their percentages. Tests and benchmarks may exercise
 production code but their own source lines are excluded from the denominator.
 Coverage describes compiled code and its instantiated templates.
 
-Coverage counters retain atomic updates for threaded execution. Instrumented
-processes can require a different watchdog from ordinary builds: the local
-curved cubic-pyramid Stokes rate test uses the existing one-hour high-order
-pyramid budget when coverage is enabled. Its refinement hierarchy, numerical
-criteria and distributed counterparts are unchanged.
+Coverage counters retain atomic updates for threaded execution. The local
+curved cubic-pyramid PETSc Stokes traction history uses a one-hour watchdog
+under serial coverage and a two-hour watchdog under threaded coverage. It
+finished in 1,997 seconds on `develop` and hit the one-hour limit in the PR
+campaign while all four MPI cases passed. The threaded local and MPI histories
+run in separate jobs so the local allowance does not consume the MPI budget.
+Both jobs retain the same refinement histories, numerical criteria and ranks.
 
 `dev/ci_artifacts.py` derives exact producer artifact names from the same plans
 used to schedule execution. A publisher downloads every required contribution
@@ -744,12 +807,44 @@ coverage instrumentation and numerical acceptance thresholds are unchanged.
 
 The local curved P3 mixed-traction hexahedron history retains all three
 refinements and numerical requirements. Coverage runs have a 3,600-second
-allowance, matching the existing local P3 pyramid allowance. Its first two
-hosted levels took 25 and 194 seconds before the final level exhausted the
+allowance. Its first two hosted levels took 25 and 194 seconds before the final level exhausted the
 former 1,800-second limit. MPI cases and non-coverage watchdogs remain unchanged.
+The threaded local P3 pyramid history timed out at 3,600 seconds during its
+finest refinement in both the `master` run of the PR's base commit and PR CI.
+The `develop` run of the same commit passed. The test has a 7,200-second coverage
+allowance in a job separate from the MPI histories. The threaded, three-rank
+PETSc Stokes pyramid pressure spectrum runs the finest affine and curved
+studies in separate jobs from the coarser points and controls. On one PR runner
+the affine study took 9,806 seconds and the combined job ran out of time during
+the finest curved study. Both studies retain their existing test watchdogs,
+MPI ranks and two independent order evaluations.
 
 Linux jobs and shared-build runner identities pin `ubuntu-24.04`. This preserves
 the validated Python 3.12.0 and Boost 1.74 environment after `ubuntu-latest`
 moved to Ubuntu 26.04. Runner changes require reviewing dependency availability
 and rerunning the complete configurations; compiler, numerical and coverage
 requirements remain unchanged.
+
+### Stable package snapshots for shared builds
+
+Shared test and benchmark environments resolve Ubuntu packages against
+`SHARED_APT_SNAPSHOT` in `dev/ci_environment.py`, through APT's signed
+[snapshot service](https://snapshot.ubuntu.com/). Both build producers and
+execution consumers use the same timestamp. Updating this pin is a dependency
+update and requires a new campaign; retries and archive restores retain it.
+The package preferences select the snapshot versions over newer preinstalled
+runner packages. Exact-version downgrades are permitted only for these
+snapshot installs. Signature checks, bounded downloads, no-removal installs,
+and runtime-library hash validation remain enforced. Mirror fallback retains
+the snapshot timestamp and cannot silently switch to the live archive.
+
+The 2026-11-12 campaign built against glibc `2.39-0ubuntu8.9`; consumers several
+hours later resolved `2.39-0ubuntu8.12`. Identical top-level package requests
+therefore failed the runtime hash check. The snapshot fixes that archive drift
+without weakening compatibility validation.
+
+Explicit CTest fixture producers declared under `examples/` set the
+`RODIN_TEST_OWNER` target property to their owning test directory and declare
+`RODIN_TEST_PROFILES`. They then participate in the same executable manifest,
+build selection, runtime inventory and fixture-preserving CTest execution as
+ordinary test targets.

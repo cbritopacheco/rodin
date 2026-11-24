@@ -63,6 +63,41 @@ namespace Rodin::Tests::Unit::NewtonSolverTestHelpers
       bool m_nonfinite;
   };
 
+  /// @brief Retains numerical factors until the polymorphic hook refreshes them.
+  class RetainedDenseSolver final : public Solver::LinearSolverBase<DenseLinearSystem>
+  {
+    public:
+      using Parent = Solver::LinearSolverBase<DenseLinearSystem>;
+      using Parent::Parent;
+      using Parent::solve;
+
+      /// @brief Refreshes the cached scalar tangent.
+      void factorize(DenseLinearSystem& system) override
+      {
+        m_tangent = system.getOperator()(0, 0);
+        ++factorizations;
+      }
+
+      /// @brief Solves with the last prepared tangent.
+      void solve(DenseLinearSystem& system) override
+      {
+        system.getSolution() = system.getVector() / m_tangent;
+      }
+
+      /// @brief Copies retained state and the problem reference.
+      RetainedDenseSolver* copy() const noexcept override
+      {
+        return new RetainedDenseSolver(*this);
+      }
+
+      /// @brief Number of refreshed tangents.
+      size_t factorizations = 0;
+
+    private:
+      /// @brief Prepared scalar tangent.
+      Real m_tangent = 0;
+  };
+
   class ScalarNonlinearProblem final : public Variational::ProblemBase<DenseLinearSystem>
   {
     public:
@@ -422,4 +457,19 @@ TEST(NewtonSolverTest, CloneAndReportReset)
   EXPECT_EQ(clone->getReport().finalStepNorm, 0);
   EXPECT_EQ(
     clone->getReport().reason, decltype(original)::ConvergedReason::AbsoluteTolerance);
+}
+
+/// @brief Base references refresh retained factors on every Newton tangent.
+TEST(NewtonSolverTest, PolymorphicFactorizationRefresh)
+{
+  Math::Vector<Real> u(1);
+  u << 1.5;
+  ScalarNonlinearProblem problem(u);
+  RetainedDenseSolver concrete(problem);
+  Solver::LinearSolverBase<DenseLinearSystem>& solver = concrete;
+  Solver::NewtonSolver newton(solver);
+  newton.setMaxIterations(20).setAbsoluteTolerance(1e-12).setRelativeTolerance(1e-12);
+  newton.solve(u);
+  EXPECT_GT(concrete.factorizations, 1u);
+  EXPECT_NEAR(u(0), std::sqrt(2.0), 1e-10);
 }

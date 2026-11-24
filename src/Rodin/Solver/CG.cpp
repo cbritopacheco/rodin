@@ -7,4 +7,8 @@
 #include "CG.h"
 
 namespace Rodin::Solver
-{}
+{
+  template class CG<Math::LinearSystem<Math::SparseMatrix<Real>, Math::Vector<Real>>>;
+  template class CG<
+    Math::LinearSystem<Math::SparseMatrix<Complex>, Math::Vector<Complex>>>;
+}

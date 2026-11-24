@@ -55,16 +55,37 @@ def local_target(page, reference):
     return target / 'index.html' if target.is_dir() else target
 
 
+CONCEPTS = 'concepts'
+
+
+def set_aside_concepts(xml):
+    """Move the records of C++ concepts out of the reach of m.css.
+
+    m.css has no page and no search entry for a concept, and stops on a
+    documented one. The records stay in a subdirectory, so that the links to
+    them can be removed from the rendered site.
+    """
+    xml = Path(xml)
+    count = 0
+    for path in xml.glob('*.xml'):
+        definition = ET.parse(path).find('compounddef')
+        if definition is not None and definition.get('kind') == 'concept':
+            (xml / CONCEPTS).mkdir(exist_ok=True)
+            path.replace(xml / CONCEPTS / path.name)
+            count += 1
+    return count
+
+
 def unlink_unpublished_references(xml, site):
     """Retain scope/type text without linking undocumented or private records.
 
-    Doxygen can link a forward declaration or enclosing private scope even when
-    m.css intentionally emits no page for it. Only those known XML records are
-    unlinked; missing public documentation and stale hand-written URLs remain
-    errors for the complete-site check.
+    Doxygen can link a forward declaration, an enclosing private scope or a
+    concept even when m.css intentionally emits no page for it. Only those
+    known XML records are unlinked; missing public documentation and stale
+    hand-written URLs remain errors for the complete-site check.
     """
     xml, site = Path(xml), Path(site).resolve()
-    unpublished = set()
+    unpublished = {path.stem + '.html' for path in (xml / CONCEPTS).glob('*.xml')}
     for path in xml.glob('*.xml'):
         definition = ET.parse(path).find('compounddef')
         if definition is None or definition.get('kind') not in ['class', 'struct', 'union', 'namespace']:

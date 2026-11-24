@@ -24,10 +24,15 @@ jobs:
       OMP_WAIT_POLICY: PASSIVE
       OPENBLAS_NUM_THREADS: 1
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
       with:
-        submodules: recursive
+        submodules: false
         lfs: false
+    - name: Start resource monitor
+      continue-on-error: true
+      run: python3 dev/ci_resource_monitor.py start
+    - name: Initialize pinned submodules
+      run: python3 dev/ci_submodules.py
     - name: Restore shared test build
       uses: ./.github/actions/test-build
       with:
@@ -45,5 +50,9 @@ jobs:
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         definition: '{"job":"${{ github.job }}","matrix":${{ toJSON(matrix) }}}'
+    - name: Summarize resource usage
+      if: always()
+      continue-on-error: true
+      run: python3 dev/ci_resource_monitor.py finish
     name: ${{ matrix.path }} (MT=${{ matrix.multithreaded }}, Suite=${{ matrix.suite }}, Physics=${{ matrix.physics }}, Context=${{
       matrix.context }})

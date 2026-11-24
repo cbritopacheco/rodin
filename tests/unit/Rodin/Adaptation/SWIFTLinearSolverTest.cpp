@@ -123,6 +123,29 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief SparseLU consumes changed values and graphs without a retained-factor API.
+  TEST_F(SWIFTLinearSolverTest, SparseLURefreshesChangedOperators)
+  {
+    parameters.linear.solver = SWIFT::Parameters::LinearSolver::SparseLU;
+    SWIFT::LinearSolver<System> solver(problem);
+    solver.setParameters(parameters);
+    auto& system = problem.getLinearSystem();
+    const Math::Vector<Real> exact = (Math::Vector<Real>(2) << 1, 2).finished();
+    for (bool diagonal : {false, true})
+    {
+      Math::Matrix<Real> matrix(2, 2);
+      matrix << 5, diagonal ? 0 : 1, diagonal ? 0 : 1, 2;
+      system.getOperator() = matrix.sparseView();
+      system.getVector() = matrix * exact;
+      system.getSolution().setZero();
+      solver.solve();
+      ASSERT_TRUE(solver.success());
+      EXPECT_LT((system.getSolution() - exact).norm(), tolerance);
+      EXPECT_LT((system.getOperator() * system.getSolution() - system.getVector()).norm(),
+        tolerance * system.getVector().norm());
+    }
+  }
+
   /// @brief Zero forcing overwrites a stale guess with the exact zero solution.
   TEST_F(SWIFTLinearSolverTest, ZeroLoadClearsGuessWithNoIterations)
   {

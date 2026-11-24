@@ -1,6 +1,9 @@
 """Provisioning failures must not become stale packages or skipped numerical work."""
 import json
 import os
+import re
+import shlex
+import shutil
 from pathlib import Path
 import subprocess
 import tempfile
@@ -18,10 +21,13 @@ ROOT = Path(__file__).resolve().parents[1]
 
 class EnvironmentTest(unittest.TestCase):
     def setUp(self):
+        sleep = patch.object(environment.time, 'sleep')
+        self.retry_sleep = sleep.start()
+        self.addCleanup(sleep.stop)
         read_text = Path.read_text
         self.release = patch.object(Path, 'read_text', autospec=True,
                                    side_effect=lambda path, *args, **kwargs:
-                                   'ID=ubuntu\nVERSION_ID="24.04"\n' if str(path) == '/etc/os-release'
+                                   'ID=ubuntu\nVERSION_ID="24.04"\nVERSION_CODENAME=noble\n' if str(path) == '/etc/os-release'
                                    else read_text(path, *args, **kwargs))
         self.release.start()
         self.addCleanup(self.release.stop)
@@ -223,6 +229,162 @@ class EnvironmentTest(unittest.TestCase):
             self.assertEqual(run.call_count, len(environment.CLEANUP_PATHS))
             self.assertFalse(any('clean' in c.args[0] for c in run.call_args_list))
 
+    def test_shared_producers_and_consumers_use_the_pinned_snapshot(self):
+        for action in ['test-environment', 'benchmark-environment']:
+            document = yaml.safe_load((ROOT / '.github/actions' / action / 'action.yml').read_text())
+            install = next(step for step in document['runs']['steps']
+                           if step.get('uses') == './.github/actions/apt-dependencies')
+            self.assertEqual(install['with']['snapshot'], 'shared')
+
+    def test_snapshot_sources_select_signed_archive_versions_over_runner_packages(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            system = root / 'etc'
+            system.mkdir()
+            original = 'deb [signed-by=/keys/ubuntu.gpg] https://archive.ubuntu.com/ubuntu noble main\n'
+            (system / 'sources.list').write_text(original)
+            (system / 'preferences').write_text('# Existing host preferences\n')
+            with patch.dict(os.environ, RODIN_APT_SNAPSHOT='shared'):
+                options = environment.sources(root / 'snapshot', None, system)
+            self.assertIn('APT::Snapshot=' + environment.SHARED_APT_SNAPSHOT, options)
+            preferences = root / 'snapshot/preferences'
+            self.assertIn('Dir::Etc::preferences=' + str(preferences), options)
+            self.assertIn('Pin: release o=Ubuntu\nPin-Priority: 1001', preferences.read_text())
+            self.assertIn('# Existing host preferences', preferences.read_text())
+            self.assertEqual((root / 'snapshot/sources.list').read_text(),
+                             original.replace('[signed-by=/keys/ubuntu.gpg]',
+                                              '[signed-by=/keys/ubuntu.gpg snapshot=no]').replace(
+                                 'https://archive.ubuntu.com/ubuntu',
+                                 'https://snapshot.ubuntu.com/ubuntu/' + environment.SHARED_APT_SNAPSHOT + '/'))
+            self.assertEqual((system / 'sources.list').read_text(), original)
+            with patch.dict(os.environ, RODIN_APT_SNAPSHOT='latest;invalid'):
+                with self.assertRaisesRegex(ValueError, 'snapshot'):
+                    environment.sources(root / 'invalid', None, system)
+
+    def test_every_snapshot_mirror_uses_only_the_same_signed_snapshot(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            system = root / 'etc'
+            system.mkdir()
+            original = ('deb [signed-by=/keys/ubuntu.gpg] '
+                        'http://azure.archive.ubuntu.com/ubuntu noble main universe\n')
+            (system / 'sources.list').write_text(original)
+            with patch.dict(os.environ, RODIN_APT_SNAPSHOT='shared'):
+                for index, mirror in enumerate(environment.MIRRORS):
+                    options = environment.sources(root / str(index), mirror, system)
+                    copied = (root / str(index) / 'sources.list').read_text()
+                    self.assertIn('https://snapshot.ubuntu.com/ubuntu/' +
+                                  environment.SHARED_APT_SNAPSHOT + '/', copied)
+                    self.assertNotIn('archive.ubuntu.com', copied)
+                    self.assertNotIn('mirrors.edge.kernel.org', copied)
+                    self.assertIn('APT::Snapshot=' + environment.SHARED_APT_SNAPSHOT, options)
+                    self.assertIn('signed-by=/keys/ubuntu.gpg', (root / str(index) / 'sources.list').read_text())
+            self.assertEqual((system / 'sources.list').read_text(), original)
+
+    def test_snapshot_resolves_runner_mirror_lists_before_the_first_update(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            system = root / 'etc'
+            parts = system / 'sources.list.d'
+            parts.mkdir(parents=True)
+            ubuntu = root / 'ubuntu-mirrors'
+            ubuntu.write_text('http://azure.archive.ubuntu.com/ubuntu/ priority:1\n'
+                              'https://archive.ubuntu.com/ubuntu/ priority:2\n')
+            vendor = root / 'vendor-mirrors'
+            vendor.write_text('https://vendor.example/apt\n')
+            original = ('Types: deb\nURIs: mirror+file:' + str(ubuntu) + '\n'
+                        'Suites: noble noble-updates\nComponents: main universe\n'
+                        'Signed-By: /keys/ubuntu.gpg\n')
+            third_party = 'deb mirror+file:' + str(vendor) + ' stable main\n'
+            (parts / 'ubuntu.sources').write_text(original)
+            (parts / 'vendor.list').write_text(third_party)
+            with patch.dict(os.environ, RODIN_APT_SNAPSHOT='shared'):
+                environment.sources(root / 'snapshot', None, system)
+            self.assertEqual((root / 'snapshot/sources.list.d/ubuntu.sources').read_text(),
+                             original.replace('mirror+file:' + str(ubuntu),
+                                              'https://snapshot.ubuntu.com/ubuntu/' +
+                                              environment.SHARED_APT_SNAPSHOT + '/').rstrip('\n') +
+                             '\nSnapshot: no\n')
+            self.assertEqual((root / 'snapshot/sources.list.d/vendor.list').read_text(), third_party)
+            self.assertEqual((parts / 'ubuntu.sources').read_text(), original)
+
+    def test_snapshot_sources_exclude_live_indexes_and_preserve_vendor_trust(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            system = root / 'etc'
+            parts = system / 'sources.list.d'
+            parts.mkdir(parents=True)
+            legacy = ('# Keep this comment\n'
+                      'deb [arch=amd64 snapshot=yes signed-by=/keys/ubuntu.gpg] '
+                      'https://archive.ubuntu.com/ubuntu noble main\n')
+            vendor = ('Types: deb\nURIs: https://vendor.example/apt\n'
+                      'Suites: stable\nComponents: main\nSigned-By: /keys/vendor.gpg\n')
+            ubuntu = ('Types: deb deb-src\nURIs: https://archive.ubuntu.com/ubuntu\n'
+                      ' https://security.ubuntu.com/ubuntu\nSuites: noble noble-security\n'
+                      'Components: main universe\nSigned-By: /keys/ubuntu.gpg\nSnapshot: yes\n')
+            (system / 'sources.list').write_text(legacy)
+            (parts / 'mixed.sources').write_text(ubuntu + '\n' + vendor)
+            with patch.dict(os.environ, RODIN_APT_SNAPSHOT='shared'):
+                environment.sources(root / 'copy', None, system)
+            copied = (root / 'copy/sources.list').read_text()
+            self.assertIn('snapshot=no', copied)
+            self.assertIn('signed-by=/keys/ubuntu.gpg', copied)
+            self.assertNotIn('archive.ubuntu.com', copied)
+            content = (root / 'copy/sources.list.d/mixed.sources').read_text()
+            self.assertIn('Snapshot: no', content)
+            self.assertNotIn('Snapshot: yes', content)
+            self.assertNotIn('security.ubuntu.com', content)
+            self.assertTrue(content.endswith(vendor))
+            self.assertEqual((parts / 'mixed.sources').read_text(), ubuntu + '\n' + vendor)
+            self.assertEqual((system / 'sources.list').read_text(), legacy)
+
+    @unittest.skipUnless(shutil.which('apt-get'), 'APT is required for offline URI routing validation')
+    def test_real_apt_routes_snapshots_on_fresh_fallbacks(self):
+        version = subprocess.check_output(['apt-get', '--version'], text=True).splitlines()[0]
+        match = re.search(r'apt (\d+)\.(\d+)', version)
+        if not match or tuple(map(int, match.groups())) < (2, 7):
+            self.skipTest('APT 2.7 or newer with snapshot support is required')
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            system = root / 'etc'
+            system.mkdir()
+            for extension, content in [
+                    ('list', 'deb [arch=amd64 signed-by=/keys/ubuntu.gpg] '
+                     'https://archive.ubuntu.com/ubuntu noble main universe\n'),
+                    ('sources', 'Types: deb\nURIs: https://archive.ubuntu.com/ubuntu\n'
+                     'Suites: noble\nComponents: main universe\nArchitectures: amd64\n'
+                     'Signed-By: /keys/ubuntu.gpg\n')]:
+                source = system / 'sources.list.d' / ('ubuntu.' + extension)
+                source.parent.mkdir(exist_ok=True)
+                source.write_text(content)
+                for index, mirror in enumerate(environment.MIRRORS):
+                    destination = root / (extension + str(index))
+                    with patch.dict(os.environ, RODIN_APT_SNAPSHOT='shared'):
+                        options = environment.sources(destination, mirror, system)
+                    result = subprocess.run(['apt-get', *options, '-o', 'APT::Architecture=amd64',
+                                             '-o', 'Dir::State::lists=' + str(destination / 'lists'),
+                                             '--print-uris', 'update'], check=True, text=True,
+                                            capture_output=True, timeout=30)
+                    uris = [shlex.split(line)[0] for line in result.stdout.splitlines()
+                            if line.startswith("'")]
+                    self.assertTrue(uris, result.stdout)
+                    self.assertTrue(all(uri.startswith('https://snapshot.ubuntu.com/ubuntu/' +
+                                                       environment.SHARED_APT_SNAPSHOT + '/')
+                                        for uri in uris), uris)
+                source.unlink()
+
+    def test_only_snapshot_installs_allow_exact_package_downgrades(self):
+        for options, operation, expected in [([], 'install', False),
+                (['-o', 'APT::Snapshot=' + environment.SHARED_APT_SNAPSHOT], 'install', True),
+                (['-o', 'APT::Snapshot=' + environment.SHARED_APT_SNAPSHOT], 'update', False)]:
+            with self.subTest(operation=operation, options=options), \
+                    patch.object(environment.subprocess, 'run', return_value=SimpleNamespace(stdout='')) as run:
+                environment.apt([operation], options, Path('/cache'), 90)
+                command = run.call_args.args[0]
+                self.assertEqual('--allow-downgrades' in command, expected)
+                self.assertNotIn('--allow-unauthenticated', command)
+                self.assertNotIn('Acquire::AllowInsecureRepositories=true', command)
+
     def test_mirror_copy_preserves_signatures_suites_components_and_third_party_sources(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp); system = root / 'etc'; parts = system / 'sources.list.d'
@@ -253,18 +415,26 @@ class EnvironmentTest(unittest.TestCase):
                                        'timeout', '--signal=TERM', '--kill-after=5', '90', 'apt-get', '-o'])
         for option in ['Acquire::Retries=1', 'Acquire::https::Timeout=20',
                        'APT::Update::Error-Mode=any', 'APT::Keep-Downloaded-Packages=true',
+                       'Acquire::Languages=none', 'Acquire::IndexTargets::deb::CNF::DefaultEnabled=false',
                        'Dir::Cache::archives=/cache']:
             self.assertIn(option, command)
         self.assertTrue(run.call_args.kwargs['check'])
         self.assertFalse(any('AllowUnauthenticated' in x or 'allow-unauthenticated' in x for x in command))
 
     def test_fallback_resolves_ubuntu_mirror_file_indirection(self):
+        for hosted in ('http://azure.archive.ubuntu.com/ubuntu/',
+                       'http://us-east-2.ec2.archive.ubuntu.com/ubuntu/'):
+            with self.subTest(hosted=hosted):
+                self.check_fallback_resolves_ubuntu_mirror_file_indirection(hosted)
+
+    def check_fallback_resolves_ubuntu_mirror_file_indirection(self, hosted):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp); system = root / 'etc'; parts = system / 'sources.list.d'
             parts.mkdir(parents=True)
             mirror_list = root / 'apt-mirrors.txt'
-            mirror_list.write_text('http://azure.archive.ubuntu.com/ubuntu/ priority:1\n'
-                                   'http://archive.ubuntu.com/ubuntu/ priority:2\n')
+            mirror_list.write_text(hosted + ' priority:1\n'
+                                   'http://archive.ubuntu.com/ubuntu/ priority:2\n'
+                                   'http://security.ubuntu.com/ubuntu/ priority:3\n')
             vendor_list = root / 'vendor-mirrors.txt'
             vendor_list.write_text('https://vendor.example/packages\n')
             original = ('Types: deb\nURIs: mirror+file:' + str(mirror_list) + '\n'
@@ -273,13 +443,16 @@ class EnvironmentTest(unittest.TestCase):
             (parts / 'ubuntu.sources').write_text(original)
             vendor = 'deb mirror+file:' + str(vendor_list) + ' stable main\n'
             (parts / 'vendor.list').write_text(vendor)
-            for i, mirror in enumerate(environment.MIRRORS):
-                destination = root / ('attempt-' + str(i))
-                environment.sources(destination, mirror, system)
-                text = (destination / 'sources.list.d/ubuntu.sources').read_text()
-                self.assertEqual(text, original if mirror is None else original.replace(
-                    'mirror+file:' + str(mirror_list), mirror + '/'))
-                self.assertEqual((destination / 'sources.list.d/vendor.list').read_text(), vendor)
+            with patch.dict(os.environ, RODIN_APT_SNAPSHOT='', GITHUB_ACTIONS='true',
+                            RUNNER_ENVIRONMENT='github-hosted'):
+                for i, mirror in enumerate(environment.MIRRORS):
+                    destination = root / ('attempt-' + str(i))
+                    environment.sources(destination, mirror, system)
+                    text = (destination / 'sources.list.d/ubuntu.sources').read_text()
+                    self.assertEqual(text, original if mirror is None else original.replace(
+                        'mirror+file:' + str(mirror_list), mirror + '/'))
+                    self.assertEqual((destination / 'sources.list.d/vendor.list').read_text(), vendor)
+                    self.assertFalse((destination / 'sources.list.d/rodin-ubuntu.sources').exists())
             self.assertEqual((parts / 'ubuntu.sources').read_text(), original)
 
     def test_dependency_closure_excludes_virtual_edges_and_preserves_exact_requests(self):
@@ -312,6 +485,9 @@ class EnvironmentTest(unittest.TestCase):
             plan = environment.prepare(['lcov'], root / 'cache', root / 'state')
         self.assertEqual([c.args[0] for c in candidates.call_args_list], [['lcov'], dependencies])
         self.assertEqual(plan['versions'], versions)
+        self.assertEqual(apt.call_args_list[0].args[3], environment.INDEX_REFRESH_TIMEOUT)
+        self.assertTrue(all(call.args[3] == environment.INDEX_TIMEOUT
+                            for call in apt.call_args_list[1:]))
         simulation = apt.call_args_list[-1].args[0]
         for name, version in versions.items():
             self.assertIn(name + '=' + version, simulation)
@@ -418,6 +594,136 @@ class EnvironmentTest(unittest.TestCase):
             self.assertNotEqual(keys[0], keys[1])
             self.assertEqual(prefixes[0], prefixes[1])
 
+    def test_empty_or_disabled_ubuntu_sources_get_a_signed_snapshot_fallback(self):
+        for disabled in [False, True]:
+            with self.subTest(disabled=disabled), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                system = root / 'etc'
+                parts = system / 'sources.list.d'
+                parts.mkdir(parents=True)
+                vendor = 'deb [signed-by=/keys/vendor.gpg] https://vendor.example/repo stable main\n'
+                (parts / 'vendor.list').write_text(vendor)
+                if disabled:
+                    (parts / 'ubuntu.sources').write_text(
+                        'Types: deb\nURIs: https://archive.ubuntu.com/ubuntu\n'
+                        'Suites: noble\nComponents: main\nEnabled: no\n')
+                keyring = root / 'ubuntu.gpg'
+                keyring.write_bytes(b'Ubuntu archive keyring fixture')
+                with patch.dict(os.environ, RODIN_APT_SNAPSHOT='shared'), \
+                        patch.object(environment, 'UBUNTU_KEYRING', keyring):
+                    environment.sources(root / 'state', None, system)
+                generated = (root / 'state/sources.list.d/rodin-ubuntu.sources').read_text()
+                self.assertIn('URIs: https://snapshot.ubuntu.com/ubuntu/' +
+                              environment.SHARED_APT_SNAPSHOT + '/', generated)
+                self.assertIn('Suites: noble noble-updates noble-backports noble-security', generated)
+                self.assertIn('Components: main restricted universe multiverse', generated)
+                self.assertIn('Signed-By: ' + str(keyring), generated)
+                self.assertNotIn('Trusted:', generated)
+                self.assertEqual((root / 'state/sources.list.d/vendor.list').read_text(), vendor)
+                self.assertEqual((parts / 'vendor.list').read_text(), vendor)
+
+    def test_binary_index_target_is_required_even_if_the_runner_disables_it(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            system = root / 'etc'
+            system.mkdir()
+            with patch.dict(os.environ, RODIN_APT_SNAPSHOT=''):
+                options = environment.sources(root / 'state', None, system)
+            with patch.object(environment.subprocess, 'run') as run, \
+                    patch.object(environment.subprocess, 'check_output', side_effect=[
+                        'lcov:\n  Candidate: 2.0-1\n', '']) as query:
+                environment.apt(['update'], options, Path('/cache'), 180)
+                self.assertEqual(environment.candidates(['lcov'], options), {'lcov': '2.0-1'})
+                self.assertEqual(environment.installed_dependencies(['lcov=2.0-1'], options), [])
+            commands = [run.call_args.args[0], *(call.args[0] for call in query.call_args_list)]
+            for command in commands:
+                self.assertIn('Acquire::IndexTargets::deb::Packages::DefaultEnabled=true', command)
+                self.assertNotIn('--allow-unauthenticated', command)
+            self.assertIn('APT::Update::Error-Mode=any', commands[0])
+
+    def test_hosted_live_apt_recovers_an_empty_binary_source_set(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            system = root / 'etc'
+            parts = system / 'sources.list.d'
+            parts.mkdir(parents=True)
+            keyring = root / 'ubuntu.gpg'
+            keyring.touch()
+            (parts / 'ubuntu.sources').write_text(
+                'Types: deb\nURIs: https://archive.ubuntu.com/ubuntu\n'
+                'Suites: noble\nComponents: main\nEnabled: no\n'
+                '\nTypes: deb-src\nURIs: https://archive.ubuntu.com/ubuntu\n'
+                'Suites: noble\nComponents: universe\nSigned-By: ' + str(keyring) + '\n')
+            with patch.dict(os.environ, RODIN_APT_SNAPSHOT='', GITHUB_ACTIONS='true',
+                            RUNNER_ENVIRONMENT='github-hosted'), \
+                    patch.object(environment, 'UBUNTU_KEYRING', keyring):
+                for i, mirror in enumerate(environment.MIRRORS):
+                    destination = root / str(i)
+                    options = environment.sources(destination, mirror, system)
+                    generated = (destination / 'sources.list.d/rodin-ubuntu.sources').read_text()
+                    archive = mirror or environment.MIRRORS[1]
+                    self.assertIn('URIs: ' + archive + '/\n', generated)
+                    self.assertIn('Components: main restricted universe multiverse', generated)
+                    self.assertIn('Signed-By: ' + str(keyring), generated)
+                    self.assertNotIn('Trusted:', generated)
+                    self.assertFalse(any(option.startswith('APT::Snapshot=') for option in options))
+
+    def test_snapshot_recovery_requires_the_existing_ubuntu_trust_root(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            system = root / 'etc'
+            system.mkdir()
+            with patch.dict(os.environ, RODIN_APT_SNAPSHOT='shared'), \
+                    patch.object(environment, 'UBUNTU_KEYRING', root / 'missing.gpg'):
+                with self.assertRaisesRegex(RuntimeError, 'Ubuntu archive keyring'):
+                    environment.sources(root / 'state', None, system)
+            self.assertFalse((root / 'state/sources.list.d/rodin-ubuntu.sources').exists())
+
+    def test_missing_candidate_retries_refresh_before_pinning_any_plan(self):
+        with tempfile.TemporaryDirectory() as directory, \
+                patch.object(environment, 'sources', return_value=[]), \
+                patch.object(environment, 'installed_dependencies', return_value=[]), \
+                patch.object(environment, 'candidates', side_effect=[
+                    environment.MissingCandidate('No APT candidate for lcov'), {'lcov': '2.0-1'}]), \
+                patch.object(environment.subprocess, 'check_output', return_value='amd64\n'), \
+                patch.object(environment, 'apt', side_effect=[None, None, '']) as apt:
+            root = Path(directory)
+            plan = environment.prepare(['lcov'], root / 'cache', root / 'state')
+            self.assertEqual(plan['source_index'], 1)
+            self.assertEqual(plan['versions'], {'lcov': '2.0-1'})
+            self.assertEqual([call.args[0][0] for call in apt.call_args_list], ['update', 'update', '--simulate'])
+            self.retry_sleep.assert_called_once()
+
+    def test_missing_candidates_exhaust_without_saving_a_plan(self):
+        with tempfile.TemporaryDirectory() as directory, \
+                patch.object(environment, 'sources', return_value=[]), \
+                patch.object(environment, 'candidates', side_effect=environment.MissingCandidate('No APT candidate for lcov')), \
+                patch.object(environment, 'apt') as apt:
+            root = Path(directory)
+            with self.assertRaisesRegex(RuntimeError, 'All signed APT index sources failed'):
+                environment.prepare(['lcov'], root / 'cache', root / 'state')
+            self.assertEqual(apt.call_count, 3)
+            self.assertEqual(self.retry_sleep.call_count, 2)
+            self.assertFalse((root / 'state/plan.json').exists())
+
+    def test_signed_index_outage_has_bounded_backoff_and_fails_closed(self):
+        with tempfile.TemporaryDirectory() as tmp, \
+                patch.object(environment, 'sources', return_value=[]) as sources, \
+                patch.object(environment, 'candidates') as candidates, \
+                patch.object(environment.random, 'uniform', return_value=7) as jitter, \
+                patch.object(environment, 'apt', side_effect=subprocess.CalledProcessError(100, 'apt')) as apt:
+            root = Path(tmp)
+            with self.assertRaisesRegex(RuntimeError, 'All signed APT index sources failed'):
+                environment.prepare(['lcov'], root / 'cache', root / 'state')
+            self.assertFalse((root / 'state/plan.json').exists())
+        self.assertEqual(apt.call_count, 3)
+        self.assertTrue(all(call.args[0] == ['update'] for call in apt.call_args_list))
+        self.assertEqual([call.args[0] for call in self.retry_sleep.call_args_list], [37, 127])
+        self.assertEqual(jitter.call_count, 2)
+        jitter.assert_called_with(0, environment.APT_RETRY_JITTER)
+        candidates.assert_not_called()
+        self.assertEqual([call.args[1] for call in sources.call_args_list], list(environment.MIRRORS))
+
     def test_index_failure_retries_another_signed_mirror(self):
         original = ['-o', 'Dir::Etc::sourcelist=original.list']
         fallback = ['-o', 'Dir::Etc::sourcelist=fallback.list']
@@ -430,6 +736,7 @@ class EnvironmentTest(unittest.TestCase):
             root = Path(tmp)
             plan = environment.prepare(['lcov'], root / 'cache', root / 'state')
             self.assertEqual(plan['source_index'], 1)
+            self.retry_sleep.assert_called_once()
             self.assertEqual([c.args[0][0] for c in apt.call_args_list], ['update', 'update', '--simulate'])
             candidates.assert_called_once_with(['lcov'], fallback)
 
@@ -475,6 +782,7 @@ class EnvironmentTest(unittest.TestCase):
             self.assertIn('libdep=1:2.0-1', commands[0])
             self.assertIn('--download-only', commands[0])
             self.assertIn('--no-download', commands[3])
+            self.retry_sleep.assert_called_once()
             self.assertTrue(all('--no-remove' in command for command in commands if command != ['update']))
 
     def test_configuration_failure_is_not_retried_as_a_mirror_problem(self):
@@ -486,6 +794,26 @@ class EnvironmentTest(unittest.TestCase):
             with self.assertRaises(subprocess.CalledProcessError):
                 environment.install(root / 'cache', root)
             self.assertEqual(apt.call_count, 2)
+            self.retry_sleep.assert_not_called()
+
+    def test_slow_snapshot_download_has_a_bounded_larger_budget(self):
+        with tempfile.TemporaryDirectory() as tmp, \
+                patch.object(environment, 'sources', return_value=['-o', 'APT::Snapshot=20261113T000000Z']), \
+                patch.object(environment, 'apt') as apt:
+            root = Path(tmp)
+            (root / 'plan.json').write_text(json.dumps({'source_index': 0, 'versions': {'petsc-dev': '1'}}))
+
+            def transfer(arguments, options, cache, timeout):
+                if '--download-only' in arguments and timeout < 540:
+                    raise subprocess.CalledProcessError(124, 'timeout')
+
+            apt.side_effect = transfer
+            environment.install(root / 'cache', root)
+            self.assertEqual(apt.call_count, 2)
+            download, install = apt.call_args_list
+            self.assertEqual(download.args[3], 900)
+            self.assertIn('petsc-dev=1', download.args[0])
+            self.assertIn('--no-download', install.args[0])
 
     def test_all_download_sources_failing_fails_the_job(self):
         with tempfile.TemporaryDirectory() as tmp, \
@@ -499,8 +827,8 @@ class EnvironmentTest(unittest.TestCase):
     def test_cache_contains_only_archives_and_uses_resolved_version_key(self):
         action = yaml.safe_load((ROOT / '.github/actions/apt-dependencies/action.yml').read_text())
         steps = action['runs']['steps']
-        restore = next(s for s in steps if s.get('uses') == 'actions/cache/restore@v4')
-        save = next(s for s in steps if s.get('uses') == 'actions/cache/save@v4')
+        restore = next(s for s in steps if s.get('uses') == 'actions/cache/restore@v5')
+        save = next(s for s in steps if s.get('uses') == 'actions/cache/save@v5')
         self.assertEqual(restore['with']['path'], '${{ runner.temp }}/rodin-apt-archives/*.deb')
         self.assertEqual(restore['with']['key'], '${{ steps.plan.outputs.key }}')
         self.assertEqual(restore['with'], {**save['with'], 'restore-keys': '${{ steps.plan.outputs.restore-prefix }}'})

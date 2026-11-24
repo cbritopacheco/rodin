@@ -158,10 +158,15 @@ jobs:
       OPENBLAS_NUM_THREADS: 1
       RODIN_PROFILE_STABILITY: ${{ startsWith(matrix.suite, 'pressure_') && '1' || '0' }}
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
       with:
-        submodules: recursive
+        submodules: false
         lfs: false
+    - name: Start resource monitor
+      continue-on-error: true
+      run: python3 dev/ci_resource_monitor.py start
+    - name: Initialize pinned submodules
+      run: python3 dev/ci_submodules.py
     - name: Restore shared test build
       uses: ./.github/actions/test-build
       with:
@@ -197,6 +202,10 @@ jobs:
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         definition: '{"job":"${{ github.job }}","matrix":${{ toJSON(matrix) }}}'
+    - name: Summarize resource usage
+      if: always()
+      continue-on-error: true
+      run: python3 dev/ci_resource_monitor.py finish
     name: ${{ matrix.path }} (MT=${{ matrix.multithreaded }}, Suite=${{ matrix.suite }})
   ConvergenceBaseline:
     runs-on: ubuntu-24.04
@@ -210,10 +219,15 @@ jobs:
       OPENBLAS_NUM_THREADS: 1
       RODIN_PROFILE_STABILITY: ${{ startsWith(matrix.suite, 'pressure_') && '1' || '0' }}
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
       with:
-        submodules: recursive
+        submodules: false
         lfs: false
+    - name: Start resource monitor
+      continue-on-error: true
+      run: python3 dev/ci_resource_monitor.py start
+    - name: Initialize pinned submodules
+      run: python3 dev/ci_submodules.py
     - uses: ./.github/actions/test-build
       with:
         job: ConvergenceBaseline
@@ -247,6 +261,10 @@ jobs:
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         definition: '{"job":"${{ github.job }}","matrix":${{ toJSON(matrix) }}}'
+    - name: Summarize resource usage
+      if: always()
+      continue-on-error: true
+      run: python3 dev/ci_resource_monitor.py finish
     name: ${{ matrix.path }} (MT=${{ matrix.multithreaded }}, Suite=${{ matrix.suite }})
   MPIH1Restriction:
     runs-on: ubuntu-24.04
@@ -365,10 +383,15 @@ jobs:
       OMPI_MCA_hwloc_base_binding_policy: none
       OMPI_MCA_mpi_yield_when_idle: '1'
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
       with:
-        submodules: recursive
+        submodules: false
         lfs: false
+    - name: Start resource monitor
+      continue-on-error: true
+      run: python3 dev/ci_resource_monitor.py start
+    - name: Initialize pinned submodules
+      run: python3 dev/ci_submodules.py
     - name: Restore shared test build
       uses: ./.github/actions/test-build
       with:
@@ -392,6 +415,10 @@ jobs:
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         definition: '{"job":"${{ github.job }}","matrix":${{ toJSON(matrix) }}}'
+    - name: Summarize resource usage
+      if: always()
+      continue-on-error: true
+      run: python3 dev/ci_resource_monitor.py finish
     name: ${{ matrix.path }} (MT=${{ matrix.multithreaded }}, NP=${{ matrix.np }}, Partition=${{ matrix.partition
       }})
   PETScConvergence:
@@ -604,7 +631,19 @@ jobs:
           context: np3
           path: Convergence / H / PETScStokes / Stability
           geometry: all
-          study: all
+          study: CoarseAndControls
+        - multithreaded: 'ON'
+          suite: pressure_pyramid
+          context: np3
+          path: Convergence / H / PETScStokes / Stability
+          geometry: all
+          study: AffineN5
+        - multithreaded: 'ON'
+          suite: pressure_pyramid
+          context: np3
+          path: Convergence / H / PETScStokes / Stability
+          geometry: all
+          study: CurvedN5
         - multithreaded: 'ON'
           suite: pressure_pyramid
           context: np4
@@ -2124,10 +2163,15 @@ jobs:
       OPENBLAS_NUM_THREADS: 1
       RODIN_PROFILE_STABILITY: ${{ startsWith(matrix.suite, 'pressure_') && '1' || '0' }}
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
       with:
-        submodules: recursive
+        submodules: false
         lfs: false
+    - name: Start resource monitor
+      continue-on-error: true
+      run: python3 dev/ci_resource_monitor.py start
+    - name: Initialize pinned submodules
+      run: python3 dev/ci_submodules.py
     - name: Restore shared test build
       uses: ./.github/actions/test-build
       with:
@@ -2151,23 +2195,55 @@ jobs:
           --output-on-failure --no-tests=error -j 1
     - name: Run PETSc pressure-spectrum suite
       if: startsWith(matrix.suite, 'pressure_')
-      run: "case \"${{ matrix.suite }}\" in\n  pressure_light) geometry_pattern='(Triangle|Quadrilateral|Hexahedron|Wedge)'\
-        \ ;;\n  pressure_tetrahedron) geometry_pattern='Tetrahedron' ;;\n  pressure_pyramid) geometry_pattern='Pyramid'\
-        \ ;;\n  *) exit 1 ;;\nesac\nutility_pattern=''\nif [ \"${{ matrix.context }}\" = local ]; then\n  if [ \"\
-        ${{ matrix.suite }}\" = pressure_light ]; then utility_pattern='|Utility'; fi\n  pattern=\"^RodinConvergenceHPETScStokesStability_((P4P3_(Rates_(Affine|Curved)N[345]|Controls)_)?${geometry_pattern}${utility_pattern})$\"\
-        \nelse\n  rank=\"${{ matrix.context }}\"\n  rank=\"${rank#np}\"\n  case \"$rank\" in 1|2|3|4) ;; *) exit\
-        \ 1 ;; esac\n  if [ \"${{ matrix.suite }}\" = pressure_light ]; then utility_pattern=\"|Utility_np${rank}\"\
-        ; fi\n  pattern=\"^RodinConvergenceHPETScMPIStokesStability_((P4P3_)?np${rank}_((Rates_(Affine|Curved)N[345]|Controls)_)?${geometry_pattern}${utility_pattern})$\"\
-        \nfi\n# Record existing placement without changing binding or thread policy.\nlscpu\ngrep '^Cpus_allowed_list:'\
-        \ /proc/self/status\nprintf 'OMP_NUM_THREADS=%s OPENBLAS_NUM_THREADS=%s\\n' \\\n  \"${OMP_NUM_THREADS:-unset}\"\
-        \ \"${OPENBLAS_NUM_THREADS:-unset}\"\nctest --test-dir build/tests -R \"$pattern\" --show-only=json-v1 \\\
-        \n  | jq '[.tests[] | {name, command}]'\nmpi_executable=$(sed -n 's/^MPIEXEC_EXECUTABLE:FILEPATH=//p' build/CMakeCache.txt)\n\
-        if [ \"${{ matrix.context }}\" != local ] && [ -n \"$mpi_executable\" ] \\\n    && \"$mpi_executable\" --version\
-        \ | grep -Eq 'Open MPI|OpenRTE'; then\n  if ! \"$mpi_executable\" -n \"$rank\" --oversubscribe --report-bindings\
-        \ \\\n      /bin/sh -c 'printf \"MPI rank=%s \" \"$OMPI_COMM_WORLD_RANK\"; grep \"^Cpus_allowed_list:\"\
-        \ /proc/self/status'; then\n    printf '::warning::MPI placement probe failed; numerical tests still run.\\\
-        n'\n  fi\nfi\n# This is a process resource report, not summed MPI peak memory or a benchmark.\n/usr/bin/time\
-        \ --verbose ctest --test-dir build/tests -R \"$pattern\" \\\n  --output-on-failure --no-tests=error -j 1\n"
+      run: |
+        case "${{ matrix.suite }}" in
+          pressure_light) geometry_pattern='(Triangle|Quadrilateral|Hexahedron|Wedge)' ;;
+          pressure_tetrahedron) geometry_pattern='Tetrahedron' ;;
+          pressure_pyramid) geometry_pattern='Pyramid' ;;
+          *) exit 1 ;;
+        esac
+        utility_pattern=''
+        rank=''
+        rank_prefix=''
+        prefix='^RodinConvergenceHPETScStokesStability_'
+        if [ "${{ matrix.context }}" != local ]; then
+          rank="${{ matrix.context }}"
+          rank="${rank#np}"
+          case "$rank" in 1|2|3|4) ;; *) exit 1 ;; esac
+          rank_prefix="np${rank}_"
+          prefix='^RodinConvergenceHPETScMPIStokesStability_'
+        fi
+        if [ "${{ matrix.suite }}" = pressure_light ]; then
+          utility_pattern="|Utility${rank:+_np$rank}"
+        fi
+        study="${{ matrix.study }}"
+        case "$study" in
+          all|CoarseAndControls)
+            levels='[345]'
+            if [ "$study" = CoarseAndControls ]; then levels='[34]'; fi
+            pattern="${prefix}(${rank_prefix}${geometry_pattern}|P4P3_${rank_prefix}(Rates_(Affine|Curved)N${levels}|Controls)_${geometry_pattern}${utility_pattern})$" ;;
+          AffineN5|CurvedN5)
+            pattern="${prefix}P4P3_${rank_prefix}Rates_${study}_${geometry_pattern}$" ;;
+          *) exit 1 ;;
+        esac
+        # Record existing placement without changing binding or thread policy.
+        lscpu
+        grep '^Cpus_allowed_list:' /proc/self/status
+        printf 'OMP_NUM_THREADS=%s OPENBLAS_NUM_THREADS=%s\n' \
+          "${OMP_NUM_THREADS:-unset}" "${OPENBLAS_NUM_THREADS:-unset}"
+        ctest --test-dir build/tests -R "$pattern" --show-only=json-v1 \
+          | jq '[.tests[] | {name, command}]'
+        mpi_executable=$(sed -n 's/^MPIEXEC_EXECUTABLE:FILEPATH=//p' build/CMakeCache.txt)
+        if [ "${{ matrix.context }}" != local ] && [ -n "$mpi_executable" ] \
+            && "$mpi_executable" --version | grep -Eq 'Open MPI|OpenRTE'; then
+          if ! "$mpi_executable" -n "$rank" --oversubscribe --report-bindings \
+              /bin/sh -c 'printf "MPI rank=%s " "$OMPI_COMM_WORLD_RANK"; grep "^Cpus_allowed_list:" /proc/self/status'; then
+            printf '::warning::MPI placement probe failed; numerical tests still run.\n'
+          fi
+        fi
+        # This is a process resource report, not summed MPI peak memory or a benchmark.
+        /usr/bin/time --verbose ctest --test-dir build/tests -R "$pattern" \
+          --output-on-failure --no-tests=error -j 1
     - name: Run PETSc boundary convergence suites
       if: endsWith(matrix.suite, '_boundary')
       run: "case \"${{ matrix.geometry }}\" in\n  light) geometry_pattern='(Segment|Triangle|Quadrilateral|Hexahedron|Wedge)'\
@@ -2184,6 +2260,10 @@ jobs:
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         definition: '{"job":"${{ github.job }}","matrix":${{ toJSON(matrix) }}}'
+    - name: Summarize resource usage
+      if: always()
+      continue-on-error: true
+      run: python3 dev/ci_resource_monitor.py finish
     name: ${{ matrix.path }} (MT=${{ matrix.multithreaded }}, Suite=${{ matrix.suite }}, Context=${{ matrix.context
       }}, Geometry=${{ matrix.geometry }}, Study=${{ matrix.study }})
   PETScDegreeConvergence:
@@ -2498,10 +2578,15 @@ jobs:
       OMP_WAIT_POLICY: PASSIVE
       OPENBLAS_NUM_THREADS: 1
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
       with:
-        submodules: recursive
+        submodules: false
         lfs: false
+    - name: Start resource monitor
+      continue-on-error: true
+      run: python3 dev/ci_resource_monitor.py start
+    - name: Initialize pinned submodules
+      run: python3 dev/ci_submodules.py
     - name: Restore shared test build
       uses: ./.github/actions/test-build
       with:
@@ -2519,6 +2604,10 @@ jobs:
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         definition: '{"job":"${{ github.job }}","matrix":${{ toJSON(matrix) }}}'
+    - name: Summarize resource usage
+      if: always()
+      continue-on-error: true
+      run: python3 dev/ci_resource_monitor.py finish
     name: ${{ matrix.path }} (MT=${{ matrix.multithreaded }}, Suite=${{ matrix.suite }}, Physics=${{ matrix.physics
       }}, Context=${{ matrix.context }})
   PETScCurvedConvergence:
@@ -4311,10 +4400,15 @@ jobs:
       OMP_WAIT_POLICY: PASSIVE
       OPENBLAS_NUM_THREADS: 1
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
       with:
-        submodules: recursive
+        submodules: false
         lfs: false
+    - name: Start resource monitor
+      continue-on-error: true
+      run: python3 dev/ci_resource_monitor.py start
+    - name: Initialize pinned submodules
+      run: python3 dev/ci_submodules.py
     - name: Restore shared test build
       uses: ./.github/actions/test-build
       with:
@@ -4338,6 +4432,10 @@ jobs:
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         definition: '{"job":"${{ github.job }}","matrix":${{ toJSON(matrix) }}}'
+    - name: Summarize resource usage
+      if: always()
+      continue-on-error: true
+      run: python3 dev/ci_resource_monitor.py finish
     name: ${{ matrix.path }} (MT=${{ matrix.multithreaded }}, Suite=${{ matrix.suite }}, Geometry=${{ matrix.geometry
       }}, Selection=${{ matrix.selection }}, Physics=${{ matrix.physics }}, Partition=${{ matrix.partition }})
   PETScCurvedBoundaryConvergence:
@@ -4392,7 +4490,13 @@ jobs:
         - multithreaded: 'ON'
           physics: LinearElasticity
           geometry: pyramid
-          selection: all
+          selection: local
+          path: Convergence / Isoparametric / LinearElasticity / BoundaryConditions
+          study: all
+        - multithreaded: 'ON'
+          physics: LinearElasticity
+          geometry: pyramid
+          selection: mpi
           path: Convergence / Isoparametric / LinearElasticity / BoundaryConditions
           study: all
         - multithreaded: 'ON'
@@ -4716,7 +4820,13 @@ jobs:
         - multithreaded: 'ON'
           physics: Stokes
           geometry: pyramid
-          selection: all
+          selection: local
+          path: Convergence / Isoparametric / Stokes / BoundaryConditions
+          study: all
+        - multithreaded: 'ON'
+          physics: Stokes
+          geometry: pyramid
+          selection: mpi
           path: Convergence / Isoparametric / Stokes / BoundaryConditions
           study: all
         - multithreaded: 'OFF'
@@ -5335,10 +5445,15 @@ jobs:
       OMP_NUM_THREADS: 2
       OPENBLAS_NUM_THREADS: 1
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
       with:
-        submodules: recursive
+        submodules: false
         lfs: false
+    - name: Start resource monitor
+      continue-on-error: true
+      run: python3 dev/ci_resource_monitor.py start
+    - name: Initialize pinned submodules
+      run: python3 dev/ci_submodules.py
     - name: Restore shared test build
       uses: ./.github/actions/test-build
       with:
@@ -5356,6 +5471,7 @@ jobs:
         case "${{ matrix.selection }}" in
           all) context_pattern='(MPI_np[1-4]_)?' ;;
           local) context_pattern='' ;;
+          mpi) context_pattern='MPI_np[1-4]_' ;;
           np1|np2|np3|np4) context_pattern='MPI_${{ matrix.selection }}_' ;;
           *) exit 1 ;;
         esac
@@ -5374,6 +5490,10 @@ jobs:
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         definition: '{"job":"${{ github.job }}","matrix":${{ toJSON(matrix) }}}'
+    - name: Summarize resource usage
+      if: always()
+      continue-on-error: true
+      run: python3 dev/ci_resource_monitor.py finish
     name: ${{ matrix.path }} (MT=${{ matrix.multithreaded }}, Physics=${{ matrix.physics }}, Geometry=${{ matrix.geometry }}, Selection=${{ matrix.selection }}, Study=${{ matrix.study }})
   PETScCurvedNonlinearTetrahedronConvergence:
     runs-on: ubuntu-24.04
@@ -5546,10 +5666,15 @@ jobs:
       OMP_NUM_THREADS: 2
       OPENBLAS_NUM_THREADS: 1
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
       with:
-        submodules: recursive
+        submodules: false
         lfs: false
+    - name: Start resource monitor
+      continue-on-error: true
+      run: python3 dev/ci_resource_monitor.py start
+    - name: Initialize pinned submodules
+      run: python3 dev/ci_submodules.py
     - name: Restore shared test build
       uses: ./.github/actions/test-build
       with:
@@ -5570,6 +5695,10 @@ jobs:
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         definition: '{"job":"${{ github.job }}","matrix":${{ toJSON(matrix) }}}'
+    - name: Summarize resource usage
+      if: always()
+      continue-on-error: true
+      run: python3 dev/ci_resource_monitor.py finish
     name: ${{ matrix.path }} (MT=${{ matrix.multithreaded }}, Selection=${{ matrix.selection }}, Partition=${{ matrix.partition
       }})
   PETScComplexConvergence:
@@ -5713,10 +5842,15 @@ jobs:
       RODIN_COVERAGE: ${{ matrix.suite == 'submesh' && 'ON' || 'OFF' }}
       OMP_NUM_THREADS: 2
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
       with:
-        submodules: recursive
+        submodules: false
         lfs: false
+    - name: Start resource monitor
+      continue-on-error: true
+      run: python3 dev/ci_resource_monitor.py start
+    - name: Initialize pinned submodules
+      run: python3 dev/ci_submodules.py
     - name: Restore shared test build
       uses: ./.github/actions/test-build
       with:
@@ -5788,6 +5922,10 @@ jobs:
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         definition: '{"job":"${{ github.job }}","matrix":${{ toJSON(matrix) }}}'
+    - name: Summarize resource usage
+      if: always()
+      continue-on-error: true
+      run: python3 dev/ci_resource_monitor.py finish
     name: ${{ matrix.path }} (MT=${{ matrix.multithreaded }}, Suite=${{ matrix.suite }}, Context=${{ matrix.context
       }})
   PETScMatrixRanges:
@@ -5815,10 +5953,15 @@ jobs:
       OMP_WAIT_POLICY: PASSIVE
       OMPI_MCA_hwloc_base_binding_policy: none
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
       with:
-        submodules: recursive
+        submodules: false
         lfs: false
+    - name: Start resource monitor
+      continue-on-error: true
+      run: python3 dev/ci_resource_monitor.py start
+    - name: Initialize pinned submodules
+      run: python3 dev/ci_submodules.py
     - uses: ./.github/actions/test-build
       with:
         job: PETScMatrixRanges
@@ -5841,4 +5984,8 @@ jobs:
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         definition: '{"job":"${{ github.job }}","matrix":${{ toJSON(matrix) }}}'
+    - name: Summarize resource usage
+      if: always()
+      continue-on-error: true
+      run: python3 dev/ci_resource_monitor.py finish
     name: ${{ matrix.path }} (Scalar=${{ matrix.scalar }}, MT=${{ matrix.multithreaded }})

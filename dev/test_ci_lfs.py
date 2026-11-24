@@ -28,6 +28,17 @@ class LFSRetryTest(unittest.TestCase):
             self.assertEqual(call.kwargs['timeout'], 300)
         self.assertEqual([c.args[0] for c in sleep.call_args_list], [15, 30, 60, 120])
 
+    def test_hosted_resolver_failure_is_retried(self):
+        for detail in ['server misbehaving', 'no such host']:
+            with self.subTest(detail=detail), \
+                    patch.object(ci_lfs.subprocess, 'run', side_effect=[
+                        self.response('dial tcp: lookup github.com on 127.0.0.53:53: ' + detail, 2),
+                        self.response()]) as run, \
+                    patch.object(ci_lfs.time, 'sleep') as sleep:
+                ci_lfs.pull('resources/**')
+            self.assertEqual(run.call_count, 2)
+            sleep.assert_called_once_with(15)
+
     def test_exhaustion_fails_closed(self):
         for failure in [self.response('HTTP 503', 2), subprocess.TimeoutExpired('git', 300)]:
             with self.subTest(failure=failure), \
@@ -40,7 +51,8 @@ class LFSRetryTest(unittest.TestCase):
 
     def test_permanent_and_unknown_failures_are_not_retried(self):
         for output in ['HTTP 403', 'HTTP 404', 'bandwidth limit exceeded', 'invalid pointer',
-                       'unknown failure', 'HTTP 502; authentication failed']:
+                       'unknown failure', 'HTTP 502; authentication failed',
+                       'authentication failed; lookup github.com: server misbehaving']:
             with self.subTest(output=output), \
                     patch.object(ci_lfs.subprocess, 'run', return_value=self.response(output, 2)) as run, \
                     patch.object(ci_lfs.time, 'sleep') as sleep:

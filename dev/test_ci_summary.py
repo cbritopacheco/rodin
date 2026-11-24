@@ -24,6 +24,11 @@ class SummaryTest(unittest.TestCase):
                     'GITHUB_SHA': 'abc', 'GITHUB_RUN_ATTEMPT': '2', 'GITHUB_RUN_ID': '123',
                     'GITHUB_REPOSITORY': 'owner/repo', 'GITHUB_STEP_SUMMARY': str(Path(folder) / 'summary.md'),
                 }
+                Path('benchmark-diagnostics').mkdir()
+                Path('benchmark-diagnostics/resources.txt').write_text(
+                    'User time (seconds): 4.5\nSystem time (seconds): 0.5\n'
+                    'Percent of CPU this job got: 250%\n'
+                    'Maximum resident set size (kbytes): 102400\n')
                 with patch.dict(os.environ, environment):
                     ci_summary.benchmark()
                 summary = Path('summary.md').read_text()
@@ -32,6 +37,9 @@ class SummaryTest(unittest.TestCase):
                 self.assertIn('distributed / 4', summary)
                 self.assertIn('/actions/runs/123/attempts/2', summary)
                 self.assertIn('pending inspection', summary)
+                self.assertIn('Percent of CPU this job got: 250%', summary)
+                self.assertIn('User time (seconds): 4.5', summary)
+                self.assertIn('Maximum resident set size (kbytes): 102400', summary)
                 context = json.loads(Path('benchmark-diagnostics/context.json').read_text())
                 self.assertEqual(context['lane']['cases'], ['Stokes/3'])
                 self.assertFalse(Path('benchmark-result/receipt.json').exists())

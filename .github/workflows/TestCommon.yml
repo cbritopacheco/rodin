@@ -20,10 +20,15 @@ jobs:
       OPENBLAS_NUM_THREADS: 1
       OMP_WAIT_POLICY: PASSIVE
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
-          submodules: recursive
+          submodules: false
           lfs: false
+      - name: Start resource monitor
+        continue-on-error: true
+        run: python3 dev/ci_resource_monitor.py start
+      - name: Initialize pinned submodules
+        run: python3 dev/ci_submodules.py
       - uses: ./.github/actions/test-environment
         with:
           definition: ${{ inputs.definition }}
@@ -52,3 +57,7 @@ jobs:
           name: ci-common-manifest-${{ fromJSON(inputs.definition).mode }}-${{ inputs.id }}
           path: ci-common-record/
           if-no-files-found: error
+      - name: Summarize resource usage
+        if: always()
+        continue-on-error: true
+        run: python3 dev/ci_resource_monitor.py finish

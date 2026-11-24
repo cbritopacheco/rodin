@@ -127,6 +127,10 @@ if (RODIN_USE_PETSC)
   add_subdirectory(PETSc)
 endif()
 
+if (RODIN_USE_KOKKOS)
+  add_subdirectory(Kokkos)
+endif()
+
 add_subdirectory(Solid)
 
 if (RODIN_USE_SCOTCH)

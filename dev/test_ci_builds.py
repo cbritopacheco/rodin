@@ -54,7 +54,7 @@ class SharedBuildPlanTest(unittest.TestCase):
                 self.assertEqual(matches, [{'id': ci.identity(expected), 'definition': expected}])
         self.assertEqual(sum(map(len, builds.values())), 84)
         self.assertEqual(sum(len(self.workflow['jobs'][job]['strategy']['matrix']['include'])
-                             for job in ci.FAMILIES), 857)
+                             for job in ci.FAMILIES), 861)
         top = yaml.safe_load((ci.ROOT / '.github/workflows/Tests.yml').read_text())['jobs']
         self.assertTrue(all(name in top['CoverageFinalize']['needs'] for name in top if name.startswith('Configurations_')))
 

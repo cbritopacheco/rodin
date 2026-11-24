@@ -74,6 +74,16 @@ class DocumentationSpacingTests(unittest.TestCase):
 
 
 class FormatConfigTests(unittest.TestCase):
+    def test_kokkos_attributes_stay_with_the_declaration(self):
+        binary = os.environ.get("CLANG_FORMAT_BINARY", "clang-format")
+        for attribute in ("KOKKOS_INLINE_FUNCTION", "KOKKOS_FUNCTION",
+                          "KOKKOS_FORCEINLINE_FUNCTION"):
+            with self.subTest(attribute=attribute):
+                source = attribute + "\nint value()\n{\n  return 1;\n}\n"
+                expected = attribute + " int value()\n{\n  return 1;\n}\n"
+                self.assertEqual(format_source(
+                    binary, str(ROOT / "src/FormatFixture.cpp"), source), expected)
+
     def check_format(self, expected):
         binary = os.environ.get("CLANG_FORMAT_BINARY", "clang-format")
         # ReflowComments is disabled to preserve mathematical documentation.

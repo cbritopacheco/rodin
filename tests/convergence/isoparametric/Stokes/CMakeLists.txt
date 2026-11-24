@@ -55,18 +55,29 @@ if (RODIN_USE_PETSC AND NOT RODIN_CONVERGENCE_PETSC_COMPLEX)
     GEOMETRIES ${_RODIN_CURVED_STOKES_GEOMETRIES})
   target_compile_definitions(RodinConvergenceIsoparametricPETScStokesBoundary
     PRIVATE RODIN_STOKES_TRACTION_CURVED)
-  # Atomic coverage counters add substantial contention to the local threaded
-  # assembly. Retain the complete cubic rate hierarchy and use the existing
-  # high-order pyramid watchdog for this instrumented process only.
+  # Use the high-order watchdog for the instrumented local cubic rate history.
   if (RODIN_CODE_COVERAGE)
+    set(_stokes_boundary_pyramid_timeout ${_RODIN_CURVED_STOKES_Q3_PYRAMID_TIMEOUT})
+    if (RODIN_MULTITHREADED)
+      # The local P3/P2 pyramid exceeded 3600 s in the threaded coverage run;
+      # its MPI histories passed. Keep the full history in a separate local job.
+      set(_stokes_boundary_pyramid_timeout 7200)
+    endif()
     set_tests_properties(RodinConvergenceIsoparametricPETScStokesBoundary_P3P2Rates_Pyramid
-      PROPERTIES TIMEOUT ${_RODIN_CURVED_STOKES_Q3_PYRAMID_TIMEOUT})
+      PROPERTIES TIMEOUT ${_stokes_boundary_pyramid_timeout})
   endif()
   add_executable(RodinConvergenceIsoparametricPETScStokes Stokes.cpp)
   target_compile_definitions(RodinConvergenceIsoparametricPETScStokes
     PRIVATE RODIN_CURVED_STOKES_PETSC)
   target_link_libraries(RodinConvergenceIsoparametricPETScStokes
     PRIVATE GTest::gtest RodinConvergence Rodin::PETSc)
+  # In the threaded coverage lane, local cubic hexahedra exceeded 1800s,
+  # while MPI-one completed in 815s and local controls took 1726s. Allow
+  # the existing high-order budget without changing the numerical study.
+  if (RODIN_CODE_COVERAGE AND RODIN_MULTITHREADED)
+    set_tests_properties(RodinConvergenceIsoparametricPETScStokesBoundary_P3P2Rates_Hexahedron
+      PROPERTIES TIMEOUT ${_RODIN_CURVED_STOKES_Q3_PYRAMID_TIMEOUT})
+  endif()
   foreach(q 1 3)
     foreach(geometry IN LISTS _RODIN_CURVED_STOKES_GEOMETRIES)
       set(_local_test RodinConvergenceIsoparametricPETScStokes_Q${q}_${geometry})

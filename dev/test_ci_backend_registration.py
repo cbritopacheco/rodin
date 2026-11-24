@@ -22,7 +22,7 @@ GEOMETRIES = ["Segment", "Triangle", "Quadrilateral", "Tetrahedron", "Pyramid", 
 
 
 class BackendRegistrationTest(unittest.TestCase):
-    def configure(self, directory, petsc=True, complex=False, coverage=False, build_type=None):
+    def configure(self, directory, petsc=True, complex=False, coverage=False, build_type=None, multithreaded=False):
         temporary = tempfile.TemporaryDirectory(prefix="rodin-ci-registration-")
         self.addCleanup(temporary.cleanup)
         source = Path(temporary.name)
@@ -38,6 +38,7 @@ class BackendRegistrationTest(unittest.TestCase):
             + f'set(RODIN_USE_PETSC {"ON" if petsc else "OFF"})\nset(RODIN_USE_MPI ON)\n'
             + f'set(RODIN_CONVERGENCE_PETSC_COMPLEX {"ON" if complex else "OFF"})\n'
             + f'set(RODIN_CODE_COVERAGE {"ON" if coverage else "OFF"})\n'
+            + f'set(RODIN_MULTITHREADED {"ON" if multithreaded else "OFF"})\n'
             + 'set(MPIEXEC_EXECUTABLE /usr/bin/true)\nset(MPIEXEC_NUMPROC_FLAG -n)\n'
             + f'include("{ROOT / "tests/convergence/PETScRefinement.cmake"}")\n'
             + ''.join(f'add_subdirectory("{ROOT / entry}" {folder})\n' for entry, folder in zip(directories, folders)))
@@ -224,26 +225,24 @@ class BackendRegistrationTest(unittest.TestCase):
         self.assertIn("-DRODIN_ELASTICITY_BOUNDARY_CURVED", flags)
 
     def test_local_curved_p3_coverage_budgets_preserve_other_commands(self):
-        baseline, build = self.configure("tests/convergence/isoparametric/LinearElasticity", coverage=False)
-        original = self.properties(build)
-        baseline_build = str(build)
-        covered, build = self.configure("tests/convergence/isoparametric/LinearElasticity", coverage=True)
-        properties = self.properties(build)
-        self.assertEqual(covered.keys(), baseline.keys())
-        selected = {f"RodinConvergenceIsoparametricPETScLinearElasticityBoundary_MixedTractionP3Rates_{geometry}"
-                    for geometry in ['Pyramid', 'Hexahedron']}
-        for name in covered:
-            self.assertEqual([arg.replace(str(build), "<build>") for arg in covered[name]],
-                             [arg.replace(baseline_build, "<build>") for arg in baseline[name]], name)
-            expected = dict(original[name])
-            if name in selected:
-                self.assertEqual(expected["TIMEOUT"], "1800")
-                expected["TIMEOUT"] = "3600"
-            self.assertEqual(properties[name], expected, name)
-        for rank, geometry in itertools.product([1, 2, 3, 4], ['Pyramid', 'Hexahedron']):
-            name = f"RodinConvergenceIsoparametricPETScLinearElasticityBoundary_MPI_np{rank}_MixedTractionP3Rates_{geometry}"
-            self.assertEqual(properties[name]["TIMEOUT"], "1800")
-            self.assertEqual(properties[name]["PROCESSORS"], str(rank))
+        directory = "tests/convergence/isoparametric/LinearElasticity"
+        for multithreaded in [False, True]:
+            baseline, baseline_build = self.configure(directory, multithreaded=multithreaded)
+            original = self.properties(baseline_build)
+            covered, build = self.configure(directory, coverage=True, multithreaded=multithreaded)
+            properties = self.properties(build)
+            self.assertEqual(covered.keys(), baseline.keys())
+            prefix = 'RodinConvergenceIsoparametricPETScLinearElasticityBoundary_MixedTractionP3Rates_'
+            budgets = {prefix + 'Hexahedron': '3600',
+                       prefix + 'Pyramid': '7200' if multithreaded else '3600'}
+            for name in covered:
+                self.assertEqual([arg.replace(str(build), "<build>") for arg in covered[name]],
+                                 [arg.replace(str(baseline_build), "<build>") for arg in baseline[name]], name)
+                expected = dict(original[name])
+                if name in budgets:
+                    self.assertEqual(expected["TIMEOUT"], "1800")
+                    expected["TIMEOUT"] = budgets[name]
+                self.assertEqual(properties[name], expected, name)
 
     def test_curved_traction_budgets_preserve_studies_and_ranks(self):
         tests, build = self.configure("tests/convergence/isoparametric/LinearElasticity")
@@ -516,6 +515,26 @@ class BackendRegistrationTest(unittest.TestCase):
             name = f"RodinConvergenceIsoparametricPETScStokesBoundary_MPI_np{rank}_P3P2Rates_Pyramid"
             self.assertIn(str(rank), configurations[1][0][name])
             self.assertEqual(properties[1][name]["PROCESSORS"], str(rank))
+
+    def test_curved_stokes_local_watchdogs_follow_coverage_and_threading(self):
+        reference = None
+        prefix = 'RodinConvergenceIsoparametricPETScStokesBoundary_P3P2Rates_'
+        for coverage, threaded in itertools.product([False, True], repeat=2):
+            tests, build = self.configure('tests/convergence/isoparametric/Stokes',
+                                          coverage=coverage, multithreaded=threaded)
+            commands = {name: [arg.replace(str(build.parent), '<FIXTURE>') for arg in args]
+                        for name, args in tests.items()}
+            properties = self.properties(build)
+            self.assertEqual(properties[prefix + 'Hexahedron']['TIMEOUT'], '3600' if coverage and threaded else '1800')
+            pyramid_timeout = '7200' if coverage and threaded else '3600' if coverage else '1800'
+            self.assertEqual(properties[prefix + 'Pyramid']['TIMEOUT'], pyramid_timeout)
+            for geometry, rank in itertools.product(['Hexahedron', 'Pyramid'], range(1, 5)):
+                name = f'RodinConvergenceIsoparametricPETScStokesBoundary_MPI_np{rank}_P3P2Rates_{geometry}'
+                self.assertEqual(properties[name]['TIMEOUT'], '1800')
+                self.assertEqual(properties[name]['PROCESSORS'], str(rank))
+            if reference is None:
+                reference = commands
+            self.assertEqual(commands, reference)
 
     def test_expanded_jobs_fit_github_matrix_limit(self):
         jobs = yaml.safe_load((ROOT / ".github/ci/targeted-lanes.yml").read_text())["jobs"]

@@ -4,6 +4,19 @@ This document describes the code style, how it is enforced, and how to run
 the checks locally. The style is not aspirational — it is derived from the
 existing code, and the tooling is configured to match it.
 
+## Creating files and copyright
+
+Every new file must have a significant, justifiable purpose within Rodin's
+existing architecture. Explain its responsibility and why it warrants a separate
+file in the pull-request description. Reuse an existing file when it already
+owns that responsibility.
+
+The author creating a file must add their own name and the year to its copyright
+notice. Every new file must be distributed under the **Boost Software License,
+Version 1.0 (BSL-1.0)**, using the license notice and comment format of the
+surrounding files. Preserve existing copyright notices when moving or adapting
+code.
+
 ## The style in five layers
 
 | Layer | What | Enforced by |

@@ -88,6 +88,11 @@
 #cmakedefine RODIN_USE_MPI
 
 /**
+ * @brief Indicates if Rodin is built with Kokkos support.
+ */
+#cmakedefine RODIN_USE_KOKKOS
+
+/**
  * @brief Indicates if Rodin is built with OpenMP support.
  *
  * # Utilization
@@ -138,6 +143,45 @@
  * @endcode
  */
 #cmakedefine RODIN_USE_MUMPS
+
+/**
+ * @brief Indicates if Rodin is built with NVIDIA cuDSS support.
+ *
+ * # Utilization
+ *
+ * @code{.cpp}
+ * #ifdef RODIN_USE_CUDSS
+ * // Code depending on cuDSS
+ * #endif
+ * @endcode
+ */
+#cmakedefine RODIN_USE_CUDSS
+
+/**
+ * @brief Indicates if Rodin is built with AMD rocSOLVER support.
+ *
+ * # Utilization
+ *
+ * @code{.cpp}
+ * #ifdef RODIN_USE_ROCSOLVER
+ * // Code depending on rocSOLVER
+ * #endif
+ * @endcode
+ */
+#cmakedefine RODIN_USE_ROCSOLVER
+
+/**
+ * @brief Indicates if Rodin is built with hypre support.
+ *
+ * # Utilization
+ *
+ * @code{.cpp}
+ * #ifdef RODIN_USE_HYPRE
+ * // Code depending on hypre
+ * #endif
+ * @endcode
+ */
+#cmakedefine RODIN_USE_HYPRE
 
 /**
  * @brief Indicates if Rodin is built with SuiteSparse support.

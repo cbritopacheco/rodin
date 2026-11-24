@@ -25,18 +25,22 @@ they curve) are separate layers throughout.
 ## Connectivity — incidence d → d′
 
 `Connectivity<Context::Local>` stores incidence relations between
-dimensions. **Nothing is computed implicitly**: call
-`mesh.getConnectivity().compute(d, dp)` before using an incidence, and
-library code asserts the requirement via the `RODIN_GEOMETRY_REQUIRE_*`
-macros in Mesh.h. `compute` has modes (e.g. `Discover` vs `Restrict`) for
-whether unseen sub-polytopes get created. Typical prerequisites:
+dimensions. Prepare each relation on the mutable mesh through
+`mesh.getConnectivity().compute(d, dp)` before the first consumer that needs
+it. Consumers query prepared incidence. They can check prerequisites with
+the `RODIN_GEOMETRY_REQUIRE_*` macros in `Mesh.h`. The explicit `compute()`
+call can also build supporting relations, with `Discover` and `Restrict`
+controlling whether missing sub-polytopes are created. Typical prerequisites:
 `compute(2,3)`/`compute(1,2)` for boundary/skin work, `compute(1,0)` for
 edge vertices, `compute(d,d)` for neighbours.
 
-Mutating topology means rebuilding: `Connectivity` has no element erase, so
-algorithms that add/remove polytopes copy out, edit, and rebuild via the
-Builder. Rebuilds re-index polytopes — never hold indices across a rebuild;
-compare coordinate/key sets in tests.
+Preparation can be staged. For example, on a triangular mesh, prepare
+cell-to-edge incidence before constructing quadratic `H1`, then add
+edge-to-cell incidence before assembly of `InterfaceIntegral`. Preserve the
+indices and incidence used by any existing space. Changes to the topology
+used by a space require rebuilding that space and its dependents. Algorithms
+that change the cells rebuild via the Builder. Rebuilds can re-index
+polytopes, so compare coordinate/key sets in tests.
 
 ## Geometry attachment — transformations
 

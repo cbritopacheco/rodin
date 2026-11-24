@@ -18,6 +18,34 @@ The installation test ensures that:
 - `test_project_CMakeLists.txt` - CMakeLists.txt template for the test project
 - `test_poisson.cpp` - Simple Poisson equation solver used as the test executable
 
+## Component consumers
+
+`test_components.py` compiles and runs consumers against an existing install.
+It covers ordinary geometry, native Kokkos assembly, distributed Kokkos meshes
+and spaces, and the Kokkos/PETSc assembly adapter. Native consumers disable
+PETSc package discovery and reject PETSc headers entering through another
+include. The installation script runs the consumers enabled by its build;
+`RODIN_USE_KOKKOS=ON` enables the Kokkos cases when the dependency is available.
+
+```bash
+python3 tests/installation/test_components.py --prefix /path/to/rodin-install \
+  --components Geometry Kokkos Kokkos::MPI Kokkos::PETSc \
+  --cmake-arg=-DCMAKE_PREFIX_PATH=/path/to/dependencies
+```
+
+The compiler and backend dependency installation must match the installed
+Rodin build. `--cmake-arg` may be repeated to provide those settings. Each
+consumer configures in a separate temporary directory and uses only installed
+Rodin headers and libraries. The MPI mesh consumer runs on one process; the
+unit MPI suites exercise multiple ranks. Kokkos consumers execute kernels and
+therefore require a working runtime and hardware for the selected backend.
+
+`dev/test_ci_package.py` additionally exercises real installed CMake exports
+with dependency doubles: required and optional components, transitive and
+wrapped target links, missing dependencies, repeated discovery, and the
+legacy whole-package call. These package-discovery tests run in the CI helper
+suite without requiring a GPU toolchain.
+
 ## Running the Test Locally
 
 From the repository root:
@@ -51,7 +79,7 @@ CLEANUP=no bash tests/installation/test_installation.sh
 
 ## GitHub Workflow
 
-The installation test is also run automatically via GitHub Actions on every push and pull request. See `.github/workflows/Installation.yml` for details.
+The installation test is also run automatically via GitHub Actions on every push and pull request. See `.github/workflows/Tests.yml` for details.
 
 ## What Gets Tested
 

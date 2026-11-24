@@ -38,6 +38,8 @@ namespace Rodin::IO
       /// @brief Grid function type being printed.
       using ObjectType = Variational::GridFunction<FES, Data>;
 
+      using IO::Printer<ObjectType>::print;
+
       /**
        * @brief Constructs a fallback grid function printer.
        * @param[in] gf Grid function to print.
@@ -92,6 +94,8 @@ namespace Rodin::IO
 
       /// @brief Type of mesh object being printed.
       using ObjectType = Variational::GridFunction<FES, Data>;
+
+      using IO::Printer<ObjectType>::print;
 
       /**
        * @brief Constructs a grid function printer base.

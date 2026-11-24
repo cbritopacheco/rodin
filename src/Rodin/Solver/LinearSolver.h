@@ -147,6 +147,17 @@ namespace Rodin::Solver
        */
       virtual void solve(LinearSystem& system) = 0;
 
+      /**
+       * @brief Prepares a new numerical factorization after the operator changes.
+       *
+       * Solvers retaining numerical factors override this hook. Solvers that
+       * consume the current operator on every solve require no preparation.
+       * Newton invokes it through the polymorphic interface for each tangent.
+       *
+       * @param system System containing the updated operator.
+       */
+      virtual void factorize([[maybe_unused]] LinearSystem& system) {}
+
     private:
       /// Reference to the problem being solved
       std::reference_wrapper<ProblemBaseType> m_pb;

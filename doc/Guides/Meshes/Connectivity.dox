@@ -29,6 +29,36 @@
   computes using existing entities. See @ref guides-connectivity for that
   construction policy.
 
+  @subsection guides-meshes-connectivity-stages Prepare relations by stage
+
+  Prepare each relation on the mutable mesh before the stage that consumes it.
+  Space construction and facet assembly query the input mesh for their
+  prerequisites. A missing required relation is a precondition violation.
+  An explicit `compute()` call can also build supporting relations.
+
+  On a triangular mesh, quadratic `H1` uses the cell-to-edge and edge-to-vertex
+  relations for its DOF numbering. Computing cell-to-edge incidence also
+  discovers the edges and records their incident vertices. Interface assembly
+  then needs the reverse edge-to-cell relation to find interior edges.
+
+  @code{.cpp}
+  auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, {4, 4});
+  mesh.getConnectivity().compute(2, 1);
+  H1 fes(std::integral_constant<std::size_t, 2>{}, mesh);
+
+  mesh.getConnectivity().compute(1, 2);
+  TrialFunction u(fes);
+  TestFunction v(fes);
+  BilinearForm form(u, v);
+  form = InterfaceIntegral(u, v);
+  form.assemble();
+  @endcode
+
+  Additional relations may be prepared between stages while the entity indices
+  and incidence used by an existing space remain valid. Rebuild the space and
+  dependent objects when an operation changes the topology used by its DOF
+  numbering.
+
   @section guides-meshes-connectivity-common Select the relation
 
   @subsection guides-meshes-connectivity-common-2d Two-dimensional meshes

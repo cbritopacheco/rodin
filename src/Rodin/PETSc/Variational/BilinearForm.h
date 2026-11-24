@@ -361,7 +361,8 @@ namespace Rodin::Variational
       /**
        * @brief Deduces the MPI communicator from the trial and test meshes.
        *
-       * When both meshes use `Context::Local`, returns `PETSC_COMM_SELF`.
+       * When both meshes are local, resident Kokkos meshes included, returns
+       * `PETSC_COMM_SELF`.
        * Otherwise, returns the communicator from the trial mesh context.
        *
        * @param[in] u Trial function reference.
@@ -374,11 +375,10 @@ namespace Rodin::Variational
         const auto& trialMesh = u.getFiniteElementSpace().getMesh();
         const auto& testMesh  = v.getFiniteElementSpace().getMesh();
         const auto& trialCtx = trialMesh.getContext();
-        const auto& testCtx  = testMesh.getContext();
-        (void) testCtx;
-        if constexpr (
-            std::is_same_v<TrialFESMeshContextType, Context::Local> &&
-            std::is_same_v<TestFESMeshContextType, Context::Local>)
+        const auto& testCtx = testMesh.getContext();
+        (void)testCtx;
+        if constexpr (Context::IsLocal<TrialFESMeshContextType>::value &&
+          Context::IsLocal<TestFESMeshContextType>::value)
         {
           return PETSC_COMM_SELF;
         }
