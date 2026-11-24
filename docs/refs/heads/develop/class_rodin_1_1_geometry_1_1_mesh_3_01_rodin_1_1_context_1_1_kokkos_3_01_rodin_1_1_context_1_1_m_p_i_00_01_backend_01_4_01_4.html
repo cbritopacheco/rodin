@@ -1,0 +1,1771 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Rodin::Geometry::Mesh&lt;Rodin::Context::Kokkos&lt;Rodin::Context::MPI, Backend&gt;&gt; class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
+  <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
+  <link rel="stylesheet" href="rodin-theme-1337632f765f.css" />
+  <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#18191c" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <a href="index.html" id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m">Rodin</a>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li>
+              <a href="pages.html">Pages</a>
+              <ol>
+                <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
+                <li><a href="gallery.html">Gallery</a></li>
+                <li><a href="guides-io.html">Input, output, and visualization</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
+                <li><a href="ci-index.html">Continuous integration</a></li>
+                <li><a href="notation-index.html">Notation</a></li>
+                <li><a href="credits-index.html">Credits</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="modules.html">Modules</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
+              </ol>
+            </li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="3">
+            <li><a href="annotated.html">Classes</a></li>
+            <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
+            <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_geometry.html">Geometry</a></div><h1>Mesh <span class="m-label m-flat m-warning">final</span></h1><p class="rodin-reference-brief">Shard of a distributed mesh resident in a Kokkos memory space.</p><p class="rodin-reference-include">Defined in <a href="_kokkos_2_m_p_i_2_geometry_2_mesh_8h.html"><code>Rodin/Kokkos/MPI/Geometry/Mesh.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Backend</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_context_1_1_m_p_i_00_01_backend_01_4_01_4.html#af89a0e12fd374236d082ff1184e8d91d"><span class="nc">Mesh</span></a><span class="o">&lt;</span>
+<span class="w">  </span><span class="n">Rodin</span><span class="o">::</span><span class="nc">Context</span><span class="o">::</span><a href="class_rodin_1_1_context_1_1_kokkos.html"><span class="nc">Kokkos</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">Rodin</span><span class="o">::</span><span class="nc">Context</span><span class="o">::</span><a href="class_rodin_1_1_context_1_1_m_p_i.html"><span class="nc">MPI</span></a><span class="p">,</span><span class="w"> </span><span class="nc">Backend</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="k">final</span><span class="p">;</span>
+</pre><section id="rodin-specialization"><h2><a href="#rodin-specialization">Specialization arguments</a></h2><p>Specialization of <a href="class_rodin_1_1_geometry_1_1_mesh.html">Mesh</a>.</p><table class="m-table m-fullwidth m-flat rodin-bindings"><tbody><tr><td><code>ContextType</code></td><td><code>Rodin::Context::Kokkos&lt; Rodin::Context::MPI, Backend &gt;</code></td></tr></tbody></table></section>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md183">Architecture</a></li>
+              </ul>
+            </li>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#base-classes">Inherits from</a></li>
+                <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+<section id="autotoc_md183_1s1"><section id="autotoc_md183"><h3><a href="#autotoc_md183">Architecture</a></h3><p>The mesh holds the shard of this process as a local resident mesh, the ownership of each of its entities, and an independent distributed host mesh it was built from. Every query is answered in the local numbering of the shard, which the kernels of a local resident mesh expect. Facet queries read the resident shard&#x27;s prepared incidence and the distributed ownership recorded on the host.</p><p>The device view marks the entities this process owns. Integrators skip the others, so that each polytope is integrated once over the processes. Host metadata is owned by value. Geometry and attribute setters update this metadata and the resident shard in one explicit mutation stage; the source mesh is unchanged. Shared vertices must be updated consistently on their holding ranks, as for the host MPI mesh. These setters introduce no communication. Topology replacement requires rebuilding dependent spaces.</p></section></section>
+        <figure class="rodin-inheritance"><figcaption>Direct inheritance by class family</figcaption><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_geometry_1_1_mesh_base.html" title="MeshBase">MeshBase</a></li></ul><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><div class="rodin-inheritance-current">Mesh</div></figure><section id="base-classes"><h2><a href="#base-classes">Inherits from</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Base class</th><th>Responsibility</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh_base.html"><code>MeshBase</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><a href="class_rodin_1_1_geometry_1_1_mesh_base.html"><span class="nc">MeshBase</span></a>
+</pre></details></td><td>Abstract base class for all mesh implementations.</td></tr></tbody></table></section><section id="rodin-overrides"><h2><a href="#rodin-overrides">Overrides</a></h2><table class="m-table m-fullwidth"><thead><tr><th>Member</th><th>Base declaration</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_context_1_1_m_p_i_00_01_backend_01_4_01_4.html#abe96527ba30c27da10256cce6db2bc17"><code>getContext()</code></a></td><td><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#acef2ca1a1d09aa328c13f39950d65749">MeshBase::getContext</a></td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_context_1_1_m_p_i_00_01_backend_01_4_01_4.html#a6f7b22045efba4c92b80c545b2100c1f"><code>getDimension()</code></a></td><td><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#aecbab974d66ff87d16610de96cf16878">MeshBase::getDimension</a></td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_context_1_1_m_p_i_00_01_backend_01_4_01_4.html#aed88568a450d0ecedcc6be7d794d61f5"><code>getSpaceDimension()</code></a></td><td><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#aed7007d20f3a38dba19ef8fd566abb46">MeshBase::getSpaceDimension</a></td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_context_1_1_m_p_i_00_01_backend_01_4_01_4.html#a6acee2e00d4773db5d4b6e3322f4933b"><code>getConnectivity()</code></a></td><td><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#a1dd5d9f85e33803b0632be6f76e3118e">MeshBase::getConnectivity</a></td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_context_1_1_m_p_i_00_01_backend_01_4_01_4.html#ad9c4fea641641a0b035c181b545bbde1"><code>getConnectivity()</code></a></td><td><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#a83faa4b376f3bad6a1a21865a4044dc1">MeshBase::getConnectivity</a></td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_context_1_1_m_p_i_00_01_backend_01_4_01_4.html#a1f247b875b87c087286298ad7d357b37"><code>getPolytopeCount()</code></a></td><td><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#aa57e302d3532878660146d122c8d3af6">MeshBase::getPolytopeCount</a></td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_context_1_1_m_p_i_00_01_backend_01_4_01_4.html#ad35ac1c34eab205cfa6976c9c7f719dd"><code>getPolytopeCount()</code></a></td><td><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#a74a7c23d97678d379a3ebc5f6ce278f5">MeshBase::getPolytopeCount</a></td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_context_1_1_m_p_i_00_01_backend_01_4_01_4.html#a8fbe97ddbdab7653bd1fded1e1125145"><code>getGeometry()</code></a></td><td><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#a268f4579b564cfb506eccd16866a278f">MeshBase::getGeometry</a></td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_context_1_1_m_p_i_00_01_backend_01_4_01_4.html#a07118dd6dc984cb9260ae21fc61a4130"><code>isSubMesh()</code></a></td><td><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#a0f3b89fad95e67e618f74858cd5927a3">MeshBase::isSubMesh</a></td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_context_1_1_m_p_i_00_01_backend_01_4_01_4.html#aa66d766684c6856007643ea05ce1479e"><code>asSubMesh()</code></a></td><td><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#a8061eb8e8fbe91f5b3f3d7a5d31bc23d">MeshBase::asSubMesh</a></td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_context_1_1_m_p_i_00_01_backend_01_4_01_4.html#a1c114dba2d138c6b2bf26203fc4723f1"><code>asSubMesh()</code></a></td><td><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#ab039fe7e561ad14d2e263d8fedf1d006">MeshBase::asSubMesh</a></td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_context_1_1_m_p_i_00_01_backend_01_4_01_4.html#a99a85952681b52f53a23f003a1c8e95b"><code>scale()</code></a></td><td><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#a543288032de1acbab32a9bf3ed77d21a">MeshBase::scale</a></td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_context_1_1_m_p_i_00_01_backend_01_4_01_4.html#a04f2540d940cc37b5c2538ed8e5b54be"><code>flush()</code></a></td><td><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#a50ab71f4bc571f6e246b20db4b3dd131">MeshBase::flush</a></td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_context_1_1_m_p_i_00_01_backend_01_4_01_4.html#a8ec05300337f3be973feed2aedae2995"><code>getVertexCoordinates()</code></a></td><td><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#ac794625a89ebaf41c81ae8cbfeb45156">MeshBase::getVertexCoordinates</a></td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_context_1_1_m_p_i_00_01_backend_01_4_01_4.html#ab98e1bf36f1c6151e63cb3d9c444c7ac"><code>setVertexCoordinates()</code></a></td><td><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#abc4f6aa1245409482513cab4b70efac6">MeshBase::setVertexCoordinates</a></td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_context_1_1_m_p_i_00_01_backend_01_4_01_4.html#a526924c58188542bf4d92910b9bb3d68"><code>getAttribute()</code></a></td><td><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#a2bfd306710910a94bab24d67336ba14c">MeshBase::getAttribute</a></td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_context_1_1_m_p_i_00_01_backend_01_4_01_4.html#a5fc8cbe2794d872102c2de0669fb8313"><code>setAttribute()</code></a></td><td><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#a5a22eb336f4cd59b30157ef348b19dc3">MeshBase::setAttribute</a></td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_context_1_1_m_p_i_00_01_backend_01_4_01_4.html#ad32c4749d2f80a66a52acd3db291ae7b"><code>setPolytopeTransformation()</code></a></td><td><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#a11834e52a91313eb6d2d3b44810e0ea1">MeshBase::setPolytopeTransformation</a></td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_context_1_1_m_p_i_00_01_backend_01_4_01_4.html#af6dd4a21d0355903406ca80ff745b940"><code>getPolytopeTransformation()</code></a></td><td><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#ab73260967f6ff488c26807cdc415abe8">MeshBase::getPolytopeTransformation</a></td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_context_1_1_m_p_i_00_01_backend_01_4_01_4.html#a09c0e298e5ca8adabd2af2d4e788c4f0"><code>getQuadrature()</code></a></td><td><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#a3d0df5c541e48ec01de14354aade83bb">MeshBase::getQuadrature</a></td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_context_1_1_m_p_i_00_01_backend_01_4_01_4.html#aa33c6cf03ddc1a84ed35e9db7d9132ac"><code>load()</code></a></td><td><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#a89c3247aa437732cab60ad21974e7559">MeshBase::load</a></td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_context_1_1_m_p_i_00_01_backend_01_4_01_4.html#a2417564814ca82044963977fe0daf963"><code>save()</code></a></td><td><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#ae5a77ac22aaa8414ec63eee7b27eea70">MeshBase::save</a></td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_context_1_1_m_p_i_00_01_backend_01_4_01_4.html#a7e96942960b71276876721cb5d9951ba"><code>getBoundary()</code></a></td><td><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#ab95d4c2eb2f1fe32ea874dd6cc496e84">MeshBase::getBoundary</a></td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_context_1_1_m_p_i_00_01_backend_01_4_01_4.html#aa05fff103c9d811467a9a2a1a3e06a9e"><code>getInterface()</code></a></td><td><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#a751a39f199d8b72e398e69ffe33be833">MeshBase::getInterface</a></td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_context_1_1_m_p_i_00_01_backend_01_4_01_4.html#a4405d79a195b60a5881e1c7eeb32f01e"><code>getCell()</code></a></td><td><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#a2f0d9b69fe0a04c132d6855b3912fb3e">MeshBase::getCell</a></td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_context_1_1_m_p_i_00_01_backend_01_4_01_4.html#adb7295b0f32fca58fd204c47925dab47"><code>getFace()</code></a></td><td><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#a8e8284f5a68f68c3d3503033ba150453">MeshBase::getFace</a></td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_context_1_1_m_p_i_00_01_backend_01_4_01_4.html#a209eaced7df93add96aea892847cdb47"><code>getVertex()</code></a></td><td><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#afb577cd14759a338f68b09172b205968">MeshBase::getVertex</a></td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_context_1_1_m_p_i_00_01_backend_01_4_01_4.html#afe4ac0131ad5294a2c1de18ae564117f"><code>getPolytope()</code></a></td><td><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#aebb9807258bf9a3a4af820ce856463cf">MeshBase::getPolytope</a></td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_context_1_1_m_p_i_00_01_backend_01_4_01_4.html#ac922f1dcd91a961f79843aefa747c100"><code>getCell()</code></a></td><td><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#a5fad8e0be2fc8f6e429d7528c59d66ec">MeshBase::getCell</a></td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_context_1_1_m_p_i_00_01_backend_01_4_01_4.html#a51f1d81922a0f97f1f00b1b211664a36"><code>getFace()</code></a></td><td><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#a01f4516e22b25edf32c08f47e35e7834">MeshBase::getFace</a></td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_context_1_1_m_p_i_00_01_backend_01_4_01_4.html#ae184fbe0b80fa65925e7cf3e5d4d61ed"><code>getVertex()</code></a></td><td><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#a51e5396aac400d4b1bab86560f7a3e59">MeshBase::getVertex</a></td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_context_1_1_m_p_i_00_01_backend_01_4_01_4.html#a4c332b1572c6657c0e20c7362092e294"><code>getPolytope()</code></a></td><td><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#afa79eb0f79ce5382dd3ff599afd0b746">MeshBase::getPolytope</a></td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_context_1_1_m_p_i_00_01_backend_01_4_01_4.html#aca7199fa0b51be29e1bab9fd08dd75c0"><code>isInterface()</code></a></td><td><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#a33e981194110c815414b870a181a6f20">MeshBase::isInterface</a></td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_context_1_1_m_p_i_00_01_backend_01_4_01_4.html#a4d5058a3237a131ae1968ca18e80ffae"><code>isBoundary()</code></a></td><td><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#a8515a8a61b23cc366b3e03647fe134ea">MeshBase::isBoundary</a></td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_context_1_1_m_p_i_00_01_backend_01_4_01_4.html#aedb17bb61a414bba468c922efb42e0d1"><code>getVolume()</code></a></td><td><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#aa90969db1bab02c4a614787ead38bd00">MeshBase::getVolume</a></td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_context_1_1_m_p_i_00_01_backend_01_4_01_4.html#a5f74ae08ef3f29494eb0257e0d7b3731"><code>getVolume()</code></a></td><td><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#ae1086268930278ab20529d42d39c430e">MeshBase::getVolume</a></td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_context_1_1_m_p_i_00_01_backend_01_4_01_4.html#ac02a438914dedb80c21204be9e18f549"><code>getVolume()</code></a></td><td><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#af662870c417da21f12e8227df3b32da6">MeshBase::getVolume</a></td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_context_1_1_m_p_i_00_01_backend_01_4_01_4.html#a7f5708e7b511ba4460df9947caf767af"><code>getArea()</code></a></td><td><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#ac7f46af86eacabd059be482d966cfcf8">MeshBase::getArea</a></td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_context_1_1_m_p_i_00_01_backend_01_4_01_4.html#ac88c6f869d1d2cb0c74df8b97a893a02"><code>getArea()</code></a></td><td><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#a0d5fb32cf9f3b58f4364235d6e272d7d">MeshBase::getArea</a></td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_context_1_1_m_p_i_00_01_backend_01_4_01_4.html#a09b24f7d5ca47ee2b390ba6b06cb7de0"><code>getArea()</code></a></td><td><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#a3c14aa7923d5233c351eb5fe36edf705">MeshBase::getArea</a></td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_context_1_1_m_p_i_00_01_backend_01_4_01_4.html#afd5d9204c1312cf4caecbb1cc9d76d75"><code>getMeasure()</code></a></td><td><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#a0d7f7c05ed21e54029222bcdd911b3e6">MeshBase::getMeasure</a></td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_context_1_1_m_p_i_00_01_backend_01_4_01_4.html#a999d43a57a93d4a974f2b60bcf863803"><code>getMeasure()</code></a></td><td><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#aad4b64cda28da924e7a59cc9429f606b">MeshBase::getMeasure</a></td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_context_1_1_m_p_i_00_01_backend_01_4_01_4.html#af2ec58a1502b3451dde4a9d7ddecdb99"><code>getMeasure()</code></a></td><td><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#a2eac32c6cf92dc422e979bc927703ef4">MeshBase::getMeasure</a></td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_context_1_1_m_p_i_00_01_backend_01_4_01_4.html#a2d613557ba40614c2d86e226e8cf1fc4"><code>getPerimeter()</code></a></td><td><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#ad34d7af265f67b82725809c1d00c016b">MeshBase::getPerimeter</a></td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_context_1_1_m_p_i_00_01_backend_01_4_01_4.html#a040bd1ac58bb84a4572516aea7997dd7"><code>getPerimeter()</code></a></td><td><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#a5bc492688ef067f853a2500600975cdb">MeshBase::getPerimeter</a></td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_context_1_1_m_p_i_00_01_backend_01_4_01_4.html#ad18b3d1147edf499d8fe0e90c9f721ad"><code>getPerimeter()</code></a></td><td><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#a0aeeb6eb4079e60cf24eb80c770b3ab1">MeshBase::getPerimeter</a></td></tr></tbody></table></section><section id="rodin-inherited"><h2><a href="#rodin-inherited">Inherited interface</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Declared in</th><th>Members</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh_base.html"><code>MeshBase</code></a></td><td><details><summary>15 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#a9000ddf38d8d853cbde9005de9efcafb"><code>getCellAttribute()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#a3275fb6c3d9c1b19129046c40d555972"><code>getCellCount()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#a1a93f6a1a2e97911722772d5429a79b1"><code>getFaceAttribute()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#aa26e370d99a09c33f3f759c4bc52800e"><code>getFaceCount()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#aafa1fbb6fcf1168fe50762a590fe5f89"><code>getName()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#a24a4e01af898769244e11a4f94ca8fd0"><code>getVertexCount()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#acc802e09e1a41bb47fc3fa6394184885"><code>inclusion()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#acf82f9b2937375c7b1cf3dccb3df3312"><code>isEmpty()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#a3203ac272db4d8b0a23eef0ed605341f"><code>isLocalPoint()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#a5c0ab183385f8806ca268b5c1b31d55d"><code>isSurface()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#a5529f7a1957bdf41e4d323e3deb6f301"><code>operator!=()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#a8a80bde2a1da80e943646eb2404423c0"><code>operator==()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#a68e832cb064e3b7ca978d8e5911cf700"><code>serialize()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#ad5193c20d0320dd32fd0c8df5460b883"><code>setName()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh_base.html#a8ad0b7ba078bbd7ac8bf10c2c8b3e239"><code>setVertexCoordinates()</code></a></li></ul></details></td></tr></tbody></table></section>
+        <section id="pub-types">
+          <h2><a href="#pub-types">Public types</a></h2>
+          <dl class="m-doc">
+            <dt id="aaeb3283ca5e44181812ecdf2a64ee162">
+              using <a href="#aaeb3283ca5e44181812ecdf2a64ee162" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a>
+            </dt>
+            <dd>Parent class.</dd>
+            <dt id="af6d78b15112a2dc8901edbc608d02bab">
+              using <a href="#af6d78b15112a2dc8901edbc608d02bab" class="m-doc-self">ContextType</a> = <a href="class_rodin_1_1_context_1_1_kokkos.html" class="m-doc">Rodin::<wbr />Context::<wbr />Kokkos</a>&lt;<a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Rodin::<wbr />Context::<wbr />MPI</a>, Backend&gt;
+            </dt>
+            <dd>Distributed execution context.</dd>
+            <dt id="a6e037ac03d355a1e4f8a84e3883f80ca">
+              using <a href="#a6e037ac03d355a1e4f8a84e3883f80ca" class="m-doc-self">Context</a> = <a href="#af6d78b15112a2dc8901edbc608d02bab" class="m-doc">ContextType</a>
+            </dt>
+            <dd>Distributed execution context.</dd>
+            <dt id="a9db228f6bac260a78de9a46e3230221b">
+              using <a href="#a9db228f6bac260a78de9a46e3230221b" class="m-doc-self">HostType</a> = <a href="#af89a0e12fd374236d082ff1184e8d91d" class="m-doc">Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Rodin::<wbr />Context::<wbr />MPI</a>&gt;
+            </dt>
+            <dd>Distributed host mesh.</dd>
+            <dt id="a2e7e61b08e286c642e5c4237edd50f70">
+              using <a href="#a2e7e61b08e286c642e5c4237edd50f70" class="m-doc-self">LocalType</a> = <a href="#af89a0e12fd374236d082ff1184e8d91d" class="m-doc">Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_kokkos.html" class="m-doc">Rodin::<wbr />Context::<wbr />Kokkos</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Rodin::<wbr />Context::<wbr />Local</a>, Backend&gt;&gt;
+            </dt>
+            <dd>Resident mesh of the shard.</dd>
+            <dt id="ab78f7cd66f68a9ce08c3ca5a42e12a90">
+              using <a href="#ab78f7cd66f68a9ce08c3ca5a42e12a90" class="m-doc-self">ExecutionSpace</a> = typename <a href="class_rodin_1_1_context_1_1_kokkos.html#accc6e672f89037295fb03a01924c9392" class="m-doc">ContextType::<wbr />ExecutionSpaceType</a>
+            </dt>
+            <dd>Execution space of the kernels.</dd>
+            <dt id="abd2285c284ad3cfde965ef4ecc1dab84">
+              using <a href="#abd2285c284ad3cfde965ef4ecc1dab84" class="m-doc-self">MemorySpace</a> = typename <a href="class_rodin_1_1_context_1_1_kokkos.html#a66e24e538ed3900abd12e5b97beada44" class="m-doc">ContextType::<wbr />MemorySpaceType</a>
+            </dt>
+            <dd>Memory space of the resident data.</dd>
+            <dt id="a175aa3e395d3bc617fa7e7fd8382de54">
+              using <a href="#a175aa3e395d3bc617fa7e7fd8382de54" class="m-doc-self">ConnectivityType</a> = <a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a>&lt;<a href="#af6d78b15112a2dc8901edbc608d02bab" class="m-doc">ContextType</a>&gt;
+            </dt>
+            <dd>Resident connectivity of the shard.</dd>
+            <dt id="a984946d2deed4832d4ea7dd7d7c98666">
+              using <a href="#a984946d2deed4832d4ea7dd7d7c98666" class="m-doc-self">View</a> = <a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Rodin::<wbr />Kokkos::<wbr />View</a>&lt;<a href="#af89a0e12fd374236d082ff1184e8d91d" class="m-doc">Mesh</a>&lt;<a href="#af6d78b15112a2dc8901edbc608d02bab" class="m-doc">ContextType</a>&gt;&gt;
+            </dt>
+            <dd>Borrowed device view.</dd>
+          </dl>
+        </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#af89a0e12fd374236d082ff1184e8d91d" class="m-doc">Mesh</a>(</span><span class="m-doc-wrap"><a href="#af6d78b15112a2dc8901edbc608d02bab" class="m-doc">ContextType</a> context,
+              const <a href="#a9db228f6bac260a78de9a46e3230221b" class="m-doc">HostType</a>&amp; host)</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a41e370009465e8495509f5063ff4b656" class="m-doc">Mesh</a>(</span><span class="m-doc-wrap">const Mesh&amp; other)</span>
+            </dt>
+            <dd>Copies host metadata and resident data, sharing read-only ownership flags.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a35fd55b8b9b41755f17756a07de4c0f8" class="m-doc">Mesh</a>(</span><span class="m-doc-wrap">Mesh&amp;&amp; other)</span>
+            </dt>
+            <dd>Moves the mesh.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#af3b7b4870c1d290bec48035b5a75bc55" class="m-doc">Mesh</a>(</span><span class="m-doc-wrap"><a href="#af6d78b15112a2dc8901edbc608d02bab" class="m-doc">ContextType</a> context) <span class="m-label m-flat m-info">explicit</span> </span>
+            </dt>
+            <dd></dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab603c8229c1ab708e3ed1c51c5628834" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="#af89a0e12fd374236d082ff1184e8d91d" class="m-doc">Mesh</a>&amp; other) -&gt; <a href="#af89a0e12fd374236d082ff1184e8d91d" class="m-doc">Mesh</a>&amp;</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#af26e292ff63011c4a5ab2ec42e731a7b" class="m-doc">operator=</a>(</span><span class="m-doc-wrap"><a href="#af89a0e12fd374236d082ff1184e8d91d" class="m-doc">Mesh</a>&amp;&amp; other) -&gt; <a href="#af89a0e12fd374236d082ff1184e8d91d" class="m-doc">Mesh</a>&amp;</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#abe96527ba30c27da10256cce6db2bc17" class="m-doc">getContext</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#af6d78b15112a2dc8901edbc608d02bab" class="m-doc">ContextType</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a8b5e0a327347b62c0c7300f05d6d1baa" class="m-doc">getHost</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a9db228f6bac260a78de9a46e3230221b" class="m-doc">HostType</a>&amp;</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aed4f73e45cb37f989166d3682d4bb29f" class="m-doc">getShard</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_geometry_1_1_shard.html" class="m-doc">Shard</a>&amp;</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a87f83a880134a6e8e40cd23c0173edc0" class="m-doc">getLocal</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a2e7e61b08e286c642e5c4237edd50f70" class="m-doc">LocalType</a>&amp;</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a2a4f93c7f01e2dbce72938dff096db67" class="m-doc">getView</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="#a984946d2deed4832d4ea7dd7d7c98666" class="m-doc">View</a></span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a53486a7f6f57fea408447b0bd7390c87" class="m-doc">getRevision</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_revision.html" class="m-doc">Revision</a></span>
+            </dt>
+            <dd>Gets the revision of the entities and of their attributes.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a5e8b0323a58dbb304e05210fab45aec7" class="m-doc">isOwned</a>(</span><span class="m-doc-wrap">size_t d,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> i) const -&gt; bool</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a6f7b22045efba4c92b80c545b2100c1f" class="m-doc">getDimension</a>(</span><span class="m-doc-wrap">) const -&gt; size_t <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Gets the topological dimension.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a4d9beac127dd99963184dc8913b8902e" class="m-doc">getGlobalDimension</a>(</span><span class="m-doc-wrap">) const -&gt; size_t</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aed88568a450d0ecedcc6be7d794d61f5" class="m-doc">getSpaceDimension</a>(</span><span class="m-doc-wrap">) const -&gt; size_t <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Gets the dimension of the ambient space.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a6acee2e00d4773db5d4b6e3322f4933b" class="m-doc">getConnectivity</a>(</span><span class="m-doc-wrap">) -&gt; <a href="#a175aa3e395d3bc617fa7e7fd8382de54" class="m-doc">ConnectivityType</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Gets the connectivity of the shard.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad9c4fea641641a0b035c181b545bbde1" class="m-doc">getConnectivity</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a175aa3e395d3bc617fa7e7fd8382de54" class="m-doc">ConnectivityType</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Gets the connectivity of the shard.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a1f247b875b87c087286298ad7d357b37" class="m-doc">getPolytopeCount</a>(</span><span class="m-doc-wrap">size_t d) const -&gt; size_t <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad35ac1c34eab205cfa6976c9c7f719dd" class="m-doc">getPolytopeCount</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Polytope::<wbr />Type</a> g) const -&gt; size_t <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a8fbe97ddbdab7653bd1fded1e1125145" class="m-doc">getGeometry</a>(</span><span class="m-doc-wrap">size_t d,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> i) const -&gt; <a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Polytope::<wbr />Type</a> <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a07118dd6dc984cb9260ae21fc61a4130" class="m-doc">isSubMesh</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Whether the mesh is a submesh.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aa66d766684c6856007643ea05ce1479e" class="m-doc">asSubMesh</a>(</span><span class="m-doc-wrap">) -&gt; <a href="class_rodin_1_1_geometry_1_1_sub_mesh_base.html" class="m-doc">SubMeshBase</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Raises an exception, the mesh not being a submesh.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a1c114dba2d138c6b2bf26203fc4723f1" class="m-doc">asSubMesh</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_geometry_1_1_sub_mesh_base.html" class="m-doc">SubMeshBase</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Raises an exception, the mesh not being a submesh.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a99a85952681b52f53a23f003a1c8e95b" class="m-doc">scale</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> c) -&gt; <a href="#af89a0e12fd374236d082ff1184e8d91d" class="m-doc">Mesh</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Scales local geometry and its owned host metadata, without communication.</dd>
+            <dt id="a04f2540d940cc37b5c2538ed8e5b54be">
+              <span class="m-doc-wrap-bumper">void <a href="#a04f2540d940cc37b5c2538ed8e5b54be" class="m-doc-self">flush</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Flushes the cached data of the resident shard.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a8ec05300337f3be973feed2aedae2995" class="m-doc">getVertexCoordinates</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> vertex) const -&gt; <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">::<wbr />Rodin::<wbr />Math::<wbr />SpatialPoint</a> <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab98e1bf36f1c6151e63cb3d9c444c7ac" class="m-doc">setVertexCoordinates</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> s,
+              size_t i) -&gt; <a href="#af89a0e12fd374236d082ff1184e8d91d" class="m-doc">Mesh</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Updates one local coordinate in backend and host storage.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a5bc07168668de3aff6ceef91ace0f403" class="m-doc">setVertexCoordinates</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx,
+              const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">::<wbr />Rodin::<wbr />Math::<wbr />SpatialPoint</a>&amp; coords) -&gt; <a href="#af89a0e12fd374236d082ff1184e8d91d" class="m-doc">Mesh</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Updates a local vertex in backend and host storage.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a526924c58188542bf4d92910b9bb3d68" class="m-doc">getAttribute</a>(</span><span class="m-doc-wrap">size_t d,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> i) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a>&gt; <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a5fc8cbe2794d872102c2de0669fb8313" class="m-doc">setAttribute</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; p,
+              const <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a>&gt;&amp; attr) -&gt; <a href="#af89a0e12fd374236d082ff1184e8d91d" class="m-doc">Mesh</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Updates a local attribute in backend and host storage.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad32c4749d2f80a66a52acd3db291ae7b" class="m-doc">setPolytopeTransformation</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt; p,
+              <a href="class_rodin_1_1_geometry_1_1_polytope_transformation.html" class="m-doc">PolytopeTransformation</a>* trans) -&gt; <a href="#af89a0e12fd374236d082ff1184e8d91d" class="m-doc">Mesh</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Replaces a local map in backend storage and copies it into host metadata.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#af6dd4a21d0355903406ca80ff745b940" class="m-doc">getPolytopeTransformation</a>(</span><span class="m-doc-wrap">size_t d,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> i) const -&gt; const <a href="class_rodin_1_1_geometry_1_1_polytope_transformation.html" class="m-doc">PolytopeTransformation</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a09c0e298e5ca8adabd2af2d4e788c4f0" class="m-doc">getQuadrature</a>(</span><span class="m-doc-wrap">size_t d,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> i,
+              const <a href="class_rodin_1_1_q_f_1_1_quadrature_formula.html" class="m-doc">QF::<wbr />QuadratureFormula</a>&amp; formula) const -&gt; const <a href="class_rodin_1_1_geometry_1_1_polytope_quadrature.html" class="m-doc">PolytopeQuadrature</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aa33c6cf03ddc1a84ed35e9db7d9132ac" class="m-doc">load</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; filename,
+              <a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfe" class="m-doc">IO::<wbr />FileFormat</a> fmt) -&gt; <a href="#af89a0e12fd374236d082ff1184e8d91d" class="m-doc">Mesh</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Collectively loads per-rank shards and builds their backend storage.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a8b205faa0d943ff483f29db53af0be47" class="m-doc">upload</a>(</span><span class="m-doc-wrap">const <a href="#a9db228f6bac260a78de9a46e3230221b" class="m-doc">HostType</a>&amp; source) -&gt; <a href="#af89a0e12fd374236d082ff1184e8d91d" class="m-doc">Mesh</a>&amp;</span>
+            </dt>
+            <dd>Replaces local backend storage and distributed metadata from a host mesh.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a97ff81b22adc1b878eed80adb24e57d5" class="m-doc">download</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="#a9db228f6bac260a78de9a46e3230221b" class="m-doc">HostType</a></span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a11d579cdf1bc0ff23336bf0f1073f522" class="m-doc">download</a>(</span><span class="m-doc-wrap"><a href="#a9db228f6bac260a78de9a46e3230221b" class="m-doc">HostType</a>&amp; destination) const</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a2417564814ca82044963977fe0daf963" class="m-doc">save</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; path,
+              <a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfe" class="m-doc">IO::<wbr />FileFormat</a> format) const <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a7e96942960b71276876721cb5d9951ba" class="m-doc">getBoundary</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_geometry_1_1_face_iterator.html" class="m-doc">FaceIterator</a> <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aa05fff103c9d811467a9a2a1a3e06a9e" class="m-doc">getInterface</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_geometry_1_1_face_iterator.html" class="m-doc">FaceIterator</a> <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a4405d79a195b60a5881e1c7eeb32f01e" class="m-doc">getCell</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_geometry_1_1_cell_iterator.html" class="m-doc">CellIterator</a> <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#adb7295b0f32fca58fd204c47925dab47" class="m-doc">getFace</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_geometry_1_1_face_iterator.html" class="m-doc">FaceIterator</a> <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a209eaced7df93add96aea892847cdb47" class="m-doc">getVertex</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_geometry_1_1_vertex_iterator.html" class="m-doc">VertexIterator</a> <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#afe4ac0131ad5294a2c1de18ae564117f" class="m-doc">getPolytope</a>(</span><span class="m-doc-wrap">size_t dimension) const -&gt; <a href="class_rodin_1_1_geometry_1_1_polytope_iterator.html" class="m-doc">PolytopeIterator</a> <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ac922f1dcd91a961f79843aefa747c100" class="m-doc">getCell</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx) const -&gt; <a href="class_rodin_1_1_geometry_1_1_cell_iterator.html" class="m-doc">CellIterator</a> <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a51f1d81922a0f97f1f00b1b211664a36" class="m-doc">getFace</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx) const -&gt; <a href="class_rodin_1_1_geometry_1_1_face_iterator.html" class="m-doc">FaceIterator</a> <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae184fbe0b80fa65925e7cf3e5d4d61ed" class="m-doc">getVertex</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx) const -&gt; <a href="class_rodin_1_1_geometry_1_1_vertex_iterator.html" class="m-doc">VertexIterator</a> <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a4c332b1572c6657c0e20c7362092e294" class="m-doc">getPolytope</a>(</span><span class="m-doc-wrap">size_t dimension,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx) const -&gt; <a href="class_rodin_1_1_geometry_1_1_polytope_iterator.html" class="m-doc">PolytopeIterator</a> <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aca7199fa0b51be29e1bab9fd08dd75c0" class="m-doc">isInterface</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> face) const -&gt; bool <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a4d5058a3237a131ae1968ca18e80ffae" class="m-doc">isBoundary</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> face) const -&gt; bool <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aedb17bb61a414bba468c922efb42e0d1" class="m-doc">getVolume</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Gets the volume of the distributed mesh.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a5f74ae08ef3f29494eb0257e0d7b3731" class="m-doc">getVolume</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a> attribute) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ac02a438914dedb80c21204be9e18f549" class="m-doc">getVolume</a>(</span><span class="m-doc-wrap">const <a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a>&gt;&amp; attributes) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a7f5708e7b511ba4460df9947caf767af" class="m-doc">getArea</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Gets the area of the distributed mesh.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ac88c6f869d1d2cb0c74df8b97a893a02" class="m-doc">getArea</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a> attribute) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a09b24f7d5ca47ee2b390ba6b06cb7de0" class="m-doc">getArea</a>(</span><span class="m-doc-wrap">const <a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a>&gt;&amp; attributes) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#afd5d9204c1312cf4caecbb1cc9d76d75" class="m-doc">getMeasure</a>(</span><span class="m-doc-wrap">size_t d) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a999d43a57a93d4a974f2b60bcf863803" class="m-doc">getMeasure</a>(</span><span class="m-doc-wrap">size_t d,
+              <a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a> attribute) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#af2ec58a1502b3451dde4a9d7ddecdb99" class="m-doc">getMeasure</a>(</span><span class="m-doc-wrap">size_t d,
+              const <a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a>&gt;&amp; attributes) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a2d613557ba40614c2d86e226e8cf1fc4" class="m-doc">getPerimeter</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Gets the perimeter of the distributed mesh.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a040bd1ac58bb84a4572516aea7997dd7" class="m-doc">getPerimeter</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a> attribute) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad18b3d1147edf499d8fe0e90c9f721ad" class="m-doc">getPerimeter</a>(</span><span class="m-doc-wrap">const <a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a>&gt;&amp; attributes) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd></dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="af89a0e12fd374236d082ff1184e8d91d"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af89a0e12fd374236d082ff1184e8d91d" class="m-doc-self">Mesh</a>(</span><span class="m-doc-wrap"><a href="#af6d78b15112a2dc8901edbc608d02bab" class="m-doc">ContextType</a> context,
+              const <a href="#a9db228f6bac260a78de9a46e3230221b" class="m-doc">HostType</a>&amp; host)</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">context</td>
+                  <td>Execution association; Kokkos must already be initialized.</td>
+                </tr>
+                <tr>
+                  <td>host</td>
+                  <td>Distributed mesh copied independently, without communication.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a41e370009465e8495509f5063ff4b656"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a41e370009465e8495509f5063ff4b656" class="m-doc-self">Mesh</a>(</span><span class="m-doc-wrap">const Mesh&amp; other)</span></span>
+            </h3>
+            <p>Copies host metadata and resident data, sharing read-only ownership flags.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Mesh to copy.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a35fd55b8b9b41755f17756a07de4c0f8"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a35fd55b8b9b41755f17756a07de4c0f8" class="m-doc-self">Mesh</a>(</span><span class="m-doc-wrap">Mesh&amp;&amp; other)</span></span>
+            </h3>
+            <p>Moves the mesh.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Mesh to move.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="af3b7b4870c1d290bec48035b5a75bc55"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af3b7b4870c1d290bec48035b5a75bc55" class="m-doc-self">Mesh</a>(</span><span class="m-doc-wrap"><a href="#af6d78b15112a2dc8901edbc608d02bab" class="m-doc">ContextType</a> context) <span class="m-label m-info">explicit</span> </span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">context</td>
+                  <td>Distribution and execution association of an empty mesh.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ab603c8229c1ab708e3ed1c51c5628834"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="#af89a0e12fd374236d082ff1184e8d91d" class="m-doc">Mesh</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab603c8229c1ab708e3ed1c51c5628834" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="#af89a0e12fd374236d082ff1184e8d91d" class="m-doc">Mesh</a>&amp; other)</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Independent mesh snapshot.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>This mesh.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="af26e292ff63011c4a5ab2ec42e731a7b"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="#af89a0e12fd374236d082ff1184e8d91d" class="m-doc">Mesh</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af26e292ff63011c4a5ab2ec42e731a7b" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="#af89a0e12fd374236d082ff1184e8d91d" class="m-doc">Mesh</a>&amp;&amp; other)</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Mesh whose storage is moved.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>This mesh.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="abe96527ba30c27da10256cce6db2bc17"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">const <a href="#af6d78b15112a2dc8901edbc608d02bab" class="m-doc">ContextType</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abe96527ba30c27da10256cce6db2bc17" class="m-doc-self">getContext</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Distributed execution context.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a8b5e0a327347b62c0c7300f05d6d1baa"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">const <a href="#a9db228f6bac260a78de9a46e3230221b" class="m-doc">HostType</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8b5e0a327347b62c0c7300f05d6d1baa" class="m-doc-self">getHost</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Distributed host mesh.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aed4f73e45cb37f989166d3682d4bb29f"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_geometry_1_1_shard.html" class="m-doc">Shard</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aed4f73e45cb37f989166d3682d4bb29f" class="m-doc-self">getShard</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Host shard of this process.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a87f83a880134a6e8e40cd23c0173edc0"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">const <a href="#a2e7e61b08e286c642e5c4237edd50f70" class="m-doc">LocalType</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a87f83a880134a6e8e40cd23c0173edc0" class="m-doc-self">getLocal</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Resident mesh of the shard.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a2a4f93c7f01e2dbce72938dff096db67"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a984946d2deed4832d4ea7dd7d7c98666" class="m-doc">View</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2a4f93c7f01e2dbce72938dff096db67" class="m-doc-self">getView</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Borrowed resident data with the ownership of the entities; kernels must finish before owner replacement.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a53486a7f6f57fea408447b0bd7390c87"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_revision.html" class="m-doc">Revision</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a53486a7f6f57fea408447b0bd7390c87" class="m-doc-self">getRevision</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Gets the revision of the entities and of their attributes.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Revision of the resident shard.</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>The entities are those of the resident shard, whose revision this forwards; the ownership is fixed when this mesh is built.</p>
+          </div></section>
+          <section class="m-doc-details" id="a5e8b0323a58dbb304e05210fab45aec7"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">bool </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5e8b0323a58dbb304e05210fab45aec7" class="m-doc-self">isOwned</a>(</span><span class="m-doc-wrap">size_t d,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> i) const</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">d</td>
+                  <td>Entity dimension.</td>
+                </tr>
+                <tr>
+                  <td>i</td>
+                  <td>Local entity index.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Whether this process owns the entity.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a6f7b22045efba4c92b80c545b2100c1f"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">size_t </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6f7b22045efba4c92b80c545b2100c1f" class="m-doc-self">getDimension</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Gets the topological dimension.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Dimension of the cells of the shard.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a4d9beac127dd99963184dc8913b8902e"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">size_t </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4d9beac127dd99963184dc8913b8902e" class="m-doc-self">getGlobalDimension</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Topological dimension of the full distributed mesh.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aed88568a450d0ecedcc6be7d794d61f5"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">size_t </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aed88568a450d0ecedcc6be7d794d61f5" class="m-doc-self">getSpaceDimension</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Gets the dimension of the ambient space.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Number of coordinates of each vertex.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a6acee2e00d4773db5d4b6e3322f4933b"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a175aa3e395d3bc617fa7e7fd8382de54" class="m-doc">ConnectivityType</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6acee2e00d4773db5d4b6e3322f4933b" class="m-doc-self">getConnectivity</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Gets the connectivity of the shard.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Resident connectivity, in the local numbering.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ad9c4fea641641a0b035c181b545bbde1"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">const <a href="#a175aa3e395d3bc617fa7e7fd8382de54" class="m-doc">ConnectivityType</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad9c4fea641641a0b035c181b545bbde1" class="m-doc-self">getConnectivity</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Gets the connectivity of the shard.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Read-only resident connectivity, in the local numbering.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a1f247b875b87c087286298ad7d357b37"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">size_t </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1f247b875b87c087286298ad7d357b37" class="m-doc-self">getPolytopeCount</a>(</span><span class="m-doc-wrap">size_t d) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">d</td>
+                  <td>Entity dimension.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Local entity count, ghosts included.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ad35ac1c34eab205cfa6976c9c7f719dd"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">size_t </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad35ac1c34eab205cfa6976c9c7f719dd" class="m-doc-self">getPolytopeCount</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Polytope::<wbr />Type</a> g) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">g</td>
+                  <td>Reference family.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Local entity count, ghosts included.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a8fbe97ddbdab7653bd1fded1e1125145"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Polytope::<wbr />Type</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8fbe97ddbdab7653bd1fded1e1125145" class="m-doc-self">getGeometry</a>(</span><span class="m-doc-wrap">size_t d,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> i) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">d</td>
+                  <td>Entity dimension.</td>
+                </tr>
+                <tr>
+                  <td>i</td>
+                  <td>Local entity index.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference family of the entity.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a07118dd6dc984cb9260ae21fc61a4130"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">bool </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a07118dd6dc984cb9260ae21fc61a4130" class="m-doc-self">isSubMesh</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Whether the mesh is a submesh.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>False.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aa66d766684c6856007643ea05ce1479e"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_sub_mesh_base.html" class="m-doc">SubMeshBase</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa66d766684c6856007643ea05ce1479e" class="m-doc-self">asSubMesh</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Raises an exception, the mesh not being a submesh.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Never returns.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a1c114dba2d138c6b2bf26203fc4723f1"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_geometry_1_1_sub_mesh_base.html" class="m-doc">SubMeshBase</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1c114dba2d138c6b2bf26203fc4723f1" class="m-doc-self">asSubMesh</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Raises an exception, the mesh not being a submesh.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Never returns.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a99a85952681b52f53a23f003a1c8e95b"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="#af89a0e12fd374236d082ff1184e8d91d" class="m-doc">Mesh</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a99a85952681b52f53a23f003a1c8e95b" class="m-doc-self">scale</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> c) <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Scales local geometry and its owned host metadata, without communication.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">c</td>
+                  <td>Finite scaling factor.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>This mesh.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a8ec05300337f3be973feed2aedae2995"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">::<wbr />Rodin::<wbr />Math::<wbr />SpatialPoint</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8ec05300337f3be973feed2aedae2995" class="m-doc-self">getVertexCoordinates</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> vertex) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">vertex</td>
+                  <td>Local vertex index.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Coordinates of the vertex.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ab98e1bf36f1c6151e63cb3d9c444c7ac"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="#af89a0e12fd374236d082ff1184e8d91d" class="m-doc">Mesh</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab98e1bf36f1c6151e63cb3d9c444c7ac" class="m-doc-self">setVertexCoordinates</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> s,
+              size_t i) <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Updates one local coordinate in backend and host storage.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">idx</td>
+                  <td>Local vertex index.</td>
+                </tr>
+                <tr>
+                  <td>s</td>
+                  <td>New coordinate.</td>
+                </tr>
+                <tr>
+                  <td>i</td>
+                  <td>Coordinate index.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>This mesh, without communication.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a5bc07168668de3aff6ceef91ace0f403"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="#af89a0e12fd374236d082ff1184e8d91d" class="m-doc">Mesh</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5bc07168668de3aff6ceef91ace0f403" class="m-doc-self">setVertexCoordinates</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx,
+              const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">::<wbr />Rodin::<wbr />Math::<wbr />SpatialPoint</a>&amp; coords) <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Updates a local vertex in backend and host storage.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">idx</td>
+                  <td>Local vertex index.</td>
+                </tr>
+                <tr>
+                  <td>coords</td>
+                  <td>New coordinates.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>This mesh, without communication.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a526924c58188542bf4d92910b9bb3d68"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a>&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a526924c58188542bf4d92910b9bb3d68" class="m-doc-self">getAttribute</a>(</span><span class="m-doc-wrap">size_t d,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> i) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">d</td>
+                  <td>Entity dimension.</td>
+                </tr>
+                <tr>
+                  <td>i</td>
+                  <td>Local entity index.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Attribute of the entity, if any.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a5fc8cbe2794d872102c2de0669fb8313"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="#af89a0e12fd374236d082ff1184e8d91d" class="m-doc">Mesh</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5fc8cbe2794d872102c2de0669fb8313" class="m-doc-self">setAttribute</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; p,
+              const <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a>&gt;&amp; attr) <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Updates a local attribute in backend and host storage.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">p</td>
+                  <td>Dimension and local entity index.</td>
+                </tr>
+                <tr>
+                  <td>attr</td>
+                  <td>New attribute.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>This mesh, without communication.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ad32c4749d2f80a66a52acd3db291ae7b"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="#af89a0e12fd374236d082ff1184e8d91d" class="m-doc">Mesh</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad32c4749d2f80a66a52acd3db291ae7b" class="m-doc-self">setPolytopeTransformation</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt; p,
+              <a href="class_rodin_1_1_geometry_1_1_polytope_transformation.html" class="m-doc">PolytopeTransformation</a>* trans) <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Replaces a local map in backend storage and copies it into host metadata.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">p</td>
+                  <td>Dimension and local entity index.</td>
+                </tr>
+                <tr>
+                  <td>trans</td>
+                  <td>Map whose ownership is taken, or null for the default map.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>This mesh, without communication.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="af6dd4a21d0355903406ca80ff745b940"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_geometry_1_1_polytope_transformation.html" class="m-doc">PolytopeTransformation</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af6dd4a21d0355903406ca80ff745b940" class="m-doc-self">getPolytopeTransformation</a>(</span><span class="m-doc-wrap">size_t d,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> i) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">d</td>
+                  <td>Entity dimension.</td>
+                </tr>
+                <tr>
+                  <td>i</td>
+                  <td>Local entity index.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Geometric transformation of the entity.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a09c0e298e5ca8adabd2af2d4e788c4f0"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_geometry_1_1_polytope_quadrature.html" class="m-doc">PolytopeQuadrature</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a09c0e298e5ca8adabd2af2d4e788c4f0" class="m-doc-self">getQuadrature</a>(</span><span class="m-doc-wrap">size_t d,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> i,
+              const <a href="class_rodin_1_1_q_f_1_1_quadrature_formula.html" class="m-doc">QF::<wbr />QuadratureFormula</a>&amp; formula) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">d</td>
+                  <td>Entity dimension.</td>
+                </tr>
+                <tr>
+                  <td>i</td>
+                  <td>Local entity index.</td>
+                </tr>
+                <tr>
+                  <td>formula</td>
+                  <td>Reference quadrature formula.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Quadrature of the formula on the entity.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aa33c6cf03ddc1a84ed35e9db7d9132ac"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="#af89a0e12fd374236d082ff1184e8d91d" class="m-doc">Mesh</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa33c6cf03ddc1a84ed35e9db7d9132ac" class="m-doc-self">load</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; filename,
+              <a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfe" class="m-doc">IO::<wbr />FileFormat</a> fmt) <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Collectively loads per-rank shards and builds their backend storage.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">filename</td>
+                  <td>Rank-local input path.</td>
+                </tr>
+                <tr>
+                  <td>fmt</td>
+                  <td>Mesh format.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>This mesh. Existing spaces must be rebuilt after replacement.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a8b205faa0d943ff483f29db53af0be47"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="#af89a0e12fd374236d082ff1184e8d91d" class="m-doc">Mesh</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8b205faa0d943ff483f29db53af0be47" class="m-doc-self">upload</a>(</span><span class="m-doc-wrap">const <a href="#a9db228f6bac260a78de9a46e3230221b" class="m-doc">HostType</a>&amp; source)</span></span>
+            </h3>
+            <p>Replaces local backend storage and distributed metadata from a host mesh.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">source</td>
+                  <td>Compatible distributed mesh, unchanged by this operation.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>This mesh, after transfer completion, without communication. Dependent spaces must be rebuilt after topology replacement.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a97ff81b22adc1b878eed80adb24e57d5"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a9db228f6bac260a78de9a46e3230221b" class="m-doc">HostType</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a97ff81b22adc1b878eed80adb24e57d5" class="m-doc-self">download</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Independent distributed host snapshot, without communication.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a11d579cdf1bc0ff23336bf0f1073f522"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a11d579cdf1bc0ff23336bf0f1073f522" class="m-doc-self">download</a>(</span><span class="m-doc-wrap"><a href="#a9db228f6bac260a78de9a46e3230221b" class="m-doc">HostType</a>&amp; destination) const</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">destination</td>
+                  <td>Distributed host destination, replaced without communication.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a2417564814ca82044963977fe0daf963"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2417564814ca82044963977fe0daf963" class="m-doc-self">save</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; path,
+              <a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfe" class="m-doc">IO::<wbr />FileFormat</a> format) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">path</td>
+                  <td>Destination.</td>
+                </tr>
+                <tr>
+                  <td>format</td>
+                  <td>File format. Saves the distributed host mesh.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a7e96942960b71276876721cb5d9951ba"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_face_iterator.html" class="m-doc">FaceIterator</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7e96942960b71276876721cb5d9951ba" class="m-doc-self">getBoundary</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Owned boundary faces, in the local numbering.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aa05fff103c9d811467a9a2a1a3e06a9e"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_face_iterator.html" class="m-doc">FaceIterator</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa05fff103c9d811467a9a2a1a3e06a9e" class="m-doc-self">getInterface</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Owned interface faces, in the local numbering.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a4405d79a195b60a5881e1c7eeb32f01e"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_cell_iterator.html" class="m-doc">CellIterator</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4405d79a195b60a5881e1c7eeb32f01e" class="m-doc-self">getCell</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Iterator over the local cells, ghosts included.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="adb7295b0f32fca58fd204c47925dab47"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_face_iterator.html" class="m-doc">FaceIterator</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adb7295b0f32fca58fd204c47925dab47" class="m-doc-self">getFace</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Iterator over the local faces, ghosts included.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a209eaced7df93add96aea892847cdb47"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_vertex_iterator.html" class="m-doc">VertexIterator</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a209eaced7df93add96aea892847cdb47" class="m-doc-self">getVertex</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Iterator over the local vertices, ghosts included.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="afe4ac0131ad5294a2c1de18ae564117f"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_polytope_iterator.html" class="m-doc">PolytopeIterator</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afe4ac0131ad5294a2c1de18ae564117f" class="m-doc-self">getPolytope</a>(</span><span class="m-doc-wrap">size_t dimension) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">dimension</td>
+                  <td>Entity dimension.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Iterator over the local entities of that dimension, ghosts included.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ac922f1dcd91a961f79843aefa747c100"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_cell_iterator.html" class="m-doc">CellIterator</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac922f1dcd91a961f79843aefa747c100" class="m-doc-self">getCell</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">idx</td>
+                  <td>Local cell index.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Iterator starting at the cell.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a51f1d81922a0f97f1f00b1b211664a36"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_face_iterator.html" class="m-doc">FaceIterator</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a51f1d81922a0f97f1f00b1b211664a36" class="m-doc-self">getFace</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">idx</td>
+                  <td>Local face index.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Iterator starting at the face.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ae184fbe0b80fa65925e7cf3e5d4d61ed"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_vertex_iterator.html" class="m-doc">VertexIterator</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae184fbe0b80fa65925e7cf3e5d4d61ed" class="m-doc-self">getVertex</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">idx</td>
+                  <td>Local vertex index.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Iterator starting at the vertex.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a4c332b1572c6657c0e20c7362092e294"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_polytope_iterator.html" class="m-doc">PolytopeIterator</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4c332b1572c6657c0e20c7362092e294" class="m-doc-self">getPolytope</a>(</span><span class="m-doc-wrap">size_t dimension,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">dimension</td>
+                  <td>Entity dimension.</td>
+                </tr>
+                <tr>
+                  <td>idx</td>
+                  <td>Local entity index.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Iterator starting at the entity.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aca7199fa0b51be29e1bab9fd08dd75c0"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">bool </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aca7199fa0b51be29e1bab9fd08dd75c0" class="m-doc-self">isInterface</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> face) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">face</td>
+                  <td>Local face index.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Whether the face lies between two cells of the distributed mesh.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a4d5058a3237a131ae1968ca18e80ffae"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">bool </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4d5058a3237a131ae1968ca18e80ffae" class="m-doc-self">isBoundary</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> face) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">face</td>
+                  <td>Local face index.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Whether the face lies on the boundary of the distributed mesh.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aedb17bb61a414bba468c922efb42e0d1"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aedb17bb61a414bba468c922efb42e0d1" class="m-doc-self">getVolume</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Gets the volume of the distributed mesh.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Measure of the three-dimensional entities over all processes.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a5f74ae08ef3f29494eb0257e0d7b3731"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5f74ae08ef3f29494eb0257e0d7b3731" class="m-doc-self">getVolume</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a> attribute) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">attribute</td>
+                  <td>Attribute.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Measure of the three-dimensional entities with that attribute over all processes.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ac02a438914dedb80c21204be9e18f549"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac02a438914dedb80c21204be9e18f549" class="m-doc-self">getVolume</a>(</span><span class="m-doc-wrap">const <a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a>&gt;&amp; attributes) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">attributes</td>
+                  <td>Attributes.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Measure of the three-dimensional entities with one of the attributes over all processes.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a7f5708e7b511ba4460df9947caf767af"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7f5708e7b511ba4460df9947caf767af" class="m-doc-self">getArea</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Gets the area of the distributed mesh.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Measure of the two-dimensional entities over all processes.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ac88c6f869d1d2cb0c74df8b97a893a02"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac88c6f869d1d2cb0c74df8b97a893a02" class="m-doc-self">getArea</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a> attribute) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">attribute</td>
+                  <td>Attribute.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Measure of the two-dimensional entities with that attribute over all processes.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a09b24f7d5ca47ee2b390ba6b06cb7de0"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a09b24f7d5ca47ee2b390ba6b06cb7de0" class="m-doc-self">getArea</a>(</span><span class="m-doc-wrap">const <a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a>&gt;&amp; attributes) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">attributes</td>
+                  <td>Attributes.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Measure of the two-dimensional entities with one of the attributes over all processes.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="afd5d9204c1312cf4caecbb1cc9d76d75"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afd5d9204c1312cf4caecbb1cc9d76d75" class="m-doc-self">getMeasure</a>(</span><span class="m-doc-wrap">size_t d) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">d</td>
+                  <td>Entity dimension.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Measure of the entities of that dimension over all processes.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a999d43a57a93d4a974f2b60bcf863803"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a999d43a57a93d4a974f2b60bcf863803" class="m-doc-self">getMeasure</a>(</span><span class="m-doc-wrap">size_t d,
+              <a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a> attribute) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">d</td>
+                  <td>Entity dimension.</td>
+                </tr>
+                <tr>
+                  <td>attribute</td>
+                  <td>Attribute.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Measure of the entities of that dimension with the attribute over all processes.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="af2ec58a1502b3451dde4a9d7ddecdb99"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af2ec58a1502b3451dde4a9d7ddecdb99" class="m-doc-self">getMeasure</a>(</span><span class="m-doc-wrap">size_t d,
+              const <a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a>&gt;&amp; attributes) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">d</td>
+                  <td>Entity dimension.</td>
+                </tr>
+                <tr>
+                  <td>attributes</td>
+                  <td>Attributes.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Measure of the entities of that dimension with one of the attributes over all processes.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a2d613557ba40614c2d86e226e8cf1fc4"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2d613557ba40614c2d86e226e8cf1fc4" class="m-doc-self">getPerimeter</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Gets the perimeter of the distributed mesh.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Measure of the boundary over all processes.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a040bd1ac58bb84a4572516aea7997dd7"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a040bd1ac58bb84a4572516aea7997dd7" class="m-doc-self">getPerimeter</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a> attribute) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">attribute</td>
+                  <td>Attribute.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Measure of the boundary faces with that attribute over all processes.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ad18b3d1147edf499d8fe0e90c9f721ad"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad18b3d1147edf499d8fe0e90c9f721ad" class="m-doc-self">getPerimeter</a>(</span><span class="m-doc-wrap">const <a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a>&gt;&amp; attributes) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">attributes</td>
+                  <td>Attributes.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Measure of the boundary faces with one of the attributes over all processes.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+        </section>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">&hellip;</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form>
+            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript.</noscript>
+          <div id="search-help" class="m-text m-dim m-text-center">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
+            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v2-eeb63e0c3a5e.js"></script>
+<script src="searchdata-v2.js" async="async"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+  <a class="rodin-ci-link" href="ci-index.html" aria-label="CI" title="CI"><span class="rodin-ci-mark" aria-hidden="true"></span><span class="rodin-ci-label">CI</span></a>
+</div>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>

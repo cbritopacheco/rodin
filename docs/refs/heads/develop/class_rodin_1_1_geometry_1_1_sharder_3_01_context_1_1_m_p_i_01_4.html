@@ -205,7 +205,7 @@
                 </tr>
               </tfoot>
             </table>
-<p>Only the root rank performs non-blocking sends of each shard to its respective owner rank. Other ranks do nothing.</p>
+<p>Only the root rank sends each shard to its owner rank, one after the other, and releases it once sent, so that only the shard of the root remains. Other ranks do nothing, and receive their shard in gather().</p>
           </div></section>
           <section class="m-doc-details" id="a72c98fb79b56d58b9db66d2eb62e9f46"><div>
             <h3>
@@ -273,7 +273,7 @@
     </div>
   </div>
 </div>
-<script src="search-v2-27108c4bc94e.js"></script>
+<script src="search-v2-eeb63e0c3a5e.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">

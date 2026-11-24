@@ -85,7 +85,16 @@
             </tr>
           </tbody>
         </table>
-<table class="m-table m-fullwidth rodin-specializations"><thead><tr><th>Specialization</th><th>Description</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_solid_1_1_internal_virtual_work_residual_3_01_law_derived_00_01_test_function_ty0433cda0d2a00fb84dede48437c734e7.html"><code>LawDerived, TestFunctionType, DisplacementType, PressureType</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<table class="m-table m-fullwidth rodin-specializations"><thead><tr><th>Specialization</th><th>Description</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_solid_1_1_internal_virtual_work_residual_3_01_law_00_01_variational_1_1_test_fun6be492f947246a36ec31eba220f71222.html"><code>Law, Variational::TestFunction&lt;TestFES&gt;, Variational::GridFunction&lt;StateFES, …&gt;</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="nc">Kokkos</span><span class="o">::</span><span class="n">Variational</span><span class="o">::</span><span class="nc">HyperElasticLaw</span><span class="w"> </span><span class="n">Law</span><span class="p">,</span>
+<span class="w">  </span><span class="nc">Kokkos</span><span class="o">::</span><span class="n">Variational</span><span class="o">::</span><span class="nc">VectorSpace</span><span class="w"> </span><span class="n">TestFES</span><span class="p">,</span>
+<span class="w">  </span><span class="nc">Kokkos</span><span class="o">::</span><span class="n">Variational</span><span class="o">::</span><span class="nc">VectorSpace</span><span class="w"> </span><span class="n">StateFES</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Data</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_solid_1_1_internal_virtual_work_residual_3_01_law_00_01_variational_1_1_test_fun6be492f947246a36ec31eba220f71222.html#ad8c0f23a6c6586ef14d2ed76b19ccc3a"><span class="nc">InternalVirtualWorkResidual</span></a><span class="o">&lt;</span>
+<span class="w">  </span><span class="n">Law</span><span class="p">,</span>
+<span class="w">  </span><span class="n">Variational</span><span class="o">::</span><a href="class_rodin_1_1_variational_1_1_test_function.html"><span class="nc">TestFunction</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">TestFES</span><span class="w"> </span><span class="o">&gt;</span><span class="p">,</span>
+<span class="w">  </span><span class="n">Variational</span><span class="o">::</span><a href="class_rodin_1_1_variational_1_1_grid_function.html"><span class="nc">GridFunction</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">StateFES</span><span class="p">,</span><span class="w"> </span><span class="nc">Data</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="k">final</span><span class="p">;</span>
+</pre></details></td><td>Device residual of the internal virtual work of a hyperelastic law of Kokkos::View.</td></tr><tr><td><a href="class_rodin_1_1_solid_1_1_internal_virtual_work_residual_3_01_law_derived_00_01_test_function_ty0433cda0d2a00fb84dede48437c734e7.html"><code>LawDerived, TestFunctionType, DisplacementType, PressureType</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
 <span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">LawDerived</span><span class="p">,</span>
 <span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">TestFunctionType</span><span class="p">,</span>
 <span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">DisplacementType</span><span class="p">,</span>
@@ -103,7 +112,15 @@
 <span class="w">  </span><span class="n">LawDerived</span><span class="p">,</span>
 <span class="w">  </span><span class="nc">TestFunctionType</span><span class="p">,</span>
 <span class="w">  </span><span class="n">DisplacementType</span><span class="o">&gt;</span><span class="w"> </span><span class="k">final</span><span class="p">;</span>
-</pre></details></td><td>Momentum residual (pure displacement formulation).</td></tr></tbody></table>
+</pre></details></td><td>Momentum residual (pure displacement formulation).</td></tr><tr><td><a href="class_rodin_1_1_solid_1_1_internal_virtual_work_residual_3_01_neo_hookean_00_01_variational_1_1_ae88fd763c137f9b4424612c29ce6897.html"><code>NeoHookean, Variational::TestFunction&lt;TestFES&gt;, Variational::GridFunction&lt;StateFES, …&gt;</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="nc">Kokkos</span><span class="o">::</span><span class="n">Variational</span><span class="o">::</span><span class="nc">VectorSpace</span><span class="w"> </span><span class="n">TestFES</span><span class="p">,</span>
+<span class="w">  </span><span class="nc">Kokkos</span><span class="o">::</span><span class="n">Variational</span><span class="o">::</span><span class="nc">VectorSpace</span><span class="w"> </span><span class="n">StateFES</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Data</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_solid_1_1_internal_virtual_work_residual_3_01_neo_hookean_00_01_variational_1_1_ae88fd763c137f9b4424612c29ce6897.html#ad8c0f23a6c6586ef14d2ed76b19ccc3a"><span class="nc">InternalVirtualWorkResidual</span></a><span class="o">&lt;</span>
+<span class="w">  </span><a href="class_rodin_1_1_solid_1_1_neo_hookean.html"><span class="nc">NeoHookean</span></a><span class="p">,</span>
+<span class="w">  </span><span class="n">Variational</span><span class="o">::</span><a href="class_rodin_1_1_variational_1_1_test_function.html"><span class="nc">TestFunction</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">TestFES</span><span class="w"> </span><span class="o">&gt;</span><span class="p">,</span>
+<span class="w">  </span><span class="n">Variational</span><span class="o">::</span><a href="class_rodin_1_1_variational_1_1_grid_function.html"><span class="nc">GridFunction</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">StateFES</span><span class="p">,</span><span class="w"> </span><span class="nc">Data</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="k">final</span><span class="p">;</span>
+</pre></details></td><td>Device residual of the internal virtual work of the Neo-Hookean law.</td></tr></tbody></table>
       </div>
     </div>
   </div>
@@ -142,7 +159,7 @@
     </div>
   </div>
 </div>
-<script src="search-v2-27108c4bc94e.js"></script>
+<script src="search-v2-eeb63e0c3a5e.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">

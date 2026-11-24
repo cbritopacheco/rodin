@@ -76,9 +76,9 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md554">Mesh Creation</a></li>
-            <li><a href="#autotoc_md555">Mesh Operations</a></li>
-            <li><a href="#autotoc_md556">Polytope types</a></li>
+            <li><a href="#autotoc_md581">Mesh Creation</a></li>
+            <li><a href="#autotoc_md582">Mesh Operations</a></li>
+            <li><a href="#autotoc_md583">Polytope types</a></li>
             <li>
               Reference
               <ul>
@@ -117,7 +117,7 @@
 <use x='215.507414' y='-2.988792' xlink:href='#eq1-g4-41'/>
 <use x='220.05974' y='-2.988792' xlink:href='#eq1-g3-58'/>
 </g>
-</svg></div><p><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh&lt;Context::<wbr />MPI&gt;</a> and <a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">getConnectivity().compute(d1, d2)</a> describe mesh entities and their incidence relations. <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a>, <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>, and <a href="class_rodin_1_1_geometry_1_1_polytope_transformation.html" class="m-doc">PolytopeTransformation</a> connect reference elements to physical geometry for integration, field evaluation, mesh extraction, and deformation.</p><p>Key classes include:</p><ul><li><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh&lt;Context::<wbr />MPI&gt;</a> — The primary mesh class supporting triangular, quadrilateral, tetrahedral, and hexahedral meshes</li><li><a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a> — Geometric entities (vertices, edges, faces, cells) with type enumeration</li><li><a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">getConnectivity().compute(d1, d2)</a> — Incidence relations between polytopes of different dimensions</li><li><a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a> — Evaluation point for grid functions, bundling reference coordinates, physical coordinates, Jacobian data, and the owning polytope</li></ul><section id="autotoc_md554"><h2><a href="#autotoc_md554">Mesh Creation</a></h2><table class="m-table"><thead><tr><th>Method</th><th>Description</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh::<wbr />UniformGrid(type, shape)</a></td><td>Structured grid on the unit hypercube</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh::<wbr />Box(faceType, shape)</a></td><td>Surface mesh (boundary of unit box)</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh::<wbr />Build()</a></td><td>Programmatic construction via Builder pattern</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">mesh.load(file, format)</a></td><td>Load from MFEM, MEDIT, or HDF5</td></tr></tbody></table></section><section id="autotoc_md555"><h2><a href="#autotoc_md555">Mesh Operations</a></h2><table class="m-table"><thead><tr><th>Method</th><th>Description</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">getConnectivity().compute(d1, d2)</a></td><td>Compute incidence relation <svg class="m-math" style="width: 4.138em; height: 1.052em; vertical-align: -0.187em;" viewBox="0 -8.302191 39.728745 10.095454">
+</svg></div><p><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh&lt;Context::<wbr />MPI&gt;</a> and <a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">getConnectivity().compute(d1, d2)</a> describe mesh entities and their incidence relations. <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a>, <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>, and <a href="class_rodin_1_1_geometry_1_1_polytope_transformation.html" class="m-doc">PolytopeTransformation</a> connect reference elements to physical geometry for integration, field evaluation, mesh extraction, and deformation.</p><p>Key classes include:</p><ul><li><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh&lt;Context::<wbr />MPI&gt;</a> — The primary mesh class supporting triangular, quadrilateral, tetrahedral, and hexahedral meshes</li><li><a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a> — Geometric entities (vertices, edges, faces, cells) with type enumeration</li><li><a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">getConnectivity().compute(d1, d2)</a> — Incidence relations between polytopes of different dimensions</li><li><a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a> — Evaluation point for grid functions, bundling reference coordinates, physical coordinates, Jacobian data, and the owning polytope</li></ul><section id="autotoc_md581"><h2><a href="#autotoc_md581">Mesh Creation</a></h2><table class="m-table"><thead><tr><th>Method</th><th>Description</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh::<wbr />UniformGrid(type, shape)</a></td><td>Structured grid on the unit hypercube</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh::<wbr />Box(faceType, shape)</a></td><td>Surface mesh (boundary of unit box)</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh::<wbr />Build()</a></td><td>Programmatic construction via Builder pattern</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">mesh.load(file, format)</a></td><td>Load from MFEM, MEDIT, or HDF5</td></tr></tbody></table></section><section id="autotoc_md582"><h2><a href="#autotoc_md582">Mesh Operations</a></h2><table class="m-table"><thead><tr><th>Method</th><th>Description</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">getConnectivity().compute(d1, d2)</a></td><td>Compute incidence relation <svg class="m-math" style="width: 4.138em; height: 1.052em; vertical-align: -0.187em;" viewBox="0 -8.302191 39.728745 10.095454">
 <title>
 $ d_1 \to d_2 $
 </title>
@@ -134,7 +134,7 @@ $ d_1 \to d_2 $
 <use x='29.411869' y='0' xlink:href='#eq2-g1-100'/>
 <use x='35.494562' y='1.793263' xlink:href='#eq2-g2-50'/>
 </g>
-</svg></td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">scale(factor)</a></td><td>Scale all vertex coordinates by a scalar factor</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">displace(vectorFunction)</a></td><td>Apply a displacement field to all vertices</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">skin()</a></td><td>Extract the boundary surface mesh</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">getDimension()</a></td><td>Topological dimension (2 for triangles, 3 for tetrahedra)</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">getSpaceDimension()</a></td><td>Ambient space dimension (&gt;= topological dimension)</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">getVertexCount()</a></td><td>Number of vertices</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">getCellCount()</a></td><td>Number of cells</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">getVolume()</a></td><td>Sum of measures of the three-dimensional entities</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">getArea()</a></td><td>Sum of measures of the two-dimensional entities</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">getPerimeter()</a></td><td>Total perimeter (or surface area) of the domain boundary</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">getVertex() / getCell() / getBoundary()</a></td><td>Polytope iterators</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">getVertexCoordinates(idx)</a></td><td>Get coordinates of a vertex</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">setAttribute({dim, idx}, attr)</a></td><td>Set attribute of a polytope (for BC labeling)</td></tr></tbody></table></section><section id="autotoc_md556"><h2><a href="#autotoc_md556">Polytope types</a></h2><table class="m-table"><thead><tr><th>Type</th><th>Dimension</th><th>Description</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Point</a></td><td>0</td><td>Vertex</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Segment</a></td><td>1</td><td>Edge</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Triangle</a></td><td>2</td><td>3-vertex face/cell</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Quadrilateral</a></td><td>2</td><td>4-vertex face/cell</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Tetrahedron</a></td><td>3</td><td>4-vertex cell</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Hexahedron</a></td><td>3</td><td>8-vertex cell</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Wedge</a></td><td>3</td><td>Triangular prism (6 vertices)</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Pyramid</a></td><td>3</td><td>Square-base pyramid (5 vertices)</td></tr></tbody></table><pre class="m-code"><span class="nc">Mesh</span><span class="w"> </span><span class="n">mesh</span><span class="p">;</span>
+</svg></td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">scale(factor)</a></td><td>Scale all vertex coordinates by a scalar factor</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">displace(vectorFunction)</a></td><td>Apply a displacement field to all vertices</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">skin()</a></td><td>Extract the boundary surface mesh</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">getDimension()</a></td><td>Topological dimension (2 for triangles, 3 for tetrahedra)</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">getSpaceDimension()</a></td><td>Ambient space dimension (&gt;= topological dimension)</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">getVertexCount()</a></td><td>Number of vertices</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">getCellCount()</a></td><td>Number of cells</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">getVolume()</a></td><td>Sum of measures of the three-dimensional entities</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">getArea()</a></td><td>Sum of measures of the two-dimensional entities</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">getPerimeter()</a></td><td>Total perimeter (or surface area) of the domain boundary</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">getVertex() / getCell() / getBoundary()</a></td><td>Polytope iterators</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">getVertexCoordinates(idx)</a></td><td>Get coordinates of a vertex</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">setAttribute({dim, idx}, attr)</a></td><td>Set attribute of a polytope (for BC labeling)</td></tr></tbody></table></section><section id="autotoc_md583"><h2><a href="#autotoc_md583">Polytope types</a></h2><table class="m-table"><thead><tr><th>Type</th><th>Dimension</th><th>Description</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Point</a></td><td>0</td><td>Vertex</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Segment</a></td><td>1</td><td>Edge</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Triangle</a></td><td>2</td><td>3-vertex face/cell</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Quadrilateral</a></td><td>2</td><td>4-vertex face/cell</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Tetrahedron</a></td><td>3</td><td>4-vertex cell</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Hexahedron</a></td><td>3</td><td>8-vertex cell</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Wedge</a></td><td>3</td><td>Triangular prism (6 vertices)</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Pyramid</a></td><td>3</td><td>Square-base pyramid (5 vertices)</td></tr></tbody></table><pre class="m-code"><span class="nc">Mesh</span><span class="w"> </span><span class="n">mesh</span><span class="p">;</span>
 <span class="n">mesh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">UniformGrid</span><span class="p">(</span><span class="nc">Polytope</span><span class="o">::</span><span class="nc">Type</span><span class="o">::</span><span class="no">Triangle</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="mi">16</span><span class="p">,</span><span class="w"> </span><span class="mi">16</span><span class="p">});</span>
 <span class="n">mesh</span><span class="p">.</span><span class="n">getConnectivity</span><span class="p">().</span><span class="n">compute</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">);</span><span class="w"> </span><span class="c1">// Compute face-to-cell connectivity</span></pre><aside class="m-note m-default"><h4>See also</h4><p><a href="guides-meshes.html" class="m-doc">Meshes guide</a></p><p><a href="guides-polytopes.html" class="m-doc">Polytopes guide</a></p><p><a href="guides-connectivity.html" class="m-doc">Connectivity guide</a></p></aside></section>
         <section id="namespaces">
@@ -142,6 +142,8 @@ $ d_1 \to d_2 $
           <dl class="m-doc">
             <dt>namespace <a href="namespace_rodin_1_1_geometry_1_1_euclidean.html" class="m-doc">Euclidean</a></dt>
             <dd>Module for dealing with Euclidean geometries.</dd>
+            <dt>namespace <a href="namespace_rodin_1_1_geometry_1_1_ordering.html" class="m-doc">Ordering</a></dt>
+            <dd>Concrete algorithms for ordering local mesh vertices.</dd>
           </dl>
         </section>
         <section id="nested-classes">
@@ -164,6 +166,11 @@ $ d_1 \to d_2 $
             </dt>
             <dd>Abstract base class for mesh connectivity.</dd>
             
+            <dt>
+              <div class="m-doc-template">template&lt;class Derived&gt;</div>
+              class <a href="class_rodin_1_1_geometry_1_1_space_filling_curve_ordering.html" class="m-doc">SpaceFillingCurveOrdering</a>
+            </dt>
+            <dd>Bounding-box quantization and sorting for spatial ordering policies.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class T&gt;</div>
               class <a href="class_rodin_1_1_geometry_1_1_geometry_indexed.html" class="m-doc">GeometryIndexed</a>
@@ -194,7 +201,15 @@ $ d_1 \to d_2 $
             <dd>Template for connectivity information.<details class="rodin-specialization-disclosure"><summary>See specializations</summary><table class="m-table m-fullwidth rodin-specializations"><thead><tr><th>Specialization</th><th>Description</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_geometry_1_1_connectivity_3_01_context_1_1_local_01_4.html"><code>Context::Local</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;&gt;</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">Connectivity</span><span class="o">&lt;</span>
 <span class="w">  </span><span class="nc">Context</span><span class="o">::</span><span class="nc">Local</span><span class="o">&gt;</span><span class="w"> </span><span class="k">final</span><span class="p">;</span>
-</pre></details></td><td>Mesh connectivity for sequential (local) meshes.</td></tr></tbody></table></details></dd>
+</pre></details></td><td>Mesh connectivity for sequential (local) meshes.</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_connectivity_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_contee09b026919fb84a1b9b1dd6a17073a2f.html"><code>Rodin::Context::Kokkos&lt;…&gt;</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Backend</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_geometry_1_1_connectivity_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_contee09b026919fb84a1b9b1dd6a17073a2f.html#a4fe1a1f8d5cd5fdef2a634865e7264dc"><span class="nc">Connectivity</span></a><span class="o">&lt;</span>
+<span class="w">  </span><span class="n">Rodin</span><span class="o">::</span><span class="nc">Context</span><span class="o">::</span><a href="class_rodin_1_1_context_1_1_kokkos.html"><span class="nc">Kokkos</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">Rodin</span><span class="o">::</span><span class="nc">Context</span><span class="o">::</span><a href="class_rodin_1_1_context_1_1_local.html"><span class="nc">Local</span></a><span class="p">,</span><span class="w"> </span><span class="nc">Backend</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="k">final</span><span class="p">;</span>
+</pre></details></td><td>Resident Kokkos graded incidence complex with device computation.</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_connectivity_3_01_context_1_1_kokkos_3_01_context_1_1_m_p_i_00_01_backend_01_4_01_4.html"><code>Context::Kokkos&lt;Context::MPI, Backend&gt;</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Backend</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_geometry_1_1_connectivity_3_01_context_1_1_kokkos_3_01_context_1_1_m_p_i_00_01_backend_01_4_01_4.html#a2f876a8810a80328e6eae635a3d321a4"><span class="nc">Connectivity</span></a><span class="o">&lt;</span>
+<span class="w">  </span><span class="nc">Context</span><span class="o">::</span><a href="class_rodin_1_1_context_1_1_kokkos.html"><span class="nc">Kokkos</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">Context</span><span class="o">::</span><span class="nc">MPI</span><span class="p">,</span><span class="w"> </span><span class="nc">Backend</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="k">final</span><span class="p">;</span>
+</pre></details></td><td>Borrows a distributed shard&#x27;s incidence relations.</td></tr></tbody></table></details></dd>
             <dt>
               <div class="m-doc-template">template&lt;class ContextType = <a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a>&gt;</div>
               class <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>
@@ -202,7 +217,15 @@ $ d_1 \to d_2 $
             <dd>Represents a polyhedral complex.<details class="rodin-specialization-disclosure"><summary>See specializations</summary><table class="m-table m-fullwidth rodin-specializations"><thead><tr><th>Specialization</th><th>Description</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html"><code>Context::Local</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;&gt;</span>
 <span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#a2a23c7c0c4e0da252b7bc0e13b6f81d8"><span class="nc">Mesh</span></a><span class="o">&lt;</span>
 <span class="w">  </span><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#a60060cb372908b6172a8a9c07a4120be"><span class="nc">Context</span></a><span class="o">::</span><a href="class_rodin_1_1_context_1_1_local.html"><span class="nc">Local</span></a><span class="o">&gt;</span><span class="p">;</span>
-</pre></details></td><td>Represents the subdivision of some domain into faces of (possibly) different geometries.</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html"><code>Context::MPI</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;&gt;</span>
+</pre></details></td><td>Represents the subdivision of some domain into faces of (possibly) different geometries.</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_context_1_1_local_00_01_backend_01_4_01_4.html"><code>Rodin::Context::Kokkos&lt;…&gt;</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Backend</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_context_1_1_local_00_01_backend_01_4_01_4.html#a70a356db196cbe76ce1c3267df97505b"><span class="nc">Mesh</span></a><span class="o">&lt;</span>
+<span class="w">  </span><span class="n">Rodin</span><span class="o">::</span><span class="nc">Context</span><span class="o">::</span><a href="class_rodin_1_1_context_1_1_kokkos.html"><span class="nc">Kokkos</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">Rodin</span><span class="o">::</span><span class="nc">Context</span><span class="o">::</span><a href="class_rodin_1_1_context_1_1_local.html"><span class="nc">Local</span></a><span class="p">,</span><span class="w"> </span><span class="nc">Backend</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="k">final</span><span class="p">;</span>
+</pre></details></td><td>Local mesh whose authoritative data resides in Kokkos memory.</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_context_1_1_m_p_i_00_01_backend_01_4_01_4.html"><code>Rodin::Context::Kokkos&lt;Rodin::Context::MPI, …&gt;</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Backend</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_context_1_1_m_p_i_00_01_backend_01_4_01_4.html#af89a0e12fd374236d082ff1184e8d91d"><span class="nc">Mesh</span></a><span class="o">&lt;</span>
+<span class="w">  </span><span class="n">Rodin</span><span class="o">::</span><span class="nc">Context</span><span class="o">::</span><a href="class_rodin_1_1_context_1_1_kokkos.html"><span class="nc">Kokkos</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">Rodin</span><span class="o">::</span><span class="nc">Context</span><span class="o">::</span><a href="class_rodin_1_1_context_1_1_m_p_i.html"><span class="nc">MPI</span></a><span class="p">,</span><span class="w"> </span><span class="nc">Backend</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="k">final</span><span class="p">;</span>
+</pre></details></td><td>Shard of a distributed mesh resident in a Kokkos memory space.</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html"><code>Context::MPI</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;&gt;</span>
 <span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html#ae6d83e8725a8c73cd8c6e400cf9d9d33"><span class="nc">Mesh</span></a><span class="o">&lt;</span>
 <span class="w">  </span><span class="nc">Context</span><span class="o">::</span><a href="class_rodin_1_1_context_1_1_m_p_i.html"><span class="nc">MPI</span></a><span class="o">&gt;</span><span class="p">;</span>
 </pre></details></td><td>Distributed mesh specialization for MPI contexts.</td></tr></tbody></table></details></dd>
@@ -355,6 +378,10 @@ $ d_1 \to d_2 $
               class <a href="class_rodin_1_1_geometry_1_1_sub_mesh_base.html" class="m-doc">SubMeshBase</a>
             </dt>
             <dd>Abstract base class for SubMesh implementations.</dd>
+            
+            
+            
+            
             
             
             
@@ -530,6 +557,15 @@ $ d_1 \to d_2 $
               const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a>&amp; rhs) -&gt; bool</span>
             </dt>
             <dd>Less-than comparison for polytopes.</dd>
+            <dt><a href="#a0dfff12603061fe025c9ebccc48a8727" class="m-doc">Mesh</a></dt><dd>Deduces an empty distributed resident mesh.<details class="rodin-declaration-disclosure"><summary>See declaration</summary><div class="rodin-overview-declaration">
+              <div class="m-doc-template">template&lt;class Backend&gt;</div>
+              <span class="m-doc-wrap-bumper"><a href="#a0dfff12603061fe025c9ebccc48a8727" class="m-doc">Mesh</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_context_1_1_kokkos.html" class="m-doc">Rodin::<wbr />Context::<wbr />Kokkos</a>&lt;<a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Rodin::<wbr />Context::<wbr />MPI</a>, Backend&gt; context) -&gt; Mesh&lt; Rodin::Context::Kokkos&lt; Rodin::Context::MPI, Backend &gt; &gt;</span>
+            </div></details></dd>
+            <dt><a href="#a3c401da7705827372c3da794e734896f" class="m-doc">Mesh</a></dt><dd>Deduces the distributed resident mesh of a host snapshot.<details class="rodin-declaration-disclosure"><summary>See declaration</summary><div class="rodin-overview-declaration">
+              <div class="m-doc-template">template&lt;class Backend&gt;</div>
+              <span class="m-doc-wrap-bumper"><a href="#a3c401da7705827372c3da794e734896f" class="m-doc">Mesh</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_context_1_1_kokkos.html" class="m-doc">Rodin::<wbr />Context::<wbr />Kokkos</a>&lt;<a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Rodin::<wbr />Context::<wbr />MPI</a>, Backend&gt; context,
+              const Mesh&lt;<a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Rodin::<wbr />Context::<wbr />MPI</a>&gt;&amp; host) -&gt; Mesh&lt; Rodin::Context::Kokkos&lt; Rodin::Context::MPI, Backend &gt; &gt;</span>
+            </div></details></dd>
             <dt>
               <span class="m-doc-wrap-bumper"><a href="#a7c024ea7e23c09a13f3431386e3a7aad" class="m-doc">Mesh</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Context::<wbr />MPI</a>&amp; context) -&gt; Mesh&lt; Context::MPI &gt;</span>
             </dt>
@@ -542,7 +578,7 @@ $ d_1 \to d_2 $
             <h3>
               enum class Rodin::<wbr />Geometry::<wbr /><a href="#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc-self">Region</a>
               
-            </h3><p class="rodin-reference-include">Defined in <a href="_region_8h.html"><code>Rodin/Geometry/Region.h</code></a></p>
+            </h3><p class="rodin-reference-include">Defined in <a href="_geometry_2_region_8h.html"><code>Rodin/Geometry/Region.h</code></a></p>
             <p>Enumeration of standard mesh regions.</p>
 <p>This enumeration defines commonly used subregions of a mesh that can be referenced in variational formulations and boundary conditions.</p>
             <table class="m-table m-fullwidth m-flat m-doc">
@@ -582,7 +618,7 @@ $ d_1 \to d_2 $
             <h3>
               using <a href="#a353a95ac576fef3796ff6f2c5b1e147c" class="m-doc-self">SequentialConnectivity</a> = <a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a>&gt;
               
-            </h3><p class="rodin-reference-include">Defined in <a href="_connectivity_8h.html"><code>Rodin/Geometry/Connectivity.h</code></a></p>
+            </h3><p class="rodin-reference-include">Defined in <a href="_geometry_2_connectivity_8h.html"><code>Rodin/Geometry/Connectivity.h</code></a></p>
             <p>Type alias for sequential (non-distributed) connectivity.</p>
           </div></section>
           <section class="m-doc-details" id="a2e85a5056404a8833600ced8a9fc603f"><div>
@@ -1391,6 +1427,53 @@ $ d&#x27; $
               </tfoot>
             </table>
           </div></section>
+          <section class="m-doc-details" id="a0dfff12603061fe025c9ebccc48a8727"><div>
+            <h3><a href="#a0dfff12603061fe025c9ebccc48a8727" class="m-doc-self">Mesh</a></h3><p class="rodin-reference-include">Defined in <a href="_kokkos_2_m_p_i_2_geometry_2_mesh_8h.html"><code>Rodin/Kokkos/MPI/Geometry/Mesh.h</code></a></p><details class="rodin-declaration-disclosure"><summary>See declaration</summary><div class="rodin-overview-declaration">
+              
+              <div class="m-doc-template">
+                template&lt;class Backend&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0dfff12603061fe025c9ebccc48a8727" class="m-doc-self">Mesh</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_context_1_1_kokkos.html" class="m-doc">Rodin::<wbr />Context::<wbr />Kokkos</a>&lt;<a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Rodin::<wbr />Context::<wbr />MPI</a>, Backend&gt; context) -&gt; Mesh&lt; Rodin::Context::Kokkos&lt; Rodin::Context::MPI, Backend &gt; &gt;</span></span>
+            </div></details>
+            <p>Deduces an empty distributed resident mesh.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">context</td>
+                  <td>Kokkos MPI execution context.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a3c401da7705827372c3da794e734896f"><div>
+            <h3><a href="#a3c401da7705827372c3da794e734896f" class="m-doc-self">Mesh</a></h3><p class="rodin-reference-include">Defined in <a href="_kokkos_2_m_p_i_2_geometry_2_mesh_8h.html"><code>Rodin/Kokkos/MPI/Geometry/Mesh.h</code></a></p><details class="rodin-declaration-disclosure"><summary>See declaration</summary><div class="rodin-overview-declaration">
+              
+              <div class="m-doc-template">
+                template&lt;class Backend&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3c401da7705827372c3da794e734896f" class="m-doc-self">Mesh</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_context_1_1_kokkos.html" class="m-doc">Rodin::<wbr />Context::<wbr />Kokkos</a>&lt;<a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Rodin::<wbr />Context::<wbr />MPI</a>, Backend&gt; context,
+              const Mesh&lt;<a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Rodin::<wbr />Context::<wbr />MPI</a>&gt;&amp; host) -&gt; Mesh&lt; Rodin::Context::Kokkos&lt; Rodin::Context::MPI, Backend &gt; &gt;</span></span>
+            </div></details>
+            <p>Deduces the distributed resident mesh of a host snapshot.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">context</td>
+                  <td>Kokkos MPI execution context.</td>
+                </tr>
+                <tr>
+                  <td>host</td>
+                  <td>Distributed host mesh copied into the backend.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="a7c024ea7e23c09a13f3431386e3a7aad"><div>
             <h3><a href="#a7c024ea7e23c09a13f3431386e3a7aad" class="m-doc-self">Mesh</a></h3><p class="rodin-reference-include">Defined in <a href="_m_p_i_2_geometry_2_mesh_8h.html"><code>Rodin/MPI/Geometry/Mesh.h</code></a></p><details class="rodin-declaration-disclosure"><summary>See declaration</summary><div class="rodin-overview-declaration">
               <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7c024ea7e23c09a13f3431386e3a7aad" class="m-doc-self">Mesh</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Context::<wbr />MPI</a>&amp; context) -&gt; Mesh&lt; Context::MPI &gt;</span></span>
@@ -1448,7 +1531,7 @@ $ d&#x27; $
     </div>
   </div>
 </div>
-<script src="search-v2-27108c4bc94e.js"></script>
+<script src="search-v2-eeb63e0c3a5e.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">

@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Rodin::Variational::ContextProjection&lt;Context::Kokkos&lt;Context::Local, Backend&gt;&gt; struct | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
+  <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
+  <link rel="stylesheet" href="rodin-theme-1337632f765f.css" />
+  <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#18191c" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <a href="index.html" id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m">Rodin</a>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li>
+              <a href="pages.html">Pages</a>
+              <ol>
+                <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
+                <li><a href="gallery.html">Gallery</a></li>
+                <li><a href="guides-io.html">Input, output, and visualization</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
+                <li><a href="ci-index.html">Continuous integration</a></li>
+                <li><a href="notation-index.html">Notation</a></li>
+                <li><a href="credits-index.html">Credits</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="modules.html">Modules</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
+              </ol>
+            </li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="3">
+            <li><a href="annotated.html">Classes</a></li>
+            <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
+            <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_variational.html">Variational</a></div><h1>ContextProjection</h1><p class="rodin-reference-brief">Projection on grid functions of device spaces of a resident Kokkos mesh.</p><p class="rodin-reference-include">Defined in <a href="_projection_8h.html"><code>Rodin/Kokkos/Variational/Projection.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Backend</span><span class="o">&gt;</span>
+<span class="k">struct</span><span class="w"> </span><span class="nc">ContextProjection</span><span class="o">&lt;</span>
+<span class="w">  </span><span class="nc">Context</span><span class="o">::</span><a href="class_rodin_1_1_context_1_1_kokkos.html"><span class="nc">Kokkos</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">Context</span><span class="o">::</span><a href="class_rodin_1_1_context_1_1_local.html"><span class="nc">Local</span></a><span class="p">,</span><span class="w"> </span><span class="nc">Backend</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="p">;</span>
+</pre><section id="rodin-specialization"><h2><a href="#rodin-specialization">Specialization arguments</a></h2><p>Specialization of <a href="struct_rodin_1_1_variational_1_1_context_projection.html">ContextProjection</a>.</p><table class="m-table m-fullwidth m-flat rodin-bindings"><tbody><tr><td><code>Context</code></td><td><code>Context::Kokkos&lt; Context::Local, Backend &gt;</code></td></tr></tbody></table></section>
+        <table class="m-table m-fullwidth m-flat">
+          <thead>
+            <tr><th colspan="2">Template parameters</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="width: 1%">Backend</td>
+              <td>Kokkos backend of the mesh context.</td>
+            </tr>
+          </tbody>
+        </table>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#pub-static-attribs">Public static variables</a></li>
+                <li><a href="#pub-static-methods">Public static functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+<p>The source is evaluated on the device at the node of every degree of freedom of the selected polytopes, as the host evaluates the linear forms of the elements. When polytopes share a degree of freedom, the one of largest index sets it, as the last one visited on the host. Degrees of freedom outside the selection keep their values.</p><p>The source is a function expression with a device lowering, a callable taking a const Rodin::Kokkos::View&lt;::Rodin::Geometry::Point&gt;&amp;, or a constant. A device predicate, callable on a const Rodin::Kokkos::View&lt;::Rodin::Geometry::Polytope&gt;&amp; and returning bool, further restricts the selected polytopes.</p>
+        <section id="pub-types">
+          <h2><a href="#pub-types">Public types</a></h2>
+          <dl class="m-doc">
+            <dt>
+              struct <a href="struct_rodin_1_1_variational_1_1_context_projection_3_01_context_1_1_kokkos_3_01_context_1_1_loc86a3211eac0ee7a570cab2ca94775c79.html" class="m-doc">CopyCoefficients</a>
+            </dt>
+            <dd>Updates only coefficients selected by the projection.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class AttributeView, class Select, class DOFs&gt;</div>
+              struct <a href="struct_rodin_1_1_variational_1_1_context_projection_3_01_context_1_1_kokkos_3_01_context_1_1_loc73c66590425235520b69f23e8a8ae3a8.html" class="m-doc">Owners</a>
+            </dt>
+            <dd>Marks every degree of freedom of a selected polytope with one plus the polytope index, keeping the largest.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class AttributeView, class Select, class ValueView, class DOFs&gt;</div>
+              struct <a href="struct_rodin_1_1_variational_1_1_context_projection_3_01_context_1_1_kokkos_3_01_context_1_1_loc74400e90487d58644d71ecb3d2cced26.html" class="m-doc">Values</a>
+            </dt>
+            <dd>Evaluates the source at the nodes of the degrees of freedom a selected polytope owns.</dd>
+            <dt id="a0da1b69d6be579da2758f2a9c7f25a63">
+              using <a href="#a0da1b69d6be579da2758f2a9c7f25a63" class="m-doc-self">ContextType</a> = <a href="class_rodin_1_1_context_1_1_kokkos.html" class="m-doc">Context::<wbr />Kokkos</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a>, Backend&gt;
+            </dt>
+            <dd>Mesh context.</dd>
+            <dt id="a4ded3263986a36723239faeabaa4a7ed">
+              using <a href="#a4ded3263986a36723239faeabaa4a7ed" class="m-doc-self">MeshType</a> = <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="#a0da1b69d6be579da2758f2a9c7f25a63" class="m-doc">ContextType</a>&gt;
+            </dt>
+            <dd>Resident mesh type.</dd>
+            <dt id="ad024797d5b5e20d7be6fa42f3acff127">
+              using <a href="#ad024797d5b5e20d7be6fa42f3acff127" class="m-doc-self">ExecutionSpace</a> = typename MeshType::ExecutionSpace
+            </dt>
+            <dd>Execution space of the mesh context.</dd>
+            <dt id="a426b377d2878611644f66b2f1d31d364">
+              using <a href="#a426b377d2878611644f66b2f1d31d364" class="m-doc-self">MemorySpace</a> = typename MeshType::MemorySpace
+            </dt>
+            <dd>Memory space of the mesh context.</dd>
+          </dl>
+        </section>
+        <section id="pub-static-attribs">
+          <h2><a href="#pub-static-attribs">Public static variables</a></h2>
+          <dl class="m-doc">
+            <dt id="a9c2b427d5176f57075ec4a0f1691fca6">
+              <div class="m-doc-template">template&lt;class Pred&gt;</div>
+              static bool <a href="#a9c2b427d5176f57075ec4a0f1691fca6" class="m-doc-self">IsPredicate</a> <span class="m-label m-flat m-primary">constexpr</span>
+            </dt>
+            <dd>Tells whether a callable is a device predicate on polytopes.</dd>
+          </dl>
+        </section>
+        <section id="pub-static-methods">
+          <h2><a href="#pub-static-methods">Public static functions</a></h2>
+          <dl class="m-doc">
+            <dt>class <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a></dt><dd>Projects a source on a grid function.<details class="rodin-declaration-disclosure"><summary>See declaration</summary><div class="rodin-overview-declaration">
+              <div class="m-doc-template">template&lt;class <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>, class Function, class Select = <a href="struct_rodin_1_1_kokkos_1_1_variational_1_1_select_all.html" class="m-doc">::<wbr />Rodin::<wbr />Kokkos::<wbr />Variational::<wbr />SelectAll</a>&gt;</div>
+              <span class="m-doc-wrap-bumper">static void <a href="#ae969aeac27473a1ee7e749c367fb5411" class="m-doc">project</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp; gf,
+              <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a> region,
+              const Function&amp; fn,
+              const <a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&gt;&amp; attrs,
+              const Select&amp; select = {})</span>
+            </div></details></dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Function&gt;</div>
+              <span class="m-doc-wrap-bumper">static auto <a href="#a03ed9c99a172abe6cb2661f6a8bc19ed" class="m-doc">lower</a>(</span><span class="m-doc-wrap">const Function&amp; fn,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> vdim) -&gt; auto</span>
+            </dt>
+            <dd>Lowers a source to a device view.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Derived&gt;</div>
+              <span class="m-doc-wrap-bumper">static auto <a href="#a108c7cb13dd63f76ef8b05247cf3d391" class="m-doc">lowerFunction</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;Derived&gt;&amp; fn) -&gt; auto</span>
+            </dt>
+            <dd>Lowers a function expression to its device view.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Derived&gt;</div>
+              <span class="m-doc-wrap-bumper">static auto <a href="#a4007d0ec2eaa60a08f1da905d2cf6823" class="m-doc">isFunction</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;Derived&gt;* source) -&gt; std::true_type</span>
+            </dt>
+            <dd>Tells that a source is a function expression.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">static auto <a href="#a6089a6474f0eb754e37b68ccc4f24864" class="m-doc">isFunction</a>(</span><span class="m-doc-wrap">const void* source) -&gt; std::false_type</span>
+            </dt>
+            <dd>Tells that a source is not a function expression.</dd>
+            <dt><a href="#a28347dd650c6ed749195f480d51b657f" class="m-doc">evaluate</a></dt><dd>Selects the degrees of freedom and evaluates the source.<details class="rodin-declaration-disclosure"><summary>See declaration</summary><div class="rodin-overview-declaration">
+              <div class="m-doc-template">template&lt;class AttributeView, class Select, class ValueView, class DOFs&gt;</div>
+              <span class="m-doc-wrap-bumper">static void <a href="#a28347dd650c6ed749195f480d51b657f" class="m-doc">evaluate</a>(</span><span class="m-doc-wrap">const <a href="#ad024797d5b5e20d7be6fa42f3acff127" class="m-doc">ExecutionSpace</a>&amp; execution,
+              const <a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Rodin::<wbr />Kokkos::<wbr />View</a>&lt;<a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">::<wbr />Rodin::<wbr />Geometry::<wbr />MeshBase</a>&gt;&amp; view,
+              <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a> region,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> d,
+              const AttributeView&amp; attributes,
+              const Select&amp; select,
+              const <a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Kokkos::<wbr />View</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>*, <a href="#a426b377d2878611644f66b2f1d31d364" class="m-doc">MemorySpace</a>&gt;&amp; owners,
+              const <a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Kokkos::<wbr />View</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>*, <a href="#a426b377d2878611644f66b2f1d31d364" class="m-doc">MemorySpace</a>&gt;&amp; values,
+              const ValueView&amp; value,
+              const DOFs&amp; dofs,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> count,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> vdim)</span>
+            </div></details></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">static void <a href="#a1a79685eda26e439000e033b4b4ba036" class="m-doc">store</a>(</span><span class="m-doc-wrap">const <a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Kokkos::<wbr />View</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>*, <a href="#a426b377d2878611644f66b2f1d31d364" class="m-doc">MemorySpace</a>&gt;&amp; values,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> dof,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> stride,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> vdim,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> v)</span>
+            </dt>
+            <dd>Stores a scalar value of a degree of freedom.</dd>
+            <dt><a href="#a5f2e07b4cf734f84ba07341fd8f58e05" class="m-doc">store</a></dt><dd>Stores the components of a vector value of a degree of freedom.<details class="rodin-declaration-disclosure"><summary>See declaration</summary><div class="rodin-overview-declaration">
+              <span class="m-doc-wrap-bumper">static void <a href="#a5f2e07b4cf734f84ba07341fd8f58e05" class="m-doc">store</a>(</span><span class="m-doc-wrap">const <a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Kokkos::<wbr />View</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>*, <a href="#a426b377d2878611644f66b2f1d31d364" class="m-doc">MemorySpace</a>&gt;&amp; values,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> dof,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> stride,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> vdim,
+              const <a href="_kokkos_2_forward_decls_8h.html#ad8287f85a5c67aed3081e78f8914601b" class="m-doc">::<wbr />Rodin::<wbr />Kokkos::<wbr />Geometry::<wbr />Vector</a>&amp; v)</span>
+            </div></details></dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="ae969aeac27473a1ee7e749c367fb5411"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Backend&gt;
+                template&lt;class <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>, class Function, class Select = <a href="struct_rodin_1_1_kokkos_1_1_variational_1_1_select_all.html" class="m-doc">::<wbr />Rodin::<wbr />Kokkos::<wbr />Variational::<wbr />SelectAll</a>&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">static void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae969aeac27473a1ee7e749c367fb5411" class="m-doc-self">project</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp; gf,
+              <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a> region,
+              const Function&amp; fn,
+              const <a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&gt;&amp; attrs,
+              const Select&amp; select = {})</span></span>
+            </h3>
+            <p>Projects a source on a grid function.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">gf</td>
+                  <td>Grid function of a device space.</td>
+                </tr>
+                <tr>
+                  <td>region</td>
+                  <td>Region on which to project.</td>
+                </tr>
+                <tr>
+                  <td>fn</td>
+                  <td>Source to evaluate.</td>
+                </tr>
+                <tr>
+                  <td>attrs</td>
+                  <td>Mesh attributes selecting the region; empty selects it all.</td>
+                </tr>
+                <tr>
+                  <td>select</td>
+                  <td>Device predicate selecting the polytopes.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a03ed9c99a172abe6cb2661f6a8bc19ed"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Backend&gt;
+                template&lt;class Function&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">static auto </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a03ed9c99a172abe6cb2661f6a8bc19ed" class="m-doc-self">lower</a>(</span><span class="m-doc-wrap">const Function&amp; fn,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> vdim)</span></span>
+            </h3>
+            <p>Lowers a source to a device view.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">fn</td>
+                  <td>Source.</td>
+                </tr>
+                <tr>
+                  <td>vdim</td>
+                  <td>Vector dimension of the space.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Device view providing getValue(const ::Rodin::Kokkos::View&lt;::Rodin::Geometry::Point&gt;&amp;).</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a108c7cb13dd63f76ef8b05247cf3d391"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Backend&gt;
+                template&lt;class Derived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">static auto </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a108c7cb13dd63f76ef8b05247cf3d391" class="m-doc-self">lowerFunction</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;Derived&gt;&amp; fn)</span></span>
+            </h3>
+            <p>Lowers a function expression to its device view.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">fn</td>
+                  <td>Function expression.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Device view of the expression.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a4007d0ec2eaa60a08f1da905d2cf6823"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Backend&gt;
+                template&lt;class Derived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">static std::true_type </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4007d0ec2eaa60a08f1da905d2cf6823" class="m-doc-self">isFunction</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;Derived&gt;* source)</span></span>
+            </h3>
+            <p>Tells that a source is a function expression.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">source</td>
+                  <td>Pointer to the source.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>std::true_type, used only in unevaluated context.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a6089a6474f0eb754e37b68ccc4f24864"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">static std::false_type </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6089a6474f0eb754e37b68ccc4f24864" class="m-doc-self">isFunction</a>(</span><span class="m-doc-wrap">const void* source)</span></span>
+            </h3>
+            <p>Tells that a source is not a function expression.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">source</td>
+                  <td>Pointer to the source.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>std::false_type, used only in unevaluated context.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a28347dd650c6ed749195f480d51b657f"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Backend&gt;
+                template&lt;class AttributeView, class Select, class ValueView, class DOFs&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">static void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a28347dd650c6ed749195f480d51b657f" class="m-doc-self">evaluate</a>(</span><span class="m-doc-wrap">const <a href="#ad024797d5b5e20d7be6fa42f3acff127" class="m-doc">ExecutionSpace</a>&amp; execution,
+              const <a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Rodin::<wbr />Kokkos::<wbr />View</a>&lt;<a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">::<wbr />Rodin::<wbr />Geometry::<wbr />MeshBase</a>&gt;&amp; view,
+              <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a> region,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> d,
+              const AttributeView&amp; attributes,
+              const Select&amp; select,
+              const <a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Kokkos::<wbr />View</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>*, <a href="#a426b377d2878611644f66b2f1d31d364" class="m-doc">MemorySpace</a>&gt;&amp; owners,
+              const <a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Kokkos::<wbr />View</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>*, <a href="#a426b377d2878611644f66b2f1d31d364" class="m-doc">MemorySpace</a>&gt;&amp; values,
+              const ValueView&amp; value,
+              const DOFs&amp; dofs,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> count,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> vdim)</span></span>
+            </h3>
+            <p>Selects the degrees of freedom and evaluates the source.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">execution</td>
+                  <td>Execution space instance.</td>
+                </tr>
+                <tr>
+                  <td>view</td>
+                  <td>Device mesh.</td>
+                </tr>
+                <tr>
+                  <td>region</td>
+                  <td>Region on which to project.</td>
+                </tr>
+                <tr>
+                  <td>d</td>
+                  <td>Dimension of the polytopes of the region.</td>
+                </tr>
+                <tr>
+                  <td>attributes</td>
+                  <td>Selected attributes; empty selects the whole region.</td>
+                </tr>
+                <tr>
+                  <td>select</td>
+                  <td>Device predicate selecting the polytopes.</td>
+                </tr>
+                <tr>
+                  <td>owners</td>
+                  <td>One plus the largest selected polytope of every scalar degree of freedom, zero when none is.</td>
+                </tr>
+                <tr>
+                  <td>values</td>
+                  <td>Value of component r of the degree of freedom i at i + r * stride.</td>
+                </tr>
+                <tr>
+                  <td>value</td>
+                  <td>Device view of the source.</td>
+                </tr>
+                <tr>
+                  <td>dofs</td>
+                  <td>Device degrees of freedom.</td>
+                </tr>
+                <tr>
+                  <td>count</td>
+                  <td>Number of polytopes of dimension d.</td>
+                </tr>
+                <tr>
+                  <td>vdim</td>
+                  <td>Vector dimension of the space.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>The count is given by the host, since the topology of the device mesh is not readable on the host.</p>
+          </div></section>
+          <section class="m-doc-details" id="a1a79685eda26e439000e033b4b4ba036"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">static void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1a79685eda26e439000e033b4b4ba036" class="m-doc-self">store</a>(</span><span class="m-doc-wrap">const <a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Kokkos::<wbr />View</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>*, <a href="#a426b377d2878611644f66b2f1d31d364" class="m-doc">MemorySpace</a>&gt;&amp; values,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> dof,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> stride,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> vdim,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> v)</span></span>
+            </h3>
+            <p>Stores a scalar value of a degree of freedom.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">values</td>
+                  <td>Projected values.</td>
+                </tr>
+                <tr>
+                  <td>dof</td>
+                  <td>Scalar degree of freedom.</td>
+                </tr>
+                <tr>
+                  <td>stride</td>
+                  <td>Offset between components.</td>
+                </tr>
+                <tr>
+                  <td>vdim</td>
+                  <td>Vector dimension of the space.</td>
+                </tr>
+                <tr>
+                  <td>v</td>
+                  <td>Value at the node.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a5f2e07b4cf734f84ba07341fd8f58e05"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">static void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5f2e07b4cf734f84ba07341fd8f58e05" class="m-doc-self">store</a>(</span><span class="m-doc-wrap">const <a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Kokkos::<wbr />View</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>*, <a href="#a426b377d2878611644f66b2f1d31d364" class="m-doc">MemorySpace</a>&gt;&amp; values,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> dof,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> stride,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> vdim,
+              const <a href="_kokkos_2_forward_decls_8h.html#ad8287f85a5c67aed3081e78f8914601b" class="m-doc">::<wbr />Rodin::<wbr />Kokkos::<wbr />Geometry::<wbr />Vector</a>&amp; v)</span></span>
+            </h3>
+            <p>Stores the components of a vector value of a degree of freedom.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">values</td>
+                  <td>Projected values, component r of the degree of freedom i at i + r * stride.</td>
+                </tr>
+                <tr>
+                  <td>dof</td>
+                  <td>Scalar degree of freedom.</td>
+                </tr>
+                <tr>
+                  <td>stride</td>
+                  <td>Offset between components.</td>
+                </tr>
+                <tr>
+                  <td>vdim</td>
+                  <td>Vector dimension of the space.</td>
+                </tr>
+                <tr>
+                  <td>v</td>
+                  <td>Value at the node.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+        </section>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">&hellip;</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form>
+            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript.</noscript>
+          <div id="search-help" class="m-text m-dim m-text-center">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
+            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v2-eeb63e0c3a5e.js"></script>
+<script src="searchdata-v2.js" async="async"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+  <a class="rodin-ci-link" href="ci-index.html" aria-label="CI" title="CI"><span class="rodin-ci-mark" aria-hidden="true"></span><span class="rodin-ci-label">CI</span></a>
+</div>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>

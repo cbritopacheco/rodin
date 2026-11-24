@@ -88,7 +88,7 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md161">Usage Example</a></li>
+            <li><a href="#autotoc_md164">Usage Example</a></li>
             <li>
               Reference
               <ul>
@@ -100,7 +100,7 @@
             </li>
           </ul>
         </nav>
-<p>Abstract base class template for printing objects to streams.</p><p>The Printer class provides a common interface for writing objects of type <code>T</code> to output streams. This class serves as the foundation for specialized printers that handle different file formats and object types.</p><p>Derived classes must implement:</p><ul><li>print(std::ostream&amp;) - Write object to an output stream</li><li>getObject() - Access the object being printed</li></ul><section id="autotoc_md161"><h2><a href="#autotoc_md161">Usage Example</a></h2><pre class="m-code"><span class="k">class</span><span class="w"> </span><span class="nc">MyObjectPrinter</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="nc">Printer</span><span class="o">&lt;</span><span class="n">MyObject</span><span class="o">&gt;</span>
+<p>Abstract base class template for printing objects to streams.</p><p>The Printer class provides a common interface for writing objects of type <code>T</code> to output streams. This class serves as the foundation for specialized printers that handle different file formats and object types.</p><p>Derived classes must implement:</p><ul><li>print(std::ostream&amp;) - Write object to an output stream</li><li>getObject() - Access the object being printed</li></ul><section id="autotoc_md164"><h2><a href="#autotoc_md164">Usage Example</a></h2><pre class="m-code"><span class="k">class</span><span class="w"> </span><span class="nc">MyObjectPrinter</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="nc">Printer</span><span class="o">&lt;</span><span class="n">MyObject</span><span class="o">&gt;</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
 <span class="w">  </span><span class="n">MyObjectPrinter</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">MyObject</span><span class="o">&amp;</span><span class="w"> </span><span class="n">obj</span><span class="p">)</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">m_object</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span><span class="w"> </span><span class="p">{}</span>
@@ -263,7 +263,7 @@
     </div>
   </div>
 </div>
-<script src="search-v2-27108c4bc94e.js"></script>
+<script src="search-v2-eeb63e0c3a5e.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">

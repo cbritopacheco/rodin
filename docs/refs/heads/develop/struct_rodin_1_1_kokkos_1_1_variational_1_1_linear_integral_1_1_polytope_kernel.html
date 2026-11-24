@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Rodin::Kokkos::Variational::LinearIntegral::PolytopeKernel struct | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
+  <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
+  <link rel="stylesheet" href="rodin-theme-1337632f765f.css" />
+  <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#18191c" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <a href="index.html" id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m">Rodin</a>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li>
+              <a href="pages.html">Pages</a>
+              <ol>
+                <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
+                <li><a href="gallery.html">Gallery</a></li>
+                <li><a href="guides-io.html">Input, output, and visualization</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
+                <li><a href="ci-index.html">Continuous integration</a></li>
+                <li><a href="notation-index.html">Notation</a></li>
+                <li><a href="credits-index.html">Credits</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="modules.html">Modules</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
+              </ol>
+            </li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="3">
+            <li><a href="annotated.html">Classes</a></li>
+            <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
+            <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span>Kokkos<span>›</span>Variational<span>›</span><a href="class_rodin_1_1_kokkos_1_1_variational_1_1_linear_integral.html">LinearIntegral</a></div><h1>PolytopeKernel</h1><p class="rodin-reference-brief">Kernel of integratePolytopes(), one thread per polytope.</p><p class="rodin-reference-include">Defined in <a href="_linear_integral_8h.html"><code>Rodin/Kokkos/Variational/LinearIntegral.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251"><span class="nc">Index</span></a><span class="w"> </span><span class="nc">Vertices</span><span class="p">,</span>
+<span class="w">  </span><span class="kt">bool</span><span class="w"> </span><span class="n">Exact</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Shape</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><a href="namespace_rodin_1_1_test.html"><span class="no">Test</span></a><span class="o">&gt;</span>
+<span class="k">struct</span><span class="w"> </span><span class="nc">PolytopeKernel</span><span class="p">;</span>
+</pre>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#pub-static-attribs">Public static variables</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
+                <li><a href="#pub-attribs">Public variables</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+        <section id="pub-static-attribs">
+          <h2><a href="#pub-static-attribs">Public static variables</a></h2>
+          <dl class="m-doc">
+            <dt id="a9d8c7d5d66515c56ccd2faa6dd26c29f">
+              static <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> <a href="#a9d8c7d5d66515c56ccd2faa6dd26c29f" class="m-doc-self">Capacity</a> <span class="m-label m-flat m-primary">constexpr</span>
+            </dt>
+            <dd>Maximum number of local test indices of a polytope.</dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a1644b4192a127056d4f8af8900e83554" class="m-doc">operator()</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> p) const</span>
+            </dt>
+            <dd>Integrates a polytope if it is selected.</dd>
+          </dl>
+        </section>
+        <section id="pub-attribs">
+          <h2><a href="#pub-attribs">Public variables</a></h2>
+          <dl class="m-doc">
+            <dt id="a593b339f65cb539f13d107a26d44197e">
+              <a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Rodin::<wbr />Kokkos::<wbr />View</a>&lt;<a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">::<wbr />Rodin::<wbr />Geometry::<wbr />MeshBase</a>&gt; <a href="#a593b339f65cb539f13d107a26d44197e" class="m-doc-self">view</a>
+            </dt>
+            <dd>Device mesh.</dd>
+            <dt id="aefb7403672c94ac747677366fccb4558">
+              <a href="class_rodin_1_1_kokkos_1_1_variational_1_1_linear_integral.html#a2de1c75f8e7b834976e5c5c4aa2601ed" class="m-doc">QuadratureType</a> <a href="#aefb7403672c94ac747677366fccb4558" class="m-doc-self">quadrature</a>
+            </dt>
+            <dd>Quadrature tables of the polytopes.</dd>
+            <dt id="a32362a8ef6b62dcd1dd2a7850fd7bb89">
+              <a href="class_rodin_1_1_assembly_1_1_polytopes.html#a44052ca536fa60052021865bb82f03a7" class="m-doc">PolytopesType::<wbr />AttributesType</a> <a href="#a32362a8ef6b62dcd1dd2a7850fd7bb89" class="m-doc-self">attributes</a>
+            </dt>
+            <dd>Selected attributes; empty selects every polytope of the region.</dd>
+            <dt id="a0f44b98ec2b86c289a7ff824558819a6">
+              <a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Kokkos::<wbr />View</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>*, <a href="class_rodin_1_1_kokkos_1_1_variational_1_1_linear_integral.html#a426b377d2878611644f66b2f1d31d364" class="m-doc">MemorySpace</a>&gt; <a href="#a0f44b98ec2b86c289a7ff824558819a6" class="m-doc-self">offsets</a>
+            </dt>
+            <dd>Entry offset of every polytope, relative to offset.</dd>
+            <dt id="a6eadc5d75371cb422ceb4711e8c17939">
+              size_t <a href="#a6eadc5d75371cb422ceb4711e8c17939" class="m-doc-self">spacing</a>
+            </dt>
+            <dd>Distance between consecutive entries of a polytope.</dd>
+            <dt id="a3cafccc9b1da840a554ccd3ff27d8351">
+              <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">::<wbr />Rodin::<wbr />Geometry::<wbr />Region</a> <a href="#a3cafccc9b1da840a554ccd3ff27d8351" class="m-doc-self">region</a>
+            </dt>
+            <dd>Integration region.</dd>
+            <dt id="a5be1c6dcdd8745ab06feb4b7587bc14c">
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> <a href="#a5be1c6dcdd8745ab06feb4b7587bc14c" class="m-doc-self">dimension</a>
+            </dt>
+            <dd>Dimension of the integrated polytopes.</dd>
+            <dt id="a21dbf56329f5a62b4e8a8f88027aeccf">
+              <a href="namespace_rodin_1_1_test.html" class="m-doc">Test</a> <a href="#a21dbf56329f5a62b4e8a8f88027aeccf" class="m-doc-self">test</a>
+            </dt>
+            <dd>Device view of the test operator.</dd>
+            <dt id="a158b1f0c51c80c45b778516212182e04">
+              <a href="class_rodin_1_1_kokkos_1_1_variational_1_1_linear_integral.html#a2c6a4ef030166499355122c4aa8ab515" class="m-doc">DOFsType</a> <a href="#a158b1f0c51c80c45b778516212182e04" class="m-doc-self">dofs</a>
+            </dt>
+            <dd>Device degrees of freedom of the test space.</dd>
+            <dt id="a544530cfab0eda904ffb6e24d1d7b2f5">
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> <a href="#a544530cfab0eda904ffb6e24d1d7b2f5" class="m-doc-self">vdim</a>
+            </dt>
+            <dd>Vector dimension of the test space.</dd>
+            <dt id="a80e3e8b255c5ee4e0afe80b29f8dd94b">
+              <a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Kokkos::<wbr />View</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>*, <a href="class_rodin_1_1_kokkos_1_1_variational_1_1_linear_integral.html#a426b377d2878611644f66b2f1d31d364" class="m-doc">MemorySpace</a>&gt; <a href="#a80e3e8b255c5ee4e0afe80b29f8dd94b" class="m-doc-self">values</a>
+            </dt>
+            <dd>Entry values.</dd>
+            <dt id="aadb6d6eb83e646653a1402032e45dcab">
+              size_t <a href="#aadb6d6eb83e646653a1402032e45dcab" class="m-doc-self">offset</a>
+            </dt>
+            <dd>Position of the first entry of the integral.</dd>
+            <dt id="a17b07df784905b895654cdb183c3e42a">
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <a href="#a17b07df784905b895654cdb183c3e42a" class="m-doc-self">sign</a>
+            </dt>
+            <dd>Factor of the contributions.</dd>
+            <dt id="a2d316264baea57f2d3bc15cd0e21e945">
+              bool <a href="#a2d316264baea57f2d3bc15cd0e21e945" class="m-doc-self">accumulate</a>
+            </dt>
+            <dd>Whether the contributions are added to the values.</dd>
+            <dt id="a7e1f783bbc6758254c17c5d46122e830">
+              bool <a href="#a7e1f783bbc6758254c17c5d46122e830" class="m-doc-self">index</a>
+            </dt>
+            <dd>Whether the indices of the entries are written.</dd>
+            <dt id="aaae34e084096b99781bd404e965ccb79">
+              <a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Kokkos::<wbr />View</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>*, <a href="class_rodin_1_1_kokkos_1_1_variational_1_1_linear_integral.html#a426b377d2878611644f66b2f1d31d364" class="m-doc">MemorySpace</a>&gt; <a href="#aaae34e084096b99781bd404e965ccb79" class="m-doc-self">indices</a>
+            </dt>
+            <dd>Entry indices, test degrees of freedom.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a1644b4192a127056d4f8af8900e83554"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> Vertices, bool Exact, class Shape, class <a href="namespace_rodin_1_1_test.html" class="m-doc">Test</a> _4&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Kokkos::<wbr />Variational::<wbr />LinearIntegral::<wbr />PolytopeKernel&lt;Vertices, Exact, Shape, _4&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1644b4192a127056d4f8af8900e83554" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> p) const</span></span>
+            </h3>
+            <p>Integrates a polytope if it is selected.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">p</td>
+                  <td>Polytope index.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+        </section>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">&hellip;</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form>
+            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript.</noscript>
+          <div id="search-help" class="m-text m-dim m-text-center">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
+            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v2-eeb63e0c3a5e.js"></script>
+<script src="searchdata-v2.js" async="async"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+  <a class="rodin-ci-link" href="ci-index.html" aria-label="CI" title="CI"><span class="rodin-ci-mark" aria-hidden="true"></span><span class="rodin-ci-label">CI</span></a>
+</div>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>

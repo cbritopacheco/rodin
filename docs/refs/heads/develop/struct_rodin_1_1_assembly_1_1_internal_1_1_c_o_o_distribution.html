@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Rodin::Assembly::Internal::COODistribution struct | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
+  <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
+  <link rel="stylesheet" href="rodin-theme-1337632f765f.css" />
+  <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#18191c" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <a href="index.html" id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m">Rodin</a>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li>
+              <a href="pages.html">Pages</a>
+              <ol>
+                <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
+                <li><a href="gallery.html">Gallery</a></li>
+                <li><a href="guides-io.html">Input, output, and visualization</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
+                <li><a href="ci-index.html">Continuous integration</a></li>
+                <li><a href="notation-index.html">Notation</a></li>
+                <li><a href="credits-index.html">Credits</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="modules.html">Modules</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
+              </ol>
+            </li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="3">
+            <li><a href="annotated.html">Classes</a></li>
+            <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
+            <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_assembly.html">Assembly</a><span>›</span>Internal</div><h1>COODistribution</h1><p class="rodin-reference-brief">Distribution of the degrees of freedom of a system over MPI processes.</p><p class="rodin-reference-include">Defined in <a href="_p_e_t_sc_2_kokkos_2_assembly_2_distribution_8h.html"><code>Rodin/PETSc/Kokkos/Assembly/Distribution.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">struct</span><span class="w"> </span><a href="struct_rodin_1_1_assembly_1_1_internal_1_1_c_o_o_distribution.html"><span class="nc">COODistribution</span></a><span class="p">;</span>
+</pre>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#pub-static-methods">Public static functions</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
+                <li><a href="#pub-attribs">Public variables</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+<p>The local degrees of freedom, ghosts included, are those the device integrators number. Each one has a global index and is owned by one process, the one owning it in its space. The process holds the contiguous range <svg class="m-math" style="width: 2.443em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 23.450691 11.955168">
+<title>
+$ [b, e) $
+</title>
+<defs>
+<path id='eq1-g0-59' d='M2.331258 .047821C2.331258-.645579 2.10411-1.159651 1.613948-1.159651C1.231382-1.159651 1.0401-.848817 1.0401-.585803S1.219427 0 1.625903 0C1.78132 0 1.912827-.047821 2.020423-.155417C2.044334-.179328 2.056289-.179328 2.068244-.179328C2.092154-.179328 2.092154-.011955 2.092154 .047821C2.092154 .442341 2.020423 1.219427 1.327024 1.996513C1.195517 2.139975 1.195517 2.163885 1.195517 2.187796C1.195517 2.247572 1.255293 2.307347 1.315068 2.307347C1.41071 2.307347 2.331258 1.422665 2.331258 .047821Z'/>
+<path id='eq1-g0-98' d='M2.761644-7.998007C2.773599-8.045828 2.797509-8.117559 2.797509-8.177335C2.797509-8.296887 2.677958-8.296887 2.654047-8.296887C2.642092-8.296887 2.211706-8.261021 1.996513-8.237111C1.793275-8.225156 1.613948-8.201245 1.398755-8.18929C1.111831-8.16538 1.028144-8.153425 1.028144-7.938232C1.028144-7.81868 1.147696-7.81868 1.267248-7.81868C1.876961-7.81868 1.876961-7.711083 1.876961-7.591532C1.876961-7.507846 1.78132-7.161146 1.733499-6.945953L1.446575-5.798257C1.327024-5.32005 .645579-2.606227 .597758-2.391034C.537983-2.092154 .537983-1.888917 .537983-1.733499C.537983-.514072 1.219427 .119552 1.996513 .119552C3.383313 .119552 4.817933-1.661768 4.817933-3.395268C4.817933-4.495143 4.196264-5.272229 3.299626-5.272229C2.677958-5.272229 2.116065-4.758157 1.888917-4.519054L2.761644-7.998007ZM2.008468-.119552C1.625903-.119552 1.207472-.406476 1.207472-1.338979C1.207472-1.733499 1.243337-1.960648 1.458531-2.797509C1.494396-2.952927 1.685679-3.718057 1.733499-3.873474C1.75741-3.969116 2.462765-5.033126 3.275716-5.033126C3.801743-5.033126 4.040847-4.507098 4.040847-3.88543C4.040847-3.311582 3.706102-1.960648 3.407223-1.338979C3.108344-.6934 2.558406-.119552 2.008468-.119552Z'/>
+<path id='eq1-g0-101' d='M2.139975-2.773599C2.462765-2.773599 3.275716-2.797509 3.849564-3.012702C4.758157-3.359402 4.841843-4.052802 4.841843-4.267995C4.841843-4.794022 4.387547-5.272229 3.598506-5.272229C2.343213-5.272229 .537983-4.136488 .537983-2.008468C.537983-.753176 1.255293 .119552 2.343213 .119552C3.969116 .119552 4.99726-1.147696 4.99726-1.303113C4.99726-1.374844 4.925529-1.43462 4.877709-1.43462C4.841843-1.43462 4.829888-1.422665 4.722291-1.315068C3.957161-.298879 2.82142-.119552 2.367123-.119552C1.685679-.119552 1.327024-.657534 1.327024-1.542217C1.327024-1.709589 1.327024-2.008468 1.506351-2.773599H2.139975ZM1.566127-3.012702C2.080199-4.853798 3.21594-5.033126 3.598506-5.033126C4.124533-5.033126 4.483188-4.722291 4.483188-4.267995C4.483188-3.012702 2.570361-3.012702 2.068244-3.012702H1.566127Z'/>
+<path id='eq1-g1-41' d='M3.371357-2.976837C3.371357-3.88543 3.251806-5.36787 2.582316-6.75467C1.876961-8.18929 .896638-8.966376 .765131-8.966376C.71731-8.966376 .657534-8.942466 .657534-8.870735C.657534-8.834869 .657534-8.810959 .860772-8.607721C2.056289-7.400249 2.725778-5.427646 2.725778-2.988792C2.725778-.669489 2.163885 1.327024 .777086 2.737733C.657534 2.84533 .657534 2.86924 .657534 2.905106C.657534 2.976837 .71731 3.000747 .765131 3.000747C.920548 3.000747 1.900872 2.139975 2.486675 .968369C3.096389-.251059 3.371357-1.542217 3.371357-2.976837Z'/>
+<path id='eq1-g1-91' d='M2.988792 2.988792V2.546451H1.829141V-8.524035H2.988792V-8.966376H1.3868V2.988792H2.988792Z'/>
+</defs>
+<g id='eq1-page1'>
+<use x='0' y='0' xlink:href='#eq1-g1-91'/>
+<use x='3.251661' y='0' xlink:href='#eq1-g0-98'/>
+<use x='8.228767' y='0' xlink:href='#eq1-g0-59'/>
+<use x='13.472925' y='0' xlink:href='#eq1-g0-101'/>
+<use x='18.898366' y='0' xlink:href='#eq1-g1-41'/>
+</g>
+</svg> of the rows of the PETSc layout, whose length is its number of owned degrees of freedom. With a single field this range is the owned range of the space.</p><p>With several fields, a degree of freedom is known by its index in the system as on the host, the offset of its field plus its index in the space of the field, and the constraints and the preassembled operators are resolved in this numbering. The range of the process holds its owned degrees of freedom of the first field, then those of the second one, and so on, so that the rows of a process are the degrees of freedom of its part of the mesh. getPETScIndex() maps the index in the system to the row of the PETSc layout, and getFieldStarts() gives the first row of each field on the process.</p>
+        <section id="pub-static-methods">
+          <h2><a href="#pub-static-methods">Public static functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;class FES&gt;</div>
+              <span class="m-doc-wrap-bumper">static auto <a href="#a4153083a6dd0a6f5d509863c5f57162f" class="m-doc">of</a>(</span><span class="m-doc-wrap">const FES&amp; fes) -&gt; <a href="struct_rodin_1_1_assembly_1_1_internal_1_1_c_o_o_distribution.html" class="m-doc">COODistribution</a></span>
+            </dt>
+            <dd>Distribution of a distributed device space.</dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae90b81af051f6d7d401fc9002d421ecf" class="m-doc">hasLayout</a>(</span><span class="m-doc-wrap">const <a href="struct_rodin_1_1_assembly_1_1_internal_1_1_c_o_o_distribution.html" class="m-doc">COODistribution</a>&amp; other) const -&gt; bool</span>
+            </dt>
+            <dd>Whether the local degrees of freedom have the same rows in the PETSc layout as those of another distribution.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a6cac08e9b1699b6e84da43217dcde1e7" class="m-doc">getOwnedSize</a>(</span><span class="m-doc-wrap">) const -&gt; PetscInt</span>
+            </dt>
+            <dd>Gets the number of owned degrees of freedom.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class FES&gt;</div>
+              <span class="m-doc-wrap-bumper">void <a href="#a93c361dbb028309d218c312c91182c9b" class="m-doc">append</a>(</span><span class="m-doc-wrap">const FES&amp; fes,
+              PetscInt offset)</span>
+            </dt>
+            <dd>Appends the local degrees of freedom of a field.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a82f23816ff88c67e017eb87dd4094249" class="m-doc">getOffset</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> start) const -&gt; PetscInt</span>
+            </dt>
+            <dd>Gets the global offset of a field.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aa95b9525cde5c5d7e39e9001b6cbd030" class="m-doc">getLocals</a>(</span><span class="m-doc-wrap">) const -&gt; std::unordered_map&lt;PetscInt, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;</span>
+            </dt>
+            <dd>Gets the local index of each global index held.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a15c17f84d3bfeda7ce264ee3d27b3750" class="m-doc">close</a>(</span><span class="m-doc-wrap">MPI_Comm communicator,
+              PetscInt total)</span>
+            </dt>
+            <dd>Lays out the rows of the processes in rank order, and the owned degrees of freedom of a process field after field; collective.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae05763c43b92b4dfe2a9f16570a5381e" class="m-doc">getPETScIndex</a>(</span><span class="m-doc-wrap">PetscInt global) const -&gt; PetscInt</span>
+            </dt>
+            <dd>Gets the row of a degree of freedom in the PETSc layout.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a923247039a145bedcb0e3624a28025ca" class="m-doc">getPETScIndices</a>(</span><span class="m-doc-wrap">) const -&gt; std::vector&lt;PetscInt&gt;</span>
+            </dt>
+            <dd>Gets the row in the PETSc layout of each local degree of freedom.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a0baf5dd31f95a8f0846b276b94189c86" class="m-doc">getFieldStarts</a>(</span><span class="m-doc-wrap">) const -&gt; std::vector&lt;PetscInt&gt;</span>
+            </dt>
+            <dd>Gets the first row of each field on this process.</dd>
+          </dl>
+        </section>
+        <section id="pub-attribs">
+          <h2><a href="#pub-attribs">Public variables</a></h2>
+          <dl class="m-doc">
+            <dt id="ab048c6f9fcbcfaa57ce68b00263dbebe">
+              MPI_Comm <a href="#ab048c6f9fcbcfaa57ce68b00263dbebe" class="m-doc-self">comm</a>
+            </dt>
+            <dd>Communicator of the processes.</dd>
+            <dt id="a2763187702635fd5258da8a00e2d15d6">
+              PetscInt <a href="#a2763187702635fd5258da8a00e2d15d6" class="m-doc-self">begin</a>
+            </dt>
+            <dd>First row of this process in the PETSc layout.</dd>
+            <dt id="a12002bbf319d73035688824e9214d7d5">
+              PetscInt <a href="#a12002bbf319d73035688824e9214d7d5" class="m-doc-self">end</a>
+            </dt>
+            <dd>One past the last row of this process in the PETSc layout.</dd>
+            <dt id="a6c06dd56ded5fe735801ea638ca0def1">
+              PetscInt <a href="#a6c06dd56ded5fe735801ea638ca0def1" class="m-doc-self">size</a>
+            </dt>
+            <dd>Global number of degrees of freedom.</dd>
+            <dt id="a3cb253c32f56c1286ec98fbd37e78302">
+              std::vector&lt;PetscInt&gt; <a href="#a3cb253c32f56c1286ec98fbd37e78302" class="m-doc-self">globals</a>
+            </dt>
+            <dd>Global index of each local degree of freedom.</dd>
+            <dt id="a911f8aa06a3114865770b3dbdd10619d">
+              std::vector&lt;unsigned char&gt; <a href="#a911f8aa06a3114865770b3dbdd10619d" class="m-doc-self">owned</a>
+            </dt>
+            <dd>Whether this process owns each local degree of freedom.</dd>
+            <dt id="a61ccf1df0d7491f6bae425b1bff37d88">
+              std::vector&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt; <a href="#a61ccf1df0d7491f6bae425b1bff37d88" class="m-doc-self">starts</a>
+            </dt>
+            <dd>Local index of the first degree of freedom of each field.</dd>
+            <dt id="a645e69d5b69ddfad254ae37feeb78906">
+              std::vector&lt;PetscInt&gt; <a href="#a645e69d5b69ddfad254ae37feeb78906" class="m-doc-self">offsets</a>
+            </dt>
+            <dd>Global index of the first degree of freedom of each field.</dd>
+            <dt id="a582632894515e2245f7a3a75112c08c5">
+              std::vector&lt;std::pair&lt;PetscInt, PetscInt&gt;&gt; <a href="#a582632894515e2245f7a3a75112c08c5" class="m-doc-self">ranges</a>
+            </dt>
+            <dd>First owned index and owned count of each field in its space.</dd>
+            <dt id="a98f93a1a466b32c2a078ba87e9ccc8f5">
+              std::vector&lt;std::vector&lt;PetscInt&gt;&gt; <a href="#a98f93a1a466b32c2a078ba87e9ccc8f5" class="m-doc-self">firsts</a>
+            </dt>
+            <dd>First owned index in its space of each field on each process, indexed by field then rank; empty when the PETSc layout is the numbering of the system.</dd>
+            <dt id="aa5756a805844942d0354cdc2ff9eb145">
+              std::vector&lt;std::vector&lt;PetscInt&gt;&gt; <a href="#aa5756a805844942d0354cdc2ff9eb145" class="m-doc-self">rows</a>
+            </dt>
+            <dd>First row in the PETSc layout of each field on each process, indexed by field then rank.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a4153083a6dd0a6f5d509863c5f57162f"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class FES&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">static <a href="struct_rodin_1_1_assembly_1_1_internal_1_1_c_o_o_distribution.html" class="m-doc">COODistribution</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4153083a6dd0a6f5d509863c5f57162f" class="m-doc-self">of</a>(</span><span class="m-doc-wrap">const FES&amp; fes)</span></span>
+            </h3>
+            <p>Distribution of a distributed device space.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">fes</td>
+                  <td>Space numbering the local degrees of freedom.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Distribution of the space.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ae90b81af051f6d7d401fc9002d421ecf"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">bool </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae90b81af051f6d7d401fc9002d421ecf" class="m-doc-self">hasLayout</a>(</span><span class="m-doc-wrap">const <a href="struct_rodin_1_1_assembly_1_1_internal_1_1_c_o_o_distribution.html" class="m-doc">COODistribution</a>&amp; other) const</span></span>
+            </h3>
+            <p>Whether the local degrees of freedom have the same rows in the PETSc layout as those of another distribution.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Distribution compared.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Whether the communicators, the global and local degrees of freedom and the layouts of the fields are the same.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a6cac08e9b1699b6e84da43217dcde1e7"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">PetscInt </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6cac08e9b1699b6e84da43217dcde1e7" class="m-doc-self">getOwnedSize</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Gets the number of owned degrees of freedom.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Owned count.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a93c361dbb028309d218c312c91182c9b"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class FES&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a93c361dbb028309d218c312c91182c9b" class="m-doc-self">append</a>(</span><span class="m-doc-wrap">const FES&amp; fes,
+              PetscInt offset)</span></span>
+            </h3>
+            <p>Appends the local degrees of freedom of a field.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">fes</td>
+                  <td>Space numbering the local degrees of freedom of the field.</td>
+                </tr>
+                <tr>
+                  <td>offset</td>
+                  <td>Global index of the first degree of freedom of the field.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a82f23816ff88c67e017eb87dd4094249"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">PetscInt </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a82f23816ff88c67e017eb87dd4094249" class="m-doc-self">getOffset</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> start) const</span></span>
+            </h3>
+            <p>Gets the global offset of a field.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">start</td>
+                  <td>Local index of the first degree of freedom of the field.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Global index of the first degree of freedom of the field.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aa95b9525cde5c5d7e39e9001b6cbd030"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::unordered_map&lt;PetscInt, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa95b9525cde5c5d7e39e9001b6cbd030" class="m-doc-self">getLocals</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Gets the local index of each global index held.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Map from global to local indices.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a15c17f84d3bfeda7ce264ee3d27b3750"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a15c17f84d3bfeda7ce264ee3d27b3750" class="m-doc-self">close</a>(</span><span class="m-doc-wrap">MPI_Comm communicator,
+              PetscInt total)</span></span>
+            </h3>
+            <p>Lays out the rows of the processes in rank order, and the owned degrees of freedom of a process field after field; collective.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">communicator</td>
+                  <td>Communicator of the processes.</td>
+                </tr>
+                <tr>
+                  <td>total</td>
+                  <td>Global number of degrees of freedom.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ae05763c43b92b4dfe2a9f16570a5381e"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">PetscInt </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae05763c43b92b4dfe2a9f16570a5381e" class="m-doc-self">getPETScIndex</a>(</span><span class="m-doc-wrap">PetscInt global) const</span></span>
+            </h3>
+            <p>Gets the row of a degree of freedom in the PETSc layout.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">global</td>
+                  <td>Index of the degree of freedom in the system.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Row of the degree of freedom.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a923247039a145bedcb0e3624a28025ca"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::vector&lt;PetscInt&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a923247039a145bedcb0e3624a28025ca" class="m-doc-self">getPETScIndices</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Gets the row in the PETSc layout of each local degree of freedom.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Rows.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a0baf5dd31f95a8f0846b276b94189c86"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::vector&lt;PetscInt&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0baf5dd31f95a8f0846b276b94189c86" class="m-doc-self">getFieldStarts</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Gets the first row of each field on this process.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Rows.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+        </section>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">&hellip;</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form>
+            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript.</noscript>
+          <div id="search-help" class="m-text m-dim m-text-center">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
+            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v2-eeb63e0c3a5e.js"></script>
+<script src="searchdata-v2.js" async="async"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+  <a class="rodin-ci-link" href="ci-index.html" aria-label="CI" title="CI"><span class="rodin-ci-mark" aria-hidden="true"></span><span class="rodin-ci-label">CI</span></a>
+</div>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>

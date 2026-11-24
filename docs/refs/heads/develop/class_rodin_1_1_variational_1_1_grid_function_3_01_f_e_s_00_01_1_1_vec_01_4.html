@@ -79,8 +79,8 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md205">Ownership and Ghost Model (MPI)</a></li>
-            <li><a href="#autotoc_md206">Array Access Protocol</a></li>
+            <li><a href="#autotoc_md232">Ownership and Ghost Model (MPI)</a></li>
+            <li><a href="#autotoc_md233">Array Access Protocol</a></li>
             <li>
               Reference
               <ul>
@@ -93,7 +93,7 @@
             </li>
           </ul>
         </nav>
-<p>This partial specialization replaces the default Eigen-based coefficient storage with a PETSc <code>Vec</code>, making it possible to assemble and solve variational problems entirely within the PETSc ecosystem. The class supports both sequential (<code>Context::Local</code>) and distributed (<code>Context::MPI</code>) finite element spaces.</p><section id="autotoc_md205"><h2><a href="#autotoc_md205">Ownership and Ghost Model (MPI)</a></h2><p>When the mesh context is <code>Context::MPI</code>, the constructor partitions the global DOF vector across MPI ranks. Each rank <em>owns</em> a contiguous range <svg class="m-math" style="width: 8.794em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 84.420393 11.955168">
+<p>This partial specialization replaces the default Eigen-based coefficient storage with a PETSc <code>Vec</code>, making it possible to assemble and solve variational problems entirely within the PETSc ecosystem. The class supports both sequential (<code>Context::Local</code>) and distributed (<code>Context::MPI</code>) finite element spaces.</p><section id="autotoc_md232"><h2><a href="#autotoc_md232">Ownership and Ghost Model (MPI)</a></h2><p>When the mesh context is <code>Context::MPI</code>, the constructor partitions the global DOF vector across MPI ranks. Each rank <em>owns</em> a contiguous range <svg class="m-math" style="width: 8.794em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 84.420393 11.955168">
 <title>
 $[\texttt{m\_begin}, \texttt{m\_end})$
 </title>
@@ -126,11 +126,12 @@ $[\texttt{m\_begin}, \texttt{m\_end})$
 <use x='73.591638' y='0' xlink:href='#eq1-g0-100'/>
 <use x='79.868067' y='0' xlink:href='#eq1-g2-41'/>
 </g>
-</svg> and additionally maintains <em>ghost</em> copies of DOFs needed for element-level operations but owned by neighbouring ranks. The ghost indices are recorded in a <code>GhostBimap</code> so that <code>operator[]</code> can transparently translate a global DOF index to the correct local position in the ghosted vector.</p></section><section id="autotoc_md206"><h2><a href="#autotoc_md206">Array Access Protocol</a></h2><p>PETSc requires explicit lock/unlock of the underlying raw array via <code>VecGetArray*</code> / <code>VecRestoreArray*</code>. This class manages the lock state through two helper structs (<code>ArrayRead</code> and <code>ArrayWrite</code>) and exposes four public methods:</p><table class="m-table"><thead><tr><th>Method</th><th>Direction</th><th>PETSc calls</th></tr></thead><tbody><tr><td><code>acquire()</code></td><td>begin access</td><td><code>VecGetLocalForm</code>, <code>VecGetArrayWrite</code></td></tr><tr><td><code>flush()</code></td><td>end access</td><td><code>VecRestoreArrayWrite</code>, <code>VecGhostRestoreLocalForm</code>, <code>VecGhostUpdate(REVERSE)</code></td></tr><tr><td><code>sync()</code></td><td>make current</td><td>Releases read access, then flushes write access</td></tr><tr><td><code>release()</code></td><td>destroy handles</td><td>Restores any acquired arrays, then <code>VecDestroy</code></td></tr></tbody></table><p>The const overloads use <code>VecGetArrayRead</code> / <code>VecRestoreArrayRead</code>.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_p_e_t_sc_1_1_variational_1_1_grid_function.html">Rodin::<wbr />PETSc::<wbr />Variational::<wbr />GridFunction</a> convenience wrapper</p></aside></section>
-        <figure class="rodin-inheritance"><figcaption>Direct inheritance by class family</figcaption><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html" title="GridFunctionBase&lt; GridFunction&lt; FES, ::Vec &gt; &gt;">GridFunctionBase</a></li></ul><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><div class="rodin-inheritance-current">GridFunction</div><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_p_e_t_sc_1_1_variational_1_1_grid_function.html" title="PETSc::Variational::GridFunction&lt; FES &gt;">PETSc::Variational::GridFunction</a></li></ul></figure><section id="base-classes"><h2><a href="#base-classes">Inherits from</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Base class</th><th>Responsibility</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_grid_function_base.html"><code>GridFunctionBase&lt;…&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#a64a561bef7097744a37d7cc40c37c66c"><span class="nc">GridFunctionBase</span></a><span class="o">&lt;</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#a5d6d5bfeed8c675c0e6288256614b32e"><span class="nc">GridFunction</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">FES</span><span class="p">,</span><span class="w"> </span><span class="o">::</span><span class="n">Vec</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span>
+</svg> and additionally maintains <em>ghost</em> copies of DOFs needed for element-level operations but owned by neighbouring ranks. The ghost indices are recorded in a <code>GhostBimap</code> so that <code>operator[]</code> can transparently translate a global DOF index to the correct local position in the ghosted vector.</p></section><section id="autotoc_md233"><h2><a href="#autotoc_md233">Array Access Protocol</a></h2><p>PETSc requires explicit lock/unlock of the underlying raw array via <code>VecGetArray*</code> / <code>VecRestoreArray*</code>. This class manages the lock state through two helper structs (<code>ArrayRead</code> and <code>ArrayWrite</code>) and exposes four public methods:</p><table class="m-table"><thead><tr><th>Method</th><th>Direction</th><th>PETSc calls</th></tr></thead><tbody><tr><td><code>acquire()</code></td><td>begin access</td><td><code>VecGetLocalForm</code>, <code>VecGetArrayWrite</code></td></tr><tr><td><code>flush()</code></td><td>end access</td><td><code>VecRestoreArrayWrite</code>, <code>VecGhostRestoreLocalForm</code>, <code>VecGhostUpdate(REVERSE)</code></td></tr><tr><td><code>sync()</code></td><td>make current</td><td>Releases read access, then flushes write access</td></tr><tr><td><code>release()</code></td><td>destroy handles</td><td>Restores any acquired arrays, then <code>VecDestroy</code></td></tr></tbody></table><p>The const overloads use <code>VecGetArrayRead</code> / <code>VecRestoreArrayRead</code>.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_p_e_t_sc_1_1_variational_1_1_grid_function.html">Rodin::<wbr />PETSc::<wbr />Variational::<wbr />GridFunction</a> convenience wrapper</p></aside></section>
+        <figure class="rodin-inheritance"><figcaption>Direct inheritance by class family</figcaption><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html" title="GridFunctionBase&lt; GridFunction&lt; FES, ::Vec &gt; &gt;; GridFunctionBase&lt; GridFunction&lt; FES, ::Vec &gt; &gt;">GridFunctionBase</a></li></ul><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><div class="rodin-inheritance-current">GridFunction</div><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_p_e_t_sc_1_1_variational_1_1_grid_function.html" title="PETSc::Variational::GridFunction&lt; FES &gt;">PETSc::Variational::GridFunction</a></li></ul></figure><section id="base-classes"><h2><a href="#base-classes">Inherits from</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Base class</th><th>Responsibility</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_grid_function_base.html"><code>GridFunctionBase&lt;…&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#a64a561bef7097744a37d7cc40c37c66c"><span class="nc">GridFunctionBase</span></a><span class="o">&lt;</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#a5d6d5bfeed8c675c0e6288256614b32e"><span class="nc">GridFunction</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">FES</span><span class="p">,</span><span class="w"> </span><span class="o">::</span><span class="n">Vec</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Base class for grid function objects.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_grid_function_base.html"><code>GridFunctionBase&lt;…&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#a64a561bef7097744a37d7cc40c37c66c"><span class="nc">GridFunctionBase</span></a><span class="o">&lt;</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#a5d6d5bfeed8c675c0e6288256614b32e"><span class="nc">GridFunction</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">FES</span><span class="p">,</span><span class="w"> </span><span class="o">::</span><span class="n">Vec</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span>
 </pre></details></td><td>Base class for grid function objects.</td></tr></tbody></table></section>
         <section id="derived-classes"><h2><a href="#derived-classes">Derived classes</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Derived class</th><th>Description</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_p_e_t_sc_1_1_variational_1_1_grid_function.html"><code>PETSc::Variational::GridFunction&lt;FES&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="n">PETSc</span><span class="o">::</span><span class="n">Variational</span><span class="o">::</span><span class="nc">GridFunction</span><span class="o">&lt;</span><span class="w"> </span><span class="nc">FES</span><span class="w"> </span><span class="o">&gt;</span>
-</pre></details></td><td>Convenience wrapper that inherits all functionality from <a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html" class="m-doc">GridFunction&lt;FES, ::<wbr />Vec&gt;</a>.</td></tr></tbody></table></section><section id="rodin-inherited"><h2><a href="#rodin-inherited">Inherited interface</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Declared in</th><th>Members</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_grid_function_base.html"><code>GridFunctionBase</code></a></td><td><details><summary>25 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#a2b5727340d5581d5b23e24cd47652a5c"><code>argmax()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#af9f4820ea5fb253ead68bf314e38d456"><code>argmin()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#a4a1c0b519f1e883b370f4fd6c3b76ee5"><code>ContextType</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#a076499a78a29517d137192da51112c84"><code>ElementType</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#ab5a2f5705f2c21ba72347ecc0f50d556"><code>getColumns()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#aad8f738241426a32d95c3696395698d3"><code>getDimension()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#a4758cdb6b0d7f09e6719a7bfa884e86e"><code>getFiniteElementSpace()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#a55906fdb64ef621b6b153e7d8d8adf35"><code>getName()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#ac5827caceb168f6993f153e631adc85b"><code>getOrder()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#a966cd5d873768a5a9b294a66c673785b"><code>getRows()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#a3677f5a27ad4efb8d5567634bf0940e9"><code>getSize()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#af0e2923caa24f35613d3cc8427bdc6bb"><code>getValue()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#a86092c214e872b8e109dce71824c1255"><code>interpolate()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#a8988d177e65dc802b5e4b03bfdb47d55"><code>load()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#afd2113abcfab004d55f4bcbd6f904362"><code>MeshType</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#adea726551c987314e1902d77cd2ab503"><code>operator*=()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#a81973aa8994c2d25436498f9952b5902"><code>operator+=()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#acf8fa02997445865a88f27c83dad4354"><code>operator-=()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#a3c09ef73cc0a8e6bb07faec534393383"><code>operator/=()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#ad1ee35b232ba18e7f94fee522ab836ee"><code>save()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#a3c0409f55497ff28ac68da355f3f64aa"><code>setData()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#ad387f7268267dcfadf5a851549224848"><code>setName()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#a20a02eeff14d68d1c188d8f2386dc91d"><code>x()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#a9de13de57bb32fb45b61d857a716cb3a"><code>y()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#acbf3185432eb4f4bdaa34d7ecd729535"><code>z()</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_grid_function_base_reference.html"><code>GridFunctionBaseReference</code></a></td><td><details><summary>4 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_variational_1_1_grid_function_base_reference.html#a992cc9631a9fa2be535cf7e9a6789503"><code>copy()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base_reference.html#a7c866cf8be951c464aceeb788579b29a"><code>operator()()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base_reference.html#a11cae0eed7fc3211076c29a6552091ab"><code>operator=()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base_reference.html#a00dc82bfe030a25cc55d89b93cf4b5a2"><code>setData()</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_function_base.html"><code>FunctionBase</code></a></td><td><details><summary>6 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_variational_1_1_function_base.html#a2a1cd57f8a8a7447519f64bb30d04950"><code>getDerived()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#af4786ff00248867e83ef9fa5159c73b7"><code>getTraceDomain()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#a2f180fed0bc9dd83a23d0f0464538409"><code>operator=()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#a64936f544e7cee3bc94dd3850a0458a9"><code>T()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#a17156a66770d12618096d2fe335dbeea"><code>TraceDomain</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#ac1f4fe7c4fef5a9e347524ae1c5e0ee1"><code>traceOf()</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_identifiable.html"><code>Identifiable</code></a></td><td><details><summary>2 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_identifiable.html#af6bc2718108274fb930c8d16aef9e17f"><code>getUUID()</code></a></li><li><a href="class_rodin_1_1_identifiable.html#a36b32316c418ee977c27453e7e37658d"><code>UUID</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_form_language_1_1_base.html"><code>FormLanguage::Base</code></a></td><td><details><summary>2 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_form_language_1_1_base.html#afbd6d41bc117ed42754035369b67dd56"><code>operator=()</code></a></li><li><a href="class_rodin_1_1_form_language_1_1_base.html#a9ae44b0112922779cf419ad36fe3aff4"><code>operator=()</code></a></li></ul></details></td></tr></tbody></table></section>
+</pre></details></td><td>Convenience wrapper that inherits all functionality from <a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html" class="m-doc">GridFunction&lt;FES, ::<wbr />Vec&gt;</a>.</td></tr></tbody></table></section><section id="rodin-inherited"><h2><a href="#rodin-inherited">Inherited interface</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Declared in</th><th>Members</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_grid_function_base.html"><code>GridFunctionBase</code></a></td><td><details><summary>26 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#a2b5727340d5581d5b23e24cd47652a5c"><code>argmax()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#af9f4820ea5fb253ead68bf314e38d456"><code>argmin()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#a4a1c0b519f1e883b370f4fd6c3b76ee5"><code>ContextType</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#a076499a78a29517d137192da51112c84"><code>ElementType</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#ab5a2f5705f2c21ba72347ecc0f50d556"><code>getColumns()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#aad8f738241426a32d95c3696395698d3"><code>getDimension()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#a4758cdb6b0d7f09e6719a7bfa884e86e"><code>getFiniteElementSpace()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#a55906fdb64ef621b6b153e7d8d8adf35"><code>getName()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#ac5827caceb168f6993f153e631adc85b"><code>getOrder()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#a966cd5d873768a5a9b294a66c673785b"><code>getRows()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#a3677f5a27ad4efb8d5567634bf0940e9"><code>getSize()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#af0e2923caa24f35613d3cc8427bdc6bb"><code>getValue()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#a86092c214e872b8e109dce71824c1255"><code>interpolate()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#a60108a86c4661099ff00e6b2898bf2b3"><code>IsDevice</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#a8988d177e65dc802b5e4b03bfdb47d55"><code>load()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#afd2113abcfab004d55f4bcbd6f904362"><code>MeshType</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#adea726551c987314e1902d77cd2ab503"><code>operator*=()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#a81973aa8994c2d25436498f9952b5902"><code>operator+=()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#acf8fa02997445865a88f27c83dad4354"><code>operator-=()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#a3c09ef73cc0a8e6bb07faec534393383"><code>operator/=()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#ad1ee35b232ba18e7f94fee522ab836ee"><code>save()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#a3c0409f55497ff28ac68da355f3f64aa"><code>setData()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#ad387f7268267dcfadf5a851549224848"><code>setName()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#a20a02eeff14d68d1c188d8f2386dc91d"><code>x()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#a9de13de57bb32fb45b61d857a716cb3a"><code>y()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#acbf3185432eb4f4bdaa34d7ecd729535"><code>z()</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_grid_function_base_reference.html"><code>GridFunctionBaseReference</code></a></td><td><details><summary>4 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_variational_1_1_grid_function_base_reference.html#a992cc9631a9fa2be535cf7e9a6789503"><code>copy()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base_reference.html#a7c866cf8be951c464aceeb788579b29a"><code>operator()()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base_reference.html#a11cae0eed7fc3211076c29a6552091ab"><code>operator=()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function_base_reference.html#a00dc82bfe030a25cc55d89b93cf4b5a2"><code>setData()</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_function_base.html"><code>FunctionBase</code></a></td><td><details><summary>6 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_variational_1_1_function_base.html#a2a1cd57f8a8a7447519f64bb30d04950"><code>getDerived()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#af4786ff00248867e83ef9fa5159c73b7"><code>getTraceDomain()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#a2f180fed0bc9dd83a23d0f0464538409"><code>operator=()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#a64936f544e7cee3bc94dd3850a0458a9"><code>T()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#a17156a66770d12618096d2fe335dbeea"><code>TraceDomain</code></a></li><li><a href="class_rodin_1_1_variational_1_1_function_base.html#ac1f4fe7c4fef5a9e347524ae1c5e0ee1"><code>traceOf()</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_identifiable.html"><code>Identifiable</code></a></td><td><details><summary>2 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_identifiable.html#af6bc2718108274fb930c8d16aef9e17f"><code>getUUID()</code></a></li><li><a href="class_rodin_1_1_identifiable.html#a36b32316c418ee977c27453e7e37658d"><code>UUID</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_grid_function.html"><code>GridFunction</code></a></td><td><details><summary>13 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_variational_1_1_grid_function.html#a83722b0cf86912c8e1cf177c0ede4d5d"><code>max()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function.html#a762bdb82b08a0ed44679c8d5c4a000f4"><code>min()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function.html#a52b2a6e2f898ab31632b6ccfe5fea5ee"><code>operator=()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function.html#a4107a9064ab310b5d2fa87a878625ae0"><code>operator=()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function.html#a8428155d772fe2c7997a96f97196e6da"><code>operator=()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function.html#acc12aa01caaf34c26e5615735516eaaa"><code>project()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function.html#a1aeb6e2b409c636d8f489065acda20ec"><code>project()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function.html#abaf16594e87535115421632ef23aff1b"><code>project()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function.html#abae738f0e1d5e7b6d873e6be20e3c863"><code>project()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function.html#a624c1be80463014f636d8680f3480a29"><code>project()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function.html#a3dd174cc366d482f7ce05866b178d0df"><code>project()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function.html#af49f1167314e6117508546d321240451"><code>project()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_grid_function.html#a371deba5a3e94af613c5cca16d0c7b80"><code>project()</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_form_language_1_1_base.html"><code>FormLanguage::Base</code></a></td><td><details><summary>2 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_form_language_1_1_base.html#afbd6d41bc117ed42754035369b67dd56"><code>operator=()</code></a></li><li><a href="class_rodin_1_1_form_language_1_1_base.html#a9ae44b0112922779cf419ad36fe3aff4"><code>operator=()</code></a></li></ul></details></td></tr></tbody></table></section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
@@ -489,7 +490,7 @@ $ u_i \leftarrow u_i / v_i $
             </div></details></dd>
             <dt>class Function</dt><dd>Projects a user-supplied function onto the grid function over a filtered mesh region.<details class="rodin-declaration-disclosure"><summary>See declaration</summary><div class="rodin-overview-declaration">
               <div class="m-doc-template">template&lt;class Function, class Pred&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a7bf67f07be076e2023ed7da153504931" class="m-doc">project</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a>&amp; region,
+              <span class="m-doc-wrap-bumper">auto <a href="#a1a243747e250265558b87e2385c383e1" class="m-doc">project</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a>&amp; region,
               const Function&amp; v,
               const Pred&amp; pred) -&gt; <a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp;</span>
             </div></details></dd>
@@ -578,12 +579,77 @@ $ u_i \leftarrow u_i / v_i $
               const <a href="class_rodin_1_1_variational_1_1_function_base.html#a64936f544e7cee3bc94dd3850a0458a9" class="m-doc">T</a>&amp; fn,
               const <a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&gt;&amp; attrs) -&gt; <a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&lt;<a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>, <a href="#a688b92a0c3e16ec579786a89a3580d88" class="m-doc">DataType</a>&gt;&amp;</span>
             </div></details></dd>
+            <dt><a href="#af49f1167314e6117508546d321240451" class="m-doc">project</a></dt><dd>Projects a source on entities of a region selected by a device predicate.<details class="rodin-declaration-disclosure"><summary>See declaration</summary><div class="rodin-overview-declaration">
+              <span class="m-doc-wrap-bumper">auto <a href="#af49f1167314e6117508546d321240451" class="m-doc">project</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a>&amp; region,
+              const <a href="class_rodin_1_1_variational_1_1_function_base.html#a64936f544e7cee3bc94dd3850a0458a9" class="m-doc">T</a>&amp; fn,
+              const Pred&amp; pred) -&gt; &amp;&amp;!<a href="namespacestd.html" class="m-doc">std</a> ::is_invocable_r_v&lt;bool, const Pred&amp;, const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp;&gt; &amp;&amp; IsDeviceProjectionPredicate&lt;typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;typename FESType::MeshType&gt;<a href="class_rodin_1_1_variational_1_1_grid_function_base.html#a4a1c0b519f1e883b370f4fd6c3b76ee5" class="m-doc">::<wbr />ContextType</a>, Pred&gt; <a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&lt;<a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>, <a href="#a688b92a0c3e16ec579786a89a3580d88" class="m-doc">DataType</a>&gt;&amp;</span>
+            </div></details></dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a762bdb82b08a0ed44679c8d5c4a000f4" class="m-doc">min</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="#a11ddd836b07135509382a92fbcc504bb" class="m-doc">ScalarType</a> <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Searches the minimum value in the grid function data.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a83722b0cf86912c8e1cf177c0ede4d5d" class="m-doc">max</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="#a11ddd836b07135509382a92fbcc504bb" class="m-doc">ScalarType</a> <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Searches for the maximum value in the grid function data.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="class_rodin_1_1_variational_1_1_grid_function.html#a52b2a6e2f898ab31632b6ccfe5fea5ee" class="m-doc">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#a64a561bef7097744a37d7cc40c37c66c" class="m-doc">GridFunctionBase</a>&amp;&amp; other) -&gt; <a href="class_rodin_1_1_variational_1_1_grid_function_base.html#a64a561bef7097744a37d7cc40c37c66c" class="m-doc">GridFunctionBase</a>&amp;</span>
+            </dt>
+            <dd>Move assignment operator.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="class_rodin_1_1_variational_1_1_grid_function.html#a4107a9064ab310b5d2fa87a878625ae0" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function_base.html#a64a561bef7097744a37d7cc40c37c66c" class="m-doc">GridFunctionBase</a>&amp; other) -&gt; <a href="class_rodin_1_1_variational_1_1_grid_function_base.html#a64a561bef7097744a37d7cc40c37c66c" class="m-doc">GridFunctionBase</a>&amp;</span>
+            </dt>
+            <dd>Copy assignment operator.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="class_rodin_1_1_variational_1_1_grid_function.html#a8428155d772fe2c7997a96f97196e6da" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_function_base.html#a64936f544e7cee3bc94dd3850a0458a9" class="m-doc">T</a>&amp; v) -&gt; <a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&lt;<a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>, <a href="#a688b92a0c3e16ec579786a89a3580d88" class="m-doc">DataType</a>&gt;&amp;</span>
+            </dt>
+            <dd>Assigns this grid function from a function or expression.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="class_rodin_1_1_variational_1_1_grid_function.html#acc12aa01caaf34c26e5615735516eaaa" class="m-doc">project</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; p,
+              const Function&amp; fn) -&gt; <a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&lt;<a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>, <a href="#a688b92a0c3e16ec579786a89a3580d88" class="m-doc">DataType</a>&gt;&amp;</span>
+            </dt>
+            <dd>Projects a function on one mesh entity.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="class_rodin_1_1_variational_1_1_grid_function.html#a1aeb6e2b409c636d8f489065acda20ec" class="m-doc">project</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; p,
+              const <a href="#a5c7fc1cee1343f294d68ab9388bbfe78" class="m-doc">RangeType</a>&amp; v) -&gt; <a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&lt;<a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>, <a href="#a688b92a0c3e16ec579786a89a3580d88" class="m-doc">DataType</a>&gt;&amp;</span>
+            </dt>
+            <dd>Sets all DOFs attached to one mesh entity from a constant value.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="class_rodin_1_1_variational_1_1_grid_function.html#abaf16594e87535115421632ef23aff1b" class="m-doc">project</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_function_base.html#a64936f544e7cee3bc94dd3850a0458a9" class="m-doc">T</a>&amp; fn) -&gt; <a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&lt;<a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>, <a href="#a688b92a0c3e16ec579786a89a3580d88" class="m-doc">DataType</a>&gt;&amp;</span>
+            </dt>
+            <dd>Projects a source on all cells.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="class_rodin_1_1_variational_1_1_grid_function.html#abae738f0e1d5e7b6d873e6be20e3c863" class="m-doc">project</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a>&amp; region,
+              const <a href="class_rodin_1_1_variational_1_1_function_base.html#a64936f544e7cee3bc94dd3850a0458a9" class="m-doc">T</a>&amp; fn) -&gt; <a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&lt;<a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>, <a href="#a688b92a0c3e16ec579786a89a3580d88" class="m-doc">DataType</a>&gt;&amp;</span>
+            </dt>
+            <dd>Projects a source on a geometric region.</dd>
+            <dt><a href="class_rodin_1_1_variational_1_1_grid_function.html#a624c1be80463014f636d8680f3480a29" class="m-doc">project</a></dt><dd>Projects a source on entities of a region with one attribute.<details class="rodin-declaration-disclosure"><summary>See declaration</summary><div class="rodin-overview-declaration">
+              <span class="m-doc-wrap-bumper">auto <a href="class_rodin_1_1_variational_1_1_grid_function.html#a624c1be80463014f636d8680f3480a29" class="m-doc">project</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a>&amp; region,
+              const <a href="class_rodin_1_1_variational_1_1_function_base.html#a64936f544e7cee3bc94dd3850a0458a9" class="m-doc">T</a>&amp; fn,
+              const <a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&amp; attr) -&gt; <a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&lt;<a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>, <a href="#a688b92a0c3e16ec579786a89a3580d88" class="m-doc">DataType</a>&gt;&amp;</span>
+            </div></details></dd>
+            <dt><a href="class_rodin_1_1_variational_1_1_grid_function.html#a3dd174cc366d482f7ce05866b178d0df" class="m-doc">project</a></dt><dd>Projects a source on entities of a region with selected attributes.<details class="rodin-declaration-disclosure"><summary>See declaration</summary><div class="rodin-overview-declaration">
+              <span class="m-doc-wrap-bumper">auto <a href="class_rodin_1_1_variational_1_1_grid_function.html#a3dd174cc366d482f7ce05866b178d0df" class="m-doc">project</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a>&amp; region,
+              const <a href="class_rodin_1_1_variational_1_1_function_base.html#a64936f544e7cee3bc94dd3850a0458a9" class="m-doc">T</a>&amp; fn,
+              const <a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&gt;&amp; attrs) -&gt; <a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&lt;<a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>, <a href="#a688b92a0c3e16ec579786a89a3580d88" class="m-doc">DataType</a>&gt;&amp;</span>
+            </div></details></dd>
+            <dt><a href="class_rodin_1_1_variational_1_1_grid_function.html#af49f1167314e6117508546d321240451" class="m-doc">project</a></dt><dd>Projects a source on entities of a region selected by a device predicate.<details class="rodin-declaration-disclosure"><summary>See declaration</summary><div class="rodin-overview-declaration">
+              <span class="m-doc-wrap-bumper">auto <a href="class_rodin_1_1_variational_1_1_grid_function.html#af49f1167314e6117508546d321240451" class="m-doc">project</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a>&amp; region,
+              const <a href="class_rodin_1_1_variational_1_1_function_base.html#a64936f544e7cee3bc94dd3850a0458a9" class="m-doc">T</a>&amp; fn,
+              const Pred&amp; pred) -&gt; &amp;&amp;!<a href="namespacestd.html" class="m-doc">std</a> ::is_invocable_r_v&lt;bool, const Pred&amp;, const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp;&gt; &amp;&amp; IsDeviceProjectionPredicate&lt;typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;typename FESType::MeshType&gt;<a href="class_rodin_1_1_variational_1_1_grid_function_base.html#a4a1c0b519f1e883b370f4fd6c3b76ee5" class="m-doc">::<wbr />ContextType</a>, Pred&gt; <a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&lt;<a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>, <a href="#a688b92a0c3e16ec579786a89a3580d88" class="m-doc">DataType</a>&gt;&amp;</span>
+            </div></details></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="class_rodin_1_1_variational_1_1_grid_function.html#a371deba5a3e94af613c5cca16d0c7b80" class="m-doc">project</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a>&amp; region,
+              const <a href="#a5c7fc1cee1343f294d68ab9388bbfe78" class="m-doc">RangeType</a>&amp; fn,
+              const Pred&amp; pred) -&gt; <a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&lt;<a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>, <a href="#a688b92a0c3e16ec579786a89a3580d88" class="m-doc">DataType</a>&gt;&amp;</span>
+            </dt>
+            <dd>Projects a constant value over a filtered region.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="class_rodin_1_1_variational_1_1_grid_function.html#a762bdb82b08a0ed44679c8d5c4a000f4" class="m-doc">min</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="#a11ddd836b07135509382a92fbcc504bb" class="m-doc">ScalarType</a></span>
+            </dt>
+            <dd>Searches the minimum value in the grid function data.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="class_rodin_1_1_variational_1_1_grid_function.html#a83722b0cf86912c8e1cf177c0ede4d5d" class="m-doc">max</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="#a11ddd836b07135509382a92fbcc504bb" class="m-doc">ScalarType</a></span>
             </dt>
             <dd>Searches for the maximum value in the grid function data.</dd>
           </dl>
@@ -607,7 +673,7 @@ $ u_i \leftarrow u_i / v_i $
                 </tr>
               </tbody>
             </table>
-<p>Allocates a PETSc vector whose size matches the number of DOFs in <code>fes</code> and sets all entries to zero.</p><h4 id="autotoc_md207">Local mode (</h4><p>Creates a sequential vector on <code>PETSC_COMM_SELF</code> with <code>VecCreate</code> → <code>VecSetSizes</code> → <code>VecSetFromOptions</code> → <code>VecSetUp</code> → <code>VecZeroEntries</code>.</p><h4 id="autotoc_md208">MPI mode (</h4><ol><li>Queries the ownership range from the finite element space via <code>fes.getOwnershipRange(m_begin, m_end)</code>.</li><li>Iterates over local shard DOFs to identify ghost indices — those whose global index falls outside  <svg class="m-math" style="width: 8.759em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 84.085771 11.955168">
+<p>Allocates a PETSc vector whose size matches the number of DOFs in <code>fes</code> and sets all entries to zero.</p><h4 id="autotoc_md234">Local mode (</h4><p>Creates a sequential vector on <code>PETSC_COMM_SELF</code> with <code>VecCreate</code> → <code>VecSetSizes</code> → <code>VecSetFromOptions</code> → <code>VecSetUp</code> → <code>VecZeroEntries</code>.</p><h4 id="autotoc_md235">MPI mode (</h4><ol><li>Queries the ownership range from the finite element space via <code>fes.getOwnershipRange(m_begin, m_end)</code>.</li><li>Iterates over local shard DOFs to identify ghost indices — those whose global index falls outside  <svg class="m-math" style="width: 8.759em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 84.085771 11.955168">
 <title>
 $[\text{m\_begin},
    \text{m\_end})$
@@ -1704,13 +1770,13 @@ $[\text{offset}, \text{offset}+N)$
               </tfoot>
             </table>
           </div></section>
-          <section class="m-doc-details" id="a7bf67f07be076e2023ed7da153504931"><div>
+          <section class="m-doc-details" id="a1a243747e250265558b87e2385c383e1"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class FES&gt;
                 template&lt;class Function, class Pred&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7bf67f07be076e2023ed7da153504931" class="m-doc-self">project</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a>&amp; region,
+              <span class="m-doc-wrap-bumper"><a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1a243747e250265558b87e2385c383e1" class="m-doc-self">project</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a>&amp; region,
               const Function&amp; v,
               const Pred&amp; pred)</span></span>
             </h3>
@@ -1765,7 +1831,7 @@ $[\text{offset}, \text{offset}+N)$
                 </tr>
               </tfoot>
             </table>
-<p>This is the entry point of the array access protocol. If the array has not already been acquired (<code>m_write.acquired == false</code>), the method.</p><h4 id="autotoc_md209">Local mode</h4><ul><li>Calls <code>VecGetArrayWrite(m_data, &amp;raw)</code>.</li></ul><h4 id="autotoc_md210">MPI mode</h4><ol><li>Obtains the local (ghosted) form via <code>VecGhostGetLocalForm</code>.</li><li>Locks the local form with <code>VecGetArrayWrite</code>.</li></ol><p>Ghost synchronization is deliberately not done here because element access may happen on only a subset of ranks during filtered assembly.</p><p>Subsequent calls while the array is already acquired are no-ops.</p>
+<p>This is the entry point of the array access protocol. If the array has not already been acquired (<code>m_write.acquired == false</code>), the method.</p><h4 id="autotoc_md236">Local mode</h4><ul><li>Calls <code>VecGetArrayWrite(m_data, &amp;raw)</code>.</li></ul><h4 id="autotoc_md237">MPI mode</h4><ol><li>Obtains the local (ghosted) form via <code>VecGhostGetLocalForm</code>.</li><li>Locks the local form with <code>VecGetArrayWrite</code>.</li></ol><p>Ghost synchronization is deliberately not done here because element access may happen on only a subset of ranks during filtered assembly.</p><p>Subsequent calls while the array is already acquired are no-ops.</p>
           </div></section>
           <section class="m-doc-details" id="a35095eb434070fff88abb65b08387c7e"><div>
             <h3>
@@ -1797,7 +1863,7 @@ $[\text{offset}, \text{offset}+N)$
                 </tr>
               </tfoot>
             </table>
-<h4 id="autotoc_md211">Local mode</h4><ul><li>Calls <code>VecRestoreArrayWrite(m_data, &amp;raw)</code>.</li></ul><h4 id="autotoc_md212">MPI mode</h4><ol><li>Restores the array with <code>VecRestoreArrayWrite(ghost, &amp;raw)</code>.</li><li>Returns the local form via <code>VecGhostRestoreLocalForm</code>.</li><li>Performs a <strong>reverse</strong> ghost update (<code>VecGhostUpdateBegin/End(INSERT_VALUES, SCATTER_REVERSE)</code>) to propagate ghost modifications back to owners.</li><li>Refreshes ghosts from owner values with a forward update.</li></ol><p>After this call, <code>m_write.acquired</code> is <code>false</code> and subsequent reads of the owned portion will reflect any changes that were made through ghost entries.</p><aside class="m-note m-warning"><h4>Warning</h4><p>In MPI mode the reverse scatter uses <code>INSERT_VALUES</code>, so ghost entries always win over the owner&#x27;s value — including ghost entries that were never written. A rank that assigns through <code>operator[]</code> must therefore cover every DOF of its shard, owned and ghost alike (as element-wise assembly does), not just its ownership range. Leaving the ghost slots at their previous values overwrites whatever the owning ranks wrote. Collective assignments (<code>operator=</code>, <code>project()</code>, <code>setData()</code>, <code>axpy()</code>, …) are unaffected; they end with a forward update from the owners.</p></aside>
+<h4 id="autotoc_md238">Local mode</h4><ul><li>Calls <code>VecRestoreArrayWrite(m_data, &amp;raw)</code>.</li></ul><h4 id="autotoc_md239">MPI mode</h4><ol><li>Restores the array with <code>VecRestoreArrayWrite(ghost, &amp;raw)</code>.</li><li>Returns the local form via <code>VecGhostRestoreLocalForm</code>.</li><li>Performs a <strong>reverse</strong> ghost update (<code>VecGhostUpdateBegin/End(INSERT_VALUES, SCATTER_REVERSE)</code>) to propagate ghost modifications back to owners.</li><li>Refreshes ghosts from owner values with a forward update.</li></ol><p>After this call, <code>m_write.acquired</code> is <code>false</code> and subsequent reads of the owned portion will reflect any changes that were made through ghost entries.</p><aside class="m-note m-warning"><h4>Warning</h4><p>In MPI mode the reverse scatter uses <code>INSERT_VALUES</code>, so ghost entries always win over the owner&#x27;s value — including ghost entries that were never written. A rank that assigns through <code>operator[]</code> must therefore cover every DOF of its shard, owned and ghost alike (as element-wise assembly does), not just its ownership range. Leaving the ghost slots at their previous values overwrites whatever the owning ranks wrote. Collective assignments (<code>operator=</code>, <code>project()</code>, <code>setData()</code>, <code>axpy()</code>, …) are unaffected; they end with a forward update from the owners.</p></aside>
           </div></section>
           <section class="m-doc-details" id="aa7e59253edaf70947f510c9bec12a2a4"><div>
             <h3>
@@ -2176,6 +2242,41 @@ $[\text{offset}, \text{offset}+N)$
             </table>
 <p>The source object <code>fn</code> is interpolated over entities of <code>region</code> whose attribute belongs to <code>attrs</code>. An empty attribute set accepts all entities in the region.</p>
           </div></section>
+          <section class="m-doc-details" id="af49f1167314e6117508546d321240451"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">&amp;&amp;!<a href="namespacestd.html" class="m-doc">std</a> ::is_invocable_r_v&lt;bool, const Pred&amp;, const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp;&gt; &amp;&amp; IsDeviceProjectionPredicate&lt;typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;typename FESType::MeshType&gt;<a href="class_rodin_1_1_variational_1_1_grid_function_base.html#a4a1c0b519f1e883b370f4fd6c3b76ee5" class="m-doc">::<wbr />ContextType</a>, Pred&gt; <a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&lt;<a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>, <a href="#a688b92a0c3e16ec579786a89a3580d88" class="m-doc">DataType</a>&gt;&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af49f1167314e6117508546d321240451" class="m-doc-self">project</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a>&amp; region,
+              const <a href="class_rodin_1_1_variational_1_1_function_base.html#a64936f544e7cee3bc94dd3850a0458a9" class="m-doc">T</a>&amp; fn,
+              const Pred&amp; pred)</span></span>
+            </h3>
+            <p>Projects a source on entities of a region selected by a device predicate.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">region</td>
+                  <td>Region on which to apply the operation.</td>
+                </tr>
+                <tr>
+                  <td>fn</td>
+                  <td>Function to evaluate.</td>
+                </tr>
+                <tr>
+                  <td>pred</td>
+                  <td>Device predicate selecting the entities on which to project.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this grid function</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>The predicate is evaluated on the device on each polytope of <code>region</code>, as given by the device projection of the mesh context, for instance a <code>KOKKOS_LAMBDA</code> taking a <code>const Rodin::Kokkos::View&lt;::Rodin::Geometry::Polytope&gt;&amp;</code>.</p>
+          </div></section>
           <section class="m-doc-details" id="a762bdb82b08a0ed44679c8d5c4a000f4"><div>
             <h3>
               
@@ -2197,6 +2298,379 @@ $[\text{offset}, \text{offset}+N)$
               
               <span class="m-doc-wrap-bumper"><a href="#a11ddd836b07135509382a92fbcc504bb" class="m-doc">ScalarType</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a83722b0cf86912c8e1cf177c0ede4d5d" class="m-doc-self">max</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
+            <p>Searches for the maximum value in the grid function data.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Maximum value in grid function.</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>This function will compute the maximum value in the grid function data array.</p><aside class="m-note m-default"><h4>Complexity</h4><p>The operation is linear in the size of the number of entries in the underlying matrix.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a52b2a6e2f898ab31632b6ccfe5fea5ee"><div>
+            <h3>
+              
+              
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#a64a561bef7097744a37d7cc40c37c66c" class="m-doc">GridFunctionBase</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a52b2a6e2f898ab31632b6ccfe5fea5ee" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#a64a561bef7097744a37d7cc40c37c66c" class="m-doc">GridFunctionBase</a>&amp;&amp; other)</span></span>
+            </h3><p class="rodin-reference-include">Defined in <a href="_variational_2_grid_function_8h.html"><code>Rodin/Variational/GridFunction.h</code></a></p>
+            <p>Move assignment operator.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Grid function to move from</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this grid function</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a4107a9064ab310b5d2fa87a878625ae0"><div>
+            <h3>
+              
+              
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_grid_function_base.html#a64a561bef7097744a37d7cc40c37c66c" class="m-doc">GridFunctionBase</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4107a9064ab310b5d2fa87a878625ae0" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function_base.html#a64a561bef7097744a37d7cc40c37c66c" class="m-doc">GridFunctionBase</a>&amp; other)</span></span>
+            </h3><p class="rodin-reference-include">Defined in <a href="_variational_2_grid_function_8h.html"><code>Rodin/Variational/GridFunction.h</code></a></p>
+            <p>Copy assignment operator.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Grid function to copy</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this grid function</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a8428155d772fe2c7997a96f97196e6da"><div>
+            <h3>
+              
+              
+              <span class="m-doc-wrap-bumper"><a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&lt;<a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>, <a href="#a688b92a0c3e16ec579786a89a3580d88" class="m-doc">DataType</a>&gt;&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8428155d772fe2c7997a96f97196e6da" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_function_base.html#a64936f544e7cee3bc94dd3850a0458a9" class="m-doc">T</a>&amp; v)</span></span>
+            </h3><p class="rodin-reference-include">Defined in <a href="_variational_2_grid_function_8h.html"><code>Rodin/Variational/GridFunction.h</code></a></p>
+            <p>Assigns this grid function from a function or expression.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">v</td>
+                  <td>Value to assign.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this grid function</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>The source object <code>v</code> is forwarded to project().</p>
+          </div></section>
+          <section class="m-doc-details" id="acc12aa01caaf34c26e5615735516eaaa"><div>
+            <h3>
+              
+              
+              <span class="m-doc-wrap-bumper"><a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&lt;<a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>, <a href="#a688b92a0c3e16ec579786a89a3580d88" class="m-doc">DataType</a>&gt;&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acc12aa01caaf34c26e5615735516eaaa" class="m-doc-self">project</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; p,
+              const Function&amp; fn)</span></span>
+            </h3><p class="rodin-reference-include">Defined in <a href="_variational_2_grid_function_8h.html"><code>Rodin/Variational/GridFunction.h</code></a></p>
+            <p>Projects a function on one mesh entity.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">p</td>
+                  <td>Entity identified by its dimension and local index.</td>
+                </tr>
+                <tr>
+                  <td>fn</td>
+                  <td>Function to evaluate.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this grid function</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>The source function <code>fn</code> is interpolated on the entity identified by the <code>(dimension, index)</code> pair <code>p</code>.</p>
+          </div></section>
+          <section class="m-doc-details" id="a1aeb6e2b409c636d8f489065acda20ec"><div>
+            <h3>
+              
+              
+              <span class="m-doc-wrap-bumper"><a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&lt;<a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>, <a href="#a688b92a0c3e16ec579786a89a3580d88" class="m-doc">DataType</a>&gt;&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1aeb6e2b409c636d8f489065acda20ec" class="m-doc-self">project</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; p,
+              const <a href="#a5c7fc1cee1343f294d68ab9388bbfe78" class="m-doc">RangeType</a>&amp; v)</span></span>
+            </h3><p class="rodin-reference-include">Defined in <a href="_variational_2_grid_function_8h.html"><code>Rodin/Variational/GridFunction.h</code></a></p>
+            <p>Sets all DOFs attached to one mesh entity from a constant value.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">p</td>
+                  <td>Entity identified by its dimension and local index.</td>
+                </tr>
+                <tr>
+                  <td>v</td>
+                  <td>Function or value to transform or project.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this grid function</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>The constant value <code>v</code> is interpolated on the entity identified by the <code>(dimension, index)</code> pair <code>p</code>.</p>
+          </div></section>
+          <section class="m-doc-details" id="abaf16594e87535115421632ef23aff1b"><div>
+            <h3>
+              
+              
+              <span class="m-doc-wrap-bumper"><a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&lt;<a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>, <a href="#a688b92a0c3e16ec579786a89a3580d88" class="m-doc">DataType</a>&gt;&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abaf16594e87535115421632ef23aff1b" class="m-doc-self">project</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_function_base.html#a64936f544e7cee3bc94dd3850a0458a9" class="m-doc">T</a>&amp; fn)</span></span>
+            </h3><p class="rodin-reference-include">Defined in <a href="_variational_2_grid_function_8h.html"><code>Rodin/Variational/GridFunction.h</code></a></p>
+            <p>Projects a source on all cells.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">fn</td>
+                  <td>Function to evaluate.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this grid function</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>The source object <code>fn</code> is interpolated on every cell.</p>
+          </div></section>
+          <section class="m-doc-details" id="abae738f0e1d5e7b6d873e6be20e3c863"><div>
+            <h3>
+              
+              
+              <span class="m-doc-wrap-bumper"><a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&lt;<a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>, <a href="#a688b92a0c3e16ec579786a89a3580d88" class="m-doc">DataType</a>&gt;&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abae738f0e1d5e7b6d873e6be20e3c863" class="m-doc-self">project</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a>&amp; region,
+              const <a href="class_rodin_1_1_variational_1_1_function_base.html#a64936f544e7cee3bc94dd3850a0458a9" class="m-doc">T</a>&amp; fn)</span></span>
+            </h3><p class="rodin-reference-include">Defined in <a href="_variational_2_grid_function_8h.html"><code>Rodin/Variational/GridFunction.h</code></a></p>
+            <p>Projects a source on a geometric region.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">region</td>
+                  <td>Region on which to apply the operation.</td>
+                </tr>
+                <tr>
+                  <td>fn</td>
+                  <td>Function to evaluate.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this grid function</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>The source object <code>fn</code> is interpolated over <code>region</code>.</p>
+          </div></section>
+          <section class="m-doc-details" id="a624c1be80463014f636d8680f3480a29"><div>
+            <h3>
+              
+              
+              <span class="m-doc-wrap-bumper"><a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&lt;<a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>, <a href="#a688b92a0c3e16ec579786a89a3580d88" class="m-doc">DataType</a>&gt;&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a624c1be80463014f636d8680f3480a29" class="m-doc-self">project</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a>&amp; region,
+              const <a href="class_rodin_1_1_variational_1_1_function_base.html#a64936f544e7cee3bc94dd3850a0458a9" class="m-doc">T</a>&amp; fn,
+              const <a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&amp; attr)</span></span>
+            </h3><p class="rodin-reference-include">Defined in <a href="_variational_2_grid_function_8h.html"><code>Rodin/Variational/GridFunction.h</code></a></p>
+            <p>Projects a source on entities of a region with one attribute.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">region</td>
+                  <td>Region on which to apply the operation.</td>
+                </tr>
+                <tr>
+                  <td>fn</td>
+                  <td>Function to evaluate.</td>
+                </tr>
+                <tr>
+                  <td>attr</td>
+                  <td>Mesh attribute selecting the region.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this grid function</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>The source object <code>fn</code> is interpolated over entities of <code>region</code> whose attribute equals <code>attr</code>.</p>
+          </div></section>
+          <section class="m-doc-details" id="a3dd174cc366d482f7ce05866b178d0df"><div>
+            <h3>
+              
+              
+              <span class="m-doc-wrap-bumper"><a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&lt;<a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>, <a href="#a688b92a0c3e16ec579786a89a3580d88" class="m-doc">DataType</a>&gt;&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3dd174cc366d482f7ce05866b178d0df" class="m-doc-self">project</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a>&amp; region,
+              const <a href="class_rodin_1_1_variational_1_1_function_base.html#a64936f544e7cee3bc94dd3850a0458a9" class="m-doc">T</a>&amp; fn,
+              const <a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&gt;&amp; attrs)</span></span>
+            </h3><p class="rodin-reference-include">Defined in <a href="_variational_2_grid_function_8h.html"><code>Rodin/Variational/GridFunction.h</code></a></p>
+            <p>Projects a source on entities of a region with selected attributes.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">region</td>
+                  <td>Region on which to apply the operation.</td>
+                </tr>
+                <tr>
+                  <td>fn</td>
+                  <td>Function to evaluate.</td>
+                </tr>
+                <tr>
+                  <td>attrs</td>
+                  <td>Mesh attributes selecting the region.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this grid function</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>The source object <code>fn</code> is interpolated over entities of <code>region</code> whose attribute belongs to <code>attrs</code>. An empty attribute set accepts all entities in the region.</p>
+          </div></section>
+          <section class="m-doc-details" id="af49f1167314e6117508546d321240451"><div>
+            <h3>
+              
+              
+              <span class="m-doc-wrap-bumper">&amp;&amp;!<a href="namespacestd.html" class="m-doc">std</a> ::is_invocable_r_v&lt;bool, const Pred&amp;, const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp;&gt; &amp;&amp; IsDeviceProjectionPredicate&lt;typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;typename FESType::MeshType&gt;<a href="class_rodin_1_1_variational_1_1_grid_function_base.html#a4a1c0b519f1e883b370f4fd6c3b76ee5" class="m-doc">::<wbr />ContextType</a>, Pred&gt; <a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&lt;<a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>, <a href="#a688b92a0c3e16ec579786a89a3580d88" class="m-doc">DataType</a>&gt;&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af49f1167314e6117508546d321240451" class="m-doc-self">project</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a>&amp; region,
+              const <a href="class_rodin_1_1_variational_1_1_function_base.html#a64936f544e7cee3bc94dd3850a0458a9" class="m-doc">T</a>&amp; fn,
+              const Pred&amp; pred)</span></span>
+            </h3><p class="rodin-reference-include">Defined in <a href="_variational_2_grid_function_8h.html"><code>Rodin/Variational/GridFunction.h</code></a></p>
+            <p>Projects a source on entities of a region selected by a device predicate.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">region</td>
+                  <td>Region on which to apply the operation.</td>
+                </tr>
+                <tr>
+                  <td>fn</td>
+                  <td>Function to evaluate.</td>
+                </tr>
+                <tr>
+                  <td>pred</td>
+                  <td>Device predicate selecting the entities on which to project.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this grid function</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>The predicate is evaluated on the device on each polytope of <code>region</code>, as given by the device projection of the mesh context, for instance a <code>KOKKOS_LAMBDA</code> taking a <code>const Rodin::Kokkos::View&lt;::Rodin::Geometry::Polytope&gt;&amp;</code>.</p>
+          </div></section>
+          <section class="m-doc-details" id="a371deba5a3e94af613c5cca16d0c7b80"><div>
+            <h3>
+              
+              
+              <span class="m-doc-wrap-bumper"><a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&lt;<a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>, <a href="#a688b92a0c3e16ec579786a89a3580d88" class="m-doc">DataType</a>&gt;&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a371deba5a3e94af613c5cca16d0c7b80" class="m-doc-self">project</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a>&amp; region,
+              const <a href="#a5c7fc1cee1343f294d68ab9388bbfe78" class="m-doc">RangeType</a>&amp; fn,
+              const Pred&amp; pred)</span></span>
+            </h3><p class="rodin-reference-include">Defined in <a href="_variational_2_grid_function_8h.html"><code>Rodin/Variational/GridFunction.h</code></a></p>
+            <p>Projects a constant value over a filtered region.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">region</td>
+                  <td>Region on which to apply the operation.</td>
+                </tr>
+                <tr>
+                  <td>fn</td>
+                  <td>Function to evaluate.</td>
+                </tr>
+                <tr>
+                  <td>pred</td>
+                  <td>Predicate selecting the entities on which to project.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this grid function</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>The constant value <code>fn</code> is interpolated over entities of <code>region</code> accepted by <code>pred</code>.</p>
+          </div></section>
+          <section class="m-doc-details" id="a762bdb82b08a0ed44679c8d5c4a000f4"><div>
+            <h3>
+              
+              
+              <span class="m-doc-wrap-bumper"><a href="#a11ddd836b07135509382a92fbcc504bb" class="m-doc">ScalarType</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a762bdb82b08a0ed44679c8d5c4a000f4" class="m-doc-self">min</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3><p class="rodin-reference-include">Defined in <a href="_variational_2_grid_function_8h.html"><code>Rodin/Variational/GridFunction.h</code></a></p>
+            <p>Searches the minimum value in the grid function data.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Minimum value in grid function.</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>This function will compute the minimum value in the grid function data array.</p><aside class="m-note m-default"><h4>Complexity</h4><p>The operation is linear in the size of the number of entries in the underlying matrix.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a83722b0cf86912c8e1cf177c0ede4d5d"><div>
+            <h3>
+              
+              
+              <span class="m-doc-wrap-bumper"><a href="#a11ddd836b07135509382a92fbcc504bb" class="m-doc">ScalarType</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a83722b0cf86912c8e1cf177c0ede4d5d" class="m-doc-self">max</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3><p class="rodin-reference-include">Defined in <a href="_variational_2_grid_function_8h.html"><code>Rodin/Variational/GridFunction.h</code></a></p>
             <p>Searches for the maximum value in the grid function data.</p>
             <table class="m-table m-fullwidth m-flat">
               <tfoot>
@@ -2247,7 +2721,7 @@ $[\text{offset}, \text{offset}+N)$
     </div>
   </div>
 </div>
-<script src="search-v2-27108c4bc94e.js"></script>
+<script src="search-v2-eeb63e0c3a5e.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">

@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Rodin::Geometry::Connectivity&lt;Rodin::Context::Kokkos&lt;Rodin::Context::Local, Backend&gt;&gt;::Discovery struct | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
+  <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
+  <link rel="stylesheet" href="rodin-theme-1337632f765f.css" />
+  <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#18191c" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <a href="index.html" id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m">Rodin</a>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li>
+              <a href="pages.html">Pages</a>
+              <ol>
+                <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
+                <li><a href="gallery.html">Gallery</a></li>
+                <li><a href="guides-io.html">Input, output, and visualization</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
+                <li><a href="ci-index.html">Continuous integration</a></li>
+                <li><a href="notation-index.html">Notation</a></li>
+                <li><a href="credits-index.html">Credits</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="modules.html">Modules</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
+              </ol>
+            </li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="3">
+            <li><a href="annotated.html">Classes</a></li>
+            <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
+            <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_geometry.html">Geometry</a><span>›</span><a href="class_rodin_1_1_geometry_1_1_connectivity_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_contee09b026919fb84a1b9b1dd6a17073a2f.html">Connectivity&lt;Rodin::Context::Kokkos&lt;Rodin::Context::Local, Backend&gt;&gt;</a></div><h1>Discovery</h1><p class="rodin-reference-brief">Resident discovery stages and their shared workspace.</p><p class="rodin-reference-include">Defined in <a href="_kokkos_2_geometry_2_connectivity_8h.html"><code>Rodin/Kokkos/Geometry/Connectivity.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">struct</span><span class="w"> </span><span class="nc">Discovery</span><span class="p">;</span>
+</pre>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#pub-static-methods">Public static functions</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
+                <li><a href="#pub-attribs">Public variables</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+        <section id="pub-types">
+          <h2><a href="#pub-types">Public types</a></h2>
+          <dl class="m-doc">
+            <dt>
+              struct <a href="struct_rodin_1_1_geometry_1_1_connectivity_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_cont55a0bbbc7fc6b3f28c2704081d5990e5.html" class="m-doc">Count</a>
+            </dt>
+            <dd>Count local reference subentities.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_geometry_1_1_connectivity_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_cont2914457812bc8724fcd5d47007ada064.html" class="m-doc">Existing</a>
+            </dt>
+            <dd>Emit existing identities first.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_geometry_1_1_connectivity_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_cont9991ac32698c6fa0c90bb6b90d16b036.html" class="m-doc">Emit</a>
+            </dt>
+            <dd>Emit cell-local candidates.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_geometry_1_1_connectivity_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_cont99d6925c3ebd509b043c26651ddb71c0.html" class="m-doc">Groups</a>
+            </dt>
+            <dd>Mark canonical-key groups.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_geometry_1_1_connectivity_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_cont89ad27dda0a3623bdc03ac8b5020b9f4.html" class="m-doc">Leaders</a>
+            </dt>
+            <dd>Choose first occurrences.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_geometry_1_1_connectivity_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_conta1dfd834d4f339c5b1bdeb81a6eb6a06.html" class="m-doc">Assign</a>
+            </dt>
+            <dd>Assign stable entity IDs.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_geometry_1_1_connectivity_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_cont9b87af588905ac41ea51e028adbb2526.html" class="m-doc">Resolve</a>
+            </dt>
+            <dd>Resolve candidate identities.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_geometry_1_1_connectivity_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_cont94358026e33eaacd7e8cab425a4fa0ab.html" class="m-doc">NewEntities</a>
+            </dt>
+            <dd>Compact newly discovered entities.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_geometry_1_1_connectivity_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_cont7902a9ada1b53278a2825b77d54da296.html" class="m-doc">CountRows</a>
+            </dt>
+            <dd>Count retained cell-local incidences.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_geometry_1_1_connectivity_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_contda30ea097a4c281161d63342ee6d8213.html" class="m-doc">FillRows</a>
+            </dt>
+            <dd>Fill cell-local incidence in reference order.</dd>
+          </dl>
+        </section>
+        <section id="pub-static-methods">
+          <h2><a href="#pub-static-methods">Public static functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">static auto <a href="#a64a1f73310e09a1cf017d1714d9ec8ea" class="m-doc">key</a>(</span><span class="m-doc-wrap">const <a href="struct_rodin_1_1_geometry_1_1_connectivity_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_cont04761ffdb34e5fb78247082577ce7c96.html" class="m-doc">Entity</a>&amp; entity,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> order) -&gt; <a href="struct_rodin_1_1_geometry_1_1_connectivity_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_cont5476bd0baa01a373693804d80352eb60.html" class="m-doc">Candidate</a></span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">static auto <a href="#a9eee4e132816a493d2b5aa0b333c1343" class="m-doc">equal</a>(</span><span class="m-doc-wrap">const <a href="struct_rodin_1_1_geometry_1_1_connectivity_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_cont5476bd0baa01a373693804d80352eb60.html" class="m-doc">Candidate</a>&amp; a,
+              const <a href="struct_rodin_1_1_geometry_1_1_connectivity_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_cont5476bd0baa01a373693804d80352eb60.html" class="m-doc">Candidate</a>&amp; b) -&gt; bool</span>
+            </dt>
+            <dd></dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#af5c867b1887694d0b2cd39780ecd8faa" class="m-doc">operator()</a>(</span><span class="m-doc-wrap"><a href="struct_rodin_1_1_geometry_1_1_connectivity_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_cont55a0bbbc7fc6b3f28c2704081d5990e5.html" class="m-doc">Count</a> tag,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> cell) const</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a74edc640f4de9adfaa1cd58fa2ec4b16" class="m-doc">operator()</a>(</span><span class="m-doc-wrap"><a href="struct_rodin_1_1_geometry_1_1_connectivity_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_cont2914457812bc8724fcd5d47007ada064.html" class="m-doc">Existing</a> tag,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> i) const</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a787e58aaafedfa59e0c81ce1cfe130df" class="m-doc">operator()</a>(</span><span class="m-doc-wrap"><a href="struct_rodin_1_1_geometry_1_1_connectivity_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_cont9991ac32698c6fa0c90bb6b90d16b036.html" class="m-doc">Emit</a> tag,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> cell) const</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#aaa24db0dd75ddb17211c85157d4dcb4f" class="m-doc">operator()</a>(</span><span class="m-doc-wrap"><a href="struct_rodin_1_1_geometry_1_1_connectivity_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_cont99d6925c3ebd509b043c26651ddb71c0.html" class="m-doc">Groups</a> tag,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> i) const</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a64ac8289c67d883cdb27b42d9cb1084b" class="m-doc">operator()</a>(</span><span class="m-doc-wrap"><a href="struct_rodin_1_1_geometry_1_1_connectivity_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_cont89ad27dda0a3623bdc03ac8b5020b9f4.html" class="m-doc">Leaders</a> tag,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> i) const</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#aadcd6ed6cab76968b2c38b52ec74c822" class="m-doc">operator()</a>(</span><span class="m-doc-wrap"><a href="struct_rodin_1_1_geometry_1_1_connectivity_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_conta1dfd834d4f339c5b1bdeb81a6eb6a06.html" class="m-doc">Assign</a> tag,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> i) const</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a1f2f65422b7d8c093b1ca564e78c62af" class="m-doc">operator()</a>(</span><span class="m-doc-wrap"><a href="struct_rodin_1_1_geometry_1_1_connectivity_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_cont9b87af588905ac41ea51e028adbb2526.html" class="m-doc">Resolve</a> tag,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> i) const</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#aa8706eb7df32dd646ebd0d35db52ff7d" class="m-doc">operator()</a>(</span><span class="m-doc-wrap"><a href="struct_rodin_1_1_geometry_1_1_connectivity_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_cont94358026e33eaacd7e8cab425a4fa0ab.html" class="m-doc">NewEntities</a> tag,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> i) const</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a14fcb3c2c512f6f6f13ae77f48c3cd86" class="m-doc">operator()</a>(</span><span class="m-doc-wrap"><a href="struct_rodin_1_1_geometry_1_1_connectivity_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_cont7902a9ada1b53278a2825b77d54da296.html" class="m-doc">CountRows</a> tag,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> cell) const</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#aa885da5be6926a05036a5f819f67030b" class="m-doc">operator()</a>(</span><span class="m-doc-wrap"><a href="struct_rodin_1_1_geometry_1_1_connectivity_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_contda30ea097a4c281161d63342ee6d8213.html" class="m-doc">FillRows</a> tag,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> cell) const</span>
+            </dt>
+            <dd></dd>
+          </dl>
+        </section>
+        <section id="pub-attribs">
+          <h2><a href="#pub-attribs">Public variables</a></h2>
+          <dl class="m-doc">
+            <dt id="aeb8cda50d047dcd671ebe26e15c94a09">
+              <a href="class_rodin_1_1_geometry_1_1_connectivity_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_contee09b026919fb84a1b9b1dd6a17073a2f.html#a6304f624090d601287d0bc6b131651cf" class="m-doc">View</a> <a href="#aeb8cda50d047dcd671ebe26e15c94a09" class="m-doc-self">topology</a>
+            </dt>
+            <dd>Input resident topology.</dd>
+            <dt id="aa8056d9f804264d6e569db058aedc7a2">
+              <a href="class_rodin_1_1_geometry_1_1_connectivity_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_contee09b026919fb84a1b9b1dd6a17073a2f.html#aa83d606ea5cd2bcf5b7491dce77ee273" class="m-doc">Array</a>&lt;<a href="struct_rodin_1_1_geometry_1_1_connectivity_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_cont82998ca1f1e0f0fa565cbf59e8e3ca05.html" class="m-doc">Reference</a>&gt; <a href="#aa8056d9f804264d6e569db058aedc7a2" class="m-doc-self">reference</a>
+            </dt>
+            <dd>Rodin reference-cell constants.</dd>
+            <dt>
+              <a href="class_rodin_1_1_geometry_1_1_connectivity_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_contee09b026919fb84a1b9b1dd6a17073a2f.html#aa83d606ea5cd2bcf5b7491dce77ee273" class="m-doc">Array</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt; <a href="#ae5de6ecb4f971806d3d699bca7531b11" class="m-doc">counts</a>
+            </dt>
+            <dd></dd>
+            <dt id="a4681411f31724200e30786e71d009910">
+              <a href="class_rodin_1_1_geometry_1_1_connectivity_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_contee09b026919fb84a1b9b1dd6a17073a2f.html#aa83d606ea5cd2bcf5b7491dce77ee273" class="m-doc">Array</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt; <a href="#a4681411f31724200e30786e71d009910" class="m-doc-self">offsets</a>
+            </dt>
+            <dd>Emission row lengths and offsets.</dd>
+            <dt>
+              <a href="class_rodin_1_1_geometry_1_1_connectivity_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_contee09b026919fb84a1b9b1dd6a17073a2f.html#aa83d606ea5cd2bcf5b7491dce77ee273" class="m-doc">Array</a>&lt;<a href="struct_rodin_1_1_geometry_1_1_connectivity_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_cont04761ffdb34e5fb78247082577ce7c96.html" class="m-doc">Entity</a>&gt; <a href="#ad206370185928b4652e97d3788d05b61" class="m-doc">records</a>
+            </dt>
+            <dd></dd>
+            <dt id="aa3d742de765e2c128d4668fdf4ba72b5">
+              <a href="class_rodin_1_1_geometry_1_1_connectivity_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_contee09b026919fb84a1b9b1dd6a17073a2f.html#aa83d606ea5cd2bcf5b7491dce77ee273" class="m-doc">Array</a>&lt;<a href="struct_rodin_1_1_geometry_1_1_connectivity_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_cont04761ffdb34e5fb78247082577ce7c96.html" class="m-doc">Entity</a>&gt; <a href="#aa3d742de765e2c128d4668fdf4ba72b5" class="m-doc-self">added</a>
+            </dt>
+            <dd>Oriented candidates and new entities.</dd>
+            <dt id="a5ca8c82c73181bfbbf3c7d471cbffec7">
+              <a href="class_rodin_1_1_geometry_1_1_connectivity_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_contee09b026919fb84a1b9b1dd6a17073a2f.html#aa83d606ea5cd2bcf5b7491dce77ee273" class="m-doc">Array</a>&lt;<a href="struct_rodin_1_1_geometry_1_1_connectivity_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_cont5476bd0baa01a373693804d80352eb60.html" class="m-doc">Candidate</a>&gt; <a href="#a5ca8c82c73181bfbbf3c7d471cbffec7" class="m-doc-self">candidates</a>
+            </dt>
+            <dd>Canonical identity keys.</dd>
+            <dt>
+              <a href="class_rodin_1_1_geometry_1_1_connectivity_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_contee09b026919fb84a1b9b1dd6a17073a2f.html#aa83d606ea5cd2bcf5b7491dce77ee273" class="m-doc">Array</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt; <a href="#ae302c89baac368263ee76782cbbf9671" class="m-doc">flags</a>
+            </dt>
+            <dd></dd>
+            <dt>
+              <a href="class_rodin_1_1_geometry_1_1_connectivity_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_contee09b026919fb84a1b9b1dd6a17073a2f.html#aa83d606ea5cd2bcf5b7491dce77ee273" class="m-doc">Array</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt; <a href="#a64e3e02e7eee75430b423ab08cb1ca99" class="m-doc">groupOffsets</a>
+            </dt>
+            <dd></dd>
+            <dt>
+              <a href="class_rodin_1_1_geometry_1_1_connectivity_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_contee09b026919fb84a1b9b1dd6a17073a2f.html#aa83d606ea5cd2bcf5b7491dce77ee273" class="m-doc">Array</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt; <a href="#a83f1287e888c6a738bd24bfabdfb1537" class="m-doc">groups</a>
+            </dt>
+            <dd></dd>
+            <dt>
+              <a href="class_rodin_1_1_geometry_1_1_connectivity_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_contee09b026919fb84a1b9b1dd6a17073a2f.html#aa83d606ea5cd2bcf5b7491dce77ee273" class="m-doc">Array</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt; <a href="#a329b7825a5b0f1c078d2b8fdaa477f96" class="m-doc">leaders</a>
+            </dt>
+            <dd></dd>
+            <dt>
+              <a href="class_rodin_1_1_geometry_1_1_connectivity_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_contee09b026919fb84a1b9b1dd6a17073a2f.html#aa83d606ea5cd2bcf5b7491dce77ee273" class="m-doc">Array</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt; <a href="#a3ea96e703f28a0a2db2c1f7607d0f4ea" class="m-doc">leaderFlags</a>
+            </dt>
+            <dd></dd>
+            <dt>
+              <a href="class_rodin_1_1_geometry_1_1_connectivity_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_contee09b026919fb84a1b9b1dd6a17073a2f.html#aa83d606ea5cd2bcf5b7491dce77ee273" class="m-doc">Array</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt; <a href="#acdf2766a14853e8d0c818438f46215d1" class="m-doc">leaderOffsets</a>
+            </dt>
+            <dd></dd>
+            <dt>
+              <a href="class_rodin_1_1_geometry_1_1_connectivity_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_contee09b026919fb84a1b9b1dd6a17073a2f.html#aa83d606ea5cd2bcf5b7491dce77ee273" class="m-doc">Array</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt; <a href="#aa87d23c3557b9d34d5a2a4c055f85a28" class="m-doc">assigned</a>
+            </dt>
+            <dd></dd>
+            <dt id="addf7f998b8b046657ec7900785c99268">
+              <a href="class_rodin_1_1_geometry_1_1_connectivity_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_contee09b026919fb84a1b9b1dd6a17073a2f.html#aa83d606ea5cd2bcf5b7491dce77ee273" class="m-doc">Array</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt; <a href="#addf7f998b8b046657ec7900785c99268" class="m-doc-self">ids</a>
+            </dt>
+            <dd>Grouping and numbering workspace.</dd>
+            <dt id="a6aa725b970562671ea47ea884df415a8">
+              <a href="class_rodin_1_1_geometry_1_1_connectivity_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_contee09b026919fb84a1b9b1dd6a17073a2f.html#aa83d606ea5cd2bcf5b7491dce77ee273" class="m-doc">Array</a>&lt;unsigned char&gt; <a href="#a6aa725b970562671ea47ea884df415a8" class="m-doc-self">matched</a>
+            </dt>
+            <dd>Explicit membership of each occurrence.</dd>
+            <dt>
+              <a href="class_rodin_1_1_geometry_1_1_connectivity_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_contee09b026919fb84a1b9b1dd6a17073a2f.html#aa83d606ea5cd2bcf5b7491dce77ee273" class="m-doc">Array</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt; <a href="#a7a5e976c201a74fd95826bfa27c41647" class="m-doc">rowOffsets</a>
+            </dt>
+            <dd></dd>
+            <dt id="a3c5207870be407c443d600c97071dca5">
+              <a href="class_rodin_1_1_geometry_1_1_connectivity_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_contee09b026919fb84a1b9b1dd6a17073a2f.html#aa83d606ea5cd2bcf5b7491dce77ee273" class="m-doc">Array</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt; <a href="#a3c5207870be407c443d600c97071dca5" class="m-doc-self">rowIndices</a>
+            </dt>
+            <dd>Output cell-to-entity relation.</dd>
+            <dt id="a389cd93f4e125d4369384464914be61f">
+              size_t <a href="#a389cd93f4e125d4369384464914be61f" class="m-doc-self">dimension</a>
+            </dt>
+            <dd>Intermediate entity dimension.</dd>
+            <dt id="a5fc7379e1cae6804ad374d281b42ec33">
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> <a href="#a5fc7379e1cae6804ad374d281b42ec33" class="m-doc-self">oldCount</a>
+            </dt>
+            <dd>Existing entities, which retain their indices.</dd>
+            <dt id="a008c54dc2128c712470397ce4af9b1fd">
+              bool <a href="#a008c54dc2128c712470397ce4af9b1fd" class="m-doc-self">discover</a>
+            </dt>
+            <dd>Whether absent keys create new entities.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a64a1f73310e09a1cf017d1714d9ec8ea"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">static <a href="struct_rodin_1_1_geometry_1_1_connectivity_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_cont5476bd0baa01a373693804d80352eb60.html" class="m-doc">Candidate</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a64a1f73310e09a1cf017d1714d9ec8ea" class="m-doc-self">key</a>(</span><span class="m-doc-wrap">const <a href="struct_rodin_1_1_geometry_1_1_connectivity_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_cont04761ffdb34e5fb78247082577ce7c96.html" class="m-doc">Entity</a>&amp; entity,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> order)</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">entity</td>
+                  <td>Ordered entity.</td>
+                </tr>
+                <tr>
+                  <td>order</td>
+                  <td>Original occurrence.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Symmetric key with deterministic tie-breaking.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a9eee4e132816a493d2b5aa0b333c1343"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">static bool </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9eee4e132816a493d2b5aa0b333c1343" class="m-doc-self">equal</a>(</span><span class="m-doc-wrap">const <a href="struct_rodin_1_1_geometry_1_1_connectivity_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_cont5476bd0baa01a373693804d80352eb60.html" class="m-doc">Candidate</a>&amp; a,
+              const <a href="struct_rodin_1_1_geometry_1_1_connectivity_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_cont5476bd0baa01a373693804d80352eb60.html" class="m-doc">Candidate</a>&amp; b)</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">a</td>
+                  <td>First candidate.</td>
+                </tr>
+                <tr>
+                  <td>b</td>
+                  <td>Second candidate.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Whether their vertex multisets agree.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="af5c867b1887694d0b2cd39780ecd8faa"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af5c867b1887694d0b2cd39780ecd8faa" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap"><a href="struct_rodin_1_1_geometry_1_1_connectivity_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_cont55a0bbbc7fc6b3f28c2704081d5990e5.html" class="m-doc">Count</a> tag,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> cell) const</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">tag</td>
+                  <td>Count pass.</td>
+                </tr>
+                <tr>
+                  <td>cell</td>
+                  <td>Cell index.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a74edc640f4de9adfaa1cd58fa2ec4b16"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a74edc640f4de9adfaa1cd58fa2ec4b16" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap"><a href="struct_rodin_1_1_geometry_1_1_connectivity_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_cont2914457812bc8724fcd5d47007ada064.html" class="m-doc">Existing</a> tag,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> i) const</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">tag</td>
+                  <td>Existing-entity pass.</td>
+                </tr>
+                <tr>
+                  <td>i</td>
+                  <td>Existing index.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a787e58aaafedfa59e0c81ce1cfe130df"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a787e58aaafedfa59e0c81ce1cfe130df" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap"><a href="struct_rodin_1_1_geometry_1_1_connectivity_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_cont9991ac32698c6fa0c90bb6b90d16b036.html" class="m-doc">Emit</a> tag,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> cell) const</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">tag</td>
+                  <td>Candidate emission.</td>
+                </tr>
+                <tr>
+                  <td>cell</td>
+                  <td>Cell index.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aaa24db0dd75ddb17211c85157d4dcb4f"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aaa24db0dd75ddb17211c85157d4dcb4f" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap"><a href="struct_rodin_1_1_geometry_1_1_connectivity_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_cont99d6925c3ebd509b043c26651ddb71c0.html" class="m-doc">Groups</a> tag,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> i) const</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">tag</td>
+                  <td>Group detection.</td>
+                </tr>
+                <tr>
+                  <td>i</td>
+                  <td>Sorted candidate index.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a64ac8289c67d883cdb27b42d9cb1084b"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a64ac8289c67d883cdb27b42d9cb1084b" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap"><a href="struct_rodin_1_1_geometry_1_1_connectivity_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_cont89ad27dda0a3623bdc03ac8b5020b9f4.html" class="m-doc">Leaders</a> tag,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> i) const</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">tag</td>
+                  <td>First-occurrence selection.</td>
+                </tr>
+                <tr>
+                  <td>i</td>
+                  <td>Sorted candidate index.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aadcd6ed6cab76968b2c38b52ec74c822"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aadcd6ed6cab76968b2c38b52ec74c822" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap"><a href="struct_rodin_1_1_geometry_1_1_connectivity_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_conta1dfd834d4f339c5b1bdeb81a6eb6a06.html" class="m-doc">Assign</a> tag,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> i) const</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">tag</td>
+                  <td>Stable numbering.</td>
+                </tr>
+                <tr>
+                  <td>i</td>
+                  <td>Original candidate index.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a1f2f65422b7d8c093b1ca564e78c62af"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1f2f65422b7d8c093b1ca564e78c62af" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap"><a href="struct_rodin_1_1_geometry_1_1_connectivity_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_cont9b87af588905ac41ea51e028adbb2526.html" class="m-doc">Resolve</a> tag,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> i) const</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">tag</td>
+                  <td>Identity resolution.</td>
+                </tr>
+                <tr>
+                  <td>i</td>
+                  <td>Original candidate index.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aa8706eb7df32dd646ebd0d35db52ff7d"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa8706eb7df32dd646ebd0d35db52ff7d" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap"><a href="struct_rodin_1_1_geometry_1_1_connectivity_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_cont94358026e33eaacd7e8cab425a4fa0ab.html" class="m-doc">NewEntities</a> tag,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> i) const</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">tag</td>
+                  <td>New-entity compaction.</td>
+                </tr>
+                <tr>
+                  <td>i</td>
+                  <td>Original candidate index.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a14fcb3c2c512f6f6f13ae77f48c3cd86"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a14fcb3c2c512f6f6f13ae77f48c3cd86" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap"><a href="struct_rodin_1_1_geometry_1_1_connectivity_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_cont7902a9ada1b53278a2825b77d54da296.html" class="m-doc">CountRows</a> tag,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> cell) const</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">tag</td>
+                  <td>Restricted row count.</td>
+                </tr>
+                <tr>
+                  <td>cell</td>
+                  <td>Cell index.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aa885da5be6926a05036a5f819f67030b"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa885da5be6926a05036a5f819f67030b" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap"><a href="struct_rodin_1_1_geometry_1_1_connectivity_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_contda30ea097a4c281161d63342ee6d8213.html" class="m-doc">FillRows</a> tag,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> cell) const</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">tag</td>
+                  <td>Reference-ordered row fill.</td>
+                </tr>
+                <tr>
+                  <td>cell</td>
+                  <td>Cell index.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+        </section>
+        <section>
+          <h2>Variable documentation</h2>
+          <section class="m-doc-details" id="ae5de6ecb4f971806d3d699bca7531b11"><div>
+            <h3>
+              <a href="class_rodin_1_1_geometry_1_1_connectivity_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_contee09b026919fb84a1b9b1dd6a17073a2f.html#aa83d606ea5cd2bcf5b7491dce77ee273" class="m-doc">Array</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt; Rodin::<wbr />Geometry::<wbr />Connectivity&lt;Rodin::<wbr />Context::<wbr />Kokkos&lt;Rodin::<wbr />Context::<wbr />Local, Backend&gt;&gt;::<wbr />Discovery::<wbr /><a href="#ae5de6ecb4f971806d3d699bca7531b11" class="m-doc-self">counts</a>
+            </h3>
+<p>Number of candidates emitted by each cell, then retained row lengths.</p>
+          </div></section>
+          <section class="m-doc-details" id="ad206370185928b4652e97d3788d05b61"><div>
+            <h3>
+              <a href="class_rodin_1_1_geometry_1_1_connectivity_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_contee09b026919fb84a1b9b1dd6a17073a2f.html#aa83d606ea5cd2bcf5b7491dce77ee273" class="m-doc">Array</a>&lt;<a href="struct_rodin_1_1_geometry_1_1_connectivity_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_cont04761ffdb34e5fb78247082577ce7c96.html" class="m-doc">Entity</a>&gt; Rodin::<wbr />Geometry::<wbr />Connectivity&lt;Rodin::<wbr />Context::<wbr />Kokkos&lt;Rodin::<wbr />Context::<wbr />Local, Backend&gt;&gt;::<wbr />Discovery::<wbr /><a href="#ad206370185928b4652e97d3788d05b61" class="m-doc-self">records</a>
+            </h3>
+<p>Oriented candidate entities, existing entities first.</p>
+          </div></section>
+          <section class="m-doc-details" id="ae302c89baac368263ee76782cbbf9671"><div>
+            <h3>
+              <a href="class_rodin_1_1_geometry_1_1_connectivity_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_contee09b026919fb84a1b9b1dd6a17073a2f.html#aa83d606ea5cd2bcf5b7491dce77ee273" class="m-doc">Array</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt; Rodin::<wbr />Geometry::<wbr />Connectivity&lt;Rodin::<wbr />Context::<wbr />Kokkos&lt;Rodin::<wbr />Context::<wbr />Local, Backend&gt;&gt;::<wbr />Discovery::<wbr /><a href="#ae302c89baac368263ee76782cbbf9671" class="m-doc-self">flags</a>
+            </h3>
+<p>Group-start flags of the sorted candidates.</p>
+          </div></section>
+          <section class="m-doc-details" id="a64e3e02e7eee75430b423ab08cb1ca99"><div>
+            <h3>
+              <a href="class_rodin_1_1_geometry_1_1_connectivity_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_contee09b026919fb84a1b9b1dd6a17073a2f.html#aa83d606ea5cd2bcf5b7491dce77ee273" class="m-doc">Array</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt; Rodin::<wbr />Geometry::<wbr />Connectivity&lt;Rodin::<wbr />Context::<wbr />Kokkos&lt;Rodin::<wbr />Context::<wbr />Local, Backend&gt;&gt;::<wbr />Discovery::<wbr /><a href="#a64e3e02e7eee75430b423ab08cb1ca99" class="m-doc-self">groupOffsets</a>
+            </h3>
+<p>Inclusive prefix sum of the group-start flags.</p>
+          </div></section>
+          <section class="m-doc-details" id="a83f1287e888c6a738bd24bfabdfb1537"><div>
+            <h3>
+              <a href="class_rodin_1_1_geometry_1_1_connectivity_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_contee09b026919fb84a1b9b1dd6a17073a2f.html#aa83d606ea5cd2bcf5b7491dce77ee273" class="m-doc">Array</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt; Rodin::<wbr />Geometry::<wbr />Connectivity&lt;Rodin::<wbr />Context::<wbr />Kokkos&lt;Rodin::<wbr />Context::<wbr />Local, Backend&gt;&gt;::<wbr />Discovery::<wbr /><a href="#a83f1287e888c6a738bd24bfabdfb1537" class="m-doc-self">groups</a>
+            </h3>
+<p>Group of each original candidate.</p>
+          </div></section>
+          <section class="m-doc-details" id="a329b7825a5b0f1c078d2b8fdaa477f96"><div>
+            <h3>
+              <a href="class_rodin_1_1_geometry_1_1_connectivity_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_contee09b026919fb84a1b9b1dd6a17073a2f.html#aa83d606ea5cd2bcf5b7491dce77ee273" class="m-doc">Array</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt; Rodin::<wbr />Geometry::<wbr />Connectivity&lt;Rodin::<wbr />Context::<wbr />Kokkos&lt;Rodin::<wbr />Context::<wbr />Local, Backend&gt;&gt;::<wbr />Discovery::<wbr /><a href="#a329b7825a5b0f1c078d2b8fdaa477f96" class="m-doc-self">leaders</a>
+            </h3>
+<p>First occurrence of each group.</p>
+          </div></section>
+          <section class="m-doc-details" id="a3ea96e703f28a0a2db2c1f7607d0f4ea"><div>
+            <h3>
+              <a href="class_rodin_1_1_geometry_1_1_connectivity_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_contee09b026919fb84a1b9b1dd6a17073a2f.html#aa83d606ea5cd2bcf5b7491dce77ee273" class="m-doc">Array</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt; Rodin::<wbr />Geometry::<wbr />Connectivity&lt;Rodin::<wbr />Context::<wbr />Kokkos&lt;Rodin::<wbr />Context::<wbr />Local, Backend&gt;&gt;::<wbr />Discovery::<wbr /><a href="#a3ea96e703f28a0a2db2c1f7607d0f4ea" class="m-doc-self">leaderFlags</a>
+            </h3>
+<p>Flags of the new candidates that lead their group.</p>
+          </div></section>
+          <section class="m-doc-details" id="acdf2766a14853e8d0c818438f46215d1"><div>
+            <h3>
+              <a href="class_rodin_1_1_geometry_1_1_connectivity_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_contee09b026919fb84a1b9b1dd6a17073a2f.html#aa83d606ea5cd2bcf5b7491dce77ee273" class="m-doc">Array</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt; Rodin::<wbr />Geometry::<wbr />Connectivity&lt;Rodin::<wbr />Context::<wbr />Kokkos&lt;Rodin::<wbr />Context::<wbr />Local, Backend&gt;&gt;::<wbr />Discovery::<wbr /><a href="#acdf2766a14853e8d0c818438f46215d1" class="m-doc-self">leaderOffsets</a>
+            </h3>
+<p>Exclusive prefix sum of the leader flags.</p>
+          </div></section>
+          <section class="m-doc-details" id="aa87d23c3557b9d34d5a2a4c055f85a28"><div>
+            <h3>
+              <a href="class_rodin_1_1_geometry_1_1_connectivity_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_contee09b026919fb84a1b9b1dd6a17073a2f.html#aa83d606ea5cd2bcf5b7491dce77ee273" class="m-doc">Array</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt; Rodin::<wbr />Geometry::<wbr />Connectivity&lt;Rodin::<wbr />Context::<wbr />Kokkos&lt;Rodin::<wbr />Context::<wbr />Local, Backend&gt;&gt;::<wbr />Discovery::<wbr /><a href="#aa87d23c3557b9d34d5a2a4c055f85a28" class="m-doc-self">assigned</a>
+            </h3>
+<p>Stable entity index assigned to each leader.</p>
+          </div></section>
+          <section class="m-doc-details" id="a7a5e976c201a74fd95826bfa27c41647"><div>
+            <h3>
+              <a href="class_rodin_1_1_geometry_1_1_connectivity_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_contee09b026919fb84a1b9b1dd6a17073a2f.html#aa83d606ea5cd2bcf5b7491dce77ee273" class="m-doc">Array</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt; Rodin::<wbr />Geometry::<wbr />Connectivity&lt;Rodin::<wbr />Context::<wbr />Kokkos&lt;Rodin::<wbr />Context::<wbr />Local, Backend&gt;&gt;::<wbr />Discovery::<wbr /><a href="#a7a5e976c201a74fd95826bfa27c41647" class="m-doc-self">rowOffsets</a>
+            </h3>
+<p>Row offsets of the output cell-to-entity relation.</p>
+          </div></section>
+        </section>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">&hellip;</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form>
+            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript.</noscript>
+          <div id="search-help" class="m-text m-dim m-text-center">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
+            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v2-eeb63e0c3a5e.js"></script>
+<script src="searchdata-v2.js" async="async"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+  <a class="rodin-ci-link" href="ci-index.html" aria-label="CI" title="CI"><span class="rodin-ci-mark" aria-hidden="true"></span><span class="rodin-ci-label">CI</span></a>
+</div>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>

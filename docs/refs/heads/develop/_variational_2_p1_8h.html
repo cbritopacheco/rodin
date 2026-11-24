@@ -80,24 +80,24 @@
             <li>
               <a href="#"></a>
               <ul>
-                <li><a href="#autotoc_md481">Reference and physical shape functions</a></li>
+                <li><a href="#autotoc_md508">Reference and physical shape functions</a></li>
               </ul>
             </li>
             <li>
               <a href="#"></a>
               <ul>
-                <li><a href="#autotoc_md482">Usage</a></li>
+                <li><a href="#autotoc_md509">Usage</a></li>
               </ul>
             </li>
             <li>
               <a href="#"></a>
               <ul>
-                <li><a href="#autotoc_md483">Operators</a></li>
+                <li><a href="#autotoc_md510">Operators</a></li>
               </ul>
             </li>
           </ul>
         </nav>
-<p>The scalar family has one degree of freedom at each mesh vertex. Shared vertex coefficients identify compatible traces across neighboring cells. Vector and matrix ranges repeat the scalar construction componentwise.</p><section id="autotoc_md481_1s1"><section id="autotoc_md481"><h3><a href="#autotoc_md481">Reference and physical shape functions</a></h3><p>On a simplex the reference space is affine. <svg class="m-math" style="width: 5.925em; height: 1.526em; vertical-align: -0.312em;" viewBox="0 -11.656309 56.878008 14.645101">
+<p>The scalar family has one degree of freedom at each mesh vertex. Shared vertex coefficients identify compatible traces across neighboring cells. Vector and matrix ranges repeat the scalar construction componentwise.</p><section id="autotoc_md508_1s1"><section id="autotoc_md508"><h3><a href="#autotoc_md508">Reference and physical shape functions</a></h3><p>On a simplex the reference space is affine. <svg class="m-math" style="width: 5.925em; height: 1.526em; vertical-align: -0.312em;" viewBox="0 -11.656309 56.878008 14.645101">
 <title>
 $\widehat P=\mathbb P_1(\widehat K)$
 </title>
@@ -150,12 +150,12 @@ $\phi_i=\widehat\phi_i\circ F_K^{-1}$
 <use x='63.446102' y='-4.948135' xlink:href='#eq2-g5-49'/>
 <use x='55.233765' y='3.241111' xlink:href='#eq2-g3-75'/>
 </g>
-</svg>.</p><p>The physical gradient is constant on affine simplices. Non-affine maps and the other cell families generally produce varying gradients. Approximation estimates require the corresponding mesh regularity, mapping and solution assumptions.</p></section></section><section id="autotoc_md482_1s1"><section id="autotoc_md482"><h3><a href="#autotoc_md482">Usage</a></h3><p>Given a mesh with boundary connectivity and a source coefficient <code>f</code>, the following code constructs the scalar Poisson form.</p><pre class="m-code"><span class="nc">P1</span><span class="w"> </span><span class="nf">space</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
+</svg>.</p><p>The physical gradient is constant on affine simplices. Non-affine maps and the other cell families generally produce varying gradients. Approximation estimates require the corresponding mesh regularity, mapping and solution assumptions.</p></section></section><section id="autotoc_md509_1s1"><section id="autotoc_md509"><h3><a href="#autotoc_md509">Usage</a></h3><p>Given a mesh with boundary connectivity and a source coefficient <code>f</code>, the following code constructs the scalar Poisson form.</p><pre class="m-code"><span class="nc">P1</span><span class="w"> </span><span class="nf">space</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
 <span class="nc">TrialFunction</span><span class="w"> </span><span class="nf">u</span><span class="p">(</span><span class="n">space</span><span class="p">);</span>
 <span class="nc">TestFunction</span><span class="w"> </span><span class="nf">v</span><span class="p">(</span><span class="n">space</span><span class="p">);</span>
 <span class="nc">Problem</span><span class="w"> </span><span class="nf">poisson</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
 <span class="n">poisson</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Integral</span><span class="p">(</span><span class="nc">Grad</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="nc">Grad</span><span class="p">(</span><span class="n">v</span><span class="p">))</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nc">Integral</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">)</span>
-<span class="w">        </span><span class="o">+</span><span class="w"> </span><span class="nc">DirichletBC</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="nc">Zero</span><span class="p">());</span></pre><p>Include <code>Rodin/Variational.h</code> for the complete form vocabulary and <code>Rodin/Solver.h</code> for solvers. The runnable <a href="examples-pdes-poisson.html" class="m-doc">Poisson tutorial</a> includes the mesh, solve and output.</p></section></section><section id="autotoc_md483_1s1"><section id="autotoc_md483"><h3><a href="#autotoc_md483">Operators</a></h3><p>This aggregate provides P1 derivatives, gradients, divergence, Jacobians, shape-function operators, potential forms, quadrature dispatch and linear elasticity integrators. Range and geometry restrictions are documented on the corresponding specializations.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="fem-ciarlet.html" class="m-doc">Ciarlet&#x27;s definition of a finite element</a>, <a href="fem-spaces.html" class="m-doc">Finite element spaces</a>, <a href="guides-polytopes.html" class="m-doc">Polytopes</a></p></aside></section></section>
+<span class="w">        </span><span class="o">+</span><span class="w"> </span><span class="nc">DirichletBC</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="nc">Zero</span><span class="p">());</span></pre><p>Include <code>Rodin/Variational.h</code> for the complete form vocabulary and <code>Rodin/Solver.h</code> for solvers. The runnable <a href="examples-pdes-poisson.html" class="m-doc">Poisson tutorial</a> includes the mesh, solve and output.</p></section></section><section id="autotoc_md510_1s1"><section id="autotoc_md510"><h3><a href="#autotoc_md510">Operators</a></h3><p>This aggregate provides P1 derivatives, gradients, divergence, Jacobians, shape-function operators, potential forms, quadrature dispatch and linear elasticity integrators. Range and geometry restrictions are documented on the corresponding specializations.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="fem-ciarlet.html" class="m-doc">Ciarlet&#x27;s definition of a finite element</a>, <a href="fem-spaces.html" class="m-doc">Finite element spaces</a>, <a href="guides-polytopes.html" class="m-doc">Polytopes</a></p></aside></section></section>
       </div>
     </div>
   </div>
@@ -194,7 +194,7 @@ $\phi_i=\widehat\phi_i\circ F_K^{-1}$
     </div>
   </div>
 </div>
-<script src="search-v2-27108c4bc94e.js"></script>
+<script src="search-v2-eeb63e0c3a5e.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">

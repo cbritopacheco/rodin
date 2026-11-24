@@ -77,8 +77,8 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md49">Design</a></li>
-            <li><a href="#autotoc_md50">Usage Example</a></li>
+            <li><a href="#autotoc_md52">Design</a></li>
+            <li><a href="#autotoc_md53">Usage Example</a></li>
             <li>
               Reference
               <ul>
@@ -88,7 +88,7 @@
             </li>
           </ul>
         </nav>
-<p>This file defines the List class template, which provides a type-safe container for storing polymorphic form language objects. The List maintains ownership of its elements through unique pointers and supports standard container operations.</p><section id="autotoc_md49"><h2><a href="#autotoc_md49">Design</a></h2><p>The List class is designed to work with types derived from FormLanguage::Base, leveraging the copy() method for proper polymorphic copying. Elements are stored as unique_ptr instances, ensuring automatic memory management.</p></section><section id="autotoc_md50"><h2><a href="#autotoc_md50">Usage Example</a></h2><pre class="m-code"><span class="nc">List</span><span class="o">&lt;</span><span class="n">BoundaryCondition</span><span class="o">&gt;</span><span class="w"> </span><span class="n">bcList</span><span class="p">;</span>
+<p>This file defines the List class template, which provides a type-safe container for storing polymorphic form language objects. The List maintains ownership of its elements through unique pointers and supports standard container operations.</p><section id="autotoc_md52"><h2><a href="#autotoc_md52">Design</a></h2><p>The List class is designed to work with types derived from FormLanguage::Base, leveraging the copy() method for proper polymorphic copying. Elements are stored as unique_ptr instances, ensuring automatic memory management.</p></section><section id="autotoc_md53"><h2><a href="#autotoc_md53">Usage Example</a></h2><pre class="m-code"><span class="nc">List</span><span class="o">&lt;</span><span class="n">BoundaryCondition</span><span class="o">&gt;</span><span class="w"> </span><span class="n">bcList</span><span class="p">;</span>
 <span class="n">bcList</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="nc">DirichletBC</span><span class="p">(...));</span>
 <span class="n">bcList</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="n">NeumannBC</span><span class="p">(...));</span>
 
@@ -161,7 +161,7 @@
     </div>
   </div>
 </div>
-<script src="search-v2-27108c4bc94e.js"></script>
+<script src="search-v2-eeb63e0c3a5e.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">

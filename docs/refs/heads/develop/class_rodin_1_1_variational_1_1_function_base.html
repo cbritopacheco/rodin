@@ -70,7 +70,7 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_variational.html">Variational</a></div><h1>FunctionBase</h1><p class="rodin-reference-brief">Base class for function objects which can be evaluated over a mesh.</p><p class="rodin-reference-include">Defined in <a href="_function_8h.html"><code>Rodin/Variational/Function.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_variational.html">Variational</a></div><h1>FunctionBase</h1><p class="rodin-reference-brief">Base class for function objects which can be evaluated over a mesh.</p><p class="rodin-reference-include">Defined in <a href="_variational_2_function_8h.html"><code>Rodin/Variational/Function.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
 <span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Derived</span><span class="o">&gt;</span>
 <span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_function_base.html#aa0bb8435377511cff3a74e884915a7ce"><span class="nc">FunctionBase</span></a><span class="p">;</span>
 </pre>
@@ -88,8 +88,8 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md371">Mathematical Foundation</a></li>
-            <li><a href="#autotoc_md372">Key Features</a></li>
+            <li><a href="#autotoc_md398">Mathematical Foundation</a></li>
+            <li><a href="#autotoc_md399">Key Features</a></li>
             <li>
               Reference
               <ul>
@@ -102,7 +102,7 @@
             </li>
           </ul>
         </nav>
-<p>Base class for functions defined on finite element meshes.</p><p>Instances of FunctionBase will always have the getValue() method defined, which enables the evaluation of any function on some mesh element.</p><p>FunctionBase provides the foundation for representing mathematical functions defined over geometric domains discretized by finite element meshes. This includes both analytical functions and discrete finite element functions (grid functions) that arise in variational formulations.</p><section id="autotoc_md371"><h2><a href="#autotoc_md371">Mathematical Foundation</a></h2><p>A function <svg class="m-math" style="width: 6.017em; height: 1.107em; vertical-align: -0.243em;" viewBox="0 -8.302191 57.763451 10.626798">
+<p>Base class for functions defined on finite element meshes.</p><p>Instances of FunctionBase will always have the getValue() method defined, which enables the evaluation of any function on some mesh element.</p><p>FunctionBase provides the foundation for representing mathematical functions defined over geometric domains discretized by finite element meshes. This includes both analytical functions and discrete finite element functions (grid functions) that arise in variational formulations.</p><section id="autotoc_md398"><h2><a href="#autotoc_md398">Mathematical Foundation</a></h2><p>A function <svg class="m-math" style="width: 6.017em; height: 1.107em; vertical-align: -0.243em;" viewBox="0 -8.302191 57.763451 10.626798">
 <title>
 $ f : \Omega \to \mathbb{R}^n $
 </title>
@@ -179,7 +179,7 @@ $ \phi_i $
 <use x='0' y='0' xlink:href='#eq5-g1-30'/>
 <use x='6.928102' y='1.793263' xlink:href='#eq5-g0-105'/>
 </g>
-</svg> spanning finite element spaces</li></ul></section><section id="autotoc_md372"><h2><a href="#autotoc_md372">Key Features</a></h2><ul><li><strong>Domain support</strong>: Functions can be restricted to subdomains or boundaries</li><li><strong>Trace operations</strong>: Support for function traces on mesh boundaries</li><li><strong>Point evaluation</strong>: Evaluation at arbitrary points within the domain</li><li><strong>Polymorphic design</strong>: CRTP enables compile-time polymorphism for efficiency</li></ul></section>
+</svg> spanning finite element spaces</li></ul></section><section id="autotoc_md399"><h2><a href="#autotoc_md399">Key Features</a></h2><ul><li><strong>Domain support</strong>: Functions can be restricted to subdomains or boundaries</li><li><strong>Trace operations</strong>: Support for function traces on mesh boundaries</li><li><strong>Point evaluation</strong>: Evaluation at arbitrary points within the domain</li><li><strong>Polymorphic design</strong>: CRTP enables compile-time polymorphism for efficiency</li></ul></section>
         <figure class="rodin-inheritance"><figcaption>Direct inheritance by class family</figcaption><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_form_language_1_1_base.html" title="FormLanguage::Base">FormLanguage::Base</a></li></ul><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><div class="rodin-inheritance-current">FunctionBase</div><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_variational_1_1_boolean_function_base.html" title="BooleanFunctionBase&lt; LHSDerived &gt;; BooleanFunctionBase&lt; RHSDerived &gt;; BooleanFunctionBase&lt; AND&lt; LHSType, RHSType &gt; &gt;; BooleanFunctionBase&lt; BooleanFunction&lt; Boolean &gt; &gt;; BooleanFunctionBase&lt; EQ&lt; LHSType, RHSType &gt; &gt;; BooleanFunctionBase&lt; GEQ&lt; FunctionBase&lt; LHSDerived &gt;, FunctionBase&lt; RHSDerived &gt; &gt; &gt;; BooleanFunctionBase&lt; GT&lt; LHSType, RHSType &gt; &gt;; BooleanFunctionBase&lt; LEQ&lt; FunctionBase&lt; LHSDerived &gt;, FunctionBase&lt; RHSDerived &gt; &gt; &gt;; BooleanFunctionBase&lt; LT&lt; FunctionBase&lt; LHSDerived &gt;, FunctionBase&lt; RHSDerived &gt; &gt; &gt;; BooleanFunctionBase&lt; NEQ&lt; LHSType, RHSType &gt; &gt;; BooleanFunctionBase&lt; OR&lt; LHSType, RHSType &gt; &gt;">BooleanFunctionBase</a></li><li><a href="class_rodin_1_1_variational_1_1_matrix_function_base.html" title="MatrixFunctionBase&lt; ScalarType, FittingTensor&lt; GradDerived, Displacement, LocatorType &gt; &gt;; MatrixFunctionBase&lt; ScalarType, IdentityMatrix &gt;; MatrixFunctionBase&lt; Scalar, MatrixFunction&lt; MatrixType &gt; &gt;; MatrixFunctionBase&lt; ScalarType, MatrixFunction &gt;">MatrixFunctionBase</a></li><li><a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" title="ScalarFunctionBase&lt; typename FormLanguage::Traits&lt; FunctionBase&lt; OperandDerived &gt; &gt;::ScalarType, Component&lt; FunctionBase&lt; OperandDerived &gt;, size_t, size_t &gt; &gt;; ScalarFunctionBase&lt; ScalarType, Component &gt;; ScalarFunctionBase&lt; Scalar, Zero&lt; Scalar &gt; &gt;">ScalarFunctionBase</a></li><li class="rodin-inheritance-more"><a href="#derived-classes">+25 more</a></li></ul></figure><section id="base-classes"><h2><a href="#base-classes">Inherits from</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Base class</th><th>Responsibility</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_form_language_1_1_base.html"><code>FormLanguage::Base</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="n">FormLanguage</span><span class="o">::</span><a href="class_rodin_1_1_form_language_1_1_base.html"><span class="nc">Base</span></a>
 </pre></details></td><td>Base class for all objects in Rodin&#x27;s FormLanguage system.</td></tr></tbody></table></section>
         <section id="derived-classes"><h2><a href="#derived-classes">Derived classes</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Derived class</th><th>Description</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_boolean_function_base.html"><code>BooleanFunctionBase&lt;LHSDerived&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="nc">BooleanFunctionBase</span><span class="o">&lt;</span><span class="w"> </span><span class="n">LHSDerived</span><span class="w"> </span><span class="o">&gt;</span>
@@ -856,7 +856,7 @@ $ A^T(x) $
     </div>
   </div>
 </div>
-<script src="search-v2-27108c4bc94e.js"></script>
+<script src="search-v2-eeb63e0c3a5e.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">

@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Rodin::Kokkos::Math::SparseMatrix class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
+  <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
+  <link rel="stylesheet" href="rodin-theme-1337632f765f.css" />
+  <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#18191c" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <a href="index.html" id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m">Rodin</a>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li>
+              <a href="pages.html">Pages</a>
+              <ol>
+                <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
+                <li><a href="gallery.html">Gallery</a></li>
+                <li><a href="guides-io.html">Input, output, and visualization</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
+                <li><a href="ci-index.html">Continuous integration</a></li>
+                <li><a href="notation-index.html">Notation</a></li>
+                <li><a href="credits-index.html">Credits</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="modules.html">Modules</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
+              </ol>
+            </li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="3">
+            <li><a href="annotated.html">Classes</a></li>
+            <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
+            <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span>Kokkos<span>›</span>Math</div><h1>SparseMatrix</h1><p class="rodin-reference-brief">Owning backend compressed row matrix.</p><p class="rodin-reference-include">Defined in <a href="_kokkos_2_math_2_sparse_matrix_8h.html"><code>Rodin/Kokkos/Math/SparseMatrix.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Scalar</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Backend</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">SparseMatrix</span><span class="p">;</span>
+</pre>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md181">Architecture</a></li>
+              </ul>
+            </li>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+<p>Sparse matrix in compressed row storage, resident in the memory space of a Kokkos backend.</p><section id="autotoc_md181_1s1"><section id="autotoc_md181"><h3><a href="#autotoc_md181">Architecture</a></h3><p>The owner holds a native KokkosSparse::CrsMatrix and a writable handle to its row offsets for reassembly. Both handles refer to the same allocation. getView() exposes the native matrix without copying it. The device assembly of a Problem builds it without copying the matrix to the host, so that a solver running on the device reads it in place. The columns of a row are sorted and unique. Copies are deep, as for Rodin::Math::SparseMatrix; moves keep the storage.</p></section></section>
+        <section id="pub-types">
+          <h2><a href="#pub-types">Public types</a></h2>
+          <dl class="m-doc">
+            <dt id="ad4b3ea5ea1f041cc44d8b1e41603b06b">
+              using <a href="#ad4b3ea5ea1f041cc44d8b1e41603b06b" class="m-doc-self">ScalarType</a> = Scalar
+            </dt>
+            <dd>Coefficient type.</dd>
+            <dt id="a9c8c84dc2235cafa9ef79f3249027c07">
+              using <a href="#a9c8c84dc2235cafa9ef79f3249027c07" class="m-doc-self">BackendType</a> = Backend
+            </dt>
+            <dd>Kokkos backend.</dd>
+            <dt id="a175d38764a967e2e19f4a110897a0871">
+              using <a href="#a175d38764a967e2e19f4a110897a0871" class="m-doc-self">ContextType</a> = <a href="class_rodin_1_1_context_1_1_kokkos.html" class="m-doc">::<wbr />Rodin::<wbr />Context::<wbr />Kokkos</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">::<wbr />Rodin::<wbr />Context::<wbr />Local</a>, Backend&gt;
+            </dt>
+            <dd>Context of the backend.</dd>
+            <dt id="ab78f7cd66f68a9ce08c3ca5a42e12a90">
+              using <a href="#ab78f7cd66f68a9ce08c3ca5a42e12a90" class="m-doc-self">ExecutionSpace</a> = typename <a href="class_rodin_1_1_context_1_1_kokkos.html#accc6e672f89037295fb03a01924c9392" class="m-doc">ContextType::<wbr />ExecutionSpaceType</a>
+            </dt>
+            <dd>Execution space of the backend.</dd>
+            <dt id="abd2285c284ad3cfde965ef4ecc1dab84">
+              using <a href="#abd2285c284ad3cfde965ef4ecc1dab84" class="m-doc-self">MemorySpace</a> = typename <a href="class_rodin_1_1_context_1_1_kokkos.html#a66e24e538ed3900abd12e5b97beada44" class="m-doc">ContextType::<wbr />MemorySpaceType</a>
+            </dt>
+            <dd>Memory space holding the matrix.</dd>
+            <dt id="a55b3f58606720f5edff275af299199cc">
+              using <a href="#a55b3f58606720f5edff275af299199cc" class="m-doc-self">IndexType</a> = <a href="namespace_rodin_1_1_math.html#a2640f04f6274aebfc8f935c13e80f9a6" class="m-doc">::<wbr />Rodin::<wbr />Math::<wbr />SparseIndex</a>
+            </dt>
+            <dd>Index type of the compressed arrays.</dd>
+            <dt id="aa83d606ea5cd2bcf5b7491dce77ee273">
+              <div class="m-doc-template">template&lt;class T&gt;</div>
+              using <a href="#aa83d606ea5cd2bcf5b7491dce77ee273" class="m-doc-self">Array</a> = <a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Kokkos::<wbr />View</a>&lt;T*, <a href="#abd2285c284ad3cfde965ef4ecc1dab84" class="m-doc">MemorySpace</a>&gt;
+            </dt>
+            <dd>Array in the memory space.</dd>
+            <dt id="aaa27f8c5ce98a6f9605bfc5b3728f577">
+              using <a href="#aaa27f8c5ce98a6f9605bfc5b3728f577" class="m-doc-self">View</a> = ::KokkosSparse::CrsMatrix&lt;Scalar, <a href="#a55b3f58606720f5edff275af299199cc" class="m-doc">IndexType</a>, ::Kokkos::Device&lt;<a href="#ab78f7cd66f68a9ce08c3ca5a42e12a90" class="m-doc">ExecutionSpace</a>, <a href="#abd2285c284ad3cfde965ef4ecc1dab84" class="m-doc">MemorySpace</a>&gt;, void, <a href="#a55b3f58606720f5edff275af299199cc" class="m-doc">IndexType</a>&gt;
+            </dt>
+            <dd>Native Kokkos-Kernels compressed row matrix.</dd>
+          </dl>
+        </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt id="ac398e07c3da79ed6f2f431c4b12ccf0e">
+              <span class="m-doc-wrap-bumper"><a href="#ac398e07c3da79ed6f2f431c4b12ccf0e" class="m-doc-self">SparseMatrix</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-info">defaulted</span></span>
+            </dt>
+            <dd>Empty matrix.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#aff781e96055b2921b7de19a91e56b4c1" class="m-doc">SparseMatrix</a>(</span><span class="m-doc-wrap">size_t rows,
+              size_t cols,
+              <a href="#aa83d606ea5cd2bcf5b7491dce77ee273" class="m-doc">Array</a>&lt;<a href="#a55b3f58606720f5edff275af299199cc" class="m-doc">IndexType</a>&gt; starts,
+              <a href="#aa83d606ea5cd2bcf5b7491dce77ee273" class="m-doc">Array</a>&lt;<a href="#a55b3f58606720f5edff275af299199cc" class="m-doc">IndexType</a>&gt; columns,
+              <a href="#aa83d606ea5cd2bcf5b7491dce77ee273" class="m-doc">Array</a>&lt;Scalar&gt; values)</span>
+            </dt>
+            <dd>Matrix holding compressed arrays.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a631add606d943913aa2dbda84c0d4d20" class="m-doc">SparseMatrix</a>(</span><span class="m-doc-wrap">const SparseMatrix&amp; other)</span>
+            </dt>
+            <dd>Copies the coefficients.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#aadcb8ef64c6580ef0315dea1fa49ca84" class="m-doc">SparseMatrix</a>(</span><span class="m-doc-wrap">SparseMatrix&amp;&amp; other) <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Moves the storage.</dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae41af2796d7839a70020d525dc9ea97f" class="m-doc">getView</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#aaa27f8c5ce98a6f9605bfc5b3728f577" class="m-doc">View</a>&amp;</span>
+            </dt>
+            <dd>Borrows the native compressed row matrix.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a9be86262d8ec3739dba5e0910c2339ad" class="m-doc">rows</a>(</span><span class="m-doc-wrap">) const -&gt; size_t</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad721833df820880f31e488d1a5e5aade" class="m-doc">cols</a>(</span><span class="m-doc-wrap">) const -&gt; size_t</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a49f4e2914aa4799a574f1613e2fad92b" class="m-doc">nonZeros</a>(</span><span class="m-doc-wrap">) const -&gt; size_t</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad27050c4a6f81c616a0f4e47c8e0bd48" class="m-doc">norm</a>(</span><span class="m-doc-wrap">) const -&gt; auto</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae012ef098bcfd6cf9fbeb5f7babe64d5" class="m-doc">operator*=</a>(</span><span class="m-doc-wrap">Scalar rhs) -&gt; <a href="#ac398e07c3da79ed6f2f431c4b12ccf0e" class="m-doc">SparseMatrix</a>&amp;</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab8a7d80668e4f5aaa41f09eb3d210718" class="m-doc">operator*</a>(</span><span class="m-doc-wrap">Scalar rhs) const -&gt; <a href="#ac398e07c3da79ed6f2f431c4b12ccf0e" class="m-doc">SparseMatrix</a></span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ac713a8f7a42b4cbf193cf07be63e0620" class="m-doc">operator*</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_kokkos_1_1_math_1_1_vector.html" class="m-doc">Vector</a>&lt;Scalar, Backend&gt;&amp; rhs) const -&gt; <a href="class_rodin_1_1_kokkos_1_1_math_1_1_vector.html" class="m-doc">Vector</a>&lt;Scalar, Backend&gt;</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad4f17807a4ada14f854138cff54cad36" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="#ac398e07c3da79ed6f2f431c4b12ccf0e" class="m-doc">SparseMatrix</a>&amp; other) -&gt; <a href="#ac398e07c3da79ed6f2f431c4b12ccf0e" class="m-doc">SparseMatrix</a>&amp;</span>
+            </dt>
+            <dd>Copies the coefficients.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a5833c63d5281ed7af0c813dbd16a8f8e" class="m-doc">operator=</a>(</span><span class="m-doc-wrap"><a href="#ac398e07c3da79ed6f2f431c4b12ccf0e" class="m-doc">SparseMatrix</a>&amp;&amp; other) -&gt; <a href="#ac398e07c3da79ed6f2f431c4b12ccf0e" class="m-doc">SparseMatrix</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Moves the storage.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab1c0e530ea23e0975c376dc1e87f122f" class="m-doc">getRowCount</a>(</span><span class="m-doc-wrap">) const -&gt; size_t</span>
+            </dt>
+            <dd>Number of rows.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a4687f87a302e6944c151f4596c75be91" class="m-doc">getColumnCount</a>(</span><span class="m-doc-wrap">) const -&gt; size_t</span>
+            </dt>
+            <dd>Number of columns.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad26f36b4850f47685556a3f1ba701fe0" class="m-doc">getNonZeroCount</a>(</span><span class="m-doc-wrap">) const -&gt; size_t</span>
+            </dt>
+            <dd>Number of stored coefficients.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a67ad93a178f6540c93cb47bc7dce884b" class="m-doc">getRowStarts</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#aa83d606ea5cd2bcf5b7491dce77ee273" class="m-doc">Array</a>&lt;<a href="#a55b3f58606720f5edff275af299199cc" class="m-doc">IndexType</a>&gt;&amp;</span>
+            </dt>
+            <dd>Position of the first coefficient of every row, followed by the number of coefficients. Empty for an empty matrix.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aa9ad0d945284f325d73a52c30afa6520" class="m-doc">getRowStarts</a>(</span><span class="m-doc-wrap">) -&gt; <a href="#aa83d606ea5cd2bcf5b7491dce77ee273" class="m-doc">Array</a>&lt;<a href="#a55b3f58606720f5edff275af299199cc" class="m-doc">IndexType</a>&gt;&amp;</span>
+            </dt>
+            <dd>Borrows writable CSR storage without reallocating it. The caller must preserve the CSR invariants and explicitly refactorize any solver after changing the matrix.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#abdeaeb3c3ea5cb70e5bebbfe201110bf" class="m-doc">getColumns</a>(</span><span class="m-doc-wrap">) const -&gt; const View::index_type&amp;</span>
+            </dt>
+            <dd>Column of every coefficient.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aa4b994531cf865619611e9e592826dac" class="m-doc">getColumns</a>(</span><span class="m-doc-wrap">) -&gt; View::index_type&amp;</span>
+            </dt>
+            <dd>Borrows writable CSR storage without reallocating it. The caller must preserve the CSR invariants and explicitly refactorize any solver after changing the matrix.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae5e126701a8f4fa0ba6ed38427590acb" class="m-doc">getValues</a>(</span><span class="m-doc-wrap">) const -&gt; const View::values_type&amp;</span>
+            </dt>
+            <dd>Value of every coefficient.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad2f318ada84f2a5d6524d3415a9c70f0" class="m-doc">getValues</a>(</span><span class="m-doc-wrap">) -&gt; View::values_type&amp;</span>
+            </dt>
+            <dd>Value of every coefficient, for an update in place.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a56c28090a85c0ed5c9cfcf906e2cab44" class="m-doc">upload</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_math.html#a1e9568d1308feaaa6f2f6a695857876f" class="m-doc">::<wbr />Rodin::<wbr />Math::<wbr />SparseMatrix</a>&lt;Scalar&gt;&amp; source) -&gt; <a href="#ac398e07c3da79ed6f2f431c4b12ccf0e" class="m-doc">SparseMatrix</a>&amp;</span>
+            </dt>
+            <dd>Replaces this backend matrix with an independent host snapshot.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#af6e2962639e5318b2f03524b9efb7527" class="m-doc">download</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_math.html#a1e9568d1308feaaa6f2f6a695857876f" class="m-doc">::<wbr />Rodin::<wbr />Math::<wbr />SparseMatrix</a>&lt;Scalar&gt;&amp; res) const</span>
+            </dt>
+            <dd>Replaces a host matrix with an independent backend snapshot.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a64eedf19028988bcf47ded2362dd1bb2" class="m-doc">download</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin_1_1_math.html#a1e9568d1308feaaa6f2f6a695857876f" class="m-doc">::<wbr />Rodin::<wbr />Math::<wbr />SparseMatrix</a>&lt;Scalar&gt;</span>
+            </dt>
+            <dd></dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="aff781e96055b2921b7de19a91e56b4c1"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aff781e96055b2921b7de19a91e56b4c1" class="m-doc-self">SparseMatrix</a>(</span><span class="m-doc-wrap">size_t rows,
+              size_t cols,
+              <a href="#aa83d606ea5cd2bcf5b7491dce77ee273" class="m-doc">Array</a>&lt;<a href="#a55b3f58606720f5edff275af299199cc" class="m-doc">IndexType</a>&gt; starts,
+              <a href="#aa83d606ea5cd2bcf5b7491dce77ee273" class="m-doc">Array</a>&lt;<a href="#a55b3f58606720f5edff275af299199cc" class="m-doc">IndexType</a>&gt; columns,
+              <a href="#aa83d606ea5cd2bcf5b7491dce77ee273" class="m-doc">Array</a>&lt;Scalar&gt; values)</span></span>
+            </h3>
+            <p>Matrix holding compressed arrays.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">rows</td>
+                  <td>Number of rows.</td>
+                </tr>
+                <tr>
+                  <td>cols</td>
+                  <td>Number of columns.</td>
+                </tr>
+                <tr>
+                  <td>starts</td>
+                  <td>Position of the first coefficient of every row, followed by the number of coefficients.</td>
+                </tr>
+                <tr>
+                  <td>columns</td>
+                  <td>Column of every coefficient.</td>
+                </tr>
+                <tr>
+                  <td>values</td>
+                  <td>Value of every coefficient.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a631add606d943913aa2dbda84c0d4d20"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a631add606d943913aa2dbda84c0d4d20" class="m-doc-self">SparseMatrix</a>(</span><span class="m-doc-wrap">const SparseMatrix&amp; other)</span></span>
+            </h3>
+            <p>Copies the coefficients.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Matrix to copy.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aadcb8ef64c6580ef0315dea1fa49ca84"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aadcb8ef64c6580ef0315dea1fa49ca84" class="m-doc-self">SparseMatrix</a>(</span><span class="m-doc-wrap">SparseMatrix&amp;&amp; other) <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Moves the storage.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Matrix to move.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ae41af2796d7839a70020d525dc9ea97f"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">const <a href="#aaa27f8c5ce98a6f9605bfc5b3728f577" class="m-doc">View</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae41af2796d7839a70020d525dc9ea97f" class="m-doc-self">getView</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Borrows the native compressed row matrix.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Native matrix sharing this owner&#x27;s arrays.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a9be86262d8ec3739dba5e0910c2339ad"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">size_t </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9be86262d8ec3739dba5e0910c2339ad" class="m-doc-self">rows</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Number of rows, for the shared algebra API.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ad721833df820880f31e488d1a5e5aade"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">size_t </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad721833df820880f31e488d1a5e5aade" class="m-doc-self">cols</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Number of columns, for the shared algebra API.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a49f4e2914aa4799a574f1613e2fad92b"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">size_t </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a49f4e2914aa4799a574f1613e2fad92b" class="m-doc-self">nonZeros</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Number of stored coefficients.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ad27050c4a6f81c616a0f4e47c8e0bd48"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">auto </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad27050c4a6f81c616a0f4e47c8e0bd48" class="m-doc-self">norm</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Frobenius norm of the stored coefficients.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ae012ef098bcfd6cf9fbeb5f7babe64d5"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="#ac398e07c3da79ed6f2f431c4b12ccf0e" class="m-doc">SparseMatrix</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae012ef098bcfd6cf9fbeb5f7babe64d5" class="m-doc-self">operator*=</a>(</span><span class="m-doc-wrap">Scalar rhs)</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">rhs</td>
+                  <td>Scalar multiplier.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>This matrix.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ab8a7d80668e4f5aaa41f09eb3d210718"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="#ac398e07c3da79ed6f2f431c4b12ccf0e" class="m-doc">SparseMatrix</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab8a7d80668e4f5aaa41f09eb3d210718" class="m-doc-self">operator*</a>(</span><span class="m-doc-wrap">Scalar rhs) const</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">rhs</td>
+                  <td>Scalar multiplier.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Independent scaled matrix.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ac713a8f7a42b4cbf193cf07be63e0620"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_kokkos_1_1_math_1_1_vector.html" class="m-doc">Vector</a>&lt;Scalar, Backend&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac713a8f7a42b4cbf193cf07be63e0620" class="m-doc-self">operator*</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_kokkos_1_1_math_1_1_vector.html" class="m-doc">Vector</a>&lt;Scalar, Backend&gt;&amp; rhs) const</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">rhs</td>
+                  <td>Backend vector.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Backend matrix-vector product.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ad4f17807a4ada14f854138cff54cad36"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="#ac398e07c3da79ed6f2f431c4b12ccf0e" class="m-doc">SparseMatrix</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad4f17807a4ada14f854138cff54cad36" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="#ac398e07c3da79ed6f2f431c4b12ccf0e" class="m-doc">SparseMatrix</a>&amp; other)</span></span>
+            </h3>
+            <p>Copies the coefficients.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Matrix to copy.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this matrix.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a5833c63d5281ed7af0c813dbd16a8f8e"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="#ac398e07c3da79ed6f2f431c4b12ccf0e" class="m-doc">SparseMatrix</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5833c63d5281ed7af0c813dbd16a8f8e" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="#ac398e07c3da79ed6f2f431c4b12ccf0e" class="m-doc">SparseMatrix</a>&amp;&amp; other) <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Moves the storage.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Matrix to move.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this matrix.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ab1c0e530ea23e0975c376dc1e87f122f"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">size_t </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab1c0e530ea23e0975c376dc1e87f122f" class="m-doc-self">getRowCount</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Number of rows.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Row count of the matrix.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a4687f87a302e6944c151f4596c75be91"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">size_t </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4687f87a302e6944c151f4596c75be91" class="m-doc-self">getColumnCount</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Number of columns.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Column count of the matrix.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ad26f36b4850f47685556a3f1ba701fe0"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">size_t </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad26f36b4850f47685556a3f1ba701fe0" class="m-doc-self">getNonZeroCount</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Number of stored coefficients.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Length of the column and value arrays.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a67ad93a178f6540c93cb47bc7dce884b"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">const <a href="#aa83d606ea5cd2bcf5b7491dce77ee273" class="m-doc">Array</a>&lt;<a href="#a55b3f58606720f5edff275af299199cc" class="m-doc">IndexType</a>&gt;&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a67ad93a178f6540c93cb47bc7dce884b" class="m-doc-self">getRowStarts</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Position of the first coefficient of every row, followed by the number of coefficients. Empty for an empty matrix.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Resident CSR row offsets.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aa9ad0d945284f325d73a52c30afa6520"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="#aa83d606ea5cd2bcf5b7491dce77ee273" class="m-doc">Array</a>&lt;<a href="#a55b3f58606720f5edff275af299199cc" class="m-doc">IndexType</a>&gt;&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa9ad0d945284f325d73a52c30afa6520" class="m-doc-self">getRowStarts</a>(</span><span class="m-doc-wrap">)</span></span>
+            </h3>
+            <p>Borrows writable CSR storage without reallocating it. The caller must preserve the CSR invariants and explicitly refactorize any solver after changing the matrix.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Resident array handle; valid until storage replacement.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="abdeaeb3c3ea5cb70e5bebbfe201110bf"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">const View::index_type&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abdeaeb3c3ea5cb70e5bebbfe201110bf" class="m-doc-self">getColumns</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Column of every coefficient.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Resident CSR column indices.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aa4b994531cf865619611e9e592826dac"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">View::index_type&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa4b994531cf865619611e9e592826dac" class="m-doc-self">getColumns</a>(</span><span class="m-doc-wrap">)</span></span>
+            </h3>
+            <p>Borrows writable CSR storage without reallocating it. The caller must preserve the CSR invariants and explicitly refactorize any solver after changing the matrix.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Resident array handle; valid until storage replacement.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ae5e126701a8f4fa0ba6ed38427590acb"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">const View::values_type&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae5e126701a8f4fa0ba6ed38427590acb" class="m-doc-self">getValues</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Value of every coefficient.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Resident CSR values, read-only.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ad2f318ada84f2a5d6524d3415a9c70f0"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">View::values_type&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad2f318ada84f2a5d6524d3415a9c70f0" class="m-doc-self">getValues</a>(</span><span class="m-doc-wrap">)</span></span>
+            </h3>
+            <p>Value of every coefficient, for an update in place.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Resident CSR values, writable.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a56c28090a85c0ed5c9cfcf906e2cab44"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="#ac398e07c3da79ed6f2f431c4b12ccf0e" class="m-doc">SparseMatrix</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a56c28090a85c0ed5c9cfcf906e2cab44" class="m-doc-self">upload</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_math.html#a1e9568d1308feaaa6f2f6a695857876f" class="m-doc">::<wbr />Rodin::<wbr />Math::<wbr />SparseMatrix</a>&lt;Scalar&gt;&amp; source)</span></span>
+            </h3>
+            <p>Replaces this backend matrix with an independent host snapshot.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">source</td>
+                  <td>Host matrix, whose column storage is converted to rows.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>This matrix, after every transfer completes.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="af6e2962639e5318b2f03524b9efb7527"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af6e2962639e5318b2f03524b9efb7527" class="m-doc-self">download</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_math.html#a1e9568d1308feaaa6f2f6a695857876f" class="m-doc">::<wbr />Rodin::<wbr />Math::<wbr />SparseMatrix</a>&lt;Scalar&gt;&amp; res) const</span></span>
+            </h3>
+            <p>Replaces a host matrix with an independent backend snapshot.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">res</td>
+                  <td>Host destination, rebuilt in compressed column storage. The backend is unchanged and transfers complete before returning.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a64eedf19028988bcf47ded2362dd1bb2"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin_1_1_math.html#a1e9568d1308feaaa6f2f6a695857876f" class="m-doc">::<wbr />Rodin::<wbr />Math::<wbr />SparseMatrix</a>&lt;Scalar&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a64eedf19028988bcf47ded2362dd1bb2" class="m-doc-self">download</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Independent host snapshot, in compressed column storage.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+        </section>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">&hellip;</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form>
+            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript.</noscript>
+          <div id="search-help" class="m-text m-dim m-text-center">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
+            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v2-eeb63e0c3a5e.js"></script>
+<script src="searchdata-v2.js" async="async"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+  <a class="rodin-ci-link" href="ci-index.html" aria-label="CI" title="CI"><span class="rodin-ci-mark" aria-hidden="true"></span><span class="rodin-ci-label">CI</span></a>
+</div>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>

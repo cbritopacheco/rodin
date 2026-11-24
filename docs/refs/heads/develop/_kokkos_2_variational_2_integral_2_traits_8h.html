@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Rodin/Kokkos/Variational/Integral/Traits.h file | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
+  <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
+  <link rel="stylesheet" href="rodin-theme-1337632f765f.css" />
+  <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#18191c" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <a href="index.html" id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m">Rodin</a>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li>
+              <a href="pages.html">Pages</a>
+              <ol>
+                <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
+                <li><a href="gallery.html">Gallery</a></li>
+                <li><a href="guides-io.html">Input, output, and visualization</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
+                <li><a href="ci-index.html">Continuous integration</a></li>
+                <li><a href="notation-index.html">Notation</a></li>
+                <li><a href="credits-index.html">Credits</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="modules.html">Modules</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
+              </ol>
+            </li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="3">
+            <li><a href="annotated.html">Classes</a></li>
+            <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
+            <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <h1>
+          <span class="m-breadcrumb"><a href="dir_a76ff2fd046c37f043d49e701a9434a5.html">Rodin</a>/</span><span class="m-breadcrumb"><a href="dir_a7844bc9c3856b43219322c84abbb59e.html">Kokkos</a>/</span><span class="m-breadcrumb"><a href="dir_198ed49192f980e50ddeae8fdffa5267.html">Variational</a>/</span><span class="m-breadcrumb"><a href="dir_e7dafc61028747cb70721e57d628a669.html">Integral</a>/</span>Traits.h <span class="m-thin">file</span>
+        </h1>
+        <p>Compile-time space and differential-form classification for integration.</p>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#namespaces">Namespaces</a></li>
+                <li><a href="#nested-classes">Classes</a></li>
+                <li><a href="#enum-members">Enums</a></li>
+                <li><a href="#typedef-members">Typedefs</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+        <section id="namespaces">
+          <h2><a href="#namespaces">Namespaces</a></h2>
+          <dl class="m-doc">
+            <dt>namespace <a href="namespace_rodin.html" class="m-doc">Rodin</a></dt>
+            <dd>The Rodin library for finite element methods and shape optimization.</dd>
+          </dl>
+        </section>
+        <section id="nested-classes">
+          <h2><a href="#nested-classes">Classes</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;class Backend&gt;</div>
+              struct <a href="struct_rodin_1_1_kokkos_1_1_variational_1_1_internal_1_1_mesh_backend_3_01_1_1_rodin_1_1_geometr06d7f7553cd37861645fe5995a393d18.html" class="m-doc">Rodin::Kokkos::Variational::Internal::MeshBackend&lt;::Rodin::Geometry::Mesh&lt;::Rodin::Context::Kokkos&lt;::Rodin::Context::Local, Backend&gt;&gt;&gt;</a>
+            </dt>
+            <dd>Backend of a resident mesh.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Backend&gt;</div>
+              struct <a href="struct_rodin_1_1_kokkos_1_1_variational_1_1_internal_1_1_mesh_backend_3_01_1_1_rodin_1_1_geometr0c7676397f5cec85f81a0dceb4354711.html" class="m-doc">Rodin::Kokkos::Variational::Internal::MeshBackend&lt;::Rodin::Geometry::Mesh&lt;::Rodin::Context::Kokkos&lt;::Rodin::Context::MPI, Backend&gt;&gt;&gt;</a>
+            </dt>
+            <dd>Backend of a distributed resident mesh.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class FES&gt;</div>
+              struct <a href="struct_rodin_1_1_kokkos_1_1_variational_1_1_internal_1_1_is_p1_space.html" class="m-doc">Rodin::Kokkos::Variational::Internal::IsP1Space</a>
+            </dt>
+            <dd>Whether a space is a P1 space.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Range, class Mesh&gt;</div>
+              struct <a href="struct_rodin_1_1_kokkos_1_1_variational_1_1_internal_1_1_is_p1_space_3_1_1_rodin_1_1_variational44e7dc619cec57cf7a4c2259bd2224c1.html" class="m-doc">Rodin::Kokkos::Variational::Internal::IsP1Space&lt;::Rodin::Variational::P1&lt;Range, Mesh&gt;&gt;</a>
+            </dt>
+            <dd>P1 space.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class FES&gt;</div>
+              struct <a href="struct_rodin_1_1_kokkos_1_1_variational_1_1_internal_1_1_is_h1_space.html" class="m-doc">Rodin::Kokkos::Variational::Internal::IsH1Space</a>
+            </dt>
+            <dd>Whether a space is an H1 space.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;size_t K, class Range, class Mesh&gt;</div>
+              struct <a href="struct_rodin_1_1_kokkos_1_1_variational_1_1_internal_1_1_is_h1_space_3_1_1_rodin_1_1_variationala9968db4034f91f22453904c6751ea24.html" class="m-doc">Rodin::Kokkos::Variational::Internal::IsH1Space&lt;::Rodin::Variational::H1&lt;K, Range, Mesh&gt;&gt;</a>
+            </dt>
+            <dd>H1 space.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class LHSDerived, class RHSDerived&gt;</div>
+              struct <a href="struct_rodin_1_1_kokkos_1_1_variational_1_1_internal_1_1_derivative_form.html" class="m-doc">Rodin::Kokkos::Variational::Internal::DerivativeForm</a>
+            </dt>
+            <dd>Derivatives of a trial/test pair, selecting the fallback quadrature order of the host handlers.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class LHSDerived, class RHSDerived, class TrialFES, class TestFES&gt;</div>
+              struct <a href="struct_rodin_1_1_kokkos_1_1_variational_1_1_internal_1_1_derivative_form_3_01_1_1_rodin_1_1_varib48df6dd3cfacd59b56ec251d6b4d652.html" class="m-doc">Rodin::Kokkos::Variational::Internal::DerivativeForm&lt;::Rodin::Variational::Grad&lt;::Rodin::Variational::ShapeFunction&lt;LHSDerived, TrialFES, ::Rodin::Variational::ShapeFunctionSpaceType::Trial&gt;&gt;, ::Rodin::Variational::Grad&lt;::Rodin::Variational::ShapeFunction&lt;RHSDerived, TestFES, ::Rodin::Variational::ShapeFunctionSpaceType::Test&gt;&gt;&gt;</a>
+            </dt>
+            <dd>Gradient trial and test operators.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class CoefficientDerived, class LHSDerived, class RHSDerived, class TrialFES, class TestFES&gt;</div>
+              struct <a href="struct_rodin_1_1_kokkos_1_1_variational_1_1_internal_1_1_derivative_form_3_01_1_1_rodin_1_1_vari03e2b866e86f1a76686b08b24fac2603.html" class="m-doc">Rodin::Kokkos::Variational::Internal::DerivativeForm&lt;::Rodin::Variational::Mult&lt;::Rodin::Variational::FunctionBase&lt;CoefficientDerived&gt;, ::Rodin::Variational::ShapeFunctionBase&lt;::Rodin::Variational::Grad&lt;::Rodin::Variational::ShapeFunction&lt;LHSDerived, TrialFES, ::Rodin::Variational::ShapeFunctionSpaceType::Trial&gt;&gt;, TrialFES, ::Rodin::Variational::ShapeFunctionSpaceType::Trial&gt;&gt;, ::Rodin::Variational::Grad&lt;::Rodin::Variational::ShapeFunction&lt;RHSDerived, TestFES, ::Rodin::Variational::ShapeFunctionSpaceType::Test&gt;&gt;&gt;</a>
+            </dt>
+            <dd>Scaled gradient trial operator and gradient test operator.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class LHSDerived, class RHSDerived, class TrialFES, class TestFES&gt;</div>
+              struct <a href="struct_rodin_1_1_kokkos_1_1_variational_1_1_internal_1_1_derivative_form_3_01_1_1_rodin_1_1_varibf1743c4005152547ef0c7f9159be3bf.html" class="m-doc">Rodin::Kokkos::Variational::Internal::DerivativeForm&lt;::Rodin::Variational::Div&lt;::Rodin::Variational::ShapeFunction&lt;LHSDerived, TrialFES, ::Rodin::Variational::ShapeFunctionSpaceType::Trial&gt;&gt;, ::Rodin::Variational::ShapeFunction&lt;RHSDerived, TestFES, ::Rodin::Variational::ShapeFunctionSpaceType::Test&gt;&gt;</a>
+            </dt>
+            <dd>Divergence trial operator and scalar test function.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class LHSDerived, class RHSDerived, class TrialFES, class TestFES&gt;</div>
+              struct <a href="struct_rodin_1_1_kokkos_1_1_variational_1_1_internal_1_1_derivative_form_3_1_1_rodin_1_1_variati1de0605fa21dcbf97ca544d60cc383f2.html" class="m-doc">Rodin::Kokkos::Variational::Internal::DerivativeForm&lt;::Rodin::Variational::ShapeFunction&lt;LHSDerived, TrialFES, ::Rodin::Variational::ShapeFunctionSpaceType::Trial&gt;, ::Rodin::Variational::Div&lt;::Rodin::Variational::ShapeFunction&lt;RHSDerived, TestFES, ::Rodin::Variational::ShapeFunctionSpaceType::Test&gt;&gt;&gt;</a>
+            </dt>
+            <dd>Scalar trial function and divergence test operator.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class LHSDerived, class RHSDerived, class TrialFES, class TestFES&gt;</div>
+              struct <a href="struct_rodin_1_1_kokkos_1_1_variational_1_1_internal_1_1_derivative_form_3_01_1_1_rodin_1_1_varia9cd9fd5bf60215114372da5581617aa.html" class="m-doc">Rodin::Kokkos::Variational::Internal::DerivativeForm&lt;::Rodin::Variational::Jacobian&lt;::Rodin::Variational::ShapeFunction&lt;LHSDerived, TrialFES, ::Rodin::Variational::ShapeFunctionSpaceType::Trial&gt;&gt;, ::Rodin::Variational::Jacobian&lt;::Rodin::Variational::ShapeFunction&lt;RHSDerived, TestFES, ::Rodin::Variational::ShapeFunctionSpaceType::Test&gt;&gt;&gt;</a>
+            </dt>
+            <dd>Jacobian trial and test operators.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class CoefficientDerived, class LHSDerived, class RHSDerived, class TrialFES, class TestFES&gt;</div>
+              struct <a href="struct_rodin_1_1_kokkos_1_1_variational_1_1_internal_1_1_derivative_form_3_01_1_1_rodin_1_1_variec06e01b10aee703ebffa601094cd8f3.html" class="m-doc">Rodin::Kokkos::Variational::Internal::DerivativeForm&lt;::Rodin::Variational::Mult&lt;::Rodin::Variational::FunctionBase&lt;CoefficientDerived&gt;, ::Rodin::Variational::ShapeFunctionBase&lt;::Rodin::Variational::Jacobian&lt;::Rodin::Variational::ShapeFunction&lt;LHSDerived, TrialFES, ::Rodin::Variational::ShapeFunctionSpaceType::Trial&gt;&gt;, TrialFES, ::Rodin::Variational::ShapeFunctionSpaceType::Trial&gt;&gt;, ::Rodin::Variational::Jacobian&lt;::Rodin::Variational::ShapeFunction&lt;RHSDerived, TestFES, ::Rodin::Variational::ShapeFunctionSpaceType::Test&gt;&gt;&gt;</a>
+            </dt>
+            <dd>Scaled Jacobian trial operator and Jacobian test operator.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class CoefficientDerived, class LHSDerived, class RHSDerived, class TrialFES, class TestFES&gt;</div>
+              struct <a href="struct_rodin_1_1_kokkos_1_1_variational_1_1_internal_1_1_derivative_form_3_01_1_1_rodin_1_1_vari39f7b3a9663d9ef498b0dcaafa08cb93.html" class="m-doc">Rodin::Kokkos::Variational::Internal::DerivativeForm&lt;::Rodin::Variational::Mult&lt;::Rodin::Variational::ShapeFunctionBase&lt;::Rodin::Variational::Jacobian&lt;::Rodin::Variational::ShapeFunction&lt;LHSDerived, TrialFES, ::Rodin::Variational::ShapeFunctionSpaceType::Trial&gt;&gt;, TrialFES, ::Rodin::Variational::ShapeFunctionSpaceType::Trial&gt;, ::Rodin::Variational::FunctionBase&lt;CoefficientDerived&gt;&gt;, ::Rodin::Variational::ShapeFunction&lt;RHSDerived, TestFES, ::Rodin::Variational::ShapeFunctionSpaceType::Test&gt;&gt;</a>
+            </dt>
+            <dd>Jacobian trial operator times a function, against a test function.</dd>
+          </dl>
+        </section>
+        <section id="enum-members">
+          <h2><a href="#enum-members">Enums</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">enum class <a href="#ac3a8b609f7e6b283882d1cb068549864" class="m-doc">DerivativeKind</a> { </span><span class="m-doc-wrap"><a href="#ac3a8b609f7e6b283882d1cb068549864a6adf97f83acf6453d4a6a4b1070f3754" class="m-doc">None</a>,
+              <a href="#ac3a8b609f7e6b283882d1cb068549864ae99e133f4481158db879726b7335d967" class="m-doc">Gradients</a>,
+              <a href="#ac3a8b609f7e6b283882d1cb068549864ac6c8146ddecafb827a15032db87704fc" class="m-doc">TrialDivergence</a>,
+              <a href="#ac3a8b609f7e6b283882d1cb068549864a8722e2b708cad5b151b59f2ffa9dd16f" class="m-doc">TestDivergence</a>,
+              <a href="#ac3a8b609f7e6b283882d1cb068549864aa7626da7b90f41b4e5ae7c703c6390b2" class="m-doc">JacobianValue</a> }</span>
+            </dt>
+            <dd>Derivatives of a trial/test pair handled by a dedicated host handler.</dd>
+          </dl>
+        </section>
+        <section id="typedef-members">
+          <h2><a href="#typedef-members">Typedefs</a></h2>
+          <dl class="m-doc">
+            <dt id="a971bfd7815d219030f9b9a5854c0104c">
+              <div class="m-doc-template">template&lt;class FES&gt;</div>
+              using <a href="#a971bfd7815d219030f9b9a5854c0104c" class="m-doc-self">BackendOf</a> = typename <a href="struct_rodin_1_1_kokkos_1_1_variational_1_1_internal_1_1_mesh_backend.html" class="m-doc">MeshBackend</a>&lt;typename FES::MeshType&gt;::Type
+            </dt>
+            <dd>Kokkos backend of the mesh of a device space.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Enum documentation</h2>
+          <section class="m-doc-details" id="ac3a8b609f7e6b283882d1cb068549864"><div>
+            <h3>
+              enum class <a href="#ac3a8b609f7e6b283882d1cb068549864" class="m-doc-self">DerivativeKind</a>
+            </h3>
+            <p>Derivatives of a trial/test pair handled by a dedicated host handler.</p>
+            <table class="m-table m-fullwidth m-flat m-doc">
+              <thead><tr><th style="width: 1%">Enumerators</th><th></th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><a href="#ac3a8b609f7e6b283882d1cb068549864a6adf97f83acf6453d4a6a4b1070f3754" class="m-doc-self" id="ac3a8b609f7e6b283882d1cb068549864a6adf97f83acf6453d4a6a4b1070f3754">None</a></td>
+                  <td>
+                  <p>No dedicated handler.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#ac3a8b609f7e6b283882d1cb068549864ae99e133f4481158db879726b7335d967" class="m-doc-self" id="ac3a8b609f7e6b283882d1cb068549864ae99e133f4481158db879726b7335d967">Gradients</a></td>
+                  <td>
+                  <p>Gradients or Jacobians on both sides.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#ac3a8b609f7e6b283882d1cb068549864ac6c8146ddecafb827a15032db87704fc" class="m-doc-self" id="ac3a8b609f7e6b283882d1cb068549864ac6c8146ddecafb827a15032db87704fc">TrialDivergence</a></td>
+                  <td>
+                  <p>Divergence of the trial function against a scalar test function.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#ac3a8b609f7e6b283882d1cb068549864a8722e2b708cad5b151b59f2ffa9dd16f" class="m-doc-self" id="ac3a8b609f7e6b283882d1cb068549864a8722e2b708cad5b151b59f2ffa9dd16f">TestDivergence</a></td>
+                  <td>
+                  <p>Scalar trial function against the divergence of the test function.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#ac3a8b609f7e6b283882d1cb068549864aa7626da7b90f41b4e5ae7c703c6390b2" class="m-doc-self" id="ac3a8b609f7e6b283882d1cb068549864aa7626da7b90f41b4e5ae7c703c6390b2">JacobianValue</a></td>
+                  <td>
+                  <p>Jacobian of the trial function times a function against a test function.</p>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+        </section>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">&hellip;</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form>
+            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript.</noscript>
+          <div id="search-help" class="m-text m-dim m-text-center">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
+            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v2-eeb63e0c3a5e.js"></script>
+<script src="searchdata-v2.js" async="async"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+  <a class="rodin-ci-link" href="ci-index.html" aria-label="CI" title="CI"><span class="rodin-ci-mark" aria-hidden="true"></span><span class="rodin-ci-label">CI</span></a>
+</div>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>

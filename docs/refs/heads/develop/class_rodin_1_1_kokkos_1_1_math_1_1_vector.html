@@ -1,0 +1,1437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Rodin::Kokkos::Math::Vector class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
+  <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
+  <link rel="stylesheet" href="rodin-theme-1337632f765f.css" />
+  <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#18191c" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <a href="index.html" id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m">Rodin</a>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li>
+              <a href="pages.html">Pages</a>
+              <ol>
+                <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
+                <li><a href="gallery.html">Gallery</a></li>
+                <li><a href="guides-io.html">Input, output, and visualization</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
+                <li><a href="ci-index.html">Continuous integration</a></li>
+                <li><a href="notation-index.html">Notation</a></li>
+                <li><a href="credits-index.html">Credits</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="modules.html">Modules</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
+              </ol>
+            </li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="3">
+            <li><a href="annotated.html">Classes</a></li>
+            <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
+            <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span>Kokkos<span>›</span>Math</div><h1>Vector</h1><p class="rodin-reference-brief">Owning backend coefficient vector.</p><p class="rodin-reference-include">Defined in <a href="_kokkos_2_math_2_vector_8h.html"><code>Rodin/Kokkos/Math/Vector.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Scalar</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Backend</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Vector</span><span class="p">;</span>
+</pre>
+        <table class="m-table m-fullwidth m-flat">
+          <thead>
+            <tr><th colspan="2">Template parameters</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="width: 1%">Scalar</td>
+              <td>Coefficient type.</td>
+            </tr>
+            <tr>
+              <td>Backend</td>
+              <td>Kokkos backend tag or execution space.</td>
+            </tr>
+          </tbody>
+        </table>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md182">Architecture</a></li>
+              </ul>
+            </li>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+<p>Dense coefficient vector with backend storage and value semantics.</p><section id="autotoc_md182_1s1"><section id="autotoc_md182"><h3><a href="#autotoc_md182">Architecture</a></h3><p>The owner retains one Kokkos allocation. Copies are deep; getView() borrows its allocation for kernels. Arithmetic, reductions and segment copies run in the execution space. Scalar host access transfers only the requested entry through a proxy; upload() and download() copy independent values across the host/backend boundary and complete before returning. Resizing invalidates borrowed views. The Kokkos runtime must outlive owners.</p></section></section>
+        <section id="pub-types">
+          <h2><a href="#pub-types">Public types</a></h2>
+          <dl class="m-doc">
+            <dt>
+              class <a href="class_rodin_1_1_kokkos_1_1_math_1_1_vector_1_1_reference.html" class="m-doc">Reference</a>
+            </dt>
+            <dd>Scalar host access without a retained host mirror.</dd>
+            <dt>
+              class <a href="class_rodin_1_1_kokkos_1_1_math_1_1_vector_1_1_segment.html" class="m-doc">Segment</a>
+            </dt>
+            <dd>Mutable segment supporting backend-to-backend assignment.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_kokkos_1_1_math_1_1_vector_1_1_finite.html" class="m-doc">Finite</a>
+            </dt>
+            <dd>Counts invalid coefficients.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_kokkos_1_1_math_1_1_vector_1_1_transform.html" class="m-doc">Transform</a>
+            </dt>
+            <dd>Kernel for coefficient-wise arithmetic.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;bool Maximum&gt;</div>
+              struct <a href="struct_rodin_1_1_kokkos_1_1_math_1_1_vector_1_1_extremum.html" class="m-doc">Extremum</a>
+            </dt>
+            <dd>Reduction kernel retaining a deterministic extremum index.</dd>
+            <dt id="aa8f137f19095e0bdcf4f521e901f88bb">
+              <span class="m-doc-wrap-bumper">enum class <a href="#aa8f137f19095e0bdcf4f521e901f88bb" class="m-doc-self">Operation</a> { </span><span class="m-doc-wrap"><a id="aa8f137f19095e0bdcf4f521e901f88bbaec211f7c20af43e742bf2570c3cb84f9" href="#aa8f137f19095e0bdcf4f521e901f88bbaec211f7c20af43e742bf2570c3cb84f9" class="m-doc">Add</a>,
+              <a id="aa8f137f19095e0bdcf4f521e901f88bbae257376d913f3b53cbb4a9b19d770648" href="#aa8f137f19095e0bdcf4f521e901f88bbae257376d913f3b53cbb4a9b19d770648" class="m-doc">Multiply</a>,
+              <a id="aa8f137f19095e0bdcf4f521e901f88bba0b914e196182d02615487e9793ecff3d" href="#aa8f137f19095e0bdcf4f521e901f88bba0b914e196182d02615487e9793ecff3d" class="m-doc">Divide</a> }</span>
+            </dt>
+            <dd>Coefficient update operation.</dd>
+            <dt id="ad4b3ea5ea1f041cc44d8b1e41603b06b">
+              using <a href="#ad4b3ea5ea1f041cc44d8b1e41603b06b" class="m-doc-self">ScalarType</a> = Scalar
+            </dt>
+            <dd>Coefficient type.</dd>
+            <dt id="a175d38764a967e2e19f4a110897a0871">
+              using <a href="#a175d38764a967e2e19f4a110897a0871" class="m-doc-self">ContextType</a> = <a href="class_rodin_1_1_context_1_1_kokkos.html" class="m-doc">::<wbr />Rodin::<wbr />Context::<wbr />Kokkos</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">::<wbr />Rodin::<wbr />Context::<wbr />Local</a>, Backend&gt;
+            </dt>
+            <dd>Context selecting execution and memory.</dd>
+            <dt id="ab78f7cd66f68a9ce08c3ca5a42e12a90">
+              using <a href="#ab78f7cd66f68a9ce08c3ca5a42e12a90" class="m-doc-self">ExecutionSpace</a> = typename <a href="class_rodin_1_1_context_1_1_kokkos.html#accc6e672f89037295fb03a01924c9392" class="m-doc">ContextType::<wbr />ExecutionSpaceType</a>
+            </dt>
+            <dd>Execution space.</dd>
+            <dt id="abd2285c284ad3cfde965ef4ecc1dab84">
+              using <a href="#abd2285c284ad3cfde965ef4ecc1dab84" class="m-doc-self">MemorySpace</a> = typename <a href="class_rodin_1_1_context_1_1_kokkos.html#a66e24e538ed3900abd12e5b97beada44" class="m-doc">ContextType::<wbr />MemorySpaceType</a>
+            </dt>
+            <dd>Allocation memory space.</dd>
+            <dt id="a117d4a310ca064e0ead63b0b1fde09be">
+              using <a href="#a117d4a310ca064e0ead63b0b1fde09be" class="m-doc-self">View</a> = <a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Kokkos::<wbr />View</a>&lt;Scalar*, <a href="#abd2285c284ad3cfde965ef4ecc1dab84" class="m-doc">MemorySpace</a>&gt;
+            </dt>
+            <dd>Borrowed kernel view.</dd>
+          </dl>
+        </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt id="aba83f7828d95b601500471996fc8c3c0">
+              <span class="m-doc-wrap-bumper"><a href="#aba83f7828d95b601500471996fc8c3c0" class="m-doc-self">Vector</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-info">defaulted</span></span>
+            </dt>
+            <dd>Constructs an empty vector.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#af4111591630fbb9f4fde2c223b519696" class="m-doc">Vector</a>(</span><span class="m-doc-wrap">size_t count) <span class="m-label m-flat m-info">explicit</span> </span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a3a8333eacded76335c362842f60e2c68" class="m-doc">Vector</a>(</span><span class="m-doc-wrap">const Vector&amp; rhs)</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#af29c3bdc0c7f5567f2733ba8d3fd9531" class="m-doc">Vector</a>(</span><span class="m-doc-wrap">Vector&amp;&amp; rhs) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd></dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a7c81dc7e93fdd1401c9e81823eddc642" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="#aba83f7828d95b601500471996fc8c3c0" class="m-doc">Vector</a>&amp; rhs) -&gt; <a href="#aba83f7828d95b601500471996fc8c3c0" class="m-doc">Vector</a>&amp;</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a4db4acb4fa6dae3929d26b606e762a67" class="m-doc">operator=</a>(</span><span class="m-doc-wrap"><a href="#aba83f7828d95b601500471996fc8c3c0" class="m-doc">Vector</a>&amp;&amp; rhs) -&gt; <a href="#aba83f7828d95b601500471996fc8c3c0" class="m-doc">Vector</a>&amp; <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Derived&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a106784291e25a50e78fe81008d3be6e1" class="m-doc">upload</a>(</span><span class="m-doc-wrap">const Eigen::MatrixBase&lt;Derived&gt;&amp; rhs) -&gt; <a href="#aba83f7828d95b601500471996fc8c3c0" class="m-doc">Vector</a>&amp;</span>
+            </dt>
+            <dd>Replaces this backend vector with an independent host snapshot.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Derived&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae16af568e0655e496afbca81b955b48e" class="m-doc">upload</a>(</span><span class="m-doc-wrap">const Eigen::ArrayBase&lt;Derived&gt;&amp; rhs) -&gt; <a href="#aba83f7828d95b601500471996fc8c3c0" class="m-doc">Vector</a>&amp;</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a259cb5a711406a8c3e5d937eb9350cca" class="m-doc">size</a>(</span><span class="m-doc-wrap">) const -&gt; size_t</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a9be86262d8ec3739dba5e0910c2339ad" class="m-doc">rows</a>(</span><span class="m-doc-wrap">) const -&gt; size_t</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad721833df820880f31e488d1a5e5aade" class="m-doc">cols</a>(</span><span class="m-doc-wrap">) const -&gt; size_t</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a2a4f93c7f01e2dbce72938dff096db67" class="m-doc">getView</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="#a117d4a310ca064e0ead63b0b1fde09be" class="m-doc">View</a></span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a3fc607233be1e4d269f420d3cb200470" class="m-doc">data</a>(</span><span class="m-doc-wrap">) -&gt; Scalar*</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a5ef0414c2b262760b321d52eaf5af014" class="m-doc">data</a>(</span><span class="m-doc-wrap">) const -&gt; const Scalar*</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a5ac1ddd040071d8fdb5dc6a2e6cbbc26" class="m-doc">resize</a>(</span><span class="m-doc-wrap">size_t count)</span>
+            </dt>
+            <dd></dd>
+            <dt id="a47affd1a10b589811fc4828c1a2e0c6d">
+              <span class="m-doc-wrap-bumper">void <a href="#a47affd1a10b589811fc4828c1a2e0c6d" class="m-doc-self">setZero</a>(</span><span class="m-doc-wrap">)</span>
+            </dt>
+            <dd>Sets all coefficients to zero.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#ade88183cc788ab8e34d632aa59cc21c7" class="m-doc">setZero</a>(</span><span class="m-doc-wrap">size_t count)</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#aa8c4ae211e0fadb1d308f4ac3f9f498c" class="m-doc">setConstant</a>(</span><span class="m-doc-wrap">Scalar value)</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aeb05c3eb09a89dcdd2b952974d64b6e0" class="m-doc">coeffRef</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> i) -&gt; <a href="class_rodin_1_1_kokkos_1_1_math_1_1_vector_1_1_reference.html" class="m-doc">Reference</a></span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a7366fc0ebdd6fe65fb22424f3fa8e45b" class="m-doc">coeff</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> i) const -&gt; Scalar</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a5cd521e884cda3c6c13e60f62845947c" class="m-doc">operator[]</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> i) -&gt; <a href="class_rodin_1_1_kokkos_1_1_math_1_1_vector_1_1_reference.html" class="m-doc">Reference</a></span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aeb8860db473ce0542949a83c989c6a35" class="m-doc">operator[]</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> i) const -&gt; Scalar</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a3fb93f66fd9663f73cc2bb7afe2e86fb" class="m-doc">operator()</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> i) -&gt; <a href="class_rodin_1_1_kokkos_1_1_math_1_1_vector_1_1_reference.html" class="m-doc">Reference</a></span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a2fada398cf0c10398e60d9429e25f7d6" class="m-doc">operator()</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> i) const -&gt; Scalar</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a8371e377d68fb48090c3101c118573ef" class="m-doc">assign</a>(</span><span class="m-doc-wrap">const <a href="#aba83f7828d95b601500471996fc8c3c0" class="m-doc">Vector</a>&amp; source,
+              size_t offset,
+              size_t count)</span>
+            </dt>
+            <dd>Copies a contiguous source range into this owner&#x27;s storage.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#af102c96b127b977e2300566bf923c8cc" class="m-doc">segment</a>(</span><span class="m-doc-wrap">size_t first,
+              size_t count) -&gt; <a href="class_rodin_1_1_kokkos_1_1_math_1_1_vector_1_1_segment.html" class="m-doc">Segment</a></span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#acf7fca0bdd1ba9a0a6775a51da40cb6e" class="m-doc">segment</a>(</span><span class="m-doc-wrap">size_t first,
+              size_t count) const -&gt; <a href="#aba83f7828d95b601500471996fc8c3c0" class="m-doc">Vector</a></span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a9755c939ec7e9df44c6ea0cc1bb7333c" class="m-doc">download</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_vector.html" class="m-doc">::<wbr />Rodin::<wbr />Math::<wbr />Vector</a>&lt;Scalar&gt;&amp; result) const</span>
+            </dt>
+            <dd>Replaces a host vector with an independent backend snapshot.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#abce55feb5ea0e6ad92ccb9e13ddeff25" class="m-doc">download</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_math_1_1_vector.html" class="m-doc">::<wbr />Rodin::<wbr />Math::<wbr />Vector</a>&lt;Scalar&gt;</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a5d613ddf07bf8527bfa66c0f7aa2d278" class="m-doc">allFinite</a>(</span><span class="m-doc-wrap">) const -&gt; bool</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad27050c4a6f81c616a0f4e47c8e0bd48" class="m-doc">norm</a>(</span><span class="m-doc-wrap">) const -&gt; auto</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ac2a268c4cbfba7d9e85a4388b0493839" class="m-doc">dot</a>(</span><span class="m-doc-wrap">const <a href="#aba83f7828d95b601500471996fc8c3c0" class="m-doc">Vector</a>&amp; rhs) const -&gt; auto</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae5a14ec88d1d26a2997c23423aaf9cfc" class="m-doc">isZero</a>(</span><span class="m-doc-wrap">Scalar tolerance = 0) const -&gt; bool</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aba8c8c6fb9bb94e98109cf14993f3daf" class="m-doc">squaredNorm</a>(</span><span class="m-doc-wrap">) const -&gt; auto</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aab8bac93b056162a39a63b3f29b577b3" class="m-doc">array</a>(</span><span class="m-doc-wrap">) -&gt; <a href="#aba83f7828d95b601500471996fc8c3c0" class="m-doc">Vector</a>&amp;</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab43a8de0ec6cf3f546247570d4329efb" class="m-doc">array</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#aba83f7828d95b601500471996fc8c3c0" class="m-doc">Vector</a>&amp;</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae923fb5f21d8a2983b385afe74fcb794" class="m-doc">operator+=</a>(</span><span class="m-doc-wrap">Scalar rhs) -&gt; <a href="#aba83f7828d95b601500471996fc8c3c0" class="m-doc">Vector</a>&amp;</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a9c44c4c841090dadc5ea27b28d8b9492" class="m-doc">operator-=</a>(</span><span class="m-doc-wrap">Scalar rhs) -&gt; <a href="#aba83f7828d95b601500471996fc8c3c0" class="m-doc">Vector</a>&amp;</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a708d3bb9947ffdc9cc7c9c74470deb17" class="m-doc">operator*=</a>(</span><span class="m-doc-wrap">Scalar rhs) -&gt; <a href="#aba83f7828d95b601500471996fc8c3c0" class="m-doc">Vector</a>&amp;</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a2efa2283545c1b143b455294e3ba5f2f" class="m-doc">operator/=</a>(</span><span class="m-doc-wrap">Scalar rhs) -&gt; <a href="#aba83f7828d95b601500471996fc8c3c0" class="m-doc">Vector</a>&amp;</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a87cea0d5434a88d4b59c1e12e8a00472" class="m-doc">operator+=</a>(</span><span class="m-doc-wrap">const <a href="#aba83f7828d95b601500471996fc8c3c0" class="m-doc">Vector</a>&amp; rhs) -&gt; <a href="#aba83f7828d95b601500471996fc8c3c0" class="m-doc">Vector</a>&amp;</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#af0c212cf24a6506feba25bfe584f030e" class="m-doc">operator-=</a>(</span><span class="m-doc-wrap">const <a href="#aba83f7828d95b601500471996fc8c3c0" class="m-doc">Vector</a>&amp; rhs) -&gt; <a href="#aba83f7828d95b601500471996fc8c3c0" class="m-doc">Vector</a>&amp;</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aee7e7638e31d9bd9bb1c757f7893e413" class="m-doc">operator*=</a>(</span><span class="m-doc-wrap">const <a href="#aba83f7828d95b601500471996fc8c3c0" class="m-doc">Vector</a>&amp; rhs) -&gt; <a href="#aba83f7828d95b601500471996fc8c3c0" class="m-doc">Vector</a>&amp;</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a81bdeeeb3fa68661bd42fff9b1ab6466" class="m-doc">operator/=</a>(</span><span class="m-doc-wrap">const <a href="#aba83f7828d95b601500471996fc8c3c0" class="m-doc">Vector</a>&amp; rhs) -&gt; <a href="#aba83f7828d95b601500471996fc8c3c0" class="m-doc">Vector</a>&amp;</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab85205dcea3171bc28887c0096d85a79" class="m-doc">operator+</a>(</span><span class="m-doc-wrap">const <a href="#aba83f7828d95b601500471996fc8c3c0" class="m-doc">Vector</a>&amp; rhs) const -&gt; <a href="#aba83f7828d95b601500471996fc8c3c0" class="m-doc">Vector</a></span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a5d3c3a6331dd4b97d70fa1eb47decead" class="m-doc">operator-</a>(</span><span class="m-doc-wrap">const <a href="#aba83f7828d95b601500471996fc8c3c0" class="m-doc">Vector</a>&amp; rhs) const -&gt; <a href="#aba83f7828d95b601500471996fc8c3c0" class="m-doc">Vector</a></span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a5785e18696423dd7b9b3667563d6950d" class="m-doc">operator-</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="#aba83f7828d95b601500471996fc8c3c0" class="m-doc">Vector</a></span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#af1597ca4e2abac4d70ffbd559814bcfa" class="m-doc">operator*</a>(</span><span class="m-doc-wrap">Scalar rhs) const -&gt; <a href="#aba83f7828d95b601500471996fc8c3c0" class="m-doc">Vector</a></span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a71264e19bde7676d411f9aa320f52c7f" class="m-doc">operator/</a>(</span><span class="m-doc-wrap">Scalar rhs) const -&gt; <a href="#aba83f7828d95b601500471996fc8c3c0" class="m-doc">Vector</a></span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad1cb3f60513fdee5d3a5b15d9c527db1" class="m-doc">minCoeff</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>* index = nullptr) const -&gt; Scalar</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a4ce32f33c5fcd275807002762d43419b" class="m-doc">maxCoeff</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>* index = nullptr) const -&gt; Scalar</span>
+            </dt>
+            <dd></dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="af4111591630fbb9f4fde2c223b519696"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af4111591630fbb9f4fde2c223b519696" class="m-doc-self">Vector</a>(</span><span class="m-doc-wrap">size_t count) <span class="m-label m-info">explicit</span> </span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">count</td>
+                  <td>Number of zero coefficients.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a3a8333eacded76335c362842f60e2c68"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3a8333eacded76335c362842f60e2c68" class="m-doc-self">Vector</a>(</span><span class="m-doc-wrap">const Vector&amp; rhs)</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">rhs</td>
+                  <td>Vector to deep-copy.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="af29c3bdc0c7f5567f2733ba8d3fd9531"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af29c3bdc0c7f5567f2733ba8d3fd9531" class="m-doc-self">Vector</a>(</span><span class="m-doc-wrap">Vector&amp;&amp; rhs) <span class="m-label m-info">defaulted</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">rhs</td>
+                  <td>Vector whose allocation is moved.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a7c81dc7e93fdd1401c9e81823eddc642"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="#aba83f7828d95b601500471996fc8c3c0" class="m-doc">Vector</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7c81dc7e93fdd1401c9e81823eddc642" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="#aba83f7828d95b601500471996fc8c3c0" class="m-doc">Vector</a>&amp; rhs)</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">rhs</td>
+                  <td>Vector to deep-copy.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>This vector.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a4db4acb4fa6dae3929d26b606e762a67"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="#aba83f7828d95b601500471996fc8c3c0" class="m-doc">Vector</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4db4acb4fa6dae3929d26b606e762a67" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="#aba83f7828d95b601500471996fc8c3c0" class="m-doc">Vector</a>&amp;&amp; rhs) <span class="m-label m-info">defaulted</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">rhs</td>
+                  <td>Vector whose allocation is moved.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>This vector.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a106784291e25a50e78fe81008d3be6e1"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Scalar, class Backend&gt;
+                template&lt;class Derived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="#aba83f7828d95b601500471996fc8c3c0" class="m-doc">Vector</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a106784291e25a50e78fe81008d3be6e1" class="m-doc-self">upload</a>(</span><span class="m-doc-wrap">const Eigen::MatrixBase&lt;Derived&gt;&amp; rhs)</span></span>
+            </h3>
+            <p>Replaces this backend vector with an independent host snapshot.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">rhs</td>
+                  <td>Host expression, evaluated before backend storage is resized.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>This vector, after the copy completes.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ae16af568e0655e496afbca81b955b48e"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Scalar, class Backend&gt;
+                template&lt;class Derived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="#aba83f7828d95b601500471996fc8c3c0" class="m-doc">Vector</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae16af568e0655e496afbca81b955b48e" class="m-doc-self">upload</a>(</span><span class="m-doc-wrap">const Eigen::ArrayBase&lt;Derived&gt;&amp; rhs)</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">rhs</td>
+                  <td>Host array expression.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>This vector, after copying.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a259cb5a711406a8c3e5d937eb9350cca"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">size_t </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a259cb5a711406a8c3e5d937eb9350cca" class="m-doc-self">size</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Number of coefficients.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a9be86262d8ec3739dba5e0910c2339ad"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">size_t </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9be86262d8ec3739dba5e0910c2339ad" class="m-doc-self">rows</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Number of rows.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ad721833df820880f31e488d1a5e5aade"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">size_t </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad721833df820880f31e488d1a5e5aade" class="m-doc-self">cols</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>One column.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a2a4f93c7f01e2dbce72938dff096db67"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a117d4a310ca064e0ead63b0b1fde09be" class="m-doc">View</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2a4f93c7f01e2dbce72938dff096db67" class="m-doc-self">getView</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Borrowed allocation handle, invalidated by replacement.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a3fc607233be1e4d269f420d3cb200470"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">Scalar* </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3fc607233be1e4d269f420d3cb200470" class="m-doc-self">data</a>(</span><span class="m-doc-wrap">)</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Pointer in the backend memory space.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a5ef0414c2b262760b321d52eaf5af014"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">const Scalar* </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5ef0414c2b262760b321d52eaf5af014" class="m-doc-self">data</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Pointer in the backend memory space.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a5ac1ddd040071d8fdb5dc6a2e6cbbc26"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5ac1ddd040071d8fdb5dc6a2e6cbbc26" class="m-doc-self">resize</a>(</span><span class="m-doc-wrap">size_t count)</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">count</td>
+                  <td>New coefficient count; unchanged sizes keep the allocation.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ade88183cc788ab8e34d632aa59cc21c7"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ade88183cc788ab8e34d632aa59cc21c7" class="m-doc-self">setZero</a>(</span><span class="m-doc-wrap">size_t count)</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">count</td>
+                  <td>New size of the zero vector.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aa8c4ae211e0fadb1d308f4ac3f9f498c"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa8c4ae211e0fadb1d308f4ac3f9f498c" class="m-doc-self">setConstant</a>(</span><span class="m-doc-wrap">Scalar value)</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">value</td>
+                  <td>Constant coefficient value.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aeb05c3eb09a89dcdd2b952974d64b6e0"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_kokkos_1_1_math_1_1_vector_1_1_reference.html" class="m-doc">Reference</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aeb05c3eb09a89dcdd2b952974d64b6e0" class="m-doc-self">coeffRef</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> i)</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">i</td>
+                  <td>Entry index.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Mutable scalar proxy.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a7366fc0ebdd6fe65fb22424f3fa8e45b"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">Scalar </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7366fc0ebdd6fe65fb22424f3fa8e45b" class="m-doc-self">coeff</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> i) const</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">i</td>
+                  <td>Entry index.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Coefficient copied to the host.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a5cd521e884cda3c6c13e60f62845947c"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_kokkos_1_1_math_1_1_vector_1_1_reference.html" class="m-doc">Reference</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5cd521e884cda3c6c13e60f62845947c" class="m-doc-self">operator[]</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> i)</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">i</td>
+                  <td>Entry index.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Mutable scalar proxy.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aeb8860db473ce0542949a83c989c6a35"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">Scalar </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aeb8860db473ce0542949a83c989c6a35" class="m-doc-self">operator[]</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> i) const</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">i</td>
+                  <td>Entry index.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Coefficient copied to the host.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a3fb93f66fd9663f73cc2bb7afe2e86fb"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_kokkos_1_1_math_1_1_vector_1_1_reference.html" class="m-doc">Reference</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3fb93f66fd9663f73cc2bb7afe2e86fb" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> i)</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">i</td>
+                  <td>Entry index.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Mutable scalar proxy.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a2fada398cf0c10398e60d9429e25f7d6"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">Scalar </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2fada398cf0c10398e60d9429e25f7d6" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> i) const</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">i</td>
+                  <td>Entry index.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Coefficient copied to the host.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a8371e377d68fb48090c3101c118573ef"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8371e377d68fb48090c3101c118573ef" class="m-doc-self">assign</a>(</span><span class="m-doc-wrap">const <a href="#aba83f7828d95b601500471996fc8c3c0" class="m-doc">Vector</a>&amp; source,
+              size_t offset,
+              size_t count)</span></span>
+            </h3>
+            <p>Copies a contiguous source range into this owner&#x27;s storage.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">source</td>
+                  <td>Source coefficients.</td>
+                </tr>
+                <tr>
+                  <td>offset</td>
+                  <td>First source coefficient.</td>
+                </tr>
+                <tr>
+                  <td>count</td>
+                  <td>Number of coefficients to copy.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="af102c96b127b977e2300566bf923c8cc"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_kokkos_1_1_math_1_1_vector_1_1_segment.html" class="m-doc">Segment</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af102c96b127b977e2300566bf923c8cc" class="m-doc-self">segment</a>(</span><span class="m-doc-wrap">size_t first,
+              size_t count)</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">first</td>
+                  <td>First entry.</td>
+                </tr>
+                <tr>
+                  <td>count</td>
+                  <td>Entry count.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Writable segment.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="acf7fca0bdd1ba9a0a6775a51da40cb6e"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="#aba83f7828d95b601500471996fc8c3c0" class="m-doc">Vector</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acf7fca0bdd1ba9a0a6775a51da40cb6e" class="m-doc-self">segment</a>(</span><span class="m-doc-wrap">size_t first,
+              size_t count) const</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">first</td>
+                  <td>First entry.</td>
+                </tr>
+                <tr>
+                  <td>count</td>
+                  <td>Entry count.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Copied segment.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a9755c939ec7e9df44c6ea0cc1bb7333c"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9755c939ec7e9df44c6ea0cc1bb7333c" class="m-doc-self">download</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_vector.html" class="m-doc">::<wbr />Rodin::<wbr />Math::<wbr />Vector</a>&lt;Scalar&gt;&amp; result) const</span></span>
+            </h3>
+            <p>Replaces a host vector with an independent backend snapshot.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">result</td>
+                  <td>Host destination, resized as required. The backend is unchanged and the copy completes before returning.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="abce55feb5ea0e6ad92ccb9e13ddeff25"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_math_1_1_vector.html" class="m-doc">::<wbr />Rodin::<wbr />Math::<wbr />Vector</a>&lt;Scalar&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abce55feb5ea0e6ad92ccb9e13ddeff25" class="m-doc-self">download</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Independent host snapshot, ready to read on return.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a5d613ddf07bf8527bfa66c0f7aa2d278"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">bool </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5d613ddf07bf8527bfa66c0f7aa2d278" class="m-doc-self">allFinite</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Whether every coefficient is finite.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ad27050c4a6f81c616a0f4e47c8e0bd48"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">auto </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad27050c4a6f81c616a0f4e47c8e0bd48" class="m-doc-self">norm</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Euclidean coefficient norm.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ac2a268c4cbfba7d9e85a4388b0493839"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">auto </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac2a268c4cbfba7d9e85a4388b0493839" class="m-doc-self">dot</a>(</span><span class="m-doc-wrap">const <a href="#aba83f7828d95b601500471996fc8c3c0" class="m-doc">Vector</a>&amp; rhs) const</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">rhs</td>
+                  <td>Second vector, conjugated in Rodin&#x27;s convention.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Inner product.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ae5a14ec88d1d26a2997c23423aaf9cfc"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">bool </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae5a14ec88d1d26a2997c23423aaf9cfc" class="m-doc-self">isZero</a>(</span><span class="m-doc-wrap">Scalar tolerance = 0) const</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">tolerance</td>
+                  <td>Maximum Euclidean norm.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Whether the vector is zero within tolerance.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aba8c8c6fb9bb94e98109cf14993f3daf"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">auto </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aba8c8c6fb9bb94e98109cf14993f3daf" class="m-doc-self">squaredNorm</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Squared Euclidean coefficient norm.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aab8bac93b056162a39a63b3f29b577b3"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="#aba83f7828d95b601500471996fc8c3c0" class="m-doc">Vector</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aab8bac93b056162a39a63b3f29b577b3" class="m-doc-self">array</a>(</span><span class="m-doc-wrap">)</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Coefficient-wise mutable operations.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ab43a8de0ec6cf3f546247570d4329efb"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">const <a href="#aba83f7828d95b601500471996fc8c3c0" class="m-doc">Vector</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab43a8de0ec6cf3f546247570d4329efb" class="m-doc-self">array</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Coefficient-wise read access.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ae923fb5f21d8a2983b385afe74fcb794"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="#aba83f7828d95b601500471996fc8c3c0" class="m-doc">Vector</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae923fb5f21d8a2983b385afe74fcb794" class="m-doc-self">operator+=</a>(</span><span class="m-doc-wrap">Scalar rhs)</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">rhs</td>
+                  <td>Scalar increment.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>This vector.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a9c44c4c841090dadc5ea27b28d8b9492"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="#aba83f7828d95b601500471996fc8c3c0" class="m-doc">Vector</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9c44c4c841090dadc5ea27b28d8b9492" class="m-doc-self">operator-=</a>(</span><span class="m-doc-wrap">Scalar rhs)</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">rhs</td>
+                  <td>Scalar decrement.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>This vector.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a708d3bb9947ffdc9cc7c9c74470deb17"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="#aba83f7828d95b601500471996fc8c3c0" class="m-doc">Vector</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a708d3bb9947ffdc9cc7c9c74470deb17" class="m-doc-self">operator*=</a>(</span><span class="m-doc-wrap">Scalar rhs)</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">rhs</td>
+                  <td>Scalar multiplier.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>This vector.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a2efa2283545c1b143b455294e3ba5f2f"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="#aba83f7828d95b601500471996fc8c3c0" class="m-doc">Vector</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2efa2283545c1b143b455294e3ba5f2f" class="m-doc-self">operator/=</a>(</span><span class="m-doc-wrap">Scalar rhs)</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">rhs</td>
+                  <td>Scalar divisor.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>This vector.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a87cea0d5434a88d4b59c1e12e8a00472"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="#aba83f7828d95b601500471996fc8c3c0" class="m-doc">Vector</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a87cea0d5434a88d4b59c1e12e8a00472" class="m-doc-self">operator+=</a>(</span><span class="m-doc-wrap">const <a href="#aba83f7828d95b601500471996fc8c3c0" class="m-doc">Vector</a>&amp; rhs)</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">rhs</td>
+                  <td>Vector increment.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>This vector.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="af0c212cf24a6506feba25bfe584f030e"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="#aba83f7828d95b601500471996fc8c3c0" class="m-doc">Vector</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af0c212cf24a6506feba25bfe584f030e" class="m-doc-self">operator-=</a>(</span><span class="m-doc-wrap">const <a href="#aba83f7828d95b601500471996fc8c3c0" class="m-doc">Vector</a>&amp; rhs)</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">rhs</td>
+                  <td>Vector decrement.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>This vector.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aee7e7638e31d9bd9bb1c757f7893e413"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="#aba83f7828d95b601500471996fc8c3c0" class="m-doc">Vector</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aee7e7638e31d9bd9bb1c757f7893e413" class="m-doc-self">operator*=</a>(</span><span class="m-doc-wrap">const <a href="#aba83f7828d95b601500471996fc8c3c0" class="m-doc">Vector</a>&amp; rhs)</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">rhs</td>
+                  <td>Coefficient-wise multiplier.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>This vector.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a81bdeeeb3fa68661bd42fff9b1ab6466"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="#aba83f7828d95b601500471996fc8c3c0" class="m-doc">Vector</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a81bdeeeb3fa68661bd42fff9b1ab6466" class="m-doc-self">operator/=</a>(</span><span class="m-doc-wrap">const <a href="#aba83f7828d95b601500471996fc8c3c0" class="m-doc">Vector</a>&amp; rhs)</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">rhs</td>
+                  <td>Coefficient-wise divisor.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>This vector.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ab85205dcea3171bc28887c0096d85a79"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="#aba83f7828d95b601500471996fc8c3c0" class="m-doc">Vector</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab85205dcea3171bc28887c0096d85a79" class="m-doc-self">operator+</a>(</span><span class="m-doc-wrap">const <a href="#aba83f7828d95b601500471996fc8c3c0" class="m-doc">Vector</a>&amp; rhs) const</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">rhs</td>
+                  <td>Vector increment.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Independent sum.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a5d3c3a6331dd4b97d70fa1eb47decead"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="#aba83f7828d95b601500471996fc8c3c0" class="m-doc">Vector</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5d3c3a6331dd4b97d70fa1eb47decead" class="m-doc-self">operator-</a>(</span><span class="m-doc-wrap">const <a href="#aba83f7828d95b601500471996fc8c3c0" class="m-doc">Vector</a>&amp; rhs) const</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">rhs</td>
+                  <td>Vector decrement.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Independent difference.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a5785e18696423dd7b9b3667563d6950d"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="#aba83f7828d95b601500471996fc8c3c0" class="m-doc">Vector</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5785e18696423dd7b9b3667563d6950d" class="m-doc-self">operator-</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Independent negated coefficients.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="af1597ca4e2abac4d70ffbd559814bcfa"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="#aba83f7828d95b601500471996fc8c3c0" class="m-doc">Vector</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af1597ca4e2abac4d70ffbd559814bcfa" class="m-doc-self">operator*</a>(</span><span class="m-doc-wrap">Scalar rhs) const</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">rhs</td>
+                  <td>Scalar factor.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Independent scaled coefficients.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a71264e19bde7676d411f9aa320f52c7f"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="#aba83f7828d95b601500471996fc8c3c0" class="m-doc">Vector</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a71264e19bde7676d411f9aa320f52c7f" class="m-doc-self">operator/</a>(</span><span class="m-doc-wrap">Scalar rhs) const</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">rhs</td>
+                  <td>Scalar divisor.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Independent divided coefficients.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ad1cb3f60513fdee5d3a5b15d9c527db1"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">Scalar </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad1cb3f60513fdee5d3a5b15d9c527db1" class="m-doc-self">minCoeff</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>* index = nullptr) const</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">index</td>
+                  <td>Receives the smallest index attaining the minimum.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Minimum coefficient.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a4ce32f33c5fcd275807002762d43419b"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">Scalar </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4ce32f33c5fcd275807002762d43419b" class="m-doc-self">maxCoeff</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>* index = nullptr) const</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">index</td>
+                  <td>Receives the smallest index attaining the maximum.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Maximum coefficient.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+        </section>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">&hellip;</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form>
+            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript.</noscript>
+          <div id="search-help" class="m-text m-dim m-text-center">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
+            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v2-eeb63e0c3a5e.js"></script>
+<script src="searchdata-v2.js" async="async"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+  <a class="rodin-ci-link" href="ci-index.html" aria-label="CI" title="CI"><span class="rodin-ci-mark" aria-hidden="true"></span><span class="rodin-ci-label">CI</span></a>
+</div>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>

@@ -165,6 +165,14 @@
               <span class="m-doc-wrap-bumper">auto <a href="#a3f6fc5de06a318920d84f3c3742db07f" class="m-doc">empty</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns true if there are no splits.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae4a3ab68b1442a7d7080e3245d2556c0" class="m-doc">getName</a>(</span><span class="m-doc-wrap">size_t i) const -&gt; std::string</span>
+            </dt>
+            <dd>Returns the name under which split <code>i</code> is installed.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a186966a21c9f2a7029faa5466f458aa2" class="m-doc">install</a>(</span><span class="m-doc-wrap">::PC pc) const -&gt; PetscErrorCode</span>
+            </dt>
+            <dd>Installs the splits on a field-split preconditioner.</dd>
           </dl>
         </section>
         <section>
@@ -421,6 +429,59 @@
               </tfoot>
             </table>
           </div></section>
+          <section class="m-doc-details" id="ae4a3ab68b1442a7d7080e3245d2556c0"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">std::string </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae4a3ab68b1442a7d7080e3245d2556c0" class="m-doc-self">getName</a>(</span><span class="m-doc-wrap">size_t i) const</span></span>
+            </h3>
+            <p>Returns the name under which split <code>i</code> is installed.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">i&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Split index.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>The split name, or its index when it has none.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a186966a21c9f2a7029faa5466f458aa2"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">PetscErrorCode </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a186966a21c9f2a7029faa5466f458aa2" class="m-doc-self">install</a>(</span><span class="m-doc-wrap">::PC pc) const</span></span>
+            </h3>
+            <p>Installs the splits on a field-split preconditioner.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">pc&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Preconditioner of type <code>PCFIELDSPLIT</code>.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td><code>PETSC_SUCCESS</code>, or the first PETSc error.</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>PETSc appends every split set in code, even one it already holds, so a preconditioner that holds these splits is left as is. A change of names, order, count or indices resets the blocks before installing the new configuration. Empty stored splits leave runtime-defined splits under PETSc control.</p>
+          </div></section>
         </section>
       </div>
     </div>
@@ -460,7 +521,7 @@
     </div>
   </div>
 </div>
-<script src="search-v2-27108c4bc94e.js"></script>
+<script src="search-v2-eeb63e0c3a5e.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">

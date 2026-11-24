@@ -77,9 +77,9 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md378">Mathematical Foundation</a></li>
-            <li><a href="#autotoc_md379">Features</a></li>
-            <li><a href="#autotoc_md380">Usage Examples</a></li>
+            <li><a href="#autotoc_md405">Mathematical Foundation</a></li>
+            <li><a href="#autotoc_md406">Features</a></li>
+            <li><a href="#autotoc_md407">Usage Examples</a></li>
             <li>
               Reference
               <ul>
@@ -89,7 +89,7 @@
             </li>
           </ul>
         </nav>
-<p>This file defines the GridFunction class, which represents functions defined on a finite element mesh by their degrees of freedom. Grid functions are the discrete representation of solutions in finite element analysis.</p><section id="autotoc_md378"><h2><a href="#autotoc_md378">Mathematical Foundation</a></h2><p>A grid function represents a function <svg class="m-math" style="width: 3.995em; height: 1.038em; vertical-align: -0.187em;" viewBox="0 -8.169366 38.356537 9.962629">
+<p>This file defines the GridFunction class, which represents functions defined on a finite element mesh by their degrees of freedom. Grid functions are the discrete representation of solutions in finite element analysis.</p><section id="autotoc_md405"><h2><a href="#autotoc_md405">Mathematical Foundation</a></h2><p>A grid function represents a function <svg class="m-math" style="width: 3.995em; height: 1.038em; vertical-align: -0.187em;" viewBox="0 -8.169366 38.356537 9.962629">
 <title>
 $ u_h \in V_h $
 </title>
@@ -179,7 +179,7 @@ $ N $
 <g id='eq5-page1'>
 <use x='0' y='0' xlink:href='#eq5-g0-78'/>
 </g>
-</svg> is the number of DOFs</li></ul></section><section id="autotoc_md379"><h2><a href="#autotoc_md379">Features</a></h2><ul><li><strong>Storage</strong>: Manages coefficient vector for FEM solutions</li><li><strong>Evaluation</strong>: Point-wise evaluation using basis function interpolation</li><li><strong>I/O</strong>: Export to visualization formats (XDMF, HDF5, MEDIT, etc.)</li><li><strong>Operations</strong>: Arithmetic operations, norms, projections</li><li><strong>Assignment</strong>: Can be set from functions or expressions</li></ul></section><section id="autotoc_md380"><h2><a href="#autotoc_md380">Usage Examples</a></h2><pre class="m-code"><span class="nc">P1</span><span class="w"> </span><span class="nf">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
+</svg> is the number of DOFs</li></ul></section><section id="autotoc_md406"><h2><a href="#autotoc_md406">Features</a></h2><ul><li><strong>Storage</strong>: Manages coefficient vector for FEM solutions</li><li><strong>Evaluation</strong>: Point-wise evaluation using basis function interpolation</li><li><strong>I/O</strong>: Export to visualization formats (XDMF, HDF5, MEDIT, etc.)</li><li><strong>Operations</strong>: Arithmetic operations, norms, projections</li><li><strong>Assignment</strong>: Can be set from functions or expressions</li></ul></section><section id="autotoc_md407"><h2><a href="#autotoc_md407">Usage Examples</a></h2><pre class="m-code"><span class="nc">P1</span><span class="w"> </span><span class="nf">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
 <span class="nc">GridFunction</span><span class="o">&lt;</span><span class="nc">P1</span><span class="o">&gt;</span><span class="w"> </span><span class="n">u</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span><span class="w">  </span><span class="c1">// Create grid function</span>
 
 <span class="c1">// Set from analytical function</span>
@@ -225,10 +225,10 @@ $ N $
             </dt>
             <dd>Base class for grid function objects.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;class FES&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_math_1_1_vector_3_01typename_01_fa803fb5fcea8b5a006f6ebef83f58418.html" class="m-doc">Rodin::Variational::GridFunction&lt;FES, Math::Vector&lt;typename FormLanguage::Traits&lt;FES&gt;::ScalarType&gt;&gt;</a>
+              <div class="m-doc-template">template&lt;class FES, class Data&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">Rodin::Variational::GridFunction</a>
             </dt>
-            <dd>Grid function storing its degrees of freedom in a dense Math::Vector over the space&#x27;s scalar type (the standard local backend).</dd>
+            <dd>Represents a grid function belonging to some finite element space.</dd>
           </dl>
         </section>
       </div>
@@ -269,7 +269,7 @@ $ N $
     </div>
   </div>
 </div>
-<script src="search-v2-27108c4bc94e.js"></script>
+<script src="search-v2-eeb63e0c3a5e.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">

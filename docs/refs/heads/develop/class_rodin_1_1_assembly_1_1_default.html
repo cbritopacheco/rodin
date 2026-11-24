@@ -85,7 +85,18 @@
             </tr>
           </tbody>
         </table>
-<p>Selects the default assembly implementation based on execution context. When OpenMP is available and enabled, defaults to parallel assembly; otherwise, defaults to sequential assembly.</p><table class="m-table m-fullwidth rodin-specializations"><thead><tr><th>Specialization</th><th>Description</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_assembly_1_1_default_3_01_context_1_1_local_00_01_context_1_1_local_01_4.html"><code>Context::Local, Context::Local</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;&gt;</span>
+<p>Selects the default assembly implementation based on execution context. When OpenMP is available and enabled, defaults to parallel assembly; otherwise, defaults to sequential assembly.</p><table class="m-table m-fullwidth rodin-specializations"><thead><tr><th>Specialization</th><th>Description</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_assembly_1_1_default_3_01_context_1_1_kokkos_3_01_host_00_01_backend_01_4_00_01_c1f69d1614124d9d77ed1ec9f1acb1a4.html"><code>Context::Kokkos&lt;Host, Backend&gt;, Context::Kokkos&lt;Host, Backend&gt;</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="no">Host</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Backend</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Default</span><span class="o">&lt;</span>
+<span class="w">  </span><span class="nc">Context</span><span class="o">::</span><span class="nc">Kokkos</span><span class="o">&lt;</span><span class="w"> </span><span class="no">Host</span><span class="p">,</span><span class="w"> </span><span class="nc">Backend</span><span class="w"> </span><span class="o">&gt;</span><span class="p">,</span>
+<span class="w">  </span><span class="nc">Context</span><span class="o">::</span><span class="nc">Kokkos</span><span class="o">&lt;</span><span class="w"> </span><span class="no">Host</span><span class="p">,</span><span class="w"> </span><span class="nc">Backend</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="p">;</span>
+</pre></details></td><td>Default assembly for trial and test spaces on Kokkos meshes.</td></tr><tr><td><a href="class_rodin_1_1_assembly_1_1_default_3_01_context_1_1_kokkos_3_01_host_00_01_backend_01_4_01_4.html"><code>Context::Kokkos&lt;Host, Backend&gt;</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="no">Host</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Backend</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Default</span><span class="o">&lt;</span>
+<span class="w">  </span><span class="nc">Context</span><span class="o">::</span><span class="nc">Kokkos</span><span class="o">&lt;</span><span class="w"> </span><span class="no">Host</span><span class="p">,</span><span class="w"> </span><span class="nc">Backend</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="p">;</span>
+</pre></details></td><td>Default assembly for a test space on a Kokkos mesh.</td></tr><tr><td><a href="class_rodin_1_1_assembly_1_1_default_3_01_context_1_1_local_00_01_context_1_1_local_01_4.html"><code>Context::Local, Context::Local</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;&gt;</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">Default</span><span class="o">&lt;</span>
 <span class="w">  </span><span class="nc">Context</span><span class="o">::</span><span class="nc">Local</span><span class="p">,</span>
 <span class="w">  </span><span class="nc">Context</span><span class="o">::</span><span class="nc">Local</span><span class="o">&gt;</span><span class="p">;</span>
@@ -138,7 +149,7 @@
     </div>
   </div>
 </div>
-<script src="search-v2-27108c4bc94e.js"></script>
+<script src="search-v2-eeb63e0c3a5e.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">

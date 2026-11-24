@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Rodin::Kokkos::Variational::LinearFormIntegrator class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
+  <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
+  <link rel="stylesheet" href="rodin-theme-1337632f765f.css" />
+  <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#18191c" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <a href="index.html" id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m">Rodin</a>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li>
+              <a href="pages.html">Pages</a>
+              <ol>
+                <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
+                <li><a href="gallery.html">Gallery</a></li>
+                <li><a href="guides-io.html">Input, output, and visualization</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
+                <li><a href="ci-index.html">Continuous integration</a></li>
+                <li><a href="notation-index.html">Notation</a></li>
+                <li><a href="credits-index.html">Credits</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="modules.html">Modules</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
+              </ol>
+            </li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="3">
+            <li><a href="annotated.html">Classes</a></li>
+            <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
+            <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span>Kokkos<span>›</span>Variational</div><h1>LinearFormIntegrator</h1><p class="rodin-reference-brief">Interface of linear form integrators evaluated on the device.</p><p class="rodin-reference-include">Defined in <a href="_kokkos_2_variational_2_linear_form_integrator_8h.html"><code>Rodin/Kokkos/Variational/LinearFormIntegrator.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Backend</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">LinearFormIntegrator</span><span class="p">;</span>
+</pre>
+        <table class="m-table m-fullwidth m-flat">
+          <thead>
+            <tr><th colspan="2">Template parameters</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="width: 1%">Backend</td>
+              <td>Kokkos backend of the mesh context.</td>
+            </tr>
+          </tbody>
+        </table>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#base-classes">Inherits from</a></li>
+                <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+<p>Assembly::Kokkos discovers this interface on the integrators of a linear form and asks each one for its contributions as device entries. An integration is a call to prepare(), which locates the entries of the cells, followed by fill(), which writes them. Preparation updates owned selection and layout state through a non-const integrator; fill() reads that prepared state without changing it.</p>
+        <figure class="rodin-inheritance"><figcaption>Direct inheritance by class family</figcaption><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" title="Variational::LinearFormIntegratorBase&lt; Real &gt;">Variational::LinearFormIntegratorBase</a></li></ul><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><div class="rodin-inheritance-current">LinearFormIntegrator</div></figure><section id="base-classes"><h2><a href="#base-classes">Inherits from</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Base class</th><th>Responsibility</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html"><code>Variational::LinearFormIntegratorBase&lt;…&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="n">Variational</span><span class="o">::</span><a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html"><span class="nc">LinearFormIntegratorBase</span></a><span class="o">&lt;</span><span class="w"> </span><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf"><span class="nc">Real</span></a><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Base class for linear form integrators.</td></tr></tbody></table></section><section id="rodin-inherited"><h2><a href="#rodin-inherited">Inherited interface</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Declared in</th><th>Members</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html"><code>Variational::LinearFormIntegratorBase</code></a></td><td><details><summary>14 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html#a15f41d8777010696597317c9083b7fc1"><code>copy()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html#ac76cd4c95442baa6361dfa9a0e9ba4a9"><code>getAttributes()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html#a3e2cc56a785ee8329807d7407fd76401"><code>getPolytope()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html#ac16226cca266745ac414468db3235c17"><code>getRegion()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html#a863fc883c7ede3985157c5897e777024"><code>getTestDOFIndices()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html#a3319ca4dc61343f68e2f5ac7721b00ba"><code>getTestFunction()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html#a58d2c9eed0f2d47891079548f1a6d7d9"><code>getType()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html#a8679f07ef842cba7327119d748501eab"><code>integrate()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html#acdd90257d932f2691107f8b8b036770e"><code>over()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html#a4f7512b0af46736dc5ed3d821a70f57c"><code>over()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html#ab51b392a98fc6705228e37ca8beac381"><code>over()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html#ab34dc093116842cc6f9fa80d9fd0a558"><code>ScalarType</code></a></li><li><a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html#ae4fa921a8e67b4666830521dee9d15c0"><code>setDOFIndices()</code></a> <span class="rodin-inheritance-qualifiers">protected</span></li><li><a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html#a22832b479c9c755896c4b79b8cf40730"><code>setPolytope()</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_form_language_1_1_base.html"><code>FormLanguage::Base</code></a></td><td><details><summary>3 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_form_language_1_1_base.html#a14046f65e816a05cc213985b9b649796"><code>getName()</code></a></li><li><a href="class_rodin_1_1_form_language_1_1_base.html#afbd6d41bc117ed42754035369b67dd56"><code>operator=()</code></a></li><li><a href="class_rodin_1_1_form_language_1_1_base.html#a9ae44b0112922779cf419ad36fe3aff4"><code>operator=()</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_integrator.html"><code>Variational::Integrator</code></a></td><td><details><summary>7 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_variational_1_1_integrator.html#a350edea67dfa070881b66ed34db4c27c"><code>getOrder()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_integrator.html#a4fbdb76097cac108edbb0f49e74bfa11"><code>getOrder()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_integrator.html#adea5ccfd57d26e8af9eb776fdf191b04"><code>OrderType</code></a></li><li><a href="class_rodin_1_1_variational_1_1_integrator.html#a779c5028c546fddc461a6d6b10dcb299"><code>setOrder()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_integrator.html#a4c4c2ddfd3edbd42d18604bd674784a2"><code>setOrder()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_integrator.html#a503b6171d3423d1daad5ac38b42b55bc"><code>setOrder()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_integrator.html#a1d1cfd8ffb84e947f82999c682b666a7"><code>Type</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_identifiable.html"><code>Identifiable</code></a></td><td><details><summary>2 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_identifiable.html#af6bc2718108274fb930c8d16aef9e17f"><code>getUUID()</code></a></li><li><a href="class_rodin_1_1_identifiable.html#a36b32316c418ee977c27453e7e37658d"><code>UUID</code></a></li></ul></details></td></tr></tbody></table></section>
+        <section id="pub-types">
+          <h2><a href="#pub-types">Public types</a></h2>
+          <dl class="m-doc">
+            <dt id="a6d2b4deb01cefcb987f502ec526afdd7">
+              using <a href="#a6d2b4deb01cefcb987f502ec526afdd7" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">::<wbr />Rodin::<wbr />Variational::<wbr />LinearFormIntegratorBase</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;
+            </dt>
+            <dd>Rodin linear integrator interface.</dd>
+            <dt id="a175d38764a967e2e19f4a110897a0871">
+              using <a href="#a175d38764a967e2e19f4a110897a0871" class="m-doc-self">ContextType</a> = <a href="class_rodin_1_1_context_1_1_kokkos.html" class="m-doc">::<wbr />Rodin::<wbr />Context::<wbr />Kokkos</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">::<wbr />Rodin::<wbr />Context::<wbr />Local</a>, Backend&gt;
+            </dt>
+            <dd>Mesh context.</dd>
+            <dt id="abd2285c284ad3cfde965ef4ecc1dab84">
+              using <a href="#abd2285c284ad3cfde965ef4ecc1dab84" class="m-doc-self">MemorySpace</a> = typename <a href="class_rodin_1_1_context_1_1_kokkos.html#a66e24e538ed3900abd12e5b97beada44" class="m-doc">ContextType::<wbr />MemorySpaceType</a>
+            </dt>
+            <dd>Memory space of the entries.</dd>
+            <dt id="a15db8417a1a58d4ed897774d97bf611d">
+              using <a href="#a15db8417a1a58d4ed897774d97bf611d" class="m-doc-self">EntriesType</a> = <a href="_integration_8h.html#a40d711e7520a0866de61de2f12ce2f35" class="m-doc">Entries</a>&lt;<a href="#abd2285c284ad3cfde965ef4ecc1dab84" class="m-doc">MemorySpace</a>&gt;
+            </dt>
+            <dd>Device entry type.</dd>
+          </dl>
+        </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a20e4fa00c3896c5ec616e1d98c5e2e34" class="m-doc">LinearFormIntegrator</a>(</span><span class="m-doc-wrap">const LinearFormIntegrator&amp; other) <span class="m-label m-flat m-info">defaulted</span></span>
+            </dt>
+            <dd>Copies the Rodin integrator and backend interface.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a901f421d8c498a9658c1e569a32dd82a" class="m-doc">LinearFormIntegrator</a>(</span><span class="m-doc-wrap">LinearFormIntegrator&amp;&amp; other) <span class="m-label m-flat m-info">defaulted</span></span>
+            </dt>
+            <dd>Moves the Rodin integrator and backend interface.</dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a9a4bc9e85722b515481afca5b9ded360" class="m-doc">getLayout</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="struct_rodin_1_1_kokkos_1_1_variational_1_1_layout.html" class="m-doc">Layout</a> <span class="m-label m-flat m-warning">pure virtual</span></span>
+            </dt>
+            <dd>Gets the arrangement of the entries.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a67349c05174e9fa5682b38a3191718f8" class="m-doc">prepare</a>(</span><span class="m-doc-wrap">) -&gt; size_t <span class="m-label m-flat m-warning">pure virtual</span></span>
+            </dt>
+            <dd>Locates the entries of every selected cell.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a60aacb2cf667e4185ad26be548c4426e" class="m-doc">getSpacing</a>(</span><span class="m-doc-wrap">) const -&gt; size_t <span class="m-label m-flat m-warning">pure virtual</span></span>
+            </dt>
+            <dd>Gets the spacing of the entries located by the last call to prepare().</dd>
+            <dt><a href="#a94ca739e3ee07ff455076ec8eab49259" class="m-doc">fill</a></dt><dd>Integrates the form over its region.<details class="rodin-declaration-disclosure"><summary>See declaration</summary><div class="rodin-overview-declaration">
+              <span class="m-doc-wrap-bumper">void <a href="#a94ca739e3ee07ff455076ec8eab49259" class="m-doc">fill</a>(</span><span class="m-doc-wrap">const <a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Kokkos::<wbr />View</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>*, <a href="#abd2285c284ad3cfde965ef4ecc1dab84" class="m-doc">MemorySpace</a>&gt;&amp; values,
+              size_t offset,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> sign,
+              bool accumulate,
+              const <a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Kokkos::<wbr />View</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>*, <a href="#abd2285c284ad3cfde965ef4ecc1dab84" class="m-doc">MemorySpace</a>&gt;&amp; indices) const <span class="m-label m-flat m-warning">pure virtual</span></span>
+            </div></details></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ac448842be45dec71effdbfa965af3c4f" class="m-doc">assemble</a>(</span><span class="m-doc-wrap">) -&gt; <a href="#a15db8417a1a58d4ed897774d97bf611d" class="m-doc">EntriesType</a></span>
+            </dt>
+            <dd>Integrates the form over its region into new entries.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a20e4fa00c3896c5ec616e1d98c5e2e34"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a20e4fa00c3896c5ec616e1d98c5e2e34" class="m-doc-self">LinearFormIntegrator</a>(</span><span class="m-doc-wrap">const LinearFormIntegrator&amp; other) <span class="m-label m-info">defaulted</span></span></span>
+            </h3>
+            <p>Copies the Rodin integrator and backend interface.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Source integrator.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a901f421d8c498a9658c1e569a32dd82a"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a901f421d8c498a9658c1e569a32dd82a" class="m-doc-self">LinearFormIntegrator</a>(</span><span class="m-doc-wrap">LinearFormIntegrator&amp;&amp; other) <span class="m-label m-info">defaulted</span></span></span>
+            </h3>
+            <p>Moves the Rodin integrator and backend interface.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Source integrator.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a9a4bc9e85722b515481afca5b9ded360"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="struct_rodin_1_1_kokkos_1_1_variational_1_1_layout.html" class="m-doc">Layout</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9a4bc9e85722b515481afca5b9ded360" class="m-doc-self">getLayout</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span></span></span>
+            </h3>
+            <p>Gets the arrangement of the entries.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Entry layout.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a67349c05174e9fa5682b38a3191718f8"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">size_t </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a67349c05174e9fa5682b38a3191718f8" class="m-doc-self">prepare</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">pure virtual</span></span></span>
+            </h3>
+            <p>Locates the entries of every selected cell.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Number of entries.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a60aacb2cf667e4185ad26be548c4426e"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">size_t </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a60aacb2cf667e4185ad26be548c4426e" class="m-doc-self">getSpacing</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span></span></span>
+            </h3>
+            <p>Gets the spacing of the entries located by the last call to prepare().</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Spacing given to getEntryPosition().</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a94ca739e3ee07ff455076ec8eab49259"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a94ca739e3ee07ff455076ec8eab49259" class="m-doc-self">fill</a>(</span><span class="m-doc-wrap">const <a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Kokkos::<wbr />View</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>*, <a href="#abd2285c284ad3cfde965ef4ecc1dab84" class="m-doc">MemorySpace</a>&gt;&amp; values,
+              size_t offset,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> sign,
+              bool accumulate,
+              const <a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Kokkos::<wbr />View</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>*, <a href="#abd2285c284ad3cfde965ef4ecc1dab84" class="m-doc">MemorySpace</a>&gt;&amp; indices) const <span class="m-label m-warning">pure virtual</span></span></span>
+            </h3>
+            <p>Integrates the form over its region.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">values</td>
+                  <td>Entry values, the entry of rank r being written at offset + getEntryPosition(r, count, getSpacing()).</td>
+                </tr>
+                <tr>
+                  <td>offset</td>
+                  <td>Position of the first entry.</td>
+                </tr>
+                <tr>
+                  <td>sign</td>
+                  <td>Factor of the contributions.</td>
+                </tr>
+                <tr>
+                  <td>accumulate</td>
+                  <td>Whether the contributions are added to the values instead of replacing them.</td>
+                </tr>
+                <tr>
+                  <td>indices</td>
+                  <td>Entry indices, test degrees of freedom, written as the values unless empty.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>The entries are the ones located by the last call to prepare().</p>
+          </div></section>
+          <section class="m-doc-details" id="ac448842be45dec71effdbfa965af3c4f"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a15db8417a1a58d4ed897774d97bf611d" class="m-doc">EntriesType</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac448842be45dec71effdbfa965af3c4f" class="m-doc-self">assemble</a>(</span><span class="m-doc-wrap">)</span></span>
+            </h3>
+            <p>Integrates the form over its region into new entries.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Local contributions, indexed by test degrees of freedom and arranged as by fill() at offset zero.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+        </section>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">&hellip;</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form>
+            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript.</noscript>
+          <div id="search-help" class="m-text m-dim m-text-center">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
+            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v2-eeb63e0c3a5e.js"></script>
+<script src="searchdata-v2.js" async="async"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+  <a class="rodin-ci-link" href="ci-index.html" aria-label="CI" title="CI"><span class="rodin-ci-mark" aria-hidden="true"></span><span class="rodin-ci-label">CI</span></a>
+</div>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>

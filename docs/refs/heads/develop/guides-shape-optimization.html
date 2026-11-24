@@ -623,8 +623,8 @@ $ \theta $
 <use x='0' y='0' xlink:href='#eq24-g0-18'/>
 </g>
 </svg>.</p><pre class="m-code"><span class="k">using</span><span class="w"> </span><span class="nc">Space</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">decltype</span><span class="p">(</span><span class="n">vectorFes</span><span class="p">);</span>
-<span class="k">using</span><span class="w"> </span><span class="n">Field</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">GridFunction</span><span class="o">&lt;</span><span class="nc">Space</span><span class="p">,</span><span class="w"> </span><span class="n">Math</span><span class="o">::</span><span class="nc">Vector</span><span class="o">&lt;</span><span class="nc">Real</span><span class="o">&gt;&gt;</span><span class="p">;</span>
-<span class="n">Hilbert</span><span class="o">::</span><span class="nc">H1a</span><span class="o">&lt;</span><span class="n">Field</span><span class="p">,</span><span class="w"> </span><span class="nc">Space</span><span class="o">&gt;</span><span class="w"> </span><span class="n">extension</span><span class="p">(</span><span class="n">vectorFes</span><span class="p">);</span>
+<span class="k">using</span><span class="w"> </span><span class="nc">Field</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">GridFunction</span><span class="o">&lt;</span><span class="nc">Space</span><span class="p">,</span><span class="w"> </span><span class="n">Math</span><span class="o">::</span><span class="nc">Vector</span><span class="o">&lt;</span><span class="nc">Real</span><span class="o">&gt;&gt;</span><span class="p">;</span>
+<span class="nc">Hilbert</span><span class="o">::</span><span class="nc">H1a</span><span class="o">&lt;</span><span class="nc">Field</span><span class="p">,</span><span class="w"> </span><span class="nc">Space</span><span class="o">&gt;</span><span class="w"> </span><span class="n">extension</span><span class="p">(</span><span class="n">vectorFes</span><span class="p">);</span>
 <span class="n">extension</span><span class="p">.</span><span class="n">setAlpha</span><span class="p">(</span><span class="n">alpha</span><span class="p">);</span>
 <span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="o">&amp;</span><span class="w"> </span><span class="n">test</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">extension</span><span class="p">.</span><span class="n">getTestFunction</span><span class="p">();</span>
 <span class="k">auto</span><span class="w"> </span><span class="n">descentLoad</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">BoundaryIntegral</span><span class="p">(</span>
@@ -868,7 +868,7 @@ $ \{\phi=0\} $
     </div>
   </div>
 </div>
-<script src="search-v2-27108c4bc94e.js"></script>
+<script src="search-v2-eeb63e0c3a5e.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">

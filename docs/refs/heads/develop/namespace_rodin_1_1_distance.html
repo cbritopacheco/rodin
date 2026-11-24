@@ -76,9 +76,9 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md568">Propagation from an attributed interface</a></li>
-            <li><a href="#autotoc_md569">Auxiliary Poisson fields</a></li>
-            <li><a href="#autotoc_md570">Algebraic normalization</a></li>
+            <li><a href="#autotoc_md595">Propagation from an attributed interface</a></li>
+            <li><a href="#autotoc_md596">Auxiliary Poisson fields</a></li>
+            <li><a href="#autotoc_md597">Algebraic normalization</a></li>
             <li>
               Reference
               <ul>
@@ -142,13 +142,13 @@ $\Gamma$
 <use x='239.120924' y='-10.184024' xlink:href='#eq2-g1-107'/>
 <use x='245.098531' y='-10.184024' xlink:href='#eq2-g3-58'/>
 </g>
-</svg></div><p>Rodin provides fast-marching propagation, auxiliary Poisson fields and algebraic normalization. Their outputs and boundary data have distinct meanings; select and check the construction required by the application.</p><section id="autotoc_md568"><h2><a href="#autotoc_md568">Propagation from an attributed interface</a></h2><p><a href="class_rodin_1_1_distance_1_1_eikonal.html" class="m-doc">Eikonal</a> wraps unit-speed fast marching. Facets carrying the configured interface attributes supply zero-time seed vertices. <code>solve()</code> propagates nonnegative arrival values. <code>sign()</code> subsequently negates values at vertices belonging to cells with the interior attributes. The interface should separate those regions consistently.</p><pre class="m-code"><span class="nc">P1</span><span class="w"> </span><span class="nf">space</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
+</svg></div><p>Rodin provides fast-marching propagation, auxiliary Poisson fields and algebraic normalization. Their outputs and boundary data have distinct meanings; select and check the construction required by the application.</p><section id="autotoc_md595"><h2><a href="#autotoc_md595">Propagation from an attributed interface</a></h2><p><a href="class_rodin_1_1_distance_1_1_eikonal.html" class="m-doc">Eikonal</a> wraps unit-speed fast marching. Facets carrying the configured interface attributes supply zero-time seed vertices. <code>solve()</code> propagates nonnegative arrival values. <code>sign()</code> subsequently negates values at vertices belonging to cells with the interior attributes. The interface should separate those regions consistently.</p><pre class="m-code"><span class="nc">P1</span><span class="w"> </span><span class="nf">space</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
 <span class="nc">GridFunction</span><span class="w"> </span><span class="nf">distance</span><span class="p">(</span><span class="n">space</span><span class="p">);</span>
 <span class="n">Distance</span><span class="o">::</span><span class="nc">Eikonal</span><span class="w"> </span><span class="nf">eikonal</span><span class="p">(</span><span class="n">distance</span><span class="p">);</span>
 <span class="n">eikonal</span><span class="p">.</span><span class="n">setInterface</span><span class="p">(</span><span class="n">interfaceAttr</span><span class="p">)</span>
 <span class="w">       </span><span class="p">.</span><span class="n">setInterior</span><span class="p">(</span><span class="n">interiorAttr</span><span class="p">)</span>
 <span class="w">       </span><span class="p">.</span><span class="n">solve</span><span class="p">()</span>
-<span class="w">       </span><span class="p">.</span><span class="n">sign</span><span class="p">();</span></pre><p>Prepare vertex adjacency and vertex/cell incidence before solving. The underlying local FMM uses scalar P1 storage. Its discrete arrival times approximate distance; geometry and stencil error require assessment. <a href="examples-eikonal-fmm.html" class="m-doc">Computing arrival times with fast marching</a> supplies an analytic point-source comparison.</p></section><section id="autotoc_md569"><h2><a href="#autotoc_md569">Auxiliary Poisson fields</a></h2><p><a href="class_rodin_1_1_distance_1_1_poisson.html" class="m-doc">Poisson</a> solves <svg class="m-math" style="width: 4.929em; height: 0.955em; vertical-align: -0.104em;" viewBox="0 -8.169366 47.315221 9.165637">
+<span class="w">       </span><span class="p">.</span><span class="n">sign</span><span class="p">();</span></pre><p>Prepare vertex adjacency and vertex/cell incidence before solving. The underlying local FMM uses scalar P1 storage. Its discrete arrival times approximate distance; geometry and stencil error require assessment. <a href="examples-eikonal-fmm.html" class="m-doc">Computing arrival times with fast marching</a> supplies an analytic point-source comparison.</p></section><section id="autotoc_md596"><h2><a href="#autotoc_md596">Auxiliary Poisson fields</a></h2><p><a href="class_rodin_1_1_distance_1_1_poisson.html" class="m-doc">Poisson</a> solves <svg class="m-math" style="width: 4.929em; height: 0.955em; vertical-align: -0.104em;" viewBox="0 -8.169366 47.315221 9.165637">
 <title>
 $-\Delta u=1$
 </title>
@@ -249,7 +249,7 @@ $\Gamma$
 </g>
 </svg></div><p>Thus the forcing is negative inside and positive outside. Remaining exterior boundary portions have the natural condition of the weak problem. These classes take a finite element space when invoked.</p><pre class="m-code"><span class="k">auto</span><span class="w"> </span><span class="n">positivePotential</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Distance</span><span class="o">::</span><span class="nc">Poisson</span><span class="p">()(</span><span class="n">space</span><span class="p">);</span>
 <span class="k">auto</span><span class="w"> </span><span class="n">negativePotential</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Distance</span><span class="o">::</span><span class="nc">SignedPoisson</span><span class="p">()(</span><span class="n">space</span><span class="p">);</span>
-<span class="k">auto</span><span class="w"> </span><span class="n">signedPotential</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Distance</span><span class="o">::</span><span class="nc">SignedPoisson</span><span class="p">()(</span><span class="n">interfaceAttr</span><span class="p">,</span><span class="w"> </span><span class="n">interiorAttr</span><span class="p">,</span><span class="w"> </span><span class="n">space</span><span class="p">);</span></pre><p>The attributed overload also accepts sets of attributes. The mesh must resolve and label the interface before the solve. The convenience operators use CG internally; application-level convergence diagnostics may require explicitly constructing the corresponding variational problem.</p></section><section id="autotoc_md570"><h2><a href="#autotoc_md570">Algebraic normalization</a></h2><p><a href="class_rodin_1_1_distance_1_1_rvachev.html" class="m-doc">Rvachev</a> and <a href="class_rodin_1_1_distance_1_1_spalding_tucker.html" class="m-doc">SpaldingTucker</a> evaluate, respectively,</p><div class="m-math"><svg style="width: 30.510em; height: 3.052em;" viewBox="47.824595 -29.301584 292.893798 29.301591">
+<span class="k">auto</span><span class="w"> </span><span class="n">signedPotential</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Distance</span><span class="o">::</span><span class="nc">SignedPoisson</span><span class="p">()(</span><span class="n">interfaceAttr</span><span class="p">,</span><span class="w"> </span><span class="n">interiorAttr</span><span class="p">,</span><span class="w"> </span><span class="n">space</span><span class="p">);</span></pre><p>The attributed overload also accepts sets of attributes. The mesh must resolve and label the interface before the solve. The convenience operators use CG internally; application-level convergence diagnostics may require explicitly constructing the corresponding variational problem.</p></section><section id="autotoc_md597"><h2><a href="#autotoc_md597">Algebraic normalization</a></h2><p><a href="class_rodin_1_1_distance_1_1_rvachev.html" class="m-doc">Rvachev</a> and <a href="class_rodin_1_1_distance_1_1_spalding_tucker.html" class="m-doc">SpaldingTucker</a> evaluate, respectively,</p><div class="m-math"><svg style="width: 30.510em; height: 3.052em;" viewBox="47.824595 -29.301584 292.893798 29.301591">
 <title>
 \[  d_R=\frac{u}{\sqrt{u^2+\lVert\nabla u\rVert^2}},\qquad
   d_{ST}=\frac{2u}{\lVert\nabla u\rVert+
@@ -386,7 +386,7 @@ $\Gamma$
     </div>
   </div>
 </div>
-<script src="search-v2-27108c4bc94e.js"></script>
+<script src="search-v2-eeb63e0c3a5e.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">

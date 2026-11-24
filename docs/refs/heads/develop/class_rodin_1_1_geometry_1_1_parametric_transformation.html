@@ -88,7 +88,7 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md93">Quadrature evaluation</a></li>
+            <li><a href="#autotoc_md96">Quadrature evaluation</a></li>
             <li>
               Reference
               <ul>
@@ -159,7 +159,7 @@ $\phi_i$
 <use x='234.246176' y='-15.032404' xlink:href='#eq3-g3-41'/>
 <use x='238.798502' y='-15.032404' xlink:href='#eq3-g2-58'/>
 </g>
-</svg></div><p>The same class covers affine P1 geometry and curved Pk geometry.</p><section id="autotoc_md93"><h2><a href="#autotoc_md93">Quadrature evaluation</a></h2><p>A bulk Jacobian evaluation borrows the element&#x27;s existing reference tabulation for the duration of the call, then contracts it with this transformation&#x27;s control points. It retains no table reference or new cache. Elements without tabulation use the pointwise interface. The scalar accumulation order is unchanged in either case.</p></section>
+</svg></div><p>The same class covers affine P1 geometry and curved Pk geometry.</p><section id="autotoc_md96"><h2><a href="#autotoc_md96">Quadrature evaluation</a></h2><p>A bulk Jacobian evaluation borrows the element&#x27;s existing reference tabulation for the duration of the call, then contracts it with this transformation&#x27;s control points. It retains no table reference or new cache. Elements without tabulation use the pointwise interface. The scalar accumulation order is unchanged in either case.</p></section>
         <figure class="rodin-inheritance"><figcaption>Direct inheritance by class family</figcaption><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_geometry_1_1_polytope_transformation.html" title="PolytopeTransformation">PolytopeTransformation</a></li></ul><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><div class="rodin-inheritance-current">ParametricTransformation</div></figure><section id="base-classes"><h2><a href="#base-classes">Inherits from</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Base class</th><th>Responsibility</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_geometry_1_1_polytope_transformation.html"><code>PolytopeTransformation</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><a href="class_rodin_1_1_geometry_1_1_polytope_transformation.html#a9bcabb196a423ae361db6c1dba37c537"><span class="nc">PolytopeTransformation</span></a>
 </pre></details></td><td>Abstract base class for polytope geometric transformations.</td></tr></tbody></table></section><section id="rodin-overrides"><h2><a href="#rodin-overrides">Overrides</a></h2><table class="m-table m-fullwidth"><thead><tr><th>Member</th><th>Base declaration</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_geometry_1_1_parametric_transformation.html#a259997ba4e371a7f4e8b7773a0407be0"><code>getDegree()</code></a></td><td><a href="class_rodin_1_1_geometry_1_1_polytope_transformation.html#a8f46c4da6ebe9fb52136d572cc570c0e">PolytopeTransformation::getDegree</a></td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_parametric_transformation.html#a234749f7714adf9ae27dd24805065f69"><code>getDegree()</code></a></td><td><a href="class_rodin_1_1_geometry_1_1_polytope_transformation.html#ac0903d45b063918df7e7f57a8dbfd53d">PolytopeTransformation::getDegree</a></td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_parametric_transformation.html#af35152a4a692e82c0acdc8f8c79c431a"><code>isFirstOrder()</code></a></td><td><a href="class_rodin_1_1_geometry_1_1_polytope_transformation.html#ab0e771407330b9447f9e14d011a8ba56">PolytopeTransformation::isFirstOrder</a></td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_parametric_transformation.html#a4e269e93cf8794c75ff9561be4c2f491"><code>getBounds()</code></a></td><td><a href="class_rodin_1_1_geometry_1_1_polytope_transformation.html#a5c3bd949d822c29e9ff87dda90029287">PolytopeTransformation::getBounds</a></td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_parametric_transformation.html#ae0895b6c6700d26833f04690f179e0aa"><code>transform()</code></a></td><td><a href="class_rodin_1_1_geometry_1_1_polytope_transformation.html#a1cebe38715f95dd2bcca579a27e476bb">PolytopeTransformation::transform</a></td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_parametric_transformation.html#a9c1f788c7113b46d6a1634af681e072f"><code>jacobian()</code></a></td><td><a href="class_rodin_1_1_geometry_1_1_polytope_transformation.html#a551bb1d2930d7c149e9f6f03cfe779b5">PolytopeTransformation::jacobian</a></td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_parametric_transformation.html#a5ea481b200a0e46625bd832e827248e0"><code>jacobian()</code></a></td><td><a href="class_rodin_1_1_geometry_1_1_polytope_transformation.html#ae6ad4bbc7a26a54c18646abf5e0a19c3">PolytopeTransformation::jacobian</a></td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_parametric_transformation.html#a363334091dd7fa73b2bd1f0600e5a062"><code>inverse()</code></a></td><td><a href="class_rodin_1_1_geometry_1_1_polytope_transformation.html#ae4ab54f76d7dc9b08ca13f3f1eb1f95d">PolytopeTransformation::inverse</a></td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_parametric_transformation.html#a7eb8fad3b975870d121030ed3392a7d3"><code>copy()</code></a></td><td><a href="class_rodin_1_1_geometry_1_1_polytope_transformation.html#aa8c6964e055701ed0dd3ab6b1a3eb71b">PolytopeTransformation::copy</a></td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_parametric_transformation.html#ae10340a695dd068151a58882853fbce7"><code>transform()</code></a></td><td><a href="class_rodin_1_1_geometry_1_1_polytope_transformation.html#ad42082e1b7dad263defd8a0762179eb7">PolytopeTransformation::transform</a></td></tr></tbody></table></section><section id="rodin-inherited"><h2><a href="#rodin-inherited">Inherited interface</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Declared in</th><th>Members</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_geometry_1_1_polytope_transformation.html"><code>PolytopeTransformation</code></a></td><td><details><summary>3 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_geometry_1_1_polytope_transformation.html#ab34e8cf9424c4ae3148faf26cc67bb2a"><code>getPhysicalDimension()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_polytope_transformation.html#a8cd9039394e63ae5b2a04accd2b6b2c8"><code>getReferenceDimension()</code></a></li><li><a href="class_rodin_1_1_geometry_1_1_polytope_transformation.html#a1e5f3d0b67a49dcd6fa19e1551dc9011"><code>operator=()</code></a></li></ul></details></td></tr></tbody></table></section>
         <section id="pub-types">
@@ -851,7 +851,7 @@ $J_{ji}(\hat x_q)=\sum_a P_{ja}\partial_i\phi_a(\hat x_q)$
                 </tr>
               </tbody>
             </table>
-<h4 id="autotoc_md94">Architecture</h4><p>Affine simplices retain the direct inverse. Other parametric maps require solving <svg class="m-math" style="width: 4.743em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 45.530193 11.955168">
+<h4 id="autotoc_md97">Architecture</h4><p>Affine simplices retain the direct inverse. Other parametric maps require solving <svg class="m-math" style="width: 4.743em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 45.530193 11.955168">
 <title>
 $F(r)=p$
 </title>
@@ -871,7 +871,7 @@ $F(r)=p$
 <use x='27.229569' y='0' xlink:href='#eq17-g1-61'/>
 <use x='39.65505' y='0' xlink:href='#eq17-g0-112'/>
 </g>
-</svg>; one affine correction is insufficient even for bilinear quadrilaterals. The map is assumed regular and locally injective. This operation inverts a supplied point; reference containment and mesh-wide element selection belong to the locator.</p><h4 id="autotoc_md95">Implementation</h4><p>Newton corrections solve <svg class="m-math" style="width: 7.641em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 73.352093 11.955168">
+</svg>; one affine correction is insufficient even for bilinear quadrilaterals. The map is assumed regular and locally injective. This operation inverts a supplied point; reference containment and mesh-wide element selection belong to the locator.</p><h4 id="autotoc_md98">Implementation</h4><p>Newton corrections solve <svg class="m-math" style="width: 7.641em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 73.352093 11.955168">
 <title>
 $J\delta=p-F(r)$
 </title>
@@ -1106,7 +1106,7 @@ $x_K(\hat x_q)=
     </div>
   </div>
 </div>
-<script src="search-v2-27108c4bc94e.js"></script>
+<script src="search-v2-eeb63e0c3a5e.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">

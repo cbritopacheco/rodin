@@ -78,8 +78,8 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md151">MFEM Format Structure</a></li>
-            <li><a href="#autotoc_md152">Usage Example</a></li>
+            <li><a href="#autotoc_md154">MFEM Format Structure</a></li>
+            <li><a href="#autotoc_md155">Usage Example</a></li>
             <li>
               Reference
               <ul>
@@ -91,10 +91,10 @@
             </li>
           </ul>
         </nav>
-<p>This loader reads mesh data from the MFEM mesh file format, a text-based format used by the MFEM library. It supports various element types and can handle 2D and 3D meshes.</p><section id="autotoc_md151"><h2><a href="#autotoc_md151">MFEM Format Structure</a></h2><p>The MFEM mesh format consists of several sections:</p><ul><li>Header: &quot;MFEM mesh v1.0&quot; with version information</li><li>dimension: Spatial dimension of the mesh</li><li>elements: Element connectivity and attributes</li><li>boundary: Boundary element information</li><li>vertices: Vertex coordinates</li></ul></section><section id="autotoc_md152"><h2><a href="#autotoc_md152">Usage Example</a></h2><pre class="m-code"><span class="nc">Mesh</span><span class="o">&lt;</span><span class="nc">Context</span><span class="o">::</span><span class="nc">Local</span><span class="o">&gt;</span><span class="w"> </span><span class="n">mesh</span><span class="p">;</span>
+<p>This loader reads mesh data from the MFEM mesh file format, a text-based format used by the MFEM library. It supports various element types and can handle 2D and 3D meshes.</p><section id="autotoc_md154"><h2><a href="#autotoc_md154">MFEM Format Structure</a></h2><p>The MFEM mesh format consists of several sections:</p><ul><li>Header: &quot;MFEM mesh v1.0&quot; with version information</li><li>dimension: Spatial dimension of the mesh</li><li>elements: Element connectivity and attributes</li><li>boundary: Boundary element information</li><li>vertices: Vertex coordinates</li></ul></section><section id="autotoc_md155"><h2><a href="#autotoc_md155">Usage Example</a></h2><pre class="m-code"><span class="nc">Mesh</span><span class="o">&lt;</span><span class="nc">Context</span><span class="o">::</span><span class="nc">Local</span><span class="o">&gt;</span><span class="w"> </span><span class="n">mesh</span><span class="p">;</span>
 <span class="nc">MeshLoader</span><span class="o">&lt;</span><span class="nc">FileFormat</span><span class="o">::</span><span class="no">MFEM</span><span class="p">,</span><span class="w"> </span><span class="nc">Context</span><span class="o">::</span><span class="nc">Local</span><span class="o">&gt;</span><span class="w"> </span><span class="n">loader</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
 <span class="n">loader</span><span class="p">.</span><span class="n">load</span><span class="p">(</span><span class="s">"mesh.mfem"</span><span class="p">);</span></pre><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_i_o_1_1_mesh_printer.html">MeshPrinter</a></p></aside></section>
-        <figure class="rodin-inheritance"><figcaption>Direct inheritance by class family</figcaption><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_i_o_1_1_mesh_loader_base.html" title="MeshLoaderBase&lt; Context::Local &gt;">MeshLoaderBase</a></li></ul><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><div class="rodin-inheritance-current">MeshLoader</div></figure><section id="base-classes"><h2><a href="#base-classes">Inherits from</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Base class</th><th>Responsibility</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_i_o_1_1_mesh_loader_base.html"><code>MeshLoaderBase&lt;Context::Local&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="nc">MeshLoaderBase</span><span class="o">&lt;</span><span class="w"> </span><span class="nc">Context</span><span class="o">::</span><a href="class_rodin_1_1_context_1_1_local.html"><span class="nc">Local</span></a><span class="w"> </span><span class="o">&gt;</span>
+        <figure class="rodin-inheritance"><figcaption>Direct inheritance by class family</figcaption><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_i_o_1_1_mesh_loader_base.html" title="MeshLoaderBase&lt; Context::Local &gt;">MeshLoaderBase</a></li></ul><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><div class="rodin-inheritance-current">MeshLoader</div></figure><section id="base-classes"><h2><a href="#base-classes">Inherits from</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Base class</th><th>Responsibility</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_i_o_1_1_mesh_loader_base.html"><code>MeshLoaderBase&lt;Context::Local&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><a href="class_rodin_1_1_i_o_1_1_mesh_loader_base.html#ac4b2329eaa90a59450bfcdeb60ce7946"><span class="nc">MeshLoaderBase</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">Context</span><span class="o">::</span><a href="class_rodin_1_1_context_1_1_local.html"><span class="nc">Local</span></a><span class="w"> </span><span class="o">&gt;</span>
 </pre></details></td><td>Base class for loading meshes from files or streams.</td></tr></tbody></table></section><section id="rodin-overrides"><h2><a href="#rodin-overrides">Overrides</a></h2><table class="m-table m-fullwidth"><thead><tr><th>Member</th><th>Base declaration</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_i_o_1_1_mesh_loader_3_01_i_o_1_1_file_format_1_1_m_f_e_m_00_01_context_1_1_local_01_4.html#a69a36ae58eeb6d0819e38eea87d59767"><code>load()</code></a></td><td><a href="class_rodin_1_1_i_o_1_1_loader.html#a4a361edaafdca57b230ccf5f8bc6479a">Loader::load</a></td></tr></tbody></table></section><section id="rodin-inherited"><h2><a href="#rodin-inherited">Inherited interface</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Declared in</th><th>Members</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_i_o_1_1_mesh_loader_base.html"><code>MeshLoaderBase</code></a></td><td><details><summary>1 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_i_o_1_1_mesh_loader_base.html#a6c83de099561717325b0b3a729cfeb1f"><code>getObject()</code></a> <span class="rodin-inheritance-qualifiers">protected</span></li></ul></details></td></tr></tbody></table></section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
@@ -107,8 +107,8 @@
               using <a href="#a0aa213e4c6f5333c6f41f8e57fd9ac5c" class="m-doc-self">ObjectType</a> = <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="#a4a1c0b519f1e883b370f4fd6c3b76ee5" class="m-doc">ContextType</a>&gt;
             </dt>
             <dd>Mesh type being loaded.</dd>
-            <dt id="a0f6063fe81811604830400d335765674">
-              using <a href="#a0f6063fe81811604830400d335765674" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_i_o_1_1_mesh_printer_base.html" class="m-doc">MeshPrinterBase</a>&lt;<a href="#a4a1c0b519f1e883b370f4fd6c3b76ee5" class="m-doc">ContextType</a>&gt;
+            <dt id="a43d336dce70d5f6c43a0a94e9b7a9a29">
+              using <a href="#a43d336dce70d5f6c43a0a94e9b7a9a29" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_i_o_1_1_mesh_loader_base.html#ac4b2329eaa90a59450bfcdeb60ce7946" class="m-doc">MeshLoaderBase</a>&lt;<a href="#a4a1c0b519f1e883b370f4fd6c3b76ee5" class="m-doc">ContextType</a>&gt;
             </dt>
             <dd>Parent class type.</dd>
           </dl>
@@ -288,7 +288,7 @@
     </div>
   </div>
 </div>
-<script src="search-v2-27108c4bc94e.js"></script>
+<script src="search-v2-eeb63e0c3a5e.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">

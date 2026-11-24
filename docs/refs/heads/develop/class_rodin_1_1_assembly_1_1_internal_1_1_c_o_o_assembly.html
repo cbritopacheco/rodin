@@ -1,0 +1,2366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Rodin::Assembly::Internal::COOAssembly class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
+  <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
+  <link rel="stylesheet" href="rodin-theme-1337632f765f.css" />
+  <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#18191c" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <a href="index.html" id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m">Rodin</a>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li>
+              <a href="pages.html">Pages</a>
+              <ol>
+                <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
+                <li><a href="gallery.html">Gallery</a></li>
+                <li><a href="guides-io.html">Input, output, and visualization</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
+                <li><a href="ci-index.html">Continuous integration</a></li>
+                <li><a href="notation-index.html">Notation</a></li>
+                <li><a href="credits-index.html">Credits</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="modules.html">Modules</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
+              </ol>
+            </li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="3">
+            <li><a href="annotated.html">Classes</a></li>
+            <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
+            <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_assembly.html">Assembly</a><span>›</span>Internal</div><h1>COOAssembly</h1><p class="rodin-reference-brief">Device system assembled into a coordinate list for PETSc.</p><p class="rodin-reference-include">Defined in <a href="_c_o_o_assembly_8h.html"><code>Rodin/PETSc/Kokkos/Assembly/COOAssembly.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Backend</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">COOAssembly</span><span class="p">;</span>
+</pre>
+        <table class="m-table m-fullwidth m-flat">
+          <thead>
+            <tr><th colspan="2">Template parameters</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="width: 1%">Backend</td>
+              <td>Kokkos backend of the mesh context.</td>
+            </tr>
+          </tbody>
+        </table>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#pub-static-attribs">Public static variables</a></li>
+                <li><a href="#pub-static-methods">Public static functions</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+<p>The integrators write their entries into a coordinate list in device memory. The fixed degrees of freedom are eliminated and the identified ones are expanded on their masters on the device, and the values summed per distinct coordinate are handed to MatSetValuesCOO. The system may be distributed over MPI processes.</p>
+        <section id="pub-types">
+          <h2><a href="#pub-types">Public types</a></h2>
+          <dl class="m-doc">
+            <dt>
+              struct <a href="struct_rodin_1_1_assembly_1_1_internal_1_1_c_o_o_assembly_1_1_contributions.html" class="m-doc">Contributions</a>
+            </dt>
+            <dd>Contributions to the right-hand side reserved in the list.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Indices&gt;</div>
+              struct <a href="struct_rodin_1_1_assembly_1_1_internal_1_1_c_o_o_assembly_1_1_shift.html" class="m-doc">Shift</a>
+            </dt>
+            <dd>Adds the block offsets to the coordinates of entry e.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Indices&gt;</div>
+              struct <a href="struct_rodin_1_1_assembly_1_1_internal_1_1_c_o_o_assembly_1_1_diagonal_list.html" class="m-doc">DiagonalList</a>
+            </dt>
+            <dd>Lists the diagonal entry i after the given offset.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Fixed, class Owned, class Scalars&gt;</div>
+              struct <a href="struct_rodin_1_1_assembly_1_1_internal_1_1_c_o_o_assembly_1_1_diagonal_fill.html" class="m-doc">DiagonalFill</a>
+            </dt>
+            <dd>Writes the diagonal value of row i, one when it is fixed.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Indices, class Fixed&gt;</div>
+              struct <a href="struct_rodin_1_1_assembly_1_1_internal_1_1_c_o_o_assembly_1_1_eliminated_count.html" class="m-doc">EliminatedCount</a>
+            </dt>
+            <dd>Counts entry e when its value moves to the right-hand side.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Indices, class Fixed, class Values, class Scalars&gt;</div>
+              struct <a href="struct_rodin_1_1_assembly_1_1_internal_1_1_c_o_o_assembly_1_1_elimination.html" class="m-doc">Elimination</a>
+            </dt>
+            <dd>Clears entry e when its row is fixed and lists its value when its column alone is fixed, at the scanned position.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Indices, class Fixed&gt;</div>
+              struct <a href="struct_rodin_1_1_assembly_1_1_internal_1_1_c_o_o_assembly_1_1_entry_selection.html" class="m-doc">EntrySelection</a>
+            </dt>
+            <dd>Lists the entries of a free row and a fixed column, or those of a fixed row, at their scanned positions.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Indices, class Values, class Scalars&gt;</div>
+              struct <a href="struct_rodin_1_1_assembly_1_1_internal_1_1_c_o_o_assembly_1_1_moved_elimination.html" class="m-doc">MovedElimination</a>
+            </dt>
+            <dd>Moves the value of a listed entry of a free row and a fixed column to the right-hand side.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Indices, class Results&gt;</div>
+              struct <a href="struct_rodin_1_1_assembly_1_1_internal_1_1_c_o_o_assembly_1_1_entry_coordinates.html" class="m-doc">EntryCoordinates</a>
+            </dt>
+            <dd>Copies the coordinates of a listed entry.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Scalars&gt;</div>
+              struct <a href="struct_rodin_1_1_assembly_1_1_internal_1_1_c_o_o_assembly_1_1_cleared_elimination.html" class="m-doc">ClearedElimination</a>
+            </dt>
+            <dd>Clears a listed entry of a fixed row.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Indices, class Values, class Fixed&gt;</div>
+              struct <a href="struct_rodin_1_1_assembly_1_1_internal_1_1_c_o_o_assembly_1_1_vector_count.html" class="m-doc">VectorCount</a>
+            </dt>
+            <dd>Counts the contributions of entry e of a linear integrator.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Indices, class Values, class Fixed&gt;</div>
+              struct <a href="struct_rodin_1_1_assembly_1_1_internal_1_1_c_o_o_assembly_1_1_vector_list.html" class="m-doc">VectorList</a>
+            </dt>
+            <dd>Lists the contributions of entry e of a linear integrator at the scanned position.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Fixed, class Values, class Owned, class RHS&gt;</div>
+              struct <a href="struct_rodin_1_1_assembly_1_1_internal_1_1_c_o_o_assembly_1_1_fixed_imposition.html" class="m-doc">FixedImposition</a>
+            </dt>
+            <dd>Writes the fixed value of row i when it is fixed.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Indices&gt;</div>
+              struct <a href="struct_rodin_1_1_assembly_1_1_internal_1_1_c_o_o_assembly_1_1_entry_rows.html" class="m-doc">EntryRows</a>
+            </dt>
+            <dd>Writes the row of entry e of a linear integrator.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Indices&gt;</div>
+              struct <a href="struct_rodin_1_1_assembly_1_1_internal_1_1_c_o_o_assembly_1_1_sequence.html" class="m-doc">Sequence</a>
+            </dt>
+            <dd>Numbers entry i of a dense vector.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Indices, class Scalars&gt;</div>
+              struct <a href="struct_rodin_1_1_assembly_1_1_internal_1_1_c_o_o_assembly_1_1_expanded_count.html" class="m-doc">ExpandedCount</a>
+            </dt>
+            <dd>Counts the contributions of entry e expanded on the masters, and the affine values it lifts.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Indices, class Results, class Scalars&gt;</div>
+              struct <a href="struct_rodin_1_1_assembly_1_1_internal_1_1_c_o_o_assembly_1_1_expansion.html" class="m-doc">Expansion</a>
+            </dt>
+            <dd>Expands entry e on the masters and lists the affine values it lifts, at the scanned positions.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Indices, class Previous&gt;</div>
+              struct <a href="struct_rodin_1_1_assembly_1_1_internal_1_1_c_o_o_assembly_1_1_difference_count.html" class="m-doc">DifferenceCount</a>
+            </dt>
+            <dd>Counts position i when two index lists differ there.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class From, class To&gt;</div>
+              struct <a href="struct_rodin_1_1_assembly_1_1_internal_1_1_c_o_o_assembly_1_1_coordinate_copy.html" class="m-doc">CoordinateCopy</a>
+            </dt>
+            <dd>Copies coordinate i into another index type.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Indices, class Previous&gt;</div>
+              struct <a href="struct_rodin_1_1_assembly_1_1_internal_1_1_c_o_o_assembly_1_1_change_count.html" class="m-doc">ChangeCount</a>
+            </dt>
+            <dd>Counts coordinate e when it differs between two patterns.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_assembly_1_1_internal_1_1_c_o_o_assembly_1_1_pattern_key.html" class="m-doc">PatternKey</a>
+            </dt>
+            <dd>Coordinate followed by the original contribution rank.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_assembly_1_1_internal_1_1_c_o_o_assembly_1_1_pattern_less.html" class="m-doc">PatternLess</a>
+            </dt>
+            <dd>Total order, including a deterministic order of duplicates.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Indices&gt;</div>
+              struct <a href="struct_rodin_1_1_assembly_1_1_internal_1_1_c_o_o_assembly_1_1_row_bounds.html" class="m-doc">RowBounds</a>
+            </dt>
+            <dd>Finds the smallest and the largest row coordinates.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Indices&gt;</div>
+              struct <a href="struct_rodin_1_1_assembly_1_1_internal_1_1_c_o_o_assembly_1_1_row_count.html" class="m-doc">RowCount</a>
+            </dt>
+            <dd>Counts the coordinates whose row lies in a range.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Indices, class Order&gt;</div>
+              struct <a href="struct_rodin_1_1_assembly_1_1_internal_1_1_c_o_o_assembly_1_1_pattern_keys.html" class="m-doc">PatternKeys</a>
+            </dt>
+            <dd>Lists, in rank order, the sort key and the index of the coordinates of a segment whose row lies in a range.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Indices, class Order&gt;</div>
+              struct <a href="struct_rodin_1_1_assembly_1_1_internal_1_1_c_o_o_assembly_1_1_distinct_head.html" class="m-doc">DistinctHead</a>
+            </dt>
+            <dd>Whether the sorted coordinate i differs from the previous one.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Indices, class Order&gt;</div>
+              struct <a href="struct_rodin_1_1_assembly_1_1_internal_1_1_c_o_o_assembly_1_1_distinct_count.html" class="m-doc">DistinctCount</a>
+            </dt>
+            <dd>Counts the sorted coordinate i when it starts a distinct one.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Indices, class Order&gt;</div>
+              struct <a href="struct_rodin_1_1_assembly_1_1_internal_1_1_c_o_o_assembly_1_1_distinct_start_list.html" class="m-doc">DistinctStartList</a>
+            </dt>
+            <dd>Writes the sorted coordinate i at the scanned position when it starts a distinct one.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Indices, class Order, class Coordinates&gt;</div>
+              struct <a href="struct_rodin_1_1_assembly_1_1_internal_1_1_c_o_o_assembly_1_1_distinct_list.html" class="m-doc">DistinctList</a>
+            </dt>
+            <dd>Lists the distinct coordinate u in the PETSc index type.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Indices, class Order, class Coordinates&gt;</div>
+              struct <a href="struct_rodin_1_1_assembly_1_1_internal_1_1_c_o_o_assembly_1_1_restoration.html" class="m-doc">Restoration</a>
+            </dt>
+            <dd>Writes the distinct coordinate u at its entries of the list.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Order, class Indices, class Scalars&gt;</div>
+              struct <a href="struct_rodin_1_1_assembly_1_1_internal_1_1_c_o_o_assembly_1_1_merge.html" class="m-doc">Merge</a>
+            </dt>
+            <dd>Sums the values of the distinct coordinate u.</dd>
+            <dt id="a175d38764a967e2e19f4a110897a0871">
+              using <a href="#a175d38764a967e2e19f4a110897a0871" class="m-doc-self">ContextType</a> = <a href="class_rodin_1_1_context_1_1_kokkos.html" class="m-doc">::<wbr />Rodin::<wbr />Context::<wbr />Kokkos</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">::<wbr />Rodin::<wbr />Context::<wbr />Local</a>, Backend&gt;
+            </dt>
+            <dd>Mesh context.</dd>
+            <dt id="ab78f7cd66f68a9ce08c3ca5a42e12a90">
+              using <a href="#ab78f7cd66f68a9ce08c3ca5a42e12a90" class="m-doc-self">ExecutionSpace</a> = typename <a href="class_rodin_1_1_context_1_1_kokkos.html#accc6e672f89037295fb03a01924c9392" class="m-doc">ContextType::<wbr />ExecutionSpaceType</a>
+            </dt>
+            <dd>Execution space of the kernels.</dd>
+            <dt>
+              using <a href="#a5dcc9838274fe2950efb87d47c1689fa" class="m-doc">Range</a> = ::Kokkos::RangePolicy&lt;<a href="#ab78f7cd66f68a9ce08c3ca5a42e12a90" class="m-doc">ExecutionSpace</a>, ::Kokkos::IndexType&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&gt;
+            </dt>
+            <dd>Range of the kernels, indexed by Index.</dd>
+            <dt id="abd2285c284ad3cfde965ef4ecc1dab84">
+              using <a href="#abd2285c284ad3cfde965ef4ecc1dab84" class="m-doc-self">MemorySpace</a> = typename <a href="class_rodin_1_1_context_1_1_kokkos.html#a66e24e538ed3900abd12e5b97beada44" class="m-doc">ContextType::<wbr />MemorySpaceType</a>
+            </dt>
+            <dd>Memory space of the system.</dd>
+            <dt id="a95217f88c86703f54044894c73b2fb88">
+              using <a href="#a95217f88c86703f54044894c73b2fb88" class="m-doc-self">CacheType</a> = <a href="struct_rodin_1_1_assembly_1_1_internal_1_1_c_o_o_cache.html" class="m-doc">COOCache</a>&lt;<a href="#abd2285c284ad3cfde965ef4ecc1dab84" class="m-doc">MemorySpace</a>&gt;
+            </dt>
+            <dd>Cache type.</dd>
+            <dt id="a3caeca5dbbe42914a885b665dd0fe2d0">
+              using <a href="#a3caeca5dbbe42914a885b665dd0fe2d0" class="m-doc-self">CoefficientCache</a> = <a href="class_rodin_1_1_p_e_t_sc_1_1_internal_1_1_coefficient_cache.html" class="m-doc">::<wbr />Rodin::<wbr />PETSc::<wbr />Internal::<wbr />CoefficientCache</a>&lt;<a href="#ab78f7cd66f68a9ce08c3ca5a42e12a90" class="m-doc">ExecutionSpace</a>&gt;
+            </dt>
+            <dd>Storage for coefficient gathers retained by the assembler.</dd>
+            <dt id="a79a4e1adebb56378e051a741b32d3b0f">
+              using <a href="#a79a4e1adebb56378e051a741b32d3b0f" class="m-doc-self">ConstraintsType</a> = <a href="class_rodin_1_1_assembly_1_1_constraints.html" class="m-doc">Constraints</a>&lt;Backend&gt;
+            </dt>
+            <dd>Constraints of the system.</dd>
+            <dt id="adf753304c7d4b88f03a8325e41feccac">
+              using <a href="#adf753304c7d4b88f03a8325e41feccac" class="m-doc-self">Expansions</a> = typename <a href="struct_rodin_1_1_assembly_1_1_constraints_1_1_expansions.html" class="m-doc">ConstraintsType::<wbr />Expansions</a>
+            </dt>
+            <dd>Expansions of the degrees of freedom on their masters.</dd>
+            <dt id="a75859e8d1868b6bf1ae3e5d3521eb090">
+              using <a href="#a75859e8d1868b6bf1ae3e5d3521eb090" class="m-doc-self">ReferenceType</a> = <a href="class_rodin_1_1_assembly_1_1_internal_1_1_system_assembly.html" class="m-doc">SystemAssembly</a>&lt;Backend&gt;
+            </dt>
+            <dd>Device system whose grouping sums the right-hand side.</dd>
+            <dt id="a8fc3f8210ce3551dd77ca767333bd51d">
+              using <a href="#a8fc3f8210ce3551dd77ca767333bd51d" class="m-doc-self">Sizes</a> = typename <a href="struct_rodin_1_1_assembly_1_1_internal_1_1_system_assembly_1_1_sizes.html" class="m-doc">ReferenceType::<wbr />Sizes</a>
+            </dt>
+            <dd>Numbers of expanded contributions.</dd>
+            <dt id="a95e14ef6282e4406e54cf01e17ec497c">
+              using <a href="#a95e14ef6282e4406e54cf01e17ec497c" class="m-doc-self">BilinearType</a> = <a href="class_rodin_1_1_kokkos_1_1_variational_1_1_bilinear_form_integrator.html" class="m-doc">::<wbr />Rodin::<wbr />Kokkos::<wbr />Variational::<wbr />BilinearFormIntegrator</a>&lt;Backend&gt;
+            </dt>
+            <dd>Device bilinear integrator.</dd>
+            <dt id="ab421a74fc0347581cc884cda63728f39">
+              using <a href="#ab421a74fc0347581cc884cda63728f39" class="m-doc-self">LinearType</a> = <a href="class_rodin_1_1_kokkos_1_1_variational_1_1_linear_form_integrator.html" class="m-doc">::<wbr />Rodin::<wbr />Kokkos::<wbr />Variational::<wbr />LinearFormIntegrator</a>&lt;Backend&gt;
+            </dt>
+            <dd>Device linear integrator.</dd>
+          </dl>
+        </section>
+        <section id="pub-static-attribs">
+          <h2><a href="#pub-static-attribs">Public static variables</a></h2>
+          <dl class="m-doc">
+            <dt>
+              static size_t <a href="#a146a578510aef370bae9bf8bfb879def" class="m-doc">SortBlockSize</a> <span class="m-label m-flat m-primary">constexpr</span>
+            </dt>
+            <dd>Largest number of coordinates that sortPattern() sorts at once.</dd>
+          </dl>
+        </section>
+        <section id="pub-static-methods">
+          <h2><a href="#pub-static-methods">Public static functions</a></h2>
+          <dl class="m-doc">
+            <dt><a href="#a1b77a4f7c1a2010a48f8a4da0e6c7f02" class="m-doc">shift</a></dt><dd>Adds the block offsets to the coordinates of a segment.<details class="rodin-declaration-disclosure"><summary>See declaration</summary><div class="rodin-overview-declaration">
+              <div class="m-doc-template">template&lt;class Indices&gt;</div>
+              <span class="m-doc-wrap-bumper">static void <a href="#a1b77a4f7c1a2010a48f8a4da0e6c7f02" class="m-doc">shift</a>(</span><span class="m-doc-wrap">const <a href="#ab78f7cd66f68a9ce08c3ca5a42e12a90" class="m-doc">ExecutionSpace</a>&amp; execution,
+              const Indices&amp; rows,
+              const Indices&amp; cols,
+              size_t offset,
+              size_t count,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> row,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> col)</span>
+            </div></details></dd>
+            <dt><a href="#aafdc625cd1c0fce918a3d254f2e5dd4a" class="m-doc">listDiagonal</a></dt><dd>Lists every diagonal entry.<details class="rodin-declaration-disclosure"><summary>See declaration</summary><div class="rodin-overview-declaration">
+              <div class="m-doc-template">template&lt;class Indices&gt;</div>
+              <span class="m-doc-wrap-bumper">static void <a href="#aafdc625cd1c0fce918a3d254f2e5dd4a" class="m-doc">listDiagonal</a>(</span><span class="m-doc-wrap">const <a href="#ab78f7cd66f68a9ce08c3ca5a42e12a90" class="m-doc">ExecutionSpace</a>&amp; execution,
+              size_t offset,
+              size_t count,
+              const Indices&amp; rows,
+              const Indices&amp; cols)</span>
+            </div></details></dd>
+            <dt><a href="#ac7bacec7ddcb4d4fd259861f0f85e45f" class="m-doc">fillDiagonal</a></dt><dd>Writes the diagonal values, one on fixed rows.<details class="rodin-declaration-disclosure"><summary>See declaration</summary><div class="rodin-overview-declaration">
+              <div class="m-doc-template">template&lt;class Fixed, class Owned, class Scalars&gt;</div>
+              <span class="m-doc-wrap-bumper">static void <a href="#ac7bacec7ddcb4d4fd259861f0f85e45f" class="m-doc">fillDiagonal</a>(</span><span class="m-doc-wrap">const <a href="#ab78f7cd66f68a9ce08c3ca5a42e12a90" class="m-doc">ExecutionSpace</a>&amp; execution,
+              size_t offset,
+              size_t count,
+              bool hasFixed,
+              const Fixed&amp; fixed,
+              const Owned&amp; owned,
+              const Scalars&amp; coo)</span>
+            </div></details></dd>
+            <dt><a href="#a5466f21b636fa1d9adc0ed50d445e95f" class="m-doc">countEliminated</a></dt><dd>Counts the matrix values moved to the right-hand side by the columns of the fixed degrees of freedom.<details class="rodin-declaration-disclosure"><summary>See declaration</summary><div class="rodin-overview-declaration">
+              <div class="m-doc-template">template&lt;class Indices, class Fixed&gt;</div>
+              <span class="m-doc-wrap-bumper">static auto <a href="#a5466f21b636fa1d9adc0ed50d445e95f" class="m-doc">countEliminated</a>(</span><span class="m-doc-wrap">const <a href="#ab78f7cd66f68a9ce08c3ca5a42e12a90" class="m-doc">ExecutionSpace</a>&amp; execution,
+              size_t count,
+              const Indices&amp; rows,
+              const Indices&amp; cols,
+              const Fixed&amp; fixed) -&gt; size_t</span>
+            </div></details></dd>
+            <dt><a href="#a66aa2039b1a0d64f663d0fce8abef1cc" class="m-doc">eliminate</a></dt><dd>Clears the rows of the fixed degrees of freedom and lists the values of their columns moved to the right-hand side.<details class="rodin-declaration-disclosure"><summary>See declaration</summary><div class="rodin-overview-declaration">
+              <div class="m-doc-template">template&lt;class Indices, class Fixed, class Values, class Scalars&gt;</div>
+              <span class="m-doc-wrap-bumper">static void <a href="#a66aa2039b1a0d64f663d0fce8abef1cc" class="m-doc">eliminate</a>(</span><span class="m-doc-wrap">const <a href="#ab78f7cd66f68a9ce08c3ca5a42e12a90" class="m-doc">ExecutionSpace</a>&amp; execution,
+              size_t count,
+              const Indices&amp; rows,
+              const Indices&amp; cols,
+              const Fixed&amp; fixed,
+              const Values&amp; values,
+              const Scalars&amp; coo,
+              const <a href="struct_rodin_1_1_assembly_1_1_internal_1_1_c_o_o_assembly_1_1_contributions.html" class="m-doc">Contributions</a>&amp; res)</span>
+            </div></details></dd>
+            <dt><a href="#a0fe71084a014625b0101cc2b414a830d" class="m-doc">countEntry</a></dt><dd>Number of contributions of an entry of a linear integrator.<details class="rodin-declaration-disclosure"><summary>See declaration</summary><div class="rodin-overview-declaration">
+              <div class="m-doc-template">template&lt;class Indices, class Values, class Fixed&gt;</div>
+              <span class="m-doc-wrap-bumper">static auto <a href="#a0fe71084a014625b0101cc2b414a830d" class="m-doc">countEntry</a>(</span><span class="m-doc-wrap">size_t e,
+              const Indices&amp; indices,
+              const Values&amp; values,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> row,
+              bool hasFixed,
+              const Fixed&amp; fixed,
+              const <a href="#adf753304c7d4b88f03a8325e41feccac" class="m-doc">Expansions</a>&amp; x,
+              bool expanded) -&gt; size_t</span>
+            </div></details></dd>
+            <dt><a href="#a9ba58241ee54fc64d76c954050e28520" class="m-doc">count</a></dt><dd>Counts the contributions of the entries of a linear integrator to the right-hand side.<details class="rodin-declaration-disclosure"><summary>See declaration</summary><div class="rodin-overview-declaration">
+              <div class="m-doc-template">template&lt;class Indices, class Values, class Fixed&gt;</div>
+              <span class="m-doc-wrap-bumper">static auto <a href="#a9ba58241ee54fc64d76c954050e28520" class="m-doc">count</a>(</span><span class="m-doc-wrap">const <a href="#ab78f7cd66f68a9ce08c3ca5a42e12a90" class="m-doc">ExecutionSpace</a>&amp; execution,
+              size_t begin,
+              size_t count,
+              const Indices&amp; indices,
+              const Values&amp; values,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> row,
+              bool hasFixed,
+              const Fixed&amp; fixed,
+              const <a href="#adf753304c7d4b88f03a8325e41feccac" class="m-doc">Expansions</a>&amp; x,
+              bool expanded) -&gt; size_t</span>
+            </div></details></dd>
+            <dt><a href="#a3ac3e5910c5b81ed73567f2671e8fe47" class="m-doc">list</a></dt><dd>Lists the nonzero entries of a linear integrator as contributions to the right-hand side.<details class="rodin-declaration-disclosure"><summary>See declaration</summary><div class="rodin-overview-declaration">
+              <div class="m-doc-template">template&lt;class Indices, class Values, class Fixed&gt;</div>
+              <span class="m-doc-wrap-bumper">static void <a href="#a3ac3e5910c5b81ed73567f2671e8fe47" class="m-doc">list</a>(</span><span class="m-doc-wrap">const <a href="#ab78f7cd66f68a9ce08c3ca5a42e12a90" class="m-doc">ExecutionSpace</a>&amp; execution,
+              size_t begin,
+              size_t count,
+              const Indices&amp; indices,
+              const Values&amp; values,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> row,
+              bool hasFixed,
+              const Fixed&amp; fixed,
+              const <a href="#adf753304c7d4b88f03a8325e41feccac" class="m-doc">Expansions</a>&amp; x,
+              bool expanded,
+              const <a href="struct_rodin_1_1_assembly_1_1_internal_1_1_c_o_o_assembly_1_1_contributions.html" class="m-doc">Contributions</a>&amp; res)</span>
+            </div></details></dd>
+            <dt><a href="#a7e0659dd98d5ab4cb049244a06575f27" class="m-doc">impose</a></dt><dd>Writes the fixed values on the fixed rows.<details class="rodin-declaration-disclosure"><summary>See declaration</summary><div class="rodin-overview-declaration">
+              <div class="m-doc-template">template&lt;class Fixed, class Values, class Owned, class RHS&gt;</div>
+              <span class="m-doc-wrap-bumper">static void <a href="#a7e0659dd98d5ab4cb049244a06575f27" class="m-doc">impose</a>(</span><span class="m-doc-wrap">const <a href="#ab78f7cd66f68a9ce08c3ca5a42e12a90" class="m-doc">ExecutionSpace</a>&amp; execution,
+              size_t count,
+              const Fixed&amp; fixed,
+              const Values&amp; values,
+              const Owned&amp; owned,
+              const RHS&amp; rhs)</span>
+            </div></details></dd>
+            <dt><a href="#a8a6672c052dc2367953e11716eb572e3" class="m-doc">shiftEntries</a></dt><dd>Writes the rows of the entries of a linear integrator.<details class="rodin-declaration-disclosure"><summary>See declaration</summary><div class="rodin-overview-declaration">
+              <div class="m-doc-template">template&lt;class Indices&gt;</div>
+              <span class="m-doc-wrap-bumper">static void <a href="#a8a6672c052dc2367953e11716eb572e3" class="m-doc">shiftEntries</a>(</span><span class="m-doc-wrap">const <a href="#ab78f7cd66f68a9ce08c3ca5a42e12a90" class="m-doc">ExecutionSpace</a>&amp; execution,
+              const Indices&amp; indices,
+              size_t begin,
+              size_t end,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> row,
+              const Indices&amp; res)</span>
+            </div></details></dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Indices&gt;</div>
+              <span class="m-doc-wrap-bumper">static void <a href="#a5280bcacaa5bb92fadc467744ca6fb21" class="m-doc">sequence</a>(</span><span class="m-doc-wrap">const <a href="#ab78f7cd66f68a9ce08c3ca5a42e12a90" class="m-doc">ExecutionSpace</a>&amp; execution,
+              const Indices&amp; res)</span>
+            </dt>
+            <dd>Numbers the entries of a dense vector.</dd>
+            <dt><a href="#a4632bec4a5fc020200ee3e8438d08517" class="m-doc">countExpanded</a></dt><dd>Counts the contributions of the coordinate list expanded on the masters, and the affine values they lift.<details class="rodin-declaration-disclosure"><summary>See declaration</summary><div class="rodin-overview-declaration">
+              <div class="m-doc-template">template&lt;class Indices, class Scalars&gt;</div>
+              <span class="m-doc-wrap-bumper">static auto <a href="#a4632bec4a5fc020200ee3e8438d08517" class="m-doc">countExpanded</a>(</span><span class="m-doc-wrap">const <a href="#ab78f7cd66f68a9ce08c3ca5a42e12a90" class="m-doc">ExecutionSpace</a>&amp; execution,
+              size_t count,
+              const Indices&amp; rows,
+              const Indices&amp; cols,
+              const Scalars&amp; values,
+              const <a href="#adf753304c7d4b88f03a8325e41feccac" class="m-doc">Expansions</a>&amp; x) -&gt; <a href="#a8fc3f8210ce3551dd77ca767333bd51d" class="m-doc">Sizes</a></span>
+            </div></details></dd>
+            <dt><a href="#a25b604d509734a2b2e3176f5ae823bd6" class="m-doc">expand</a></dt><dd>Expands the coordinate list on the masters.<details class="rodin-declaration-disclosure"><summary>See declaration</summary><div class="rodin-overview-declaration">
+              <div class="m-doc-template">template&lt;class Indices, class Results, class Scalars&gt;</div>
+              <span class="m-doc-wrap-bumper">static void <a href="#a25b604d509734a2b2e3176f5ae823bd6" class="m-doc">expand</a>(</span><span class="m-doc-wrap">const <a href="#ab78f7cd66f68a9ce08c3ca5a42e12a90" class="m-doc">ExecutionSpace</a>&amp; execution,
+              size_t count,
+              const Indices&amp; rows,
+              const Indices&amp; cols,
+              const Scalars&amp; values,
+              const <a href="#adf753304c7d4b88f03a8325e41feccac" class="m-doc">Expansions</a>&amp; x,
+              const Results&amp; resRows,
+              const Results&amp; resCols,
+              const Scalars&amp; resValues,
+              const <a href="struct_rodin_1_1_assembly_1_1_internal_1_1_c_o_o_assembly_1_1_contributions.html" class="m-doc">Contributions</a>&amp; lifts)</span>
+            </div></details></dd>
+            <dt><a href="#aafaa5c25d6988b6a14caf67e77b36c64" class="m-doc">countDifferences</a></dt><dd>Counts the positions at which two index lists differ.<details class="rodin-declaration-disclosure"><summary>See declaration</summary><div class="rodin-overview-declaration">
+              <div class="m-doc-template">template&lt;class Indices, class Previous&gt;</div>
+              <span class="m-doc-wrap-bumper">static auto <a href="#aafaa5c25d6988b6a14caf67e77b36c64" class="m-doc">countDifferences</a>(</span><span class="m-doc-wrap">const <a href="#ab78f7cd66f68a9ce08c3ca5a42e12a90" class="m-doc">ExecutionSpace</a>&amp; execution,
+              const Indices&amp; indices,
+              const Previous&amp; previous) -&gt; size_t</span>
+            </div></details></dd>
+            <dt><a href="#a84a3b526c6d6d4af4a2e43ff91389aca" class="m-doc">copyCoordinates</a></dt><dd>Copies coordinates into another index type.<details class="rodin-declaration-disclosure"><summary>See declaration</summary><div class="rodin-overview-declaration">
+              <div class="m-doc-template">template&lt;class From, class To&gt;</div>
+              <span class="m-doc-wrap-bumper">static void <a href="#a84a3b526c6d6d4af4a2e43ff91389aca" class="m-doc">copyCoordinates</a>(</span><span class="m-doc-wrap">const <a href="#ab78f7cd66f68a9ce08c3ca5a42e12a90" class="m-doc">ExecutionSpace</a>&amp; execution,
+              const From&amp; from,
+              const To&amp; to,
+              size_t offset = 0)</span>
+            </div></details></dd>
+            <dt><a href="#a1a5ed8eb4290fc76227dc7ff448dbbf0" class="m-doc">countChanges</a></dt><dd>Counts the coordinates that differ between two patterns.<details class="rodin-declaration-disclosure"><summary>See declaration</summary><div class="rodin-overview-declaration">
+              <div class="m-doc-template">template&lt;class Indices, class Previous&gt;</div>
+              <span class="m-doc-wrap-bumper">static auto <a href="#a1a5ed8eb4290fc76227dc7ff448dbbf0" class="m-doc">countChanges</a>(</span><span class="m-doc-wrap">const <a href="#ab78f7cd66f68a9ce08c3ca5a42e12a90" class="m-doc">ExecutionSpace</a>&amp; execution,
+              const Indices&amp; rows,
+              const Indices&amp; cols,
+              const Previous&amp; previousRows,
+              const Previous&amp; previousCols,
+              size_t begin = 0,
+              size_t end = std::numeric_limits&lt;size_t&gt;::max()) -&gt; size_t</span>
+            </div></details></dd>
+            <dt><a href="#a54300c5de7a6b6053e5dae9c71dfa6f1" class="m-doc">sortPattern</a></dt><dd>Sorts the coordinates by row then column.<details class="rodin-declaration-disclosure"><summary>See declaration</summary><div class="rodin-overview-declaration">
+              <div class="m-doc-template">template&lt;class Indices&gt;</div>
+              <span class="m-doc-wrap-bumper">static void <a href="#a54300c5de7a6b6053e5dae9c71dfa6f1" class="m-doc">sortPattern</a>(</span><span class="m-doc-wrap">const <a href="#ab78f7cd66f68a9ce08c3ca5a42e12a90" class="m-doc">ExecutionSpace</a>&amp; execution,
+              size_t columns,
+              const std::vector&lt;<a href="struct_rodin_1_1_assembly_1_1_internal_1_1_c_o_o_segment.html" class="m-doc">COOSegment</a>&gt;&amp; segments,
+              const std::vector&lt;size_t&gt;&amp; offsets,
+              const Indices&amp; rows,
+              const Indices&amp; cols,
+              <a href="struct_rodin_1_1_assembly_1_1_internal_1_1_c_o_o_order.html" class="m-doc">COOOrder</a>&lt;<a href="#abd2285c284ad3cfde965ef4ecc1dab84" class="m-doc">MemorySpace</a>&gt;&amp; order)</span>
+            </div></details></dd>
+            <dt><a href="#a2623d16ced939230bb03e16fd6c06d47" class="m-doc">sortPattern</a></dt><dd>Sorts the coordinates into the given indices.<details class="rodin-declaration-disclosure"><summary>See declaration</summary><div class="rodin-overview-declaration">
+              <div class="m-doc-template">template&lt;class Indices, class Order&gt;</div>
+              <span class="m-doc-wrap-bumper">static void <a href="#a2623d16ced939230bb03e16fd6c06d47" class="m-doc">sortPattern</a>(</span><span class="m-doc-wrap">const <a href="#ab78f7cd66f68a9ce08c3ca5a42e12a90" class="m-doc">ExecutionSpace</a>&amp; execution,
+              size_t columns,
+              const std::vector&lt;<a href="struct_rodin_1_1_assembly_1_1_internal_1_1_c_o_o_segment.html" class="m-doc">COOSegment</a>&gt;&amp; segments,
+              const std::vector&lt;size_t&gt;&amp; offsets,
+              const Indices&amp; rows,
+              const Indices&amp; cols,
+              const Order&amp; order,
+              size_t blockSize = <a href="#a146a578510aef370bae9bf8bfb879def" class="m-doc">SortBlockSize</a>)</span>
+            </div></details></dd>
+            <dt><a href="#a38df2ea92cd97514b8ec0917a89c5c12" class="m-doc">listDistinct</a></dt><dd>Lists the distinct coordinates in the PETSc index type.<details class="rodin-declaration-disclosure"><summary>See declaration</summary><div class="rodin-overview-declaration">
+              <div class="m-doc-template">template&lt;class Indices, class Order, class Coordinates&gt;</div>
+              <span class="m-doc-wrap-bumper">static void <a href="#a38df2ea92cd97514b8ec0917a89c5c12" class="m-doc">listDistinct</a>(</span><span class="m-doc-wrap">const <a href="#ab78f7cd66f68a9ce08c3ca5a42e12a90" class="m-doc">ExecutionSpace</a>&amp; execution,
+              const Indices&amp; rows,
+              const Indices&amp; cols,
+              const Order&amp; order,
+              const <a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Kokkos::<wbr />View</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>*, <a href="#abd2285c284ad3cfde965ef4ecc1dab84" class="m-doc">MemorySpace</a>&gt;&amp; starts,
+              const Coordinates&amp; distinctRows,
+              const Coordinates&amp; distinctCols)</span>
+            </div></details></dd>
+            <dt><a href="#a227c654bb131971eea261bccfcf15dbc" class="m-doc">restore</a></dt><dd>Lists the coordinates again from the distinct ones, the inverse of listDistinct().<details class="rodin-declaration-disclosure"><summary>See declaration</summary><div class="rodin-overview-declaration">
+              <div class="m-doc-template">template&lt;class Indices, class Order, class Coordinates&gt;</div>
+              <span class="m-doc-wrap-bumper">static void <a href="#a227c654bb131971eea261bccfcf15dbc" class="m-doc">restore</a>(</span><span class="m-doc-wrap">const <a href="#ab78f7cd66f68a9ce08c3ca5a42e12a90" class="m-doc">ExecutionSpace</a>&amp; execution,
+              const Order&amp; order,
+              const <a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Kokkos::<wbr />View</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>*, <a href="#abd2285c284ad3cfde965ef4ecc1dab84" class="m-doc">MemorySpace</a>&gt;&amp; starts,
+              const Coordinates&amp; distinctRows,
+              const Coordinates&amp; distinctCols,
+              const Indices&amp; rows,
+              const Indices&amp; cols)</span>
+            </div></details></dd>
+            <dt><a href="#a166e49ac6630810a56320ce0f0a52b7c" class="m-doc">merge</a></dt><dd>Sums the values of each distinct coordinate.<details class="rodin-declaration-disclosure"><summary>See declaration</summary><div class="rodin-overview-declaration">
+              <div class="m-doc-template">template&lt;class Order, class Indices, class Scalars&gt;</div>
+              <span class="m-doc-wrap-bumper">static void <a href="#a166e49ac6630810a56320ce0f0a52b7c" class="m-doc">merge</a>(</span><span class="m-doc-wrap">const <a href="#ab78f7cd66f68a9ce08c3ca5a42e12a90" class="m-doc">ExecutionSpace</a>&amp; execution,
+              const Order&amp; order,
+              const Indices&amp; starts,
+              const Scalars&amp; values,
+              const Scalars&amp; merged)</span>
+            </div></details></dd>
+          </dl>
+        </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a24cf57457a364598919633f4619554dc" class="m-doc">COOAssembly</a>(</span><span class="m-doc-wrap">const <a href="#ab78f7cd66f68a9ce08c3ca5a42e12a90" class="m-doc">ExecutionSpace</a>&amp; execution,
+              size_t rows,
+              size_t cols)</span>
+            </dt>
+            <dd>Creates an empty system.</dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#adb22abb433fdda9dddd549a915c46967" class="m-doc">fix</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_dirichlet_b_c_base.html" class="m-doc">Variational::<wbr />DirichletBCBase</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; dbc,
+              size_t offset,
+              size_t masterOffset)</span>
+            </dt>
+            <dd>Assembles a Dirichlet condition and constrains its degrees of freedom.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#aea5bdc2769ae3600c5bf64c5109e18fa" class="m-doc">fix</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_dirichlet_b_c_base.html" class="m-doc">Variational::<wbr />DirichletBCBase</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; dbc,
+              size_t offset)</span>
+            </dt>
+            <dd>Assembles a Dirichlet condition whose masters, if any, are in the constrained space.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a4bb258b5acd9582ef5d9263c1e3d8fbe" class="m-doc">identify</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_periodic_b_c_base.html" class="m-doc">Variational::<wbr />PeriodicBCBase</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; pbc,
+              size_t offset)</span>
+            </dt>
+            <dd>Assembles a periodic condition and identifies its degrees of freedom.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ac7055ae1161e3e0d69558169704d0967" class="m-doc">hasConstraints</a>(</span><span class="m-doc-wrap">) const -&gt; bool</span>
+            </dt>
+            <dd>Whether the matrix contributes to the right-hand side; collective once the system is distributed, since a process may hold degrees of freedom fixed by another one.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#af9de01fa3a4a0054ff9d64bdb008c5ee" class="m-doc">distribute</a>(</span><span class="m-doc-wrap"><a href="struct_rodin_1_1_assembly_1_1_internal_1_1_c_o_o_distribution.html" class="m-doc">COODistribution</a> distribution)</span>
+            </dt>
+            <dd>Distributes the system over MPI processes.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a6eb32229719e75e262ae8ea733ce14d2" class="m-doc">distribute</a>(</span><span class="m-doc-wrap"><a href="struct_rodin_1_1_assembly_1_1_internal_1_1_c_o_o_distribution.html" class="m-doc">COODistribution</a> rows,
+              <a href="struct_rodin_1_1_assembly_1_1_internal_1_1_c_o_o_distribution.html" class="m-doc">COODistribution</a> cols)</span>
+            </dt>
+            <dd>Distributes a system without constraints whose rows and columns are numbered apart.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a5917145d799791b2dc40350fa9e67c26" class="m-doc">getDistribution</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="struct_rodin_1_1_assembly_1_1_internal_1_1_c_o_o_distribution.html" class="m-doc">COODistribution</a>&amp;</span>
+            </dt>
+            <dd>Gets the distribution of a distributed system.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a2f1f0d95b0d290ba7882fa72a03486c7" class="m-doc">add</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_local_bilinear_form_integrator_base.html" class="m-doc">Variational::<wbr />LocalBilinearFormIntegratorBase</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; lbfi,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> row,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> col)</span>
+            </dt>
+            <dd>Adds a local integrator to the system.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#ae59821e10fbc576028a4240845112bb2" class="m-doc">add</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_global_bilinear_form_integrator_base.html" class="m-doc">Variational::<wbr />GlobalBilinearFormIntegratorBase</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; gbfi,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> row,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> col)</span>
+            </dt>
+            <dd>Adds a global integrator to the system.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a8f9cec3f23e1ff26be61480aa1eacd85" class="m-doc">add</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">Variational::<wbr />LinearFormIntegratorBase</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; lfi,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> row,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> sign)</span>
+            </dt>
+            <dd>Adds a linear integrator to the system.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a3ba777e3efeb71f0161d6b0e4b042a7c" class="m-doc">add</a>(</span><span class="m-doc-wrap">::Mat op,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> row,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> col)</span>
+            </dt>
+            <dd>Adds the entries of a preassembled operator to the matrix.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#aed7dad6b47375934bac36c2d4f292a51" class="m-doc">add</a>(</span><span class="m-doc-wrap">::Vec vec,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> row)</span>
+            </dt>
+            <dd>Adds a preassembled vector to the right-hand side.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#ad1c10ec7324927e91f5ac550df45024c" class="m-doc">finish</a>(</span><span class="m-doc-wrap"><a href="#a95217f88c86703f54044894c73b2fb88" class="m-doc">CacheType</a>&amp; cache,
+              <a href="#a3caeca5dbbe42914a885b665dd0fe2d0" class="m-doc">CoefficientCache</a>&amp; coefficients,
+              ::Mat A,
+              ::Vec b)</span>
+            </dt>
+            <dd>Integrates, eliminates the constraints and fills the PETSc objects.</dd>
+            <dt><a href="#a7c34b79d92fd94fe12a4ffa22a7d08f3" class="m-doc">selectEntries</a></dt><dd>Lists by increasing position the entries of a free row and a fixed column, or those of a fixed row.<details class="rodin-declaration-disclosure"><summary>See declaration</summary><div class="rodin-overview-declaration">
+              <div class="m-doc-template">template&lt;class Indices, class Fixed&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a7c34b79d92fd94fe12a4ffa22a7d08f3" class="m-doc">selectEntries</a>(</span><span class="m-doc-wrap">const <a href="#ab78f7cd66f68a9ce08c3ca5a42e12a90" class="m-doc">ExecutionSpace</a>&amp; execution,
+              size_t count,
+              const Indices&amp; rows,
+              const Indices&amp; cols,
+              const Fixed&amp; fixed,
+              bool moved) -&gt; <a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Kokkos::<wbr />View</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>*, <a href="#abd2285c284ad3cfde965ef4ecc1dab84" class="m-doc">MemorySpace</a>&gt;</span>
+            </div></details></dd>
+            <dt><a href="#a23db4795764b5e71ca42ba7e7893e5a6" class="m-doc">distinctStarts</a></dt><dd>Finds where each distinct coordinate starts in the sorted coordinates.<details class="rodin-declaration-disclosure"><summary>See declaration</summary><div class="rodin-overview-declaration">
+              <div class="m-doc-template">template&lt;class Indices, class Order&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a23db4795764b5e71ca42ba7e7893e5a6" class="m-doc">distinctStarts</a>(</span><span class="m-doc-wrap">const <a href="#ab78f7cd66f68a9ce08c3ca5a42e12a90" class="m-doc">ExecutionSpace</a>&amp; execution,
+              const Indices&amp; rows,
+              const Indices&amp; cols,
+              const Order&amp; order) -&gt; <a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Kokkos::<wbr />View</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>*, <a href="#abd2285c284ad3cfde965ef4ecc1dab84" class="m-doc">MemorySpace</a>&gt;</span>
+            </div></details></dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Typedef documentation</h2>
+          <section class="m-doc-details" id="a5dcc9838274fe2950efb87d47c1689fa"><div>
+            <h3>
+              
+              using <a href="#a5dcc9838274fe2950efb87d47c1689fa" class="m-doc-self">Range</a> = ::Kokkos::RangePolicy&lt;<a href="#ab78f7cd66f68a9ce08c3ca5a42e12a90" class="m-doc">ExecutionSpace</a>, ::Kokkos::IndexType&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&gt;
+            </h3>
+            <p>Range of the kernels, indexed by Index.</p>
+<p>The default index of a Kokkos 5 range is the index_type of the execution space, a 32 bit int on the GPUs, and a bound past it aborts. One process can hold more than 2^31 entries.</p>
+          </div></section>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a1b77a4f7c1a2010a48f8a4da0e6c7f02"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Backend&gt;
+                template&lt;class Indices&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">static void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1b77a4f7c1a2010a48f8a4da0e6c7f02" class="m-doc-self">shift</a>(</span><span class="m-doc-wrap">const <a href="#ab78f7cd66f68a9ce08c3ca5a42e12a90" class="m-doc">ExecutionSpace</a>&amp; execution,
+              const Indices&amp; rows,
+              const Indices&amp; cols,
+              size_t offset,
+              size_t count,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> row,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> col)</span></span>
+            </h3>
+            <p>Adds the block offsets to the coordinates of a segment.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">execution</td>
+                  <td>Execution space instance of the kernel.</td>
+                </tr>
+                <tr>
+                  <td>rows</td>
+                  <td>Row coordinates.</td>
+                </tr>
+                <tr>
+                  <td>cols</td>
+                  <td>Column coordinates.</td>
+                </tr>
+                <tr>
+                  <td>offset</td>
+                  <td>Position of the first entry of the segment.</td>
+                </tr>
+                <tr>
+                  <td>count</td>
+                  <td>Number of entries of the segment.</td>
+                </tr>
+                <tr>
+                  <td>row</td>
+                  <td>Offset of the test space.</td>
+                </tr>
+                <tr>
+                  <td>col</td>
+                  <td>Offset of the trial space.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aafdc625cd1c0fce918a3d254f2e5dd4a"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Backend&gt;
+                template&lt;class Indices&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">static void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aafdc625cd1c0fce918a3d254f2e5dd4a" class="m-doc-self">listDiagonal</a>(</span><span class="m-doc-wrap">const <a href="#ab78f7cd66f68a9ce08c3ca5a42e12a90" class="m-doc">ExecutionSpace</a>&amp; execution,
+              size_t offset,
+              size_t count,
+              const Indices&amp; rows,
+              const Indices&amp; cols)</span></span>
+            </h3>
+            <p>Lists every diagonal entry.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">execution</td>
+                  <td>Execution space instance of the kernel.</td>
+                </tr>
+                <tr>
+                  <td>offset</td>
+                  <td>Position of the first diagonal entry in the list.</td>
+                </tr>
+                <tr>
+                  <td>count</td>
+                  <td>Number of diagonal entries.</td>
+                </tr>
+                <tr>
+                  <td>rows</td>
+                  <td>Receives the row coordinates.</td>
+                </tr>
+                <tr>
+                  <td>cols</td>
+                  <td>Receives the column coordinates.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ac7bacec7ddcb4d4fd259861f0f85e45f"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Backend&gt;
+                template&lt;class Fixed, class Owned, class Scalars&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">static void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac7bacec7ddcb4d4fd259861f0f85e45f" class="m-doc-self">fillDiagonal</a>(</span><span class="m-doc-wrap">const <a href="#ab78f7cd66f68a9ce08c3ca5a42e12a90" class="m-doc">ExecutionSpace</a>&amp; execution,
+              size_t offset,
+              size_t count,
+              bool hasFixed,
+              const Fixed&amp; fixed,
+              const Owned&amp; owned,
+              const Scalars&amp; coo)</span></span>
+            </h3>
+            <p>Writes the diagonal values, one on fixed rows.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">execution</td>
+                  <td>Execution space instance of the kernel.</td>
+                </tr>
+                <tr>
+                  <td>offset</td>
+                  <td>Position of the first diagonal value in the list.</td>
+                </tr>
+                <tr>
+                  <td>count</td>
+                  <td>Number of diagonal values.</td>
+                </tr>
+                <tr>
+                  <td>hasFixed</td>
+                  <td>Whether the system has fixed degrees of freedom.</td>
+                </tr>
+                <tr>
+                  <td>fixed</td>
+                  <td>Flags of the fixed degrees of freedom.</td>
+                </tr>
+                <tr>
+                  <td>owned</td>
+                  <td>Flags of the degrees of freedom the process owns, empty when the system is not distributed.</td>
+                </tr>
+                <tr>
+                  <td>coo</td>
+                  <td>Values of the coordinate list.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>On a distributed system, the owner of a fixed row alone writes one.</p>
+          </div></section>
+          <section class="m-doc-details" id="a5466f21b636fa1d9adc0ed50d445e95f"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Backend&gt;
+                template&lt;class Indices, class Fixed&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">static size_t </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5466f21b636fa1d9adc0ed50d445e95f" class="m-doc-self">countEliminated</a>(</span><span class="m-doc-wrap">const <a href="#ab78f7cd66f68a9ce08c3ca5a42e12a90" class="m-doc">ExecutionSpace</a>&amp; execution,
+              size_t count,
+              const Indices&amp; rows,
+              const Indices&amp; cols,
+              const Fixed&amp; fixed)</span></span>
+            </h3>
+            <p>Counts the matrix values moved to the right-hand side by the columns of the fixed degrees of freedom.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">execution</td>
+                  <td>Execution space instance of the kernel.</td>
+                </tr>
+                <tr>
+                  <td>count</td>
+                  <td>Number of entries in the list.</td>
+                </tr>
+                <tr>
+                  <td>rows</td>
+                  <td>Row coordinates.</td>
+                </tr>
+                <tr>
+                  <td>cols</td>
+                  <td>Column coordinates.</td>
+                </tr>
+                <tr>
+                  <td>fixed</td>
+                  <td>Flags of the fixed degrees of freedom.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Number of values of a free row and a fixed column.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a66aa2039b1a0d64f663d0fce8abef1cc"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Backend&gt;
+                template&lt;class Indices, class Fixed, class Values, class Scalars&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">static void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a66aa2039b1a0d64f663d0fce8abef1cc" class="m-doc-self">eliminate</a>(</span><span class="m-doc-wrap">const <a href="#ab78f7cd66f68a9ce08c3ca5a42e12a90" class="m-doc">ExecutionSpace</a>&amp; execution,
+              size_t count,
+              const Indices&amp; rows,
+              const Indices&amp; cols,
+              const Fixed&amp; fixed,
+              const Values&amp; values,
+              const Scalars&amp; coo,
+              const <a href="struct_rodin_1_1_assembly_1_1_internal_1_1_c_o_o_assembly_1_1_contributions.html" class="m-doc">Contributions</a>&amp; res)</span></span>
+            </h3>
+            <p>Clears the rows of the fixed degrees of freedom and lists the values of their columns moved to the right-hand side.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">execution</td>
+                  <td>Execution space instance of the kernel.</td>
+                </tr>
+                <tr>
+                  <td>count</td>
+                  <td>Number of entries in the list.</td>
+                </tr>
+                <tr>
+                  <td>rows</td>
+                  <td>Row coordinates.</td>
+                </tr>
+                <tr>
+                  <td>cols</td>
+                  <td>Column coordinates.</td>
+                </tr>
+                <tr>
+                  <td>fixed</td>
+                  <td>Flags of the fixed degrees of freedom.</td>
+                </tr>
+                <tr>
+                  <td>values</td>
+                  <td>Fixed values, per degree of freedom.</td>
+                </tr>
+                <tr>
+                  <td>coo</td>
+                  <td>Values of the coordinate list, cleared on the fixed rows.</td>
+                </tr>
+                <tr>
+                  <td>res</td>
+                  <td>Receives the moved values, in coordinate order.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a0fe71084a014625b0101cc2b414a830d"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Backend&gt;
+                template&lt;class Indices, class Values, class Fixed&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">static size_t </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0fe71084a014625b0101cc2b414a830d" class="m-doc-self">countEntry</a>(</span><span class="m-doc-wrap">size_t e,
+              const Indices&amp; indices,
+              const Values&amp; values,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> row,
+              bool hasFixed,
+              const Fixed&amp; fixed,
+              const <a href="#adf753304c7d4b88f03a8325e41feccac" class="m-doc">Expansions</a>&amp; x,
+              bool expanded)</span></span>
+            </h3>
+            <p>Number of contributions of an entry of a linear integrator.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">e</td>
+                  <td>Position of the entry.</td>
+                </tr>
+                <tr>
+                  <td>indices</td>
+                  <td>Indices of the entries in the space of the integrator.</td>
+                </tr>
+                <tr>
+                  <td>values</td>
+                  <td>Values of the entries.</td>
+                </tr>
+                <tr>
+                  <td>row</td>
+                  <td>Offset of the space of the integrator.</td>
+                </tr>
+                <tr>
+                  <td>hasFixed</td>
+                  <td>Whether the system has fixed degrees of freedom.</td>
+                </tr>
+                <tr>
+                  <td>fixed</td>
+                  <td>Flags of the fixed degrees of freedom.</td>
+                </tr>
+                <tr>
+                  <td>x</td>
+                  <td>Expansions on the masters, used when <code>expanded</code> is set.</td>
+                </tr>
+                <tr>
+                  <td>expanded</td>
+                  <td>Whether an entry goes to the masters of its row, with their coefficients, rather than to its row when it is free.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Zero for a zero value, the number of masters of the row when <code>expanded</code> is set, and otherwise one when the row is free.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a9ba58241ee54fc64d76c954050e28520"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Backend&gt;
+                template&lt;class Indices, class Values, class Fixed&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">static size_t </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9ba58241ee54fc64d76c954050e28520" class="m-doc-self">count</a>(</span><span class="m-doc-wrap">const <a href="#ab78f7cd66f68a9ce08c3ca5a42e12a90" class="m-doc">ExecutionSpace</a>&amp; execution,
+              size_t begin,
+              size_t count,
+              const Indices&amp; indices,
+              const Values&amp; values,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> row,
+              bool hasFixed,
+              const Fixed&amp; fixed,
+              const <a href="#adf753304c7d4b88f03a8325e41feccac" class="m-doc">Expansions</a>&amp; x,
+              bool expanded)</span></span>
+            </h3>
+            <p>Counts the contributions of the entries of a linear integrator to the right-hand side.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">execution</td>
+                  <td>Execution space instance of the kernel.</td>
+                </tr>
+                <tr>
+                  <td>begin</td>
+                  <td>Position of the first entry.</td>
+                </tr>
+                <tr>
+                  <td>count</td>
+                  <td>Entry count.</td>
+                </tr>
+                <tr>
+                  <td>indices</td>
+                  <td>Indices of the entries in the space of the integrator.</td>
+                </tr>
+                <tr>
+                  <td>values</td>
+                  <td>Values of the entries.</td>
+                </tr>
+                <tr>
+                  <td>row</td>
+                  <td>Offset of the space of the integrator.</td>
+                </tr>
+                <tr>
+                  <td>hasFixed</td>
+                  <td>Whether the system has fixed degrees of freedom.</td>
+                </tr>
+                <tr>
+                  <td>fixed</td>
+                  <td>Flags of the fixed degrees of freedom.</td>
+                </tr>
+                <tr>
+                  <td>x</td>
+                  <td>Expansions on the masters, used when <code>expanded</code> is set.</td>
+                </tr>
+                <tr>
+                  <td>expanded</td>
+                  <td>Whether an entry goes to the masters of its row.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Number of contributions, as counted by countEntry.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a3ac3e5910c5b81ed73567f2671e8fe47"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Backend&gt;
+                template&lt;class Indices, class Values, class Fixed&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">static void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3ac3e5910c5b81ed73567f2671e8fe47" class="m-doc-self">list</a>(</span><span class="m-doc-wrap">const <a href="#ab78f7cd66f68a9ce08c3ca5a42e12a90" class="m-doc">ExecutionSpace</a>&amp; execution,
+              size_t begin,
+              size_t count,
+              const Indices&amp; indices,
+              const Values&amp; values,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> row,
+              bool hasFixed,
+              const Fixed&amp; fixed,
+              const <a href="#adf753304c7d4b88f03a8325e41feccac" class="m-doc">Expansions</a>&amp; x,
+              bool expanded,
+              const <a href="struct_rodin_1_1_assembly_1_1_internal_1_1_c_o_o_assembly_1_1_contributions.html" class="m-doc">Contributions</a>&amp; res)</span></span>
+            </h3>
+            <p>Lists the nonzero entries of a linear integrator as contributions to the right-hand side.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">execution</td>
+                  <td>Execution space instance of the kernel.</td>
+                </tr>
+                <tr>
+                  <td>begin</td>
+                  <td>Position of the first entry.</td>
+                </tr>
+                <tr>
+                  <td>count</td>
+                  <td>Entry count.</td>
+                </tr>
+                <tr>
+                  <td>indices</td>
+                  <td>Indices of the entries in the space of the integrator.</td>
+                </tr>
+                <tr>
+                  <td>values</td>
+                  <td>Values of the entries.</td>
+                </tr>
+                <tr>
+                  <td>row</td>
+                  <td>Offset of the space of the integrator.</td>
+                </tr>
+                <tr>
+                  <td>hasFixed</td>
+                  <td>Whether the system has fixed degrees of freedom.</td>
+                </tr>
+                <tr>
+                  <td>fixed</td>
+                  <td>Flags of the fixed degrees of freedom.</td>
+                </tr>
+                <tr>
+                  <td>x</td>
+                  <td>Expansions on the masters, used when <code>expanded</code> is set.</td>
+                </tr>
+                <tr>
+                  <td>expanded</td>
+                  <td>Whether an entry goes to the masters of its row.</td>
+                </tr>
+                <tr>
+                  <td>res</td>
+                  <td>Receives the contributions, counted by countVector.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>The contributions follow the order of the entries, and of the masters of an entry.</p>
+          </div></section>
+          <section class="m-doc-details" id="a7e0659dd98d5ab4cb049244a06575f27"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Backend&gt;
+                template&lt;class Fixed, class Values, class Owned, class RHS&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">static void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7e0659dd98d5ab4cb049244a06575f27" class="m-doc-self">impose</a>(</span><span class="m-doc-wrap">const <a href="#ab78f7cd66f68a9ce08c3ca5a42e12a90" class="m-doc">ExecutionSpace</a>&amp; execution,
+              size_t count,
+              const Fixed&amp; fixed,
+              const Values&amp; values,
+              const Owned&amp; owned,
+              const RHS&amp; rhs)</span></span>
+            </h3>
+            <p>Writes the fixed values on the fixed rows.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">execution</td>
+                  <td>Execution space instance of the kernel.</td>
+                </tr>
+                <tr>
+                  <td>count</td>
+                  <td>Number of rows.</td>
+                </tr>
+                <tr>
+                  <td>fixed</td>
+                  <td>Flags of the rows whose value is imposed.</td>
+                </tr>
+                <tr>
+                  <td>values</td>
+                  <td>Imposed values, per degree of freedom.</td>
+                </tr>
+                <tr>
+                  <td>owned</td>
+                  <td>Flags of the degrees of freedom the process owns, empty when the system is not distributed.</td>
+                </tr>
+                <tr>
+                  <td>rhs</td>
+                  <td>Right-hand side.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>On a distributed system, the other processes write zero.</p>
+          </div></section>
+          <section class="m-doc-details" id="a8a6672c052dc2367953e11716eb572e3"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Backend&gt;
+                template&lt;class Indices&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">static void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8a6672c052dc2367953e11716eb572e3" class="m-doc-self">shiftEntries</a>(</span><span class="m-doc-wrap">const <a href="#ab78f7cd66f68a9ce08c3ca5a42e12a90" class="m-doc">ExecutionSpace</a>&amp; execution,
+              const Indices&amp; indices,
+              size_t begin,
+              size_t end,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> row,
+              const Indices&amp; res)</span></span>
+            </h3>
+            <p>Writes the rows of the entries of a linear integrator.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">execution</td>
+                  <td>Execution space instance of the kernel.</td>
+                </tr>
+                <tr>
+                  <td>indices</td>
+                  <td>Entry indices.</td>
+                </tr>
+                <tr>
+                  <td>begin</td>
+                  <td>Position of the first entry.</td>
+                </tr>
+                <tr>
+                  <td>end</td>
+                  <td>Position past the last one.</td>
+                </tr>
+                <tr>
+                  <td>row</td>
+                  <td>Offset of the test space.</td>
+                </tr>
+                <tr>
+                  <td>res</td>
+                  <td>Receives the rows.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a5280bcacaa5bb92fadc467744ca6fb21"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Backend&gt;
+                template&lt;class Indices&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">static void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5280bcacaa5bb92fadc467744ca6fb21" class="m-doc-self">sequence</a>(</span><span class="m-doc-wrap">const <a href="#ab78f7cd66f68a9ce08c3ca5a42e12a90" class="m-doc">ExecutionSpace</a>&amp; execution,
+              const Indices&amp; res)</span></span>
+            </h3>
+            <p>Numbers the entries of a dense vector.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">execution</td>
+                  <td>Execution space instance of the kernel.</td>
+                </tr>
+                <tr>
+                  <td>res</td>
+                  <td>Receives the index of each entry.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a4632bec4a5fc020200ee3e8438d08517"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Backend&gt;
+                template&lt;class Indices, class Scalars&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">static <a href="#a8fc3f8210ce3551dd77ca767333bd51d" class="m-doc">Sizes</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4632bec4a5fc020200ee3e8438d08517" class="m-doc-self">countExpanded</a>(</span><span class="m-doc-wrap">const <a href="#ab78f7cd66f68a9ce08c3ca5a42e12a90" class="m-doc">ExecutionSpace</a>&amp; execution,
+              size_t count,
+              const Indices&amp; rows,
+              const Indices&amp; cols,
+              const Scalars&amp; values,
+              const <a href="#adf753304c7d4b88f03a8325e41feccac" class="m-doc">Expansions</a>&amp; x)</span></span>
+            </h3>
+            <p>Counts the contributions of the coordinate list expanded on the masters, and the affine values they lift.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">execution</td>
+                  <td>Execution space instance of the kernel.</td>
+                </tr>
+                <tr>
+                  <td>count</td>
+                  <td>Number of entries in the list.</td>
+                </tr>
+                <tr>
+                  <td>rows</td>
+                  <td>Row coordinates.</td>
+                </tr>
+                <tr>
+                  <td>cols</td>
+                  <td>Column coordinates.</td>
+                </tr>
+                <tr>
+                  <td>values</td>
+                  <td>Values of the coordinate list.</td>
+                </tr>
+                <tr>
+                  <td>x</td>
+                  <td>Expansions on the masters.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Numbers of expanded contributions and of lifted values.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a25b604d509734a2b2e3176f5ae823bd6"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Backend&gt;
+                template&lt;class Indices, class Results, class Scalars&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">static void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a25b604d509734a2b2e3176f5ae823bd6" class="m-doc-self">expand</a>(</span><span class="m-doc-wrap">const <a href="#ab78f7cd66f68a9ce08c3ca5a42e12a90" class="m-doc">ExecutionSpace</a>&amp; execution,
+              size_t count,
+              const Indices&amp; rows,
+              const Indices&amp; cols,
+              const Scalars&amp; values,
+              const <a href="#adf753304c7d4b88f03a8325e41feccac" class="m-doc">Expansions</a>&amp; x,
+              const Results&amp; resRows,
+              const Results&amp; resCols,
+              const Scalars&amp; resValues,
+              const <a href="struct_rodin_1_1_assembly_1_1_internal_1_1_c_o_o_assembly_1_1_contributions.html" class="m-doc">Contributions</a>&amp; lifts)</span></span>
+            </h3>
+            <p>Expands the coordinate list on the masters.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">execution</td>
+                  <td>Execution space instance of the kernel.</td>
+                </tr>
+                <tr>
+                  <td>count</td>
+                  <td>Number of entries in the list.</td>
+                </tr>
+                <tr>
+                  <td>rows</td>
+                  <td>Row coordinates.</td>
+                </tr>
+                <tr>
+                  <td>cols</td>
+                  <td>Column coordinates.</td>
+                </tr>
+                <tr>
+                  <td>values</td>
+                  <td>Values of the coordinate list.</td>
+                </tr>
+                <tr>
+                  <td>x</td>
+                  <td>Expansions on the masters.</td>
+                </tr>
+                <tr>
+                  <td>resRows</td>
+                  <td>Receives the rows of the expanded contributions.</td>
+                </tr>
+                <tr>
+                  <td>resCols</td>
+                  <td>Receives the columns of the expanded contributions.</td>
+                </tr>
+                <tr>
+                  <td>resValues</td>
+                  <td>Receives the expanded contributions.</td>
+                </tr>
+                <tr>
+                  <td>lifts</td>
+                  <td>Receives the lifted affine values, in coordinate order.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>The nonzero value <svg class="m-math" style="width: 0.640em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.144944 5.147373">
+<title>
+$ a $
+</title>
+<defs>
+<path id='eq1-g0-97' d='M3.598506-1.422665C3.53873-1.219427 3.53873-1.195517 3.371357-.968369C3.108344-.633624 2.582316-.119552 2.020423-.119552C1.530262-.119552 1.255293-.561893 1.255293-1.267248C1.255293-1.924782 1.625903-3.263761 1.853051-3.765878C2.259527-4.60274 2.82142-5.033126 3.287671-5.033126C4.076712-5.033126 4.23213-4.052802 4.23213-3.957161C4.23213-3.945205 4.196264-3.789788 4.184309-3.765878L3.598506-1.422665ZM4.363636-4.483188C4.23213-4.794022 3.90934-5.272229 3.287671-5.272229C1.936737-5.272229 .478207-3.526775 .478207-1.75741C.478207-.573848 1.171606 .119552 1.984558 .119552C2.642092 .119552 3.203985-.394521 3.53873-.789041C3.658281-.083686 4.220174 .119552 4.578829 .119552S5.224408-.095641 5.439601-.526027C5.630884-.932503 5.798257-1.661768 5.798257-1.709589C5.798257-1.769365 5.750436-1.817186 5.678705-1.817186C5.571108-1.817186 5.559153-1.75741 5.511333-1.578082C5.332005-.872727 5.104857-.119552 4.614695-.119552C4.267995-.119552 4.244085-.430386 4.244085-.669489C4.244085-.944458 4.27995-1.075965 4.387547-1.542217C4.471233-1.841096 4.531009-2.10411 4.62665-2.450809C5.068991-4.244085 5.176588-4.674471 5.176588-4.746202C5.176588-4.913574 5.045081-5.045081 4.865753-5.045081C4.483188-5.045081 4.387547-4.62665 4.363636-4.483188Z'/>
+</defs>
+<g id='eq1-page1'>
+<use x='0' y='0' xlink:href='#eq1-g0-97'/>
+</g>
+</svg> of row <svg class="m-math" style="width: 0.416em; height: 0.816em; vertical-align: -0.000em;" viewBox="0 -7.837689 3.993432 7.837689">
+<title>
+$ i $
+</title>
+<defs>
+<path id='eq2-g0-105' d='M3.383313-1.709589C3.383313-1.769365 3.335492-1.817186 3.263761-1.817186C3.156164-1.817186 3.144209-1.78132 3.084433-1.578082C2.773599-.490162 2.283437-.119552 1.888917-.119552C1.745455-.119552 1.578082-.155417 1.578082-.514072C1.578082-.836862 1.721544-1.195517 1.853051-1.554172L2.689913-3.777833C2.725778-3.873474 2.809465-4.088667 2.809465-4.315816C2.809465-4.817933 2.450809-5.272229 1.865006-5.272229C.765131-5.272229 .32279-3.53873 .32279-3.443088C.32279-3.395268 .37061-3.335492 .454296-3.335492C.561893-3.335492 .573848-3.383313 .621669-3.550685C.908593-4.554919 1.362889-5.033126 1.829141-5.033126C1.936737-5.033126 2.139975-5.021171 2.139975-4.638605C2.139975-4.327771 1.984558-3.93325 1.888917-3.670237L1.052055-1.446575C.980324-1.255293 .908593-1.06401 .908593-.848817C.908593-.310834 1.279203 .119552 1.853051 .119552C2.952927 .119552 3.383313-1.625903 3.383313-1.709589ZM3.287671-7.460025C3.287671-7.639352 3.144209-7.854545 2.881196-7.854545C2.606227-7.854545 2.295392-7.591532 2.295392-7.280697C2.295392-6.981818 2.546451-6.886177 2.689913-6.886177C3.012702-6.886177 3.287671-7.197011 3.287671-7.460025Z'/>
+</defs>
+<g id='eq2-page1'>
+<use x='0' y='0' xlink:href='#eq2-g0-105'/>
+</g>
+</svg> and column <svg class="m-math" style="width: 0.575em; height: 1.059em; vertical-align: -0.243em;" viewBox="0 -7.837689 5.515499 10.162297">
+<title>
+$ j $
+</title>
+<defs>
+<path id='eq3-g0-106' d='M4.184309-3.789788C4.23213-3.981071 4.23213-4.148443 4.23213-4.196264C4.23213-4.889664 3.718057-5.272229 3.180075-5.272229C1.972603-5.272229 1.327024-3.526775 1.327024-3.443088C1.327024-3.383313 1.374844-3.335492 1.446575-3.335492C1.542217-3.335492 1.554172-3.383313 1.613948-3.502864C2.092154-4.662516 2.689913-5.033126 3.144209-5.033126C3.395268-5.033126 3.526775-4.901619 3.526775-4.483188C3.526775-4.196264 3.490909-4.076712 3.443088-3.861519L2.307347 .645579C2.080199 1.530262 1.518306 2.199751 .860772 2.199751C.812951 2.199751 .561893 2.199751 .334745 2.080199C.621669 2.020423 .848817 1.793275 .848817 1.506351C.848817 1.315068 .705355 1.123786 .442341 1.123786C.131507 1.123786-.155417 1.3868-.155417 1.745455C-.155417 2.235616 .37061 2.438854 .860772 2.438854C1.685679 2.438854 2.773599 1.829141 3.072478 .633624L4.184309-3.789788ZM4.674471-7.460025C4.674471-7.758904 4.423412-7.854545 4.27995-7.854545C3.957161-7.854545 3.682192-7.543711 3.682192-7.280697C3.682192-7.10137 3.825654-6.886177 4.088667-6.886177C4.363636-6.886177 4.674471-7.149191 4.674471-7.460025Z'/>
+</defs>
+<g id='eq3-page1'>
+<use x='0' y='0' xlink:href='#eq3-g0-106'/>
+</g>
+</svg> becomes the values <svg class="m-math" style="width: 3.520em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 33.796219 11.955168">
+<title>
+$ (c_r a) c_s $
+</title>
+<defs>
+<path id='eq4-g0-114' d='M1.538232-1.099875C1.625903-1.44259 1.713574-1.785305 1.793275-2.13599C1.801245-2.15193 1.857036-2.383064 1.865006-2.422914C1.888917-2.494645 2.088169-2.82142 2.295392-3.020672C2.550436-3.251806 2.82142-3.291656 2.964882-3.291656C3.052553-3.291656 3.196015-3.283686 3.307597-3.188045C2.964882-3.116314 2.917061-2.82142 2.917061-2.749689C2.917061-2.574346 3.052553-2.454795 3.227895-2.454795C3.443088-2.454795 3.682192-2.630137 3.682192-2.948941C3.682192-3.235866 3.435118-3.514819 2.980822-3.514819C2.438854-3.514819 2.072229-3.156164 1.904857-2.940971C1.745455-3.514819 1.203487-3.514819 1.123786-3.514819C.836862-3.514819 .637609-3.331507 .510087-3.084433C.326775-2.725778 .239103-2.319303 .239103-2.295392C.239103-2.223661 .294894-2.191781 .358655-2.191781C.462267-2.191781 .470237-2.223661 .526027-2.430884C.621669-2.82142 .765131-3.291656 1.099875-3.291656C1.307098-3.291656 1.354919-3.092403 1.354919-2.917061C1.354919-2.773599 1.315068-2.622167 1.251308-2.359153C1.235367-2.295392 1.115816-1.825156 1.083935-1.713574L.789041-.518057C.757161-.398506 .70934-.199253 .70934-.167372C.70934 .01594 .860772 .079701 .964384 .079701C1.243337 .079701 1.299128-.143462 1.362889-.414446L1.538232-1.099875Z'/>
+<path id='eq4-g0-115' d='M3.211955-2.996762C3.028643-2.964882 2.86127-2.82142 2.86127-2.622167C2.86127-2.478705 2.956912-2.375093 3.132254-2.375093C3.251806-2.375093 3.498879-2.462765 3.498879-2.82142C3.498879-3.315567 2.980822-3.514819 2.486675-3.514819C1.41868-3.514819 1.083935-2.757659 1.083935-2.351183C1.083935-2.271482 1.083935-1.984558 1.378829-1.761395C1.562142-1.617933 1.697634-1.594022 2.11208-1.514321C2.391034-1.458531 2.84533-1.378829 2.84533-.964384C2.84533-.757161 2.693898-.494147 2.470735-.342715C2.175841-.151432 1.785305-.143462 1.657783-.143462C1.466501-.143462 .924533-.175342 .72528-.494147C1.131756-.510087 1.187547-.836862 1.187547-.932503C1.187547-1.171606 .972354-1.227397 .876712-1.227397C.749191-1.227397 .422416-1.131756 .422416-.6934C.422416-.223163 .916563 .079701 1.657783 .079701C3.044583 .079701 3.339477-.900623 3.339477-1.235367C3.339477-1.952677 2.558406-2.10411 2.263512-2.1599C1.880946-2.231631 1.570112-2.287422 1.570112-2.622167C1.570112-2.765629 1.705604-3.291656 2.478705-3.291656C2.781569-3.291656 3.092403-3.203985 3.211955-2.996762Z'/>
+<path id='eq4-g1-97' d='M3.598506-1.422665C3.53873-1.219427 3.53873-1.195517 3.371357-.968369C3.108344-.633624 2.582316-.119552 2.020423-.119552C1.530262-.119552 1.255293-.561893 1.255293-1.267248C1.255293-1.924782 1.625903-3.263761 1.853051-3.765878C2.259527-4.60274 2.82142-5.033126 3.287671-5.033126C4.076712-5.033126 4.23213-4.052802 4.23213-3.957161C4.23213-3.945205 4.196264-3.789788 4.184309-3.765878L3.598506-1.422665ZM4.363636-4.483188C4.23213-4.794022 3.90934-5.272229 3.287671-5.272229C1.936737-5.272229 .478207-3.526775 .478207-1.75741C.478207-.573848 1.171606 .119552 1.984558 .119552C2.642092 .119552 3.203985-.394521 3.53873-.789041C3.658281-.083686 4.220174 .119552 4.578829 .119552S5.224408-.095641 5.439601-.526027C5.630884-.932503 5.798257-1.661768 5.798257-1.709589C5.798257-1.769365 5.750436-1.817186 5.678705-1.817186C5.571108-1.817186 5.559153-1.75741 5.511333-1.578082C5.332005-.872727 5.104857-.119552 4.614695-.119552C4.267995-.119552 4.244085-.430386 4.244085-.669489C4.244085-.944458 4.27995-1.075965 4.387547-1.542217C4.471233-1.841096 4.531009-2.10411 4.62665-2.450809C5.068991-4.244085 5.176588-4.674471 5.176588-4.746202C5.176588-4.913574 5.045081-5.045081 4.865753-5.045081C4.483188-5.045081 4.387547-4.62665 4.363636-4.483188Z'/>
+<path id='eq4-g1-99' d='M4.674471-4.495143C4.447323-4.495143 4.339726-4.495143 4.172354-4.351681C4.100623-4.291905 3.969116-4.112578 3.969116-3.921295C3.969116-3.682192 4.148443-3.53873 4.375592-3.53873C4.662516-3.53873 4.985305-3.777833 4.985305-4.25604C4.985305-4.829888 4.435367-5.272229 3.610461-5.272229C2.044334-5.272229 .478207-3.56264 .478207-1.865006C.478207-.824907 1.123786 .119552 2.343213 .119552C3.969116 .119552 4.99726-1.147696 4.99726-1.303113C4.99726-1.374844 4.925529-1.43462 4.877709-1.43462C4.841843-1.43462 4.829888-1.422665 4.722291-1.315068C3.957161-.298879 2.82142-.119552 2.367123-.119552C1.542217-.119552 1.279203-.836862 1.279203-1.43462C1.279203-1.853051 1.482441-3.012702 1.912827-3.825654C2.223661-4.387547 2.86924-5.033126 3.622416-5.033126C3.777833-5.033126 4.435367-5.009215 4.674471-4.495143Z'/>
+<path id='eq4-g2-40' d='M3.88543 2.905106C3.88543 2.86924 3.88543 2.84533 3.682192 2.642092C2.486675 1.43462 1.817186-.537983 1.817186-2.976837C1.817186-5.296139 2.379078-7.292653 3.765878-8.703362C3.88543-8.810959 3.88543-8.834869 3.88543-8.870735C3.88543-8.942466 3.825654-8.966376 3.777833-8.966376C3.622416-8.966376 2.642092-8.105604 2.056289-6.933998C1.446575-5.726526 1.171606-4.447323 1.171606-2.976837C1.171606-1.912827 1.338979-.490162 1.960648 .789041C2.666002 2.223661 3.646326 3.000747 3.777833 3.000747C3.825654 3.000747 3.88543 2.976837 3.88543 2.905106Z'/>
+<path id='eq4-g2-41' d='M3.371357-2.976837C3.371357-3.88543 3.251806-5.36787 2.582316-6.75467C1.876961-8.18929 .896638-8.966376 .765131-8.966376C.71731-8.966376 .657534-8.942466 .657534-8.870735C.657534-8.834869 .657534-8.810959 .860772-8.607721C2.056289-7.400249 2.725778-5.427646 2.725778-2.988792C2.725778-.669489 2.163885 1.327024 .777086 2.737733C.657534 2.84533 .657534 2.86924 .657534 2.905106C.657534 2.976837 .71731 3.000747 .765131 3.000747C.920548 3.000747 1.900872 2.139975 2.486675 .968369C3.096389-.251059 3.371357-1.542217 3.371357-2.976837Z'/>
+</defs>
+<g id='eq4-page1'>
+<use x='0' y='0' xlink:href='#eq4-g2-40'/>
+<use x='4.552326' y='0' xlink:href='#eq4-g1-99'/>
+<use x='9.590314' y='1.793263' xlink:href='#eq4-g0-114'/>
+<use x='14.145042' y='0' xlink:href='#eq4-g1-97'/>
+<use x='20.289986' y='0' xlink:href='#eq4-g2-41'/>
+<use x='24.842312' y='0' xlink:href='#eq4-g1-99'/>
+<use x='29.8803' y='1.793263' xlink:href='#eq4-g0-115'/>
+</g>
+</svg> of the masters <svg class="m-math" style="width: 0.583em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 5.600473 5.147373">
+<title>
+$ r $
+</title>
+<defs>
+<path id='eq5-g0-114' d='M4.65056-4.889664C4.27995-4.817933 4.088667-4.554919 4.088667-4.291905C4.088667-4.004981 4.315816-3.90934 4.483188-3.90934C4.817933-3.90934 5.092902-4.196264 5.092902-4.554919C5.092902-4.937484 4.722291-5.272229 4.124533-5.272229C3.646326-5.272229 3.096389-5.057036 2.594271-4.327771C2.510585-4.961395 2.032379-5.272229 1.554172-5.272229C1.08792-5.272229 .848817-4.913574 .705355-4.65056C.502117-4.220174 .32279-3.502864 .32279-3.443088C.32279-3.395268 .37061-3.335492 .454296-3.335492C.549938-3.335492 .561893-3.347447 .633624-3.622416C.812951-4.339726 1.0401-5.033126 1.518306-5.033126C1.80523-5.033126 1.888917-4.829888 1.888917-4.483188C1.888917-4.220174 1.769365-3.753923 1.685679-3.383313L1.350934-2.092154C1.303113-1.865006 1.171606-1.327024 1.111831-1.111831C1.028144-.800996 .896638-.239103 .896638-.179328C.896638-.011955 1.028144 .119552 1.207472 .119552C1.338979 .119552 1.566127 .035866 1.637858-.203238C1.673724-.298879 2.116065-2.10411 2.187796-2.379078C2.247572-2.642092 2.319303-2.893151 2.379078-3.156164C2.426899-3.323537 2.47472-3.514819 2.510585-3.670237C2.546451-3.777833 2.86924-4.363636 3.16812-4.62665C3.311582-4.758157 3.622416-5.033126 4.112578-5.033126C4.303861-5.033126 4.495143-4.99726 4.65056-4.889664Z'/>
+</defs>
+<g id='eq5-page1'>
+<use x='0' y='0' xlink:href='#eq5-g0-114'/>
+</g>
+</svg> of <svg class="m-math" style="width: 0.416em; height: 0.816em; vertical-align: -0.000em;" viewBox="0 -7.837689 3.993432 7.837689">
+<title>
+$ i $
+</title>
+<defs>
+<path id='eq6-g0-105' d='M3.383313-1.709589C3.383313-1.769365 3.335492-1.817186 3.263761-1.817186C3.156164-1.817186 3.144209-1.78132 3.084433-1.578082C2.773599-.490162 2.283437-.119552 1.888917-.119552C1.745455-.119552 1.578082-.155417 1.578082-.514072C1.578082-.836862 1.721544-1.195517 1.853051-1.554172L2.689913-3.777833C2.725778-3.873474 2.809465-4.088667 2.809465-4.315816C2.809465-4.817933 2.450809-5.272229 1.865006-5.272229C.765131-5.272229 .32279-3.53873 .32279-3.443088C.32279-3.395268 .37061-3.335492 .454296-3.335492C.561893-3.335492 .573848-3.383313 .621669-3.550685C.908593-4.554919 1.362889-5.033126 1.829141-5.033126C1.936737-5.033126 2.139975-5.021171 2.139975-4.638605C2.139975-4.327771 1.984558-3.93325 1.888917-3.670237L1.052055-1.446575C.980324-1.255293 .908593-1.06401 .908593-.848817C.908593-.310834 1.279203 .119552 1.853051 .119552C2.952927 .119552 3.383313-1.625903 3.383313-1.709589ZM3.287671-7.460025C3.287671-7.639352 3.144209-7.854545 2.881196-7.854545C2.606227-7.854545 2.295392-7.591532 2.295392-7.280697C2.295392-6.981818 2.546451-6.886177 2.689913-6.886177C3.012702-6.886177 3.287671-7.197011 3.287671-7.460025Z'/>
+</defs>
+<g id='eq6-page1'>
+<use x='0' y='0' xlink:href='#eq6-g0-105'/>
+</g>
+</svg> and <svg class="m-math" style="width: 0.574em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 5.514006 5.147373">
+<title>
+$ s $
+</title>
+<defs>
+<path id='eq7-g0-115' d='M2.725778-2.391034C2.929016-2.355168 3.251806-2.283437 3.323537-2.271482C3.478954-2.223661 4.016936-2.032379 4.016936-1.458531C4.016936-1.08792 3.682192-.119552 2.295392-.119552C2.044334-.119552 1.147696-.155417 .908593-.812951C1.3868-.753176 1.625903-1.123786 1.625903-1.3868C1.625903-1.637858 1.458531-1.769365 1.219427-1.769365C.956413-1.769365 .609714-1.566127 .609714-1.028144C.609714-.32279 1.327024 .119552 2.283437 .119552C4.100623 .119552 4.638605-1.219427 4.638605-1.841096C4.638605-2.020423 4.638605-2.355168 4.25604-2.737733C3.957161-3.024658 3.670237-3.084433 3.024658-3.21594C2.701868-3.287671 2.187796-3.395268 2.187796-3.93325C2.187796-4.172354 2.402989-5.033126 3.53873-5.033126C4.040847-5.033126 4.531009-4.841843 4.65056-4.411457C4.124533-4.411457 4.100623-3.957161 4.100623-3.945205C4.100623-3.694147 4.327771-3.622416 4.435367-3.622416C4.60274-3.622416 4.937484-3.753923 4.937484-4.25604S4.483188-5.272229 3.550685-5.272229C1.984558-5.272229 1.566127-4.040847 1.566127-3.550685C1.566127-2.642092 2.450809-2.450809 2.725778-2.391034Z'/>
+</defs>
+<g id='eq7-page1'>
+<use x='0' y='0' xlink:href='#eq7-g0-115'/>
+</g>
+</svg> of <svg class="m-math" style="width: 0.575em; height: 1.059em; vertical-align: -0.243em;" viewBox="0 -7.837689 5.515499 10.162297">
+<title>
+$ j $
+</title>
+<defs>
+<path id='eq8-g0-106' d='M4.184309-3.789788C4.23213-3.981071 4.23213-4.148443 4.23213-4.196264C4.23213-4.889664 3.718057-5.272229 3.180075-5.272229C1.972603-5.272229 1.327024-3.526775 1.327024-3.443088C1.327024-3.383313 1.374844-3.335492 1.446575-3.335492C1.542217-3.335492 1.554172-3.383313 1.613948-3.502864C2.092154-4.662516 2.689913-5.033126 3.144209-5.033126C3.395268-5.033126 3.526775-4.901619 3.526775-4.483188C3.526775-4.196264 3.490909-4.076712 3.443088-3.861519L2.307347 .645579C2.080199 1.530262 1.518306 2.199751 .860772 2.199751C.812951 2.199751 .561893 2.199751 .334745 2.080199C.621669 2.020423 .848817 1.793275 .848817 1.506351C.848817 1.315068 .705355 1.123786 .442341 1.123786C.131507 1.123786-.155417 1.3868-.155417 1.745455C-.155417 2.235616 .37061 2.438854 .860772 2.438854C1.685679 2.438854 2.773599 1.829141 3.072478 .633624L4.184309-3.789788ZM4.674471-7.460025C4.674471-7.758904 4.423412-7.854545 4.27995-7.854545C3.957161-7.854545 3.682192-7.543711 3.682192-7.280697C3.682192-7.10137 3.825654-6.886177 4.088667-6.886177C4.363636-6.886177 4.674471-7.149191 4.674471-7.460025Z'/>
+</defs>
+<g id='eq8-page1'>
+<use x='0' y='0' xlink:href='#eq8-g0-106'/>
+</g>
+</svg>, and lifts <svg class="m-math" style="width: 4.595em; height: 1.282em; vertical-align: -0.350em;" viewBox="0 -8.966376 44.107527 12.309385">
+<title>
+$ -(c_r a) d_j $
+</title>
+<defs>
+<path id='eq9-g2-97' d='M3.598506-1.422665C3.53873-1.219427 3.53873-1.195517 3.371357-.968369C3.108344-.633624 2.582316-.119552 2.020423-.119552C1.530262-.119552 1.255293-.561893 1.255293-1.267248C1.255293-1.924782 1.625903-3.263761 1.853051-3.765878C2.259527-4.60274 2.82142-5.033126 3.287671-5.033126C4.076712-5.033126 4.23213-4.052802 4.23213-3.957161C4.23213-3.945205 4.196264-3.789788 4.184309-3.765878L3.598506-1.422665ZM4.363636-4.483188C4.23213-4.794022 3.90934-5.272229 3.287671-5.272229C1.936737-5.272229 .478207-3.526775 .478207-1.75741C.478207-.573848 1.171606 .119552 1.984558 .119552C2.642092 .119552 3.203985-.394521 3.53873-.789041C3.658281-.083686 4.220174 .119552 4.578829 .119552S5.224408-.095641 5.439601-.526027C5.630884-.932503 5.798257-1.661768 5.798257-1.709589C5.798257-1.769365 5.750436-1.817186 5.678705-1.817186C5.571108-1.817186 5.559153-1.75741 5.511333-1.578082C5.332005-.872727 5.104857-.119552 4.614695-.119552C4.267995-.119552 4.244085-.430386 4.244085-.669489C4.244085-.944458 4.27995-1.075965 4.387547-1.542217C4.471233-1.841096 4.531009-2.10411 4.62665-2.450809C5.068991-4.244085 5.176588-4.674471 5.176588-4.746202C5.176588-4.913574 5.045081-5.045081 4.865753-5.045081C4.483188-5.045081 4.387547-4.62665 4.363636-4.483188Z'/>
+<path id='eq9-g2-99' d='M4.674471-4.495143C4.447323-4.495143 4.339726-4.495143 4.172354-4.351681C4.100623-4.291905 3.969116-4.112578 3.969116-3.921295C3.969116-3.682192 4.148443-3.53873 4.375592-3.53873C4.662516-3.53873 4.985305-3.777833 4.985305-4.25604C4.985305-4.829888 4.435367-5.272229 3.610461-5.272229C2.044334-5.272229 .478207-3.56264 .478207-1.865006C.478207-.824907 1.123786 .119552 2.343213 .119552C3.969116 .119552 4.99726-1.147696 4.99726-1.303113C4.99726-1.374844 4.925529-1.43462 4.877709-1.43462C4.841843-1.43462 4.829888-1.422665 4.722291-1.315068C3.957161-.298879 2.82142-.119552 2.367123-.119552C1.542217-.119552 1.279203-.836862 1.279203-1.43462C1.279203-1.853051 1.482441-3.012702 1.912827-3.825654C2.223661-4.387547 2.86924-5.033126 3.622416-5.033126C3.777833-5.033126 4.435367-5.009215 4.674471-4.495143Z'/>
+<path id='eq9-g2-100' d='M6.01345-7.998007C6.025405-8.045828 6.049315-8.117559 6.049315-8.177335C6.049315-8.296887 5.929763-8.296887 5.905853-8.296887C5.893898-8.296887 5.308095-8.249066 5.248319-8.237111C5.045081-8.225156 4.865753-8.201245 4.65056-8.18929C4.351681-8.16538 4.267995-8.153425 4.267995-7.938232C4.267995-7.81868 4.363636-7.81868 4.531009-7.81868C5.116812-7.81868 5.128767-7.711083 5.128767-7.591532C5.128767-7.519801 5.104857-7.424159 5.092902-7.388294L4.363636-4.483188C4.23213-4.794022 3.90934-5.272229 3.287671-5.272229C1.936737-5.272229 .478207-3.526775 .478207-1.75741C.478207-.573848 1.171606 .119552 1.984558 .119552C2.642092 .119552 3.203985-.394521 3.53873-.789041C3.658281-.083686 4.220174 .119552 4.578829 .119552S5.224408-.095641 5.439601-.526027C5.630884-.932503 5.798257-1.661768 5.798257-1.709589C5.798257-1.769365 5.750436-1.817186 5.678705-1.817186C5.571108-1.817186 5.559153-1.75741 5.511333-1.578082C5.332005-.872727 5.104857-.119552 4.614695-.119552C4.267995-.119552 4.244085-.430386 4.244085-.669489C4.244085-.71731 4.244085-.968369 4.327771-1.303113L6.01345-7.998007ZM3.598506-1.422665C3.53873-1.219427 3.53873-1.195517 3.371357-.968369C3.108344-.633624 2.582316-.119552 2.020423-.119552C1.530262-.119552 1.255293-.561893 1.255293-1.267248C1.255293-1.924782 1.625903-3.263761 1.853051-3.765878C2.259527-4.60274 2.82142-5.033126 3.287671-5.033126C4.076712-5.033126 4.23213-4.052802 4.23213-3.957161C4.23213-3.945205 4.196264-3.789788 4.184309-3.765878L3.598506-1.422665Z'/>
+<path id='eq9-g1-106' d='M3.291656-4.97335C3.291656-5.124782 3.172105-5.276214 2.980822-5.276214C2.741719-5.276214 2.534496-5.053051 2.534496-4.845828C2.534496-4.694396 2.654047-4.542964 2.84533-4.542964C3.084433-4.542964 3.291656-4.766127 3.291656-4.97335ZM1.625903 .398506C1.506351 .884682 1.115816 1.40274 .629639 1.40274C.502117 1.40274 .382565 1.370859 .366625 1.362889C.613699 1.243337 .645579 1.028144 .645579 .956413C.645579 .765131 .502117 .661519 .334745 .661519C.103611 .661519-.111582 .860772-.111582 1.123786C-.111582 1.42665 .183313 1.625903 .637609 1.625903C1.123786 1.625903 2.000498 1.323039 2.239601 .366625L2.956912-2.486675C2.980822-2.582316 2.996762-2.646077 2.996762-2.765629C2.996762-3.203985 2.646077-3.514819 2.183811-3.514819C1.338979-3.514819 .844832-2.399004 .844832-2.295392C.844832-2.223661 .900623-2.191781 .964384-2.191781C1.052055-2.191781 1.060025-2.215691 1.115816-2.335243C1.354919-2.885181 1.761395-3.291656 2.1599-3.291656C2.327273-3.291656 2.422914-3.180075 2.422914-2.917061C2.422914-2.805479 2.399004-2.693898 2.375093-2.582316L1.625903 .398506Z'/>
+<path id='eq9-g1-114' d='M1.538232-1.099875C1.625903-1.44259 1.713574-1.785305 1.793275-2.13599C1.801245-2.15193 1.857036-2.383064 1.865006-2.422914C1.888917-2.494645 2.088169-2.82142 2.295392-3.020672C2.550436-3.251806 2.82142-3.291656 2.964882-3.291656C3.052553-3.291656 3.196015-3.283686 3.307597-3.188045C2.964882-3.116314 2.917061-2.82142 2.917061-2.749689C2.917061-2.574346 3.052553-2.454795 3.227895-2.454795C3.443088-2.454795 3.682192-2.630137 3.682192-2.948941C3.682192-3.235866 3.435118-3.514819 2.980822-3.514819C2.438854-3.514819 2.072229-3.156164 1.904857-2.940971C1.745455-3.514819 1.203487-3.514819 1.123786-3.514819C.836862-3.514819 .637609-3.331507 .510087-3.084433C.326775-2.725778 .239103-2.319303 .239103-2.295392C.239103-2.223661 .294894-2.191781 .358655-2.191781C.462267-2.191781 .470237-2.223661 .526027-2.430884C.621669-2.82142 .765131-3.291656 1.099875-3.291656C1.307098-3.291656 1.354919-3.092403 1.354919-2.917061C1.354919-2.773599 1.315068-2.622167 1.251308-2.359153C1.235367-2.295392 1.115816-1.825156 1.083935-1.713574L.789041-.518057C.757161-.398506 .70934-.199253 .70934-.167372C.70934 .01594 .860772 .079701 .964384 .079701C1.243337 .079701 1.299128-.143462 1.362889-.414446L1.538232-1.099875Z'/>
+<path id='eq9-g3-40' d='M3.88543 2.905106C3.88543 2.86924 3.88543 2.84533 3.682192 2.642092C2.486675 1.43462 1.817186-.537983 1.817186-2.976837C1.817186-5.296139 2.379078-7.292653 3.765878-8.703362C3.88543-8.810959 3.88543-8.834869 3.88543-8.870735C3.88543-8.942466 3.825654-8.966376 3.777833-8.966376C3.622416-8.966376 2.642092-8.105604 2.056289-6.933998C1.446575-5.726526 1.171606-4.447323 1.171606-2.976837C1.171606-1.912827 1.338979-.490162 1.960648 .789041C2.666002 2.223661 3.646326 3.000747 3.777833 3.000747C3.825654 3.000747 3.88543 2.976837 3.88543 2.905106Z'/>
+<path id='eq9-g3-41' d='M3.371357-2.976837C3.371357-3.88543 3.251806-5.36787 2.582316-6.75467C1.876961-8.18929 .896638-8.966376 .765131-8.966376C.71731-8.966376 .657534-8.942466 .657534-8.870735C.657534-8.834869 .657534-8.810959 .860772-8.607721C2.056289-7.400249 2.725778-5.427646 2.725778-2.988792C2.725778-.669489 2.163885 1.327024 .777086 2.737733C.657534 2.84533 .657534 2.86924 .657534 2.905106C.657534 2.976837 .71731 3.000747 .765131 3.000747C.920548 3.000747 1.900872 2.139975 2.486675 .968369C3.096389-.251059 3.371357-1.542217 3.371357-2.976837Z'/>
+<path id='eq9-g0-0' d='M7.878456-2.749689C8.081694-2.749689 8.296887-2.749689 8.296887-2.988792S8.081694-3.227895 7.878456-3.227895H1.41071C1.207472-3.227895 .992279-3.227895 .992279-2.988792S1.207472-2.749689 1.41071-2.749689H7.878456Z'/>
+</defs>
+<g id='eq9-page1'>
+<use x='0' y='0' xlink:href='#eq9-g0-0'/>
+<use x='9.298497' y='0' xlink:href='#eq9-g3-40'/>
+<use x='13.850823' y='0' xlink:href='#eq9-g2-99'/>
+<use x='18.888811' y='1.793263' xlink:href='#eq9-g1-114'/>
+<use x='23.443539' y='0' xlink:href='#eq9-g2-97'/>
+<use x='29.588483' y='0' xlink:href='#eq9-g3-41'/>
+<use x='34.140809' y='0' xlink:href='#eq9-g2-100'/>
+<use x='40.223502' y='1.793263' xlink:href='#eq9-g1-106'/>
+</g>
+</svg> to row <svg class="m-math" style="width: 0.583em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 5.600473 5.147373">
+<title>
+$ r $
+</title>
+<defs>
+<path id='eq10-g0-114' d='M4.65056-4.889664C4.27995-4.817933 4.088667-4.554919 4.088667-4.291905C4.088667-4.004981 4.315816-3.90934 4.483188-3.90934C4.817933-3.90934 5.092902-4.196264 5.092902-4.554919C5.092902-4.937484 4.722291-5.272229 4.124533-5.272229C3.646326-5.272229 3.096389-5.057036 2.594271-4.327771C2.510585-4.961395 2.032379-5.272229 1.554172-5.272229C1.08792-5.272229 .848817-4.913574 .705355-4.65056C.502117-4.220174 .32279-3.502864 .32279-3.443088C.32279-3.395268 .37061-3.335492 .454296-3.335492C.549938-3.335492 .561893-3.347447 .633624-3.622416C.812951-4.339726 1.0401-5.033126 1.518306-5.033126C1.80523-5.033126 1.888917-4.829888 1.888917-4.483188C1.888917-4.220174 1.769365-3.753923 1.685679-3.383313L1.350934-2.092154C1.303113-1.865006 1.171606-1.327024 1.111831-1.111831C1.028144-.800996 .896638-.239103 .896638-.179328C.896638-.011955 1.028144 .119552 1.207472 .119552C1.338979 .119552 1.566127 .035866 1.637858-.203238C1.673724-.298879 2.116065-2.10411 2.187796-2.379078C2.247572-2.642092 2.319303-2.893151 2.379078-3.156164C2.426899-3.323537 2.47472-3.514819 2.510585-3.670237C2.546451-3.777833 2.86924-4.363636 3.16812-4.62665C3.311582-4.758157 3.622416-5.033126 4.112578-5.033126C4.303861-5.033126 4.495143-4.99726 4.65056-4.889664Z'/>
+</defs>
+<g id='eq10-page1'>
+<use x='0' y='0' xlink:href='#eq10-g0-114'/>
+</g>
+</svg> when <svg class="m-math" style="width: 0.575em; height: 1.059em; vertical-align: -0.243em;" viewBox="0 -7.837689 5.515499 10.162297">
+<title>
+$ j $
+</title>
+<defs>
+<path id='eq11-g0-106' d='M4.184309-3.789788C4.23213-3.981071 4.23213-4.148443 4.23213-4.196264C4.23213-4.889664 3.718057-5.272229 3.180075-5.272229C1.972603-5.272229 1.327024-3.526775 1.327024-3.443088C1.327024-3.383313 1.374844-3.335492 1.446575-3.335492C1.542217-3.335492 1.554172-3.383313 1.613948-3.502864C2.092154-4.662516 2.689913-5.033126 3.144209-5.033126C3.395268-5.033126 3.526775-4.901619 3.526775-4.483188C3.526775-4.196264 3.490909-4.076712 3.443088-3.861519L2.307347 .645579C2.080199 1.530262 1.518306 2.199751 .860772 2.199751C.812951 2.199751 .561893 2.199751 .334745 2.080199C.621669 2.020423 .848817 1.793275 .848817 1.506351C.848817 1.315068 .705355 1.123786 .442341 1.123786C.131507 1.123786-.155417 1.3868-.155417 1.745455C-.155417 2.235616 .37061 2.438854 .860772 2.438854C1.685679 2.438854 2.773599 1.829141 3.072478 .633624L4.184309-3.789788ZM4.674471-7.460025C4.674471-7.758904 4.423412-7.854545 4.27995-7.854545C3.957161-7.854545 3.682192-7.543711 3.682192-7.280697C3.682192-7.10137 3.825654-6.886177 4.088667-6.886177C4.363636-6.886177 4.674471-7.149191 4.674471-7.460025Z'/>
+</defs>
+<g id='eq11-page1'>
+<use x='0' y='0' xlink:href='#eq11-g0-106'/>
+</g>
+</svg> has a nonzero affine value <svg class="m-math" style="width: 1.038em; height: 1.213em; vertical-align: -0.350em;" viewBox="0 -8.302191 9.966718 11.6452">
+<title>
+$ d_j $
+</title>
+<defs>
+<path id='eq12-g0-106' d='M3.291656-4.97335C3.291656-5.124782 3.172105-5.276214 2.980822-5.276214C2.741719-5.276214 2.534496-5.053051 2.534496-4.845828C2.534496-4.694396 2.654047-4.542964 2.84533-4.542964C3.084433-4.542964 3.291656-4.766127 3.291656-4.97335ZM1.625903 .398506C1.506351 .884682 1.115816 1.40274 .629639 1.40274C.502117 1.40274 .382565 1.370859 .366625 1.362889C.613699 1.243337 .645579 1.028144 .645579 .956413C.645579 .765131 .502117 .661519 .334745 .661519C.103611 .661519-.111582 .860772-.111582 1.123786C-.111582 1.42665 .183313 1.625903 .637609 1.625903C1.123786 1.625903 2.000498 1.323039 2.239601 .366625L2.956912-2.486675C2.980822-2.582316 2.996762-2.646077 2.996762-2.765629C2.996762-3.203985 2.646077-3.514819 2.183811-3.514819C1.338979-3.514819 .844832-2.399004 .844832-2.295392C.844832-2.223661 .900623-2.191781 .964384-2.191781C1.052055-2.191781 1.060025-2.215691 1.115816-2.335243C1.354919-2.885181 1.761395-3.291656 2.1599-3.291656C2.327273-3.291656 2.422914-3.180075 2.422914-2.917061C2.422914-2.805479 2.399004-2.693898 2.375093-2.582316L1.625903 .398506Z'/>
+<path id='eq12-g1-100' d='M6.01345-7.998007C6.025405-8.045828 6.049315-8.117559 6.049315-8.177335C6.049315-8.296887 5.929763-8.296887 5.905853-8.296887C5.893898-8.296887 5.308095-8.249066 5.248319-8.237111C5.045081-8.225156 4.865753-8.201245 4.65056-8.18929C4.351681-8.16538 4.267995-8.153425 4.267995-7.938232C4.267995-7.81868 4.363636-7.81868 4.531009-7.81868C5.116812-7.81868 5.128767-7.711083 5.128767-7.591532C5.128767-7.519801 5.104857-7.424159 5.092902-7.388294L4.363636-4.483188C4.23213-4.794022 3.90934-5.272229 3.287671-5.272229C1.936737-5.272229 .478207-3.526775 .478207-1.75741C.478207-.573848 1.171606 .119552 1.984558 .119552C2.642092 .119552 3.203985-.394521 3.53873-.789041C3.658281-.083686 4.220174 .119552 4.578829 .119552S5.224408-.095641 5.439601-.526027C5.630884-.932503 5.798257-1.661768 5.798257-1.709589C5.798257-1.769365 5.750436-1.817186 5.678705-1.817186C5.571108-1.817186 5.559153-1.75741 5.511333-1.578082C5.332005-.872727 5.104857-.119552 4.614695-.119552C4.267995-.119552 4.244085-.430386 4.244085-.669489C4.244085-.71731 4.244085-.968369 4.327771-1.303113L6.01345-7.998007ZM3.598506-1.422665C3.53873-1.219427 3.53873-1.195517 3.371357-.968369C3.108344-.633624 2.582316-.119552 2.020423-.119552C1.530262-.119552 1.255293-.561893 1.255293-1.267248C1.255293-1.924782 1.625903-3.263761 1.853051-3.765878C2.259527-4.60274 2.82142-5.033126 3.287671-5.033126C4.076712-5.033126 4.23213-4.052802 4.23213-3.957161C4.23213-3.945205 4.196264-3.789788 4.184309-3.765878L3.598506-1.422665Z'/>
+</defs>
+<g id='eq12-page1'>
+<use x='0' y='0' xlink:href='#eq12-g1-100'/>
+<use x='6.082693' y='1.793263' xlink:href='#eq12-g0-106'/>
+</g>
+</svg>, as the host assemblies do.</p>
+          </div></section>
+          <section class="m-doc-details" id="aafaa5c25d6988b6a14caf67e77b36c64"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Backend&gt;
+                template&lt;class Indices, class Previous&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">static size_t </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aafaa5c25d6988b6a14caf67e77b36c64" class="m-doc-self">countDifferences</a>(</span><span class="m-doc-wrap">const <a href="#ab78f7cd66f68a9ce08c3ca5a42e12a90" class="m-doc">ExecutionSpace</a>&amp; execution,
+              const Indices&amp; indices,
+              const Previous&amp; previous)</span></span>
+            </h3>
+            <p>Counts the positions at which two index lists differ.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">execution</td>
+                  <td>Execution space instance of the kernel.</td>
+                </tr>
+                <tr>
+                  <td>indices</td>
+                  <td>Index list.</td>
+                </tr>
+                <tr>
+                  <td>previous</td>
+                  <td>Index list it is compared with, at least as long.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Number of differing positions.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a84a3b526c6d6d4af4a2e43ff91389aca"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Backend&gt;
+                template&lt;class From, class To&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">static void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a84a3b526c6d6d4af4a2e43ff91389aca" class="m-doc-self">copyCoordinates</a>(</span><span class="m-doc-wrap">const <a href="#ab78f7cd66f68a9ce08c3ca5a42e12a90" class="m-doc">ExecutionSpace</a>&amp; execution,
+              const From&amp; from,
+              const To&amp; to,
+              size_t offset = 0)</span></span>
+            </h3>
+            <p>Copies coordinates into another index type.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">execution</td>
+                  <td>Execution space instance of the kernel.</td>
+                </tr>
+                <tr>
+                  <td>from</td>
+                  <td>Coordinates copied.</td>
+                </tr>
+                <tr>
+                  <td>to</td>
+                  <td>Receives the coordinates.</td>
+                </tr>
+                <tr>
+                  <td>offset</td>
+                  <td>Position of the first coordinate received.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a1a5ed8eb4290fc76227dc7ff448dbbf0"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Backend&gt;
+                template&lt;class Indices, class Previous&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">static size_t </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1a5ed8eb4290fc76227dc7ff448dbbf0" class="m-doc-self">countChanges</a>(</span><span class="m-doc-wrap">const <a href="#ab78f7cd66f68a9ce08c3ca5a42e12a90" class="m-doc">ExecutionSpace</a>&amp; execution,
+              const Indices&amp; rows,
+              const Indices&amp; cols,
+              const Previous&amp; previousRows,
+              const Previous&amp; previousCols,
+              size_t begin = 0,
+              size_t end = std::numeric_limits&lt;size_t&gt;::max())</span></span>
+            </h3>
+            <p>Counts the coordinates that differ between two patterns.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">execution</td>
+                  <td>Execution space instance of the kernel.</td>
+                </tr>
+                <tr>
+                  <td>rows</td>
+                  <td>Row coordinates.</td>
+                </tr>
+                <tr>
+                  <td>cols</td>
+                  <td>Column coordinates.</td>
+                </tr>
+                <tr>
+                  <td>previousRows</td>
+                  <td>Row coordinates of the previous pattern.</td>
+                </tr>
+                <tr>
+                  <td>previousCols</td>
+                  <td>Column coordinates of the previous pattern.</td>
+                </tr>
+                <tr>
+                  <td>begin</td>
+                  <td>Position of the first coordinate compared.</td>
+                </tr>
+                <tr>
+                  <td>end</td>
+                  <td>Position past the last coordinate compared, the end of the list by default.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Number of differing coordinates.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a54300c5de7a6b6053e5dae9c71dfa6f1"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Backend&gt;
+                template&lt;class Indices&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">static void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a54300c5de7a6b6053e5dae9c71dfa6f1" class="m-doc-self">sortPattern</a>(</span><span class="m-doc-wrap">const <a href="#ab78f7cd66f68a9ce08c3ca5a42e12a90" class="m-doc">ExecutionSpace</a>&amp; execution,
+              size_t columns,
+              const std::vector&lt;<a href="struct_rodin_1_1_assembly_1_1_internal_1_1_c_o_o_segment.html" class="m-doc">COOSegment</a>&gt;&amp; segments,
+              const std::vector&lt;size_t&gt;&amp; offsets,
+              const Indices&amp; rows,
+              const Indices&amp; cols,
+              <a href="struct_rodin_1_1_assembly_1_1_internal_1_1_c_o_o_order.html" class="m-doc">COOOrder</a>&lt;<a href="#abd2285c284ad3cfde965ef4ecc1dab84" class="m-doc">MemorySpace</a>&gt;&amp; order)</span></span>
+            </h3>
+            <p>Sorts the coordinates by row then column.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">execution</td>
+                  <td>Execution space instance of the kernel.</td>
+                </tr>
+                <tr>
+                  <td>columns</td>
+                  <td>Column count of the system.</td>
+                </tr>
+                <tr>
+                  <td>segments</td>
+                  <td>Segments of the coordinates.</td>
+                </tr>
+                <tr>
+                  <td>offsets</td>
+                  <td>Position of the first entry of every segment, the entries past the last segment being stored in rank order.</td>
+                </tr>
+                <tr>
+                  <td>rows</td>
+                  <td>Row coordinates.</td>
+                </tr>
+                <tr>
+                  <td>cols</td>
+                  <td>Column coordinates.</td>
+                </tr>
+                <tr>
+                  <td>order</td>
+                  <td>Receives the indices of the sorted coordinates.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>The coordinates are handed to the sort in rank order, so that the duplicates of a coordinate follow one another as the integrators ranked them, whatever the spacing of their entries.</p>
+          </div></section>
+          <section class="m-doc-details" id="a2623d16ced939230bb03e16fd6c06d47"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Backend&gt;
+                template&lt;class Indices, class Order&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">static void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2623d16ced939230bb03e16fd6c06d47" class="m-doc-self">sortPattern</a>(</span><span class="m-doc-wrap">const <a href="#ab78f7cd66f68a9ce08c3ca5a42e12a90" class="m-doc">ExecutionSpace</a>&amp; execution,
+              size_t columns,
+              const std::vector&lt;<a href="struct_rodin_1_1_assembly_1_1_internal_1_1_c_o_o_segment.html" class="m-doc">COOSegment</a>&gt;&amp; segments,
+              const std::vector&lt;size_t&gt;&amp; offsets,
+              const Indices&amp; rows,
+              const Indices&amp; cols,
+              const Order&amp; order,
+              size_t blockSize = <a href="#a146a578510aef370bae9bf8bfb879def" class="m-doc">SortBlockSize</a>)</span></span>
+            </h3>
+            <p>Sorts the coordinates into the given indices.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">execution</td>
+                  <td>Execution space instance of the kernel.</td>
+                </tr>
+                <tr>
+                  <td>columns</td>
+                  <td>Column count of the system.</td>
+                </tr>
+                <tr>
+                  <td>segments</td>
+                  <td>Segments of the coordinates.</td>
+                </tr>
+                <tr>
+                  <td>offsets</td>
+                  <td>Position of the first entry of every segment.</td>
+                </tr>
+                <tr>
+                  <td>rows</td>
+                  <td>Row coordinates.</td>
+                </tr>
+                <tr>
+                  <td>cols</td>
+                  <td>Column coordinates.</td>
+                </tr>
+                <tr>
+                  <td>order</td>
+                  <td>Receives the indices of the sorted coordinates.</td>
+                </tr>
+                <tr>
+                  <td>blockSize</td>
+                  <td>Target maximum number of coordinates sorted at once.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>The rows are split in ranges of at most SortBlockSize coordinates, by halving, and the ranges are sorted one after the other in row order. Contribution rank breaks coordinate ties, so every bucket size and backend produces the same permutation.</p>
+          </div></section>
+          <section class="m-doc-details" id="a38df2ea92cd97514b8ec0917a89c5c12"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Backend&gt;
+                template&lt;class Indices, class Order, class Coordinates&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">static void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a38df2ea92cd97514b8ec0917a89c5c12" class="m-doc-self">listDistinct</a>(</span><span class="m-doc-wrap">const <a href="#ab78f7cd66f68a9ce08c3ca5a42e12a90" class="m-doc">ExecutionSpace</a>&amp; execution,
+              const Indices&amp; rows,
+              const Indices&amp; cols,
+              const Order&amp; order,
+              const <a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Kokkos::<wbr />View</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>*, <a href="#abd2285c284ad3cfde965ef4ecc1dab84" class="m-doc">MemorySpace</a>&gt;&amp; starts,
+              const Coordinates&amp; distinctRows,
+              const Coordinates&amp; distinctCols)</span></span>
+            </h3>
+            <p>Lists the distinct coordinates in the PETSc index type.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">execution</td>
+                  <td>Execution space instance of the kernel.</td>
+                </tr>
+                <tr>
+                  <td>rows</td>
+                  <td>Row coordinates.</td>
+                </tr>
+                <tr>
+                  <td>cols</td>
+                  <td>Column coordinates.</td>
+                </tr>
+                <tr>
+                  <td>order</td>
+                  <td>Indices of the sorted coordinates.</td>
+                </tr>
+                <tr>
+                  <td>starts</td>
+                  <td>Start of each distinct coordinate in the sorted coordinates.</td>
+                </tr>
+                <tr>
+                  <td>distinctRows</td>
+                  <td>Receives the rows of the distinct coordinates.</td>
+                </tr>
+                <tr>
+                  <td>distinctCols</td>
+                  <td>Receives the columns of the distinct coordinates.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a227c654bb131971eea261bccfcf15dbc"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Backend&gt;
+                template&lt;class Indices, class Order, class Coordinates&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">static void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a227c654bb131971eea261bccfcf15dbc" class="m-doc-self">restore</a>(</span><span class="m-doc-wrap">const <a href="#ab78f7cd66f68a9ce08c3ca5a42e12a90" class="m-doc">ExecutionSpace</a>&amp; execution,
+              const Order&amp; order,
+              const <a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Kokkos::<wbr />View</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>*, <a href="#abd2285c284ad3cfde965ef4ecc1dab84" class="m-doc">MemorySpace</a>&gt;&amp; starts,
+              const Coordinates&amp; distinctRows,
+              const Coordinates&amp; distinctCols,
+              const Indices&amp; rows,
+              const Indices&amp; cols)</span></span>
+            </h3>
+            <p>Lists the coordinates again from the distinct ones, the inverse of listDistinct().</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">execution</td>
+                  <td>Execution space instance of the kernel.</td>
+                </tr>
+                <tr>
+                  <td>order</td>
+                  <td>Indices of the sorted coordinates.</td>
+                </tr>
+                <tr>
+                  <td>starts</td>
+                  <td>Start of each distinct coordinate in the sorted coordinates.</td>
+                </tr>
+                <tr>
+                  <td>distinctRows</td>
+                  <td>Rows of the distinct coordinates.</td>
+                </tr>
+                <tr>
+                  <td>distinctCols</td>
+                  <td>Columns of the distinct coordinates.</td>
+                </tr>
+                <tr>
+                  <td>rows</td>
+                  <td>Receives the row coordinates.</td>
+                </tr>
+                <tr>
+                  <td>cols</td>
+                  <td>Receives the column coordinates.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a166e49ac6630810a56320ce0f0a52b7c"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Backend&gt;
+                template&lt;class Order, class Indices, class Scalars&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">static void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a166e49ac6630810a56320ce0f0a52b7c" class="m-doc-self">merge</a>(</span><span class="m-doc-wrap">const <a href="#ab78f7cd66f68a9ce08c3ca5a42e12a90" class="m-doc">ExecutionSpace</a>&amp; execution,
+              const Order&amp; order,
+              const Indices&amp; starts,
+              const Scalars&amp; values,
+              const Scalars&amp; merged)</span></span>
+            </h3>
+            <p>Sums the values of each distinct coordinate.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">execution</td>
+                  <td>Execution space instance of the kernel.</td>
+                </tr>
+                <tr>
+                  <td>order</td>
+                  <td>Indices of the sorted coordinates.</td>
+                </tr>
+                <tr>
+                  <td>starts</td>
+                  <td>Start of each distinct coordinate in the sorted coordinates, followed by the list size.</td>
+                </tr>
+                <tr>
+                  <td>values</td>
+                  <td>Values of the coordinate list.</td>
+                </tr>
+                <tr>
+                  <td>merged</td>
+                  <td>Receives the sum of each distinct coordinate.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a24cf57457a364598919633f4619554dc"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a24cf57457a364598919633f4619554dc" class="m-doc-self">COOAssembly</a>(</span><span class="m-doc-wrap">const <a href="#ab78f7cd66f68a9ce08c3ca5a42e12a90" class="m-doc">ExecutionSpace</a>&amp; execution,
+              size_t rows,
+              size_t cols)</span></span>
+            </h3>
+            <p>Creates an empty system.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">execution</td>
+                  <td>Execution space instance of the mesh.</td>
+                </tr>
+                <tr>
+                  <td>rows</td>
+                  <td>Number of rows, the size of the test spaces.</td>
+                </tr>
+                <tr>
+                  <td>cols</td>
+                  <td>Number of columns, the size of the trial spaces.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="adb22abb433fdda9dddd549a915c46967"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adb22abb433fdda9dddd549a915c46967" class="m-doc-self">fix</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_dirichlet_b_c_base.html" class="m-doc">Variational::<wbr />DirichletBCBase</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; dbc,
+              size_t offset,
+              size_t masterOffset)</span></span>
+            </h3>
+            <p>Assembles a Dirichlet condition and constrains its degrees of freedom.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">dbc</td>
+                  <td>Value or identification Dirichlet condition.</td>
+                </tr>
+                <tr>
+                  <td>offset</td>
+                  <td>Offset of the constrained space in the system.</td>
+                </tr>
+                <tr>
+                  <td>masterOffset</td>
+                  <td>Offset of the space of the masters of an identification.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aea5bdc2769ae3600c5bf64c5109e18fa"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aea5bdc2769ae3600c5bf64c5109e18fa" class="m-doc-self">fix</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_dirichlet_b_c_base.html" class="m-doc">Variational::<wbr />DirichletBCBase</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; dbc,
+              size_t offset)</span></span>
+            </h3>
+            <p>Assembles a Dirichlet condition whose masters, if any, are in the constrained space.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">dbc</td>
+                  <td>Value or identification Dirichlet condition.</td>
+                </tr>
+                <tr>
+                  <td>offset</td>
+                  <td>Offset of the constrained space in the system.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a4bb258b5acd9582ef5d9263c1e3d8fbe"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4bb258b5acd9582ef5d9263c1e3d8fbe" class="m-doc-self">identify</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_periodic_b_c_base.html" class="m-doc">Variational::<wbr />PeriodicBCBase</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; pbc,
+              size_t offset)</span></span>
+            </h3>
+            <p>Assembles a periodic condition and identifies its degrees of freedom.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">pbc</td>
+                  <td>Periodic condition.</td>
+                </tr>
+                <tr>
+                  <td>offset</td>
+                  <td>Offset of the constrained space in the system.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ac7055ae1161e3e0d69558169704d0967"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">bool </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac7055ae1161e3e0d69558169704d0967" class="m-doc-self">hasConstraints</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Whether the matrix contributes to the right-hand side; collective once the system is distributed, since a process may hold degrees of freedom fixed by another one.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Whether a degree of freedom is fixed or identified, on any process once the system is distributed.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="af9de01fa3a4a0054ff9d64bdb008c5ee"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af9de01fa3a4a0054ff9d64bdb008c5ee" class="m-doc-self">distribute</a>(</span><span class="m-doc-wrap"><a href="struct_rodin_1_1_assembly_1_1_internal_1_1_c_o_o_distribution.html" class="m-doc">COODistribution</a> distribution)</span></span>
+            </h3>
+            <p>Distributes the system over MPI processes.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">distribution</td>
+                  <td>Global numbering of the local rows and columns.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>The rows and columns of the system are then the local degrees of freedom. Their entries are sent to the owners of their global indices, which sum them. Every process eliminates the fixed degrees of freedom it holds, and their owner alone writes the diagonal and the fixed value.</p>
+          </div></section>
+          <section class="m-doc-details" id="a6eb32229719e75e262ae8ea733ce14d2"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6eb32229719e75e262ae8ea733ce14d2" class="m-doc-self">distribute</a>(</span><span class="m-doc-wrap"><a href="struct_rodin_1_1_assembly_1_1_internal_1_1_c_o_o_distribution.html" class="m-doc">COODistribution</a> rows,
+              <a href="struct_rodin_1_1_assembly_1_1_internal_1_1_c_o_o_distribution.html" class="m-doc">COODistribution</a> cols)</span></span>
+            </h3>
+            <p>Distributes a system without constraints whose rows and columns are numbered apart.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">rows</td>
+                  <td>Global numbering of the local rows.</td>
+                </tr>
+                <tr>
+                  <td>cols</td>
+                  <td>Global numbering of the local columns.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a5917145d799791b2dc40350fa9e67c26"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">const <a href="struct_rodin_1_1_assembly_1_1_internal_1_1_c_o_o_distribution.html" class="m-doc">COODistribution</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5917145d799791b2dc40350fa9e67c26" class="m-doc-self">getDistribution</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Gets the distribution of a distributed system.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Distribution.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a2f1f0d95b0d290ba7882fa72a03486c7"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2f1f0d95b0d290ba7882fa72a03486c7" class="m-doc-self">add</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_local_bilinear_form_integrator_base.html" class="m-doc">Variational::<wbr />LocalBilinearFormIntegratorBase</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; lbfi,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> row,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> col)</span></span>
+            </h3>
+            <p>Adds a local integrator to the system.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">lbfi</td>
+                  <td>Local integrator, possibly negated or scaled by a real.</td>
+                </tr>
+                <tr>
+                  <td>row</td>
+                  <td>Offset of its test space.</td>
+                </tr>
+                <tr>
+                  <td>col</td>
+                  <td>Offset of its trial space.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ae59821e10fbc576028a4240845112bb2"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae59821e10fbc576028a4240845112bb2" class="m-doc-self">add</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_global_bilinear_form_integrator_base.html" class="m-doc">Variational::<wbr />GlobalBilinearFormIntegratorBase</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; gbfi,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> row,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> col)</span></span>
+            </h3>
+            <p>Adds a global integrator to the system.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">gbfi</td>
+                  <td>Global integrator, possibly negated.</td>
+                </tr>
+                <tr>
+                  <td>row</td>
+                  <td>Offset of its test space.</td>
+                </tr>
+                <tr>
+                  <td>col</td>
+                  <td>Offset of its trial space.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a8f9cec3f23e1ff26be61480aa1eacd85"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8f9cec3f23e1ff26be61480aa1eacd85" class="m-doc-self">add</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">Variational::<wbr />LinearFormIntegratorBase</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; lfi,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> row,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> sign)</span></span>
+            </h3>
+            <p>Adds a linear integrator to the system.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">lfi</td>
+                  <td>Integrator, possibly negated.</td>
+                </tr>
+                <tr>
+                  <td>row</td>
+                  <td>Offset of its test space.</td>
+                </tr>
+                <tr>
+                  <td>sign</td>
+                  <td>Factor of the contributions.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a3ba777e3efeb71f0161d6b0e4b042a7c"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3ba777e3efeb71f0161d6b0e4b042a7c" class="m-doc-self">add</a>(</span><span class="m-doc-wrap">::Mat op,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> row,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> col)</span></span>
+            </h3>
+            <p>Adds the entries of a preassembled operator to the matrix.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">op</td>
+                  <td>Operator, alive until finish() returns.</td>
+                </tr>
+                <tr>
+                  <td>row</td>
+                  <td>Offset of its test space.</td>
+                </tr>
+                <tr>
+                  <td>col</td>
+                  <td>Offset of its trial space.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aed7dad6b47375934bac36c2d4f292a51"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aed7dad6b47375934bac36c2d4f292a51" class="m-doc-self">add</a>(</span><span class="m-doc-wrap">::Vec vec,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> row)</span></span>
+            </h3>
+            <p>Adds a preassembled vector to the right-hand side.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">vec</td>
+                  <td>Vector, alive until finish() returns.</td>
+                </tr>
+                <tr>
+                  <td>row</td>
+                  <td>Offset of its test space.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ad1c10ec7324927e91f5ac550df45024c"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad1c10ec7324927e91f5ac550df45024c" class="m-doc-self">finish</a>(</span><span class="m-doc-wrap"><a href="#a95217f88c86703f54044894c73b2fb88" class="m-doc">CacheType</a>&amp; cache,
+              <a href="#a3caeca5dbbe42914a885b665dd0fe2d0" class="m-doc">CoefficientCache</a>&amp; coefficients,
+              ::Mat A,
+              ::Vec b)</span></span>
+            </h3>
+            <p>Integrates, eliminates the constraints and fills the PETSc objects.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">cache</td>
+                  <td>Buffers and pattern of the previous assemblies.</td>
+                </tr>
+                <tr>
+                  <td>coefficients</td>
+                  <td>Assembler storage for reusable coefficient gathers.</td>
+                </tr>
+                <tr>
+                  <td>A</td>
+                  <td>Matrix, filled when not null.</td>
+                </tr>
+                <tr>
+                  <td>b</td>
+                  <td>Right-hand side, filled when not null.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a7c34b79d92fd94fe12a4ffa22a7d08f3"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Backend&gt;
+                template&lt;class Indices, class Fixed&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Kokkos::<wbr />View</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>*, <a href="#abd2285c284ad3cfde965ef4ecc1dab84" class="m-doc">MemorySpace</a>&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7c34b79d92fd94fe12a4ffa22a7d08f3" class="m-doc-self">selectEntries</a>(</span><span class="m-doc-wrap">const <a href="#ab78f7cd66f68a9ce08c3ca5a42e12a90" class="m-doc">ExecutionSpace</a>&amp; execution,
+              size_t count,
+              const Indices&amp; rows,
+              const Indices&amp; cols,
+              const Fixed&amp; fixed,
+              bool moved)</span></span>
+            </h3>
+            <p>Lists by increasing position the entries of a free row and a fixed column, or those of a fixed row.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">execution</td>
+                  <td>Execution space instance of the kernels.</td>
+                </tr>
+                <tr>
+                  <td>count</td>
+                  <td>Number of entries in the list.</td>
+                </tr>
+                <tr>
+                  <td>rows</td>
+                  <td>Row coordinates.</td>
+                </tr>
+                <tr>
+                  <td>cols</td>
+                  <td>Column coordinates.</td>
+                </tr>
+                <tr>
+                  <td>fixed</td>
+                  <td>Flags of the fixed degrees of freedom.</td>
+                </tr>
+                <tr>
+                  <td>moved</td>
+                  <td>Whether the entries whose value moves to the right-hand side are listed, rather than those of a fixed row.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Positions of the selected entries.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a23db4795764b5e71ca42ba7e7893e5a6"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Backend&gt;
+                template&lt;class Indices, class Order&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Kokkos::<wbr />View</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>*, <a href="#abd2285c284ad3cfde965ef4ecc1dab84" class="m-doc">MemorySpace</a>&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a23db4795764b5e71ca42ba7e7893e5a6" class="m-doc-self">distinctStarts</a>(</span><span class="m-doc-wrap">const <a href="#ab78f7cd66f68a9ce08c3ca5a42e12a90" class="m-doc">ExecutionSpace</a>&amp; execution,
+              const Indices&amp; rows,
+              const Indices&amp; cols,
+              const Order&amp; order)</span></span>
+            </h3>
+            <p>Finds where each distinct coordinate starts in the sorted coordinates.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">execution</td>
+                  <td>Execution space instance of the kernel.</td>
+                </tr>
+                <tr>
+                  <td>rows</td>
+                  <td>Row coordinates.</td>
+                </tr>
+                <tr>
+                  <td>cols</td>
+                  <td>Column coordinates.</td>
+                </tr>
+                <tr>
+                  <td>order</td>
+                  <td>Indices of the sorted coordinates.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Starts of the distinct coordinates, followed by the list size.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+        </section>
+        <section>
+          <h2>Variable documentation</h2>
+          <section class="m-doc-details" id="a146a578510aef370bae9bf8bfb879def"><div>
+            <h3>
+              
+              static size_t Rodin::<wbr />Assembly::<wbr />Internal::<wbr />COOAssembly&lt;Backend&gt;::<wbr /><a href="#a146a578510aef370bae9bf8bfb879def" class="m-doc-self">SortBlockSize</a> <span class="m-label m-primary">constexpr</span>
+            </h3>
+            <p>Largest number of coordinates that sortPattern() sorts at once.</p>
+<p>The key array is limited to the same one-GiB budget as the former eight-byte keys. Each key now also stores the contribution rank. Row ranges are halved until they fit this budget; an indivisible single row may exceed it. Sort scratch is proportional to the range.</p>
+          </div></section>
+        </section>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">&hellip;</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form>
+            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript.</noscript>
+          <div id="search-help" class="m-text m-dim m-text-center">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
+            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v2-eeb63e0c3a5e.js"></script>
+<script src="searchdata-v2.js" async="async"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+  <a class="rodin-ci-link" href="ci-index.html" aria-label="CI" title="CI"><span class="rodin-ci-mark" aria-hidden="true"></span><span class="rodin-ci-label">CI</span></a>
+</div>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>

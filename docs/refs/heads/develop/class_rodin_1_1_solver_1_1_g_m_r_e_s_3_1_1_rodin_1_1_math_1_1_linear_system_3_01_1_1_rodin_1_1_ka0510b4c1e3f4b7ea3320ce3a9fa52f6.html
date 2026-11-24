@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Rodin::Solver::GMRES&lt;::Rodin::Math::LinearSystem&lt;::Rodin::Kokkos::Math::SparseMatrix&lt;Real, Backend&gt;, VectorType_&gt;&gt; class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
+  <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
+  <link rel="stylesheet" href="rodin-theme-1337632f765f.css" />
+  <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#18191c" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <a href="index.html" id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m">Rodin</a>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li>
+              <a href="pages.html">Pages</a>
+              <ol>
+                <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
+                <li><a href="gallery.html">Gallery</a></li>
+                <li><a href="guides-io.html">Input, output, and visualization</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
+                <li><a href="ci-index.html">Continuous integration</a></li>
+                <li><a href="notation-index.html">Notation</a></li>
+                <li><a href="credits-index.html">Credits</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="modules.html">Modules</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
+              </ol>
+            </li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="3">
+            <li><a href="annotated.html">Classes</a></li>
+            <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
+            <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_solver.html">Solver</a></div><h1>GMRES <span class="m-label m-flat m-warning">final</span></h1><p class="rodin-reference-brief">Restarted GMRES of Kokkos-Kernels on the device, right preconditioned by Jacobi, for a system whose matrix is a Kokkos::Math::SparseMatrix.</p><p class="rodin-reference-include">Defined in <a href="_kokkos_2_solver_2_g_m_r_e_s_8h.html"><code>Rodin/Kokkos/Solver/GMRES.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Backend</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">VectorType_</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_solver_1_1_g_m_r_e_s_3_1_1_rodin_1_1_math_1_1_linear_system_3_01_1_1_rodin_1_1_ka0510b4c1e3f4b7ea3320ce3a9fa52f6.html#a76f245a31c2b9bfd9b545b4d2f8f2144"><span class="nc">GMRES</span></a><span class="o">&lt;</span>
+<span class="w">  </span><span class="o">::</span><span class="n">Rodin</span><span class="o">::</span><span class="n">Math</span><span class="o">::</span><a href="class_rodin_1_1_math_1_1_linear_system.html"><span class="nc">LinearSystem</span></a><span class="o">&lt;</span><span class="w"> </span><span class="o">::</span><span class="n">Rodin</span><span class="o">::</span><span class="nc">Kokkos</span><span class="o">::</span><span class="n">Math</span><span class="o">::</span><a href="class_rodin_1_1_kokkos_1_1_math_1_1_sparse_matrix.html"><span class="nc">SparseMatrix</span></a><span class="o">&lt;</span><span class="w"> </span><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf"><span class="nc">Real</span></a><span class="p">,</span><span class="w"> </span><span class="nc">Backend</span><span class="w"> </span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="n">VectorType_</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="k">final</span><span class="p">;</span>
+</pre><section id="rodin-specialization"><h2><a href="#rodin-specialization">Specialization arguments</a></h2><p>Specialization of <a href="class_rodin_1_1_solver_1_1_g_m_r_e_s.html">GMRES</a>.</p><table class="m-table m-fullwidth m-flat rodin-bindings"><tbody><tr><td><code>LinearSystem</code></td><td><code>::Rodin::Math::LinearSystem&lt; ::Rodin::Kokkos::Math::SparseMatrix&lt; Real, Backend &gt;, VectorType_ &gt;</code></td></tr></tbody></table></section>
+        <table class="m-table m-fullwidth m-flat">
+          <thead>
+            <tr><th colspan="2">Template parameters</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="width: 1%">Backend</td>
+              <td>Kokkos backend of the matrix.</td>
+            </tr>
+          </tbody>
+        </table>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#base-classes">Inherits from</a></li>
+                <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+<p>The defaults are those of the sparse Eigen GMRES: the machine epsilon as tolerance on <svg class="m-math" style="width: 7.266em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 69.756886 11.955168">
+<title>
+$ \|b - Ax\| / \|b\| $
+</title>
+<defs>
+<path id='eq1-g1-61' d='M5.128767-8.524035C5.128767-8.53599 5.200498-8.715318 5.200498-8.739228C5.200498-8.88269 5.080946-8.966376 4.985305-8.966376C4.925529-8.966376 4.817933-8.966376 4.722291-8.703362L.71731 2.546451C.71731 2.558406 .645579 2.737733 .645579 2.761644C.645579 2.905106 .765131 2.988792 .860772 2.988792C.932503 2.988792 1.0401 2.976837 1.123786 2.725778L5.128767-8.524035Z'/>
+<path id='eq1-g1-65' d='M2.032379-1.327024C1.613948-.621669 1.207472-.382565 .633624-.3467C.502117-.334745 .406476-.334745 .406476-.119552C.406476-.047821 .466252 0 .549938 0C.765131 0 1.303113-.02391 1.518306-.02391C1.865006-.02391 2.247572 0 2.582316 0C2.654047 0 2.797509 0 2.797509-.227148C2.797509-.334745 2.701868-.3467 2.630137-.3467C2.355168-.37061 2.12802-.466252 2.12802-.753176C2.12802-.920548 2.199751-1.052055 2.355168-1.315068L3.263761-2.82142H6.312329C6.324284-2.713823 6.324284-2.618182 6.336239-2.510585C6.372105-2.199751 6.515567-.956413 6.515567-.729265C6.515567-.37061 5.905853-.3467 5.71457-.3467C5.583064-.3467 5.451557-.3467 5.451557-.131507C5.451557 0 5.559153 0 5.630884 0C5.834122 0 6.073225-.02391 6.276463-.02391H6.957908C7.687173-.02391 8.2132 0 8.225156 0C8.308842 0 8.440349 0 8.440349-.227148C8.440349-.3467 8.332752-.3467 8.153425-.3467C7.49589-.3467 7.483935-.454296 7.44807-.812951L6.718804-8.272976C6.694894-8.51208 6.647073-8.53599 6.515567-8.53599C6.396015-8.53599 6.324284-8.51208 6.216687-8.332752L2.032379-1.327024ZM3.466999-3.16812L5.869988-7.185056L6.276463-3.16812H3.466999Z'/>
+<path id='eq1-g1-98' d='M2.761644-7.998007C2.773599-8.045828 2.797509-8.117559 2.797509-8.177335C2.797509-8.296887 2.677958-8.296887 2.654047-8.296887C2.642092-8.296887 2.211706-8.261021 1.996513-8.237111C1.793275-8.225156 1.613948-8.201245 1.398755-8.18929C1.111831-8.16538 1.028144-8.153425 1.028144-7.938232C1.028144-7.81868 1.147696-7.81868 1.267248-7.81868C1.876961-7.81868 1.876961-7.711083 1.876961-7.591532C1.876961-7.507846 1.78132-7.161146 1.733499-6.945953L1.446575-5.798257C1.327024-5.32005 .645579-2.606227 .597758-2.391034C.537983-2.092154 .537983-1.888917 .537983-1.733499C.537983-.514072 1.219427 .119552 1.996513 .119552C3.383313 .119552 4.817933-1.661768 4.817933-3.395268C4.817933-4.495143 4.196264-5.272229 3.299626-5.272229C2.677958-5.272229 2.116065-4.758157 1.888917-4.519054L2.761644-7.998007ZM2.008468-.119552C1.625903-.119552 1.207472-.406476 1.207472-1.338979C1.207472-1.733499 1.243337-1.960648 1.458531-2.797509C1.494396-2.952927 1.685679-3.718057 1.733499-3.873474C1.75741-3.969116 2.462765-5.033126 3.275716-5.033126C3.801743-5.033126 4.040847-4.507098 4.040847-3.88543C4.040847-3.311582 3.706102-1.960648 3.407223-1.338979C3.108344-.6934 2.558406-.119552 2.008468-.119552Z'/>
+<path id='eq1-g1-120' d='M5.66675-4.877709C5.284184-4.805978 5.140722-4.519054 5.140722-4.291905C5.140722-4.004981 5.36787-3.90934 5.535243-3.90934C5.893898-3.90934 6.144956-4.220174 6.144956-4.542964C6.144956-5.045081 5.571108-5.272229 5.068991-5.272229C4.339726-5.272229 3.93325-4.554919 3.825654-4.327771C3.550685-5.224408 2.809465-5.272229 2.594271-5.272229C1.374844-5.272229 .729265-3.706102 .729265-3.443088C.729265-3.395268 .777086-3.335492 .860772-3.335492C.956413-3.335492 .980324-3.407223 1.004234-3.455044C1.41071-4.782067 2.211706-5.033126 2.558406-5.033126C3.096389-5.033126 3.203985-4.531009 3.203985-4.244085C3.203985-3.981071 3.132254-3.706102 2.988792-3.132254L2.582316-1.494396C2.402989-.777086 2.056289-.119552 1.422665-.119552C1.362889-.119552 1.06401-.119552 .812951-.274969C1.243337-.358655 1.338979-.71731 1.338979-.860772C1.338979-1.099875 1.159651-1.243337 .932503-1.243337C.645579-1.243337 .334745-.992279 .334745-.609714C.334745-.107597 .896638 .119552 1.41071 .119552C1.984558 .119552 2.391034-.334745 2.642092-.824907C2.833375-.119552 3.431133 .119552 3.873474 .119552C5.092902 .119552 5.738481-1.446575 5.738481-1.709589C5.738481-1.769365 5.69066-1.817186 5.618929-1.817186C5.511333-1.817186 5.499377-1.75741 5.463512-1.661768C5.140722-.609714 4.447323-.119552 3.90934-.119552C3.490909-.119552 3.263761-.430386 3.263761-.920548C3.263761-1.183562 3.311582-1.374844 3.502864-2.163885L3.921295-3.789788C4.100623-4.507098 4.507098-5.033126 5.057036-5.033126C5.080946-5.033126 5.415691-5.033126 5.66675-4.877709Z'/>
+<path id='eq1-g0-0' d='M7.878456-2.749689C8.081694-2.749689 8.296887-2.749689 8.296887-2.988792S8.081694-3.227895 7.878456-3.227895H1.41071C1.207472-3.227895 .992279-3.227895 .992279-2.988792S1.207472-2.749689 1.41071-2.749689H7.878456Z'/>
+<path id='eq1-g0-107' d='M2.056289-8.5599C2.056289-8.751183 2.056289-8.966376 1.817186-8.966376S1.578082-8.703362 1.578082-8.524035V2.546451C1.578082 2.737733 1.578082 2.988792 1.817186 2.988792S2.056289 2.773599 2.056289 2.582316V-8.5599ZM4.387547-8.524035C4.387547-8.715318 4.387547-8.966376 4.148443-8.966376S3.90934-8.751183 3.90934-8.5599V2.582316C3.90934 2.773599 3.90934 2.988792 4.148443 2.988792S4.387547 2.725778 4.387547 2.546451V-8.524035Z'/>
+</defs>
+<g id='eq1-page1'>
+<use x='0' y='0' xlink:href='#eq1-g0-107'/>
+<use x='5.977607' y='0' xlink:href='#eq1-g1-98'/>
+<use x='13.611376' y='0' xlink:href='#eq1-g0-0'/>
+<use x='25.566536' y='0' xlink:href='#eq1-g1-65'/>
+<use x='34.341883' y='0' xlink:href='#eq1-g1-120'/>
+<use x='40.99397' y='0' xlink:href='#eq1-g0-107'/>
+<use x='46.971577' y='0' xlink:href='#eq1-g1-61'/>
+<use x='52.824567' y='0' xlink:href='#eq1-g0-107'/>
+<use x='58.802174' y='0' xlink:href='#eq1-g1-98'/>
+<use x='63.779279' y='0' xlink:href='#eq1-g0-107'/>
+</g>
+</svg>, twice the size as iteration limit and a restart of 30. The iteration limit is rounded up to a whole number of restart cycles. The matrix is read in place; the right-hand side and solution are borrowed directly for backend vectors, while explicit host vectors are staged. The solution supplies the initial guess when its size matches.</p>
+        <figure class="rodin-inheritance"><figcaption>Direct inheritance by class family</figcaption><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_solver_1_1_linear_solver_base.html" title="LinearSolverBase&lt;::Rodin::Math::LinearSystem&lt; ::Rodin::Kokkos::Math::SparseMatrix&lt; Real, Backend &gt;, VectorType_ &gt; &gt;">LinearSolverBase</a></li></ul><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><div class="rodin-inheritance-current">GMRES</div></figure><section id="base-classes"><h2><a href="#base-classes">Inherits from</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Base class</th><th>Responsibility</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_solver_1_1_linear_solver_base.html"><code>LinearSolverBase&lt;…&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><a href="class_rodin_1_1_solver_1_1_linear_solver_base.html#ae28253f47bbc22b7e87643fd51631637"><span class="nc">LinearSolverBase</span></a><span class="o">&lt;::</span><span class="n">Rodin</span><span class="o">::</span><span class="n">Math</span><span class="o">::</span><a href="class_rodin_1_1_math_1_1_linear_system.html"><span class="nc">LinearSystem</span></a><span class="o">&lt;</span><span class="w"> </span><span class="o">::</span><span class="n">Rodin</span><span class="o">::</span><span class="nc">Kokkos</span><span class="o">::</span><span class="n">Math</span><span class="o">::</span><a href="class_rodin_1_1_kokkos_1_1_math_1_1_sparse_matrix.html"><span class="nc">SparseMatrix</span></a><span class="o">&lt;</span><span class="w"> </span><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf"><span class="nc">Real</span></a><span class="p">,</span><span class="w"> </span><span class="nc">Backend</span><span class="w"> </span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="n">VectorType_</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Abstract base class for linear system solvers.</td></tr></tbody></table></section><section id="rodin-overrides"><h2><a href="#rodin-overrides">Overrides</a></h2><table class="m-table m-fullwidth"><thead><tr><th>Member</th><th>Base declaration</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_solver_1_1_g_m_r_e_s_3_1_1_rodin_1_1_math_1_1_linear_system_3_01_1_1_rodin_1_1_ka0510b4c1e3f4b7ea3320ce3a9fa52f6.html#ae0d964975c15ca1cca84d8c6eff3c163"><code>copy()</code></a></td><td><a href="class_rodin_1_1_copyable.html#ab4e2e0c492116fe03366ba4e4403a2c8">Copyable::copy</a></td></tr></tbody></table></section><section id="rodin-inherited"><h2><a href="#rodin-inherited">Inherited interface</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Declared in</th><th>Members</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_solver_1_1_linear_solver_base.html"><code>LinearSolverBase</code></a></td><td><details><summary>2 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_solver_1_1_linear_solver_base.html#a1ebb533a694e1950a9fd16133b9be14f"><code>factorize()</code></a></li><li><a href="class_rodin_1_1_solver_1_1_linear_solver_base.html#a07663f770d90c7558d8746889964d6bc"><code>getProblem()</code></a></li></ul></details></td></tr></tbody></table></section>
+        <section id="pub-types">
+          <h2><a href="#pub-types">Public types</a></h2>
+          <dl class="m-doc">
+            <dt id="a515179486a633cd3bd8acc6d313ed50d">
+              using <a href="#a515179486a633cd3bd8acc6d313ed50d" class="m-doc-self">ScalarType</a> = <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>
+            </dt>
+            <dd>Scalar type.</dd>
+            <dt id="a0ed4ecad291b963557f0aa61e5181f9b">
+              using <a href="#a0ed4ecad291b963557f0aa61e5181f9b" class="m-doc-self">VectorType</a> = VectorType_
+            </dt>
+            <dd>System coefficient vector type.</dd>
+            <dt id="ac2a10dd369a958c41cb9535b9c3560c1">
+              using <a href="#ac2a10dd369a958c41cb9535b9c3560c1" class="m-doc-self">OperatorType</a> = <a href="class_rodin_1_1_kokkos_1_1_math_1_1_sparse_matrix.html" class="m-doc">::<wbr />Rodin::<wbr />Kokkos::<wbr />Math::<wbr />SparseMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>, Backend&gt;
+            </dt>
+            <dd>Device matrix type.</dd>
+            <dt id="a8f25576335b5d95266cab35aaef140a6">
+              using <a href="#a8f25576335b5d95266cab35aaef140a6" class="m-doc-self">LinearSystemType</a> = <a href="class_rodin_1_1_math_1_1_linear_system.html" class="m-doc">::<wbr />Rodin::<wbr />Math::<wbr />LinearSystem</a>&lt;<a href="#ac2a10dd369a958c41cb9535b9c3560c1" class="m-doc">OperatorType</a>, <a href="#a0ed4ecad291b963557f0aa61e5181f9b" class="m-doc">VectorType</a>&gt;
+            </dt>
+            <dd>Linear system type.</dd>
+            <dt id="ab6098d508adace773204c1e42ece893a">
+              using <a href="#ab6098d508adace773204c1e42ece893a" class="m-doc-self">ProblemBaseType</a> = <a href="class_rodin_1_1_variational_1_1_problem_base.html" class="m-doc">Variational::<wbr />ProblemBase</a>&lt;<a href="#a8f25576335b5d95266cab35aaef140a6" class="m-doc">LinearSystemType</a>&gt;
+            </dt>
+            <dd>Problem type.</dd>
+            <dt id="a85385c6607a397925a213e9098256fdc">
+              using <a href="#a85385c6607a397925a213e9098256fdc" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_solver_1_1_linear_solver_base.html#ae28253f47bbc22b7e87643fd51631637" class="m-doc">LinearSolverBase</a>&lt;<a href="#a8f25576335b5d95266cab35aaef140a6" class="m-doc">LinearSystemType</a>&gt;
+            </dt>
+            <dd>Parent class type.</dd>
+          </dl>
+        </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a76f245a31c2b9bfd9b545b4d2f8f2144" class="m-doc">GMRES</a>(</span><span class="m-doc-wrap"><a href="#ab6098d508adace773204c1e42ece893a" class="m-doc">ProblemBaseType</a>&amp; problem) <span class="m-label m-flat m-info">explicit</span> </span>
+            </dt>
+            <dd>Constructs the solver of a problem.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a6a9ad6e38e6013816ccf3405811aebde" class="m-doc">GMRES</a>(</span><span class="m-doc-wrap">const GMRES&amp; other)</span>
+            </dt>
+            <dd>Copies the settings, not the device vectors.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#ad01b9f001d0c46017f7d1712c08230a4" class="m-doc">GMRES</a>(</span><span class="m-doc-wrap">GMRES&amp;&amp; other) <span class="m-label m-flat m-info">defaulted</span></span>
+            </dt>
+            <dd>Moves the solver.</dd>
+            <dt id="a8b6ad61bc5115b028d5e5805606caa1f">
+              <span class="m-doc-wrap-bumper"><a href="#a8b6ad61bc5115b028d5e5805606caa1f" class="m-doc-self">~GMRES</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-info">defaulted</span></span>
+            </dt>
+            <dd>Destructor.</dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aaaa2a31891508be334cfaccf67a85cb5" class="m-doc">setTolerance</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&amp; tolerance) -&gt; <a href="#a76f245a31c2b9bfd9b545b4d2f8f2144" class="m-doc">GMRES</a>&amp;</span>
+            </dt>
+            <dd>Sets the relative tolerance.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a8fa0b73410eb23b80f0921aa475a564a" class="m-doc">setMaxIterations</a>(</span><span class="m-doc-wrap">size_t count) -&gt; <a href="#a76f245a31c2b9bfd9b545b4d2f8f2144" class="m-doc">GMRES</a>&amp;</span>
+            </dt>
+            <dd>Sets the iteration limit, rounded up to whole restart cycles.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a981edbb1ef6022e657bf2f77ecc0335d" class="m-doc">setRestart</a>(</span><span class="m-doc-wrap">size_t count) -&gt; <a href="#a76f245a31c2b9bfd9b545b4d2f8f2144" class="m-doc">GMRES</a>&amp;</span>
+            </dt>
+            <dd>Sets the restart dimension.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a5138badfa002a29e4d9dcce4d9a246c0" class="m-doc">solve</a>(</span><span class="m-doc-wrap"><a href="#a8f25576335b5d95266cab35aaef140a6" class="m-doc">LinearSystemType</a>&amp; system) <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Solves the system on the device.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a7bd8b39d7964b40a7a4dcb0a1ff594b7" class="m-doc">success</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin.html#a717a190167959b837148d927a5d380ba" class="m-doc">Boolean</a></span>
+            </dt>
+            <dd>Whether the last solve reached the tolerance.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aaeefc8a5f2ecf0a47f975af9bfa39ff2" class="m-doc">getIterationNumber</a>(</span><span class="m-doc-wrap">) const -&gt; size_t</span>
+            </dt>
+            <dd>Number of iterations of the last solve.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a7300e7d0367728f293f23cb1951a6d64" class="m-doc">getError</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
+            </dt>
+            <dd>Relative residual of the last solve.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae0d964975c15ca1cca84d8c6eff3c163" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="#a76f245a31c2b9bfd9b545b4d2f8f2144" class="m-doc">GMRES</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Creates a copy of this solver.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#af7d39f0eac0af0ed5785935ac72a1e7d" class="m-doc">solve</a>(</span><span class="m-doc-wrap">)</span>
+            </dt>
+            <dd>Solves the associated problem.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#adeb0e48252fd318e8aa17cc7cad8d7c0" class="m-doc">solve</a>(</span><span class="m-doc-wrap"><a href="#a8f25576335b5d95266cab35aaef140a6" class="m-doc">LinearSystemType</a>&amp; system) <span class="m-label m-flat m-warning">pure virtual</span></span>
+            </dt>
+            <dd>Solves the linear system.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a76f245a31c2b9bfd9b545b4d2f8f2144"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Backend, class VectorType_ _2&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solver::<wbr />GMRES&lt;::<wbr />Rodin::<wbr />Math::<wbr />LinearSystem&lt;::<wbr />Rodin::<wbr />Kokkos::<wbr />Math::<wbr />SparseMatrix&lt;Real, Backend&gt;, VectorType_&gt;&gt;&lt;Backend, _2&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a76f245a31c2b9bfd9b545b4d2f8f2144" class="m-doc-self">GMRES</a>(</span><span class="m-doc-wrap"><a href="#ab6098d508adace773204c1e42ece893a" class="m-doc">ProblemBaseType</a>&amp; problem) <span class="m-label m-info">explicit</span> </span></span>
+            </h3>
+            <p>Constructs the solver of a problem.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">problem</td>
+                  <td>Problem to solve.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a6a9ad6e38e6013816ccf3405811aebde"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Backend, class VectorType_ _2&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solver::<wbr />GMRES&lt;::<wbr />Rodin::<wbr />Math::<wbr />LinearSystem&lt;::<wbr />Rodin::<wbr />Kokkos::<wbr />Math::<wbr />SparseMatrix&lt;Real, Backend&gt;, VectorType_&gt;&gt;&lt;Backend, _2&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6a9ad6e38e6013816ccf3405811aebde" class="m-doc-self">GMRES</a>(</span><span class="m-doc-wrap">const GMRES&amp; other)</span></span>
+            </h3>
+            <p>Copies the settings, not the device vectors.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Solver to copy.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ad01b9f001d0c46017f7d1712c08230a4"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Backend, class VectorType_ _2&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solver::<wbr />GMRES&lt;::<wbr />Rodin::<wbr />Math::<wbr />LinearSystem&lt;::<wbr />Rodin::<wbr />Kokkos::<wbr />Math::<wbr />SparseMatrix&lt;Real, Backend&gt;, VectorType_&gt;&gt;&lt;Backend, _2&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad01b9f001d0c46017f7d1712c08230a4" class="m-doc-self">GMRES</a>(</span><span class="m-doc-wrap">GMRES&amp;&amp; other) <span class="m-label m-info">defaulted</span></span></span>
+            </h3>
+            <p>Moves the solver.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Solver to move.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aaaa2a31891508be334cfaccf67a85cb5"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Backend, class VectorType_ _2&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="#a76f245a31c2b9bfd9b545b4d2f8f2144" class="m-doc">GMRES</a>&amp; Rodin::<wbr />Solver::<wbr />GMRES&lt;::<wbr />Rodin::<wbr />Math::<wbr />LinearSystem&lt;::<wbr />Rodin::<wbr />Kokkos::<wbr />Math::<wbr />SparseMatrix&lt;Real, Backend&gt;, VectorType_&gt;&gt;&lt;Backend, _2&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aaaa2a31891508be334cfaccf67a85cb5" class="m-doc-self">setTolerance</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&amp; tolerance)</span></span>
+            </h3>
+            <p>Sets the relative tolerance.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">tolerance</td>
+                  <td>Tolerance on <svg class="m-math" style="width: 7.266em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 69.756886 11.955168">
+<title>
+$ \|b - Ax\| / \|b\| $
+</title>
+<defs>
+<path id='eq2-g1-61' d='M5.128767-8.524035C5.128767-8.53599 5.200498-8.715318 5.200498-8.739228C5.200498-8.88269 5.080946-8.966376 4.985305-8.966376C4.925529-8.966376 4.817933-8.966376 4.722291-8.703362L.71731 2.546451C.71731 2.558406 .645579 2.737733 .645579 2.761644C.645579 2.905106 .765131 2.988792 .860772 2.988792C.932503 2.988792 1.0401 2.976837 1.123786 2.725778L5.128767-8.524035Z'/>
+<path id='eq2-g1-65' d='M2.032379-1.327024C1.613948-.621669 1.207472-.382565 .633624-.3467C.502117-.334745 .406476-.334745 .406476-.119552C.406476-.047821 .466252 0 .549938 0C.765131 0 1.303113-.02391 1.518306-.02391C1.865006-.02391 2.247572 0 2.582316 0C2.654047 0 2.797509 0 2.797509-.227148C2.797509-.334745 2.701868-.3467 2.630137-.3467C2.355168-.37061 2.12802-.466252 2.12802-.753176C2.12802-.920548 2.199751-1.052055 2.355168-1.315068L3.263761-2.82142H6.312329C6.324284-2.713823 6.324284-2.618182 6.336239-2.510585C6.372105-2.199751 6.515567-.956413 6.515567-.729265C6.515567-.37061 5.905853-.3467 5.71457-.3467C5.583064-.3467 5.451557-.3467 5.451557-.131507C5.451557 0 5.559153 0 5.630884 0C5.834122 0 6.073225-.02391 6.276463-.02391H6.957908C7.687173-.02391 8.2132 0 8.225156 0C8.308842 0 8.440349 0 8.440349-.227148C8.440349-.3467 8.332752-.3467 8.153425-.3467C7.49589-.3467 7.483935-.454296 7.44807-.812951L6.718804-8.272976C6.694894-8.51208 6.647073-8.53599 6.515567-8.53599C6.396015-8.53599 6.324284-8.51208 6.216687-8.332752L2.032379-1.327024ZM3.466999-3.16812L5.869988-7.185056L6.276463-3.16812H3.466999Z'/>
+<path id='eq2-g1-98' d='M2.761644-7.998007C2.773599-8.045828 2.797509-8.117559 2.797509-8.177335C2.797509-8.296887 2.677958-8.296887 2.654047-8.296887C2.642092-8.296887 2.211706-8.261021 1.996513-8.237111C1.793275-8.225156 1.613948-8.201245 1.398755-8.18929C1.111831-8.16538 1.028144-8.153425 1.028144-7.938232C1.028144-7.81868 1.147696-7.81868 1.267248-7.81868C1.876961-7.81868 1.876961-7.711083 1.876961-7.591532C1.876961-7.507846 1.78132-7.161146 1.733499-6.945953L1.446575-5.798257C1.327024-5.32005 .645579-2.606227 .597758-2.391034C.537983-2.092154 .537983-1.888917 .537983-1.733499C.537983-.514072 1.219427 .119552 1.996513 .119552C3.383313 .119552 4.817933-1.661768 4.817933-3.395268C4.817933-4.495143 4.196264-5.272229 3.299626-5.272229C2.677958-5.272229 2.116065-4.758157 1.888917-4.519054L2.761644-7.998007ZM2.008468-.119552C1.625903-.119552 1.207472-.406476 1.207472-1.338979C1.207472-1.733499 1.243337-1.960648 1.458531-2.797509C1.494396-2.952927 1.685679-3.718057 1.733499-3.873474C1.75741-3.969116 2.462765-5.033126 3.275716-5.033126C3.801743-5.033126 4.040847-4.507098 4.040847-3.88543C4.040847-3.311582 3.706102-1.960648 3.407223-1.338979C3.108344-.6934 2.558406-.119552 2.008468-.119552Z'/>
+<path id='eq2-g1-120' d='M5.66675-4.877709C5.284184-4.805978 5.140722-4.519054 5.140722-4.291905C5.140722-4.004981 5.36787-3.90934 5.535243-3.90934C5.893898-3.90934 6.144956-4.220174 6.144956-4.542964C6.144956-5.045081 5.571108-5.272229 5.068991-5.272229C4.339726-5.272229 3.93325-4.554919 3.825654-4.327771C3.550685-5.224408 2.809465-5.272229 2.594271-5.272229C1.374844-5.272229 .729265-3.706102 .729265-3.443088C.729265-3.395268 .777086-3.335492 .860772-3.335492C.956413-3.335492 .980324-3.407223 1.004234-3.455044C1.41071-4.782067 2.211706-5.033126 2.558406-5.033126C3.096389-5.033126 3.203985-4.531009 3.203985-4.244085C3.203985-3.981071 3.132254-3.706102 2.988792-3.132254L2.582316-1.494396C2.402989-.777086 2.056289-.119552 1.422665-.119552C1.362889-.119552 1.06401-.119552 .812951-.274969C1.243337-.358655 1.338979-.71731 1.338979-.860772C1.338979-1.099875 1.159651-1.243337 .932503-1.243337C.645579-1.243337 .334745-.992279 .334745-.609714C.334745-.107597 .896638 .119552 1.41071 .119552C1.984558 .119552 2.391034-.334745 2.642092-.824907C2.833375-.119552 3.431133 .119552 3.873474 .119552C5.092902 .119552 5.738481-1.446575 5.738481-1.709589C5.738481-1.769365 5.69066-1.817186 5.618929-1.817186C5.511333-1.817186 5.499377-1.75741 5.463512-1.661768C5.140722-.609714 4.447323-.119552 3.90934-.119552C3.490909-.119552 3.263761-.430386 3.263761-.920548C3.263761-1.183562 3.311582-1.374844 3.502864-2.163885L3.921295-3.789788C4.100623-4.507098 4.507098-5.033126 5.057036-5.033126C5.080946-5.033126 5.415691-5.033126 5.66675-4.877709Z'/>
+<path id='eq2-g0-0' d='M7.878456-2.749689C8.081694-2.749689 8.296887-2.749689 8.296887-2.988792S8.081694-3.227895 7.878456-3.227895H1.41071C1.207472-3.227895 .992279-3.227895 .992279-2.988792S1.207472-2.749689 1.41071-2.749689H7.878456Z'/>
+<path id='eq2-g0-107' d='M2.056289-8.5599C2.056289-8.751183 2.056289-8.966376 1.817186-8.966376S1.578082-8.703362 1.578082-8.524035V2.546451C1.578082 2.737733 1.578082 2.988792 1.817186 2.988792S2.056289 2.773599 2.056289 2.582316V-8.5599ZM4.387547-8.524035C4.387547-8.715318 4.387547-8.966376 4.148443-8.966376S3.90934-8.751183 3.90934-8.5599V2.582316C3.90934 2.773599 3.90934 2.988792 4.148443 2.988792S4.387547 2.725778 4.387547 2.546451V-8.524035Z'/>
+</defs>
+<g id='eq2-page1'>
+<use x='0' y='0' xlink:href='#eq2-g0-107'/>
+<use x='5.977607' y='0' xlink:href='#eq2-g1-98'/>
+<use x='13.611376' y='0' xlink:href='#eq2-g0-0'/>
+<use x='25.566536' y='0' xlink:href='#eq2-g1-65'/>
+<use x='34.341883' y='0' xlink:href='#eq2-g1-120'/>
+<use x='40.99397' y='0' xlink:href='#eq2-g0-107'/>
+<use x='46.971577' y='0' xlink:href='#eq2-g1-61'/>
+<use x='52.824567' y='0' xlink:href='#eq2-g0-107'/>
+<use x='58.802174' y='0' xlink:href='#eq2-g1-98'/>
+<use x='63.779279' y='0' xlink:href='#eq2-g0-107'/>
+</g>
+</svg>.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>This solver.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a8fa0b73410eb23b80f0921aa475a564a"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Backend, class VectorType_ _2&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="#a76f245a31c2b9bfd9b545b4d2f8f2144" class="m-doc">GMRES</a>&amp; Rodin::<wbr />Solver::<wbr />GMRES&lt;::<wbr />Rodin::<wbr />Math::<wbr />LinearSystem&lt;::<wbr />Rodin::<wbr />Kokkos::<wbr />Math::<wbr />SparseMatrix&lt;Real, Backend&gt;, VectorType_&gt;&gt;&lt;Backend, _2&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8fa0b73410eb23b80f0921aa475a564a" class="m-doc-self">setMaxIterations</a>(</span><span class="m-doc-wrap">size_t count)</span></span>
+            </h3>
+            <p>Sets the iteration limit, rounded up to whole restart cycles.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">count</td>
+                  <td>Maximum number of iterations.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>This solver.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a981edbb1ef6022e657bf2f77ecc0335d"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Backend, class VectorType_ _2&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="#a76f245a31c2b9bfd9b545b4d2f8f2144" class="m-doc">GMRES</a>&amp; Rodin::<wbr />Solver::<wbr />GMRES&lt;::<wbr />Rodin::<wbr />Math::<wbr />LinearSystem&lt;::<wbr />Rodin::<wbr />Kokkos::<wbr />Math::<wbr />SparseMatrix&lt;Real, Backend&gt;, VectorType_&gt;&gt;&lt;Backend, _2&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a981edbb1ef6022e657bf2f77ecc0335d" class="m-doc-self">setRestart</a>(</span><span class="m-doc-wrap">size_t count)</span></span>
+            </h3>
+            <p>Sets the restart dimension.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">count</td>
+                  <td>Krylov dimension between restarts.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>This solver.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a5138badfa002a29e4d9dcce4d9a246c0"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Backend, class VectorType_ _2&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Solver::<wbr />GMRES&lt;::<wbr />Rodin::<wbr />Math::<wbr />LinearSystem&lt;::<wbr />Rodin::<wbr />Kokkos::<wbr />Math::<wbr />SparseMatrix&lt;Real, Backend&gt;, VectorType_&gt;&gt;&lt;Backend, _2&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5138badfa002a29e4d9dcce4d9a246c0" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap"><a href="#a8f25576335b5d95266cab35aaef140a6" class="m-doc">LinearSystemType</a>&amp; system) <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Solves the system on the device.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">system&nbsp;<span class="m-label m-flat m-danger">in/out</span></td>
+                  <td>System, whose solution is the initial guess when its size matches.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a7bd8b39d7964b40a7a4dcb0a1ff594b7"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Backend, class VectorType_ _2&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a717a190167959b837148d927a5d380ba" class="m-doc">Boolean</a> Rodin::<wbr />Solver::<wbr />GMRES&lt;::<wbr />Rodin::<wbr />Math::<wbr />LinearSystem&lt;::<wbr />Rodin::<wbr />Kokkos::<wbr />Math::<wbr />SparseMatrix&lt;Real, Backend&gt;, VectorType_&gt;&gt;&lt;Backend, _2&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7bd8b39d7964b40a7a4dcb0a1ff594b7" class="m-doc-self">success</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Whether the last solve reached the tolerance.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>True if the last solve converged.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aaeefc8a5f2ecf0a47f975af9bfa39ff2"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Backend, class VectorType_ _2&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Solver::<wbr />GMRES&lt;::<wbr />Rodin::<wbr />Math::<wbr />LinearSystem&lt;::<wbr />Rodin::<wbr />Kokkos::<wbr />Math::<wbr />SparseMatrix&lt;Real, Backend&gt;, VectorType_&gt;&gt;&lt;Backend, _2&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aaeefc8a5f2ecf0a47f975af9bfa39ff2" class="m-doc-self">getIterationNumber</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Number of iterations of the last solve.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Iteration count reported by the GMRES handle.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a7300e7d0367728f293f23cb1951a6d64"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Backend, class VectorType_ _2&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Solver::<wbr />GMRES&lt;::<wbr />Rodin::<wbr />Math::<wbr />LinearSystem&lt;::<wbr />Rodin::<wbr />Kokkos::<wbr />Math::<wbr />SparseMatrix&lt;Real, Backend&gt;, VectorType_&gt;&gt;&lt;Backend, _2&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7300e7d0367728f293f23cb1951a6d64" class="m-doc-self">getError</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Relative residual of the last solve.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Final relative residual reported by the GMRES handle.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ae0d964975c15ca1cca84d8c6eff3c163"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Backend, class VectorType_ _2&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="#a76f245a31c2b9bfd9b545b4d2f8f2144" class="m-doc">GMRES</a>* Rodin::<wbr />Solver::<wbr />GMRES&lt;::<wbr />Rodin::<wbr />Math::<wbr />LinearSystem&lt;::<wbr />Rodin::<wbr />Kokkos::<wbr />Math::<wbr />SparseMatrix&lt;Real, Backend&gt;, VectorType_&gt;&gt;&lt;Backend, _2&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae0d964975c15ca1cca84d8c6eff3c163" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Creates a copy of this solver.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Pointer to a new GMRES instance.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="af7d39f0eac0af0ed5785935ac72a1e7d"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Backend, class VectorType_ _2&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Solver::<wbr />GMRES&lt;::<wbr />Rodin::<wbr />Math::<wbr />LinearSystem&lt;::<wbr />Rodin::<wbr />Kokkos::<wbr />Math::<wbr />SparseMatrix&lt;Real, Backend&gt;, VectorType_&gt;&gt;&lt;Backend, _2&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af7d39f0eac0af0ed5785935ac72a1e7d" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap">)</span></span>
+            </h3>
+            <p>Solves the associated problem.</p>
+<p>This method delegates solving to the problem&#x27;s solve method, passing this solver as the argument.</p>
+          </div></section>
+          <section class="m-doc-details" id="adeb0e48252fd318e8aa17cc7cad8d7c0"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Backend, class VectorType_ _2&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Solver::<wbr />GMRES&lt;::<wbr />Rodin::<wbr />Math::<wbr />LinearSystem&lt;::<wbr />Rodin::<wbr />Kokkos::<wbr />Math::<wbr />SparseMatrix&lt;Real, Backend&gt;, VectorType_&gt;&gt;&lt;Backend, _2&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adeb0e48252fd318e8aa17cc7cad8d7c0" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap"><a href="#a8f25576335b5d95266cab35aaef140a6" class="m-doc">LinearSystemType</a>&amp; system) <span class="m-label m-warning">pure virtual</span></span></span>
+            </h3>
+            <p>Solves the linear system.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">system&nbsp;<span class="m-label m-flat m-danger">in/out</span></td>
+                  <td>The linear system to solve. On entry the solution vector is the initial guess; on exit it stores the solution.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Solves the linear system <svg class="m-math" style="width: 3.766em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 36.150849 8.302191">
+<title>
+$ Ax = b $
+</title>
+<defs>
+<path id='eq3-g1-61' d='M8.069738-3.873474C8.237111-3.873474 8.452304-3.873474 8.452304-4.088667C8.452304-4.315816 8.249066-4.315816 8.069738-4.315816H1.028144C.860772-4.315816 .645579-4.315816 .645579-4.100623C.645579-3.873474 .848817-3.873474 1.028144-3.873474H8.069738ZM8.069738-1.649813C8.237111-1.649813 8.452304-1.649813 8.452304-1.865006C8.452304-2.092154 8.249066-2.092154 8.069738-2.092154H1.028144C.860772-2.092154 .645579-2.092154 .645579-1.876961C.645579-1.649813 .848817-1.649813 1.028144-1.649813H8.069738Z'/>
+<path id='eq3-g0-65' d='M2.032379-1.327024C1.613948-.621669 1.207472-.382565 .633624-.3467C.502117-.334745 .406476-.334745 .406476-.119552C.406476-.047821 .466252 0 .549938 0C.765131 0 1.303113-.02391 1.518306-.02391C1.865006-.02391 2.247572 0 2.582316 0C2.654047 0 2.797509 0 2.797509-.227148C2.797509-.334745 2.701868-.3467 2.630137-.3467C2.355168-.37061 2.12802-.466252 2.12802-.753176C2.12802-.920548 2.199751-1.052055 2.355168-1.315068L3.263761-2.82142H6.312329C6.324284-2.713823 6.324284-2.618182 6.336239-2.510585C6.372105-2.199751 6.515567-.956413 6.515567-.729265C6.515567-.37061 5.905853-.3467 5.71457-.3467C5.583064-.3467 5.451557-.3467 5.451557-.131507C5.451557 0 5.559153 0 5.630884 0C5.834122 0 6.073225-.02391 6.276463-.02391H6.957908C7.687173-.02391 8.2132 0 8.225156 0C8.308842 0 8.440349 0 8.440349-.227148C8.440349-.3467 8.332752-.3467 8.153425-.3467C7.49589-.3467 7.483935-.454296 7.44807-.812951L6.718804-8.272976C6.694894-8.51208 6.647073-8.53599 6.515567-8.53599C6.396015-8.53599 6.324284-8.51208 6.216687-8.332752L2.032379-1.327024ZM3.466999-3.16812L5.869988-7.185056L6.276463-3.16812H3.466999Z'/>
+<path id='eq3-g0-98' d='M2.761644-7.998007C2.773599-8.045828 2.797509-8.117559 2.797509-8.177335C2.797509-8.296887 2.677958-8.296887 2.654047-8.296887C2.642092-8.296887 2.211706-8.261021 1.996513-8.237111C1.793275-8.225156 1.613948-8.201245 1.398755-8.18929C1.111831-8.16538 1.028144-8.153425 1.028144-7.938232C1.028144-7.81868 1.147696-7.81868 1.267248-7.81868C1.876961-7.81868 1.876961-7.711083 1.876961-7.591532C1.876961-7.507846 1.78132-7.161146 1.733499-6.945953L1.446575-5.798257C1.327024-5.32005 .645579-2.606227 .597758-2.391034C.537983-2.092154 .537983-1.888917 .537983-1.733499C.537983-.514072 1.219427 .119552 1.996513 .119552C3.383313 .119552 4.817933-1.661768 4.817933-3.395268C4.817933-4.495143 4.196264-5.272229 3.299626-5.272229C2.677958-5.272229 2.116065-4.758157 1.888917-4.519054L2.761644-7.998007ZM2.008468-.119552C1.625903-.119552 1.207472-.406476 1.207472-1.338979C1.207472-1.733499 1.243337-1.960648 1.458531-2.797509C1.494396-2.952927 1.685679-3.718057 1.733499-3.873474C1.75741-3.969116 2.462765-5.033126 3.275716-5.033126C3.801743-5.033126 4.040847-4.507098 4.040847-3.88543C4.040847-3.311582 3.706102-1.960648 3.407223-1.338979C3.108344-.6934 2.558406-.119552 2.008468-.119552Z'/>
+<path id='eq3-g0-120' d='M5.66675-4.877709C5.284184-4.805978 5.140722-4.519054 5.140722-4.291905C5.140722-4.004981 5.36787-3.90934 5.535243-3.90934C5.893898-3.90934 6.144956-4.220174 6.144956-4.542964C6.144956-5.045081 5.571108-5.272229 5.068991-5.272229C4.339726-5.272229 3.93325-4.554919 3.825654-4.327771C3.550685-5.224408 2.809465-5.272229 2.594271-5.272229C1.374844-5.272229 .729265-3.706102 .729265-3.443088C.729265-3.395268 .777086-3.335492 .860772-3.335492C.956413-3.335492 .980324-3.407223 1.004234-3.455044C1.41071-4.782067 2.211706-5.033126 2.558406-5.033126C3.096389-5.033126 3.203985-4.531009 3.203985-4.244085C3.203985-3.981071 3.132254-3.706102 2.988792-3.132254L2.582316-1.494396C2.402989-.777086 2.056289-.119552 1.422665-.119552C1.362889-.119552 1.06401-.119552 .812951-.274969C1.243337-.358655 1.338979-.71731 1.338979-.860772C1.338979-1.099875 1.159651-1.243337 .932503-1.243337C.645579-1.243337 .334745-.992279 .334745-.609714C.334745-.107597 .896638 .119552 1.41071 .119552C1.984558 .119552 2.391034-.334745 2.642092-.824907C2.833375-.119552 3.431133 .119552 3.873474 .119552C5.092902 .119552 5.738481-1.446575 5.738481-1.709589C5.738481-1.769365 5.69066-1.817186 5.618929-1.817186C5.511333-1.817186 5.499377-1.75741 5.463512-1.661768C5.140722-.609714 4.447323-.119552 3.90934-.119552C3.490909-.119552 3.263761-.430386 3.263761-.920548C3.263761-1.183562 3.311582-1.374844 3.502864-2.163885L3.921295-3.789788C4.100623-4.507098 4.507098-5.033126 5.057036-5.033126C5.080946-5.033126 5.415691-5.033126 5.66675-4.877709Z'/>
+</defs>
+<g id='eq3-page1'>
+<use x='0' y='0' xlink:href='#eq3-g0-65'/>
+<use x='8.775347' y='0' xlink:href='#eq3-g0-120'/>
+<use x='18.748263' y='0' xlink:href='#eq3-g1-61'/>
+<use x='31.173744' y='0' xlink:href='#eq3-g0-98'/>
+</g>
+</svg> where <svg class="m-math" style="width: 0.914em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 8.775347 8.169366">
+<title>
+$ A $
+</title>
+<defs>
+<path id='eq4-g0-65' d='M2.032379-1.327024C1.613948-.621669 1.207472-.382565 .633624-.3467C.502117-.334745 .406476-.334745 .406476-.119552C.406476-.047821 .466252 0 .549938 0C.765131 0 1.303113-.02391 1.518306-.02391C1.865006-.02391 2.247572 0 2.582316 0C2.654047 0 2.797509 0 2.797509-.227148C2.797509-.334745 2.701868-.3467 2.630137-.3467C2.355168-.37061 2.12802-.466252 2.12802-.753176C2.12802-.920548 2.199751-1.052055 2.355168-1.315068L3.263761-2.82142H6.312329C6.324284-2.713823 6.324284-2.618182 6.336239-2.510585C6.372105-2.199751 6.515567-.956413 6.515567-.729265C6.515567-.37061 5.905853-.3467 5.71457-.3467C5.583064-.3467 5.451557-.3467 5.451557-.131507C5.451557 0 5.559153 0 5.630884 0C5.834122 0 6.073225-.02391 6.276463-.02391H6.957908C7.687173-.02391 8.2132 0 8.225156 0C8.308842 0 8.440349 0 8.440349-.227148C8.440349-.3467 8.332752-.3467 8.153425-.3467C7.49589-.3467 7.483935-.454296 7.44807-.812951L6.718804-8.272976C6.694894-8.51208 6.647073-8.53599 6.515567-8.53599C6.396015-8.53599 6.324284-8.51208 6.216687-8.332752L2.032379-1.327024ZM3.466999-3.16812L5.869988-7.185056L6.276463-3.16812H3.466999Z'/>
+</defs>
+<g id='eq4-page1'>
+<use x='0' y='0' xlink:href='#eq4-g0-65'/>
+</g>
+</svg> is the matrix operator, <svg class="m-math" style="width: 0.693em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.652087 5.147373">
+<title>
+$ x $
+</title>
+<defs>
+<path id='eq5-g0-120' d='M5.66675-4.877709C5.284184-4.805978 5.140722-4.519054 5.140722-4.291905C5.140722-4.004981 5.36787-3.90934 5.535243-3.90934C5.893898-3.90934 6.144956-4.220174 6.144956-4.542964C6.144956-5.045081 5.571108-5.272229 5.068991-5.272229C4.339726-5.272229 3.93325-4.554919 3.825654-4.327771C3.550685-5.224408 2.809465-5.272229 2.594271-5.272229C1.374844-5.272229 .729265-3.706102 .729265-3.443088C.729265-3.395268 .777086-3.335492 .860772-3.335492C.956413-3.335492 .980324-3.407223 1.004234-3.455044C1.41071-4.782067 2.211706-5.033126 2.558406-5.033126C3.096389-5.033126 3.203985-4.531009 3.203985-4.244085C3.203985-3.981071 3.132254-3.706102 2.988792-3.132254L2.582316-1.494396C2.402989-.777086 2.056289-.119552 1.422665-.119552C1.362889-.119552 1.06401-.119552 .812951-.274969C1.243337-.358655 1.338979-.71731 1.338979-.860772C1.338979-1.099875 1.159651-1.243337 .932503-1.243337C.645579-1.243337 .334745-.992279 .334745-.609714C.334745-.107597 .896638 .119552 1.41071 .119552C1.984558 .119552 2.391034-.334745 2.642092-.824907C2.833375-.119552 3.431133 .119552 3.873474 .119552C5.092902 .119552 5.738481-1.446575 5.738481-1.709589C5.738481-1.769365 5.69066-1.817186 5.618929-1.817186C5.511333-1.817186 5.499377-1.75741 5.463512-1.661768C5.140722-.609714 4.447323-.119552 3.90934-.119552C3.490909-.119552 3.263761-.430386 3.263761-.920548C3.263761-1.183562 3.311582-1.374844 3.502864-2.163885L3.921295-3.789788C4.100623-4.507098 4.507098-5.033126 5.057036-5.033126C5.080946-5.033126 5.415691-5.033126 5.66675-4.877709Z'/>
+</defs>
+<g id='eq5-page1'>
+<use x='0' y='0' xlink:href='#eq5-g0-120'/>
+</g>
+</svg> is the solution vector, and <svg class="m-math" style="width: 0.518em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 4.977105 8.302191">
+<title>
+$ b $
+</title>
+<defs>
+<path id='eq6-g0-98' d='M2.761644-7.998007C2.773599-8.045828 2.797509-8.117559 2.797509-8.177335C2.797509-8.296887 2.677958-8.296887 2.654047-8.296887C2.642092-8.296887 2.211706-8.261021 1.996513-8.237111C1.793275-8.225156 1.613948-8.201245 1.398755-8.18929C1.111831-8.16538 1.028144-8.153425 1.028144-7.938232C1.028144-7.81868 1.147696-7.81868 1.267248-7.81868C1.876961-7.81868 1.876961-7.711083 1.876961-7.591532C1.876961-7.507846 1.78132-7.161146 1.733499-6.945953L1.446575-5.798257C1.327024-5.32005 .645579-2.606227 .597758-2.391034C.537983-2.092154 .537983-1.888917 .537983-1.733499C.537983-.514072 1.219427 .119552 1.996513 .119552C3.383313 .119552 4.817933-1.661768 4.817933-3.395268C4.817933-4.495143 4.196264-5.272229 3.299626-5.272229C2.677958-5.272229 2.116065-4.758157 1.888917-4.519054L2.761644-7.998007ZM2.008468-.119552C1.625903-.119552 1.207472-.406476 1.207472-1.338979C1.207472-1.733499 1.243337-1.960648 1.458531-2.797509C1.494396-2.952927 1.685679-3.718057 1.733499-3.873474C1.75741-3.969116 2.462765-5.033126 3.275716-5.033126C3.801743-5.033126 4.040847-4.507098 4.040847-3.88543C4.040847-3.311582 3.706102-1.960648 3.407223-1.338979C3.108344-.6934 2.558406-.119552 2.008468-.119552Z'/>
+</defs>
+<g id='eq6-page1'>
+<use x='0' y='0' xlink:href='#eq6-g0-98'/>
+</g>
+</svg> is the right-hand side vector.</p><aside class="m-note m-default"><h4>Initial guess contract</h4><p>On entry, the system&#x27;s solution vector holds the initial guess; on exit it holds the solution. Iterative solvers use the guess whenever it is correctly sized; direct solvers ignore it. Assembly seeds the guess from the trial function data, which is zero by construction unless set.</p></aside>
+          </div></section>
+        </section>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">&hellip;</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form>
+            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript.</noscript>
+          <div id="search-help" class="m-text m-dim m-text-center">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
+            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v2-eeb63e0c3a5e.js"></script>
+<script src="searchdata-v2.js" async="async"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+  <a class="rodin-ci-link" href="ci-index.html" aria-label="CI" title="CI"><span class="rodin-ci-mark" aria-hidden="true"></span><span class="rodin-ci-label">CI</span></a>
+</div>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>

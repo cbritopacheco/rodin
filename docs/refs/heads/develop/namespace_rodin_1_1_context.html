@@ -76,8 +76,8 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md550">Supported contexts</a></li>
-            <li><a href="#autotoc_md551">Representative use</a></li>
+            <li><a href="#autotoc_md577">Supported contexts</a></li>
+            <li><a href="#autotoc_md578">Representative use</a></li>
             <li>
               Reference
               <ul>
@@ -86,7 +86,7 @@
             </li>
           </ul>
         </nav>
-<p><a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Local</a> selects local execution, and <a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Context::<wbr />MPI</a> carries the environment and communicator for distributed execution. Mesh, connectivity, and finite element specializations use these context types to select their data distribution and backend behavior while preserving the same mathematical interfaces.</p><section id="autotoc_md550"><h2><a href="#autotoc_md550">Supported contexts</a></h2><ul><li><strong>Local Context</strong>: Single-machine execution with shared memory</li><li><strong>Distributed Context</strong>: Multi-node execution with message passing (MPI)</li></ul></section><section id="autotoc_md551"><h2><a href="#autotoc_md551">Representative use</a></h2><p>A mesh&#x27;s context selects its execution environment without changing its geometric role.</p><pre class="m-code"><span class="k">using</span><span class="w"> </span><span class="nc">LocalMesh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Geometry</span><span class="o">::</span><span class="nc">Mesh</span><span class="o">&lt;</span><span class="nc">Context</span><span class="o">::</span><span class="nc">Local</span><span class="o">&gt;</span><span class="p">;</span>
+<p><a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Local</a> selects local execution, and <a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Context::<wbr />MPI</a> carries the environment and communicator for distributed execution. Mesh, connectivity, and finite element specializations use these context types to select their data distribution and backend behavior while preserving the same mathematical interfaces.</p><section id="autotoc_md577"><h2><a href="#autotoc_md577">Supported contexts</a></h2><ul><li><strong>Local Context</strong>: Single-machine execution with shared memory</li><li><strong>Distributed Context</strong>: Multi-node execution with message passing (MPI)</li></ul></section><section id="autotoc_md578"><h2><a href="#autotoc_md578">Representative use</a></h2><p>A mesh&#x27;s context selects its execution environment without changing its geometric role.</p><pre class="m-code"><span class="k">using</span><span class="w"> </span><span class="nc">LocalMesh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Geometry</span><span class="o">::</span><span class="nc">Mesh</span><span class="o">&lt;</span><span class="nc">Context</span><span class="o">::</span><span class="nc">Local</span><span class="o">&gt;</span><span class="p">;</span>
 <span class="k">auto</span><span class="w"> </span><span class="n">mesh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">LocalMesh</span><span class="o">::</span><span class="n">UniformGrid</span><span class="p">(</span><span class="n">Geometry</span><span class="o">::</span><span class="nc">Polytope</span><span class="o">::</span><span class="nc">Type</span><span class="o">::</span><span class="no">Triangle</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="mi">8</span><span class="p">,</span><span class="w"> </span><span class="mi">8</span><span class="p">});</span></pre></section>
         <section id="nested-classes">
           <h2><a href="#nested-classes">Classes</a></h2>
@@ -96,9 +96,75 @@
             </dt>
             <dd>Abstract base class for all execution contexts.</dd>
             <dt>
+              <div class="m-doc-template">template&lt;class Distribution, class Backend&gt;</div>
+              class <a href="class_rodin_1_1_context_1_1_kokkos.html" class="m-doc">Kokkos</a>
+            </dt>
+            <dd>Combines a distribution context with a Kokkos execution space.<details class="rodin-specialization-disclosure"><summary>See specializations</summary><table class="m-table m-fullwidth rodin-specializations"><thead><tr><th>Specialization</th><th>Description</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_context_1_1_kokkos_3_01_distribution_00_01_c_u_d_a_01_4.html"><code>Distribution, CUDA</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Distribution</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_context_1_1_kokkos.html#a193d61c156056d61f169058a9306bc08"><span class="nc">Kokkos</span></a><span class="o">&lt;</span>
+<span class="w">  </span><span class="nc">Distribution</span><span class="p">,</span>
+<span class="w">  </span><a href="class_rodin_1_1_context_1_1_c_u_d_a.html"><span class="nc">CUDA</span></a><span class="o">&gt;</span><span class="p">;</span>
+</pre></details></td><td>Diagnoses CUDA selection with a Kokkos build lacking CUDA support.</td></tr><tr><td><a href="class_rodin_1_1_context_1_1_kokkos_3_01_distribution_00_01_h_i_p_01_4.html"><code>Distribution, HIP</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Distribution</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_context_1_1_kokkos.html#a193d61c156056d61f169058a9306bc08"><span class="nc">Kokkos</span></a><span class="o">&lt;</span>
+<span class="w">  </span><span class="nc">Distribution</span><span class="p">,</span>
+<span class="w">  </span><a href="class_rodin_1_1_context_1_1_h_i_p.html"><span class="nc">HIP</span></a><span class="o">&gt;</span><span class="p">;</span>
+</pre></details></td><td>Diagnoses HIP selection with a Kokkos build lacking HIP support.</td></tr><tr><td><a href="class_rodin_1_1_context_1_1_kokkos_3_01_distribution_00_01_s_y_c_l_01_4.html"><code>Distribution, SYCL</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Distribution</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_context_1_1_kokkos.html#a193d61c156056d61f169058a9306bc08"><span class="nc">Kokkos</span></a><span class="o">&lt;</span>
+<span class="w">  </span><span class="nc">Distribution</span><span class="p">,</span>
+<span class="w">  </span><a href="class_rodin_1_1_context_1_1_s_y_c_l.html"><span class="nc">SYCL</span></a><span class="o">&gt;</span><span class="p">;</span>
+</pre></details></td><td>Diagnoses SYCL selection with a Kokkos build lacking SYCL support.</td></tr></tbody></table></details></dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class C&gt;</div>
+              struct <a href="struct_rodin_1_1_context_1_1_is_kokkos.html" class="m-doc">IsKokkos</a>
+            </dt>
+            <dd>Whether a context executes on a Kokkos device.<details class="rodin-specialization-disclosure"><summary>See specializations</summary><table class="m-table m-fullwidth rodin-specializations"><thead><tr><th>Specialization</th><th>Description</th></tr></thead><tbody><tr><td><a href="struct_rodin_1_1_context_1_1_is_kokkos_3_01_kokkos_3_01_distribution_00_01_backend_01_4_01_4.html"><code>Kokkos&lt;Distribution, Backend&gt;</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Distribution</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Backend</span><span class="o">&gt;</span>
+<span class="k">struct</span><span class="w"> </span><span class="nc">IsKokkos</span><span class="o">&lt;</span>
+<span class="w">  </span><span class="nc">Kokkos</span><span class="o">&lt;</span><span class="w"> </span><span class="nc">Distribution</span><span class="p">,</span><span class="w"> </span><span class="nc">Backend</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="p">;</span>
+</pre></details></td><td>Kokkos contexts execute on a Kokkos device.</td></tr></tbody></table></details></dd>
+            
+            <dt>
+              <div class="m-doc-template">template&lt;class C&gt;</div>
+              struct <a href="struct_rodin_1_1_context_1_1_is_local.html" class="m-doc">IsLocal</a>
+            </dt>
+            <dd>Whether a context runs its mesh in a single process.<details class="rodin-specialization-disclosure"><summary>See specializations</summary><table class="m-table m-fullwidth rodin-specializations"><thead><tr><th>Specialization</th><th>Description</th></tr></thead><tbody><tr><td><a href="struct_rodin_1_1_context_1_1_is_local_3_01_kokkos_3_01_local_00_01_backend_01_4_01_4.html"><code>Kokkos&lt;Local, Backend&gt;</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Backend</span><span class="o">&gt;</span>
+<span class="k">struct</span><span class="w"> </span><span class="nc">IsLocal</span><span class="o">&lt;</span>
+<span class="w">  </span><span class="nc">Kokkos</span><span class="o">&lt;</span><span class="w"> </span><span class="nc">Local</span><span class="p">,</span><span class="w"> </span><span class="nc">Backend</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="p">;</span>
+</pre></details></td><td>Kokkos contexts of a local mesh run in a single process.</td></tr></tbody></table></details></dd>
+            
+            <dt>
+              <div class="m-doc-template">template&lt;class C&gt;</div>
+              struct <a href="struct_rodin_1_1_context_1_1_is_m_p_i.html" class="m-doc">IsMPI</a>
+            </dt>
+            <dd>Whether a context distributes its mesh over MPI processes.<details class="rodin-specialization-disclosure"><summary>See specializations</summary><table class="m-table m-fullwidth rodin-specializations"><thead><tr><th>Specialization</th><th>Description</th></tr></thead><tbody><tr><td><a href="struct_rodin_1_1_context_1_1_is_m_p_i_3_01_kokkos_3_01_m_p_i_00_01_backend_01_4_01_4.html"><code>Kokkos&lt;MPI, Backend&gt;</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Backend</span><span class="o">&gt;</span>
+<span class="k">struct</span><span class="w"> </span><span class="nc">IsMPI</span><span class="o">&lt;</span>
+<span class="w">  </span><span class="nc">Kokkos</span><span class="o">&lt;</span><span class="w"> </span><span class="nc">MPI</span><span class="p">,</span><span class="w"> </span><span class="nc">Backend</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="p">;</span>
+</pre></details></td><td>Kokkos contexts of a distributed mesh run over MPI processes.</td></tr></tbody></table></details></dd>
+            
+            <dt>
               class <a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Local</a>
             </dt>
             <dd>Represents a single machine context.</dd>
+            <dt>
+              class <a href="class_rodin_1_1_context_1_1_c_u_d_a.html" class="m-doc">CUDA</a>
+            </dt>
+            <dd>Selects CUDA execution in a composed Kokkos context.</dd>
+            <dt>
+              class <a href="class_rodin_1_1_context_1_1_h_i_p.html" class="m-doc">HIP</a>
+            </dt>
+            <dd>Selects HIP execution in a composed Kokkos context.</dd>
+            
+            
+            
+            <dt>
+              class <a href="class_rodin_1_1_context_1_1_s_y_c_l.html" class="m-doc">SYCL</a>
+            </dt>
+            <dd>Selects SYCL execution in a composed Kokkos context.</dd>
             <dt>
               class <a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">MPI</a>
             </dt>
@@ -143,7 +209,7 @@
     </div>
   </div>
 </div>
-<script src="search-v2-27108c4bc94e.js"></script>
+<script src="search-v2-eeb63e0c3a5e.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">

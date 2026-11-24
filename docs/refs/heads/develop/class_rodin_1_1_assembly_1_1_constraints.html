@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Rodin::Assembly::Constraints class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
+  <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
+  <link rel="stylesheet" href="rodin-theme-1337632f765f.css" />
+  <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#18191c" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <a href="index.html" id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m">Rodin</a>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li>
+              <a href="pages.html">Pages</a>
+              <ol>
+                <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
+                <li><a href="gallery.html">Gallery</a></li>
+                <li><a href="guides-io.html">Input, output, and visualization</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
+                <li><a href="ci-index.html">Continuous integration</a></li>
+                <li><a href="notation-index.html">Notation</a></li>
+                <li><a href="credits-index.html">Credits</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="modules.html">Modules</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
+              </ol>
+            </li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="3">
+            <li><a href="annotated.html">Classes</a></li>
+            <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
+            <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_assembly.html">Assembly</a></div><h1>Constraints</h1><p class="rodin-reference-brief">Constraints of a device system, resolved on the host.</p><p class="rodin-reference-include">Defined in <a href="_constraints_8h.html"><code>Rodin/Kokkos/Assembly/Constraints.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Backend</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Constraints</span><span class="p">;</span>
+</pre>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md168">Architecture</a></li>
+              </ul>
+            </li>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+<section id="autotoc_md168_1s1"><section id="autotoc_md168"><h3><a href="#autotoc_md168">Architecture</a></h3><p>Value constraints are recorded as they are assembled. When an identification Dirichlet condition or a periodic condition is present, resolve() replays every condition, in order, in a host ConstraintMap, as the host assemblies do, and uploads the expansion of every degree of freedom on its masters.</p></section></section>
+        <section id="pub-types">
+          <h2><a href="#pub-types">Public types</a></h2>
+          <dl class="m-doc">
+            <dt>
+              struct <a href="struct_rodin_1_1_assembly_1_1_constraints_1_1_expansions.html" class="m-doc">Expansions</a>
+            </dt>
+            <dd>Expansions of the degrees of freedom on their masters.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_assembly_1_1_constraints_1_1_resolved.html" class="m-doc">Resolved</a>
+            </dt>
+            <dd>Identification constraints resolved on the host.</dd>
+            <dt id="a175d38764a967e2e19f4a110897a0871">
+              using <a href="#a175d38764a967e2e19f4a110897a0871" class="m-doc-self">ContextType</a> = <a href="class_rodin_1_1_context_1_1_kokkos.html" class="m-doc">::<wbr />Rodin::<wbr />Context::<wbr />Kokkos</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">::<wbr />Rodin::<wbr />Context::<wbr />Local</a>, Backend&gt;
+            </dt>
+            <dd>Mesh context.</dd>
+            <dt id="ab78f7cd66f68a9ce08c3ca5a42e12a90">
+              using <a href="#ab78f7cd66f68a9ce08c3ca5a42e12a90" class="m-doc-self">ExecutionSpace</a> = typename <a href="class_rodin_1_1_context_1_1_kokkos.html#accc6e672f89037295fb03a01924c9392" class="m-doc">ContextType::<wbr />ExecutionSpaceType</a>
+            </dt>
+            <dd>Execution space of the kernels.</dd>
+            <dt id="abd2285c284ad3cfde965ef4ecc1dab84">
+              using <a href="#abd2285c284ad3cfde965ef4ecc1dab84" class="m-doc-self">MemorySpace</a> = typename <a href="class_rodin_1_1_context_1_1_kokkos.html#a66e24e538ed3900abd12e5b97beada44" class="m-doc">ContextType::<wbr />MemorySpaceType</a>
+            </dt>
+            <dd>Memory space of the expansions.</dd>
+            <dt id="aa83d606ea5cd2bcf5b7491dce77ee273">
+              <div class="m-doc-template">template&lt;class T&gt;</div>
+              using <a href="#aa83d606ea5cd2bcf5b7491dce77ee273" class="m-doc-self">Array</a> = <a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Kokkos::<wbr />View</a>&lt;T*, <a href="#abd2285c284ad3cfde965ef4ecc1dab84" class="m-doc">MemorySpace</a>&gt;
+            </dt>
+            <dd>Device array.</dd>
+          </dl>
+        </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a0c9e3a4982cd7328ed08d263edae93dd" class="m-doc">Constraints</a>(</span><span class="m-doc-wrap">size_t rows,
+              size_t size)</span>
+            </dt>
+            <dd>Creates empty constraints.</dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#adb22abb433fdda9dddd549a915c46967" class="m-doc">fix</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_dirichlet_b_c_base.html" class="m-doc">Variational::<wbr />DirichletBCBase</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; dbc,
+              size_t offset,
+              size_t masterOffset)</span>
+            </dt>
+            <dd>Assembles a Dirichlet condition and records its constraints.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a4bb258b5acd9582ef5d9263c1e3d8fbe" class="m-doc">identify</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_periodic_b_c_base.html" class="m-doc">Variational::<wbr />PeriodicBCBase</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; pbc,
+              size_t offset)</span>
+            </dt>
+            <dd>Assembles a periodic condition and records its constraints.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae9907aeac1c2f19b6339b22449cc805c" class="m-doc">isConstrained</a>(</span><span class="m-doc-wrap">) const -&gt; bool</span>
+            </dt>
+            <dd>Whether some degree of freedom is fixed.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae7f636950d11c972ab56c62a5403c8f2" class="m-doc">isIdentified</a>(</span><span class="m-doc-wrap">) const -&gt; bool</span>
+            </dt>
+            <dd>Whether some condition identifies degrees of freedom.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a7b272d926d1398fda6514558428aa638" class="m-doc">getFixed</a>(</span><span class="m-doc-wrap">) const -&gt; const std::vector&lt;unsigned char&gt;&amp;</span>
+            </dt>
+            <dd>Whether each degree of freedom is fixed.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad4e6a9ef44834fc9bb538a64aa3922a4" class="m-doc">getValues</a>(</span><span class="m-doc-wrap">) const -&gt; const std::vector&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp;</span>
+            </dt>
+            <dd>Values of the fixed degrees of freedom, and of the identified ones once resolved.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#af26776ae45c1019eade529fa1e89de54" class="m-doc">resolve</a>(</span><span class="m-doc-wrap">const <a href="#ab78f7cd66f68a9ce08c3ca5a42e12a90" class="m-doc">ExecutionSpace</a>&amp; execution) -&gt; <a href="struct_rodin_1_1_assembly_1_1_constraints_1_1_resolved.html" class="m-doc">Resolved</a></span>
+            </dt>
+            <dd>Replays the conditions in a host constraint map and uploads the expansions of the degrees of freedom identified after flattening.</dd>
+            <dt>class <a href="group___rodin_types.html#gaa4e2542497b9d770faa236c58e485129" class="m-doc">Map</a></dt><dd>Resolves the conditions of a distributed system in the global numbering, then expands the local degrees of freedom on local indices.<details class="rodin-declaration-disclosure"><summary>See declaration</summary><div class="rodin-overview-declaration">
+              <div class="m-doc-template">template&lt;class <a href="group___rodin_types.html#gaa4e2542497b9d770faa236c58e485129" class="m-doc">Map</a>, class Offset, class Finalize&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a9980163efd43183f32b5cf9439aeb483" class="m-doc">resolve</a>(</span><span class="m-doc-wrap">const <a href="#ab78f7cd66f68a9ce08c3ca5a42e12a90" class="m-doc">ExecutionSpace</a>&amp; execution,
+              <a href="group___rodin_types.html#gaa4e2542497b9d770faa236c58e485129" class="m-doc">Map</a>&amp; map,
+              std::vector&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; globals,
+              std::vector&lt;unsigned char&gt;&amp; owned,
+              Offset&amp;&amp; offset,
+              Finalize&amp;&amp; finalize) -&gt; <a href="struct_rodin_1_1_assembly_1_1_constraints_1_1_resolved.html" class="m-doc">Resolved</a></span>
+            </div></details></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#ab2e9c5b2bb93e2cf5aeebf5cfeb4624f" class="m-doc">setFixed</a>(</span><span class="m-doc-wrap">std::vector&lt;unsigned char&gt; fixed,
+              std::vector&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt; values)</span>
+            </dt>
+            <dd>Replaces the fixed degrees of freedom, before a distributed resolution.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a0c9e3a4982cd7328ed08d263edae93dd"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0c9e3a4982cd7328ed08d263edae93dd" class="m-doc-self">Constraints</a>(</span><span class="m-doc-wrap">size_t rows,
+              size_t size)</span></span>
+            </h3>
+            <p>Creates empty constraints.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">rows</td>
+                  <td>Number of rows of the system.</td>
+                </tr>
+                <tr>
+                  <td>size</td>
+                  <td>Number of degrees of freedom, the larger of the row and column counts.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="adb22abb433fdda9dddd549a915c46967"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adb22abb433fdda9dddd549a915c46967" class="m-doc-self">fix</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_dirichlet_b_c_base.html" class="m-doc">Variational::<wbr />DirichletBCBase</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; dbc,
+              size_t offset,
+              size_t masterOffset)</span></span>
+            </h3>
+            <p>Assembles a Dirichlet condition and records its constraints.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">dbc</td>
+                  <td>Value or identification Dirichlet condition.</td>
+                </tr>
+                <tr>
+                  <td>offset</td>
+                  <td>Offset of the constrained space in the system.</td>
+                </tr>
+                <tr>
+                  <td>masterOffset</td>
+                  <td>Offset of the space of the masters of an identification.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a4bb258b5acd9582ef5d9263c1e3d8fbe"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4bb258b5acd9582ef5d9263c1e3d8fbe" class="m-doc-self">identify</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_periodic_b_c_base.html" class="m-doc">Variational::<wbr />PeriodicBCBase</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; pbc,
+              size_t offset)</span></span>
+            </h3>
+            <p>Assembles a periodic condition and records its constraints.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">pbc</td>
+                  <td>Periodic condition.</td>
+                </tr>
+                <tr>
+                  <td>offset</td>
+                  <td>Offset of the constrained space in the system.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ae9907aeac1c2f19b6339b22449cc805c"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">bool </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae9907aeac1c2f19b6339b22449cc805c" class="m-doc-self">isConstrained</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Whether some degree of freedom is fixed.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>True when at least one degree of freedom is fixed.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ae7f636950d11c972ab56c62a5403c8f2"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">bool </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae7f636950d11c972ab56c62a5403c8f2" class="m-doc-self">isIdentified</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Whether some condition identifies degrees of freedom.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>True when an identification or periodic condition was recorded.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a7b272d926d1398fda6514558428aa638"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">const std::vector&lt;unsigned char&gt;&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7b272d926d1398fda6514558428aa638" class="m-doc-self">getFixed</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Whether each degree of freedom is fixed.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Flag of each degree of freedom, nonzero when fixed.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ad4e6a9ef44834fc9bb538a64aa3922a4"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">const std::vector&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad4e6a9ef44834fc9bb538a64aa3922a4" class="m-doc-self">getValues</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Values of the fixed degrees of freedom, and of the identified ones once resolved.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Value of each degree of freedom, zero when unconstrained.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="af26776ae45c1019eade529fa1e89de54"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="struct_rodin_1_1_assembly_1_1_constraints_1_1_resolved.html" class="m-doc">Resolved</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af26776ae45c1019eade529fa1e89de54" class="m-doc-self">resolve</a>(</span><span class="m-doc-wrap">const <a href="#ab78f7cd66f68a9ce08c3ca5a42e12a90" class="m-doc">ExecutionSpace</a>&amp; execution)</span></span>
+            </h3>
+            <p>Replays the conditions in a host constraint map and uploads the expansions of the degrees of freedom identified after flattening.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">execution</td>
+                  <td>Execution space of the uploads.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Resolved constraints, with empty expansions when no degree of freedom stays identified.</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>The fixed degrees of freedom are those of the flattened map, which may fix degrees of freedom identified on fixed masters.</p>
+          </div></section>
+          <section class="m-doc-details" id="a9980163efd43183f32b5cf9439aeb483"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Backend&gt;
+                template&lt;class <a href="group___rodin_types.html#gaa4e2542497b9d770faa236c58e485129" class="m-doc">Map</a>, class Offset, class Finalize&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="struct_rodin_1_1_assembly_1_1_constraints_1_1_resolved.html" class="m-doc">Resolved</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9980163efd43183f32b5cf9439aeb483" class="m-doc-self">resolve</a>(</span><span class="m-doc-wrap">const <a href="#ab78f7cd66f68a9ce08c3ca5a42e12a90" class="m-doc">ExecutionSpace</a>&amp; execution,
+              <a href="group___rodin_types.html#gaa4e2542497b9d770faa236c58e485129" class="m-doc">Map</a>&amp; map,
+              std::vector&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; globals,
+              std::vector&lt;unsigned char&gt;&amp; owned,
+              Offset&amp;&amp; offset,
+              Finalize&amp;&amp; finalize)</span></span>
+            </h3>
+            <p>Resolves the conditions of a distributed system in the global numbering, then expands the local degrees of freedom on local indices.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">execution</td>
+                  <td>Execution space of the uploads.</td>
+                </tr>
+                <tr>
+                  <td>map</td>
+                  <td>Empty constraint map of the global degrees of freedom.</td>
+                </tr>
+                <tr>
+                  <td>globals</td>
+                  <td>Global index of each local degree of freedom, appended with the masters the process does not hold.</td>
+                </tr>
+                <tr>
+                  <td>owned</td>
+                  <td>Whether the process owns each local degree of freedom, appended likewise.</td>
+                </tr>
+                <tr>
+                  <td>offset</td>
+                  <td>Callable giving the global index of the first degree of freedom of a field from its local one.</td>
+                </tr>
+                <tr>
+                  <td>finalize</td>
+                  <td>Callable resolving the map over the processes; collective.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Resolved constraints in local indices, with empty expansions when no degree of freedom stays identified.</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>The periodic and identification conditions relate global indices of their spaces, which may be held by other processes; each process may give any of them, and the map gathers them all. The fixed degrees of freedom are those already synchronized over the processes. The masters the process does not hold are appended to the local degrees of freedom, so that their entries are sent to their owners, and only the owner of an identified degree of freedom writes its row.</p>
+          </div></section>
+          <section class="m-doc-details" id="ab2e9c5b2bb93e2cf5aeebf5cfeb4624f"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab2e9c5b2bb93e2cf5aeebf5cfeb4624f" class="m-doc-self">setFixed</a>(</span><span class="m-doc-wrap">std::vector&lt;unsigned char&gt; fixed,
+              std::vector&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt; values)</span></span>
+            </h3>
+            <p>Replaces the fixed degrees of freedom, before a distributed resolution.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">fixed</td>
+                  <td>Whether each local degree of freedom is fixed.</td>
+                </tr>
+                <tr>
+                  <td>values</td>
+                  <td>Fixed value of each local degree of freedom.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+        </section>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">&hellip;</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form>
+            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript.</noscript>
+          <div id="search-help" class="m-text m-dim m-text-center">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
+            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v2-eeb63e0c3a5e.js"></script>
+<script src="searchdata-v2.js" async="async"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+  <a class="rodin-ci-link" href="ci-index.html" aria-label="CI" title="CI"><span class="rodin-ci-mark" aria-hidden="true"></span><span class="rodin-ci-label">CI</span></a>
+</div>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>

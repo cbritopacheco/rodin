@@ -76,11 +76,11 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md557">Assembly strategies</a></li>
-            <li><a href="#autotoc_md558">What gets assembled</a></li>
-            <li><a href="#autotoc_md559">Assembly pipeline</a></li>
-            <li><a href="#autotoc_md560">Multiple-field assembly</a></li>
-            <li><a href="#autotoc_md561">Representative formula</a></li>
+            <li><a href="#autotoc_md584">Assembly strategies</a></li>
+            <li><a href="#autotoc_md585">What gets assembled</a></li>
+            <li><a href="#autotoc_md586">Assembly pipeline</a></li>
+            <li><a href="#autotoc_md587">Multiple-field assembly</a></li>
+            <li><a href="#autotoc_md588">Representative formula</a></li>
             <li>
               Reference
               <ul>
@@ -90,7 +90,7 @@
             </li>
           </ul>
         </nav>
-<p><a href="class_rodin_1_1_assembly_1_1_sequential.html" class="m-doc">Assembly::<wbr />Sequential</a> evaluates local integrals and accumulates global matrices and vectors; <a href="class_rodin_1_1_assembly_1_1_default.html" class="m-doc">Assembly::<wbr />Default</a> selects the configured assembly strategy. <a href="class_rodin_1_1_assembly_1_1_bilinear_form_assembly_input.html" class="m-doc">BilinearFormAssemblyInput</a> supplies spaces and integrators, and <a href="class_rodin_1_1_assembly_1_1_constraint_map.html" class="m-doc">ConstraintMap</a> expands degree-of-freedom constraints when assembling constrained or coupled problems.</p><section id="autotoc_md557"><h2><a href="#autotoc_md557">Assembly strategies</a></h2><table class="m-table"><thead><tr><th>Strategy</th><th>Class</th><th>Description</th></tr></thead><tbody><tr><td><strong>Sequential</strong></td><td><a href="class_rodin_1_1_assembly_1_1_sequential.html" class="m-doc">Assembly::<wbr />Sequential</a></td><td>Single-threaded assembly. Iterates over mesh cells, evaluates local element matrices/vectors, and accumulates into the global system. Deterministic and reproducible.</td></tr><tr><td><strong>OpenMP</strong></td><td><a href="namespace_rodin_1_1_assembly.html" class="m-doc">Assembly::<wbr />OpenMP</a></td><td>Shared-memory parallel assembly using OpenMP. Each thread processes a subset of cells and accumulates contributions using thread-safe operations. Requires compilation with <code>RODIN_USE_OPENMP=ON</code>.</td></tr><tr><td><strong>Default</strong></td><td><a href="class_rodin_1_1_assembly_1_1_default.html" class="m-doc">Assembly::<wbr />Default</a></td><td>Compile-time policy selector. Maps to <a href="namespace_rodin_1_1_assembly.html" class="m-doc">Assembly::<wbr />OpenMP</a> when OpenMP is available, otherwise falls back to <a href="class_rodin_1_1_assembly_1_1_sequential.html" class="m-doc">Assembly::<wbr />Sequential</a>. Users rarely need to specify this directly.</td></tr></tbody></table></section><section id="autotoc_md558"><h2><a href="#autotoc_md558">What gets assembled</a></h2><ul><li><strong>Bilinear Form</strong> <svg class="m-math" style="width: 3.463em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 33.244413 11.955168">
+<p><a href="class_rodin_1_1_assembly_1_1_sequential.html" class="m-doc">Assembly::<wbr />Sequential</a> evaluates local integrals and accumulates global matrices and vectors; <a href="class_rodin_1_1_assembly_1_1_default.html" class="m-doc">Assembly::<wbr />Default</a> selects the configured assembly strategy. <a href="class_rodin_1_1_assembly_1_1_bilinear_form_assembly_input.html" class="m-doc">BilinearFormAssemblyInput</a> supplies spaces and integrators, and <a href="class_rodin_1_1_assembly_1_1_constraint_map.html" class="m-doc">ConstraintMap</a> expands degree-of-freedom constraints when assembling constrained or coupled problems.</p><section id="autotoc_md584"><h2><a href="#autotoc_md584">Assembly strategies</a></h2><table class="m-table"><thead><tr><th>Strategy</th><th>Class</th><th>Description</th></tr></thead><tbody><tr><td><strong>Sequential</strong></td><td><a href="class_rodin_1_1_assembly_1_1_sequential.html" class="m-doc">Assembly::<wbr />Sequential</a></td><td>Single-threaded assembly. Iterates over mesh cells, evaluates local element matrices/vectors, and accumulates into the global system. Deterministic and reproducible.</td></tr><tr><td><strong>OpenMP</strong></td><td><a href="namespace_rodin_1_1_assembly.html" class="m-doc">Assembly::<wbr />OpenMP</a></td><td>Shared-memory parallel assembly using OpenMP. Each thread processes a subset of cells and accumulates contributions using thread-safe operations. Requires compilation with <code>RODIN_USE_OPENMP=ON</code>.</td></tr><tr><td><strong>Default</strong></td><td><a href="class_rodin_1_1_assembly_1_1_default.html" class="m-doc">Assembly::<wbr />Default</a></td><td>Compile-time policy selector. Maps to <a href="namespace_rodin_1_1_assembly.html" class="m-doc">Assembly::<wbr />OpenMP</a> when OpenMP is available, otherwise falls back to <a href="class_rodin_1_1_assembly_1_1_sequential.html" class="m-doc">Assembly::<wbr />Sequential</a>. Users rarely need to specify this directly.</td></tr></tbody></table></section><section id="autotoc_md585"><h2><a href="#autotoc_md585">What gets assembled</a></h2><ul><li><strong>Bilinear Form</strong> <svg class="m-math" style="width: 3.463em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 33.244413 11.955168">
 <title>
 $ a(u,v) $
 </title>
@@ -203,7 +203,7 @@ $ b_i = \ell(\psi_i) $
 <use x='41.179386' y='1.793263' xlink:href='#eq6-g0-105'/>
 <use x='44.560658' y='0' xlink:href='#eq6-g2-41'/>
 </g>
-</svg>.</li><li><strong>Dirichlet BC</strong>: Assembles into an <code>IndexMap</code> mapping constrained DOFs to their prescribed values.</li><li><strong>Problem</strong>: Orchestrates the full assembly pipeline — bilinear form, linear form(s), Dirichlet elimination — into a complete <a href="class_rodin_1_1_math_1_1_linear_system.html" class="m-doc">LinearSystem&lt;Operator, Vector&gt;</a>.</li></ul></section><section id="autotoc_md559"><h2><a href="#autotoc_md559">Assembly pipeline</a></h2><p>Calling a solver on a <code>Problem</code> normally triggers assembly. Explicit <code>Problem::assemble()</code> updates the system without solving it. The pipeline is:</p><ol><li>Assemble the bilinear form into a sparse matrix <svg class="m-math" style="width: 0.914em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 8.775347 8.169366">
+</svg>.</li><li><strong>Dirichlet BC</strong>: Assembles into an <code>IndexMap</code> mapping constrained DOFs to their prescribed values.</li><li><strong>Problem</strong>: Orchestrates the full assembly pipeline — bilinear form, linear form(s), Dirichlet elimination — into a complete <a href="class_rodin_1_1_math_1_1_linear_system.html" class="m-doc">LinearSystem&lt;Operator, Vector&gt;</a>.</li></ul></section><section id="autotoc_md586"><h2><a href="#autotoc_md586">Assembly pipeline</a></h2><p>Calling a solver on a <code>Problem</code> normally triggers assembly. Explicit <code>Problem::assemble()</code> updates the system without solving it. The pipeline is:</p><ol><li>Assemble the bilinear form into a sparse matrix <svg class="m-math" style="width: 0.914em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 8.775347 8.169366">
 <title>
 $ A $
 </title>
@@ -223,7 +223,7 @@ $ b $
 <g id='eq8-page1'>
 <use x='0' y='0' xlink:href='#eq8-g0-98'/>
 </g>
-</svg></li><li>Apply Dirichlet boundary conditions (row/column elimination)</li><li>Package into a <code>LinearSystem</code> and pass to the solver</li></ol><p>Users can also trigger assembly manually by calling <code>BilinearForm::assemble()</code> or <code>LinearForm::assemble()</code>.</p></section><section id="autotoc_md560"><h2><a href="#autotoc_md560">Multiple-field assembly</a></h2><p>For saddle-point problems (e.g. Stokes), the Assembly module supports block-structured systems via <code>Tuple&lt;BilinearForm...&gt;</code> and <code>Tuple&lt;LinearForm...&gt;</code>, which assemble into block matrices and vectors. This is used by multi-field <code>Problem</code> objects with multiple trial/test function pairs.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="guides-variational.html" class="m-doc">Variational formulations guide</a></p></aside></section><section id="autotoc_md561"><h2><a href="#autotoc_md561">Representative formula</a></h2><p>Trial basis functions <svg class="m-math" style="width: 1.126em; height: 1.213em; vertical-align: -0.350em;" viewBox="0 -8.302191 10.812127 11.6452">
+</svg></li><li>Apply Dirichlet boundary conditions (row/column elimination)</li><li>Package into a <code>LinearSystem</code> and pass to the solver</li></ol><p>Users can also trigger assembly manually by calling <code>BilinearForm::assemble()</code> or <code>LinearForm::assemble()</code>.</p></section><section id="autotoc_md587"><h2><a href="#autotoc_md587">Multiple-field assembly</a></h2><p>For saddle-point problems (e.g. Stokes), the Assembly module supports block-structured systems via <code>Tuple&lt;BilinearForm...&gt;</code> and <code>Tuple&lt;LinearForm...&gt;</code>, which assemble into block matrices and vectors. This is used by multi-field <code>Problem</code> objects with multiple trial/test function pairs.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="guides-variational.html" class="m-doc">Variational formulations guide</a></p></aside></section><section id="autotoc_md588"><h2><a href="#autotoc_md588">Representative formula</a></h2><p>Trial basis functions <svg class="m-math" style="width: 1.126em; height: 1.213em; vertical-align: -0.350em;" viewBox="0 -8.302191 10.812127 11.6452">
 <title>
 $\phi_j$
 </title>
@@ -553,7 +553,18 @@ $\psi_i$
 <span class="k">class</span><span class="w"> </span><span class="nc">Default</span><span class="o">&lt;</span>
 <span class="w">  </span><span class="nc">Context</span><span class="o">::</span><span class="nc">Local</span><span class="p">,</span>
 <span class="w">  </span><span class="nc">Context</span><span class="o">::</span><span class="nc">Local</span><span class="o">&gt;</span><span class="p">;</span>
-</pre></details></td><td>Default assembly strategy for mixed local contexts with OpenMP enabled.</td></tr><tr><td><a href="class_rodin_1_1_assembly_1_1_default_3_01_context_1_1_m_p_i_01_4.html"><code>Context::MPI</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;&gt;</span>
+</pre></details></td><td>Default assembly strategy for mixed local contexts with OpenMP enabled.</td></tr><tr><td><a href="class_rodin_1_1_assembly_1_1_default_3_01_context_1_1_kokkos_3_01_host_00_01_backend_01_4_01_4.html"><code>Context::Kokkos&lt;Host, Backend&gt;</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="no">Host</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Backend</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Default</span><span class="o">&lt;</span>
+<span class="w">  </span><span class="nc">Context</span><span class="o">::</span><span class="nc">Kokkos</span><span class="o">&lt;</span><span class="w"> </span><span class="no">Host</span><span class="p">,</span><span class="w"> </span><span class="nc">Backend</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="p">;</span>
+</pre></details></td><td>Default assembly for a test space on a Kokkos mesh.</td></tr><tr><td><a href="class_rodin_1_1_assembly_1_1_default_3_01_context_1_1_kokkos_3_01_host_00_01_backend_01_4_00_01_c1f69d1614124d9d77ed1ec9f1acb1a4.html"><code>Context::Kokkos&lt;Host, Backend&gt;, Context::Kokkos&lt;Host, Backend&gt;</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="no">Host</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Backend</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Default</span><span class="o">&lt;</span>
+<span class="w">  </span><span class="nc">Context</span><span class="o">::</span><span class="nc">Kokkos</span><span class="o">&lt;</span><span class="w"> </span><span class="no">Host</span><span class="p">,</span><span class="w"> </span><span class="nc">Backend</span><span class="w"> </span><span class="o">&gt;</span><span class="p">,</span>
+<span class="w">  </span><span class="nc">Context</span><span class="o">::</span><span class="nc">Kokkos</span><span class="o">&lt;</span><span class="w"> </span><span class="no">Host</span><span class="p">,</span><span class="w"> </span><span class="nc">Backend</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="p">;</span>
+</pre></details></td><td>Default assembly for trial and test spaces on Kokkos meshes.</td></tr><tr><td><a href="class_rodin_1_1_assembly_1_1_default_3_01_context_1_1_m_p_i_01_4.html"><code>Context::MPI</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;&gt;</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">Default</span><span class="o">&lt;</span>
 <span class="w">  </span><span class="nc">Context</span><span class="o">::</span><span class="nc">MPI</span><span class="o">&gt;</span><span class="p">;</span>
 </pre></details></td><td>Selects MPI assembly when only the trial/test context is MPI.</td></tr><tr><td><a href="class_rodin_1_1_assembly_1_1_default_3_01_context_1_1_m_p_i_00_01_context_1_1_m_p_i_01_4.html"><code>Context::MPI, Context::MPI</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;&gt;</span>
@@ -734,6 +745,117 @@ $\psi_i$
             
             
             <dt>
+              <div class="m-doc-template">template&lt;class Backend&gt;</div>
+              class <a href="class_rodin_1_1_assembly_1_1_constraints.html" class="m-doc">Constraints</a>
+            </dt>
+            <dd>Constraints of a device system, resolved on the host.</dd>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            <dt>
+              <div class="m-doc-template">template&lt;class Mesh&gt;</div>
+              class <a href="class_rodin_1_1_assembly_1_1_polytopes.html" class="m-doc">Polytopes</a>
+            </dt>
+            <dd>Polytopes integrated by a device integrator and the position of their entries.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Mesh&gt;</div>
+              class <a href="class_rodin_1_1_assembly_1_1_kokkos_iteration.html" class="m-doc">KokkosIteration</a>
+            </dt>
+            <dd>Resident mesh traversal for Kokkos assembly.<details class="rodin-specialization-disclosure"><summary>See specializations</summary><table class="m-table m-fullwidth rodin-specializations"><thead><tr><th>Specialization</th><th>Description</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_assembly_1_1_kokkos_iteration_3_01_geometry_1_1_mesh_3_01_context_1_1_kokkos_3_06153fbc0d5f1529ae96429c7cfa28649.html"><code>Geometry::Mesh&lt;…&gt;</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Backend</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">KokkosIteration</span><span class="o">&lt;</span>
+<span class="w">  </span><span class="n">Geometry</span><span class="o">::</span><a href="class_rodin_1_1_geometry_1_1_mesh.html"><span class="nc">Mesh</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">Context</span><span class="o">::</span><a href="class_rodin_1_1_context_1_1_kokkos.html"><span class="nc">Kokkos</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">Context</span><span class="o">::</span><a href="class_rodin_1_1_context_1_1_local.html"><span class="nc">Local</span></a><span class="p">,</span><span class="w"> </span><span class="nc">Backend</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="k">final</span><span class="p">;</span>
+</pre></details></td><td>Kokkos traversal of the existing mesh assembly regions.</td></tr></tbody></table></details></dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class LinearAlgebraType, class Object&gt;</div>
+              class <a href="class_rodin_1_1_assembly_1_1_kokkos.html" class="m-doc">Kokkos</a>
+            </dt>
+            <dd>Device assembly on resident Kokkos meshes.<details class="rodin-specialization-disclosure"><summary>See specializations</summary><table class="m-table m-fullwidth rodin-specializations"><thead><tr><th>Specialization</th><th>Description</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_assembly_1_1_kokkos_3_01_matrix_00_01_variational_1_1_bilinear_form_3_01_solutioa859cc4c7cad9be032537eff2a9a3d4f.html"><code>Matrix, Variational::BilinearForm&lt;Solution, …&gt;</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Matrix</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Solution</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">TrialFES</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">TestFES</span><span class="o">&gt;</span>
+<span class="k">requires</span><span class="w"> </span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">is_same_v</span><span class="o">&lt;</span><span class="nc">Matrix</span><span class="p">,</span><span class="w"> </span><span class="o">::</span><span class="n">Rodin</span><span class="o">::</span><span class="n">Math</span><span class="o">::</span><a href="namespace_rodin_1_1_math.html#a1e9568d1308feaaa6f2f6a695857876f"><span class="nc">SparseMatrix</span></a><span class="o">&lt;</span><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf"><span class="nc">Real</span></a><span class="o">&gt;&gt;</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="k">requires</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">typename</span><span class="w"> </span><span class="nc">Matrix</span><span class="o">::</span><span class="nc">BackendType</span><span class="p">;</span><span class="w"> </span><span class="p">})</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_assembly_1_1_kokkos_3_01_matrix_00_01_variational_1_1_bilinear_form_3_01_solutioa859cc4c7cad9be032537eff2a9a3d4f.html#adf3a7c8a3c2cfba5ea9260b893cdf56e"><span class="nc">Kokkos</span></a><span class="o">&lt;</span>
+<span class="w">  </span><span class="nc">Matrix</span><span class="p">,</span>
+<span class="w">  </span><span class="n">Variational</span><span class="o">::</span><a href="class_rodin_1_1_variational_1_1_bilinear_form.html"><span class="nc">BilinearForm</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">Solution</span><span class="p">,</span><span class="w"> </span><span class="n">TrialFES</span><span class="p">,</span><span class="w"> </span><span class="n">TestFES</span><span class="p">,</span><span class="w"> </span><span class="nc">Matrix</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="k">final</span><span class="p">;</span>
+</pre></details></td><td>Device assembly of a sparse bilinear form on a Kokkos mesh.</td></tr><tr><td><a href="class_rodin_1_1_assembly_1_1_kokkos_3_01_vector_00_01_variational_1_1_linear_form_3_01_f_e_s_00_01_vector_01_4_01_4.html"><code>Vector, Variational::LinearForm&lt;FES, Vector&gt;</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_math_1_1_vector.html"><span class="nc">Vector</span></a><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">FES</span><span class="o">&gt;</span>
+<span class="k">requires</span><span class="w"> </span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">is_same_v</span><span class="o">&lt;</span><a href="class_rodin_1_1_math_1_1_vector.html"><span class="nc">Vector</span></a><span class="p">,</span><span class="w"> </span><span class="o">::</span><span class="n">Rodin</span><span class="o">::</span><span class="n">Math</span><span class="o">::</span><a href="class_rodin_1_1_math_1_1_vector.html"><span class="nc">Vector</span></a><span class="o">&lt;</span><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf"><span class="nc">Real</span></a><span class="o">&gt;&gt;</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="k">requires</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">typename</span><span class="w"> </span><a href="class_rodin_1_1_math_1_1_vector.html"><span class="nc">Vector</span></a><span class="o">::</span><span class="nc">MemorySpace</span><span class="p">;</span><span class="w"> </span><span class="p">})</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_assembly_1_1_kokkos_3_01_vector_00_01_variational_1_1_linear_form_3_01_f_e_s_00_01_vector_01_4_01_4.html#adf3a7c8a3c2cfba5ea9260b893cdf56e"><span class="nc">Kokkos</span></a><span class="o">&lt;</span>
+<span class="w">  </span><a href="class_rodin_1_1_math_1_1_vector.html"><span class="nc">Vector</span></a><span class="p">,</span>
+<span class="w">  </span><span class="n">Variational</span><span class="o">::</span><a href="class_rodin_1_1_variational_1_1_linear_form.html"><span class="nc">LinearForm</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">FES</span><span class="p">,</span><span class="w"> </span><a href="class_rodin_1_1_math_1_1_vector.html"><span class="nc">Vector</span></a><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="k">final</span><span class="p">;</span>
+</pre></details></td><td>Device assembly of a linear form on a Kokkos mesh.</td></tr><tr><td><a href="class_rodin_1_1_assembly_1_1_kokkos_3_1_1_rodin_1_1_math_1_1_linear_system_3_01_matrix_00_01_vecc78c6d864915cd600d7b5b96a440434a.html"><code>::Rodin::Math::LinearSystem&lt;Matrix, …&gt;, Variational::Problem&lt;…&gt;</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Matrix</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Vector</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">TrialFunction</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">TestFunction</span><span class="o">&gt;</span>
+<span class="k">requires</span><span class="w"> </span><span class="n">Internal</span><span class="o">::</span><span class="n">KokkosProblemMatrix</span><span class="o">&lt;</span><span class="nc">Matrix</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_assembly_1_1_kokkos_3_1_1_rodin_1_1_math_1_1_linear_system_3_01_matrix_00_01_vecc78c6d864915cd600d7b5b96a440434a.html#adf3a7c8a3c2cfba5ea9260b893cdf56e"><span class="nc">Kokkos</span></a><span class="o">&lt;</span>
+<span class="w">  </span><span class="o">::</span><span class="n">Rodin</span><span class="o">::</span><span class="n">Math</span><span class="o">::</span><a href="class_rodin_1_1_math_1_1_linear_system.html"><span class="nc">LinearSystem</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">Matrix</span><span class="p">,</span><span class="w"> </span><span class="nc">Vector</span><span class="w"> </span><span class="o">&gt;</span><span class="p">,</span>
+<span class="w">  </span><span class="n">Variational</span><span class="o">::</span><a href="class_rodin_1_1_variational_1_1_problem.html"><span class="nc">Problem</span></a><span class="o">&lt;::</span><span class="n">Rodin</span><span class="o">::</span><span class="n">Math</span><span class="o">::</span><a href="class_rodin_1_1_math_1_1_linear_system.html"><span class="nc">LinearSystem</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">Matrix</span><span class="p">,</span><span class="w"> </span><span class="nc">Vector</span><span class="w"> </span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="nc">TrialFunction</span><span class="p">,</span><span class="w"> </span><span class="nc">TestFunction</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="k">final</span><span class="p">;</span>
+</pre></details></td><td>Device assembly of a single field problem on a Kokkos mesh.</td></tr><tr><td><a href="class_rodin_1_1_assembly_1_1_kokkos_3_1_1_rodin_1_1_math_1_1_linear_system_3_01_matrix_00_01_vec134a695ba9f85a6c5ee10e8d65de74ee.html"><code>::Rodin::Math::LinearSystem&lt;Matrix, …&gt;, Variational::Problem&lt;…&gt;</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Matrix</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Vector</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">U1</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">U2</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">U3</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="p">...</span><span class="w"> </span><span class="n">Us</span><span class="o">&gt;</span>
+<span class="k">requires</span><span class="w"> </span><span class="n">Internal</span><span class="o">::</span><span class="n">KokkosProblemMatrix</span><span class="o">&lt;</span><span class="nc">Matrix</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_assembly_1_1_kokkos_3_1_1_rodin_1_1_math_1_1_linear_system_3_01_matrix_00_01_vec134a695ba9f85a6c5ee10e8d65de74ee.html#adf3a7c8a3c2cfba5ea9260b893cdf56e"><span class="nc">Kokkos</span></a><span class="o">&lt;</span>
+<span class="w">  </span><span class="o">::</span><span class="n">Rodin</span><span class="o">::</span><span class="n">Math</span><span class="o">::</span><a href="class_rodin_1_1_math_1_1_linear_system.html"><span class="nc">LinearSystem</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">Matrix</span><span class="p">,</span><span class="w"> </span><span class="nc">Vector</span><span class="w"> </span><span class="o">&gt;</span><span class="p">,</span>
+<span class="w">  </span><span class="n">Variational</span><span class="o">::</span><a href="class_rodin_1_1_variational_1_1_problem.html"><span class="nc">Problem</span></a><span class="o">&lt;::</span><span class="n">Rodin</span><span class="o">::</span><span class="n">Math</span><span class="o">::</span><a href="class_rodin_1_1_math_1_1_linear_system.html"><span class="nc">LinearSystem</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">Matrix</span><span class="p">,</span><span class="w"> </span><span class="nc">Vector</span><span class="w"> </span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="n">U1</span><span class="p">,</span><span class="w"> </span><span class="n">U2</span><span class="p">,</span><span class="w"> </span><span class="n">U3</span><span class="p">,</span><span class="w"> </span><span class="n">Us</span><span class="p">...</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="k">final</span><span class="p">;</span>
+</pre></details></td><td>Device assembly of a mixed problem on a Kokkos mesh.</td></tr><tr><td><a href="class_rodin_1_1_assembly_1_1_kokkos_3_01_index_map_3_01_real_01_4_00_01_variational_1_1_dirichle4868e35bb4fdea8f08b954ec370ec397.html"><code>IndexMap&lt;Real&gt;, Variational::DirichletBC&lt;…&gt;</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Solution</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">FES</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">ValueDerived</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_assembly_1_1_kokkos_3_01_index_map_3_01_real_01_4_00_01_variational_1_1_dirichle4868e35bb4fdea8f08b954ec370ec397.html#adf3a7c8a3c2cfba5ea9260b893cdf56e"><span class="nc">Kokkos</span></a><span class="o">&lt;</span>
+<span class="w">  </span><a href="group___rodin_types.html#ga6c5e391ad8021755d9d9f9d5755539cb"><span class="nc">IndexMap</span></a><span class="o">&lt;</span><span class="w"> </span><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf"><span class="nc">Real</span></a><span class="w"> </span><span class="o">&gt;</span><span class="p">,</span>
+<span class="w">  </span><span class="n">Variational</span><span class="o">::</span><a href="class_rodin_1_1_variational_1_1_dirichlet_b_c.html"><span class="nc">DirichletBC</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">Variational</span><span class="o">::</span><a href="class_rodin_1_1_variational_1_1_trial_function.html"><span class="nc">TrialFunction</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">Solution</span><span class="p">,</span><span class="w"> </span><span class="nc">FES</span><span class="w"> </span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="n">Variational</span><span class="o">::</span><a href="class_rodin_1_1_variational_1_1_function_base.html"><span class="nc">FunctionBase</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">ValueDerived</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="k">final</span><span class="p">;</span>
+</pre></details></td><td>Device assembly of a value Dirichlet condition on a Lagrange Kokkos space.</td></tr><tr><td><a href="class_rodin_1_1_assembly_1_1_kokkos_3_01_index_map_3_01std_1_1pair_3_01_index_array_00_01_1_1_ro6dcb665ce13e277a93d40a5fef358a7f.html"><code>IndexMap&lt;…&gt;, Variational::DirichletBC&lt;…&gt;</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Solution</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">FES1</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Derived2</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">FES2</span><span class="p">,</span>
+<span class="w">  </span><span class="n">Variational</span><span class="o">::</span><a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4"><span class="nc">ShapeFunctionSpaceType</span></a><span class="w"> </span><span class="n">Sp</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_assembly_1_1_kokkos_3_01_index_map_3_01std_1_1pair_3_01_index_array_00_01_1_1_ro6dcb665ce13e277a93d40a5fef358a7f.html#adf3a7c8a3c2cfba5ea9260b893cdf56e"><span class="nc">Kokkos</span></a><span class="o">&lt;</span>
+<span class="w">  </span><a href="group___rodin_types.html#ga6c5e391ad8021755d9d9f9d5755539cb"><span class="nc">IndexMap</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">pair</span><span class="o">&lt;</span><span class="w"> </span><a href="namespace_rodin.html#a3b5d284c6fb7166b753c5664773266cc"><span class="nc">IndexArray</span></a><span class="p">,</span><span class="w"> </span><span class="o">::</span><span class="n">Rodin</span><span class="o">::</span><span class="n">Math</span><span class="o">::</span><a href="class_rodin_1_1_math_1_1_vector.html"><span class="nc">Vector</span></a><span class="o">&lt;</span><span class="w"> </span><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf"><span class="nc">Real</span></a><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span><span class="p">,</span>
+<span class="w">  </span><span class="n">Variational</span><span class="o">::</span><a href="class_rodin_1_1_variational_1_1_dirichlet_b_c.html"><span class="nc">DirichletBC</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">Variational</span><span class="o">::</span><a href="class_rodin_1_1_variational_1_1_trial_function.html"><span class="nc">TrialFunction</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">Solution</span><span class="p">,</span><span class="w"> </span><span class="n">FES1</span><span class="w"> </span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="n">Variational</span><span class="o">::</span><a href="class_rodin_1_1_variational_1_1_shape_function_base.html"><span class="nc">ShapeFunctionBase</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">Derived2</span><span class="p">,</span><span class="w"> </span><span class="n">FES2</span><span class="p">,</span><span class="w"> </span><span class="n">Sp</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="k">final</span><span class="p">;</span>
+</pre></details></td><td>Identification Dirichlet condition $ u = A(v) $ on a Kokkos space.</td></tr><tr><td><a href="class_rodin_1_1_assembly_1_1_kokkos_3_1_1_mat_00_01_variational_1_1_bilinear_form_3_01_solution_c069d399cb21de7ff54010ef7fe54f63.html"><code>::Mat, Variational::BilinearForm&lt;Solution, …&gt;</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Solution</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">TrialFES</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">TestFES</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_assembly_1_1_kokkos_3_1_1_mat_00_01_variational_1_1_bilinear_form_3_01_solution_c069d399cb21de7ff54010ef7fe54f63.html#adf3a7c8a3c2cfba5ea9260b893cdf56e"><span class="nc">Kokkos</span></a><span class="o">&lt;</span>
+<span class="w">  </span><span class="o">::</span><span class="n">Mat</span><span class="p">,</span>
+<span class="w">  </span><span class="n">Variational</span><span class="o">::</span><a href="class_rodin_1_1_variational_1_1_bilinear_form.html"><span class="nc">BilinearForm</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">Solution</span><span class="p">,</span><span class="w"> </span><span class="n">TrialFES</span><span class="p">,</span><span class="w"> </span><span class="n">TestFES</span><span class="p">,</span><span class="w"> </span><span class="o">::</span><span class="n">Mat</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="k">final</span><span class="p">;</span>
+</pre></details></td><td>Device assembly of a PETSc bilinear form on a Kokkos mesh.</td></tr><tr><td><a href="class_rodin_1_1_assembly_1_1_kokkos_3_1_1_vec_00_01_variational_1_1_linear_form_3_01_f_e_s_00_01_1_1_vec_01_4_01_4.html"><code>::Vec, Variational::LinearForm&lt;FES,::Vec&gt;</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">FES</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_assembly_1_1_kokkos_3_1_1_vec_00_01_variational_1_1_linear_form_3_01_f_e_s_00_01_1_1_vec_01_4_01_4.html#adf3a7c8a3c2cfba5ea9260b893cdf56e"><span class="nc">Kokkos</span></a><span class="o">&lt;</span>
+<span class="w">  </span><span class="o">::</span><span class="n">Vec</span><span class="p">,</span>
+<span class="w">  </span><span class="n">Variational</span><span class="o">::</span><a href="class_rodin_1_1_variational_1_1_linear_form.html"><span class="nc">LinearForm</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">FES</span><span class="p">,</span><span class="w"> </span><span class="o">::</span><span class="n">Vec</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="k">final</span><span class="p">;</span>
+</pre></details></td><td>Device assembly of a PETSc linear form on a Kokkos mesh.</td></tr><tr><td><a href="class_rodin_1_1_assembly_1_1_kokkos_3_01_p_e_t_sc_1_1_math_1_1_linear_system_00_01_variational_16915c4a4366f6446611cc67b7f2db070.html"><code>PETSc::Math::LinearSystem, Variational::Problem&lt;…&gt;</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">U</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">V</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_assembly_1_1_kokkos_3_01_p_e_t_sc_1_1_math_1_1_linear_system_00_01_variational_16915c4a4366f6446611cc67b7f2db070.html#adf3a7c8a3c2cfba5ea9260b893cdf56e"><span class="nc">Kokkos</span></a><span class="o">&lt;</span>
+<span class="w">  </span><span class="n">PETSc</span><span class="o">::</span><span class="n">Math</span><span class="o">::</span><a href="namespace_rodin_1_1_p_e_t_sc_1_1_math.html#afa0435f07e69ca0a0806164a5b7e897f"><span class="nc">LinearSystem</span></a><span class="p">,</span>
+<span class="w">  </span><span class="n">Variational</span><span class="o">::</span><a href="class_rodin_1_1_variational_1_1_problem.html"><span class="nc">Problem</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">PETSc</span><span class="o">::</span><span class="n">Math</span><span class="o">::</span><a href="namespace_rodin_1_1_p_e_t_sc_1_1_math.html#afa0435f07e69ca0a0806164a5b7e897f"><span class="nc">LinearSystem</span></a><span class="p">,</span><span class="w"> </span><span class="n">U</span><span class="p">,</span><span class="w"> </span><span class="n">V</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="k">final</span><span class="p">;</span>
+</pre></details></td><td>Device assembly of a single field PETSc problem on a Kokkos mesh.</td></tr><tr><td><a href="class_rodin_1_1_assembly_1_1_kokkos_3_01_p_e_t_sc_1_1_math_1_1_linear_system_00_01_variational_1f4ea98caa4b64c6daddb37acf455f6ad.html"><code>PETSc::Math::LinearSystem, Variational::Problem&lt;…&gt;</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">U1</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">U2</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">U3</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="p">...</span><span class="w"> </span><span class="n">Us</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_assembly_1_1_kokkos_3_01_p_e_t_sc_1_1_math_1_1_linear_system_00_01_variational_1f4ea98caa4b64c6daddb37acf455f6ad.html#adf3a7c8a3c2cfba5ea9260b893cdf56e"><span class="nc">Kokkos</span></a><span class="o">&lt;</span>
+<span class="w">  </span><span class="n">PETSc</span><span class="o">::</span><span class="n">Math</span><span class="o">::</span><a href="namespace_rodin_1_1_p_e_t_sc_1_1_math.html#afa0435f07e69ca0a0806164a5b7e897f"><span class="nc">LinearSystem</span></a><span class="p">,</span>
+<span class="w">  </span><span class="n">Variational</span><span class="o">::</span><a href="class_rodin_1_1_variational_1_1_problem.html"><span class="nc">Problem</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">PETSc</span><span class="o">::</span><span class="n">Math</span><span class="o">::</span><a href="namespace_rodin_1_1_p_e_t_sc_1_1_math.html#afa0435f07e69ca0a0806164a5b7e897f"><span class="nc">LinearSystem</span></a><span class="p">,</span><span class="w"> </span><span class="n">U1</span><span class="p">,</span><span class="w"> </span><span class="n">U2</span><span class="p">,</span><span class="w"> </span><span class="n">U3</span><span class="p">,</span><span class="w"> </span><span class="n">Us</span><span class="p">...</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="k">final</span><span class="p">;</span>
+</pre></details></td><td>Device assembly of a mixed PETSc problem on a Kokkos mesh.</td></tr></tbody></table></details></dd>
+            <dt>
               <div class="m-doc-template">template&lt;class FES&gt;</div>
               class <a href="class_rodin_1_1_assembly_1_1_m_p_i_boundary_d_o_fs.html" class="m-doc">MPIBoundaryDOFs</a>
             </dt>
@@ -816,6 +938,10 @@ $\psi_i$
             
             
             
+            
+            
+            
+            
           </dl>
         </section>
         <section id="func-members">
@@ -837,6 +963,11 @@ $\psi_i$
             <dt><a href="#a394801fc26b61465d94e8970925f741d" class="m-doc">SequentialIteration</a></dt><dd>Template argument deduction guide for SequentialIteration.<details class="rodin-declaration-disclosure"><summary>See declaration</summary><div class="rodin-overview-declaration">
               <span class="m-doc-wrap-bumper"><a href="#a394801fc26b61465d94e8970925f741d" class="m-doc">SequentialIteration</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a>&gt;&amp; mesh,
               const <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a>&amp; region) -&gt; SequentialIteration&lt; Geometry::Mesh&lt; Context::Local &gt; &gt;</span>
+            </div></details></dd>
+            <dt><a href="#a5b67dc551a482a70e2de1865b9c0bcee" class="m-doc">KokkosIteration</a></dt><dd>Deduces resident traversal from its mesh and region.<details class="rodin-declaration-disclosure"><summary>See declaration</summary><div class="rodin-overview-declaration">
+              <div class="m-doc-template">template&lt;class Backend&gt;</div>
+              <span class="m-doc-wrap-bumper"><a href="#a5b67dc551a482a70e2de1865b9c0bcee" class="m-doc">KokkosIteration</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_kokkos.html" class="m-doc">Context::<wbr />Kokkos</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a>, Backend&gt;&gt;&amp; mesh,
+              const <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a>&amp; region) -&gt; KokkosIteration&lt; Geometry::Mesh&lt; Context::Kokkos&lt; Context::Local, Backend &gt; &gt; &gt;</span>
             </div></details></dd>
           </dl>
         </section>
@@ -926,6 +1057,41 @@ $\psi_i$
               </tbody>
             </table>
           </div></section>
+          <section class="m-doc-details" id="a5b67dc551a482a70e2de1865b9c0bcee"><div>
+            <h3><a href="#a5b67dc551a482a70e2de1865b9c0bcee" class="m-doc-self">KokkosIteration</a></h3><p class="rodin-reference-include">Defined in <a href="_kokkos_iteration_8h.html"><code>Rodin/Kokkos/Assembly/KokkosIteration.h</code></a></p><details class="rodin-declaration-disclosure"><summary>See declaration</summary><div class="rodin-overview-declaration">
+              
+              <div class="m-doc-template">
+                template&lt;class Backend&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5b67dc551a482a70e2de1865b9c0bcee" class="m-doc-self">KokkosIteration</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_kokkos.html" class="m-doc">Context::<wbr />Kokkos</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a>, Backend&gt;&gt;&amp; mesh,
+              const <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a>&amp; region) -&gt; KokkosIteration&lt; Geometry::Mesh&lt; Context::Kokkos&lt; Context::Local, Backend &gt; &gt; &gt;</span></span>
+            </div></details>
+            <p>Deduces resident traversal from its mesh and region.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">Backend</td>
+                  <td>Kokkos execution backend.</td>
+                </tr>
+              </tbody>
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>mesh</td>
+                  <td>Resident mesh to traverse.</td>
+                </tr>
+                <tr>
+                  <td>region</td>
+                  <td>Existing Rodin assembly region.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
         </section>
       </div>
     </div>
@@ -965,7 +1131,7 @@ $\psi_i$
     </div>
   </div>
 </div>
-<script src="search-v2-27108c4bc94e.js"></script>
+<script src="search-v2-eeb63e0c3a5e.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">

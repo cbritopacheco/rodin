@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Rodin::Assembly::Internal::COOCache struct | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
+  <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
+  <link rel="stylesheet" href="rodin-theme-1337632f765f.css" />
+  <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#18191c" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <a href="index.html" id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m">Rodin</a>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li>
+              <a href="pages.html">Pages</a>
+              <ol>
+                <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
+                <li><a href="gallery.html">Gallery</a></li>
+                <li><a href="guides-io.html">Input, output, and visualization</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
+                <li><a href="ci-index.html">Continuous integration</a></li>
+                <li><a href="notation-index.html">Notation</a></li>
+                <li><a href="credits-index.html">Credits</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="modules.html">Modules</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
+              </ol>
+            </li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="3">
+            <li><a href="annotated.html">Classes</a></li>
+            <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
+            <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_assembly.html">Assembly</a><span>›</span>Internal</div><h1>COOCache</h1><p class="rodin-reference-brief">Device buffers and sparsity pattern kept between the assemblies of a PETSc system.</p><p class="rodin-reference-include">Defined in <a href="_c_o_o_cache_8h.html"><code>Rodin/PETSc/Kokkos/Assembly/COOCache.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">MemorySpace</span><span class="o">&gt;</span>
+<span class="k">struct</span><span class="w"> </span><span class="nc">COOCache</span><span class="p">;</span>
+</pre>
+        <table class="m-table m-fullwidth m-flat">
+          <thead>
+            <tr><th colspan="2">Template parameters</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="width: 1%">MemorySpace</td>
+              <td>Kokkos memory space of the buffers.</td>
+            </tr>
+          </tbody>
+        </table>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
+                <li><a href="#pub-attribs">Public variables</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+<p>PETSc analyses the coordinate list in MatSetPreallocationCOO, which is much more expensive than MatSetValuesCOO. The pattern is kept to skip that analysis, and the coordinates are not even listed again, when the same matrix is assembled again with the same segments. PETSc is given the distinct coordinates sorted by row then column, which it analyses in linear time, and the values summed per coordinate on the device. Integrators restricted to attributes list their coordinates at every assembly, since the attributes of the cells may change, and the pattern is analysed again only when they moved. The buffers are reused while their size does not change.</p><p>A copy starts empty, so copies never share buffers.</p>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a3c028cdf4765ca31cd1bbfd62c8dd263" class="m-doc">COOCache</a>(</span><span class="m-doc-wrap">const COOCache&amp; other)</span>
+            </dt>
+            <dd>Constructs an empty cache, without sharing the buffers.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a18424f808567f2f4261f61068e2a066f" class="m-doc">COOCache</a>(</span><span class="m-doc-wrap">COOCache&amp;&amp; other) <span class="m-label m-flat m-info">defaulted</span></span>
+            </dt>
+            <dd>Takes the buffers of the moved cache.</dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a1009a71b008decd6a44046e09147098a" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const COOCache&amp; other) -&gt; COOCache&amp;</span>
+            </dt>
+            <dd>Empties the cache, without sharing the buffers.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a8ae37f37aa6554e13a763b9777f6fff3" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">COOCache&amp;&amp; other) -&gt; COOCache&amp; <span class="m-label m-flat m-info">defaulted</span></span>
+            </dt>
+            <dd>Takes the buffers of the moved cache.</dd>
+          </dl>
+        </section>
+        <section id="pub-attribs">
+          <h2><a href="#pub-attribs">Public variables</a></h2>
+          <dl class="m-doc">
+            <dt id="a2ab3f18be849439eb219cca17bac8c89">
+              PetscInt64 <a href="#a2ab3f18be849439eb219cca17bac8c89" class="m-doc-self">matrix</a>
+            </dt>
+            <dd>PETSc identifier of the matrix preallocated with the pattern, or -1.</dd>
+            <dt id="a156a9d78c28b119bcbfb3b488421b642">
+              PetscInt64 <a href="#a156a9d78c28b119bcbfb3b488421b642" class="m-doc-self">vector</a>
+            </dt>
+            <dd>PETSc identifier of the distributed right-hand side preallocated with the local coordinates, or -1.</dd>
+            <dt id="a5526f40b4ddcf23b599388283b318a13">
+              bool <a href="#a5526f40b4ddcf23b599388283b318a13" class="m-doc-self">indexed</a>
+            </dt>
+            <dd>Whether the coordinates hold the pattern of the segments.</dd>
+            <dt id="a9932b9d2bf7e0c8894b57fd9601d47ed">
+              std::vector&lt;<a href="struct_rodin_1_1_assembly_1_1_internal_1_1_c_o_o_segment.html" class="m-doc">COOSegment</a>&gt; <a href="#a9932b9d2bf7e0c8894b57fd9601d47ed" class="m-doc-self">segments</a>
+            </dt>
+            <dd>Segments of the pattern.</dd>
+            <dt>
+              <a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Kokkos::<wbr />View</a>&lt;PetscInt*, MemorySpace&gt; <a href="#aee2532da58426a3f17a1089da143560b" class="m-doc">rows</a>
+            </dt>
+            <dd>Row coordinates, empty while they are released.</dd>
+            <dt id="a985c53f9bdcf7b79bf736b856ac01fb7">
+              <a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Kokkos::<wbr />View</a>&lt;PetscInt*, MemorySpace&gt; <a href="#a985c53f9bdcf7b79bf736b856ac01fb7" class="m-doc-self">cols</a>
+            </dt>
+            <dd>Column coordinates, empty while they are released.</dd>
+            <dt id="af869b749aa2a8f5f40a5d1b3278b43ca">
+              size_t <a href="#af869b749aa2a8f5f40a5d1b3278b43ca" class="m-doc-self">listed</a>
+            </dt>
+            <dd>Number of coordinates of the pattern.</dd>
+            <dt id="a91c2547547fac2e62cda07211affbde7">
+              bool <a href="#a91c2547547fac2e62cda07211affbde7" class="m-doc-self">released</a>
+            </dt>
+            <dd>Whether the coordinates were released, the distinct ones being kept to list them again.</dd>
+            <dt id="a7f5faf331a4aeacb0fb6cb67e437c0bd">
+              <a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Kokkos::<wbr />View</a>&lt;PetscInt*, MemorySpace&gt; <a href="#a7f5faf331a4aeacb0fb6cb67e437c0bd" class="m-doc-self">distinctRows</a>
+            </dt>
+            <dd>Rows of the distinct coordinates, kept while they are released.</dd>
+            <dt id="aaa4cb679b1c6d5c2fbe10c7d035fc04a">
+              <a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Kokkos::<wbr />View</a>&lt;PetscInt*, MemorySpace&gt; <a href="#aaa4cb679b1c6d5c2fbe10c7d035fc04a" class="m-doc-self">distinctCols</a>
+            </dt>
+            <dd>Columns of the distinct coordinates, kept as distinctRows.</dd>
+            <dt id="aae8984c31df689ae9e8fa899ab31e76a">
+              <a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Kokkos::<wbr />View</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>*, MemorySpace&gt; <a href="#aae8984c31df689ae9e8fa899ab31e76a" class="m-doc-self">restrictedRows</a>
+            </dt>
+            <dd>Row coordinates of the restricted segments, packed as nextRows.</dd>
+            <dt id="a5bb5386ae81bb6d5cd9460d51895d9b4">
+              <a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Kokkos::<wbr />View</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>*, MemorySpace&gt; <a href="#a5bb5386ae81bb6d5cd9460d51895d9b4" class="m-doc-self">restrictedCols</a>
+            </dt>
+            <dd>Column coordinates of the restricted segments, as restrictedRows.</dd>
+            <dt id="ab0679abfcff644dff760249984fd8c9d">
+              <a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Kokkos::<wbr />View</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>*, MemorySpace&gt; <a href="#ab0679abfcff644dff760249984fd8c9d" class="m-doc-self">nextRows</a>
+            </dt>
+            <dd>Row coordinates being listed, all of them or only those of the restricted segments, packed, when they alone are listed again.</dd>
+            <dt id="a07e9aa7f88426be9ebfdaa7feb323393">
+              <a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Kokkos::<wbr />View</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>*, MemorySpace&gt; <a href="#a07e9aa7f88426be9ebfdaa7feb323393" class="m-doc-self">nextCols</a>
+            </dt>
+            <dd>Column coordinates being listed, as nextRows.</dd>
+            <dt id="a0f5300445113b93d87eb1c110d7c0ce5">
+              <a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Kokkos::<wbr />View</a>&lt;PetscScalar*, MemorySpace&gt; <a href="#a0f5300445113b93d87eb1c110d7c0ce5" class="m-doc-self">nextValues</a>
+            </dt>
+            <dd>Values of the restricted segments listed again, as nextRows.</dd>
+            <dt id="a0d8b75a4f8e394bf3a2d414e3ddc1d78">
+              <a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Kokkos::<wbr />View</a>&lt;PetscScalar*, MemorySpace&gt; <a href="#a0d8b75a4f8e394bf3a2d414e3ddc1d78" class="m-doc-self">values</a>
+            </dt>
+            <dd>Matrix values.</dd>
+            <dt id="ad61fa942af9036e7f58ce0d75f71303a">
+              <a href="struct_rodin_1_1_assembly_1_1_internal_1_1_c_o_o_order.html" class="m-doc">COOOrder</a>&lt;MemorySpace&gt; <a href="#ad61fa942af9036e7f58ce0d75f71303a" class="m-doc-self">order</a>
+            </dt>
+            <dd>Coordinates sorted by row then column, as indices in the list.</dd>
+            <dt id="a8705f04e44ff6281b1e08936d890e6ed">
+              <a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Kokkos::<wbr />View</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>*, MemorySpace&gt; <a href="#a8705f04e44ff6281b1e08936d890e6ed" class="m-doc-self">starts</a>
+            </dt>
+            <dd>Start in the sorted coordinates of each distinct coordinate, and the list size.</dd>
+            <dt id="a702dcd6e741df00ee5b98827ccc25cf1">
+              <a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Kokkos::<wbr />View</a>&lt;PetscScalar*, MemorySpace&gt; <a href="#a702dcd6e741df00ee5b98827ccc25cf1" class="m-doc-self">merged</a>
+            </dt>
+            <dd>Sum of the values of each distinct coordinate.</dd>
+            <dt id="a499c0d0b4a614f1ef93056ccfb5df8d4">
+              <a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Kokkos::<wbr />View</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>*, MemorySpace&gt; <a href="#a499c0d0b4a614f1ef93056ccfb5df8d4" class="m-doc-self">rhs</a>
+            </dt>
+            <dd>Right-hand side.</dd>
+            <dt id="accf4e1f91f8d52b48538cc011248d4e3">
+              <a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Kokkos::<wbr />View</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>*, MemorySpace&gt; <a href="#accf4e1f91f8d52b48538cc011248d4e3" class="m-doc-self">entryIndices</a>
+            </dt>
+            <dd>Indices of the linear integrator entries.</dd>
+            <dt id="a0a6a73737deca5b729e72f1edfb95c35">
+              <a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Kokkos::<wbr />View</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>*, MemorySpace&gt; <a href="#a0a6a73737deca5b729e72f1edfb95c35" class="m-doc-self">entryValues</a>
+            </dt>
+            <dd>Values of the linear integrator entries.</dd>
+            <dt id="aad1a392ea70e928d0c5985b6c2fadbec">
+              <a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Kokkos::<wbr />View</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>*, MemorySpace&gt; <a href="#aad1a392ea70e928d0c5985b6c2fadbec" class="m-doc-self">contributionRows</a>
+            </dt>
+            <dd>Rows of the contributions to the right-hand side, listed in a fixed order.</dd>
+            <dt id="a02535e33d5e035e7121a1948518df307">
+              <a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Kokkos::<wbr />View</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>*, MemorySpace&gt; <a href="#a02535e33d5e035e7121a1948518df307" class="m-doc-self">contributionValues</a>
+            </dt>
+            <dd>Contributions to the right-hand side.</dd>
+            <dt id="a2571098b99757c3d4c90afe9b22d709d">
+              size_t <a href="#a2571098b99757c3d4c90afe9b22d709d" class="m-doc-self">contributions</a>
+            </dt>
+            <dd>Number of listed contributions to the right-hand side.</dd>
+            <dt id="ab6c70141ec1cfa25ab11aac6f3a8d809">
+              <a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Kokkos::<wbr />View</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>*, MemorySpace&gt; <a href="#ab6c70141ec1cfa25ab11aac6f3a8d809" class="m-doc-self">groupedRows</a>
+            </dt>
+            <dd>Rows of the contributions grouped at the last assembly.</dd>
+            <dt id="a128f41e2a789a227f05b37b0551785a7">
+              <a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Kokkos::<wbr />View</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>*, MemorySpace&gt; <a href="#a128f41e2a789a227f05b37b0551785a7" class="m-doc-self">groupedPositions</a>
+            </dt>
+            <dd>Positions of these contributions, grouped by row in list order.</dd>
+            <dt id="ab0bc1e5041332a8749e2f9ccd8c8d5cd">
+              <a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Kokkos::<wbr />View</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>*, MemorySpace&gt; <a href="#ab0bc1e5041332a8749e2f9ccd8c8d5cd" class="m-doc-self">groupStarts</a>
+            </dt>
+            <dd>Start of every row group in groupedPositions, followed by the contribution count.</dd>
+            <dt id="a4295c64452cc0c5d209e1e73c17c6c13">
+              <a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Kokkos::<wbr />View</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>*, MemorySpace&gt; <a href="#a4295c64452cc0c5d209e1e73c17c6c13" class="m-doc-self">groupKeys</a>
+            </dt>
+            <dd>Row of every group.</dd>
+            <dt id="aefa60db1c9b69e05979816f5bcc8e07c">
+              std::vector&lt;<a href="struct_rodin_1_1_assembly_1_1_internal_1_1_c_o_o_segment.html" class="m-doc">COOSegment</a>&gt; <a href="#aefa60db1c9b69e05979816f5bcc8e07c" class="m-doc-self">vectorSegments</a>
+            </dt>
+            <dd>Linear integrators whose entries were grouped at the last assembly, when the entries were the contributions themselves.</dd>
+            <dt id="af4ea0304fa5e9a091bbd929bec8f42f5">
+              <a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Kokkos::<wbr />View</a>&lt;unsigned char*, MemorySpace&gt; <a href="#af4ea0304fa5e9a091bbd929bec8f42f5" class="m-doc-self">fixed</a>
+            </dt>
+            <dd>Whether each degree of freedom is fixed.</dd>
+            <dt id="a8f6cfdd192e0d0cbf5d32d57f5972e10">
+              <a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Kokkos::<wbr />View</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>*, MemorySpace&gt; <a href="#a8f6cfdd192e0d0cbf5d32d57f5972e10" class="m-doc-self">fixedValues</a>
+            </dt>
+            <dd>Values of the fixed degrees of freedom.</dd>
+            <dt id="a70b650ab19fc13daa8e659a7cb172679">
+              <a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Kokkos::<wbr />View</a>&lt;unsigned char*, MemorySpace&gt; <a href="#a70b650ab19fc13daa8e659a7cb172679" class="m-doc-self">imposed</a>
+            </dt>
+            <dd>Whether the right-hand side of each row is imposed, when degrees of freedom are identified.</dd>
+            <dt id="a2b5f481f1f7a6a0a57e1d4de02751132">
+              std::uint64_t <a href="#a2b5f481f1f7a6a0a57e1d4de02751132" class="m-doc-self">pattern</a>
+            </dt>
+            <dd>Revision of the pattern, increased when the coordinates change.</dd>
+            <dt id="ab9785d73eec1d55657c1830439db2fe5">
+              std::vector&lt;unsigned char&gt; <a href="#ab9785d73eec1d55657c1830439db2fe5" class="m-doc-self">fixedMask</a>
+            </dt>
+            <dd>Fixed degrees of freedom of the last assembly, on the host.</dd>
+            <dt id="ae8d13fe066f3686a94acd7015923edc6">
+              std::uint64_t <a href="#ae8d13fe066f3686a94acd7015923edc6" class="m-doc-self">fixedRevision</a>
+            </dt>
+            <dd>Revision of fixedMask, increased when it changes.</dd>
+            <dt id="a85f7a57a4a45d20791f383770acd4088">
+              std::pair&lt;std::uint64_t, std::uint64_t&gt; <a href="#a85f7a57a4a45d20791f383770acd4088" class="m-doc-self">elimination</a>
+            </dt>
+            <dd>Revisions of the pattern and of the fixed degrees of freedom the eliminated entries were listed for.</dd>
+            <dt id="a08f37f76ae4d8da4804c979dae5cad83">
+              size_t <a href="#a08f37f76ae4d8da4804c979dae5cad83" class="m-doc-self">eliminationCount</a>
+            </dt>
+            <dd>Number of entries the eliminated entries were listed in.</dd>
+            <dt id="a0f33411c00651e4e901b28368e7079fa">
+              <a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Kokkos::<wbr />View</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>*, MemorySpace&gt; <a href="#a0f33411c00651e4e901b28368e7079fa" class="m-doc-self">movedEntries</a>
+            </dt>
+            <dd>Entries of a free row and a fixed column, by increasing position.</dd>
+            <dt id="ada819a60383d810be49cb6f4372e796c">
+              <a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Kokkos::<wbr />View</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>*, MemorySpace&gt; <a href="#ada819a60383d810be49cb6f4372e796c" class="m-doc-self">movedRows</a>
+            </dt>
+            <dd>Row of each entry of movedEntries.</dd>
+            <dt id="ae8b0c9f3a86810c162fedcff1a3694ff">
+              <a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Kokkos::<wbr />View</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>*, MemorySpace&gt; <a href="#ae8b0c9f3a86810c162fedcff1a3694ff" class="m-doc-self">movedCols</a>
+            </dt>
+            <dd>Column of each entry of movedEntries.</dd>
+            <dt id="ac91ecf89b7584d3a9d17929728147df4">
+              <a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Kokkos::<wbr />View</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>*, MemorySpace&gt; <a href="#ac91ecf89b7584d3a9d17929728147df4" class="m-doc-self">clearedEntries</a>
+            </dt>
+            <dd>Entries of a fixed row.</dd>
+            <dt id="a509de781a41934b9e43ee410f0eb8a03">
+              bool <a href="#a509de781a41934b9e43ee410f0eb8a03" class="m-doc-self">expanded</a>
+            </dt>
+            <dd>Whether the matrix was preallocated with the expanded pattern.</dd>
+            <dt id="aa24f57bfbed5ff6bd85bf5eccb78ad36">
+              <a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Kokkos::<wbr />View</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>*, MemorySpace&gt; <a href="#aa24f57bfbed5ff6bd85bf5eccb78ad36" class="m-doc-self">expandedRows</a>
+            </dt>
+            <dd>Row coordinates expanded on the masters.</dd>
+            <dt id="a6093561e5961b2a16debab93be8e6575">
+              <a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Kokkos::<wbr />View</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>*, MemorySpace&gt; <a href="#a6093561e5961b2a16debab93be8e6575" class="m-doc-self">expandedCols</a>
+            </dt>
+            <dd>Column coordinates expanded on the masters.</dd>
+            <dt id="a0d065d8addbf05ed237e4c98a31f9ec0">
+              <a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Kokkos::<wbr />View</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>*, MemorySpace&gt; <a href="#a0d065d8addbf05ed237e4c98a31f9ec0" class="m-doc-self">nextExpandedRows</a>
+            </dt>
+            <dd>Expanded coordinates being listed.</dd>
+            <dt id="ab113d2ed54decab726ced2cd1dfb995e">
+              <a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Kokkos::<wbr />View</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>*, MemorySpace&gt; <a href="#ab113d2ed54decab726ced2cd1dfb995e" class="m-doc-self">nextExpandedCols</a>
+            </dt>
+            <dd>Expanded coordinates being listed.</dd>
+            <dt id="a685cab7a8b9b4547686c228e20c84b7b">
+              <a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Kokkos::<wbr />View</a>&lt;PetscScalar*, MemorySpace&gt; <a href="#a685cab7a8b9b4547686c228e20c84b7b" class="m-doc-self">expandedValues</a>
+            </dt>
+            <dd>Expanded matrix values.</dd>
+            <dt id="a32ed5fc52411b252ab13466701d0bd10">
+              <a href="struct_rodin_1_1_assembly_1_1_internal_1_1_c_o_o_order.html" class="m-doc">COOOrder</a>&lt;MemorySpace&gt; <a href="#a32ed5fc52411b252ab13466701d0bd10" class="m-doc-self">expandedOrder</a>
+            </dt>
+            <dd>Expanded coordinates sorted by row then column.</dd>
+            <dt id="a12718465eb38735dc96d9c065008e606">
+              <a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Kokkos::<wbr />View</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>*, MemorySpace&gt; <a href="#a12718465eb38735dc96d9c065008e606" class="m-doc-self">expandedStarts</a>
+            </dt>
+            <dd>Start of each distinct expanded coordinate, and the list size.</dd>
+            <dt id="ac563ed71dc4e43cd2a99ce167e9ae25a">
+              std::shared_ptr&lt;std::remove_pointer_t&lt;::Vec&gt;&gt; <a href="#ac563ed71dc4e43cd2a99ce167e9ae25a" class="m-doc-self">exchange</a>
+            </dt>
+            <dd>Ghosted vector of two entries per row summing the fixed degrees of freedom over the processes, kept while the distribution keeps its layout.</dd>
+            <dt id="a0e521cc382fdd9ad658087660dde9ed4">
+              std::shared_ptr&lt;const <a href="struct_rodin_1_1_assembly_1_1_internal_1_1_c_o_o_distribution.html" class="m-doc">COODistribution</a>&gt; <a href="#a0e521cc382fdd9ad658087660dde9ed4" class="m-doc-self">exchangeLayout</a>
+            </dt>
+            <dd>Distribution the exchange was created for.</dd>
+            <dt id="a3da433451ecbc2eb448655349decfe26">
+              std::vector&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt; <a href="#a3da433451ecbc2eb448655349decfe26" class="m-doc-self">exchangeShared</a>
+            </dt>
+            <dd>Local degrees of freedom held by several processes, the only ones the exchange changes.</dd>
+            <dt id="ae114ac6193c546eb52077a818ff51214">
+              std::vector&lt;PetscInt&gt; <a href="#ae114ac6193c546eb52077a818ff51214" class="m-doc-self">exchangeBlocks</a>
+            </dt>
+            <dd>Block of each degree of freedom of exchangeShared in the local form of the exchange.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a3c028cdf4765ca31cd1bbfd62c8dd263"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3c028cdf4765ca31cd1bbfd62c8dd263" class="m-doc-self">COOCache</a>(</span><span class="m-doc-wrap">const COOCache&amp; other)</span></span>
+            </h3>
+            <p>Constructs an empty cache, without sharing the buffers.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Cache copied, whose buffers are not copied.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a18424f808567f2f4261f61068e2a066f"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a18424f808567f2f4261f61068e2a066f" class="m-doc-self">COOCache</a>(</span><span class="m-doc-wrap">COOCache&amp;&amp; other) <span class="m-label m-info">defaulted</span></span></span>
+            </h3>
+            <p>Takes the buffers of the moved cache.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Cache moved.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a1009a71b008decd6a44046e09147098a"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">COOCache&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1009a71b008decd6a44046e09147098a" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const COOCache&amp; other)</span></span>
+            </h3>
+            <p>Empties the cache, without sharing the buffers.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Cache assigned, whose buffers are not copied.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this cache.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a8ae37f37aa6554e13a763b9777f6fff3"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">COOCache&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8ae37f37aa6554e13a763b9777f6fff3" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">COOCache&amp;&amp; other) <span class="m-label m-info">defaulted</span></span></span>
+            </h3>
+            <p>Takes the buffers of the moved cache.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Cache moved.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this cache.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+        </section>
+        <section>
+          <h2>Variable documentation</h2>
+          <section class="m-doc-details" id="aee2532da58426a3f17a1089da143560b"><div>
+            <h3>
+              
+              <a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Kokkos::<wbr />View</a>&lt;PetscInt*, MemorySpace&gt; Rodin::<wbr />Assembly::<wbr />Internal::<wbr />COOCache&lt;MemorySpace&gt;::<wbr /><a href="#aee2532da58426a3f17a1089da143560b" class="m-doc-self">rows</a>
+            </h3>
+            <p>Row coordinates, empty while they are released.</p>
+<p>They are kept in the PETSc index type, which receives them and takes half of the listed indices when it is 32 bits wide.</p>
+          </div></section>
+        </section>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">&hellip;</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form>
+            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript.</noscript>
+          <div id="search-help" class="m-text m-dim m-text-center">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
+            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v2-eeb63e0c3a5e.js"></script>
+<script src="searchdata-v2.js" async="async"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+  <a class="rodin-ci-link" href="ci-index.html" aria-label="CI" title="CI"><span class="rodin-ci-mark" aria-hidden="true"></span><span class="rodin-ci-label">CI</span></a>
+</div>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>

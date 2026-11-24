@@ -79,6 +79,7 @@
               Reference
               <ul>
                 <li><a href="#base-classes">Inherits from</a></li>
+                <li><a href="#derived-classes">Derived classes</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
@@ -86,8 +87,11 @@
           </ul>
         </nav>
 <p>This class provides an MPI context that wraps the Boost.MPI environment and communicator objects. It serves as the interface for parallel computations across multiple processes in distributed memory systems.</p><p>The context is passed to distributed mesh, assembly, and finite-element components so they can access rank-local and collective communication services in a uniform way.</p>
-        <figure class="rodin-inheritance"><figcaption>Direct inheritance by class family</figcaption><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_context_1_1_base.html" title="Base">Base</a></li></ul><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><div class="rodin-inheritance-current">MPI</div></figure><section id="base-classes"><h2><a href="#base-classes">Inherits from</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Base class</th><th>Responsibility</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_context_1_1_base.html"><code>Base</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="nc">Base</span>
-</pre></details></td><td>Abstract base class for all execution contexts.</td></tr></tbody></table></section><section id="rodin-inherited"><h2><a href="#rodin-inherited">Inherited interface</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Declared in</th><th>Members</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_context_1_1_base.html"><code>Base</code></a></td><td><details><summary>1 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_context_1_1_base.html#a68e832cb064e3b7ca978d8e5911cf700"><code>serialize()</code></a></li></ul></details></td></tr></tbody></table></section>
+        <figure class="rodin-inheritance"><figcaption>Direct inheritance by class family</figcaption><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_context_1_1_base.html" title="Base">Base</a></li></ul><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><div class="rodin-inheritance-current">MPI</div><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_context_1_1_kokkos.html" title="Kokkos&lt; Rodin::Context::MPI, Backend &gt;; Kokkos&lt; Context::MPI, Backend &gt;">Kokkos</a></li></ul></figure><section id="base-classes"><h2><a href="#base-classes">Inherits from</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Base class</th><th>Responsibility</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_context_1_1_base.html"><code>Base</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="nc">Base</span>
+</pre></details></td><td>Abstract base class for all execution contexts.</td></tr></tbody></table></section>
+        <section id="derived-classes"><h2><a href="#derived-classes">Derived classes</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Derived class</th><th>Description</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_context_1_1_kokkos.html"><code>Kokkos&lt;Rodin::Context::MPI, Backend&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="nc">Kokkos</span><span class="o">&lt;</span><span class="w"> </span><span class="n">Rodin</span><span class="o">::</span><span class="nc">Context</span><span class="o">::</span><span class="nc">MPI</span><span class="p">,</span><span class="w"> </span><span class="nc">Backend</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Combines a distribution context with a Kokkos execution space.</td></tr><tr><td><a href="class_rodin_1_1_context_1_1_kokkos.html"><code>Kokkos&lt;Context::MPI, Backend&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="nc">Kokkos</span><span class="o">&lt;</span><span class="w"> </span><span class="nc">Context</span><span class="o">::</span><span class="nc">MPI</span><span class="p">,</span><span class="w"> </span><span class="nc">Backend</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Combines a distribution context with a Kokkos execution space.</td></tr></tbody></table></section><section id="rodin-inherited"><h2><a href="#rodin-inherited">Inherited interface</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Declared in</th><th>Members</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_context_1_1_base.html"><code>Base</code></a></td><td><details><summary>1 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_context_1_1_base.html#a68e832cb064e3b7ca978d8e5911cf700"><code>serialize()</code></a></li></ul></details></td></tr></tbody></table></section>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
@@ -202,7 +206,7 @@
     </div>
   </div>
 </div>
-<script src="search-v2-27108c4bc94e.js"></script>
+<script src="search-v2-eeb63e0c3a5e.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">

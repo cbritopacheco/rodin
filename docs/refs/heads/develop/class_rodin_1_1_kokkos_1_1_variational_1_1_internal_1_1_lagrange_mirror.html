@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Rodin::Kokkos::Variational::Internal::LagrangeMirror class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
+  <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
+  <link rel="stylesheet" href="rodin-theme-1337632f765f.css" />
+  <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#18191c" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <a href="index.html" id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m">Rodin</a>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li>
+              <a href="pages.html">Pages</a>
+              <ol>
+                <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
+                <li><a href="gallery.html">Gallery</a></li>
+                <li><a href="guides-io.html">Input, output, and visualization</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
+                <li><a href="ci-index.html">Continuous integration</a></li>
+                <li><a href="notation-index.html">Notation</a></li>
+                <li><a href="credits-index.html">Credits</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="modules.html">Modules</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
+              </ol>
+            </li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="3">
+            <li><a href="annotated.html">Classes</a></li>
+            <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
+            <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span>Kokkos<span>›</span>Variational<span>›</span>Internal</div><h1>LagrangeMirror</h1><p class="rodin-reference-brief">Host copy of a resident mesh with the H1 spaces of degree K built on it.</p><p class="rodin-reference-include">Defined in <a href="_kokkos_2_variational_2_h1_8h.html"><code>Rodin/Kokkos/Variational/H1.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="kt">size_t</span><span class="w"> </span><span class="n">K</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Backend</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_kokkos_1_1_variational_1_1_internal_1_1_lagrange_mirror.html#ab0f0e71dda9ab6c520f4c5818a1bb8d5"><span class="nc">LagrangeMirror</span></a><span class="p">;</span>
+</pre>
+        <table class="m-table m-fullwidth m-flat">
+          <thead>
+            <tr><th colspan="2">Template parameters</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="width: 1%">K</td>
+              <td>Polynomial degree.</td>
+            </tr>
+            <tr>
+              <td>Backend</td>
+              <td>Kokkos backend of the mesh context.</td>
+            </tr>
+          </tbody>
+        </table>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+<p>The host spaces number the degrees of freedom and answer the form language queries; the scalar numbering is copied to the device.</p>
+        <section id="pub-types">
+          <h2><a href="#pub-types">Public types</a></h2>
+          <dl class="m-doc">
+            <dt id="a9e93b5a42f5933e703b94833baaf53a2">
+              using <a href="#a9e93b5a42f5933e703b94833baaf53a2" class="m-doc-self">MeshType</a> = <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">::<wbr />Rodin::<wbr />Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_kokkos.html" class="m-doc">::<wbr />Rodin::<wbr />Context::<wbr />Kokkos</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">::<wbr />Rodin::<wbr />Context::<wbr />Local</a>, Backend&gt;&gt;
+            </dt>
+            <dd>Resident mesh type.</dd>
+            <dt id="aadfa74e184316392642605047d908e38">
+              using <a href="#aadfa74e184316392642605047d908e38" class="m-doc-self">HostMeshType</a> = <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">::<wbr />Rodin::<wbr />Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">::<wbr />Rodin::<wbr />Context::<wbr />Local</a>&gt;
+            </dt>
+            <dd>Host mesh type.</dd>
+            <dt id="a426b377d2878611644f66b2f1d31d364">
+              using <a href="#a426b377d2878611644f66b2f1d31d364" class="m-doc-self">MemorySpace</a> = typename MeshType::MemorySpace
+            </dt>
+            <dd>Memory space of the device tables.</dd>
+            <dt id="aa09da8dfd4d5349c1ea9da357604827d">
+              using <a href="#aa09da8dfd4d5349c1ea9da357604827d" class="m-doc-self">ScalarSpace</a> = <a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">::<wbr />Rodin::<wbr />Variational::<wbr />H1</a>&lt;K, <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>, <a href="#aadfa74e184316392642605047d908e38" class="m-doc">HostMeshType</a>&gt;
+            </dt>
+            <dd>Scalar host space.</dd>
+            <dt id="aeddffd13acb09e3e8174e10922c07fe4">
+              using <a href="#aeddffd13acb09e3e8174e10922c07fe4" class="m-doc-self">VectorSpace</a> = <a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">::<wbr />Rodin::<wbr />Variational::<wbr />H1</a>&lt;K, <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">::<wbr />Rodin::<wbr />Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;, <a href="#aadfa74e184316392642605047d908e38" class="m-doc">HostMeshType</a>&gt;
+            </dt>
+            <dd>Vector host space.</dd>
+          </dl>
+        </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#ab0f0e71dda9ab6c520f4c5818a1bb8d5" class="m-doc">LagrangeMirror</a>(</span><span class="m-doc-wrap">const <a href="#a9e93b5a42f5933e703b94833baaf53a2" class="m-doc">MeshType</a>&amp; mesh,
+              size_t vdim)</span>
+            </dt>
+            <dd>Builds the host spaces and copies the numbering to the device.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a128a66c987aeb88c35bb5f7a670ff92b" class="m-doc">LagrangeMirror</a>(</span><span class="m-doc-wrap">const LagrangeMirror&amp; other) <span class="m-label m-flat m-danger">deleted</span></span>
+            </dt>
+            <dd>Not copyable, the host spaces referring to the owned host mesh.</dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab7230751d843cfce271f5ac81116833f" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="#ab0f0e71dda9ab6c520f4c5818a1bb8d5" class="m-doc">LagrangeMirror</a>&amp; other) -&gt; <a href="#ab0f0e71dda9ab6c520f4c5818a1bb8d5" class="m-doc">LagrangeMirror</a>&amp; <span class="m-label m-flat m-danger">deleted</span></span>
+            </dt>
+            <dd>Not copy assignable, the host spaces referring to the owned host mesh.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae5d885f4f5adb2616e41ed2594b1d8f4" class="m-doc">getScalar</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#aa09da8dfd4d5349c1ea9da357604827d" class="m-doc">ScalarSpace</a>&amp;</span>
+            </dt>
+            <dd>Gets the scalar host space.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aee9b9c9ea3c4827d0ad0d61d48784451" class="m-doc">getVector</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#aeddffd13acb09e3e8174e10922c07fe4" class="m-doc">VectorSpace</a>&amp;</span>
+            </dt>
+            <dd>Gets the vector host space.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab46ad4b5d821ad0b1661b8cc5682d336" class="m-doc">getDOFs</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_kokkos_1_1_variational_1_1_lagrange_d_o_fs.html" class="m-doc">LagrangeDOFs</a>&lt;K, <a href="#a426b377d2878611644f66b2f1d31d364" class="m-doc">MemorySpace</a>&gt;&amp;</span>
+            </dt>
+            <dd>Gets the device numbering.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="ab0f0e71dda9ab6c520f4c5818a1bb8d5"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab0f0e71dda9ab6c520f4c5818a1bb8d5" class="m-doc-self">LagrangeMirror</a>(</span><span class="m-doc-wrap">const <a href="#a9e93b5a42f5933e703b94833baaf53a2" class="m-doc">MeshType</a>&amp; mesh,
+              size_t vdim)</span></span>
+            </h3>
+            <p>Builds the host spaces and copies the numbering to the device.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">mesh</td>
+                  <td>Resident mesh without pyramids and with the prepared incidences <svg class="m-math" style="width: 5.336em; height: 0.969em; vertical-align: -0.104em;" viewBox="0 -8.302191 51.227061 9.298463">
+<title>
+$ d \to d - 1 $
+</title>
+<defs>
+<path id='eq1-g2-49' d='M3.443088-7.663263C3.443088-7.938232 3.443088-7.950187 3.203985-7.950187C2.917061-7.627397 2.319303-7.185056 1.08792-7.185056V-6.838356C1.362889-6.838356 1.960648-6.838356 2.618182-7.149191V-.920548C2.618182-.490162 2.582316-.3467 1.530262-.3467H1.159651V0C1.482441-.02391 2.642092-.02391 3.036613-.02391S4.578829-.02391 4.901619 0V-.3467H4.531009C3.478954-.3467 3.443088-.490162 3.443088-.920548V-7.663263Z'/>
+<path id='eq1-g0-0' d='M7.878456-2.749689C8.081694-2.749689 8.296887-2.749689 8.296887-2.988792S8.081694-3.227895 7.878456-3.227895H1.41071C1.207472-3.227895 .992279-3.227895 .992279-2.988792S1.207472-2.749689 1.41071-2.749689H7.878456Z'/>
+<path id='eq1-g0-33' d='M9.97061-2.749689C9.313076-2.247572 8.990286-1.75741 8.894645-1.601993C8.356663-.777086 8.261021-.02391 8.261021-.011955C8.261021 .131507 8.404483 .131507 8.500125 .131507C8.703362 .131507 8.715318 .107597 8.763138-.107597C9.038107-1.279203 9.743462-2.283437 11.094396-2.833375C11.237858-2.881196 11.273724-2.905106 11.273724-2.988792S11.201993-3.108344 11.178082-3.120299C10.652055-3.323537 9.205479-3.921295 8.751183-5.929763C8.715318-6.073225 8.703362-6.109091 8.500125-6.109091C8.404483-6.109091 8.261021-6.109091 8.261021-5.965629C8.261021-5.941719 8.368618-5.188543 8.870735-4.387547C9.109838-4.028892 9.456538-3.610461 9.97061-3.227895H1.08792C.872727-3.227895 .657534-3.227895 .657534-2.988792S.872727-2.749689 1.08792-2.749689H9.97061Z'/>
+<path id='eq1-g1-100' d='M6.01345-7.998007C6.025405-8.045828 6.049315-8.117559 6.049315-8.177335C6.049315-8.296887 5.929763-8.296887 5.905853-8.296887C5.893898-8.296887 5.308095-8.249066 5.248319-8.237111C5.045081-8.225156 4.865753-8.201245 4.65056-8.18929C4.351681-8.16538 4.267995-8.153425 4.267995-7.938232C4.267995-7.81868 4.363636-7.81868 4.531009-7.81868C5.116812-7.81868 5.128767-7.711083 5.128767-7.591532C5.128767-7.519801 5.104857-7.424159 5.092902-7.388294L4.363636-4.483188C4.23213-4.794022 3.90934-5.272229 3.287671-5.272229C1.936737-5.272229 .478207-3.526775 .478207-1.75741C.478207-.573848 1.171606 .119552 1.984558 .119552C2.642092 .119552 3.203985-.394521 3.53873-.789041C3.658281-.083686 4.220174 .119552 4.578829 .119552S5.224408-.095641 5.439601-.526027C5.630884-.932503 5.798257-1.661768 5.798257-1.709589C5.798257-1.769365 5.750436-1.817186 5.678705-1.817186C5.571108-1.817186 5.559153-1.75741 5.511333-1.578082C5.332005-.872727 5.104857-.119552 4.614695-.119552C4.267995-.119552 4.244085-.430386 4.244085-.669489C4.244085-.71731 4.244085-.968369 4.327771-1.303113L6.01345-7.998007ZM3.598506-1.422665C3.53873-1.219427 3.53873-1.195517 3.371357-.968369C3.108344-.633624 2.582316-.119552 2.020423-.119552C1.530262-.119552 1.255293-.561893 1.255293-1.267248C1.255293-1.924782 1.625903-3.263761 1.853051-3.765878C2.259527-4.60274 2.82142-5.033126 3.287671-5.033126C4.076712-5.033126 4.23213-4.052802 4.23213-3.957161C4.23213-3.945205 4.196264-3.789788 4.184309-3.765878L3.598506-1.422665Z'/>
+</defs>
+<g id='eq1-page1'>
+<use x='0' y='0' xlink:href='#eq1-g1-100'/>
+<use x='9.403522' y='0' xlink:href='#eq1-g0-33'/>
+<use x='24.679554' y='0' xlink:href='#eq1-g1-100'/>
+<use x='33.418911' y='0' xlink:href='#eq1-g0-0'/>
+<use x='45.374071' y='0' xlink:href='#eq1-g2-49'/>
+</g>
+</svg>.</td>
+                </tr>
+                <tr>
+                  <td>vdim</td>
+                  <td>Vector dimension, zero for a scalar space only.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a128a66c987aeb88c35bb5f7a670ff92b"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a128a66c987aeb88c35bb5f7a670ff92b" class="m-doc-self">LagrangeMirror</a>(</span><span class="m-doc-wrap">const LagrangeMirror&amp; other) <span class="m-label m-danger">deleted</span></span></span>
+            </h3>
+            <p>Not copyable, the host spaces referring to the owned host mesh.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Mirror not copied.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ab7230751d843cfce271f5ac81116833f"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="#ab0f0e71dda9ab6c520f4c5818a1bb8d5" class="m-doc">LagrangeMirror</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab7230751d843cfce271f5ac81116833f" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="#ab0f0e71dda9ab6c520f4c5818a1bb8d5" class="m-doc">LagrangeMirror</a>&amp; other) <span class="m-label m-danger">deleted</span></span></span>
+            </h3>
+            <p>Not copy assignable, the host spaces referring to the owned host mesh.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Mirror not copied.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this mirror.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ae5d885f4f5adb2616e41ed2594b1d8f4"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">const <a href="#aa09da8dfd4d5349c1ea9da357604827d" class="m-doc">ScalarSpace</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae5d885f4f5adb2616e41ed2594b1d8f4" class="m-doc-self">getScalar</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Gets the scalar host space.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Scalar space.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aee9b9c9ea3c4827d0ad0d61d48784451"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">const <a href="#aeddffd13acb09e3e8174e10922c07fe4" class="m-doc">VectorSpace</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aee9b9c9ea3c4827d0ad0d61d48784451" class="m-doc-self">getVector</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Gets the vector host space.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Vector space.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ab46ad4b5d821ad0b1661b8cc5682d336"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_kokkos_1_1_variational_1_1_lagrange_d_o_fs.html" class="m-doc">LagrangeDOFs</a>&lt;K, <a href="#a426b377d2878611644f66b2f1d31d364" class="m-doc">MemorySpace</a>&gt;&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab46ad4b5d821ad0b1661b8cc5682d336" class="m-doc-self">getDOFs</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Gets the device numbering.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Scalar degrees of freedom.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+        </section>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">&hellip;</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form>
+            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript.</noscript>
+          <div id="search-help" class="m-text m-dim m-text-center">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
+            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v2-eeb63e0c3a5e.js"></script>
+<script src="searchdata-v2.js" async="async"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+  <a class="rodin-ci-link" href="ci-index.html" aria-label="CI" title="CI"><span class="rodin-ci-mark" aria-hidden="true"></span><span class="rodin-ci-label">CI</span></a>
+</div>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>

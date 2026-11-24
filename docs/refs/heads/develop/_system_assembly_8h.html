@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Rodin/Kokkos/Assembly/SystemAssembly.h file | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
+  <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
+  <link rel="stylesheet" href="rodin-theme-1337632f765f.css" />
+  <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#18191c" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <a href="index.html" id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m">Rodin</a>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li>
+              <a href="pages.html">Pages</a>
+              <ol>
+                <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
+                <li><a href="gallery.html">Gallery</a></li>
+                <li><a href="guides-io.html">Input, output, and visualization</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
+                <li><a href="ci-index.html">Continuous integration</a></li>
+                <li><a href="notation-index.html">Notation</a></li>
+                <li><a href="credits-index.html">Credits</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="modules.html">Modules</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
+              </ol>
+            </li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="3">
+            <li><a href="annotated.html">Classes</a></li>
+            <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
+            <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <h1>
+          <span class="m-breadcrumb"><a href="dir_a76ff2fd046c37f043d49e701a9434a5.html">Rodin</a>/</span><span class="m-breadcrumb"><a href="dir_a7844bc9c3856b43219322c84abbb59e.html">Kokkos</a>/</span><span class="m-breadcrumb"><a href="dir_11583e841eaae577c09f463e007fd29c.html">Assembly</a>/</span>SystemAssembly.h <span class="m-thin">file</span>
+        </h1>
+        <p>COO reduction, symbolic reuse and constrained Kokkos system assembly.</p>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#namespaces">Namespaces</a></li>
+                <li><a href="#nested-classes">Classes</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+        <section id="namespaces">
+          <h2><a href="#namespaces">Namespaces</a></h2>
+          <dl class="m-doc">
+            <dt>namespace <a href="namespace_rodin.html" class="m-doc">Rodin</a></dt>
+            <dd>The Rodin library for finite element methods and shape optimization.</dd>
+            <dt>namespace <a href="namespace_rodin_1_1_assembly.html" class="m-doc">Rodin::Assembly</a></dt>
+            <dd>Global assembly of discrete operators.</dd>
+          </dl>
+        </section>
+        <section id="nested-classes">
+          <h2><a href="#nested-classes">Classes</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;class Backend&gt;</div>
+              class <a href="class_rodin_1_1_assembly_1_1_internal_1_1_system_assembly.html" class="m-doc">Rodin::Assembly::Internal::SystemAssembly</a>
+            </dt>
+            <dd>Linear system assembled in device memory with value constraints eliminated, then copied to Eigen.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_assembly_1_1_internal_1_1_system_assembly_1_1_segment.html" class="m-doc">Rodin::Assembly::Internal::SystemAssembly::Segment</a>
+            </dt>
+            <dd>Entries written by one source, contiguous in storage.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_assembly_1_1_internal_1_1_system_assembly_1_1_ranks.html" class="m-doc">Rodin::Assembly::Internal::SystemAssembly::Ranks</a>
+            </dt>
+            <dd>Rank of the entries in the list of contributions, by position.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_assembly_1_1_internal_1_1_system_assembly_1_1_triplets.html" class="m-doc">Rodin::Assembly::Internal::SystemAssembly::Triplets</a>
+            </dt>
+            <dd>Matrix contributions.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_assembly_1_1_internal_1_1_system_assembly_1_1_copy_matrix.html" class="m-doc">Rodin::Assembly::Internal::SystemAssembly::CopyMatrix</a>
+            </dt>
+            <dd>Copies an existing backend matrix into its contribution segment.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_assembly_1_1_internal_1_1_system_assembly_1_1_listed.html" class="m-doc">Rodin::Assembly::Internal::SystemAssembly::Listed</a>
+            </dt>
+            <dd>Listed entries.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_assembly_1_1_internal_1_1_system_assembly_1_1_counts.html" class="m-doc">Rodin::Assembly::Internal::SystemAssembly::Counts</a>
+            </dt>
+            <dd>Numbers of listed matrix contributions.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_assembly_1_1_internal_1_1_system_assembly_1_1_groups.html" class="m-doc">Rodin::Assembly::Internal::SystemAssembly::Groups</a>
+            </dt>
+            <dd>Entries grouped by key.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_assembly_1_1_internal_1_1_system_assembly_1_1_pattern.html" class="m-doc">Rodin::Assembly::Internal::SystemAssembly::Pattern</a>
+            </dt>
+            <dd>Ordered structural groups retained by an assembly policy.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_assembly_1_1_internal_1_1_system_assembly_1_1_symbolic.html" class="m-doc">Rodin::Assembly::Internal::SystemAssembly::Symbolic</a>
+            </dt>
+            <dd>Symbolic plans owned by one assembler, in grouping call order.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_assembly_1_1_internal_1_1_system_assembly_1_1_eliminated.html" class="m-doc">Rodin::Assembly::Internal::SystemAssembly::Eliminated</a>
+            </dt>
+            <dd>Contribution moved to the right-hand side by a fixed column.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_assembly_1_1_internal_1_1_system_assembly_1_1_sizes.html" class="m-doc">Rodin::Assembly::Internal::SystemAssembly::Sizes</a>
+            </dt>
+            <dd>Numbers of expanded contributions.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_assembly_1_1_internal_1_1_system_assembly_1_1_group_head.html" class="m-doc">Rodin::Assembly::Internal::SystemAssembly::GroupHead</a>
+            </dt>
+            <dd>Whether a sorted key starts a group.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_assembly_1_1_internal_1_1_system_assembly_1_1_classification.html" class="m-doc">Rodin::Assembly::Internal::SystemAssembly::Classification</a>
+            </dt>
+            <dd>Lists of a contribution, or of a fixed diagonal entry past the triplets.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_assembly_1_1_internal_1_1_system_assembly_1_1_matrix_expansion_sizes.html" class="m-doc">Rodin::Assembly::Internal::SystemAssembly::MatrixExpansionSizes</a>
+            </dt>
+            <dd>Expanded sizes of the matrix contribution of rank k.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_assembly_1_1_internal_1_1_system_assembly_1_1_vector_expansion_size.html" class="m-doc">Rodin::Assembly::Internal::SystemAssembly::VectorExpansionSize</a>
+            </dt>
+            <dd>Expanded size of the vector contribution of rank k.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_assembly_1_1_internal_1_1_system_assembly_1_1_lifted.html" class="m-doc">Rodin::Assembly::Internal::SystemAssembly::Lifted</a>
+            </dt>
+            <dd>Expanded matrix contributions.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_assembly_1_1_internal_1_1_system_assembly_1_1_index_shift.html" class="m-doc">Rodin::Assembly::Internal::SystemAssembly::IndexShift</a>
+            </dt>
+            <dd>Adds the offsets of their spaces to the indices of an entry.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_assembly_1_1_internal_1_1_system_assembly_1_1_group_count.html" class="m-doc">Rodin::Assembly::Internal::SystemAssembly::GroupCount</a>
+            </dt>
+            <dd>Counts the groups of sorted keys and the entries following an entry of higher rank in their group.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_assembly_1_1_internal_1_1_system_assembly_1_1_group_starts.html" class="m-doc">Rodin::Assembly::Internal::SystemAssembly::GroupStarts</a>
+            </dt>
+            <dd>Writes the start and the key of every group of sorted keys.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_assembly_1_1_internal_1_1_system_assembly_1_1_group_order.html" class="m-doc">Rodin::Assembly::Internal::SystemAssembly::GroupOrder</a>
+            </dt>
+            <dd>Sorts the positions of a group in rank order, by insertion.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_assembly_1_1_internal_1_1_system_assembly_1_1_symbolic_changes.html" class="m-doc">Rodin::Assembly::Internal::SystemAssembly::SymbolicChanges</a>
+            </dt>
+            <dd>Counts the entries of a retained symbolic pattern that differ from the current listing.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_assembly_1_1_internal_1_1_system_assembly_1_1_symbolic_ranks.html" class="m-doc">Rodin::Assembly::Internal::SystemAssembly::SymbolicRanks</a>
+            </dt>
+            <dd>Retains the ranks of the entries in key order.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_assembly_1_1_internal_1_1_system_assembly_1_1_active_entries.html" class="m-doc">Rodin::Assembly::Internal::SystemAssembly::ActiveEntries</a>
+            </dt>
+            <dd>Tells the entries kept in the graph presented to callers.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_assembly_1_1_internal_1_1_system_assembly_1_1_active_groups.html" class="m-doc">Rodin::Assembly::Internal::SystemAssembly::ActiveGroups</a>
+            </dt>
+            <dd>Counts the kept entries and the groups holding one.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_assembly_1_1_internal_1_1_system_assembly_1_1_group_selection.html" class="m-doc">Rodin::Assembly::Internal::SystemAssembly::GroupSelection</a>
+            </dt>
+            <dd>Writes the groups holding kept entries, with these entries.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_assembly_1_1_internal_1_1_system_assembly_1_1_vector_keys.html" class="m-doc">Rodin::Assembly::Internal::SystemAssembly::VectorKeys</a>
+            </dt>
+            <dd>Writes the sort key and the position of vector entries.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_assembly_1_1_internal_1_1_system_assembly_1_1_contribution_count.html" class="m-doc">Rodin::Assembly::Internal::SystemAssembly::ContributionCount</a>
+            </dt>
+            <dd>Sums the lists of the contributions.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_assembly_1_1_internal_1_1_system_assembly_1_1_contribution_list.html" class="m-doc">Rodin::Assembly::Internal::SystemAssembly::ContributionList</a>
+            </dt>
+            <dd>Writes the sort key and the position of every listed contribution.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_assembly_1_1_internal_1_1_system_assembly_1_1_coefficient_sum.html" class="m-doc">Rodin::Assembly::Internal::SystemAssembly::CoefficientSum</a>
+            </dt>
+            <dd>Sums the contributions of a coefficient and writes its inner index.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_assembly_1_1_internal_1_1_system_assembly_1_1_outer_starts.html" class="m-doc">Rodin::Assembly::Internal::SystemAssembly::OuterStarts</a>
+            </dt>
+            <dd>Starts the outer indices following the one of the previous coefficient, up to its own, at a coefficient.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_assembly_1_1_internal_1_1_system_assembly_1_1_nonzero_count.html" class="m-doc">Rodin::Assembly::Internal::SystemAssembly::NonzeroCount</a>
+            </dt>
+            <dd>Counts the nonzero entries of a vector.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_assembly_1_1_internal_1_1_system_assembly_1_1_entry_list.html" class="m-doc">Rodin::Assembly::Internal::SystemAssembly::EntryList</a>
+            </dt>
+            <dd>Writes the sort key and the position of every nonzero entry of a vector.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Contribution&gt;</div>
+              struct <a href="struct_rodin_1_1_assembly_1_1_internal_1_1_system_assembly_1_1_accumulation.html" class="m-doc">Rodin::Assembly::Internal::SystemAssembly::Accumulation</a>
+            </dt>
+            <dd>Adds the contributions of a group to its entry of the right-hand side, in rank order.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_assembly_1_1_internal_1_1_system_assembly_1_1_dense_sum.html" class="m-doc">Rodin::Assembly::Internal::SystemAssembly::DenseSum</a>
+            </dt>
+            <dd>Adds an entry of a preassembled vector to the right-hand side.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_assembly_1_1_internal_1_1_system_assembly_1_1_fixed_value.html" class="m-doc">Rodin::Assembly::Internal::SystemAssembly::FixedValue</a>
+            </dt>
+            <dd>Writes the fixed value on a fixed row.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_assembly_1_1_internal_1_1_system_assembly_1_1_rank_order.html" class="m-doc">Rodin::Assembly::Internal::SystemAssembly::RankOrder</a>
+            </dt>
+            <dd>Writes the position of an entry at its rank.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_assembly_1_1_internal_1_1_system_assembly_1_1_matrix_expansion_count.html" class="m-doc">Rodin::Assembly::Internal::SystemAssembly::MatrixExpansionCount</a>
+            </dt>
+            <dd>Sums the expanded sizes of the matrix contributions.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_assembly_1_1_internal_1_1_system_assembly_1_1_matrix_expansion.html" class="m-doc">Rodin::Assembly::Internal::SystemAssembly::MatrixExpansion</a>
+            </dt>
+            <dd>Expands the matrix contribution of rank k and lifts its affine values.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_assembly_1_1_internal_1_1_system_assembly_1_1_vector_expansion_count.html" class="m-doc">Rodin::Assembly::Internal::SystemAssembly::VectorExpansionCount</a>
+            </dt>
+            <dd>Sums the expanded sizes of the vector contributions.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_assembly_1_1_internal_1_1_system_assembly_1_1_vector_expansion.html" class="m-doc">Rodin::Assembly::Internal::SystemAssembly::VectorExpansion</a>
+            </dt>
+            <dd>Expands the vector contribution of rank k.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_assembly_1_1_internal_1_1_system_assembly_1_1_sequence.html" class="m-doc">Rodin::Assembly::Internal::SystemAssembly::Sequence</a>
+            </dt>
+            <dd>Writes the index of an entry of a preassembled vector.</dd>
+          </dl>
+        </section>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">&hellip;</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form>
+            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript.</noscript>
+          <div id="search-help" class="m-text m-dim m-text-center">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
+            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v2-eeb63e0c3a5e.js"></script>
+<script src="searchdata-v2.js" async="async"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+  <a class="rodin-ci-link" href="ci-index.html" aria-label="CI" title="CI"><span class="rodin-ci-mark" aria-hidden="true"></span><span class="rodin-ci-label">CI</span></a>
+</div>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>

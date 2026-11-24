@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Rodin::Kokkos::Variational::PotentialIntegral class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
+  <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
+  <link rel="stylesheet" href="rodin-theme-1337632f765f.css" />
+  <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#18191c" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <a href="index.html" id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m">Rodin</a>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li>
+              <a href="pages.html">Pages</a>
+              <ol>
+                <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
+                <li><a href="gallery.html">Gallery</a></li>
+                <li><a href="guides-io.html">Input, output, and visualization</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
+                <li><a href="ci-index.html">Continuous integration</a></li>
+                <li><a href="notation-index.html">Notation</a></li>
+                <li><a href="credits-index.html">Credits</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="modules.html">Modules</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
+              </ol>
+            </li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="3">
+            <li><a href="annotated.html">Classes</a></li>
+            <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
+            <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span>Kokkos<span>›</span>Variational</div><h1>PotentialIntegral</h1><p class="rodin-reference-brief">Device integration of a potential tested against a shape function.</p><p class="rodin-reference-include">Defined in <a href="_kokkos_2_variational_2_potential_8h.html"><code>Rodin/Kokkos/Variational/Potential.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Kernel</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">LHSDerived</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">RHSDerived</span><span class="p">,</span>
+<span class="w">  </span><span class="nc">Space</span><span class="w"> </span><span class="n">TrialFES</span><span class="p">,</span>
+<span class="w">  </span><span class="nc">Space</span><span class="w"> </span><span class="n">TestFES</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_kokkos_1_1_variational_1_1_potential_integral.html#a80fe6cf14fea5b3a39a559a49f2328fd"><span class="nc">PotentialIntegral</span></a><span class="p">;</span>
+</pre>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#base-classes">Inherits from</a></li>
+                <li><a href="#derived-classes">Derived classes</a></li>
+                <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#pub-static-attribs">Public static variables</a></li>
+                <li><a href="#pub-static-methods">Public static functions</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+<p>Represents</p><div class="m-math"><svg style="width: 16.273em; height: 2.966em;" viewBox="116.162961 -28.471297 156.2171 28.471297">
+<title>
+\[  \int_{\mathcal{T}_h} \int_{\mathcal{T}_h} k(x, y) \, u(x) \cdot v(y)
+  \ dx \ dy
+\]
+</title>
+<defs>
+<path id='eq1-g5-40' d='M3.88543 2.905106C3.88543 2.86924 3.88543 2.84533 3.682192 2.642092C2.486675 1.43462 1.817186-.537983 1.817186-2.976837C1.817186-5.296139 2.379078-7.292653 3.765878-8.703362C3.88543-8.810959 3.88543-8.834869 3.88543-8.870735C3.88543-8.942466 3.825654-8.966376 3.777833-8.966376C3.622416-8.966376 2.642092-8.105604 2.056289-6.933998C1.446575-5.726526 1.171606-4.447323 1.171606-2.976837C1.171606-1.912827 1.338979-.490162 1.960648 .789041C2.666002 2.223661 3.646326 3.000747 3.777833 3.000747C3.825654 3.000747 3.88543 2.976837 3.88543 2.905106Z'/>
+<path id='eq1-g5-41' d='M3.371357-2.976837C3.371357-3.88543 3.251806-5.36787 2.582316-6.75467C1.876961-8.18929 .896638-8.966376 .765131-8.966376C.71731-8.966376 .657534-8.942466 .657534-8.870735C.657534-8.834869 .657534-8.810959 .860772-8.607721C2.056289-7.400249 2.725778-5.427646 2.725778-2.988792C2.725778-.669489 2.163885 1.327024 .777086 2.737733C.657534 2.84533 .657534 2.86924 .657534 2.905106C.657534 2.976837 .71731 3.000747 .765131 3.000747C.920548 3.000747 1.900872 2.139975 2.486675 .968369C3.096389-.251059 3.371357-1.542217 3.371357-2.976837Z'/>
+<path id='eq1-g2-1' d='M2.295392-2.988792C2.295392-3.335492 2.008468-3.622416 1.661768-3.622416S1.028144-3.335492 1.028144-2.988792S1.315068-2.355168 1.661768-2.355168S2.295392-2.642092 2.295392-2.988792Z'/>
+<path id='eq1-g4-59' d='M2.331258 .047821C2.331258-.645579 2.10411-1.159651 1.613948-1.159651C1.231382-1.159651 1.0401-.848817 1.0401-.585803S1.219427 0 1.625903 0C1.78132 0 1.912827-.047821 2.020423-.155417C2.044334-.179328 2.056289-.179328 2.068244-.179328C2.092154-.179328 2.092154-.011955 2.092154 .047821C2.092154 .442341 2.020423 1.219427 1.327024 1.996513C1.195517 2.139975 1.195517 2.163885 1.195517 2.187796C1.195517 2.247572 1.255293 2.307347 1.315068 2.307347C1.41071 2.307347 2.331258 1.422665 2.331258 .047821Z'/>
+<path id='eq1-g4-100' d='M6.01345-7.998007C6.025405-8.045828 6.049315-8.117559 6.049315-8.177335C6.049315-8.296887 5.929763-8.296887 5.905853-8.296887C5.893898-8.296887 5.308095-8.249066 5.248319-8.237111C5.045081-8.225156 4.865753-8.201245 4.65056-8.18929C4.351681-8.16538 4.267995-8.153425 4.267995-7.938232C4.267995-7.81868 4.363636-7.81868 4.531009-7.81868C5.116812-7.81868 5.128767-7.711083 5.128767-7.591532C5.128767-7.519801 5.104857-7.424159 5.092902-7.388294L4.363636-4.483188C4.23213-4.794022 3.90934-5.272229 3.287671-5.272229C1.936737-5.272229 .478207-3.526775 .478207-1.75741C.478207-.573848 1.171606 .119552 1.984558 .119552C2.642092 .119552 3.203985-.394521 3.53873-.789041C3.658281-.083686 4.220174 .119552 4.578829 .119552S5.224408-.095641 5.439601-.526027C5.630884-.932503 5.798257-1.661768 5.798257-1.709589C5.798257-1.769365 5.750436-1.817186 5.678705-1.817186C5.571108-1.817186 5.559153-1.75741 5.511333-1.578082C5.332005-.872727 5.104857-.119552 4.614695-.119552C4.267995-.119552 4.244085-.430386 4.244085-.669489C4.244085-.71731 4.244085-.968369 4.327771-1.303113L6.01345-7.998007ZM3.598506-1.422665C3.53873-1.219427 3.53873-1.195517 3.371357-.968369C3.108344-.633624 2.582316-.119552 2.020423-.119552C1.530262-.119552 1.255293-.561893 1.255293-1.267248C1.255293-1.924782 1.625903-3.263761 1.853051-3.765878C2.259527-4.60274 2.82142-5.033126 3.287671-5.033126C4.076712-5.033126 4.23213-4.052802 4.23213-3.957161C4.23213-3.945205 4.196264-3.789788 4.184309-3.765878L3.598506-1.422665Z'/>
+<path id='eq1-g4-107' d='M3.359402-7.998007C3.371357-8.045828 3.395268-8.117559 3.395268-8.177335C3.395268-8.296887 3.275716-8.296887 3.251806-8.296887C3.239851-8.296887 2.809465-8.261021 2.594271-8.237111C2.391034-8.225156 2.211706-8.201245 1.996513-8.18929C1.709589-8.16538 1.625903-8.153425 1.625903-7.938232C1.625903-7.81868 1.745455-7.81868 1.865006-7.81868C2.47472-7.81868 2.47472-7.711083 2.47472-7.591532C2.47472-7.543711 2.47472-7.519801 2.414944-7.304608L.705355-.466252C.657534-.286924 .657534-.263014 .657534-.191283C.657534 .071731 .860772 .119552 .980324 .119552C1.315068 .119552 1.3868-.143462 1.482441-.514072L2.044334-2.749689C2.905106-2.654047 3.419178-2.295392 3.419178-1.721544C3.419178-1.649813 3.419178-1.601993 3.383313-1.422665C3.335492-1.243337 3.335492-1.099875 3.335492-1.0401C3.335492-.3467 3.789788 .119552 4.399502 .119552C4.94944 .119552 5.236364-.382565 5.332005-.549938C5.583064-.992279 5.738481-1.661768 5.738481-1.709589C5.738481-1.769365 5.69066-1.817186 5.618929-1.817186C5.511333-1.817186 5.499377-1.769365 5.451557-1.578082C5.284184-.956413 5.033126-.119552 4.423412-.119552C4.184309-.119552 4.028892-.239103 4.028892-.6934C4.028892-.920548 4.076712-1.183562 4.124533-1.362889C4.172354-1.578082 4.172354-1.590037 4.172354-1.733499C4.172354-2.438854 3.53873-2.833375 2.438854-2.976837C2.86924-3.239851 3.299626-3.706102 3.466999-3.88543C4.148443-4.65056 4.614695-5.033126 5.164633-5.033126C5.439601-5.033126 5.511333-4.961395 5.595019-4.889664C5.152677-4.841843 4.985305-4.531009 4.985305-4.291905C4.985305-4.004981 5.212453-3.90934 5.379826-3.90934C5.702615-3.90934 5.989539-4.184309 5.989539-4.566874C5.989539-4.913574 5.71457-5.272229 5.176588-5.272229C4.519054-5.272229 3.981071-4.805978 3.132254-3.849564C3.012702-3.706102 2.570361-3.251806 2.12802-3.084433L3.359402-7.998007Z'/>
+<path id='eq1-g4-117' d='M4.076712-.6934C4.23213-.02391 4.805978 .119552 5.092902 .119552C5.475467 .119552 5.762391-.131507 5.953674-.537983C6.156912-.968369 6.312329-1.673724 6.312329-1.709589C6.312329-1.769365 6.264508-1.817186 6.192777-1.817186C6.085181-1.817186 6.073225-1.75741 6.025405-1.578082C5.810212-.753176 5.595019-.119552 5.116812-.119552C4.758157-.119552 4.758157-.514072 4.758157-.669489C4.758157-.944458 4.794022-1.06401 4.913574-1.566127C4.99726-1.888917 5.080946-2.211706 5.152677-2.546451L5.642839-4.495143C5.726526-4.794022 5.726526-4.817933 5.726526-4.853798C5.726526-5.033126 5.583064-5.152677 5.403736-5.152677C5.057036-5.152677 4.97335-4.853798 4.901619-4.554919C4.782067-4.088667 4.136488-1.518306 4.052802-1.099875C4.040847-1.099875 3.574595-.119552 2.701868-.119552C2.080199-.119552 1.960648-.657534 1.960648-1.099875C1.960648-1.78132 2.295392-2.737733 2.606227-3.53873C2.749689-3.921295 2.809465-4.076712 2.809465-4.315816C2.809465-4.829888 2.438854-5.272229 1.865006-5.272229C.765131-5.272229 .32279-3.53873 .32279-3.443088C.32279-3.395268 .37061-3.335492 .454296-3.335492C.561893-3.335492 .573848-3.383313 .621669-3.550685C.908593-4.578829 1.374844-5.033126 1.829141-5.033126C1.948692-5.033126 2.139975-5.021171 2.139975-4.638605C2.139975-4.327771 2.008468-3.981071 1.829141-3.526775C1.303113-2.10411 1.243337-1.649813 1.243337-1.291158C1.243337-.071731 2.163885 .119552 2.654047 .119552C3.419178 .119552 3.837609-.406476 4.076712-.6934Z'/>
+<path id='eq1-g4-118' d='M5.463512-4.471233C5.463512-5.224408 5.080946-5.272229 4.985305-5.272229C4.698381-5.272229 4.435367-4.985305 4.435367-4.746202C4.435367-4.60274 4.519054-4.519054 4.566874-4.471233C4.686426-4.363636 4.99726-4.040847 4.99726-3.419178C4.99726-2.917061 4.27995-.119552 2.84533-.119552C2.116065-.119552 1.972603-.729265 1.972603-1.171606C1.972603-1.769365 2.247572-2.606227 2.570361-3.466999C2.761644-3.957161 2.809465-4.076712 2.809465-4.315816C2.809465-4.817933 2.450809-5.272229 1.865006-5.272229C.765131-5.272229 .32279-3.53873 .32279-3.443088C.32279-3.395268 .37061-3.335492 .454296-3.335492C.561893-3.335492 .573848-3.383313 .621669-3.550685C.908593-4.578829 1.374844-5.033126 1.829141-5.033126C1.936737-5.033126 2.139975-5.033126 2.139975-4.638605C2.139975-4.327771 2.008468-3.981071 1.829141-3.526775C1.255293-1.996513 1.255293-1.625903 1.255293-1.338979C1.255293-1.075965 1.291158-.585803 1.661768-.251059C2.092154 .119552 2.689913 .119552 2.797509 .119552C4.782067 .119552 5.463512-3.789788 5.463512-4.471233Z'/>
+<path id='eq1-g4-120' d='M5.66675-4.877709C5.284184-4.805978 5.140722-4.519054 5.140722-4.291905C5.140722-4.004981 5.36787-3.90934 5.535243-3.90934C5.893898-3.90934 6.144956-4.220174 6.144956-4.542964C6.144956-5.045081 5.571108-5.272229 5.068991-5.272229C4.339726-5.272229 3.93325-4.554919 3.825654-4.327771C3.550685-5.224408 2.809465-5.272229 2.594271-5.272229C1.374844-5.272229 .729265-3.706102 .729265-3.443088C.729265-3.395268 .777086-3.335492 .860772-3.335492C.956413-3.335492 .980324-3.407223 1.004234-3.455044C1.41071-4.782067 2.211706-5.033126 2.558406-5.033126C3.096389-5.033126 3.203985-4.531009 3.203985-4.244085C3.203985-3.981071 3.132254-3.706102 2.988792-3.132254L2.582316-1.494396C2.402989-.777086 2.056289-.119552 1.422665-.119552C1.362889-.119552 1.06401-.119552 .812951-.274969C1.243337-.358655 1.338979-.71731 1.338979-.860772C1.338979-1.099875 1.159651-1.243337 .932503-1.243337C.645579-1.243337 .334745-.992279 .334745-.609714C.334745-.107597 .896638 .119552 1.41071 .119552C1.984558 .119552 2.391034-.334745 2.642092-.824907C2.833375-.119552 3.431133 .119552 3.873474 .119552C5.092902 .119552 5.738481-1.446575 5.738481-1.709589C5.738481-1.769365 5.69066-1.817186 5.618929-1.817186C5.511333-1.817186 5.499377-1.75741 5.463512-1.661768C5.140722-.609714 4.447323-.119552 3.90934-.119552C3.490909-.119552 3.263761-.430386 3.263761-.920548C3.263761-1.183562 3.311582-1.374844 3.502864-2.163885L3.921295-3.789788C4.100623-4.507098 4.507098-5.033126 5.057036-5.033126C5.080946-5.033126 5.415691-5.033126 5.66675-4.877709Z'/>
+<path id='eq1-g4-121' d='M3.144209 1.338979C2.82142 1.793275 2.355168 2.199751 1.769365 2.199751C1.625903 2.199751 1.052055 2.175841 .872727 1.625903C.908593 1.637858 .968369 1.637858 .992279 1.637858C1.350934 1.637858 1.590037 1.327024 1.590037 1.052055S1.362889 .681445 1.183562 .681445C.992279 .681445 .573848 .824907 .573848 1.41071C.573848 2.020423 1.08792 2.438854 1.769365 2.438854C2.964882 2.438854 4.172354 1.338979 4.507098 .011955L5.678705-4.65056C5.69066-4.710336 5.71457-4.782067 5.71457-4.853798C5.71457-5.033126 5.571108-5.152677 5.391781-5.152677C5.284184-5.152677 5.033126-5.104857 4.937484-4.746202L4.052802-1.231382C3.993026-1.016189 3.993026-.992279 3.897385-.860772C3.658281-.526027 3.263761-.119552 2.689913-.119552C2.020423-.119552 1.960648-.777086 1.960648-1.099875C1.960648-1.78132 2.283437-2.701868 2.606227-3.56264C2.737733-3.90934 2.809465-4.076712 2.809465-4.315816C2.809465-4.817933 2.450809-5.272229 1.865006-5.272229C.765131-5.272229 .32279-3.53873 .32279-3.443088C.32279-3.395268 .37061-3.335492 .454296-3.335492C.561893-3.335492 .573848-3.383313 .621669-3.550685C.908593-4.554919 1.362889-5.033126 1.829141-5.033126C1.936737-5.033126 2.139975-5.033126 2.139975-4.638605C2.139975-4.327771 2.008468-3.981071 1.829141-3.526775C1.243337-1.960648 1.243337-1.566127 1.243337-1.279203C1.243337-.143462 2.056289 .119552 2.654047 .119552C3.000747 .119552 3.431133 .011955 3.849564-.430386L3.861519-.418431C3.682192 .286924 3.56264 .753176 3.144209 1.338979Z'/>
+<path id='eq1-g3-104' d='M1.990535-3.969116C1.996513-3.993026 2.008468-4.028892 2.008468-4.05878C2.008468-4.154421 1.888917-4.148443 1.817186-4.142466L1.147696-4.088667C1.046077-4.08269 .968369-4.076712 .968369-3.939228C.968369-3.843587 1.046077-3.843587 1.135741-3.843587C1.315068-3.843587 1.356912-3.831631 1.43462-3.801743C1.43462-3.730012 1.43462-3.718057 1.41071-3.622416L.573848-.280946C.549938-.185305 .549938-.155417 .549938-.143462C.549938 .005978 .669489 .059776 .759153 .059776C.818929 .059776 .926526 .035866 1.004234-.077709C1.022167-.119552 1.075965-.316812 1.105853-.442341C1.135741-.555915 1.201494-.830884 1.23736-.980324C1.279203-1.135741 1.309091-1.243337 1.338979-1.380822C1.362889-1.470486 1.392777-1.578082 1.560149-1.823163C1.75741-2.110087 2.068244-2.438854 2.528518-2.438854C2.905106-2.438854 2.905106-2.12802 2.905106-2.020423C2.905106-1.667746 2.654047-1.034122 2.540473-.759153C2.504608-.657534 2.462765-.561893 2.462765-.460274C2.462765-.155417 2.737733 .059776 3.066501 .059776C3.670237 .059776 3.969116-.729265 3.969116-.860772C3.969116-.872727 3.963138-.944458 3.855542-.944458C3.771856-.944458 3.765878-.91457 3.730012-.800996C3.634371-.490162 3.38929-.137484 3.084433-.137484C2.970859-.137484 2.923039-.227148 2.923039-.352677C2.923039-.472229 2.964882-.573848 3.01868-.699377C3.108344-.932503 3.377335-1.60797 3.377335-1.942715C3.377335-2.414944 3.036613-2.636115 2.552428-2.636115C2.080199-2.636115 1.763387-2.379078 1.524284-2.110087L1.990535-3.969116Z'/>
+<path id='eq1-g1-84' d='M4.080697-4.941469H5.587049C6.615193-4.941469 7.037609-5.531258 7.037609-5.65878C7.037609-5.71457 6.989788-5.71457 6.957908-5.71457C6.774595-5.71457 6.519552-5.539228 6.40797-5.459527C6.38406-5.443587 6.336239-5.443587 6.296389-5.443587H2.287422C1.323039-5.363885 .278954-4.519054 .278954-3.905355C.278954-3.849564 .302864-3.833624 .374595-3.833624C.478207-3.833624 .68543-3.929265 .804981-4.008966C1.044085-4.168369 1.060025-4.2401 1.075965-4.335741C1.099875-4.471233 1.155666-4.662516 1.338979-4.829888C1.458531-4.941469 1.753425-4.941469 1.849066-4.941469H3.498879C3.363387-4.845828 3.339477-4.750187 3.315567-4.654545L2.422914-1.091905C2.343213-.765131 2.1599-.207223 1.896887 .374595C1.857036 .462267 1.857036 .478207 1.857036 .486177C1.857036 .541968 1.896887 .541968 1.936737 .541968C2.10411 .541968 2.438854 .358655 2.582316 .199253C2.669988 .095641 3.044583-.804981 3.211955-1.466501L4.080697-4.941469Z'/>
+<path id='eq1-g0-90' d='M1.243337 26.026401C1.625903 26.002491 1.829141 25.739477 1.829141 25.440598C1.829141 25.046077 1.530262 24.854795 1.255293 24.854795C.968369 24.854795 .669489 25.034122 .669489 25.452553C.669489 26.062267 1.267248 26.564384 1.996513 26.564384C3.813699 26.564384 4.495143 23.766874 5.34396 20.299875C6.264508 16.522042 7.041594 12.708344 7.687173 8.870735C8.129514 6.324284 8.571856 3.93325 8.978331 2.391034C9.121793 1.80523 9.528269 .263014 9.994521 .263014C10.365131 .263014 10.66401 .490162 10.711831 .537983C10.31731 .561893 10.114072 .824907 10.114072 1.123786C10.114072 1.518306 10.412951 1.709589 10.68792 1.709589C10.974844 1.709589 11.273724 1.530262 11.273724 1.111831C11.273724 .466252 10.628144 0 9.97061 0C9.062017 0 8.392528 1.303113 7.734994 3.741968C7.699128 3.873474 6.073225 9.874969 4.758157 17.693649C4.447323 19.52279 4.100623 21.519303 3.706102 23.181071C3.490909 24.053798 2.940971 26.30137 1.972603 26.30137C1.542217 26.30137 1.255293 26.026401 1.243337 26.026401Z'/>
+</defs>
+<g id='eq1-page1'>
+<use x='116.162961' y='-28.471297' xlink:href='#eq1-g0-90'/>
+<use x='122.804741' y='-1.405846' xlink:href='#eq1-g1-84'/>
+<use x='127.477769' y='0' xlink:href='#eq1-g3-104'/>
+<use x='134.80442' y='-28.471297' xlink:href='#eq1-g0-90'/>
+<use x='141.4462' y='-1.405846' xlink:href='#eq1-g1-84'/>
+<use x='146.119228' y='0' xlink:href='#eq1-g3-104'/>
+<use x='153.445879' y='-12.198853' xlink:href='#eq1-g4-107'/>
+<use x='159.935383' y='-12.198853' xlink:href='#eq1-g5-40'/>
+<use x='164.487709' y='-12.198853' xlink:href='#eq1-g4-120'/>
+<use x='171.139796' y='-12.198853' xlink:href='#eq1-g4-59'/>
+<use x='176.383955' y='-12.198853' xlink:href='#eq1-g4-121'/>
+<use x='182.520607' y='-12.198853' xlink:href='#eq1-g5-41'/>
+<use x='189.06543' y='-12.198853' xlink:href='#eq1-g4-117'/>
+<use x='195.72787' y='-12.198853' xlink:href='#eq1-g5-40'/>
+<use x='200.280195' y='-12.198853' xlink:href='#eq1-g4-120'/>
+<use x='206.932283' y='-12.198853' xlink:href='#eq1-g5-41'/>
+<use x='214.141272' y='-12.198853' xlink:href='#eq1-g2-1'/>
+<use x='220.118825' y='-12.198853' xlink:href='#eq1-g4-118'/>
+<use x='226.207044' y='-12.198853' xlink:href='#eq1-g5-40'/>
+<use x='230.75937' y='-12.198853' xlink:href='#eq1-g4-121'/>
+<use x='236.896022' y='-12.198853' xlink:href='#eq1-g5-41'/>
+<use x='244.43714' y='-12.198853' xlink:href='#eq1-g4-100'/>
+<use x='250.519833' y='-12.198853' xlink:href='#eq1-g4-120'/>
+<use x='260.160712' y='-12.198853' xlink:href='#eq1-g4-100'/>
+<use x='266.243405' y='-12.198853' xlink:href='#eq1-g4-121'/>
+</g>
+</svg></div><p>for P1 trial and test spaces on a resident Kokkos mesh, with the quadrature of the host QuadratureRule. A thread integrates one pair of a selected test cell and a selected trial cell. A pair of coincident triangles is integrated by the Sauter-Schwab transformation with a tensor Gauss-Legendre rule, any other pair by the centroid rules of both cells.</p><p>The kernel is a KOKKOS_LAMBDA. For scalar spaces it takes the trial and the test points, as const Rodin::Kokkos::View&lt;::Rodin::Geometry::Point&gt;&amp;, and returns a Real. For vector spaces it takes first a Rodin::Kokkos::Geometry::Matrix&amp;, sized to the vector dimension and set to zero, which it fills.</p><p>The entries of a pair follow the entries of the previous pairs, the pairs being ordered by test cell, then by trial cell, as the host assemblies visit them.</p><p>The order of the Gauss-Legendre rule is read once, on the first triangle of the mesh, so it must depend only on the geometry.</p><p>The host evaluation interface (setPolytope(), integrate()) is not available and raises; the form is assembled by Assembly::Kokkos.</p>
+        <figure class="rodin-inheritance"><figcaption>Direct inheritance by class family</figcaption><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_kokkos_1_1_variational_1_1_global_bilinear_form_integrator.html" title="GlobalBilinearFormIntegrator&lt; Internal::BackendOf&lt; TrialFES &gt; &gt;">GlobalBilinearFormIntegrator</a></li></ul><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><div class="rodin-inheritance-current">PotentialIntegral</div><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_variational_1_1_integral.html" title="Variational::Integral&lt; Dot&lt; Potential&lt; Kernel, ShapeFunctionBase&lt; LHSDerived, TrialFES, TrialSpace &gt; &gt;, ShapeFunctionBase&lt; RHSDerived, TestFES, TestSpace &gt; &gt; &gt;">Variational::Integral</a></li></ul></figure><section id="base-classes"><h2><a href="#base-classes">Inherits from</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Base class</th><th>Responsibility</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_kokkos_1_1_variational_1_1_global_bilinear_form_integrator.html"><code>GlobalBilinearFormIntegrator&lt;…&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><a href="class_rodin_1_1_kokkos_1_1_variational_1_1_global_bilinear_form_integrator.html"><span class="nc">GlobalBilinearFormIntegrator</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">Internal</span><span class="o">::</span><a href="_kokkos_2_variational_2_integral_2_traits_8h.html#a971bfd7815d219030f9b9a5854c0104c"><span class="nc">BackendOf</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">TrialFES</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Rodin global bilinear integrator with backend execution.</td></tr></tbody></table></section>
+        <section id="derived-classes"><h2><a href="#derived-classes">Derived classes</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Derived class</th><th>Description</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_integral_3_01_dot_3_01_potential_3_01_kernel_00_01_shape_functio6faa1061564b3e95bdddbb2f4bea3630.html"><code>Variational::Integral&lt;…&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="n">Variational</span><span class="o">::</span><span class="nc">Integral</span><span class="o">&lt;</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_dot.html"><span class="nc">Dot</span></a><span class="o">&lt;</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_potential.html"><span class="nc">Potential</span></a><span class="o">&lt;</span><span class="w"> </span><span class="nc">Kernel</span><span class="p">,</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_shape_function_base.html"><span class="nc">ShapeFunctionBase</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">LHSDerived</span><span class="p">,</span><span class="w"> </span><span class="n">TrialFES</span><span class="p">,</span><span class="w"> </span><span class="n">TrialSpace</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><a href="class_rodin_1_1_variational_1_1_shape_function_base.html"><span class="nc">ShapeFunctionBase</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">RHSDerived</span><span class="p">,</span><span class="w"> </span><span class="n">TestFES</span><span class="p">,</span><span class="w"> </span><span class="n">TestSpace</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Device integration of a potential tested against a shape function on a Kokkos mesh.</td></tr></tbody></table></section><section id="rodin-overrides"><h2><a href="#rodin-overrides">Overrides</a></h2><table class="m-table m-fullwidth"><thead><tr><th>Member</th><th>Base declaration</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_kokkos_1_1_variational_1_1_potential_integral.html#a6760799986617dfb930a8b4e130fa9f3"><code>integrate()</code></a></td><td><a href="class_rodin_1_1_variational_1_1_global_bilinear_form_integrator_base.html#a97c55b694574be6740d557e27aff8ba2">GlobalBilinearFormIntegratorBase::integrate</a></td></tr><tr><td><a href="class_rodin_1_1_kokkos_1_1_variational_1_1_potential_integral.html#a1222c2735c7f682ad73f4de308df9ad8"><code>getTrialRegion()</code></a></td><td><a href="class_rodin_1_1_variational_1_1_global_bilinear_form_integrator_base.html#ab4da447bab19d73c198c580f3f012e09">GlobalBilinearFormIntegratorBase::getTrialRegion</a></td></tr><tr><td><a href="class_rodin_1_1_kokkos_1_1_variational_1_1_potential_integral.html#a2d2510d0d4e95eeb632c0201ba817c79"><code>getLayout()</code></a></td><td><a href="class_rodin_1_1_kokkos_1_1_variational_1_1_bilinear_form_integrator.html#a9a4bc9e85722b515481afca5b9ded360">BilinearFormIntegrator::getLayout</a></td></tr><tr><td><a href="class_rodin_1_1_kokkos_1_1_variational_1_1_potential_integral.html#ad687004a03778d2aacf025c58c6a841f"><code>prepare()</code></a></td><td><a href="class_rodin_1_1_kokkos_1_1_variational_1_1_bilinear_form_integrator.html#aa2ce0f7e30899beee11f5eaaee3d2f11">BilinearFormIntegrator::prepare</a></td></tr><tr><td><a href="class_rodin_1_1_kokkos_1_1_variational_1_1_potential_integral.html#a5893dcaee09c79fd6a45dd98787714aa"><code>getSpacing()</code></a></td><td><a href="class_rodin_1_1_kokkos_1_1_variational_1_1_bilinear_form_integrator.html#a60aacb2cf667e4185ad26be548c4426e">BilinearFormIntegrator::getSpacing</a></td></tr><tr><td><a href="class_rodin_1_1_kokkos_1_1_variational_1_1_potential_integral.html#a6ef14f27632114d29a3460c75388157b"><code>copy()</code></a></td><td><a href="class_rodin_1_1_variational_1_1_global_bilinear_form_integrator_base.html#a728feb66b9c25d31488d2ef140009949">GlobalBilinearFormIntegratorBase::copy</a></td></tr></tbody></table></section><section id="rodin-inherited"><h2><a href="#rodin-inherited">Inherited interface</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Declared in</th><th>Members</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_kokkos_1_1_variational_1_1_bilinear_form_integrator.html"><code>BilinearFormIntegrator</code></a></td><td><details><summary>5 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_kokkos_1_1_variational_1_1_bilinear_form_integrator.html#ac6f6593cd26035beb2063efdb6968614"><code>assemble()</code></a></li><li><a href="class_rodin_1_1_kokkos_1_1_variational_1_1_bilinear_form_integrator.html#a175d38764a967e2e19f4a110897a0871"><code>ContextType</code></a></li><li><a href="class_rodin_1_1_kokkos_1_1_variational_1_1_bilinear_form_integrator.html#a6db8340635d2b76371a804dcd5cfe224"><code>fill()</code></a></li><li><a href="class_rodin_1_1_kokkos_1_1_variational_1_1_bilinear_form_integrator.html#ac64e923237b6e2bb719379125067c99e"><code>isBlockDiagonal()</code></a></li><li><a href="class_rodin_1_1_kokkos_1_1_variational_1_1_bilinear_form_integrator.html#ae6056204e6a6f2b215ebf90da68a3bf0"><code>TripletsType</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_form_language_1_1_base.html"><code>FormLanguage::Base</code></a></td><td><details><summary>3 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_form_language_1_1_base.html#a14046f65e816a05cc213985b9b649796"><code>getName()</code></a></li><li><a href="class_rodin_1_1_form_language_1_1_base.html#afbd6d41bc117ed42754035369b67dd56"><code>operator=()</code></a></li><li><a href="class_rodin_1_1_form_language_1_1_base.html#a9ae44b0112922779cf419ad36fe3aff4"><code>operator=()</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_integrator.html"><code>Variational::Integrator</code></a></td><td><details><summary>7 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_variational_1_1_integrator.html#a350edea67dfa070881b66ed34db4c27c"><code>getOrder()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_integrator.html#a4fbdb76097cac108edbb0f49e74bfa11"><code>getOrder()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_integrator.html#adea5ccfd57d26e8af9eb776fdf191b04"><code>OrderType</code></a></li><li><a href="class_rodin_1_1_variational_1_1_integrator.html#a779c5028c546fddc461a6d6b10dcb299"><code>setOrder()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_integrator.html#a4c4c2ddfd3edbd42d18604bd674784a2"><code>setOrder()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_integrator.html#a503b6171d3423d1daad5ac38b42b55bc"><code>setOrder()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_integrator.html#a1d1cfd8ffb84e947f82999c682b666a7"><code>Type</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_global_bilinear_form_integrator_base.html"><code>Variational::GlobalBilinearFormIntegratorBase</code></a></td><td><details><summary>7 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_variational_1_1_global_bilinear_form_integrator_base.html#a81cb55732fb9dedf297a83e2e7c94ac7"><code>getTestAttributes()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_global_bilinear_form_integrator_base.html#ad22db9a6b9e33b5ddc849c7c4ff86329"><code>getTestRegion()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_global_bilinear_form_integrator_base.html#ac970835779b65b7473d7f59823ed6390"><code>getTrialAttributes()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_global_bilinear_form_integrator_base.html#ab34dc093116842cc6f9fa80d9fd0a558"><code>ScalarType</code></a></li><li><a href="class_rodin_1_1_variational_1_1_global_bilinear_form_integrator_base.html#aa73cf989a8160732931b43ec991a80ce"><code>setPolytope()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_global_bilinear_form_integrator_base.html#a597191c533ee53eb9bcbbd204b3fb257"><code>setTestAttributes()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_global_bilinear_form_integrator_base.html#a7ae48c1da274a59377f79a2403174aaf"><code>setTrialAttributes()</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_bilinear_form_integrator_base.html"><code>Variational::BilinearFormIntegratorBase</code></a></td><td><details><summary>3 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_variational_1_1_bilinear_form_integrator_base.html#a3319ca4dc61343f68e2f5ac7721b00ba"><code>getTestFunction()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_bilinear_form_integrator_base.html#aa35bc19de6026cd8134134430e4b5ec8"><code>getTrialFunction()</code></a></li><li><a href="class_rodin_1_1_variational_1_1_bilinear_form_integrator_base.html#a58d2c9eed0f2d47891079548f1a6d7d9"><code>getType()</code></a></li></ul></details></td></tr><tr><td><a href="class_rodin_1_1_identifiable.html"><code>Identifiable</code></a></td><td><details><summary>2 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_identifiable.html#af6bc2718108274fb930c8d16aef9e17f"><code>getUUID()</code></a></li><li><a href="class_rodin_1_1_identifiable.html#a36b32316c418ee977c27453e7e37658d"><code>UUID</code></a></li></ul></details></td></tr></tbody></table></section>
+        <section id="pub-types">
+          <h2><a href="#pub-types">Public types</a></h2>
+          <dl class="m-doc">
+            <dt>
+              struct <a href="struct_rodin_1_1_kokkos_1_1_variational_1_1_potential_integral_1_1_selection.html" class="m-doc">Selection</a>
+            </dt>
+            <dd>Selected cells of one side of the pairs.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class DOFs&gt;</div>
+              struct <a href="struct_rodin_1_1_kokkos_1_1_variational_1_1_potential_integral_1_1_cell_range.html" class="m-doc">CellRange</a>
+            </dt>
+            <dd>Counts the selected cells and bounds their local counts.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_kokkos_1_1_variational_1_1_potential_integral_1_1_selected_cells.html" class="m-doc">SelectedCells</a>
+            </dt>
+            <dd>Writes the selected cells, in increasing order.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class DOFs&gt;</div>
+              struct <a href="struct_rodin_1_1_kokkos_1_1_variational_1_1_potential_integral_1_1_cell_offsets.html" class="m-doc">CellOffsets</a>
+            </dt>
+            <dd>Writes the sum of the local counts of the previous selected cells.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_kokkos_1_1_variational_1_1_potential_integral_1_1_pair_kernel.html" class="m-doc">PairKernel</a>
+            </dt>
+            <dd>Kernel of integratePairs(), one pair of selected cells per thread.</dd>
+            <dt id="ab434360b238d9ad16db489326c99b48e">
+              using <a href="#ab434360b238d9ad16db489326c99b48e" class="m-doc-self">TrialFESType</a> = TrialFES
+            </dt>
+            <dd>Finite element space of the trial functions.</dd>
+            <dt id="afa321364ce6063856f52da8fcfb00814">
+              using <a href="#afa321364ce6063856f52da8fcfb00814" class="m-doc-self">TestFESType</a> = TestFES
+            </dt>
+            <dd>Finite element space of the test functions.</dd>
+            <dt id="a425b3ded15af3844a7ceb30998566329">
+              using <a href="#a425b3ded15af3844a7ceb30998566329" class="m-doc-self">TrialRange</a> = typename TrialFESType::RangeType
+            </dt>
+            <dd>Range type of the trial space.</dd>
+            <dt id="adfe5ac86a5eeb6f357edebd3b3a2527f">
+              using <a href="#adfe5ac86a5eeb6f357edebd3b3a2527f" class="m-doc-self">TestRange</a> = typename TestFESType::RangeType
+            </dt>
+            <dd>Range type of the test space.</dd>
+            <dt id="ac0a92c6f77449398dd99bbc0be164cde">
+              using <a href="#ac0a92c6f77449398dd99bbc0be164cde" class="m-doc-self">TrialDOFsType</a> = typename TrialFESType::DOFsType
+            </dt>
+            <dd>Device degrees of freedom of the trial space.</dd>
+            <dt id="aa85be14ab24ad8f8da54434dfe1f4a31">
+              using <a href="#aa85be14ab24ad8f8da54434dfe1f4a31" class="m-doc-self">TestDOFsType</a> = typename TestFESType::DOFsType
+            </dt>
+            <dd>Device degrees of freedom of the test space.</dd>
+            <dt id="aa00f8f49ea4864c669c09e7da212b3f3">
+              using <a href="#aa00f8f49ea4864c669c09e7da212b3f3" class="m-doc-self">KernelType</a> = Kernel
+            </dt>
+            <dd>Kernel type.</dd>
+            <dt id="a8ae7daa3e3c36baec88420d30b7af5a1">
+              using <a href="#a8ae7daa3e3c36baec88420d30b7af5a1" class="m-doc-self">LHSType</a> = <a href="class_rodin_1_1_variational_1_1_potential.html" class="m-doc">::<wbr />Rodin::<wbr />Variational::<wbr />Potential</a>&lt;<a href="#aa00f8f49ea4864c669c09e7da212b3f3" class="m-doc">KernelType</a>, <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">::<wbr />Rodin::<wbr />Variational::<wbr />ShapeFunctionBase</a>&lt;LHSDerived, <a href="#ab434360b238d9ad16db489326c99b48e" class="m-doc">TrialFESType</a>, <a href="group___rodin_variational.html#gga6cd58505ac5f9e57b8f353cfeef7d7a4a1b52c526b858eb9dd2c66da1c0b8f44d" class="m-doc">::<wbr />Rodin::<wbr />Variational::<wbr />ShapeFunctionSpaceType::<wbr />Trial</a>&gt;&gt;
+            </dt>
+            <dd>Type of the left operand of the dot product.</dd>
+            <dt id="a8520d2c7c67dc9fde27f55a15049f6dc">
+              using <a href="#a8520d2c7c67dc9fde27f55a15049f6dc" class="m-doc-self">RHSType</a> = <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">::<wbr />Rodin::<wbr />Variational::<wbr />ShapeFunctionBase</a>&lt;RHSDerived, <a href="#afa321364ce6063856f52da8fcfb00814" class="m-doc">TestFESType</a>, <a href="group___rodin_variational.html#gga6cd58505ac5f9e57b8f353cfeef7d7a4a0cbc6611f5540bd0809a388dc95a615b" class="m-doc">::<wbr />Rodin::<wbr />Variational::<wbr />ShapeFunctionSpaceType::<wbr />Test</a>&gt;
+            </dt>
+            <dd>Type of the right operand of the dot product.</dd>
+            <dt id="a4c35072c8e6bcace772c96bb8741deae">
+              using <a href="#a4c35072c8e6bcace772c96bb8741deae" class="m-doc-self">IntegrandType</a> = <a href="class_rodin_1_1_variational_1_1_dot.html" class="m-doc">::<wbr />Rodin::<wbr />Variational::<wbr />Dot</a>&lt;<a href="#a8ae7daa3e3c36baec88420d30b7af5a1" class="m-doc">LHSType</a>, <a href="#a8520d2c7c67dc9fde27f55a15049f6dc" class="m-doc">RHSType</a>&gt;
+            </dt>
+            <dd>Type of the integrand.</dd>
+            <dt id="a7254aab76ff9cebd9054f2781d4530ed">
+              using <a href="#a7254aab76ff9cebd9054f2781d4530ed" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_kokkos_1_1_variational_1_1_global_bilinear_form_integrator.html" class="m-doc">GlobalBilinearFormIntegrator</a>&lt;<a href="_kokkos_2_variational_2_integral_2_traits_8h.html#a971bfd7815d219030f9b9a5854c0104c" class="m-doc">Internal::<wbr />BackendOf</a>&lt;TrialFES&gt;&gt;
+            </dt>
+            <dd>Kokkos integrator base.</dd>
+            <dt id="a9f8ef6636e37a34b8f2b6742078d38b1">
+              using <a href="#a9f8ef6636e37a34b8f2b6742078d38b1" class="m-doc-self">ViewParent</a> = <a href="class_rodin_1_1_kokkos_1_1_variational_1_1_bilinear_form_integrator.html" class="m-doc">BilinearFormIntegrator</a>&lt;<a href="_kokkos_2_variational_2_integral_2_traits_8h.html#a971bfd7815d219030f9b9a5854c0104c" class="m-doc">Internal::<wbr />BackendOf</a>&lt;TrialFES&gt;&gt;
+            </dt>
+            <dd>Bulk integration interface.</dd>
+            <dt id="a9edadbc870ad35add3d3fc2f4dcb5a62">
+              using <a href="#a9edadbc870ad35add3d3fc2f4dcb5a62" class="m-doc-self">MeshType</a> = typename TrialFESType::MeshType
+            </dt>
+            <dd>Mesh type.</dd>
+            <dt id="ad024797d5b5e20d7be6fa42f3acff127">
+              using <a href="#ad024797d5b5e20d7be6fa42f3acff127" class="m-doc-self">ExecutionSpace</a> = typename MeshType::ExecutionSpace
+            </dt>
+            <dd>Kokkos execution space.</dd>
+            <dt id="a426b377d2878611644f66b2f1d31d364">
+              using <a href="#a426b377d2878611644f66b2f1d31d364" class="m-doc-self">MemorySpace</a> = typename MeshType::MemorySpace
+            </dt>
+            <dd>Kokkos memory space.</dd>
+            <dt id="a44052ca536fa60052021865bb82f03a7">
+              using <a href="#a44052ca536fa60052021865bb82f03a7" class="m-doc-self">AttributesType</a> = <a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Kokkos::<wbr />View</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">::<wbr />Rodin::<wbr />Geometry::<wbr />Attribute</a>*, <a href="#a426b377d2878611644f66b2f1d31d364" class="m-doc">MemorySpace</a>&gt;
+            </dt>
+            <dd>Device attribute selection.</dd>
+            <dt id="a65fb38fb067b243ea0ab2c3b33d631f6">
+              using <a href="#a65fb38fb067b243ea0ab2c3b33d631f6" class="m-doc-self">TableType</a> = <a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Kokkos::<wbr />View</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>*, <a href="#a426b377d2878611644f66b2f1d31d364" class="m-doc">MemorySpace</a>&gt;
+            </dt>
+            <dd>Device quadrature table.</dd>
+          </dl>
+        </section>
+        <section id="pub-static-attribs">
+          <h2><a href="#pub-static-attribs">Public static variables</a></h2>
+          <dl class="m-doc">
+            <dt id="a4c57b1af4126bb100764b918fe4aaa8f">
+              static bool <a href="#a4c57b1af4126bb100764b918fe4aaa8f" class="m-doc-self">Scalar</a> <span class="m-label m-flat m-primary">constexpr</span>
+            </dt>
+            <dd>Whether the spaces are scalar.</dd>
+            <dt id="a78aac7559138cfa54d0def65ab9bb302">
+              static <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> <a href="#a78aac7559138cfa54d0def65ab9bb302" class="m-doc-self">VectorCapacity</a> <span class="m-label m-flat m-primary">constexpr</span>
+            </dt>
+            <dd>Maximum number of components of the spaces.</dd>
+            <dt id="a19f6f4ecca2a838f5f2cafbb6c039905">
+              static <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> <a href="#a19f6f4ecca2a838f5f2cafbb6c039905" class="m-doc-self">TriangleCapacity</a> <span class="m-label m-flat m-primary">constexpr</span>
+            </dt>
+            <dd>Maximum local count of a triangle, integrated in thread memory.</dd>
+            <dt id="a91ba48980c0d8b9899d5817df2ccda27">
+              static size_t <a href="#a91ba48980c0d8b9899d5817df2ccda27" class="m-doc-self">GeometryCount</a> <span class="m-label m-flat m-primary">constexpr</span>
+            </dt>
+            <dd>Number of reference geometries.</dd>
+            <dt id="ad54fdad4f03c37d6e2b5e8dadcff87ad">
+              static <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> <a href="#ad54fdad4f03c37d6e2b5e8dadcff87ad" class="m-doc-self">ReferenceStride</a> <span class="m-label m-flat m-primary">constexpr</span>
+            </dt>
+            <dd>Stride of the flattened reference coordinates of the centroids.</dd>
+          </dl>
+        </section>
+        <section id="pub-static-methods">
+          <h2><a href="#pub-static-methods">Public static functions</a></h2>
+          <dl class="m-doc">
+            <dt><a href="#aeb3d495d8088eda1dd515372b554caa8" class="m-doc">select</a></dt><dd>Selects the cells of one side of the pairs.<details class="rodin-declaration-disclosure"><summary>See declaration</summary><div class="rodin-overview-declaration">
+              <div class="m-doc-template">template&lt;class DOFs&gt;</div>
+              <span class="m-doc-wrap-bumper">static void <a href="#aeb3d495d8088eda1dd515372b554caa8" class="m-doc">select</a>(</span><span class="m-doc-wrap">const <a href="#ad024797d5b5e20d7be6fa42f3acff127" class="m-doc">ExecutionSpace</a>&amp; execution,
+              const <a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Rodin::<wbr />Kokkos::<wbr />View</a>&lt;<a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">::<wbr />Rodin::<wbr />Geometry::<wbr />MeshBase</a>&gt;&amp; view,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> dimension,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> count,
+              const <a href="#a44052ca536fa60052021865bb82f03a7" class="m-doc">AttributesType</a>&amp; attributes,
+              const DOFs&amp; dofs,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> vdim,
+              <a href="struct_rodin_1_1_kokkos_1_1_variational_1_1_potential_integral_1_1_selection.html" class="m-doc">Selection</a>&amp; selection)</span>
+            </div></details></dd>
+            <dt><a href="#a1d2b86e13bca49a091e4fff8f7d814af" class="m-doc">integratePairs</a></dt><dd>Integrates the pairs of selected cells.<details class="rodin-declaration-disclosure"><summary>See declaration</summary><div class="rodin-overview-declaration">
+              <span class="m-doc-wrap-bumper">static void <a href="#a1d2b86e13bca49a091e4fff8f7d814af" class="m-doc">integratePairs</a>(</span><span class="m-doc-wrap">const <a href="#a9edadbc870ad35add3d3fc2f4dcb5a62" class="m-doc">MeshType</a>&amp; mesh,
+              const <a href="#aa00f8f49ea4864c669c09e7da212b3f3" class="m-doc">KernelType</a>&amp; kernel,
+              const <a href="struct_rodin_1_1_kokkos_1_1_variational_1_1_potential_integral_1_1_selection.html" class="m-doc">Selection</a>&amp; test,
+              const <a href="struct_rodin_1_1_kokkos_1_1_variational_1_1_potential_integral_1_1_selection.html" class="m-doc">Selection</a>&amp; trial,
+              bool uniform,
+              size_t spacing,
+              const <a href="#a65fb38fb067b243ea0ab2c3b33d631f6" class="m-doc">TableType</a>&amp; nodes,
+              const <a href="#a65fb38fb067b243ea0ab2c3b33d631f6" class="m-doc">TableType</a>&amp; weights,
+              const <a href="#a65fb38fb067b243ea0ab2c3b33d631f6" class="m-doc">TableType</a>&amp; centroids,
+              const <a href="#a65fb38fb067b243ea0ab2c3b33d631f6" class="m-doc">TableType</a>&amp; centroidWeights,
+              const <a href="#ac0a92c6f77449398dd99bbc0be164cde" class="m-doc">TrialDOFsType</a>&amp; trialDOFs,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> trialVDim,
+              const <a href="#aa85be14ab24ad8f8da54434dfe1f4a31" class="m-doc">TestDOFsType</a>&amp; testDOFs,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> testVDim,
+              const <a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Kokkos::<wbr />View</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>*, <a href="#a426b377d2878611644f66b2f1d31d364" class="m-doc">MemorySpace</a>&gt;&amp; values,
+              size_t offset,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> sign,
+              bool accumulate,
+              const <a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Kokkos::<wbr />View</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>*, <a href="#a426b377d2878611644f66b2f1d31d364" class="m-doc">MemorySpace</a>&gt;&amp; rows,
+              const <a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Kokkos::<wbr />View</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>*, <a href="#a426b377d2878611644f66b2f1d31d364" class="m-doc">MemorySpace</a>&gt;&amp; cols)</span>
+            </div></details></dd>
+          </dl>
+        </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a80fe6cf14fea5b3a39a559a49f2328fd" class="m-doc">PotentialIntegral</a>(</span><span class="m-doc-wrap">const <a href="#a4c35072c8e6bcace772c96bb8741deae" class="m-doc">IntegrandType</a>&amp; integrand)</span>
+            </dt>
+            <dd>Constructs the integral of a dot product.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a8818759bafff407e94cb37a748a5df02" class="m-doc">PotentialIntegral</a>(</span><span class="m-doc-wrap">const PotentialIntegral&amp; other)</span>
+            </dt>
+            <dd>Copy constructor.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#aa066d56ffdd897d582c405e9a8f63866" class="m-doc">PotentialIntegral</a>(</span><span class="m-doc-wrap">PotentialIntegral&amp;&amp; other)</span>
+            </dt>
+            <dd>Move constructor.</dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a904cdee8f54bf04b92b4ebbd7f18ace8" class="m-doc">getIntegrand</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a4c35072c8e6bcace772c96bb8741deae" class="m-doc">IntegrandType</a>&amp;</span>
+            </dt>
+            <dd>Gets the integrand.</dd>
+            <dt><a href="#ac9f10c7566229871a08c6a39d4ffb907" class="m-doc">setPolytope</a></dt><dd>Unavailable; the integral has no host evaluation.<details class="rodin-declaration-disclosure"><summary>See declaration</summary><div class="rodin-overview-declaration">
+              <span class="m-doc-wrap-bumper">auto <a href="#ac9f10c7566229871a08c6a39d4ffb907" class="m-doc">setPolytope</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">::<wbr />Rodin::<wbr />Geometry::<wbr />Polytope</a>&amp; tau,
+              const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">::<wbr />Rodin::<wbr />Geometry::<wbr />Polytope</a>&amp; t) -&gt; <a href="#a80fe6cf14fea5b3a39a559a49f2328fd" class="m-doc">PotentialIntegral</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
+            </div></details></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a6760799986617dfb930a8b4e130fa9f3" class="m-doc">integrate</a>(</span><span class="m-doc-wrap">size_t tr,
+              size_t te) -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Unavailable; the integral has no host evaluation.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a1222c2735c7f682ad73f4de308df9ad8" class="m-doc">getTrialRegion</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">::<wbr />Rodin::<wbr />Geometry::<wbr />Region</a> <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Gets the trial region.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a2d2510d0d4e95eeb632c0201ba817c79" class="m-doc">getLayout</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="struct_rodin_1_1_kokkos_1_1_variational_1_1_layout.html" class="m-doc">Layout</a> <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Gets the arrangement of the entries.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad687004a03778d2aacf025c58c6a841f" class="m-doc">prepare</a>(</span><span class="m-doc-wrap">bool diagonal) -&gt; size_t <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Locates the entries of every pair of selected cells.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a5893dcaee09c79fd6a45dd98787714aa" class="m-doc">getSpacing</a>(</span><span class="m-doc-wrap">) const -&gt; size_t <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Gets the spacing of the entries.</dd>
+            <dt><a href="#a68eff588ad1983b79d9f71f19fe4be5e" class="m-doc">fill</a></dt><dd>Integrates every pair of selected cells on the device.<details class="rodin-declaration-disclosure"><summary>See declaration</summary><div class="rodin-overview-declaration">
+              <span class="m-doc-wrap-bumper">void <a href="#a68eff588ad1983b79d9f71f19fe4be5e" class="m-doc">fill</a>(</span><span class="m-doc-wrap">const <a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Kokkos::<wbr />View</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>*, <a href="#a426b377d2878611644f66b2f1d31d364" class="m-doc">MemorySpace</a>&gt;&amp; values,
+              size_t offset,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> sign,
+              bool accumulate,
+              const <a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Kokkos::<wbr />View</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>*, <a href="#a426b377d2878611644f66b2f1d31d364" class="m-doc">MemorySpace</a>&gt;&amp; rows,
+              const <a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Kokkos::<wbr />View</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>*, <a href="#a426b377d2878611644f66b2f1d31d364" class="m-doc">MemorySpace</a>&gt;&amp; cols) const <span class="m-label m-flat m-warning">override</span></span>
+            </div></details></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a6ef14f27632114d29a3460c75388157b" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="#a80fe6cf14fea5b3a39a559a49f2328fd" class="m-doc">PotentialIntegral</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Creates a copy of the integral.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="aeb3d495d8088eda1dd515372b554caa8"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Kernel, class LHSDerived, class RHSDerived, Space TrialFES, Space TestFES&gt;
+                template&lt;class DOFs&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">static void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aeb3d495d8088eda1dd515372b554caa8" class="m-doc-self">select</a>(</span><span class="m-doc-wrap">const <a href="#ad024797d5b5e20d7be6fa42f3acff127" class="m-doc">ExecutionSpace</a>&amp; execution,
+              const <a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Rodin::<wbr />Kokkos::<wbr />View</a>&lt;<a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">::<wbr />Rodin::<wbr />Geometry::<wbr />MeshBase</a>&gt;&amp; view,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> dimension,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> count,
+              const <a href="#a44052ca536fa60052021865bb82f03a7" class="m-doc">AttributesType</a>&amp; attributes,
+              const DOFs&amp; dofs,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> vdim,
+              <a href="struct_rodin_1_1_kokkos_1_1_variational_1_1_potential_integral_1_1_selection.html" class="m-doc">Selection</a>&amp; selection)</span></span>
+            </h3>
+            <p>Selects the cells of one side of the pairs.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">execution</td>
+                  <td>Execution space instance.</td>
+                </tr>
+                <tr>
+                  <td>view</td>
+                  <td>Device mesh.</td>
+                </tr>
+                <tr>
+                  <td>dimension</td>
+                  <td>Dimension of the cells.</td>
+                </tr>
+                <tr>
+                  <td>count</td>
+                  <td>Number of cells.</td>
+                </tr>
+                <tr>
+                  <td>attributes</td>
+                  <td>Selected attributes; empty selects every cell.</td>
+                </tr>
+                <tr>
+                  <td>dofs</td>
+                  <td>Device degrees of freedom of the side.</td>
+                </tr>
+                <tr>
+                  <td>vdim</td>
+                  <td>Vector dimension of the side.</td>
+                </tr>
+                <tr>
+                  <td>selection</td>
+                  <td>Selected cells and their offsets.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a1d2b86e13bca49a091e4fff8f7d814af"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">static void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1d2b86e13bca49a091e4fff8f7d814af" class="m-doc-self">integratePairs</a>(</span><span class="m-doc-wrap">const <a href="#a9edadbc870ad35add3d3fc2f4dcb5a62" class="m-doc">MeshType</a>&amp; mesh,
+              const <a href="#aa00f8f49ea4864c669c09e7da212b3f3" class="m-doc">KernelType</a>&amp; kernel,
+              const <a href="struct_rodin_1_1_kokkos_1_1_variational_1_1_potential_integral_1_1_selection.html" class="m-doc">Selection</a>&amp; test,
+              const <a href="struct_rodin_1_1_kokkos_1_1_variational_1_1_potential_integral_1_1_selection.html" class="m-doc">Selection</a>&amp; trial,
+              bool uniform,
+              size_t spacing,
+              const <a href="#a65fb38fb067b243ea0ab2c3b33d631f6" class="m-doc">TableType</a>&amp; nodes,
+              const <a href="#a65fb38fb067b243ea0ab2c3b33d631f6" class="m-doc">TableType</a>&amp; weights,
+              const <a href="#a65fb38fb067b243ea0ab2c3b33d631f6" class="m-doc">TableType</a>&amp; centroids,
+              const <a href="#a65fb38fb067b243ea0ab2c3b33d631f6" class="m-doc">TableType</a>&amp; centroidWeights,
+              const <a href="#ac0a92c6f77449398dd99bbc0be164cde" class="m-doc">TrialDOFsType</a>&amp; trialDOFs,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> trialVDim,
+              const <a href="#aa85be14ab24ad8f8da54434dfe1f4a31" class="m-doc">TestDOFsType</a>&amp; testDOFs,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> testVDim,
+              const <a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Kokkos::<wbr />View</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>*, <a href="#a426b377d2878611644f66b2f1d31d364" class="m-doc">MemorySpace</a>&gt;&amp; values,
+              size_t offset,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> sign,
+              bool accumulate,
+              const <a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Kokkos::<wbr />View</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>*, <a href="#a426b377d2878611644f66b2f1d31d364" class="m-doc">MemorySpace</a>&gt;&amp; rows,
+              const <a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Kokkos::<wbr />View</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>*, <a href="#a426b377d2878611644f66b2f1d31d364" class="m-doc">MemorySpace</a>&gt;&amp; cols)</span></span>
+            </h3>
+            <p>Integrates the pairs of selected cells.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">mesh</td>
+                  <td>Resident mesh.</td>
+                </tr>
+                <tr>
+                  <td>kernel</td>
+                  <td>Device kernel <svg class="m-math" style="width: 3.503em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 33.627053 11.955168">
+<title>
+$ k(x, y) $
+</title>
+<defs>
+<path id='eq2-g1-40' d='M3.88543 2.905106C3.88543 2.86924 3.88543 2.84533 3.682192 2.642092C2.486675 1.43462 1.817186-.537983 1.817186-2.976837C1.817186-5.296139 2.379078-7.292653 3.765878-8.703362C3.88543-8.810959 3.88543-8.834869 3.88543-8.870735C3.88543-8.942466 3.825654-8.966376 3.777833-8.966376C3.622416-8.966376 2.642092-8.105604 2.056289-6.933998C1.446575-5.726526 1.171606-4.447323 1.171606-2.976837C1.171606-1.912827 1.338979-.490162 1.960648 .789041C2.666002 2.223661 3.646326 3.000747 3.777833 3.000747C3.825654 3.000747 3.88543 2.976837 3.88543 2.905106Z'/>
+<path id='eq2-g1-41' d='M3.371357-2.976837C3.371357-3.88543 3.251806-5.36787 2.582316-6.75467C1.876961-8.18929 .896638-8.966376 .765131-8.966376C.71731-8.966376 .657534-8.942466 .657534-8.870735C.657534-8.834869 .657534-8.810959 .860772-8.607721C2.056289-7.400249 2.725778-5.427646 2.725778-2.988792C2.725778-.669489 2.163885 1.327024 .777086 2.737733C.657534 2.84533 .657534 2.86924 .657534 2.905106C.657534 2.976837 .71731 3.000747 .765131 3.000747C.920548 3.000747 1.900872 2.139975 2.486675 .968369C3.096389-.251059 3.371357-1.542217 3.371357-2.976837Z'/>
+<path id='eq2-g0-59' d='M2.331258 .047821C2.331258-.645579 2.10411-1.159651 1.613948-1.159651C1.231382-1.159651 1.0401-.848817 1.0401-.585803S1.219427 0 1.625903 0C1.78132 0 1.912827-.047821 2.020423-.155417C2.044334-.179328 2.056289-.179328 2.068244-.179328C2.092154-.179328 2.092154-.011955 2.092154 .047821C2.092154 .442341 2.020423 1.219427 1.327024 1.996513C1.195517 2.139975 1.195517 2.163885 1.195517 2.187796C1.195517 2.247572 1.255293 2.307347 1.315068 2.307347C1.41071 2.307347 2.331258 1.422665 2.331258 .047821Z'/>
+<path id='eq2-g0-107' d='M3.359402-7.998007C3.371357-8.045828 3.395268-8.117559 3.395268-8.177335C3.395268-8.296887 3.275716-8.296887 3.251806-8.296887C3.239851-8.296887 2.809465-8.261021 2.594271-8.237111C2.391034-8.225156 2.211706-8.201245 1.996513-8.18929C1.709589-8.16538 1.625903-8.153425 1.625903-7.938232C1.625903-7.81868 1.745455-7.81868 1.865006-7.81868C2.47472-7.81868 2.47472-7.711083 2.47472-7.591532C2.47472-7.543711 2.47472-7.519801 2.414944-7.304608L.705355-.466252C.657534-.286924 .657534-.263014 .657534-.191283C.657534 .071731 .860772 .119552 .980324 .119552C1.315068 .119552 1.3868-.143462 1.482441-.514072L2.044334-2.749689C2.905106-2.654047 3.419178-2.295392 3.419178-1.721544C3.419178-1.649813 3.419178-1.601993 3.383313-1.422665C3.335492-1.243337 3.335492-1.099875 3.335492-1.0401C3.335492-.3467 3.789788 .119552 4.399502 .119552C4.94944 .119552 5.236364-.382565 5.332005-.549938C5.583064-.992279 5.738481-1.661768 5.738481-1.709589C5.738481-1.769365 5.69066-1.817186 5.618929-1.817186C5.511333-1.817186 5.499377-1.769365 5.451557-1.578082C5.284184-.956413 5.033126-.119552 4.423412-.119552C4.184309-.119552 4.028892-.239103 4.028892-.6934C4.028892-.920548 4.076712-1.183562 4.124533-1.362889C4.172354-1.578082 4.172354-1.590037 4.172354-1.733499C4.172354-2.438854 3.53873-2.833375 2.438854-2.976837C2.86924-3.239851 3.299626-3.706102 3.466999-3.88543C4.148443-4.65056 4.614695-5.033126 5.164633-5.033126C5.439601-5.033126 5.511333-4.961395 5.595019-4.889664C5.152677-4.841843 4.985305-4.531009 4.985305-4.291905C4.985305-4.004981 5.212453-3.90934 5.379826-3.90934C5.702615-3.90934 5.989539-4.184309 5.989539-4.566874C5.989539-4.913574 5.71457-5.272229 5.176588-5.272229C4.519054-5.272229 3.981071-4.805978 3.132254-3.849564C3.012702-3.706102 2.570361-3.251806 2.12802-3.084433L3.359402-7.998007Z'/>
+<path id='eq2-g0-120' d='M5.66675-4.877709C5.284184-4.805978 5.140722-4.519054 5.140722-4.291905C5.140722-4.004981 5.36787-3.90934 5.535243-3.90934C5.893898-3.90934 6.144956-4.220174 6.144956-4.542964C6.144956-5.045081 5.571108-5.272229 5.068991-5.272229C4.339726-5.272229 3.93325-4.554919 3.825654-4.327771C3.550685-5.224408 2.809465-5.272229 2.594271-5.272229C1.374844-5.272229 .729265-3.706102 .729265-3.443088C.729265-3.395268 .777086-3.335492 .860772-3.335492C.956413-3.335492 .980324-3.407223 1.004234-3.455044C1.41071-4.782067 2.211706-5.033126 2.558406-5.033126C3.096389-5.033126 3.203985-4.531009 3.203985-4.244085C3.203985-3.981071 3.132254-3.706102 2.988792-3.132254L2.582316-1.494396C2.402989-.777086 2.056289-.119552 1.422665-.119552C1.362889-.119552 1.06401-.119552 .812951-.274969C1.243337-.358655 1.338979-.71731 1.338979-.860772C1.338979-1.099875 1.159651-1.243337 .932503-1.243337C.645579-1.243337 .334745-.992279 .334745-.609714C.334745-.107597 .896638 .119552 1.41071 .119552C1.984558 .119552 2.391034-.334745 2.642092-.824907C2.833375-.119552 3.431133 .119552 3.873474 .119552C5.092902 .119552 5.738481-1.446575 5.738481-1.709589C5.738481-1.769365 5.69066-1.817186 5.618929-1.817186C5.511333-1.817186 5.499377-1.75741 5.463512-1.661768C5.140722-.609714 4.447323-.119552 3.90934-.119552C3.490909-.119552 3.263761-.430386 3.263761-.920548C3.263761-1.183562 3.311582-1.374844 3.502864-2.163885L3.921295-3.789788C4.100623-4.507098 4.507098-5.033126 5.057036-5.033126C5.080946-5.033126 5.415691-5.033126 5.66675-4.877709Z'/>
+<path id='eq2-g0-121' d='M3.144209 1.338979C2.82142 1.793275 2.355168 2.199751 1.769365 2.199751C1.625903 2.199751 1.052055 2.175841 .872727 1.625903C.908593 1.637858 .968369 1.637858 .992279 1.637858C1.350934 1.637858 1.590037 1.327024 1.590037 1.052055S1.362889 .681445 1.183562 .681445C.992279 .681445 .573848 .824907 .573848 1.41071C.573848 2.020423 1.08792 2.438854 1.769365 2.438854C2.964882 2.438854 4.172354 1.338979 4.507098 .011955L5.678705-4.65056C5.69066-4.710336 5.71457-4.782067 5.71457-4.853798C5.71457-5.033126 5.571108-5.152677 5.391781-5.152677C5.284184-5.152677 5.033126-5.104857 4.937484-4.746202L4.052802-1.231382C3.993026-1.016189 3.993026-.992279 3.897385-.860772C3.658281-.526027 3.263761-.119552 2.689913-.119552C2.020423-.119552 1.960648-.777086 1.960648-1.099875C1.960648-1.78132 2.283437-2.701868 2.606227-3.56264C2.737733-3.90934 2.809465-4.076712 2.809465-4.315816C2.809465-4.817933 2.450809-5.272229 1.865006-5.272229C.765131-5.272229 .32279-3.53873 .32279-3.443088C.32279-3.395268 .37061-3.335492 .454296-3.335492C.561893-3.335492 .573848-3.383313 .621669-3.550685C.908593-4.554919 1.362889-5.033126 1.829141-5.033126C1.936737-5.033126 2.139975-5.033126 2.139975-4.638605C2.139975-4.327771 2.008468-3.981071 1.829141-3.526775C1.243337-1.960648 1.243337-1.566127 1.243337-1.279203C1.243337-.143462 2.056289 .119552 2.654047 .119552C3.000747 .119552 3.431133 .011955 3.849564-.430386L3.861519-.418431C3.682192 .286924 3.56264 .753176 3.144209 1.338979Z'/>
+</defs>
+<g id='eq2-page1'>
+<use x='0' y='0' xlink:href='#eq2-g0-107'/>
+<use x='6.489504' y='0' xlink:href='#eq2-g1-40'/>
+<use x='11.04183' y='0' xlink:href='#eq2-g0-120'/>
+<use x='17.693917' y='0' xlink:href='#eq2-g0-59'/>
+<use x='22.938076' y='0' xlink:href='#eq2-g0-121'/>
+<use x='29.074728' y='0' xlink:href='#eq2-g1-41'/>
+</g>
+</svg>.</td>
+                </tr>
+                <tr>
+                  <td>test</td>
+                  <td>Selected test cells.</td>
+                </tr>
+                <tr>
+                  <td>trial</td>
+                  <td>Selected trial cells.</td>
+                </tr>
+                <tr>
+                  <td>uniform</td>
+                  <td>Whether all the pairs have the same local counts, the entries then being interleaved with the given spacing.</td>
+                </tr>
+                <tr>
+                  <td>spacing</td>
+                  <td>Spacing of the entries.</td>
+                </tr>
+                <tr>
+                  <td>nodes</td>
+                  <td>Gauss-Legendre nodes on the unit interval.</td>
+                </tr>
+                <tr>
+                  <td>weights</td>
+                  <td>Gauss-Legendre weights on the unit interval.</td>
+                </tr>
+                <tr>
+                  <td>centroids</td>
+                  <td>Reference coordinates of the centroid of each reference geometry, with stride ReferenceStride.</td>
+                </tr>
+                <tr>
+                  <td>centroidWeights</td>
+                  <td>Centroid rule weight of each reference geometry.</td>
+                </tr>
+                <tr>
+                  <td>trialDOFs</td>
+                  <td>Device degrees of freedom of the trial space.</td>
+                </tr>
+                <tr>
+                  <td>trialVDim</td>
+                  <td>Vector dimension of the trial space.</td>
+                </tr>
+                <tr>
+                  <td>testDOFs</td>
+                  <td>Device degrees of freedom of the test space.</td>
+                </tr>
+                <tr>
+                  <td>testVDim</td>
+                  <td>Vector dimension of the test space.</td>
+                </tr>
+                <tr>
+                  <td>values</td>
+                  <td>Entry values.</td>
+                </tr>
+                <tr>
+                  <td>offset</td>
+                  <td>Position of the first entry.</td>
+                </tr>
+                <tr>
+                  <td>sign</td>
+                  <td>Factor of the contributions.</td>
+                </tr>
+                <tr>
+                  <td>accumulate</td>
+                  <td>Whether the contributions are added to the values instead of replacing them.</td>
+                </tr>
+                <tr>
+                  <td>rows</td>
+                  <td>Row indices, written as the values unless empty.</td>
+                </tr>
+                <tr>
+                  <td>cols</td>
+                  <td>Column indices, written as the values unless empty.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a80fe6cf14fea5b3a39a559a49f2328fd"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a80fe6cf14fea5b3a39a559a49f2328fd" class="m-doc-self">PotentialIntegral</a>(</span><span class="m-doc-wrap">const <a href="#a4c35072c8e6bcace772c96bb8741deae" class="m-doc">IntegrandType</a>&amp; integrand)</span></span>
+            </h3>
+            <p>Constructs the integral of a dot product.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">integrand&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Dot product of a potential and a test operator.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a8818759bafff407e94cb37a748a5df02"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8818759bafff407e94cb37a748a5df02" class="m-doc-self">PotentialIntegral</a>(</span><span class="m-doc-wrap">const PotentialIntegral&amp; other)</span></span>
+            </h3>
+            <p>Copy constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Integral to copy.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aa066d56ffdd897d582c405e9a8f63866"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa066d56ffdd897d582c405e9a8f63866" class="m-doc-self">PotentialIntegral</a>(</span><span class="m-doc-wrap">PotentialIntegral&amp;&amp; other)</span></span>
+            </h3>
+            <p>Move constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Integral to move from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a904cdee8f54bf04b92b4ebbd7f18ace8"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">const <a href="#a4c35072c8e6bcace772c96bb8741deae" class="m-doc">IntegrandType</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a904cdee8f54bf04b92b4ebbd7f18ace8" class="m-doc-self">getIntegrand</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Gets the integrand.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Dot product being integrated.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ac9f10c7566229871a08c6a39d4ffb907"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a80fe6cf14fea5b3a39a559a49f2328fd" class="m-doc">PotentialIntegral</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac9f10c7566229871a08c6a39d4ffb907" class="m-doc-self">setPolytope</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">::<wbr />Rodin::<wbr />Geometry::<wbr />Polytope</a>&amp; tau,
+              const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">::<wbr />Rodin::<wbr />Geometry::<wbr />Polytope</a>&amp; t) <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Unavailable; the integral has no host evaluation.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">tau</td>
+                  <td>Trial polytope.</td>
+                </tr>
+                <tr>
+                  <td>t</td>
+                  <td>Test polytope.</td>
+                </tr>
+              </tbody>
+              <thead>
+                <tr>
+                  <th>Returns</th>
+                  <td>Never returns.</td>
+                </tr>
+              </thead>
+              <thead>
+                <tr><th colspan="2">Exceptions</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Alert::Exception</td>
+                  <td>Always.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a6760799986617dfb930a8b4e130fa9f3"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6760799986617dfb930a8b4e130fa9f3" class="m-doc-self">integrate</a>(</span><span class="m-doc-wrap">size_t tr,
+              size_t te) <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Unavailable; the integral has no host evaluation.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">tr</td>
+                  <td>Local trial degree of freedom.</td>
+                </tr>
+                <tr>
+                  <td>te</td>
+                  <td>Local test degree of freedom.</td>
+                </tr>
+              </tbody>
+              <thead>
+                <tr>
+                  <th>Returns</th>
+                  <td>Never returns.</td>
+                </tr>
+              </thead>
+              <thead>
+                <tr><th colspan="2">Exceptions</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Alert::Exception</td>
+                  <td>Always.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a1222c2735c7f682ad73f4de308df9ad8"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">::<wbr />Rodin::<wbr />Geometry::<wbr />Region</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1222c2735c7f682ad73f4de308df9ad8" class="m-doc-self">getTrialRegion</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Gets the trial region.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Region::Cells.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a2d2510d0d4e95eeb632c0201ba817c79"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="struct_rodin_1_1_kokkos_1_1_variational_1_1_layout.html" class="m-doc">Layout</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2d2510d0d4e95eeb632c0201ba817c79" class="m-doc-self">getLayout</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Gets the arrangement of the entries.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Entry layout.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ad687004a03778d2aacf025c58c6a841f"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">size_t </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad687004a03778d2aacf025c58c6a841f" class="m-doc-self">prepare</a>(</span><span class="m-doc-wrap">bool diagonal) <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Locates the entries of every pair of selected cells.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">diagonal</td>
+                  <td>Whether to list only the diagonals of the component blocks, ignored since a global integrator lists every entry.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Number of entries, the pair of a test cell with n test and a trial cell with m trial local degrees of freedom owning n * m entries.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a5893dcaee09c79fd6a45dd98787714aa"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">size_t </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5893dcaee09c79fd6a45dd98787714aa" class="m-doc-self">getSpacing</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Gets the spacing of the entries.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Spacing of the last integration.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a68eff588ad1983b79d9f71f19fe4be5e"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a68eff588ad1983b79d9f71f19fe4be5e" class="m-doc-self">fill</a>(</span><span class="m-doc-wrap">const <a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Kokkos::<wbr />View</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>*, <a href="#a426b377d2878611644f66b2f1d31d364" class="m-doc">MemorySpace</a>&gt;&amp; values,
+              size_t offset,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> sign,
+              bool accumulate,
+              const <a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Kokkos::<wbr />View</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>*, <a href="#a426b377d2878611644f66b2f1d31d364" class="m-doc">MemorySpace</a>&gt;&amp; rows,
+              const <a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Kokkos::<wbr />View</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>*, <a href="#a426b377d2878611644f66b2f1d31d364" class="m-doc">MemorySpace</a>&gt;&amp; cols) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Integrates every pair of selected cells on the device.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">values</td>
+                  <td>Entry values, the entry of rank r being written at offset + getEntryPosition(r, count, getSpacing()).</td>
+                </tr>
+                <tr>
+                  <td>offset</td>
+                  <td>Position of the first entry.</td>
+                </tr>
+                <tr>
+                  <td>sign</td>
+                  <td>Factor of the contributions.</td>
+                </tr>
+                <tr>
+                  <td>accumulate</td>
+                  <td>Whether the contributions are added to the values instead of replacing them.</td>
+                </tr>
+                <tr>
+                  <td>rows</td>
+                  <td>Row indices, test degrees of freedom, written as the values unless empty.</td>
+                </tr>
+                <tr>
+                  <td>cols</td>
+                  <td>Column indices, trial degrees of freedom, written as the values unless empty.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>The entry of local test index te and local trial index tr of a pair has rank te * ntr + tr among the entries of the pair.</p>
+          </div></section>
+          <section class="m-doc-details" id="a6ef14f27632114d29a3460c75388157b"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="#a80fe6cf14fea5b3a39a559a49f2328fd" class="m-doc">PotentialIntegral</a>* </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6ef14f27632114d29a3460c75388157b" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Creates a copy of the integral.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Pointer to a new instance of the derived integral.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+        </section>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">&hellip;</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form>
+            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript.</noscript>
+          <div id="search-help" class="m-text m-dim m-text-center">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
+            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v2-eeb63e0c3a5e.js"></script>
+<script src="searchdata-v2.js" async="async"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+  <a class="rodin-ci-link" href="ci-index.html" aria-label="CI" title="CI"><span class="rodin-ci-mark" aria-hidden="true"></span><span class="rodin-ci-label">CI</span></a>
+</div>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>

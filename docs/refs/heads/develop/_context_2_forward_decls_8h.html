@@ -81,6 +81,7 @@
               Reference
               <ul>
                 <li><a href="#namespaces">Namespaces</a></li>
+                <li><a href="#nested-classes">Classes</a></li>
               </ul>
             </li>
           </ul>
@@ -92,6 +93,41 @@
             <dd>The Rodin library for finite element methods and shape optimization.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_context.html" class="m-doc">Rodin::Context</a></dt>
             <dd>Execution contexts for local and distributed computation.</dd>
+          </dl>
+        </section>
+        <section id="nested-classes">
+          <h2><a href="#nested-classes">Classes</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;class C&gt;</div>
+              struct <a href="struct_rodin_1_1_context_1_1_is_kokkos.html" class="m-doc">Rodin::Context::IsKokkos</a>
+            </dt>
+            <dd>Whether a context executes on a Kokkos device.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Distribution, class Backend&gt;</div>
+              struct <a href="struct_rodin_1_1_context_1_1_is_kokkos_3_01_kokkos_3_01_distribution_00_01_backend_01_4_01_4.html" class="m-doc">Rodin::Context::IsKokkos&lt;Kokkos&lt;Distribution, Backend&gt;&gt;</a>
+            </dt>
+            <dd>Kokkos contexts execute on a Kokkos device.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class C&gt;</div>
+              struct <a href="struct_rodin_1_1_context_1_1_is_local.html" class="m-doc">Rodin::Context::IsLocal</a>
+            </dt>
+            <dd>Whether a context runs its mesh in a single process.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Backend&gt;</div>
+              struct <a href="struct_rodin_1_1_context_1_1_is_local_3_01_kokkos_3_01_local_00_01_backend_01_4_01_4.html" class="m-doc">Rodin::Context::IsLocal&lt;Kokkos&lt;Local, Backend&gt;&gt;</a>
+            </dt>
+            <dd>Kokkos contexts of a local mesh run in a single process.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class C&gt;</div>
+              struct <a href="struct_rodin_1_1_context_1_1_is_m_p_i.html" class="m-doc">Rodin::Context::IsMPI</a>
+            </dt>
+            <dd>Whether a context distributes its mesh over MPI processes.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Backend&gt;</div>
+              struct <a href="struct_rodin_1_1_context_1_1_is_m_p_i_3_01_kokkos_3_01_m_p_i_00_01_backend_01_4_01_4.html" class="m-doc">Rodin::Context::IsMPI&lt;Kokkos&lt;MPI, Backend&gt;&gt;</a>
+            </dt>
+            <dd>Kokkos contexts of a distributed mesh run over MPI processes.</dd>
           </dl>
         </section>
       </div>
@@ -132,7 +168,7 @@
     </div>
   </div>
 </div>
-<script src="search-v2-27108c4bc94e.js"></script>
+<script src="search-v2-eeb63e0c3a5e.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">

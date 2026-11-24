@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Rodin::Geometry::Mesh&lt;Rodin::Context::Kokkos&lt;Rodin::Context::Local, Backend&gt;&gt;::GrowEntities struct | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
+  <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
+  <link rel="stylesheet" href="rodin-theme-1337632f765f.css" />
+  <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#18191c" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <a href="index.html" id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m">Rodin</a>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li>
+              <a href="pages.html">Pages</a>
+              <ol>
+                <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
+                <li><a href="gallery.html">Gallery</a></li>
+                <li><a href="guides-io.html">Input, output, and visualization</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
+                <li><a href="ci-index.html">Continuous integration</a></li>
+                <li><a href="notation-index.html">Notation</a></li>
+                <li><a href="credits-index.html">Credits</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="modules.html">Modules</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
+              </ol>
+            </li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="3">
+            <li><a href="annotated.html">Classes</a></li>
+            <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
+            <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_geometry.html">Geometry</a><span>›</span><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_context_1_1_local_00_01_backend_01_4_01_4.html">Mesh&lt;Rodin::Context::Kokkos&lt;Rodin::Context::Local, Backend&gt;&gt;</a></div><h1>GrowEntities</h1><p class="rodin-reference-brief">Grows entity data after device discovery without changing existing maps.</p><p class="rodin-reference-include">Defined in <a href="_kokkos_2_geometry_2_mesh_8h.html"><code>Rodin/Kokkos/Geometry/Mesh.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">struct</span><span class="w"> </span><span class="nc">GrowEntities</span><span class="p">;</span>
+</pre>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#pub-methods">Public functions</a></li>
+                <li><a href="#pub-attribs">Public variables</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#aa66bd7526004ee1d8b4533bfe20d86b5" class="m-doc">operator()</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> i) const</span>
+            </dt>
+            <dd></dd>
+          </dl>
+        </section>
+        <section id="pub-attribs">
+          <h2><a href="#pub-attribs">Public variables</a></h2>
+          <dl class="m-doc">
+            <dt>
+              ::Kokkos::Array&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>, 5&gt; <a href="#a6fd35b5198750975a448dcb0b70ed2ce" class="m-doc">oldOffsets</a>
+            </dt>
+            <dd></dd>
+            <dt id="a4ed9578e0bda1d3ed71b83e2c74cb852">
+              ::Kokkos::Array&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>, 5&gt; <a href="#a4ed9578e0bda1d3ed71b83e2c74cb852" class="m-doc-self">newOffsets</a>
+            </dt>
+            <dd>Dimension offsets before and after discovery.</dd>
+            <dt>
+              <a href="class_rodin_1_1_geometry_1_1_mesh_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_context_1_1_local_00_01_backend_01_4_01_4.html#aa83d606ea5cd2bcf5b7491dce77ee273" class="m-doc">Array</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a>&gt; <a href="#a5b76553cd04cd57332fa9a74aa7b59a3" class="m-doc">oldAttributes</a>
+            </dt>
+            <dd></dd>
+            <dt id="acf0608dada3371bf9fee33148ea758b7">
+              <a href="class_rodin_1_1_geometry_1_1_mesh_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_context_1_1_local_00_01_backend_01_4_01_4.html#aa83d606ea5cd2bcf5b7491dce77ee273" class="m-doc">Array</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a>&gt; <a href="#acf0608dada3371bf9fee33148ea758b7" class="m-doc-self">attributes</a>
+            </dt>
+            <dd>Existing and replacement labels.</dd>
+            <dt>
+              <a href="class_rodin_1_1_geometry_1_1_mesh_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_context_1_1_local_00_01_backend_01_4_01_4.html#aa83d606ea5cd2bcf5b7491dce77ee273" class="m-doc">Array</a>&lt;unsigned char&gt; <a href="#a0c49da841afed0eaf3958002b64acea2" class="m-doc">oldPresent</a>
+            </dt>
+            <dd></dd>
+            <dt id="a90d324f4e9121f4d0abebc1ba9a012c1">
+              <a href="class_rodin_1_1_geometry_1_1_mesh_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_context_1_1_local_00_01_backend_01_4_01_4.html#aa83d606ea5cd2bcf5b7491dce77ee273" class="m-doc">Array</a>&lt;unsigned char&gt; <a href="#a90d324f4e9121f4d0abebc1ba9a012c1" class="m-doc-self">present</a>
+            </dt>
+            <dd>Explicit label presence.</dd>
+            <dt>
+              <a href="class_rodin_1_1_geometry_1_1_mesh_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_context_1_1_local_00_01_backend_01_4_01_4.html#aa83d606ea5cd2bcf5b7491dce77ee273" class="m-doc">Array</a>&lt;<a href="_geometry_2_view_8h.html#a1d96da0919cb1075586541b3831a49f5" class="m-doc">GeometryKind</a>&gt; <a href="#afedd8fe65151b7434cc5788ae3195891" class="m-doc">oldKinds</a>
+            </dt>
+            <dd></dd>
+            <dt id="afa079bf4397b26fe56841d0ddff76336">
+              <a href="class_rodin_1_1_geometry_1_1_mesh_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_context_1_1_local_00_01_backend_01_4_01_4.html#aa83d606ea5cd2bcf5b7491dce77ee273" class="m-doc">Array</a>&lt;<a href="_geometry_2_view_8h.html#a1d96da0919cb1075586541b3831a49f5" class="m-doc">GeometryKind</a>&gt; <a href="#afa079bf4397b26fe56841d0ddff76336" class="m-doc-self">kinds</a>
+            </dt>
+            <dd>Existing and replacement maps.</dd>
+            <dt>
+              <a href="class_rodin_1_1_geometry_1_1_mesh_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_context_1_1_local_00_01_backend_01_4_01_4.html#aa83d606ea5cd2bcf5b7491dce77ee273" class="m-doc">Array</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt; <a href="#a4ba90999a008338f1e0dd4eca655ef18" class="m-doc">oldControls</a>
+            </dt>
+            <dd></dd>
+            <dt id="acf368a5f9ecf936d1a64f07015787570">
+              <a href="class_rodin_1_1_geometry_1_1_mesh_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_context_1_1_local_00_01_backend_01_4_01_4.html#aa83d606ea5cd2bcf5b7491dce77ee273" class="m-doc">Array</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt; <a href="#acf368a5f9ecf936d1a64f07015787570" class="m-doc-self">controls</a>
+            </dt>
+            <dd>Existing and replacement control-point offsets.</dd>
+            <dt id="a389cd93f4e125d4369384464914be61f">
+              size_t <a href="#a389cd93f4e125d4369384464914be61f" class="m-doc-self">dimension</a>
+            </dt>
+            <dd>Topological dimension.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="aa66bd7526004ee1d8b4533bfe20d86b5"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa66bd7526004ee1d8b4533bfe20d86b5" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> i) const</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">i</td>
+                  <td>New flattened entity index, including the terminal control offset.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+        </section>
+        <section>
+          <h2>Variable documentation</h2>
+          <section class="m-doc-details" id="a6fd35b5198750975a448dcb0b70ed2ce"><div>
+            <h3>
+              ::Kokkos::Array&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>, 5&gt; Rodin::<wbr />Geometry::<wbr />Mesh&lt;Rodin::<wbr />Context::<wbr />Kokkos&lt;Rodin::<wbr />Context::<wbr />Local, Backend&gt;&gt;::<wbr />GrowEntities::<wbr /><a href="#a6fd35b5198750975a448dcb0b70ed2ce" class="m-doc-self">oldOffsets</a>
+            </h3>
+<p>Dimension offsets of the flattened entity numbering before discovery.</p>
+          </div></section>
+          <section class="m-doc-details" id="a5b76553cd04cd57332fa9a74aa7b59a3"><div>
+            <h3>
+              <a href="class_rodin_1_1_geometry_1_1_mesh_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_context_1_1_local_00_01_backend_01_4_01_4.html#aa83d606ea5cd2bcf5b7491dce77ee273" class="m-doc">Array</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a>&gt; Rodin::<wbr />Geometry::<wbr />Mesh&lt;Rodin::<wbr />Context::<wbr />Kokkos&lt;Rodin::<wbr />Context::<wbr />Local, Backend&gt;&gt;::<wbr />GrowEntities::<wbr /><a href="#a5b76553cd04cd57332fa9a74aa7b59a3" class="m-doc-self">oldAttributes</a>
+            </h3>
+<p>Existing labels, indexed by the old flattened numbering.</p>
+          </div></section>
+          <section class="m-doc-details" id="a0c49da841afed0eaf3958002b64acea2"><div>
+            <h3>
+              <a href="class_rodin_1_1_geometry_1_1_mesh_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_context_1_1_local_00_01_backend_01_4_01_4.html#aa83d606ea5cd2bcf5b7491dce77ee273" class="m-doc">Array</a>&lt;unsigned char&gt; Rodin::<wbr />Geometry::<wbr />Mesh&lt;Rodin::<wbr />Context::<wbr />Kokkos&lt;Rodin::<wbr />Context::<wbr />Local, Backend&gt;&gt;::<wbr />GrowEntities::<wbr /><a href="#a0c49da841afed0eaf3958002b64acea2" class="m-doc-self">oldPresent</a>
+            </h3>
+<p>Existing explicit label presence flags.</p>
+          </div></section>
+          <section class="m-doc-details" id="afedd8fe65151b7434cc5788ae3195891"><div>
+            <h3>
+              <a href="class_rodin_1_1_geometry_1_1_mesh_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_context_1_1_local_00_01_backend_01_4_01_4.html#aa83d606ea5cd2bcf5b7491dce77ee273" class="m-doc">Array</a>&lt;<a href="_geometry_2_view_8h.html#a1d96da0919cb1075586541b3831a49f5" class="m-doc">GeometryKind</a>&gt; Rodin::<wbr />Geometry::<wbr />Mesh&lt;Rodin::<wbr />Context::<wbr />Kokkos&lt;Rodin::<wbr />Context::<wbr />Local, Backend&gt;&gt;::<wbr />GrowEntities::<wbr /><a href="#afedd8fe65151b7434cc5788ae3195891" class="m-doc-self">oldKinds</a>
+            </h3>
+<p>Existing geometric transformation representations.</p>
+          </div></section>
+          <section class="m-doc-details" id="a4ba90999a008338f1e0dd4eca655ef18"><div>
+            <h3>
+              <a href="class_rodin_1_1_geometry_1_1_mesh_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_context_1_1_local_00_01_backend_01_4_01_4.html#aa83d606ea5cd2bcf5b7491dce77ee273" class="m-doc">Array</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt; Rodin::<wbr />Geometry::<wbr />Mesh&lt;Rodin::<wbr />Context::<wbr />Kokkos&lt;Rodin::<wbr />Context::<wbr />Local, Backend&gt;&gt;::<wbr />GrowEntities::<wbr /><a href="#a4ba90999a008338f1e0dd4eca655ef18" class="m-doc-self">oldControls</a>
+            </h3>
+<p>Existing control-point offsets, including the terminal offset.</p>
+          </div></section>
+        </section>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">&hellip;</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form>
+            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript.</noscript>
+          <div id="search-help" class="m-text m-dim m-text-center">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
+            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v2-eeb63e0c3a5e.js"></script>
+<script src="searchdata-v2.js" async="async"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+  <a class="rodin-ci-link" href="ci-index.html" aria-label="CI" title="CI"><span class="rodin-ci-mark" aria-hidden="true"></span><span class="rodin-ci-label">CI</span></a>
+</div>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>

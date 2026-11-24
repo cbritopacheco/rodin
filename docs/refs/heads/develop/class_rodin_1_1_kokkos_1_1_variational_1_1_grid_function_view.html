@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Rodin::Kokkos::Variational::GridFunctionView class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
+  <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
+  <link rel="stylesheet" href="rodin-theme-1337632f765f.css" />
+  <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#18191c" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <a href="index.html" id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m">Rodin</a>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li>
+              <a href="pages.html">Pages</a>
+              <ol>
+                <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
+                <li><a href="gallery.html">Gallery</a></li>
+                <li><a href="guides-io.html">Input, output, and visualization</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
+                <li><a href="ci-index.html">Continuous integration</a></li>
+                <li><a href="notation-index.html">Notation</a></li>
+                <li><a href="credits-index.html">Credits</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="modules.html">Modules</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
+              </ol>
+            </li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="3">
+            <li><a href="annotated.html">Classes</a></li>
+            <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
+            <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span>Kokkos<span>›</span>Variational</div><h1>GridFunctionView</h1><p class="rodin-reference-brief">Coefficients of a grid function of a device space in device memory.</p><p class="rodin-reference-include">Defined in <a href="_kokkos_2_variational_2_view_2_grid_function_8h.html"><code>Rodin/Kokkos/Variational/View/GridFunction.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="nc">Space</span><span class="w"> </span><span class="nc">FES</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">GridFunctionView</span><span class="p">;</span>
+</pre>
+        <table class="m-table m-fullwidth m-flat">
+          <thead>
+            <tr><th colspan="2">Template parameters</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="width: 1%">FES</td>
+              <td>Device space of the grid function.</td>
+            </tr>
+          </tbody>
+        </table>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+<p>Backend coefficient vectors are borrowed directly. Explicit host coefficient vectors are staged when the view is built, and PETSc vectors retain their prepared coefficients through their state-aware adapter. Values and derivatives are interpolated from the degrees of freedom of the polytope holding the point, as on the host.</p>
+        <section id="pub-types">
+          <h2><a href="#pub-types">Public types</a></h2>
+          <dl class="m-doc">
+            <dt id="aeb764ef99b9fe43949b7e3d34f279e53">
+              using <a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc-self">FESType</a> = FES
+            </dt>
+            <dd>Finite element space.</dd>
+            <dt id="a91a862cc395fd1560b3398af234a5ee2">
+              using <a href="#a91a862cc395fd1560b3398af234a5ee2" class="m-doc-self">DOFsType</a> = typename FESType::DOFsType
+            </dt>
+            <dd>Device degrees of freedom.</dd>
+            <dt id="acdc4c87ad95d3d7e034cd24bb630f820">
+              using <a href="#acdc4c87ad95d3d7e034cd24bb630f820" class="m-doc-self">ElementType</a> = <a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Rodin::<wbr />Kokkos::<wbr />View</a>&lt;<a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>&gt;
+            </dt>
+            <dd>Physical element evaluation and numbering.</dd>
+            <dt id="a2eaa19a34629e77df9ac551427e5bb0c">
+              using <a href="#a2eaa19a34629e77df9ac551427e5bb0c" class="m-doc-self">MemorySpace</a> = typename FESType::MeshType::MemorySpace
+            </dt>
+            <dd>Memory space of the coefficients.</dd>
+          </dl>
+        </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;class <a href="_kokkos_2_variational_2_grid_function_data_8h.html#ad36a957b4f2d978d6b3ba0c5dc38ea73" class="m-doc">Data</a>&gt;</div>
+              <span class="m-doc-wrap-bumper"><a href="#a8227392fd3fd3acd1c92281405f6863f" class="m-doc">GridFunctionView</a>(</span><span class="m-doc-wrap">const <a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>&amp; fes,
+              const <a href="_kokkos_2_variational_2_grid_function_data_8h.html#ad36a957b4f2d978d6b3ba0c5dc38ea73" class="m-doc">Data</a>&amp; data)</span>
+            </dt>
+            <dd>Prepares the coefficients of a grid function for device evaluation.</dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab5c97675a0cdb50d8074ea9986c47e94" class="m-doc">getDOFs</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a91a862cc395fd1560b3398af234a5ee2" class="m-doc">DOFsType</a>&amp;</span>
+            </dt>
+            <dd>Gets the device degrees of freedom.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a71aa6f59ff008df5c580d96a787daf96" class="m-doc">getData</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Kokkos::<wbr />View</a>&lt;const <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>*, <a href="#a2eaa19a34629e77df9ac551427e5bb0c" class="m-doc">MemorySpace</a>&gt;&amp;</span>
+            </dt>
+            <dd>Gets the coefficients.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a8f82c319cf228a2ab4c9bd574fb5b710" class="m-doc">getVectorDimension</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a></span>
+            </dt>
+            <dd>Returns the vector dimension.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae2ddf976ca80988b91e05c78098948c0" class="m-doc">interpolate</a>(</span><span class="m-doc-wrap">const <a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Rodin::<wbr />Kokkos::<wbr />View</a>&lt;<a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">::<wbr />Rodin::<wbr />Geometry::<wbr />Point</a>&gt;&amp; p,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> r) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
+            </dt>
+            <dd>Interpolates one component.</dd>
+            <dt><a href="#a93cbdead647c95e5423236c084c7e5fe" class="m-doc">interpolateJacobian</a></dt><dd>Interpolates the physical Jacobian.<details class="rodin-declaration-disclosure"><summary>See declaration</summary><div class="rodin-overview-declaration">
+              <span class="m-doc-wrap-bumper">auto <a href="#a93cbdead647c95e5423236c084c7e5fe" class="m-doc">interpolateJacobian</a>(</span><span class="m-doc-wrap">const <a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Rodin::<wbr />Kokkos::<wbr />View</a>&lt;<a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">::<wbr />Rodin::<wbr />Geometry::<wbr />Point</a>&gt;&amp; p,
+              const <a href="class_rodin_1_1_kokkos_1_1_variational_1_1_trace_domain_view.html" class="m-doc">TraceDomainView</a>&amp; trace = {}) const -&gt; <a href="_kokkos_2_forward_decls_8h.html#a9c7073f129196443d15e0da82a39aff5" class="m-doc">Geometry::<wbr />Matrix</a></span>
+            </div></details></dd>
+            <dt><a href="#a179a9cb0d755c49076d1e6c3438ec032" class="m-doc">interpolateDivergence</a></dt><dd>Interpolates the divergence.<details class="rodin-declaration-disclosure"><summary>See declaration</summary><div class="rodin-overview-declaration">
+              <span class="m-doc-wrap-bumper">auto <a href="#a179a9cb0d755c49076d1e6c3438ec032" class="m-doc">interpolateDivergence</a>(</span><span class="m-doc-wrap">const <a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Rodin::<wbr />Kokkos::<wbr />View</a>&lt;<a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">::<wbr />Rodin::<wbr />Geometry::<wbr />Point</a>&gt;&amp; p,
+              const <a href="class_rodin_1_1_kokkos_1_1_variational_1_1_trace_domain_view.html" class="m-doc">TraceDomainView</a>&amp; trace = {}) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
+            </div></details></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a9b993ea815d75eb525afa53487f1be1c" class="m-doc">interpolate</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_kokkos_1_1_variational_1_1_integration_point_view.html" class="m-doc">IntegrationPointView</a>&amp; ip,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> r) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
+            </dt>
+            <dd>Interpolates one component with the basis of an integration point.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a8a7dc3183d101635c3c07bb47f013c2d" class="m-doc">interpolateVector</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_kokkos_1_1_variational_1_1_integration_point_view.html" class="m-doc">IntegrationPointView</a>&amp; ip) const -&gt; <a href="_kokkos_2_forward_decls_8h.html#ad8287f85a5c67aed3081e78f8914601b" class="m-doc">Geometry::<wbr />Vector</a></span>
+            </dt>
+            <dd>Interpolates every component with the basis of an integration point.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a5356bba33b2ca06ca8dbc01a8e62f4c7" class="m-doc">interpolateVector</a>(</span><span class="m-doc-wrap">const <a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Rodin::<wbr />Kokkos::<wbr />View</a>&lt;<a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">::<wbr />Rodin::<wbr />Geometry::<wbr />Point</a>&gt;&amp; p) const -&gt; <a href="_kokkos_2_forward_decls_8h.html#ad8287f85a5c67aed3081e78f8914601b" class="m-doc">Geometry::<wbr />Vector</a></span>
+            </dt>
+            <dd>Interpolates every component.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a425b823d133f7ce57e679470ad083314" class="m-doc">interpolateJacobian</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_kokkos_1_1_variational_1_1_integration_point_view.html" class="m-doc">IntegrationPointView</a>&amp; ip,
+              const <a href="class_rodin_1_1_kokkos_1_1_variational_1_1_trace_domain_view.html" class="m-doc">TraceDomainView</a>&amp; trace = {}) const -&gt; <a href="_kokkos_2_forward_decls_8h.html#a9c7073f129196443d15e0da82a39aff5" class="m-doc">Geometry::<wbr />Matrix</a></span>
+            </dt>
+            <dd>Interpolates the physical Jacobian with the basis gradients of an integration point.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a7c700baaa88fe83651fcb6b52436800a" class="m-doc">interpolateDivergence</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_kokkos_1_1_variational_1_1_integration_point_view.html" class="m-doc">IntegrationPointView</a>&amp; ip,
+              const <a href="class_rodin_1_1_kokkos_1_1_variational_1_1_trace_domain_view.html" class="m-doc">TraceDomainView</a>&amp; trace = {}) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
+            </dt>
+            <dd>Interpolates the divergence with the basis gradients of an integration point.</dd>
+            <dt><a href="#a6c6e445bcd686145de184089f904cb8c" class="m-doc">interpolateJacobian</a></dt><dd>Interpolates the physical Jacobian at an integration point of a cell.<details class="rodin-declaration-disclosure"><summary>See declaration</summary><div class="rodin-overview-declaration">
+              <span class="m-doc-wrap-bumper">auto <a href="#a6c6e445bcd686145de184089f904cb8c" class="m-doc">interpolateJacobian</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_kokkos_1_1_variational_1_1_cell_integration_point_view.html" class="m-doc">CellIntegrationPointView</a>&amp; ip,
+              const <a href="class_rodin_1_1_kokkos_1_1_variational_1_1_trace_domain_view.html" class="m-doc">TraceDomainView</a>&amp; trace = {}) const -&gt; <a href="_kokkos_2_forward_decls_8h.html#a9c7073f129196443d15e0da82a39aff5" class="m-doc">Geometry::<wbr />Matrix</a></span>
+            </div></details></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ac13edd80a04df2ec8dfec960331edafa" class="m-doc">interpolateDivergence</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_kokkos_1_1_variational_1_1_cell_integration_point_view.html" class="m-doc">CellIntegrationPointView</a>&amp; ip,
+              const <a href="class_rodin_1_1_kokkos_1_1_variational_1_1_trace_domain_view.html" class="m-doc">TraceDomainView</a>&amp; trace = {}) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
+            </dt>
+            <dd>Interpolates the divergence at an integration point of a cell.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a8227392fd3fd3acd1c92281405f6863f"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;Space FES&gt;
+                template&lt;class <a href="_kokkos_2_variational_2_grid_function_data_8h.html#ad36a957b4f2d978d6b3ba0c5dc38ea73" class="m-doc">Data</a>&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8227392fd3fd3acd1c92281405f6863f" class="m-doc-self">GridFunctionView</a>(</span><span class="m-doc-wrap">const <a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>&amp; fes,
+              const <a href="_kokkos_2_variational_2_grid_function_data_8h.html#ad36a957b4f2d978d6b3ba0c5dc38ea73" class="m-doc">Data</a>&amp; data)</span></span>
+            </h3>
+            <p>Prepares the coefficients of a grid function for device evaluation.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">fes</td>
+                  <td>Space of the grid function.</td>
+                </tr>
+                <tr>
+                  <td>data</td>
+                  <td>Coefficients, numbered as by the space.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ab5c97675a0cdb50d8074ea9986c47e94"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">const <a href="#a91a862cc395fd1560b3398af234a5ee2" class="m-doc">DOFsType</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab5c97675a0cdb50d8074ea9986c47e94" class="m-doc-self">getDOFs</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Gets the device degrees of freedom.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Degrees of freedom.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a71aa6f59ff008df5c580d96a787daf96"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">const <a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Kokkos::<wbr />View</a>&lt;const <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>*, <a href="#a2eaa19a34629e77df9ac551427e5bb0c" class="m-doc">MemorySpace</a>&gt;&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a71aa6f59ff008df5c580d96a787daf96" class="m-doc-self">getData</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Gets the coefficients.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Device coefficients.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a8f82c319cf228a2ab4c9bd574fb5b710"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8f82c319cf228a2ab4c9bd574fb5b710" class="m-doc-self">getVectorDimension</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Returns the vector dimension.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Component count.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ae2ddf976ca80988b91e05c78098948c0"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae2ddf976ca80988b91e05c78098948c0" class="m-doc-self">interpolate</a>(</span><span class="m-doc-wrap">const <a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Rodin::<wbr />Kokkos::<wbr />View</a>&lt;<a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">::<wbr />Rodin::<wbr />Geometry::<wbr />Point</a>&gt;&amp; p,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> r) const</span></span>
+            </h3>
+            <p>Interpolates one component.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">p</td>
+                  <td>Device point.</td>
+                </tr>
+                <tr>
+                  <td>r</td>
+                  <td>Component index.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Component <svg class="m-math" style="width: 2.729em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 26.196962 11.955168">
+<title>
+$ u_r(p) $
+</title>
+<defs>
+<path id='eq1-g2-40' d='M3.88543 2.905106C3.88543 2.86924 3.88543 2.84533 3.682192 2.642092C2.486675 1.43462 1.817186-.537983 1.817186-2.976837C1.817186-5.296139 2.379078-7.292653 3.765878-8.703362C3.88543-8.810959 3.88543-8.834869 3.88543-8.870735C3.88543-8.942466 3.825654-8.966376 3.777833-8.966376C3.622416-8.966376 2.642092-8.105604 2.056289-6.933998C1.446575-5.726526 1.171606-4.447323 1.171606-2.976837C1.171606-1.912827 1.338979-.490162 1.960648 .789041C2.666002 2.223661 3.646326 3.000747 3.777833 3.000747C3.825654 3.000747 3.88543 2.976837 3.88543 2.905106Z'/>
+<path id='eq1-g2-41' d='M3.371357-2.976837C3.371357-3.88543 3.251806-5.36787 2.582316-6.75467C1.876961-8.18929 .896638-8.966376 .765131-8.966376C.71731-8.966376 .657534-8.942466 .657534-8.870735C.657534-8.834869 .657534-8.810959 .860772-8.607721C2.056289-7.400249 2.725778-5.427646 2.725778-2.988792C2.725778-.669489 2.163885 1.327024 .777086 2.737733C.657534 2.84533 .657534 2.86924 .657534 2.905106C.657534 2.976837 .71731 3.000747 .765131 3.000747C.920548 3.000747 1.900872 2.139975 2.486675 .968369C3.096389-.251059 3.371357-1.542217 3.371357-2.976837Z'/>
+<path id='eq1-g0-114' d='M1.538232-1.099875C1.625903-1.44259 1.713574-1.785305 1.793275-2.13599C1.801245-2.15193 1.857036-2.383064 1.865006-2.422914C1.888917-2.494645 2.088169-2.82142 2.295392-3.020672C2.550436-3.251806 2.82142-3.291656 2.964882-3.291656C3.052553-3.291656 3.196015-3.283686 3.307597-3.188045C2.964882-3.116314 2.917061-2.82142 2.917061-2.749689C2.917061-2.574346 3.052553-2.454795 3.227895-2.454795C3.443088-2.454795 3.682192-2.630137 3.682192-2.948941C3.682192-3.235866 3.435118-3.514819 2.980822-3.514819C2.438854-3.514819 2.072229-3.156164 1.904857-2.940971C1.745455-3.514819 1.203487-3.514819 1.123786-3.514819C.836862-3.514819 .637609-3.331507 .510087-3.084433C.326775-2.725778 .239103-2.319303 .239103-2.295392C.239103-2.223661 .294894-2.191781 .358655-2.191781C.462267-2.191781 .470237-2.223661 .526027-2.430884C.621669-2.82142 .765131-3.291656 1.099875-3.291656C1.307098-3.291656 1.354919-3.092403 1.354919-2.917061C1.354919-2.773599 1.315068-2.622167 1.251308-2.359153C1.235367-2.295392 1.115816-1.825156 1.083935-1.713574L.789041-.518057C.757161-.398506 .70934-.199253 .70934-.167372C.70934 .01594 .860772 .079701 .964384 .079701C1.243337 .079701 1.299128-.143462 1.362889-.414446L1.538232-1.099875Z'/>
+<path id='eq1-g1-112' d='M.514072 1.518306C.430386 1.876961 .382565 1.972603-.107597 1.972603C-.251059 1.972603-.37061 1.972603-.37061 2.199751C-.37061 2.223661-.358655 2.319303-.227148 2.319303C-.071731 2.319303 .095641 2.295392 .251059 2.295392H.765131C1.016189 2.295392 1.625903 2.319303 1.876961 2.319303C1.948692 2.319303 2.092154 2.319303 2.092154 2.10411C2.092154 1.972603 2.008468 1.972603 1.80523 1.972603C1.255293 1.972603 1.219427 1.888917 1.219427 1.793275C1.219427 1.649813 1.75741-.406476 1.829141-.681445C1.960648-.3467 2.283437 .119552 2.905106 .119552C4.25604 .119552 5.71457-1.637858 5.71457-3.395268C5.71457-4.495143 5.092902-5.272229 4.196264-5.272229C3.431133-5.272229 2.785554-4.531009 2.654047-4.363636C2.558406-4.961395 2.092154-5.272229 1.613948-5.272229C1.267248-5.272229 .992279-5.104857 .765131-4.65056C.549938-4.220174 .382565-3.490909 .382565-3.443088S.430386-3.335492 .514072-3.335492C.609714-3.335492 .621669-3.347447 .6934-3.622416C.872727-4.327771 1.099875-5.033126 1.578082-5.033126C1.853051-5.033126 1.948692-4.841843 1.948692-4.483188C1.948692-4.196264 1.912827-4.076712 1.865006-3.861519L.514072 1.518306ZM2.582316-3.730012C2.666002-4.064757 3.000747-4.411457 3.19203-4.578829C3.323537-4.698381 3.718057-5.033126 4.172354-5.033126C4.698381-5.033126 4.937484-4.507098 4.937484-3.88543C4.937484-3.311582 4.60274-1.960648 4.303861-1.338979C4.004981-.6934 3.455044-.119552 2.905106-.119552C2.092154-.119552 1.960648-1.147696 1.960648-1.195517C1.960648-1.231382 1.984558-1.327024 1.996513-1.3868L2.582316-3.730012Z'/>
+<path id='eq1-g1-117' d='M4.076712-.6934C4.23213-.02391 4.805978 .119552 5.092902 .119552C5.475467 .119552 5.762391-.131507 5.953674-.537983C6.156912-.968369 6.312329-1.673724 6.312329-1.709589C6.312329-1.769365 6.264508-1.817186 6.192777-1.817186C6.085181-1.817186 6.073225-1.75741 6.025405-1.578082C5.810212-.753176 5.595019-.119552 5.116812-.119552C4.758157-.119552 4.758157-.514072 4.758157-.669489C4.758157-.944458 4.794022-1.06401 4.913574-1.566127C4.99726-1.888917 5.080946-2.211706 5.152677-2.546451L5.642839-4.495143C5.726526-4.794022 5.726526-4.817933 5.726526-4.853798C5.726526-5.033126 5.583064-5.152677 5.403736-5.152677C5.057036-5.152677 4.97335-4.853798 4.901619-4.554919C4.782067-4.088667 4.136488-1.518306 4.052802-1.099875C4.040847-1.099875 3.574595-.119552 2.701868-.119552C2.080199-.119552 1.960648-.657534 1.960648-1.099875C1.960648-1.78132 2.295392-2.737733 2.606227-3.53873C2.749689-3.921295 2.809465-4.076712 2.809465-4.315816C2.809465-4.829888 2.438854-5.272229 1.865006-5.272229C.765131-5.272229 .32279-3.53873 .32279-3.443088C.32279-3.395268 .37061-3.335492 .454296-3.335492C.561893-3.335492 .573848-3.383313 .621669-3.550685C.908593-4.578829 1.374844-5.033126 1.829141-5.033126C1.948692-5.033126 2.139975-5.021171 2.139975-4.638605C2.139975-4.327771 2.008468-3.981071 1.829141-3.526775C1.303113-2.10411 1.243337-1.649813 1.243337-1.291158C1.243337-.071731 2.163885 .119552 2.654047 .119552C3.419178 .119552 3.837609-.406476 4.076712-.6934Z'/>
+</defs>
+<g id='eq1-page1'>
+<use x='0' y='0' xlink:href='#eq1-g1-117'/>
+<use x='6.66244' y='1.793263' xlink:href='#eq1-g0-114'/>
+<use x='11.217167' y='0' xlink:href='#eq1-g2-40'/>
+<use x='15.769493' y='0' xlink:href='#eq1-g1-112'/>
+<use x='21.644636' y='0' xlink:href='#eq1-g2-41'/>
+</g>
+</svg>.</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>The P1 basis is evaluated directly at the point, the other bases through an IntegrationPointView of the point.</p>
+          </div></section>
+          <section class="m-doc-details" id="a93cbdead647c95e5423236c084c7e5fe"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="_kokkos_2_forward_decls_8h.html#a9c7073f129196443d15e0da82a39aff5" class="m-doc">Geometry::<wbr />Matrix</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a93cbdead647c95e5423236c084c7e5fe" class="m-doc-self">interpolateJacobian</a>(</span><span class="m-doc-wrap">const <a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Rodin::<wbr />Kokkos::<wbr />View</a>&lt;<a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">::<wbr />Rodin::<wbr />Geometry::<wbr />Point</a>&gt;&amp; p,
+              const <a href="class_rodin_1_1_kokkos_1_1_variational_1_1_trace_domain_view.html" class="m-doc">TraceDomainView</a>&amp; trace = {}) const</span></span>
+            </h3>
+            <p>Interpolates the physical Jacobian.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">p</td>
+                  <td>Device point.</td>
+                </tr>
+                <tr>
+                  <td>trace</td>
+                  <td>Trace domain, used when the point lies on an interface.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Matrix with one row per component, row <svg class="m-math" style="width: 0.583em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 5.600473 5.147373">
+<title>
+$ r $
+</title>
+<defs>
+<path id='eq2-g0-114' d='M4.65056-4.889664C4.27995-4.817933 4.088667-4.554919 4.088667-4.291905C4.088667-4.004981 4.315816-3.90934 4.483188-3.90934C4.817933-3.90934 5.092902-4.196264 5.092902-4.554919C5.092902-4.937484 4.722291-5.272229 4.124533-5.272229C3.646326-5.272229 3.096389-5.057036 2.594271-4.327771C2.510585-4.961395 2.032379-5.272229 1.554172-5.272229C1.08792-5.272229 .848817-4.913574 .705355-4.65056C.502117-4.220174 .32279-3.502864 .32279-3.443088C.32279-3.395268 .37061-3.335492 .454296-3.335492C.549938-3.335492 .561893-3.347447 .633624-3.622416C.812951-4.339726 1.0401-5.033126 1.518306-5.033126C1.80523-5.033126 1.888917-4.829888 1.888917-4.483188C1.888917-4.220174 1.769365-3.753923 1.685679-3.383313L1.350934-2.092154C1.303113-1.865006 1.171606-1.327024 1.111831-1.111831C1.028144-.800996 .896638-.239103 .896638-.179328C.896638-.011955 1.028144 .119552 1.207472 .119552C1.338979 .119552 1.566127 .035866 1.637858-.203238C1.673724-.298879 2.116065-2.10411 2.187796-2.379078C2.247572-2.642092 2.319303-2.893151 2.379078-3.156164C2.426899-3.323537 2.47472-3.514819 2.510585-3.670237C2.546451-3.777833 2.86924-4.363636 3.16812-4.62665C3.311582-4.758157 3.622416-5.033126 4.112578-5.033126C4.303861-5.033126 4.495143-4.99726 4.65056-4.889664Z'/>
+</defs>
+<g id='eq2-page1'>
+<use x='0' y='0' xlink:href='#eq2-g0-114'/>
+</g>
+</svg> holding <svg class="m-math" style="width: 3.767em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 36.159632 11.955168">
+<title>
+$ \nabla u_r(p) $
+</title>
+<defs>
+<path id='eq3-g3-40' d='M3.88543 2.905106C3.88543 2.86924 3.88543 2.84533 3.682192 2.642092C2.486675 1.43462 1.817186-.537983 1.817186-2.976837C1.817186-5.296139 2.379078-7.292653 3.765878-8.703362C3.88543-8.810959 3.88543-8.834869 3.88543-8.870735C3.88543-8.942466 3.825654-8.966376 3.777833-8.966376C3.622416-8.966376 2.642092-8.105604 2.056289-6.933998C1.446575-5.726526 1.171606-4.447323 1.171606-2.976837C1.171606-1.912827 1.338979-.490162 1.960648 .789041C2.666002 2.223661 3.646326 3.000747 3.777833 3.000747C3.825654 3.000747 3.88543 2.976837 3.88543 2.905106Z'/>
+<path id='eq3-g3-41' d='M3.371357-2.976837C3.371357-3.88543 3.251806-5.36787 2.582316-6.75467C1.876961-8.18929 .896638-8.966376 .765131-8.966376C.71731-8.966376 .657534-8.942466 .657534-8.870735C.657534-8.834869 .657534-8.810959 .860772-8.607721C2.056289-7.400249 2.725778-5.427646 2.725778-2.988792C2.725778-.669489 2.163885 1.327024 .777086 2.737733C.657534 2.84533 .657534 2.86924 .657534 2.905106C.657534 2.976837 .71731 3.000747 .765131 3.000747C.920548 3.000747 1.900872 2.139975 2.486675 .968369C3.096389-.251059 3.371357-1.542217 3.371357-2.976837Z'/>
+<path id='eq3-g1-114' d='M1.538232-1.099875C1.625903-1.44259 1.713574-1.785305 1.793275-2.13599C1.801245-2.15193 1.857036-2.383064 1.865006-2.422914C1.888917-2.494645 2.088169-2.82142 2.295392-3.020672C2.550436-3.251806 2.82142-3.291656 2.964882-3.291656C3.052553-3.291656 3.196015-3.283686 3.307597-3.188045C2.964882-3.116314 2.917061-2.82142 2.917061-2.749689C2.917061-2.574346 3.052553-2.454795 3.227895-2.454795C3.443088-2.454795 3.682192-2.630137 3.682192-2.948941C3.682192-3.235866 3.435118-3.514819 2.980822-3.514819C2.438854-3.514819 2.072229-3.156164 1.904857-2.940971C1.745455-3.514819 1.203487-3.514819 1.123786-3.514819C.836862-3.514819 .637609-3.331507 .510087-3.084433C.326775-2.725778 .239103-2.319303 .239103-2.295392C.239103-2.223661 .294894-2.191781 .358655-2.191781C.462267-2.191781 .470237-2.223661 .526027-2.430884C.621669-2.82142 .765131-3.291656 1.099875-3.291656C1.307098-3.291656 1.354919-3.092403 1.354919-2.917061C1.354919-2.773599 1.315068-2.622167 1.251308-2.359153C1.235367-2.295392 1.115816-1.825156 1.083935-1.713574L.789041-.518057C.757161-.398506 .70934-.199253 .70934-.167372C.70934 .01594 .860772 .079701 .964384 .079701C1.243337 .079701 1.299128-.143462 1.362889-.414446L1.538232-1.099875Z'/>
+<path id='eq3-g2-112' d='M.514072 1.518306C.430386 1.876961 .382565 1.972603-.107597 1.972603C-.251059 1.972603-.37061 1.972603-.37061 2.199751C-.37061 2.223661-.358655 2.319303-.227148 2.319303C-.071731 2.319303 .095641 2.295392 .251059 2.295392H.765131C1.016189 2.295392 1.625903 2.319303 1.876961 2.319303C1.948692 2.319303 2.092154 2.319303 2.092154 2.10411C2.092154 1.972603 2.008468 1.972603 1.80523 1.972603C1.255293 1.972603 1.219427 1.888917 1.219427 1.793275C1.219427 1.649813 1.75741-.406476 1.829141-.681445C1.960648-.3467 2.283437 .119552 2.905106 .119552C4.25604 .119552 5.71457-1.637858 5.71457-3.395268C5.71457-4.495143 5.092902-5.272229 4.196264-5.272229C3.431133-5.272229 2.785554-4.531009 2.654047-4.363636C2.558406-4.961395 2.092154-5.272229 1.613948-5.272229C1.267248-5.272229 .992279-5.104857 .765131-4.65056C.549938-4.220174 .382565-3.490909 .382565-3.443088S.430386-3.335492 .514072-3.335492C.609714-3.335492 .621669-3.347447 .6934-3.622416C.872727-4.327771 1.099875-5.033126 1.578082-5.033126C1.853051-5.033126 1.948692-4.841843 1.948692-4.483188C1.948692-4.196264 1.912827-4.076712 1.865006-3.861519L.514072 1.518306ZM2.582316-3.730012C2.666002-4.064757 3.000747-4.411457 3.19203-4.578829C3.323537-4.698381 3.718057-5.033126 4.172354-5.033126C4.698381-5.033126 4.937484-4.507098 4.937484-3.88543C4.937484-3.311582 4.60274-1.960648 4.303861-1.338979C4.004981-.6934 3.455044-.119552 2.905106-.119552C2.092154-.119552 1.960648-1.147696 1.960648-1.195517C1.960648-1.231382 1.984558-1.327024 1.996513-1.3868L2.582316-3.730012Z'/>
+<path id='eq3-g2-117' d='M4.076712-.6934C4.23213-.02391 4.805978 .119552 5.092902 .119552C5.475467 .119552 5.762391-.131507 5.953674-.537983C6.156912-.968369 6.312329-1.673724 6.312329-1.709589C6.312329-1.769365 6.264508-1.817186 6.192777-1.817186C6.085181-1.817186 6.073225-1.75741 6.025405-1.578082C5.810212-.753176 5.595019-.119552 5.116812-.119552C4.758157-.119552 4.758157-.514072 4.758157-.669489C4.758157-.944458 4.794022-1.06401 4.913574-1.566127C4.99726-1.888917 5.080946-2.211706 5.152677-2.546451L5.642839-4.495143C5.726526-4.794022 5.726526-4.817933 5.726526-4.853798C5.726526-5.033126 5.583064-5.152677 5.403736-5.152677C5.057036-5.152677 4.97335-4.853798 4.901619-4.554919C4.782067-4.088667 4.136488-1.518306 4.052802-1.099875C4.040847-1.099875 3.574595-.119552 2.701868-.119552C2.080199-.119552 1.960648-.657534 1.960648-1.099875C1.960648-1.78132 2.295392-2.737733 2.606227-3.53873C2.749689-3.921295 2.809465-4.076712 2.809465-4.315816C2.809465-4.829888 2.438854-5.272229 1.865006-5.272229C.765131-5.272229 .32279-3.53873 .32279-3.443088C.32279-3.395268 .37061-3.335492 .454296-3.335492C.561893-3.335492 .573848-3.383313 .621669-3.550685C.908593-4.578829 1.374844-5.033126 1.829141-5.033126C1.948692-5.033126 2.139975-5.021171 2.139975-4.638605C2.139975-4.327771 2.008468-3.981071 1.829141-3.526775C1.303113-2.10411 1.243337-1.649813 1.243337-1.291158C1.243337-.071731 2.163885 .119552 2.654047 .119552C3.419178 .119552 3.837609-.406476 4.076712-.6934Z'/>
+<path id='eq3-g0-114' d='M9.325031-7.902366C9.348941-7.938232 9.384807-8.021918 9.384807-8.069738C9.384807-8.153425 9.372852-8.16538 9.097883-8.16538H.848817C.573848-8.16538 .561893-8.153425 .561893-8.069738C.561893-8.021918 .597758-7.938232 .621669-7.902366L4.65056 .167372C4.734247 .32279 4.770112 .394521 4.97335 .394521S5.212453 .32279 5.296139 .167372L9.325031-7.902366ZM2.044334-7.304608H8.607721L5.332005-.729265L2.044334-7.304608Z'/>
+</defs>
+<g id='eq3-page1'>
+<use x='0' y='0' xlink:href='#eq3-g0-114'/>
+<use x='9.962671' y='0' xlink:href='#eq3-g2-117'/>
+<use x='16.62511' y='1.793263' xlink:href='#eq3-g1-114'/>
+<use x='21.179838' y='0' xlink:href='#eq3-g3-40'/>
+<use x='25.732163' y='0' xlink:href='#eq3-g2-112'/>
+<use x='31.607306' y='0' xlink:href='#eq3-g3-41'/>
+</g>
+</svg>.</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>On a face, the Jacobian is that of an incident cell.</p>
+          </div></section>
+          <section class="m-doc-details" id="a179a9cb0d755c49076d1e6c3438ec032"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a179a9cb0d755c49076d1e6c3438ec032" class="m-doc-self">interpolateDivergence</a>(</span><span class="m-doc-wrap">const <a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Rodin::<wbr />Kokkos::<wbr />View</a>&lt;<a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">::<wbr />Rodin::<wbr />Geometry::<wbr />Point</a>&gt;&amp; p,
+              const <a href="class_rodin_1_1_kokkos_1_1_variational_1_1_trace_domain_view.html" class="m-doc">TraceDomainView</a>&amp; trace = {}) const</span></span>
+            </h3>
+            <p>Interpolates the divergence.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">p</td>
+                  <td>Device point.</td>
+                </tr>
+                <tr>
+                  <td>trace</td>
+                  <td>Trace domain, used when the point lies on an interface.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Trace of interpolateJacobian(p), summed in the same order.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a9b993ea815d75eb525afa53487f1be1c"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9b993ea815d75eb525afa53487f1be1c" class="m-doc-self">interpolate</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_kokkos_1_1_variational_1_1_integration_point_view.html" class="m-doc">IntegrationPointView</a>&amp; ip,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> r) const</span></span>
+            </h3>
+            <p>Interpolates one component with the basis of an integration point.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">ip</td>
+                  <td>Integration point on a polytope of the space mesh.</td>
+                </tr>
+                <tr>
+                  <td>r</td>
+                  <td>Component index.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Component <svg class="m-math" style="width: 2.729em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 26.196962 11.955168">
+<title>
+$ u_r(p) $
+</title>
+<defs>
+<path id='eq4-g2-40' d='M3.88543 2.905106C3.88543 2.86924 3.88543 2.84533 3.682192 2.642092C2.486675 1.43462 1.817186-.537983 1.817186-2.976837C1.817186-5.296139 2.379078-7.292653 3.765878-8.703362C3.88543-8.810959 3.88543-8.834869 3.88543-8.870735C3.88543-8.942466 3.825654-8.966376 3.777833-8.966376C3.622416-8.966376 2.642092-8.105604 2.056289-6.933998C1.446575-5.726526 1.171606-4.447323 1.171606-2.976837C1.171606-1.912827 1.338979-.490162 1.960648 .789041C2.666002 2.223661 3.646326 3.000747 3.777833 3.000747C3.825654 3.000747 3.88543 2.976837 3.88543 2.905106Z'/>
+<path id='eq4-g2-41' d='M3.371357-2.976837C3.371357-3.88543 3.251806-5.36787 2.582316-6.75467C1.876961-8.18929 .896638-8.966376 .765131-8.966376C.71731-8.966376 .657534-8.942466 .657534-8.870735C.657534-8.834869 .657534-8.810959 .860772-8.607721C2.056289-7.400249 2.725778-5.427646 2.725778-2.988792C2.725778-.669489 2.163885 1.327024 .777086 2.737733C.657534 2.84533 .657534 2.86924 .657534 2.905106C.657534 2.976837 .71731 3.000747 .765131 3.000747C.920548 3.000747 1.900872 2.139975 2.486675 .968369C3.096389-.251059 3.371357-1.542217 3.371357-2.976837Z'/>
+<path id='eq4-g0-114' d='M1.538232-1.099875C1.625903-1.44259 1.713574-1.785305 1.793275-2.13599C1.801245-2.15193 1.857036-2.383064 1.865006-2.422914C1.888917-2.494645 2.088169-2.82142 2.295392-3.020672C2.550436-3.251806 2.82142-3.291656 2.964882-3.291656C3.052553-3.291656 3.196015-3.283686 3.307597-3.188045C2.964882-3.116314 2.917061-2.82142 2.917061-2.749689C2.917061-2.574346 3.052553-2.454795 3.227895-2.454795C3.443088-2.454795 3.682192-2.630137 3.682192-2.948941C3.682192-3.235866 3.435118-3.514819 2.980822-3.514819C2.438854-3.514819 2.072229-3.156164 1.904857-2.940971C1.745455-3.514819 1.203487-3.514819 1.123786-3.514819C.836862-3.514819 .637609-3.331507 .510087-3.084433C.326775-2.725778 .239103-2.319303 .239103-2.295392C.239103-2.223661 .294894-2.191781 .358655-2.191781C.462267-2.191781 .470237-2.223661 .526027-2.430884C.621669-2.82142 .765131-3.291656 1.099875-3.291656C1.307098-3.291656 1.354919-3.092403 1.354919-2.917061C1.354919-2.773599 1.315068-2.622167 1.251308-2.359153C1.235367-2.295392 1.115816-1.825156 1.083935-1.713574L.789041-.518057C.757161-.398506 .70934-.199253 .70934-.167372C.70934 .01594 .860772 .079701 .964384 .079701C1.243337 .079701 1.299128-.143462 1.362889-.414446L1.538232-1.099875Z'/>
+<path id='eq4-g1-112' d='M.514072 1.518306C.430386 1.876961 .382565 1.972603-.107597 1.972603C-.251059 1.972603-.37061 1.972603-.37061 2.199751C-.37061 2.223661-.358655 2.319303-.227148 2.319303C-.071731 2.319303 .095641 2.295392 .251059 2.295392H.765131C1.016189 2.295392 1.625903 2.319303 1.876961 2.319303C1.948692 2.319303 2.092154 2.319303 2.092154 2.10411C2.092154 1.972603 2.008468 1.972603 1.80523 1.972603C1.255293 1.972603 1.219427 1.888917 1.219427 1.793275C1.219427 1.649813 1.75741-.406476 1.829141-.681445C1.960648-.3467 2.283437 .119552 2.905106 .119552C4.25604 .119552 5.71457-1.637858 5.71457-3.395268C5.71457-4.495143 5.092902-5.272229 4.196264-5.272229C3.431133-5.272229 2.785554-4.531009 2.654047-4.363636C2.558406-4.961395 2.092154-5.272229 1.613948-5.272229C1.267248-5.272229 .992279-5.104857 .765131-4.65056C.549938-4.220174 .382565-3.490909 .382565-3.443088S.430386-3.335492 .514072-3.335492C.609714-3.335492 .621669-3.347447 .6934-3.622416C.872727-4.327771 1.099875-5.033126 1.578082-5.033126C1.853051-5.033126 1.948692-4.841843 1.948692-4.483188C1.948692-4.196264 1.912827-4.076712 1.865006-3.861519L.514072 1.518306ZM2.582316-3.730012C2.666002-4.064757 3.000747-4.411457 3.19203-4.578829C3.323537-4.698381 3.718057-5.033126 4.172354-5.033126C4.698381-5.033126 4.937484-4.507098 4.937484-3.88543C4.937484-3.311582 4.60274-1.960648 4.303861-1.338979C4.004981-.6934 3.455044-.119552 2.905106-.119552C2.092154-.119552 1.960648-1.147696 1.960648-1.195517C1.960648-1.231382 1.984558-1.327024 1.996513-1.3868L2.582316-3.730012Z'/>
+<path id='eq4-g1-117' d='M4.076712-.6934C4.23213-.02391 4.805978 .119552 5.092902 .119552C5.475467 .119552 5.762391-.131507 5.953674-.537983C6.156912-.968369 6.312329-1.673724 6.312329-1.709589C6.312329-1.769365 6.264508-1.817186 6.192777-1.817186C6.085181-1.817186 6.073225-1.75741 6.025405-1.578082C5.810212-.753176 5.595019-.119552 5.116812-.119552C4.758157-.119552 4.758157-.514072 4.758157-.669489C4.758157-.944458 4.794022-1.06401 4.913574-1.566127C4.99726-1.888917 5.080946-2.211706 5.152677-2.546451L5.642839-4.495143C5.726526-4.794022 5.726526-4.817933 5.726526-4.853798C5.726526-5.033126 5.583064-5.152677 5.403736-5.152677C5.057036-5.152677 4.97335-4.853798 4.901619-4.554919C4.782067-4.088667 4.136488-1.518306 4.052802-1.099875C4.040847-1.099875 3.574595-.119552 2.701868-.119552C2.080199-.119552 1.960648-.657534 1.960648-1.099875C1.960648-1.78132 2.295392-2.737733 2.606227-3.53873C2.749689-3.921295 2.809465-4.076712 2.809465-4.315816C2.809465-4.829888 2.438854-5.272229 1.865006-5.272229C.765131-5.272229 .32279-3.53873 .32279-3.443088C.32279-3.395268 .37061-3.335492 .454296-3.335492C.561893-3.335492 .573848-3.383313 .621669-3.550685C.908593-4.578829 1.374844-5.033126 1.829141-5.033126C1.948692-5.033126 2.139975-5.021171 2.139975-4.638605C2.139975-4.327771 2.008468-3.981071 1.829141-3.526775C1.303113-2.10411 1.243337-1.649813 1.243337-1.291158C1.243337-.071731 2.163885 .119552 2.654047 .119552C3.419178 .119552 3.837609-.406476 4.076712-.6934Z'/>
+</defs>
+<g id='eq4-page1'>
+<use x='0' y='0' xlink:href='#eq4-g1-117'/>
+<use x='6.66244' y='1.793263' xlink:href='#eq4-g0-114'/>
+<use x='11.217167' y='0' xlink:href='#eq4-g2-40'/>
+<use x='15.769493' y='0' xlink:href='#eq4-g1-112'/>
+<use x='21.644636' y='0' xlink:href='#eq4-g2-41'/>
+</g>
+</svg>.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a8a7dc3183d101635c3c07bb47f013c2d"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="_kokkos_2_forward_decls_8h.html#ad8287f85a5c67aed3081e78f8914601b" class="m-doc">Geometry::<wbr />Vector</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8a7dc3183d101635c3c07bb47f013c2d" class="m-doc-self">interpolateVector</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_kokkos_1_1_variational_1_1_integration_point_view.html" class="m-doc">IntegrationPointView</a>&amp; ip) const</span></span>
+            </h3>
+            <p>Interpolates every component with the basis of an integration point.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">ip</td>
+                  <td>Integration point on a polytope of the space mesh.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Vector of the components <svg class="m-math" style="width: 2.729em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 26.196962 11.955168">
+<title>
+$ u_r(p) $
+</title>
+<defs>
+<path id='eq5-g2-40' d='M3.88543 2.905106C3.88543 2.86924 3.88543 2.84533 3.682192 2.642092C2.486675 1.43462 1.817186-.537983 1.817186-2.976837C1.817186-5.296139 2.379078-7.292653 3.765878-8.703362C3.88543-8.810959 3.88543-8.834869 3.88543-8.870735C3.88543-8.942466 3.825654-8.966376 3.777833-8.966376C3.622416-8.966376 2.642092-8.105604 2.056289-6.933998C1.446575-5.726526 1.171606-4.447323 1.171606-2.976837C1.171606-1.912827 1.338979-.490162 1.960648 .789041C2.666002 2.223661 3.646326 3.000747 3.777833 3.000747C3.825654 3.000747 3.88543 2.976837 3.88543 2.905106Z'/>
+<path id='eq5-g2-41' d='M3.371357-2.976837C3.371357-3.88543 3.251806-5.36787 2.582316-6.75467C1.876961-8.18929 .896638-8.966376 .765131-8.966376C.71731-8.966376 .657534-8.942466 .657534-8.870735C.657534-8.834869 .657534-8.810959 .860772-8.607721C2.056289-7.400249 2.725778-5.427646 2.725778-2.988792C2.725778-.669489 2.163885 1.327024 .777086 2.737733C.657534 2.84533 .657534 2.86924 .657534 2.905106C.657534 2.976837 .71731 3.000747 .765131 3.000747C.920548 3.000747 1.900872 2.139975 2.486675 .968369C3.096389-.251059 3.371357-1.542217 3.371357-2.976837Z'/>
+<path id='eq5-g0-114' d='M1.538232-1.099875C1.625903-1.44259 1.713574-1.785305 1.793275-2.13599C1.801245-2.15193 1.857036-2.383064 1.865006-2.422914C1.888917-2.494645 2.088169-2.82142 2.295392-3.020672C2.550436-3.251806 2.82142-3.291656 2.964882-3.291656C3.052553-3.291656 3.196015-3.283686 3.307597-3.188045C2.964882-3.116314 2.917061-2.82142 2.917061-2.749689C2.917061-2.574346 3.052553-2.454795 3.227895-2.454795C3.443088-2.454795 3.682192-2.630137 3.682192-2.948941C3.682192-3.235866 3.435118-3.514819 2.980822-3.514819C2.438854-3.514819 2.072229-3.156164 1.904857-2.940971C1.745455-3.514819 1.203487-3.514819 1.123786-3.514819C.836862-3.514819 .637609-3.331507 .510087-3.084433C.326775-2.725778 .239103-2.319303 .239103-2.295392C.239103-2.223661 .294894-2.191781 .358655-2.191781C.462267-2.191781 .470237-2.223661 .526027-2.430884C.621669-2.82142 .765131-3.291656 1.099875-3.291656C1.307098-3.291656 1.354919-3.092403 1.354919-2.917061C1.354919-2.773599 1.315068-2.622167 1.251308-2.359153C1.235367-2.295392 1.115816-1.825156 1.083935-1.713574L.789041-.518057C.757161-.398506 .70934-.199253 .70934-.167372C.70934 .01594 .860772 .079701 .964384 .079701C1.243337 .079701 1.299128-.143462 1.362889-.414446L1.538232-1.099875Z'/>
+<path id='eq5-g1-112' d='M.514072 1.518306C.430386 1.876961 .382565 1.972603-.107597 1.972603C-.251059 1.972603-.37061 1.972603-.37061 2.199751C-.37061 2.223661-.358655 2.319303-.227148 2.319303C-.071731 2.319303 .095641 2.295392 .251059 2.295392H.765131C1.016189 2.295392 1.625903 2.319303 1.876961 2.319303C1.948692 2.319303 2.092154 2.319303 2.092154 2.10411C2.092154 1.972603 2.008468 1.972603 1.80523 1.972603C1.255293 1.972603 1.219427 1.888917 1.219427 1.793275C1.219427 1.649813 1.75741-.406476 1.829141-.681445C1.960648-.3467 2.283437 .119552 2.905106 .119552C4.25604 .119552 5.71457-1.637858 5.71457-3.395268C5.71457-4.495143 5.092902-5.272229 4.196264-5.272229C3.431133-5.272229 2.785554-4.531009 2.654047-4.363636C2.558406-4.961395 2.092154-5.272229 1.613948-5.272229C1.267248-5.272229 .992279-5.104857 .765131-4.65056C.549938-4.220174 .382565-3.490909 .382565-3.443088S.430386-3.335492 .514072-3.335492C.609714-3.335492 .621669-3.347447 .6934-3.622416C.872727-4.327771 1.099875-5.033126 1.578082-5.033126C1.853051-5.033126 1.948692-4.841843 1.948692-4.483188C1.948692-4.196264 1.912827-4.076712 1.865006-3.861519L.514072 1.518306ZM2.582316-3.730012C2.666002-4.064757 3.000747-4.411457 3.19203-4.578829C3.323537-4.698381 3.718057-5.033126 4.172354-5.033126C4.698381-5.033126 4.937484-4.507098 4.937484-3.88543C4.937484-3.311582 4.60274-1.960648 4.303861-1.338979C4.004981-.6934 3.455044-.119552 2.905106-.119552C2.092154-.119552 1.960648-1.147696 1.960648-1.195517C1.960648-1.231382 1.984558-1.327024 1.996513-1.3868L2.582316-3.730012Z'/>
+<path id='eq5-g1-117' d='M4.076712-.6934C4.23213-.02391 4.805978 .119552 5.092902 .119552C5.475467 .119552 5.762391-.131507 5.953674-.537983C6.156912-.968369 6.312329-1.673724 6.312329-1.709589C6.312329-1.769365 6.264508-1.817186 6.192777-1.817186C6.085181-1.817186 6.073225-1.75741 6.025405-1.578082C5.810212-.753176 5.595019-.119552 5.116812-.119552C4.758157-.119552 4.758157-.514072 4.758157-.669489C4.758157-.944458 4.794022-1.06401 4.913574-1.566127C4.99726-1.888917 5.080946-2.211706 5.152677-2.546451L5.642839-4.495143C5.726526-4.794022 5.726526-4.817933 5.726526-4.853798C5.726526-5.033126 5.583064-5.152677 5.403736-5.152677C5.057036-5.152677 4.97335-4.853798 4.901619-4.554919C4.782067-4.088667 4.136488-1.518306 4.052802-1.099875C4.040847-1.099875 3.574595-.119552 2.701868-.119552C2.080199-.119552 1.960648-.657534 1.960648-1.099875C1.960648-1.78132 2.295392-2.737733 2.606227-3.53873C2.749689-3.921295 2.809465-4.076712 2.809465-4.315816C2.809465-4.829888 2.438854-5.272229 1.865006-5.272229C.765131-5.272229 .32279-3.53873 .32279-3.443088C.32279-3.395268 .37061-3.335492 .454296-3.335492C.561893-3.335492 .573848-3.383313 .621669-3.550685C.908593-4.578829 1.374844-5.033126 1.829141-5.033126C1.948692-5.033126 2.139975-5.021171 2.139975-4.638605C2.139975-4.327771 2.008468-3.981071 1.829141-3.526775C1.303113-2.10411 1.243337-1.649813 1.243337-1.291158C1.243337-.071731 2.163885 .119552 2.654047 .119552C3.419178 .119552 3.837609-.406476 4.076712-.6934Z'/>
+</defs>
+<g id='eq5-page1'>
+<use x='0' y='0' xlink:href='#eq5-g1-117'/>
+<use x='6.66244' y='1.793263' xlink:href='#eq5-g0-114'/>
+<use x='11.217167' y='0' xlink:href='#eq5-g2-40'/>
+<use x='15.769493' y='0' xlink:href='#eq5-g1-112'/>
+<use x='21.644636' y='0' xlink:href='#eq5-g2-41'/>
+</g>
+</svg>.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a5356bba33b2ca06ca8dbc01a8e62f4c7"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="_kokkos_2_forward_decls_8h.html#ad8287f85a5c67aed3081e78f8914601b" class="m-doc">Geometry::<wbr />Vector</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5356bba33b2ca06ca8dbc01a8e62f4c7" class="m-doc-self">interpolateVector</a>(</span><span class="m-doc-wrap">const <a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Rodin::<wbr />Kokkos::<wbr />View</a>&lt;<a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">::<wbr />Rodin::<wbr />Geometry::<wbr />Point</a>&gt;&amp; p) const</span></span>
+            </h3>
+            <p>Interpolates every component.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">p</td>
+                  <td>Device point.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Vector of the components <svg class="m-math" style="width: 2.729em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 26.196962 11.955168">
+<title>
+$ u_r(p) $
+</title>
+<defs>
+<path id='eq6-g2-40' d='M3.88543 2.905106C3.88543 2.86924 3.88543 2.84533 3.682192 2.642092C2.486675 1.43462 1.817186-.537983 1.817186-2.976837C1.817186-5.296139 2.379078-7.292653 3.765878-8.703362C3.88543-8.810959 3.88543-8.834869 3.88543-8.870735C3.88543-8.942466 3.825654-8.966376 3.777833-8.966376C3.622416-8.966376 2.642092-8.105604 2.056289-6.933998C1.446575-5.726526 1.171606-4.447323 1.171606-2.976837C1.171606-1.912827 1.338979-.490162 1.960648 .789041C2.666002 2.223661 3.646326 3.000747 3.777833 3.000747C3.825654 3.000747 3.88543 2.976837 3.88543 2.905106Z'/>
+<path id='eq6-g2-41' d='M3.371357-2.976837C3.371357-3.88543 3.251806-5.36787 2.582316-6.75467C1.876961-8.18929 .896638-8.966376 .765131-8.966376C.71731-8.966376 .657534-8.942466 .657534-8.870735C.657534-8.834869 .657534-8.810959 .860772-8.607721C2.056289-7.400249 2.725778-5.427646 2.725778-2.988792C2.725778-.669489 2.163885 1.327024 .777086 2.737733C.657534 2.84533 .657534 2.86924 .657534 2.905106C.657534 2.976837 .71731 3.000747 .765131 3.000747C.920548 3.000747 1.900872 2.139975 2.486675 .968369C3.096389-.251059 3.371357-1.542217 3.371357-2.976837Z'/>
+<path id='eq6-g0-114' d='M1.538232-1.099875C1.625903-1.44259 1.713574-1.785305 1.793275-2.13599C1.801245-2.15193 1.857036-2.383064 1.865006-2.422914C1.888917-2.494645 2.088169-2.82142 2.295392-3.020672C2.550436-3.251806 2.82142-3.291656 2.964882-3.291656C3.052553-3.291656 3.196015-3.283686 3.307597-3.188045C2.964882-3.116314 2.917061-2.82142 2.917061-2.749689C2.917061-2.574346 3.052553-2.454795 3.227895-2.454795C3.443088-2.454795 3.682192-2.630137 3.682192-2.948941C3.682192-3.235866 3.435118-3.514819 2.980822-3.514819C2.438854-3.514819 2.072229-3.156164 1.904857-2.940971C1.745455-3.514819 1.203487-3.514819 1.123786-3.514819C.836862-3.514819 .637609-3.331507 .510087-3.084433C.326775-2.725778 .239103-2.319303 .239103-2.295392C.239103-2.223661 .294894-2.191781 .358655-2.191781C.462267-2.191781 .470237-2.223661 .526027-2.430884C.621669-2.82142 .765131-3.291656 1.099875-3.291656C1.307098-3.291656 1.354919-3.092403 1.354919-2.917061C1.354919-2.773599 1.315068-2.622167 1.251308-2.359153C1.235367-2.295392 1.115816-1.825156 1.083935-1.713574L.789041-.518057C.757161-.398506 .70934-.199253 .70934-.167372C.70934 .01594 .860772 .079701 .964384 .079701C1.243337 .079701 1.299128-.143462 1.362889-.414446L1.538232-1.099875Z'/>
+<path id='eq6-g1-112' d='M.514072 1.518306C.430386 1.876961 .382565 1.972603-.107597 1.972603C-.251059 1.972603-.37061 1.972603-.37061 2.199751C-.37061 2.223661-.358655 2.319303-.227148 2.319303C-.071731 2.319303 .095641 2.295392 .251059 2.295392H.765131C1.016189 2.295392 1.625903 2.319303 1.876961 2.319303C1.948692 2.319303 2.092154 2.319303 2.092154 2.10411C2.092154 1.972603 2.008468 1.972603 1.80523 1.972603C1.255293 1.972603 1.219427 1.888917 1.219427 1.793275C1.219427 1.649813 1.75741-.406476 1.829141-.681445C1.960648-.3467 2.283437 .119552 2.905106 .119552C4.25604 .119552 5.71457-1.637858 5.71457-3.395268C5.71457-4.495143 5.092902-5.272229 4.196264-5.272229C3.431133-5.272229 2.785554-4.531009 2.654047-4.363636C2.558406-4.961395 2.092154-5.272229 1.613948-5.272229C1.267248-5.272229 .992279-5.104857 .765131-4.65056C.549938-4.220174 .382565-3.490909 .382565-3.443088S.430386-3.335492 .514072-3.335492C.609714-3.335492 .621669-3.347447 .6934-3.622416C.872727-4.327771 1.099875-5.033126 1.578082-5.033126C1.853051-5.033126 1.948692-4.841843 1.948692-4.483188C1.948692-4.196264 1.912827-4.076712 1.865006-3.861519L.514072 1.518306ZM2.582316-3.730012C2.666002-4.064757 3.000747-4.411457 3.19203-4.578829C3.323537-4.698381 3.718057-5.033126 4.172354-5.033126C4.698381-5.033126 4.937484-4.507098 4.937484-3.88543C4.937484-3.311582 4.60274-1.960648 4.303861-1.338979C4.004981-.6934 3.455044-.119552 2.905106-.119552C2.092154-.119552 1.960648-1.147696 1.960648-1.195517C1.960648-1.231382 1.984558-1.327024 1.996513-1.3868L2.582316-3.730012Z'/>
+<path id='eq6-g1-117' d='M4.076712-.6934C4.23213-.02391 4.805978 .119552 5.092902 .119552C5.475467 .119552 5.762391-.131507 5.953674-.537983C6.156912-.968369 6.312329-1.673724 6.312329-1.709589C6.312329-1.769365 6.264508-1.817186 6.192777-1.817186C6.085181-1.817186 6.073225-1.75741 6.025405-1.578082C5.810212-.753176 5.595019-.119552 5.116812-.119552C4.758157-.119552 4.758157-.514072 4.758157-.669489C4.758157-.944458 4.794022-1.06401 4.913574-1.566127C4.99726-1.888917 5.080946-2.211706 5.152677-2.546451L5.642839-4.495143C5.726526-4.794022 5.726526-4.817933 5.726526-4.853798C5.726526-5.033126 5.583064-5.152677 5.403736-5.152677C5.057036-5.152677 4.97335-4.853798 4.901619-4.554919C4.782067-4.088667 4.136488-1.518306 4.052802-1.099875C4.040847-1.099875 3.574595-.119552 2.701868-.119552C2.080199-.119552 1.960648-.657534 1.960648-1.099875C1.960648-1.78132 2.295392-2.737733 2.606227-3.53873C2.749689-3.921295 2.809465-4.076712 2.809465-4.315816C2.809465-4.829888 2.438854-5.272229 1.865006-5.272229C.765131-5.272229 .32279-3.53873 .32279-3.443088C.32279-3.395268 .37061-3.335492 .454296-3.335492C.561893-3.335492 .573848-3.383313 .621669-3.550685C.908593-4.578829 1.374844-5.033126 1.829141-5.033126C1.948692-5.033126 2.139975-5.021171 2.139975-4.638605C2.139975-4.327771 2.008468-3.981071 1.829141-3.526775C1.303113-2.10411 1.243337-1.649813 1.243337-1.291158C1.243337-.071731 2.163885 .119552 2.654047 .119552C3.419178 .119552 3.837609-.406476 4.076712-.6934Z'/>
+</defs>
+<g id='eq6-page1'>
+<use x='0' y='0' xlink:href='#eq6-g1-117'/>
+<use x='6.66244' y='1.793263' xlink:href='#eq6-g0-114'/>
+<use x='11.217167' y='0' xlink:href='#eq6-g2-40'/>
+<use x='15.769493' y='0' xlink:href='#eq6-g1-112'/>
+<use x='21.644636' y='0' xlink:href='#eq6-g2-41'/>
+</g>
+</svg>.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a425b823d133f7ce57e679470ad083314"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="_kokkos_2_forward_decls_8h.html#a9c7073f129196443d15e0da82a39aff5" class="m-doc">Geometry::<wbr />Matrix</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a425b823d133f7ce57e679470ad083314" class="m-doc-self">interpolateJacobian</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_kokkos_1_1_variational_1_1_integration_point_view.html" class="m-doc">IntegrationPointView</a>&amp; ip,
+              const <a href="class_rodin_1_1_kokkos_1_1_variational_1_1_trace_domain_view.html" class="m-doc">TraceDomainView</a>&amp; trace = {}) const</span></span>
+            </h3>
+            <p>Interpolates the physical Jacobian with the basis gradients of an integration point.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">ip</td>
+                  <td>Integration point on a polytope of the space mesh.</td>
+                </tr>
+                <tr>
+                  <td>trace</td>
+                  <td>Trace domain, used when the point lies on an interface.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Matrix with one row per component, row <svg class="m-math" style="width: 0.583em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 5.600473 5.147373">
+<title>
+$ r $
+</title>
+<defs>
+<path id='eq7-g0-114' d='M4.65056-4.889664C4.27995-4.817933 4.088667-4.554919 4.088667-4.291905C4.088667-4.004981 4.315816-3.90934 4.483188-3.90934C4.817933-3.90934 5.092902-4.196264 5.092902-4.554919C5.092902-4.937484 4.722291-5.272229 4.124533-5.272229C3.646326-5.272229 3.096389-5.057036 2.594271-4.327771C2.510585-4.961395 2.032379-5.272229 1.554172-5.272229C1.08792-5.272229 .848817-4.913574 .705355-4.65056C.502117-4.220174 .32279-3.502864 .32279-3.443088C.32279-3.395268 .37061-3.335492 .454296-3.335492C.549938-3.335492 .561893-3.347447 .633624-3.622416C.812951-4.339726 1.0401-5.033126 1.518306-5.033126C1.80523-5.033126 1.888917-4.829888 1.888917-4.483188C1.888917-4.220174 1.769365-3.753923 1.685679-3.383313L1.350934-2.092154C1.303113-1.865006 1.171606-1.327024 1.111831-1.111831C1.028144-.800996 .896638-.239103 .896638-.179328C.896638-.011955 1.028144 .119552 1.207472 .119552C1.338979 .119552 1.566127 .035866 1.637858-.203238C1.673724-.298879 2.116065-2.10411 2.187796-2.379078C2.247572-2.642092 2.319303-2.893151 2.379078-3.156164C2.426899-3.323537 2.47472-3.514819 2.510585-3.670237C2.546451-3.777833 2.86924-4.363636 3.16812-4.62665C3.311582-4.758157 3.622416-5.033126 4.112578-5.033126C4.303861-5.033126 4.495143-4.99726 4.65056-4.889664Z'/>
+</defs>
+<g id='eq7-page1'>
+<use x='0' y='0' xlink:href='#eq7-g0-114'/>
+</g>
+</svg> holding <svg class="m-math" style="width: 3.767em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 36.159632 11.955168">
+<title>
+$ \nabla u_r(p) $
+</title>
+<defs>
+<path id='eq8-g3-40' d='M3.88543 2.905106C3.88543 2.86924 3.88543 2.84533 3.682192 2.642092C2.486675 1.43462 1.817186-.537983 1.817186-2.976837C1.817186-5.296139 2.379078-7.292653 3.765878-8.703362C3.88543-8.810959 3.88543-8.834869 3.88543-8.870735C3.88543-8.942466 3.825654-8.966376 3.777833-8.966376C3.622416-8.966376 2.642092-8.105604 2.056289-6.933998C1.446575-5.726526 1.171606-4.447323 1.171606-2.976837C1.171606-1.912827 1.338979-.490162 1.960648 .789041C2.666002 2.223661 3.646326 3.000747 3.777833 3.000747C3.825654 3.000747 3.88543 2.976837 3.88543 2.905106Z'/>
+<path id='eq8-g3-41' d='M3.371357-2.976837C3.371357-3.88543 3.251806-5.36787 2.582316-6.75467C1.876961-8.18929 .896638-8.966376 .765131-8.966376C.71731-8.966376 .657534-8.942466 .657534-8.870735C.657534-8.834869 .657534-8.810959 .860772-8.607721C2.056289-7.400249 2.725778-5.427646 2.725778-2.988792C2.725778-.669489 2.163885 1.327024 .777086 2.737733C.657534 2.84533 .657534 2.86924 .657534 2.905106C.657534 2.976837 .71731 3.000747 .765131 3.000747C.920548 3.000747 1.900872 2.139975 2.486675 .968369C3.096389-.251059 3.371357-1.542217 3.371357-2.976837Z'/>
+<path id='eq8-g1-114' d='M1.538232-1.099875C1.625903-1.44259 1.713574-1.785305 1.793275-2.13599C1.801245-2.15193 1.857036-2.383064 1.865006-2.422914C1.888917-2.494645 2.088169-2.82142 2.295392-3.020672C2.550436-3.251806 2.82142-3.291656 2.964882-3.291656C3.052553-3.291656 3.196015-3.283686 3.307597-3.188045C2.964882-3.116314 2.917061-2.82142 2.917061-2.749689C2.917061-2.574346 3.052553-2.454795 3.227895-2.454795C3.443088-2.454795 3.682192-2.630137 3.682192-2.948941C3.682192-3.235866 3.435118-3.514819 2.980822-3.514819C2.438854-3.514819 2.072229-3.156164 1.904857-2.940971C1.745455-3.514819 1.203487-3.514819 1.123786-3.514819C.836862-3.514819 .637609-3.331507 .510087-3.084433C.326775-2.725778 .239103-2.319303 .239103-2.295392C.239103-2.223661 .294894-2.191781 .358655-2.191781C.462267-2.191781 .470237-2.223661 .526027-2.430884C.621669-2.82142 .765131-3.291656 1.099875-3.291656C1.307098-3.291656 1.354919-3.092403 1.354919-2.917061C1.354919-2.773599 1.315068-2.622167 1.251308-2.359153C1.235367-2.295392 1.115816-1.825156 1.083935-1.713574L.789041-.518057C.757161-.398506 .70934-.199253 .70934-.167372C.70934 .01594 .860772 .079701 .964384 .079701C1.243337 .079701 1.299128-.143462 1.362889-.414446L1.538232-1.099875Z'/>
+<path id='eq8-g2-112' d='M.514072 1.518306C.430386 1.876961 .382565 1.972603-.107597 1.972603C-.251059 1.972603-.37061 1.972603-.37061 2.199751C-.37061 2.223661-.358655 2.319303-.227148 2.319303C-.071731 2.319303 .095641 2.295392 .251059 2.295392H.765131C1.016189 2.295392 1.625903 2.319303 1.876961 2.319303C1.948692 2.319303 2.092154 2.319303 2.092154 2.10411C2.092154 1.972603 2.008468 1.972603 1.80523 1.972603C1.255293 1.972603 1.219427 1.888917 1.219427 1.793275C1.219427 1.649813 1.75741-.406476 1.829141-.681445C1.960648-.3467 2.283437 .119552 2.905106 .119552C4.25604 .119552 5.71457-1.637858 5.71457-3.395268C5.71457-4.495143 5.092902-5.272229 4.196264-5.272229C3.431133-5.272229 2.785554-4.531009 2.654047-4.363636C2.558406-4.961395 2.092154-5.272229 1.613948-5.272229C1.267248-5.272229 .992279-5.104857 .765131-4.65056C.549938-4.220174 .382565-3.490909 .382565-3.443088S.430386-3.335492 .514072-3.335492C.609714-3.335492 .621669-3.347447 .6934-3.622416C.872727-4.327771 1.099875-5.033126 1.578082-5.033126C1.853051-5.033126 1.948692-4.841843 1.948692-4.483188C1.948692-4.196264 1.912827-4.076712 1.865006-3.861519L.514072 1.518306ZM2.582316-3.730012C2.666002-4.064757 3.000747-4.411457 3.19203-4.578829C3.323537-4.698381 3.718057-5.033126 4.172354-5.033126C4.698381-5.033126 4.937484-4.507098 4.937484-3.88543C4.937484-3.311582 4.60274-1.960648 4.303861-1.338979C4.004981-.6934 3.455044-.119552 2.905106-.119552C2.092154-.119552 1.960648-1.147696 1.960648-1.195517C1.960648-1.231382 1.984558-1.327024 1.996513-1.3868L2.582316-3.730012Z'/>
+<path id='eq8-g2-117' d='M4.076712-.6934C4.23213-.02391 4.805978 .119552 5.092902 .119552C5.475467 .119552 5.762391-.131507 5.953674-.537983C6.156912-.968369 6.312329-1.673724 6.312329-1.709589C6.312329-1.769365 6.264508-1.817186 6.192777-1.817186C6.085181-1.817186 6.073225-1.75741 6.025405-1.578082C5.810212-.753176 5.595019-.119552 5.116812-.119552C4.758157-.119552 4.758157-.514072 4.758157-.669489C4.758157-.944458 4.794022-1.06401 4.913574-1.566127C4.99726-1.888917 5.080946-2.211706 5.152677-2.546451L5.642839-4.495143C5.726526-4.794022 5.726526-4.817933 5.726526-4.853798C5.726526-5.033126 5.583064-5.152677 5.403736-5.152677C5.057036-5.152677 4.97335-4.853798 4.901619-4.554919C4.782067-4.088667 4.136488-1.518306 4.052802-1.099875C4.040847-1.099875 3.574595-.119552 2.701868-.119552C2.080199-.119552 1.960648-.657534 1.960648-1.099875C1.960648-1.78132 2.295392-2.737733 2.606227-3.53873C2.749689-3.921295 2.809465-4.076712 2.809465-4.315816C2.809465-4.829888 2.438854-5.272229 1.865006-5.272229C.765131-5.272229 .32279-3.53873 .32279-3.443088C.32279-3.395268 .37061-3.335492 .454296-3.335492C.561893-3.335492 .573848-3.383313 .621669-3.550685C.908593-4.578829 1.374844-5.033126 1.829141-5.033126C1.948692-5.033126 2.139975-5.021171 2.139975-4.638605C2.139975-4.327771 2.008468-3.981071 1.829141-3.526775C1.303113-2.10411 1.243337-1.649813 1.243337-1.291158C1.243337-.071731 2.163885 .119552 2.654047 .119552C3.419178 .119552 3.837609-.406476 4.076712-.6934Z'/>
+<path id='eq8-g0-114' d='M9.325031-7.902366C9.348941-7.938232 9.384807-8.021918 9.384807-8.069738C9.384807-8.153425 9.372852-8.16538 9.097883-8.16538H.848817C.573848-8.16538 .561893-8.153425 .561893-8.069738C.561893-8.021918 .597758-7.938232 .621669-7.902366L4.65056 .167372C4.734247 .32279 4.770112 .394521 4.97335 .394521S5.212453 .32279 5.296139 .167372L9.325031-7.902366ZM2.044334-7.304608H8.607721L5.332005-.729265L2.044334-7.304608Z'/>
+</defs>
+<g id='eq8-page1'>
+<use x='0' y='0' xlink:href='#eq8-g0-114'/>
+<use x='9.962671' y='0' xlink:href='#eq8-g2-117'/>
+<use x='16.62511' y='1.793263' xlink:href='#eq8-g1-114'/>
+<use x='21.179838' y='0' xlink:href='#eq8-g3-40'/>
+<use x='25.732163' y='0' xlink:href='#eq8-g2-112'/>
+<use x='31.607306' y='0' xlink:href='#eq8-g3-41'/>
+</g>
+</svg>.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a7c700baaa88fe83651fcb6b52436800a"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7c700baaa88fe83651fcb6b52436800a" class="m-doc-self">interpolateDivergence</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_kokkos_1_1_variational_1_1_integration_point_view.html" class="m-doc">IntegrationPointView</a>&amp; ip,
+              const <a href="class_rodin_1_1_kokkos_1_1_variational_1_1_trace_domain_view.html" class="m-doc">TraceDomainView</a>&amp; trace = {}) const</span></span>
+            </h3>
+            <p>Interpolates the divergence with the basis gradients of an integration point.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">ip</td>
+                  <td>Integration point on a polytope of the space mesh.</td>
+                </tr>
+                <tr>
+                  <td>trace</td>
+                  <td>Trace domain, used when the point lies on an interface.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Trace of interpolateJacobian(ip), summed in the same order.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a6c6e445bcd686145de184089f904cb8c"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="_kokkos_2_forward_decls_8h.html#a9c7073f129196443d15e0da82a39aff5" class="m-doc">Geometry::<wbr />Matrix</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6c6e445bcd686145de184089f904cb8c" class="m-doc-self">interpolateJacobian</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_kokkos_1_1_variational_1_1_cell_integration_point_view.html" class="m-doc">CellIntegrationPointView</a>&amp; ip,
+              const <a href="class_rodin_1_1_kokkos_1_1_variational_1_1_trace_domain_view.html" class="m-doc">TraceDomainView</a>&amp; trace = {}) const</span></span>
+            </h3>
+            <p>Interpolates the physical Jacobian at an integration point of a cell.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">ip</td>
+                  <td>Integration point on a cell of the space mesh.</td>
+                </tr>
+                <tr>
+                  <td>trace</td>
+                  <td>Trace domain, unused since a cell is not an interface.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Matrix with one row per component, row <svg class="m-math" style="width: 0.583em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 5.600473 5.147373">
+<title>
+$ r $
+</title>
+<defs>
+<path id='eq9-g0-114' d='M4.65056-4.889664C4.27995-4.817933 4.088667-4.554919 4.088667-4.291905C4.088667-4.004981 4.315816-3.90934 4.483188-3.90934C4.817933-3.90934 5.092902-4.196264 5.092902-4.554919C5.092902-4.937484 4.722291-5.272229 4.124533-5.272229C3.646326-5.272229 3.096389-5.057036 2.594271-4.327771C2.510585-4.961395 2.032379-5.272229 1.554172-5.272229C1.08792-5.272229 .848817-4.913574 .705355-4.65056C.502117-4.220174 .32279-3.502864 .32279-3.443088C.32279-3.395268 .37061-3.335492 .454296-3.335492C.549938-3.335492 .561893-3.347447 .633624-3.622416C.812951-4.339726 1.0401-5.033126 1.518306-5.033126C1.80523-5.033126 1.888917-4.829888 1.888917-4.483188C1.888917-4.220174 1.769365-3.753923 1.685679-3.383313L1.350934-2.092154C1.303113-1.865006 1.171606-1.327024 1.111831-1.111831C1.028144-.800996 .896638-.239103 .896638-.179328C.896638-.011955 1.028144 .119552 1.207472 .119552C1.338979 .119552 1.566127 .035866 1.637858-.203238C1.673724-.298879 2.116065-2.10411 2.187796-2.379078C2.247572-2.642092 2.319303-2.893151 2.379078-3.156164C2.426899-3.323537 2.47472-3.514819 2.510585-3.670237C2.546451-3.777833 2.86924-4.363636 3.16812-4.62665C3.311582-4.758157 3.622416-5.033126 4.112578-5.033126C4.303861-5.033126 4.495143-4.99726 4.65056-4.889664Z'/>
+</defs>
+<g id='eq9-page1'>
+<use x='0' y='0' xlink:href='#eq9-g0-114'/>
+</g>
+</svg> holding <svg class="m-math" style="width: 3.767em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 36.159632 11.955168">
+<title>
+$ \nabla u_r(p) $
+</title>
+<defs>
+<path id='eq10-g3-40' d='M3.88543 2.905106C3.88543 2.86924 3.88543 2.84533 3.682192 2.642092C2.486675 1.43462 1.817186-.537983 1.817186-2.976837C1.817186-5.296139 2.379078-7.292653 3.765878-8.703362C3.88543-8.810959 3.88543-8.834869 3.88543-8.870735C3.88543-8.942466 3.825654-8.966376 3.777833-8.966376C3.622416-8.966376 2.642092-8.105604 2.056289-6.933998C1.446575-5.726526 1.171606-4.447323 1.171606-2.976837C1.171606-1.912827 1.338979-.490162 1.960648 .789041C2.666002 2.223661 3.646326 3.000747 3.777833 3.000747C3.825654 3.000747 3.88543 2.976837 3.88543 2.905106Z'/>
+<path id='eq10-g3-41' d='M3.371357-2.976837C3.371357-3.88543 3.251806-5.36787 2.582316-6.75467C1.876961-8.18929 .896638-8.966376 .765131-8.966376C.71731-8.966376 .657534-8.942466 .657534-8.870735C.657534-8.834869 .657534-8.810959 .860772-8.607721C2.056289-7.400249 2.725778-5.427646 2.725778-2.988792C2.725778-.669489 2.163885 1.327024 .777086 2.737733C.657534 2.84533 .657534 2.86924 .657534 2.905106C.657534 2.976837 .71731 3.000747 .765131 3.000747C.920548 3.000747 1.900872 2.139975 2.486675 .968369C3.096389-.251059 3.371357-1.542217 3.371357-2.976837Z'/>
+<path id='eq10-g1-114' d='M1.538232-1.099875C1.625903-1.44259 1.713574-1.785305 1.793275-2.13599C1.801245-2.15193 1.857036-2.383064 1.865006-2.422914C1.888917-2.494645 2.088169-2.82142 2.295392-3.020672C2.550436-3.251806 2.82142-3.291656 2.964882-3.291656C3.052553-3.291656 3.196015-3.283686 3.307597-3.188045C2.964882-3.116314 2.917061-2.82142 2.917061-2.749689C2.917061-2.574346 3.052553-2.454795 3.227895-2.454795C3.443088-2.454795 3.682192-2.630137 3.682192-2.948941C3.682192-3.235866 3.435118-3.514819 2.980822-3.514819C2.438854-3.514819 2.072229-3.156164 1.904857-2.940971C1.745455-3.514819 1.203487-3.514819 1.123786-3.514819C.836862-3.514819 .637609-3.331507 .510087-3.084433C.326775-2.725778 .239103-2.319303 .239103-2.295392C.239103-2.223661 .294894-2.191781 .358655-2.191781C.462267-2.191781 .470237-2.223661 .526027-2.430884C.621669-2.82142 .765131-3.291656 1.099875-3.291656C1.307098-3.291656 1.354919-3.092403 1.354919-2.917061C1.354919-2.773599 1.315068-2.622167 1.251308-2.359153C1.235367-2.295392 1.115816-1.825156 1.083935-1.713574L.789041-.518057C.757161-.398506 .70934-.199253 .70934-.167372C.70934 .01594 .860772 .079701 .964384 .079701C1.243337 .079701 1.299128-.143462 1.362889-.414446L1.538232-1.099875Z'/>
+<path id='eq10-g2-112' d='M.514072 1.518306C.430386 1.876961 .382565 1.972603-.107597 1.972603C-.251059 1.972603-.37061 1.972603-.37061 2.199751C-.37061 2.223661-.358655 2.319303-.227148 2.319303C-.071731 2.319303 .095641 2.295392 .251059 2.295392H.765131C1.016189 2.295392 1.625903 2.319303 1.876961 2.319303C1.948692 2.319303 2.092154 2.319303 2.092154 2.10411C2.092154 1.972603 2.008468 1.972603 1.80523 1.972603C1.255293 1.972603 1.219427 1.888917 1.219427 1.793275C1.219427 1.649813 1.75741-.406476 1.829141-.681445C1.960648-.3467 2.283437 .119552 2.905106 .119552C4.25604 .119552 5.71457-1.637858 5.71457-3.395268C5.71457-4.495143 5.092902-5.272229 4.196264-5.272229C3.431133-5.272229 2.785554-4.531009 2.654047-4.363636C2.558406-4.961395 2.092154-5.272229 1.613948-5.272229C1.267248-5.272229 .992279-5.104857 .765131-4.65056C.549938-4.220174 .382565-3.490909 .382565-3.443088S.430386-3.335492 .514072-3.335492C.609714-3.335492 .621669-3.347447 .6934-3.622416C.872727-4.327771 1.099875-5.033126 1.578082-5.033126C1.853051-5.033126 1.948692-4.841843 1.948692-4.483188C1.948692-4.196264 1.912827-4.076712 1.865006-3.861519L.514072 1.518306ZM2.582316-3.730012C2.666002-4.064757 3.000747-4.411457 3.19203-4.578829C3.323537-4.698381 3.718057-5.033126 4.172354-5.033126C4.698381-5.033126 4.937484-4.507098 4.937484-3.88543C4.937484-3.311582 4.60274-1.960648 4.303861-1.338979C4.004981-.6934 3.455044-.119552 2.905106-.119552C2.092154-.119552 1.960648-1.147696 1.960648-1.195517C1.960648-1.231382 1.984558-1.327024 1.996513-1.3868L2.582316-3.730012Z'/>
+<path id='eq10-g2-117' d='M4.076712-.6934C4.23213-.02391 4.805978 .119552 5.092902 .119552C5.475467 .119552 5.762391-.131507 5.953674-.537983C6.156912-.968369 6.312329-1.673724 6.312329-1.709589C6.312329-1.769365 6.264508-1.817186 6.192777-1.817186C6.085181-1.817186 6.073225-1.75741 6.025405-1.578082C5.810212-.753176 5.595019-.119552 5.116812-.119552C4.758157-.119552 4.758157-.514072 4.758157-.669489C4.758157-.944458 4.794022-1.06401 4.913574-1.566127C4.99726-1.888917 5.080946-2.211706 5.152677-2.546451L5.642839-4.495143C5.726526-4.794022 5.726526-4.817933 5.726526-4.853798C5.726526-5.033126 5.583064-5.152677 5.403736-5.152677C5.057036-5.152677 4.97335-4.853798 4.901619-4.554919C4.782067-4.088667 4.136488-1.518306 4.052802-1.099875C4.040847-1.099875 3.574595-.119552 2.701868-.119552C2.080199-.119552 1.960648-.657534 1.960648-1.099875C1.960648-1.78132 2.295392-2.737733 2.606227-3.53873C2.749689-3.921295 2.809465-4.076712 2.809465-4.315816C2.809465-4.829888 2.438854-5.272229 1.865006-5.272229C.765131-5.272229 .32279-3.53873 .32279-3.443088C.32279-3.395268 .37061-3.335492 .454296-3.335492C.561893-3.335492 .573848-3.383313 .621669-3.550685C.908593-4.578829 1.374844-5.033126 1.829141-5.033126C1.948692-5.033126 2.139975-5.021171 2.139975-4.638605C2.139975-4.327771 2.008468-3.981071 1.829141-3.526775C1.303113-2.10411 1.243337-1.649813 1.243337-1.291158C1.243337-.071731 2.163885 .119552 2.654047 .119552C3.419178 .119552 3.837609-.406476 4.076712-.6934Z'/>
+<path id='eq10-g0-114' d='M9.325031-7.902366C9.348941-7.938232 9.384807-8.021918 9.384807-8.069738C9.384807-8.153425 9.372852-8.16538 9.097883-8.16538H.848817C.573848-8.16538 .561893-8.153425 .561893-8.069738C.561893-8.021918 .597758-7.938232 .621669-7.902366L4.65056 .167372C4.734247 .32279 4.770112 .394521 4.97335 .394521S5.212453 .32279 5.296139 .167372L9.325031-7.902366ZM2.044334-7.304608H8.607721L5.332005-.729265L2.044334-7.304608Z'/>
+</defs>
+<g id='eq10-page1'>
+<use x='0' y='0' xlink:href='#eq10-g0-114'/>
+<use x='9.962671' y='0' xlink:href='#eq10-g2-117'/>
+<use x='16.62511' y='1.793263' xlink:href='#eq10-g1-114'/>
+<use x='21.179838' y='0' xlink:href='#eq10-g3-40'/>
+<use x='25.732163' y='0' xlink:href='#eq10-g2-112'/>
+<use x='31.607306' y='0' xlink:href='#eq10-g3-41'/>
+</g>
+</svg>.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ac13edd80a04df2ec8dfec960331edafa"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac13edd80a04df2ec8dfec960331edafa" class="m-doc-self">interpolateDivergence</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_kokkos_1_1_variational_1_1_cell_integration_point_view.html" class="m-doc">CellIntegrationPointView</a>&amp; ip,
+              const <a href="class_rodin_1_1_kokkos_1_1_variational_1_1_trace_domain_view.html" class="m-doc">TraceDomainView</a>&amp; trace = {}) const</span></span>
+            </h3>
+            <p>Interpolates the divergence at an integration point of a cell.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">ip</td>
+                  <td>Integration point on a cell of the space mesh.</td>
+                </tr>
+                <tr>
+                  <td>trace</td>
+                  <td>Trace domain, unused since a cell is not an interface.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Trace of interpolateJacobian(ip), summed in the same order.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+        </section>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">&hellip;</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form>
+            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript.</noscript>
+          <div id="search-help" class="m-text m-dim m-text-center">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
+            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v2-eeb63e0c3a5e.js"></script>
+<script src="searchdata-v2.js" async="async"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+  <a class="rodin-ci-link" href="ci-index.html" aria-label="CI" title="CI"><span class="rodin-ci-mark" aria-hidden="true"></span><span class="rodin-ci-label">CI</span></a>
+</div>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>

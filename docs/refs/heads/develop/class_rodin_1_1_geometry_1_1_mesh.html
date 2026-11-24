@@ -77,8 +77,8 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md77">Key Features</a></li>
-            <li><a href="#autotoc_md78">Context Types</a></li>
+            <li><a href="#autotoc_md80">Key Features</a></li>
+            <li><a href="#autotoc_md81">Context Types</a></li>
             <li>
               Reference
               <ul>
@@ -98,13 +98,21 @@ $ \mathcal{T}_h $
 <use x='0' y='0' xlink:href='#eq1-g0-84'/>
 <use x='6.511315' y='1.793263' xlink:href='#eq1-g1-104'/>
 </g>
-</svg>, which is a set containing finitely many convex polyhedra. The mesh provides access to polytopes of various dimensions and their connectivity.</p><section id="autotoc_md77"><h2><a href="#autotoc_md77">Key Features</a></h2><ul><li>Access to polytopes by dimension (vertices, faces, cells)</li><li>Connectivity information between polytopes</li><li>Support for attributes marking different regions</li><li>Thread-safe operations (context-dependent)</li></ul></section><section id="autotoc_md78"><h2><a href="#autotoc_md78">Context Types</a></h2><p>The template parameter <code>ContextType</code> determines the execution model.</p><table class="m-table m-fullwidth rodin-specializations"><thead><tr><th>Specialization</th><th>Description</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html"><code>Context::Local</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;&gt;</span>
+</svg>, which is a set containing finitely many convex polyhedra. The mesh provides access to polytopes of various dimensions and their connectivity.</p><section id="autotoc_md80"><h2><a href="#autotoc_md80">Key Features</a></h2><ul><li>Access to polytopes by dimension (vertices, faces, cells)</li><li>Connectivity information between polytopes</li><li>Support for attributes marking different regions</li><li>Thread-safe operations (context-dependent)</li></ul></section><section id="autotoc_md81"><h2><a href="#autotoc_md81">Context Types</a></h2><p>The template parameter <code>ContextType</code> determines the execution model.</p><table class="m-table m-fullwidth rodin-specializations"><thead><tr><th>Specialization</th><th>Description</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html"><code>Context::Local</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;&gt;</span>
 <span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#a2a23c7c0c4e0da252b7bc0e13b6f81d8"><span class="nc">Mesh</span></a><span class="o">&lt;</span>
 <span class="w">  </span><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#a60060cb372908b6172a8a9c07a4120be"><span class="nc">Context</span></a><span class="o">::</span><a href="class_rodin_1_1_context_1_1_local.html"><span class="nc">Local</span></a><span class="o">&gt;</span><span class="p">;</span>
 </pre></details></td><td>Represents the subdivision of some domain into faces of (possibly) different geometries.</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html"><code>Context::MPI</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;&gt;</span>
 <span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html#ae6d83e8725a8c73cd8c6e400cf9d9d33"><span class="nc">Mesh</span></a><span class="o">&lt;</span>
 <span class="w">  </span><span class="nc">Context</span><span class="o">::</span><a href="class_rodin_1_1_context_1_1_m_p_i.html"><span class="nc">MPI</span></a><span class="o">&gt;</span><span class="p">;</span>
-</pre></details></td><td>Distributed mesh specialization for MPI contexts.</td></tr></tbody></table><aside class="m-note m-default"><h4>See also</h4><p><a href="_geometry_2_mesh_8h.html">Mesh.h</a></p><p><a href="group___mesh_types.html" class="m-doc">Mesh Types and Template Specializations</a></p></aside></section>
+</pre></details></td><td>Distributed mesh specialization for MPI contexts.</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_context_1_1_local_00_01_backend_01_4_01_4.html"><code>Rodin::Context::Kokkos&lt;…&gt;</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Backend</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_context_1_1_local_00_01_backend_01_4_01_4.html#a70a356db196cbe76ce1c3267df97505b"><span class="nc">Mesh</span></a><span class="o">&lt;</span>
+<span class="w">  </span><span class="n">Rodin</span><span class="o">::</span><span class="nc">Context</span><span class="o">::</span><a href="class_rodin_1_1_context_1_1_kokkos.html"><span class="nc">Kokkos</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">Rodin</span><span class="o">::</span><span class="nc">Context</span><span class="o">::</span><a href="class_rodin_1_1_context_1_1_local.html"><span class="nc">Local</span></a><span class="p">,</span><span class="w"> </span><span class="nc">Backend</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="k">final</span><span class="p">;</span>
+</pre></details></td><td>Local mesh whose authoritative data resides in Kokkos memory.</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_context_1_1_m_p_i_00_01_backend_01_4_01_4.html"><code>Rodin::Context::Kokkos&lt;Rodin::Context::MPI, …&gt;</code></a><details><summary>Full specialization</summary><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Backend</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_rodin_1_1_context_1_1_kokkos_3_01_rodin_1_1_context_1_1_m_p_i_00_01_backend_01_4_01_4.html#af89a0e12fd374236d082ff1184e8d91d"><span class="nc">Mesh</span></a><span class="o">&lt;</span>
+<span class="w">  </span><span class="n">Rodin</span><span class="o">::</span><span class="nc">Context</span><span class="o">::</span><a href="class_rodin_1_1_context_1_1_kokkos.html"><span class="nc">Kokkos</span></a><span class="o">&lt;</span><span class="w"> </span><span class="n">Rodin</span><span class="o">::</span><span class="nc">Context</span><span class="o">::</span><a href="class_rodin_1_1_context_1_1_m_p_i.html"><span class="nc">MPI</span></a><span class="p">,</span><span class="w"> </span><span class="nc">Backend</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="k">final</span><span class="p">;</span>
+</pre></details></td><td>Shard of a distributed mesh resident in a Kokkos memory space.</td></tr></tbody></table><aside class="m-note m-default"><h4>See also</h4><p><a href="_geometry_2_mesh_8h.html">Mesh.h</a></p><p><a href="group___mesh_types.html" class="m-doc">Mesh Types and Template Specializations</a></p></aside></section>
       </div>
     </div>
   </div>
@@ -143,7 +151,7 @@ $ \mathcal{T}_h $
     </div>
   </div>
 </div>
-<script src="search-v2-27108c4bc94e.js"></script>
+<script src="search-v2-eeb63e0c3a5e.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">

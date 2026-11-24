@@ -77,8 +77,8 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md246">Usage with CRTP</a></li>
-            <li><a href="#autotoc_md247">Usage with lambda / std::function</a></li>
+            <li><a href="#autotoc_md273">Usage with CRTP</a></li>
+            <li><a href="#autotoc_md274">Usage with lambda / std::function</a></li>
             <li>
               Reference
               <ul>
@@ -88,7 +88,7 @@
             </li>
           </ul>
         </nav>
-<p>An Input populates a ConstitutivePoint with auxiliary data at each quadrature point during integration. This is the injection site for material-specific fields (fiber directions, activation parameters, region-wise material properties, etc.) without hard-coding them into the integrator or the constitutive law.</p><section id="autotoc_md246"><h2><a href="#autotoc_md246">Usage with CRTP</a></h2><pre class="m-code"><span class="k">struct</span><span class="w"> </span><span class="nc">MyInput</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">Solid</span><span class="o">::</span><span class="nc">Input</span><span class="o">&lt;</span><span class="n">MyInput</span><span class="o">&gt;</span>
+<p>An Input populates a ConstitutivePoint with auxiliary data at each quadrature point during integration. This is the injection site for material-specific fields (fiber directions, activation parameters, region-wise material properties, etc.) without hard-coding them into the integrator or the constitutive law.</p><section id="autotoc_md273"><h2><a href="#autotoc_md273">Usage with CRTP</a></h2><pre class="m-code"><span class="k">struct</span><span class="w"> </span><span class="nc">MyInput</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">Solid</span><span class="o">::</span><span class="nc">Input</span><span class="o">&lt;</span><span class="n">MyInput</span><span class="o">&gt;</span>
 <span class="p">{</span>
 <span class="w">  </span><span class="n">MyInput</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">default</span><span class="p">;</span>
 
@@ -104,7 +104,7 @@
 <span class="n">force</span><span class="p">.</span><span class="n">setInput</span><span class="p">([</span><span class="n">input</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MyInput</span><span class="p">{}](</span><span class="n">Solid</span><span class="o">::</span><span class="nc">ConstitutivePoint</span><span class="o">&amp;</span><span class="w"> </span><span class="n">cp</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">  </span><span class="k">const</span><span class="w"> </span><span class="n">Solid</span><span class="o">::</span><span class="nc">Input</span><span class="o">&lt;</span><span class="n">MyInput</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">base</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">input</span><span class="p">;</span>
 <span class="w">  </span><span class="n">base</span><span class="p">.</span><span class="n">populate</span><span class="p">(</span><span class="n">cp</span><span class="p">);</span>
-<span class="p">});</span></pre></section><section id="autotoc_md247"><h2><a href="#autotoc_md247">Usage with lambda / std::function</a></h2><pre class="m-code"><span class="n">force</span><span class="p">.</span><span class="n">setInput</span><span class="p">([</span><span class="o">&amp;</span><span class="p">](</span><span class="n">Solid</span><span class="o">::</span><span class="nc">ConstitutivePoint</span><span class="o">&amp;</span><span class="w"> </span><span class="n">cp</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="p">});</span></pre></section><section id="autotoc_md274"><h2><a href="#autotoc_md274">Usage with lambda / std::function</a></h2><pre class="m-code"><span class="n">force</span><span class="p">.</span><span class="n">setInput</span><span class="p">([</span><span class="o">&amp;</span><span class="p">](</span><span class="n">Solid</span><span class="o">::</span><span class="nc">ConstitutivePoint</span><span class="o">&amp;</span><span class="w"> </span><span class="n">cp</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">  </span><span class="n">cp</span><span class="p">.</span><span class="n">set</span><span class="o">&lt;</span><span class="n">Solid</span><span class="o">::</span><span class="n">Tags</span><span class="o">::</span><span class="nc">Activation</span><span class="o">&gt;</span><span class="p">(</span><span class="n">activationValue</span><span class="p">);</span>
 <span class="p">});</span></pre></section>
         <section id="namespaces">
@@ -164,7 +164,7 @@
     </div>
   </div>
 </div>
-<script src="search-v2-27108c4bc94e.js"></script>
+<script src="search-v2-eeb63e0c3a5e.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">

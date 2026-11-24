@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Rodin::Solver::BoomerAMG&lt;::Rodin::Math::LinearSystem&lt;::Rodin::Kokkos::Math::SparseMatrix&lt;Real, Backend&gt;, VectorType_&gt;&gt; class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
+  <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
+  <link rel="stylesheet" href="rodin-theme-1337632f765f.css" />
+  <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#18191c" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <a href="index.html" id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m">Rodin</a>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li>
+              <a href="pages.html">Pages</a>
+              <ol>
+                <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
+                <li><a href="gallery.html">Gallery</a></li>
+                <li><a href="guides-io.html">Input, output, and visualization</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
+                <li><a href="ci-index.html">Continuous integration</a></li>
+                <li><a href="notation-index.html">Notation</a></li>
+                <li><a href="credits-index.html">Credits</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="modules.html">Modules</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
+              </ol>
+            </li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="3">
+            <li><a href="annotated.html">Classes</a></li>
+            <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
+            <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span><a href="namespace_rodin_1_1_solver.html">Solver</a></div><h1>BoomerAMG <span class="m-label m-flat m-warning">final</span></h1><p class="rodin-reference-brief">Conjugate gradient of hypre preconditioned by BoomerAMG, for a system whose matrix is a Kokkos::Math::SparseMatrix.</p><p class="rodin-reference-include">Defined in <a href="_boomer_a_m_g_8h.html"><code>Rodin/Kokkos/Solver/BoomerAMG.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">Backend</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">VectorType_</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><a href="class_rodin_1_1_solver_1_1_boomer_a_m_g_3_1_1_rodin_1_1_math_1_1_linear_system_3_01_1_1_rodin_1_cbb5410ad6e7d417f503ff1e9186bdb3.html#afd0154116be280a08a187a20d7b26961"><span class="nc">BoomerAMG</span></a><span class="o">&lt;</span>
+<span class="w">  </span><span class="o">::</span><span class="n">Rodin</span><span class="o">::</span><span class="n">Math</span><span class="o">::</span><a href="class_rodin_1_1_math_1_1_linear_system.html"><span class="nc">LinearSystem</span></a><span class="o">&lt;</span><span class="w"> </span><span class="o">::</span><span class="n">Rodin</span><span class="o">::</span><span class="nc">Kokkos</span><span class="o">::</span><span class="n">Math</span><span class="o">::</span><a href="class_rodin_1_1_kokkos_1_1_math_1_1_sparse_matrix.html"><span class="nc">SparseMatrix</span></a><span class="o">&lt;</span><span class="w"> </span><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf"><span class="nc">Real</span></a><span class="p">,</span><span class="w"> </span><span class="nc">Backend</span><span class="w"> </span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="n">VectorType_</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="k">final</span><span class="p">;</span>
+</pre><section id="rodin-specialization"><h2><a href="#rodin-specialization">Specialization arguments</a></h2><p>Specialization of <a href="class_rodin_1_1_solver_1_1_boomer_a_m_g.html">BoomerAMG</a>.</p><table class="m-table m-fullwidth m-flat rodin-bindings"><tbody><tr><td><code>LinearSystem</code></td><td><code>::Rodin::Math::LinearSystem&lt; ::Rodin::Kokkos::Math::SparseMatrix&lt; Real, Backend &gt;, VectorType_ &gt;</code></td></tr></tbody></table></section>
+        <table class="m-table m-fullwidth m-flat">
+          <thead>
+            <tr><th colspan="2">Template parameters</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="width: 1%">Backend</td>
+              <td>Kokkos backend of the matrix.</td>
+            </tr>
+          </tbody>
+        </table>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#base-classes">Inherits from</a></li>
+                <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#pub-static-methods">Public static functions</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+<p>The matrix must be symmetric positive definite. hypre copies the CSR arrays of the device matrix in the memory of the backend, sets up the hierarchy and solves there; only the right-hand side and the solution cross to the host. A solve performs at least one iteration, even from the solution.</p><p>The hierarchy is retained from one solve to the next, together with the copy of the matrix it was built from, as PETSc does with <code>KSPSetReusePreconditioner</code>. The ordinary <a href="#a5138badfa002a29e4d9dcce4d9a246c0" class="m-doc">solve</a> entry point builds a hierarchy only when none is retained; the conjugate gradient always runs on the current matrix, so a hierarchy built from an older matrix of the same size still gives the solution of the current system, in more iterations as the matrix drifts away. Call <a href="#a7be5424905e95452112a495118b15586" class="m-doc">setup</a> to build the hierarchy again from the current matrix, and <a href="#a03bfacfaaba9195e4498375659f43531" class="m-doc">clear</a> to release it. Changing the coarsening settings releases the hierarchy.</p><p>The solve stops when <svg class="m-math" style="width: 9.632em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 92.468706 11.955168">
+<title>
+$ \|b - Ax\| \leq \text{tol} \|b\| $
+</title>
+<defs>
+<path id='eq1-g4-108' d='M3.060999 0V-.178658C2.298727-.2263 2.167712-.345405 2.167712-1.000482V-8.111053L2.12007-8.134874C1.500723-7.932395 1.048124-7.81329 .2263-7.610812V-7.420244H.297763C.428778-7.432154 .571704-7.444065 .666988-7.444065C1.048124-7.444065 1.167229-7.277318 1.167229-6.717524V-1.036214C1.167229-.393047 1.000482-.23821 .250121-.178658V0H3.060999Z'/>
+<path id='eq1-g4-111' d='M5.597937-2.787058C5.597937-4.347334 4.50217-5.478832 2.977626-5.478832C1.42926-5.478832 .345405-4.335423 .345405-2.691774C.345405-1.083856 1.453081 .119105 2.953805 .119105S5.597937-1.143408 5.597937-2.787058ZM4.525991-2.37019C4.525991-1.024303 3.990019-.214389 3.096731-.214389C2.632221-.214389 2.191533-.500241 1.941412-.976661C1.607918-1.596007 1.41735-2.429743 1.41735-3.275389C1.41735-4.406886 1.977144-5.145338 2.822789-5.145338C3.823272-5.145338 4.525991-4.001929 4.525991-2.37019Z'/>
+<path id='eq1-g4-116' d='M3.323031-.786093L3.168194-.917109C2.906163-.607436 2.715595-.500241 2.453564-.500241C2.012875-.500241 1.834218-.809914 1.834218-1.572186V-4.978591H3.037178V-5.359727H1.834218V-6.741345C1.834218-6.86045 1.810397-6.896182 1.750844-6.896182C1.679381-6.777077 1.596007-6.669882 1.512634-6.562688C1.071945-5.90761 .666988-5.466921 .357315-5.288264C.2263-5.20489 .154837-5.133427 .154837-5.061964C.154837-5.026233 .166747-5.002412 .202479-4.978591H.833735V-1.393529C.833735-.393047 1.19105 .119105 1.88186 .119105C2.477385 .119105 2.929984-.166747 3.323031-.786093Z'/>
+<path id='eq1-g1-65' d='M2.032379-1.327024C1.613948-.621669 1.207472-.382565 .633624-.3467C.502117-.334745 .406476-.334745 .406476-.119552C.406476-.047821 .466252 0 .549938 0C.765131 0 1.303113-.02391 1.518306-.02391C1.865006-.02391 2.247572 0 2.582316 0C2.654047 0 2.797509 0 2.797509-.227148C2.797509-.334745 2.701868-.3467 2.630137-.3467C2.355168-.37061 2.12802-.466252 2.12802-.753176C2.12802-.920548 2.199751-1.052055 2.355168-1.315068L3.263761-2.82142H6.312329C6.324284-2.713823 6.324284-2.618182 6.336239-2.510585C6.372105-2.199751 6.515567-.956413 6.515567-.729265C6.515567-.37061 5.905853-.3467 5.71457-.3467C5.583064-.3467 5.451557-.3467 5.451557-.131507C5.451557 0 5.559153 0 5.630884 0C5.834122 0 6.073225-.02391 6.276463-.02391H6.957908C7.687173-.02391 8.2132 0 8.225156 0C8.308842 0 8.440349 0 8.440349-.227148C8.440349-.3467 8.332752-.3467 8.153425-.3467C7.49589-.3467 7.483935-.454296 7.44807-.812951L6.718804-8.272976C6.694894-8.51208 6.647073-8.53599 6.515567-8.53599C6.396015-8.53599 6.324284-8.51208 6.216687-8.332752L2.032379-1.327024ZM3.466999-3.16812L5.869988-7.185056L6.276463-3.16812H3.466999Z'/>
+<path id='eq1-g1-98' d='M2.761644-7.998007C2.773599-8.045828 2.797509-8.117559 2.797509-8.177335C2.797509-8.296887 2.677958-8.296887 2.654047-8.296887C2.642092-8.296887 2.211706-8.261021 1.996513-8.237111C1.793275-8.225156 1.613948-8.201245 1.398755-8.18929C1.111831-8.16538 1.028144-8.153425 1.028144-7.938232C1.028144-7.81868 1.147696-7.81868 1.267248-7.81868C1.876961-7.81868 1.876961-7.711083 1.876961-7.591532C1.876961-7.507846 1.78132-7.161146 1.733499-6.945953L1.446575-5.798257C1.327024-5.32005 .645579-2.606227 .597758-2.391034C.537983-2.092154 .537983-1.888917 .537983-1.733499C.537983-.514072 1.219427 .119552 1.996513 .119552C3.383313 .119552 4.817933-1.661768 4.817933-3.395268C4.817933-4.495143 4.196264-5.272229 3.299626-5.272229C2.677958-5.272229 2.116065-4.758157 1.888917-4.519054L2.761644-7.998007ZM2.008468-.119552C1.625903-.119552 1.207472-.406476 1.207472-1.338979C1.207472-1.733499 1.243337-1.960648 1.458531-2.797509C1.494396-2.952927 1.685679-3.718057 1.733499-3.873474C1.75741-3.969116 2.462765-5.033126 3.275716-5.033126C3.801743-5.033126 4.040847-4.507098 4.040847-3.88543C4.040847-3.311582 3.706102-1.960648 3.407223-1.338979C3.108344-.6934 2.558406-.119552 2.008468-.119552Z'/>
+<path id='eq1-g1-120' d='M5.66675-4.877709C5.284184-4.805978 5.140722-4.519054 5.140722-4.291905C5.140722-4.004981 5.36787-3.90934 5.535243-3.90934C5.893898-3.90934 6.144956-4.220174 6.144956-4.542964C6.144956-5.045081 5.571108-5.272229 5.068991-5.272229C4.339726-5.272229 3.93325-4.554919 3.825654-4.327771C3.550685-5.224408 2.809465-5.272229 2.594271-5.272229C1.374844-5.272229 .729265-3.706102 .729265-3.443088C.729265-3.395268 .777086-3.335492 .860772-3.335492C.956413-3.335492 .980324-3.407223 1.004234-3.455044C1.41071-4.782067 2.211706-5.033126 2.558406-5.033126C3.096389-5.033126 3.203985-4.531009 3.203985-4.244085C3.203985-3.981071 3.132254-3.706102 2.988792-3.132254L2.582316-1.494396C2.402989-.777086 2.056289-.119552 1.422665-.119552C1.362889-.119552 1.06401-.119552 .812951-.274969C1.243337-.358655 1.338979-.71731 1.338979-.860772C1.338979-1.099875 1.159651-1.243337 .932503-1.243337C.645579-1.243337 .334745-.992279 .334745-.609714C.334745-.107597 .896638 .119552 1.41071 .119552C1.984558 .119552 2.391034-.334745 2.642092-.824907C2.833375-.119552 3.431133 .119552 3.873474 .119552C5.092902 .119552 5.738481-1.446575 5.738481-1.709589C5.738481-1.769365 5.69066-1.817186 5.618929-1.817186C5.511333-1.817186 5.499377-1.75741 5.463512-1.661768C5.140722-.609714 4.447323-.119552 3.90934-.119552C3.490909-.119552 3.263761-.430386 3.263761-.920548C3.263761-1.183562 3.311582-1.374844 3.502864-2.163885L3.921295-3.789788C4.100623-4.507098 4.507098-5.033126 5.057036-5.033126C5.080946-5.033126 5.415691-5.033126 5.66675-4.877709Z'/>
+<path id='eq1-g0-0' d='M7.878456-2.749689C8.081694-2.749689 8.296887-2.749689 8.296887-2.988792S8.081694-3.227895 7.878456-3.227895H1.41071C1.207472-3.227895 .992279-3.227895 .992279-2.988792S1.207472-2.749689 1.41071-2.749689H7.878456Z'/>
+<path id='eq1-g0-20' d='M8.069738-7.10137C8.201245-7.161146 8.296887-7.220922 8.296887-7.364384C8.296887-7.49589 8.201245-7.603487 8.057783-7.603487C7.998007-7.603487 7.890411-7.555666 7.84259-7.531756L1.231382-4.411457C1.028144-4.315816 .992279-4.23213 .992279-4.136488C.992279-4.028892 1.06401-3.945205 1.231382-3.873474L7.84259-.765131C7.998007-.681445 8.021918-.681445 8.057783-.681445C8.18929-.681445 8.296887-.789041 8.296887-.920548C8.296887-1.028144 8.249066-1.099875 8.045828-1.195517L1.793275-4.136488L8.069738-7.10137ZM7.878456 1.637858C8.081694 1.637858 8.296887 1.637858 8.296887 1.398755S8.045828 1.159651 7.866501 1.159651H1.422665C1.243337 1.159651 .992279 1.159651 .992279 1.398755S1.207472 1.637858 1.41071 1.637858H7.878456Z'/>
+<path id='eq1-g0-107' d='M2.056289-8.5599C2.056289-8.751183 2.056289-8.966376 1.817186-8.966376S1.578082-8.703362 1.578082-8.524035V2.546451C1.578082 2.737733 1.578082 2.988792 1.817186 2.988792S2.056289 2.773599 2.056289 2.582316V-8.5599ZM4.387547-8.524035C4.387547-8.715318 4.387547-8.966376 4.148443-8.966376S3.90934-8.751183 3.90934-8.5599V2.582316C3.90934 2.773599 3.90934 2.988792 4.148443 2.988792S4.387547 2.725778 4.387547 2.546451V-8.524035Z'/>
+</defs>
+<g id='eq1-page1'>
+<use x='0' y='0' xlink:href='#eq1-g0-107'/>
+<use x='5.977607' y='0' xlink:href='#eq1-g1-98'/>
+<use x='13.611376' y='0' xlink:href='#eq1-g0-0'/>
+<use x='25.566536' y='0' xlink:href='#eq1-g1-65'/>
+<use x='34.341883' y='0' xlink:href='#eq1-g1-120'/>
+<use x='40.99397' y='0' xlink:href='#eq1-g0-107'/>
+<use x='50.292406' y='0' xlink:href='#eq1-g0-20'/>
+<use x='62.911733' y='0' xlink:href='#eq1-g4-116'/>
+<use x='66.235268' y='0' xlink:href='#eq1-g4-111'/>
+<use x='72.212852' y='0' xlink:href='#eq1-g4-108'/>
+<use x='75.536387' y='0' xlink:href='#eq1-g0-107'/>
+<use x='81.513994' y='0' xlink:href='#eq1-g1-98'/>
+<use x='86.4911' y='0' xlink:href='#eq1-g0-107'/>
+</g>
+</svg>, with a tolerance of <svg class="m-math" style="width: 2.788em; height: 0.987em; vertical-align: -0.000em;" viewBox="0 -9.474739 26.760853 9.474739">
+<title>
+$ 10^{-10} $
+</title>
+<defs>
+<path id='eq2-g1-48' d='M3.897385-2.542466C3.897385-3.395268 3.809714-3.913325 3.5467-4.423412C3.196015-5.124782 2.550436-5.300125 2.11208-5.300125C1.107846-5.300125 .74122-4.550934 .629639-4.327771C.342715-3.745953 .326775-2.956912 .326775-2.542466C.326775-2.016438 .350685-1.211457 .73325-.573848C1.099875 .01594 1.689664 .167372 2.11208 .167372C2.494645 .167372 3.180075 .047821 3.57858-.74122C3.873474-1.315068 3.897385-2.024408 3.897385-2.542466ZM2.11208-.055791C1.841096-.055791 1.291158-.183313 1.123786-1.020174C1.036115-1.474471 1.036115-2.223661 1.036115-2.638107C1.036115-3.188045 1.036115-3.745953 1.123786-4.184309C1.291158-4.99726 1.912827-5.076961 2.11208-5.076961C2.383064-5.076961 2.933001-4.941469 3.092403-4.216189C3.188045-3.777833 3.188045-3.180075 3.188045-2.638107C3.188045-2.16787 3.188045-1.45056 3.092403-1.004234C2.925031-.167372 2.375093-.055791 2.11208-.055791Z'/>
+<path id='eq2-g1-49' d='M2.502615-5.076961C2.502615-5.292154 2.486675-5.300125 2.271482-5.300125C1.944707-4.98132 1.522291-4.790037 .765131-4.790037V-4.527024C.980324-4.527024 1.41071-4.527024 1.872976-4.742217V-.653549C1.872976-.358655 1.849066-.263014 1.091905-.263014H.812951V0C1.139726-.02391 1.825156-.02391 2.183811-.02391S3.235866-.02391 3.56264 0V-.263014H3.283686C2.526526-.263014 2.502615-.358655 2.502615-.653549V-5.076961Z'/>
+<path id='eq2-g0-0' d='M5.571108-1.809215C5.69863-1.809215 5.873973-1.809215 5.873973-1.992528S5.69863-2.175841 5.571108-2.175841H1.004234C.876712-2.175841 .70137-2.175841 .70137-1.992528S.876712-1.809215 1.004234-1.809215H5.571108Z'/>
+<path id='eq2-g2-48' d='M5.355915-3.825654C5.355915-4.817933 5.296139-5.786301 4.865753-6.694894C4.375592-7.687173 3.514819-7.950187 2.929016-7.950187C2.235616-7.950187 1.3868-7.603487 .944458-6.611208C.609714-5.858032 .490162-5.116812 .490162-3.825654C.490162-2.666002 .573848-1.793275 1.004234-.944458C1.470486-.035866 2.295392 .251059 2.917061 .251059C3.957161 .251059 4.554919-.37061 4.901619-1.06401C5.332005-1.960648 5.355915-3.132254 5.355915-3.825654ZM2.917061 .011955C2.534496 .011955 1.75741-.203238 1.530262-1.506351C1.398755-2.223661 1.398755-3.132254 1.398755-3.969116C1.398755-4.94944 1.398755-5.834122 1.590037-6.539477C1.793275-7.340473 2.402989-7.711083 2.917061-7.711083C3.371357-7.711083 4.064757-7.436115 4.291905-6.40797C4.447323-5.726526 4.447323-4.782067 4.447323-3.969116C4.447323-3.16812 4.447323-2.259527 4.315816-1.530262C4.088667-.215193 3.335492 .011955 2.917061 .011955Z'/>
+<path id='eq2-g2-49' d='M3.443088-7.663263C3.443088-7.938232 3.443088-7.950187 3.203985-7.950187C2.917061-7.627397 2.319303-7.185056 1.08792-7.185056V-6.838356C1.362889-6.838356 1.960648-6.838356 2.618182-7.149191V-.920548C2.618182-.490162 2.582316-.3467 1.530262-.3467H1.159651V0C1.482441-.02391 2.642092-.02391 3.036613-.02391S4.578829-.02391 4.901619 0V-.3467H4.531009C3.478954-.3467 3.443088-.490162 3.443088-.920548V-7.663263Z'/>
+</defs>
+<g id='eq2-page1'>
+<use x='0' y='0' xlink:href='#eq2-g2-49'/>
+<use x='5.85299' y='0' xlink:href='#eq2-g2-48'/>
+<use x='11.705981' y='-4.338437' xlink:href='#eq2-g0-0'/>
+<use x='18.292487' y='-4.338437' xlink:href='#eq2-g1-49'/>
+<use x='22.52667' y='-4.338437' xlink:href='#eq2-g1-48'/>
+</g>
+</svg> and at most 1000 iterations by default. The hierarchy uses settings that run on a GPU: PMIS coarsening, extended plus i interpolation, one sweep of l1 Jacobi and Gaussian elimination on the coarsest grid. The strength threshold (0.25 by default), the levels of aggressive coarsening (none by default) and the interpolation truncation (4 elements per row by default) are adjustable; three dimensional problems usually need a threshold of 0.5 to 0.7 and aggressive coarsening to fit in the memory of the device.</p><p>MPI and hypre are initialized on the first setup when the application has not done so. Their finalization is left to the application, after the last solver is destroyed, since a solver releases its hierarchy on destruction. The solve runs on <code>MPI_COMM_SELF</code>.</p>
+        <figure class="rodin-inheritance"><figcaption>Direct inheritance by class family</figcaption><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_solver_1_1_linear_solver_base.html" title="LinearSolverBase&lt;::Rodin::Math::LinearSystem&lt; ::Rodin::Kokkos::Math::SparseMatrix&lt; Real, Backend &gt;, VectorType_ &gt; &gt;">LinearSolverBase</a></li></ul><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><div class="rodin-inheritance-current">BoomerAMG</div></figure><section id="base-classes"><h2><a href="#base-classes">Inherits from</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Base class</th><th>Responsibility</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_solver_1_1_linear_solver_base.html"><code>LinearSolverBase&lt;…&gt;</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><a href="class_rodin_1_1_solver_1_1_linear_solver_base.html#ae28253f47bbc22b7e87643fd51631637"><span class="nc">LinearSolverBase</span></a><span class="o">&lt;::</span><span class="n">Rodin</span><span class="o">::</span><span class="n">Math</span><span class="o">::</span><a href="class_rodin_1_1_math_1_1_linear_system.html"><span class="nc">LinearSystem</span></a><span class="o">&lt;</span><span class="w"> </span><span class="o">::</span><span class="n">Rodin</span><span class="o">::</span><span class="nc">Kokkos</span><span class="o">::</span><span class="n">Math</span><span class="o">::</span><a href="class_rodin_1_1_kokkos_1_1_math_1_1_sparse_matrix.html"><span class="nc">SparseMatrix</span></a><span class="o">&lt;</span><span class="w"> </span><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf"><span class="nc">Real</span></a><span class="p">,</span><span class="w"> </span><span class="nc">Backend</span><span class="w"> </span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="n">VectorType_</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span>
+</pre></details></td><td>Abstract base class for linear system solvers.</td></tr></tbody></table></section><section id="rodin-overrides"><h2><a href="#rodin-overrides">Overrides</a></h2><table class="m-table m-fullwidth"><thead><tr><th>Member</th><th>Base declaration</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_solver_1_1_boomer_a_m_g_3_1_1_rodin_1_1_math_1_1_linear_system_3_01_1_1_rodin_1_cbb5410ad6e7d417f503ff1e9186bdb3.html#a834d1b989f7197a3d04e842f4c5f6281"><code>copy()</code></a></td><td><a href="class_rodin_1_1_copyable.html#ab4e2e0c492116fe03366ba4e4403a2c8">Copyable::copy</a></td></tr></tbody></table></section><section id="rodin-inherited"><h2><a href="#rodin-inherited">Inherited interface</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Declared in</th><th>Members</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_solver_1_1_linear_solver_base.html"><code>LinearSolverBase</code></a></td><td><details><summary>2 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_solver_1_1_linear_solver_base.html#a1ebb533a694e1950a9fd16133b9be14f"><code>factorize()</code></a></li><li><a href="class_rodin_1_1_solver_1_1_linear_solver_base.html#a07663f770d90c7558d8746889964d6bc"><code>getProblem()</code></a></li></ul></details></td></tr></tbody></table></section>
+        <section id="pub-types">
+          <h2><a href="#pub-types">Public types</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;class Starts, class Counts, class Rows&gt;</div>
+              struct <a href="struct_rodin_1_1_solver_1_1_boomer_a_m_g_3_1_1_rodin_1_1_math_1_1_linear_system_3_01_1_1_rodin_1233da6dc2554870dd7ef7c43daef22ea.html" class="m-doc">FillRows</a>
+            </dt>
+            <dd>Writes the row count and the row number of each row of a CSR matrix.</dd>
+            <dt id="a515179486a633cd3bd8acc6d313ed50d">
+              using <a href="#a515179486a633cd3bd8acc6d313ed50d" class="m-doc-self">ScalarType</a> = <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>
+            </dt>
+            <dd>Scalar type.</dd>
+            <dt id="a0ed4ecad291b963557f0aa61e5181f9b">
+              using <a href="#a0ed4ecad291b963557f0aa61e5181f9b" class="m-doc-self">VectorType</a> = VectorType_
+            </dt>
+            <dd>Host vector type.</dd>
+            <dt id="ac2a10dd369a958c41cb9535b9c3560c1">
+              using <a href="#ac2a10dd369a958c41cb9535b9c3560c1" class="m-doc-self">OperatorType</a> = <a href="class_rodin_1_1_kokkos_1_1_math_1_1_sparse_matrix.html" class="m-doc">::<wbr />Rodin::<wbr />Kokkos::<wbr />Math::<wbr />SparseMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>, Backend&gt;
+            </dt>
+            <dd>Device matrix type.</dd>
+            <dt id="a8f25576335b5d95266cab35aaef140a6">
+              using <a href="#a8f25576335b5d95266cab35aaef140a6" class="m-doc-self">LinearSystemType</a> = <a href="class_rodin_1_1_math_1_1_linear_system.html" class="m-doc">::<wbr />Rodin::<wbr />Math::<wbr />LinearSystem</a>&lt;<a href="#ac2a10dd369a958c41cb9535b9c3560c1" class="m-doc">OperatorType</a>, <a href="#a0ed4ecad291b963557f0aa61e5181f9b" class="m-doc">VectorType</a>&gt;
+            </dt>
+            <dd>Linear system type.</dd>
+            <dt id="ab6098d508adace773204c1e42ece893a">
+              using <a href="#ab6098d508adace773204c1e42ece893a" class="m-doc-self">ProblemBaseType</a> = <a href="class_rodin_1_1_variational_1_1_problem_base.html" class="m-doc">Variational::<wbr />ProblemBase</a>&lt;<a href="#a8f25576335b5d95266cab35aaef140a6" class="m-doc">LinearSystemType</a>&gt;
+            </dt>
+            <dd>Problem type.</dd>
+            <dt id="a85385c6607a397925a213e9098256fdc">
+              using <a href="#a85385c6607a397925a213e9098256fdc" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_solver_1_1_linear_solver_base.html#ae28253f47bbc22b7e87643fd51631637" class="m-doc">LinearSolverBase</a>&lt;<a href="#a8f25576335b5d95266cab35aaef140a6" class="m-doc">LinearSystemType</a>&gt;
+            </dt>
+            <dd>Parent class type.</dd>
+            <dt id="ab2aafb43f3defabed38d4e5380df08f3">
+              using <a href="#ab2aafb43f3defabed38d4e5380df08f3" class="m-doc-self">ExecutionSpace</a> = typename <a href="class_rodin_1_1_kokkos_1_1_math_1_1_sparse_matrix.html#ab78f7cd66f68a9ce08c3ca5a42e12a90" class="m-doc">OperatorType::<wbr />ExecutionSpace</a>
+            </dt>
+            <dd>Execution space of the matrix.</dd>
+            <dt id="a3b401621b944e83bcbd6430df5e2d6fb">
+              using <a href="#a3b401621b944e83bcbd6430df5e2d6fb" class="m-doc-self">MemorySpace</a> = typename <a href="class_rodin_1_1_kokkos_1_1_math_1_1_sparse_matrix.html#abd2285c284ad3cfde965ef4ecc1dab84" class="m-doc">OperatorType::<wbr />MemorySpace</a>
+            </dt>
+            <dd>Memory space of the matrix.</dd>
+          </dl>
+        </section>
+        <section id="pub-static-methods">
+          <h2><a href="#pub-static-methods">Public static functions</a></h2>
+          <dl class="m-doc">
+            <dt><a href="#a39c3faa5b5cdc06bf2441434a4fe8a47" class="m-doc">fillRows</a></dt><dd>Writes the row counts and the row numbers of a CSR matrix.<details class="rodin-declaration-disclosure"><summary>See declaration</summary><div class="rodin-overview-declaration">
+              <div class="m-doc-template">template&lt;class Starts, class Counts, class Rows&gt;</div>
+              <span class="m-doc-wrap-bumper">static void <a href="#a39c3faa5b5cdc06bf2441434a4fe8a47" class="m-doc">fillRows</a>(</span><span class="m-doc-wrap">const Starts&amp; starts,
+              const Counts&amp; counts,
+              const Rows&amp; rows)</span>
+            </div></details></dd>
+          </dl>
+        </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#afd0154116be280a08a187a20d7b26961" class="m-doc">BoomerAMG</a>(</span><span class="m-doc-wrap"><a href="#ab6098d508adace773204c1e42ece893a" class="m-doc">ProblemBaseType</a>&amp; problem) <span class="m-label m-flat m-info">explicit</span> </span>
+            </dt>
+            <dd>Constructs the solver of a problem.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#af14a5e934468d41c1947895bd41df923" class="m-doc">BoomerAMG</a>(</span><span class="m-doc-wrap">const BoomerAMG&amp; other)</span>
+            </dt>
+            <dd>Copies the settings and the outcome of the last solve, without the hierarchy.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#af5ec43da3f88250ef3f0e4460232f8f8" class="m-doc">BoomerAMG</a>(</span><span class="m-doc-wrap">BoomerAMG&amp;&amp; other) <span class="m-label m-flat m-info">defaulted</span></span>
+            </dt>
+            <dd>Moves the solver.</dd>
+            <dt id="af1c960359c49ad50308f2e0f2e4b2fa3">
+              <span class="m-doc-wrap-bumper"><a href="#af1c960359c49ad50308f2e0f2e4b2fa3" class="m-doc-self">~BoomerAMG</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Destructor.</dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a288c8cb3222a33f91d61caab0476182d" class="m-doc">setTolerance</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> tolerance) -&gt; <a href="#afd0154116be280a08a187a20d7b26961" class="m-doc">BoomerAMG</a>&amp;</span>
+            </dt>
+            <dd>Sets the relative tolerance.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aef3c5f1fddae5a339ecc71cb658f8e5d" class="m-doc">setMaxIterations</a>(</span><span class="m-doc-wrap">size_t count) -&gt; <a href="#afd0154116be280a08a187a20d7b26961" class="m-doc">BoomerAMG</a>&amp;</span>
+            </dt>
+            <dd>Sets the iteration limit of the conjugate gradient.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aa903e0a776415eefb9ce1d63d7e674ac" class="m-doc">setStrongThreshold</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> threshold) -&gt; <a href="#afd0154116be280a08a187a20d7b26961" class="m-doc">BoomerAMG</a>&amp;</span>
+            </dt>
+            <dd>Sets the strength threshold of the coarsening.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a9ca3b26d059786be990b62b07d4d9d0b" class="m-doc">setAggressiveLevels</a>(</span><span class="m-doc-wrap">size_t count) -&gt; <a href="#afd0154116be280a08a187a20d7b26961" class="m-doc">BoomerAMG</a>&amp;</span>
+            </dt>
+            <dd>Sets the number of levels of aggressive coarsening.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a1339be617d5010e831259afa2b554d99" class="m-doc">setMaxInterpolationElements</a>(</span><span class="m-doc-wrap">size_t count) -&gt; <a href="#afd0154116be280a08a187a20d7b26961" class="m-doc">BoomerAMG</a>&amp;</span>
+            </dt>
+            <dd>Sets the maximum number of elements per row of the interpolation.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a7be5424905e95452112a495118b15586" class="m-doc">setup</a>(</span><span class="m-doc-wrap">const <a href="#a8f25576335b5d95266cab35aaef140a6" class="m-doc">LinearSystemType</a>&amp; system)</span>
+            </dt>
+            <dd>Builds the hierarchy from the current matrix of a system.</dd>
+            <dt id="a03bfacfaaba9195e4498375659f43531">
+              <span class="m-doc-wrap-bumper">void <a href="#a03bfacfaaba9195e4498375659f43531" class="m-doc-self">clear</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Releases the retained hierarchy.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a812c5a4cdb2106afc309433f39708e80" class="m-doc">isSetup</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin.html#a717a190167959b837148d927a5d380ba" class="m-doc">Boolean</a> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Whether a hierarchy is retained.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a5138badfa002a29e4d9dcce4d9a246c0" class="m-doc">solve</a>(</span><span class="m-doc-wrap"><a href="#a8f25576335b5d95266cab35aaef140a6" class="m-doc">LinearSystemType</a>&amp; system) <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Solves the system.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a7bd8b39d7964b40a7a4dcb0a1ff594b7" class="m-doc">success</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin.html#a717a190167959b837148d927a5d380ba" class="m-doc">Boolean</a></span>
+            </dt>
+            <dd>Whether the last solve reached the tolerance.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aaeefc8a5f2ecf0a47f975af9bfa39ff2" class="m-doc">getIterationNumber</a>(</span><span class="m-doc-wrap">) const -&gt; size_t</span>
+            </dt>
+            <dd>Number of iterations of the last solve.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a7300e7d0367728f293f23cb1951a6d64" class="m-doc">getError</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
+            </dt>
+            <dd>Relative residual of the last solve.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a834d1b989f7197a3d04e842f4c5f6281" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="#afd0154116be280a08a187a20d7b26961" class="m-doc">BoomerAMG</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Creates a copy of this solver.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#af7d39f0eac0af0ed5785935ac72a1e7d" class="m-doc">solve</a>(</span><span class="m-doc-wrap">)</span>
+            </dt>
+            <dd>Solves the associated problem.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#adeb0e48252fd318e8aa17cc7cad8d7c0" class="m-doc">solve</a>(</span><span class="m-doc-wrap"><a href="#a8f25576335b5d95266cab35aaef140a6" class="m-doc">LinearSystemType</a>&amp; system) <span class="m-label m-flat m-warning">pure virtual</span></span>
+            </dt>
+            <dd>Solves the linear system.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a39c3faa5b5cdc06bf2441434a4fe8a47"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Backend, class VectorType_ _2&gt;
+                template&lt;class Starts, class Counts, class Rows&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">static void Rodin::<wbr />Solver::<wbr />BoomerAMG&lt;::<wbr />Rodin::<wbr />Math::<wbr />LinearSystem&lt;::<wbr />Rodin::<wbr />Kokkos::<wbr />Math::<wbr />SparseMatrix&lt;Real, Backend&gt;, VectorType_&gt;&gt;&lt;Backend, _2&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a39c3faa5b5cdc06bf2441434a4fe8a47" class="m-doc-self">fillRows</a>(</span><span class="m-doc-wrap">const Starts&amp; starts,
+              const Counts&amp; counts,
+              const Rows&amp; rows)</span></span>
+            </h3>
+            <p>Writes the row counts and the row numbers of a CSR matrix.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">starts</td>
+                  <td>Row starts.</td>
+                </tr>
+                <tr>
+                  <td>counts</td>
+                  <td>Row counts, one per row.</td>
+                </tr>
+                <tr>
+                  <td>rows</td>
+                  <td>Row numbers, one per row.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="afd0154116be280a08a187a20d7b26961"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Backend, class VectorType_ _2&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solver::<wbr />BoomerAMG&lt;::<wbr />Rodin::<wbr />Math::<wbr />LinearSystem&lt;::<wbr />Rodin::<wbr />Kokkos::<wbr />Math::<wbr />SparseMatrix&lt;Real, Backend&gt;, VectorType_&gt;&gt;&lt;Backend, _2&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afd0154116be280a08a187a20d7b26961" class="m-doc-self">BoomerAMG</a>(</span><span class="m-doc-wrap"><a href="#ab6098d508adace773204c1e42ece893a" class="m-doc">ProblemBaseType</a>&amp; problem) <span class="m-label m-info">explicit</span> </span></span>
+            </h3>
+            <p>Constructs the solver of a problem.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">problem</td>
+                  <td>Problem to solve.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="af14a5e934468d41c1947895bd41df923"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Backend, class VectorType_ _2&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solver::<wbr />BoomerAMG&lt;::<wbr />Rodin::<wbr />Math::<wbr />LinearSystem&lt;::<wbr />Rodin::<wbr />Kokkos::<wbr />Math::<wbr />SparseMatrix&lt;Real, Backend&gt;, VectorType_&gt;&gt;&lt;Backend, _2&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af14a5e934468d41c1947895bd41df923" class="m-doc-self">BoomerAMG</a>(</span><span class="m-doc-wrap">const BoomerAMG&amp; other)</span></span>
+            </h3>
+            <p>Copies the settings and the outcome of the last solve, without the hierarchy.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Solver to copy.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="af5ec43da3f88250ef3f0e4460232f8f8"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Backend, class VectorType_ _2&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solver::<wbr />BoomerAMG&lt;::<wbr />Rodin::<wbr />Math::<wbr />LinearSystem&lt;::<wbr />Rodin::<wbr />Kokkos::<wbr />Math::<wbr />SparseMatrix&lt;Real, Backend&gt;, VectorType_&gt;&gt;&lt;Backend, _2&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af5ec43da3f88250ef3f0e4460232f8f8" class="m-doc-self">BoomerAMG</a>(</span><span class="m-doc-wrap">BoomerAMG&amp;&amp; other) <span class="m-label m-info">defaulted</span></span></span>
+            </h3>
+            <p>Moves the solver.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Solver to move.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a288c8cb3222a33f91d61caab0476182d"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Backend, class VectorType_ _2&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="#afd0154116be280a08a187a20d7b26961" class="m-doc">BoomerAMG</a>&amp; Rodin::<wbr />Solver::<wbr />BoomerAMG&lt;::<wbr />Rodin::<wbr />Math::<wbr />LinearSystem&lt;::<wbr />Rodin::<wbr />Kokkos::<wbr />Math::<wbr />SparseMatrix&lt;Real, Backend&gt;, VectorType_&gt;&gt;&lt;Backend, _2&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a288c8cb3222a33f91d61caab0476182d" class="m-doc-self">setTolerance</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> tolerance)</span></span>
+            </h3>
+            <p>Sets the relative tolerance.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">tolerance</td>
+                  <td>Tolerance on <svg class="m-math" style="width: 7.266em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 69.756886 11.955168">
+<title>
+$ \|b - Ax\| / \|b\| $
+</title>
+<defs>
+<path id='eq3-g1-61' d='M5.128767-8.524035C5.128767-8.53599 5.200498-8.715318 5.200498-8.739228C5.200498-8.88269 5.080946-8.966376 4.985305-8.966376C4.925529-8.966376 4.817933-8.966376 4.722291-8.703362L.71731 2.546451C.71731 2.558406 .645579 2.737733 .645579 2.761644C.645579 2.905106 .765131 2.988792 .860772 2.988792C.932503 2.988792 1.0401 2.976837 1.123786 2.725778L5.128767-8.524035Z'/>
+<path id='eq3-g1-65' d='M2.032379-1.327024C1.613948-.621669 1.207472-.382565 .633624-.3467C.502117-.334745 .406476-.334745 .406476-.119552C.406476-.047821 .466252 0 .549938 0C.765131 0 1.303113-.02391 1.518306-.02391C1.865006-.02391 2.247572 0 2.582316 0C2.654047 0 2.797509 0 2.797509-.227148C2.797509-.334745 2.701868-.3467 2.630137-.3467C2.355168-.37061 2.12802-.466252 2.12802-.753176C2.12802-.920548 2.199751-1.052055 2.355168-1.315068L3.263761-2.82142H6.312329C6.324284-2.713823 6.324284-2.618182 6.336239-2.510585C6.372105-2.199751 6.515567-.956413 6.515567-.729265C6.515567-.37061 5.905853-.3467 5.71457-.3467C5.583064-.3467 5.451557-.3467 5.451557-.131507C5.451557 0 5.559153 0 5.630884 0C5.834122 0 6.073225-.02391 6.276463-.02391H6.957908C7.687173-.02391 8.2132 0 8.225156 0C8.308842 0 8.440349 0 8.440349-.227148C8.440349-.3467 8.332752-.3467 8.153425-.3467C7.49589-.3467 7.483935-.454296 7.44807-.812951L6.718804-8.272976C6.694894-8.51208 6.647073-8.53599 6.515567-8.53599C6.396015-8.53599 6.324284-8.51208 6.216687-8.332752L2.032379-1.327024ZM3.466999-3.16812L5.869988-7.185056L6.276463-3.16812H3.466999Z'/>
+<path id='eq3-g1-98' d='M2.761644-7.998007C2.773599-8.045828 2.797509-8.117559 2.797509-8.177335C2.797509-8.296887 2.677958-8.296887 2.654047-8.296887C2.642092-8.296887 2.211706-8.261021 1.996513-8.237111C1.793275-8.225156 1.613948-8.201245 1.398755-8.18929C1.111831-8.16538 1.028144-8.153425 1.028144-7.938232C1.028144-7.81868 1.147696-7.81868 1.267248-7.81868C1.876961-7.81868 1.876961-7.711083 1.876961-7.591532C1.876961-7.507846 1.78132-7.161146 1.733499-6.945953L1.446575-5.798257C1.327024-5.32005 .645579-2.606227 .597758-2.391034C.537983-2.092154 .537983-1.888917 .537983-1.733499C.537983-.514072 1.219427 .119552 1.996513 .119552C3.383313 .119552 4.817933-1.661768 4.817933-3.395268C4.817933-4.495143 4.196264-5.272229 3.299626-5.272229C2.677958-5.272229 2.116065-4.758157 1.888917-4.519054L2.761644-7.998007ZM2.008468-.119552C1.625903-.119552 1.207472-.406476 1.207472-1.338979C1.207472-1.733499 1.243337-1.960648 1.458531-2.797509C1.494396-2.952927 1.685679-3.718057 1.733499-3.873474C1.75741-3.969116 2.462765-5.033126 3.275716-5.033126C3.801743-5.033126 4.040847-4.507098 4.040847-3.88543C4.040847-3.311582 3.706102-1.960648 3.407223-1.338979C3.108344-.6934 2.558406-.119552 2.008468-.119552Z'/>
+<path id='eq3-g1-120' d='M5.66675-4.877709C5.284184-4.805978 5.140722-4.519054 5.140722-4.291905C5.140722-4.004981 5.36787-3.90934 5.535243-3.90934C5.893898-3.90934 6.144956-4.220174 6.144956-4.542964C6.144956-5.045081 5.571108-5.272229 5.068991-5.272229C4.339726-5.272229 3.93325-4.554919 3.825654-4.327771C3.550685-5.224408 2.809465-5.272229 2.594271-5.272229C1.374844-5.272229 .729265-3.706102 .729265-3.443088C.729265-3.395268 .777086-3.335492 .860772-3.335492C.956413-3.335492 .980324-3.407223 1.004234-3.455044C1.41071-4.782067 2.211706-5.033126 2.558406-5.033126C3.096389-5.033126 3.203985-4.531009 3.203985-4.244085C3.203985-3.981071 3.132254-3.706102 2.988792-3.132254L2.582316-1.494396C2.402989-.777086 2.056289-.119552 1.422665-.119552C1.362889-.119552 1.06401-.119552 .812951-.274969C1.243337-.358655 1.338979-.71731 1.338979-.860772C1.338979-1.099875 1.159651-1.243337 .932503-1.243337C.645579-1.243337 .334745-.992279 .334745-.609714C.334745-.107597 .896638 .119552 1.41071 .119552C1.984558 .119552 2.391034-.334745 2.642092-.824907C2.833375-.119552 3.431133 .119552 3.873474 .119552C5.092902 .119552 5.738481-1.446575 5.738481-1.709589C5.738481-1.769365 5.69066-1.817186 5.618929-1.817186C5.511333-1.817186 5.499377-1.75741 5.463512-1.661768C5.140722-.609714 4.447323-.119552 3.90934-.119552C3.490909-.119552 3.263761-.430386 3.263761-.920548C3.263761-1.183562 3.311582-1.374844 3.502864-2.163885L3.921295-3.789788C4.100623-4.507098 4.507098-5.033126 5.057036-5.033126C5.080946-5.033126 5.415691-5.033126 5.66675-4.877709Z'/>
+<path id='eq3-g0-0' d='M7.878456-2.749689C8.081694-2.749689 8.296887-2.749689 8.296887-2.988792S8.081694-3.227895 7.878456-3.227895H1.41071C1.207472-3.227895 .992279-3.227895 .992279-2.988792S1.207472-2.749689 1.41071-2.749689H7.878456Z'/>
+<path id='eq3-g0-107' d='M2.056289-8.5599C2.056289-8.751183 2.056289-8.966376 1.817186-8.966376S1.578082-8.703362 1.578082-8.524035V2.546451C1.578082 2.737733 1.578082 2.988792 1.817186 2.988792S2.056289 2.773599 2.056289 2.582316V-8.5599ZM4.387547-8.524035C4.387547-8.715318 4.387547-8.966376 4.148443-8.966376S3.90934-8.751183 3.90934-8.5599V2.582316C3.90934 2.773599 3.90934 2.988792 4.148443 2.988792S4.387547 2.725778 4.387547 2.546451V-8.524035Z'/>
+</defs>
+<g id='eq3-page1'>
+<use x='0' y='0' xlink:href='#eq3-g0-107'/>
+<use x='5.977607' y='0' xlink:href='#eq3-g1-98'/>
+<use x='13.611376' y='0' xlink:href='#eq3-g0-0'/>
+<use x='25.566536' y='0' xlink:href='#eq3-g1-65'/>
+<use x='34.341883' y='0' xlink:href='#eq3-g1-120'/>
+<use x='40.99397' y='0' xlink:href='#eq3-g0-107'/>
+<use x='46.971577' y='0' xlink:href='#eq3-g1-61'/>
+<use x='52.824567' y='0' xlink:href='#eq3-g0-107'/>
+<use x='58.802174' y='0' xlink:href='#eq3-g1-98'/>
+<use x='63.779279' y='0' xlink:href='#eq3-g0-107'/>
+</g>
+</svg>.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>This solver.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aef3c5f1fddae5a339ecc71cb658f8e5d"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Backend, class VectorType_ _2&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="#afd0154116be280a08a187a20d7b26961" class="m-doc">BoomerAMG</a>&amp; Rodin::<wbr />Solver::<wbr />BoomerAMG&lt;::<wbr />Rodin::<wbr />Math::<wbr />LinearSystem&lt;::<wbr />Rodin::<wbr />Kokkos::<wbr />Math::<wbr />SparseMatrix&lt;Real, Backend&gt;, VectorType_&gt;&gt;&lt;Backend, _2&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aef3c5f1fddae5a339ecc71cb658f8e5d" class="m-doc-self">setMaxIterations</a>(</span><span class="m-doc-wrap">size_t count)</span></span>
+            </h3>
+            <p>Sets the iteration limit of the conjugate gradient.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">count</td>
+                  <td>Maximum number of iterations.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>This solver.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aa903e0a776415eefb9ce1d63d7e674ac"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Backend, class VectorType_ _2&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="#afd0154116be280a08a187a20d7b26961" class="m-doc">BoomerAMG</a>&amp; Rodin::<wbr />Solver::<wbr />BoomerAMG&lt;::<wbr />Rodin::<wbr />Math::<wbr />LinearSystem&lt;::<wbr />Rodin::<wbr />Kokkos::<wbr />Math::<wbr />SparseMatrix&lt;Real, Backend&gt;, VectorType_&gt;&gt;&lt;Backend, _2&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa903e0a776415eefb9ce1d63d7e674ac" class="m-doc-self">setStrongThreshold</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> threshold)</span></span>
+            </h3>
+            <p>Sets the strength threshold of the coarsening.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">threshold</td>
+                  <td>Threshold in <svg class="m-math" style="width: 2.714em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 26.054791 11.955168">
+<title>
+$ (0, 1) $
+</title>
+<defs>
+<path id='eq4-g0-59' d='M2.331258 .047821C2.331258-.645579 2.10411-1.159651 1.613948-1.159651C1.231382-1.159651 1.0401-.848817 1.0401-.585803S1.219427 0 1.625903 0C1.78132 0 1.912827-.047821 2.020423-.155417C2.044334-.179328 2.056289-.179328 2.068244-.179328C2.092154-.179328 2.092154-.011955 2.092154 .047821C2.092154 .442341 2.020423 1.219427 1.327024 1.996513C1.195517 2.139975 1.195517 2.163885 1.195517 2.187796C1.195517 2.247572 1.255293 2.307347 1.315068 2.307347C1.41071 2.307347 2.331258 1.422665 2.331258 .047821Z'/>
+<path id='eq4-g1-40' d='M3.88543 2.905106C3.88543 2.86924 3.88543 2.84533 3.682192 2.642092C2.486675 1.43462 1.817186-.537983 1.817186-2.976837C1.817186-5.296139 2.379078-7.292653 3.765878-8.703362C3.88543-8.810959 3.88543-8.834869 3.88543-8.870735C3.88543-8.942466 3.825654-8.966376 3.777833-8.966376C3.622416-8.966376 2.642092-8.105604 2.056289-6.933998C1.446575-5.726526 1.171606-4.447323 1.171606-2.976837C1.171606-1.912827 1.338979-.490162 1.960648 .789041C2.666002 2.223661 3.646326 3.000747 3.777833 3.000747C3.825654 3.000747 3.88543 2.976837 3.88543 2.905106Z'/>
+<path id='eq4-g1-41' d='M3.371357-2.976837C3.371357-3.88543 3.251806-5.36787 2.582316-6.75467C1.876961-8.18929 .896638-8.966376 .765131-8.966376C.71731-8.966376 .657534-8.942466 .657534-8.870735C.657534-8.834869 .657534-8.810959 .860772-8.607721C2.056289-7.400249 2.725778-5.427646 2.725778-2.988792C2.725778-.669489 2.163885 1.327024 .777086 2.737733C.657534 2.84533 .657534 2.86924 .657534 2.905106C.657534 2.976837 .71731 3.000747 .765131 3.000747C.920548 3.000747 1.900872 2.139975 2.486675 .968369C3.096389-.251059 3.371357-1.542217 3.371357-2.976837Z'/>
+<path id='eq4-g1-48' d='M5.355915-3.825654C5.355915-4.817933 5.296139-5.786301 4.865753-6.694894C4.375592-7.687173 3.514819-7.950187 2.929016-7.950187C2.235616-7.950187 1.3868-7.603487 .944458-6.611208C.609714-5.858032 .490162-5.116812 .490162-3.825654C.490162-2.666002 .573848-1.793275 1.004234-.944458C1.470486-.035866 2.295392 .251059 2.917061 .251059C3.957161 .251059 4.554919-.37061 4.901619-1.06401C5.332005-1.960648 5.355915-3.132254 5.355915-3.825654ZM2.917061 .011955C2.534496 .011955 1.75741-.203238 1.530262-1.506351C1.398755-2.223661 1.398755-3.132254 1.398755-3.969116C1.398755-4.94944 1.398755-5.834122 1.590037-6.539477C1.793275-7.340473 2.402989-7.711083 2.917061-7.711083C3.371357-7.711083 4.064757-7.436115 4.291905-6.40797C4.447323-5.726526 4.447323-4.782067 4.447323-3.969116C4.447323-3.16812 4.447323-2.259527 4.315816-1.530262C4.088667-.215193 3.335492 .011955 2.917061 .011955Z'/>
+<path id='eq4-g1-49' d='M3.443088-7.663263C3.443088-7.938232 3.443088-7.950187 3.203985-7.950187C2.917061-7.627397 2.319303-7.185056 1.08792-7.185056V-6.838356C1.362889-6.838356 1.960648-6.838356 2.618182-7.149191V-.920548C2.618182-.490162 2.582316-.3467 1.530262-.3467H1.159651V0C1.482441-.02391 2.642092-.02391 3.036613-.02391S4.578829-.02391 4.901619 0V-.3467H4.531009C3.478954-.3467 3.443088-.490162 3.443088-.920548V-7.663263Z'/>
+</defs>
+<g id='eq4-page1'>
+<use x='0' y='0' xlink:href='#eq4-g1-40'/>
+<use x='4.552326' y='0' xlink:href='#eq4-g1-48'/>
+<use x='10.405316' y='0' xlink:href='#eq4-g0-59'/>
+<use x='15.649475' y='0' xlink:href='#eq4-g1-49'/>
+<use x='21.502465' y='0' xlink:href='#eq4-g1-41'/>
+</g>
+</svg>. Releases the retained hierarchy.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>This solver.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a9ca3b26d059786be990b62b07d4d9d0b"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Backend, class VectorType_ _2&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="#afd0154116be280a08a187a20d7b26961" class="m-doc">BoomerAMG</a>&amp; Rodin::<wbr />Solver::<wbr />BoomerAMG&lt;::<wbr />Rodin::<wbr />Math::<wbr />LinearSystem&lt;::<wbr />Rodin::<wbr />Kokkos::<wbr />Math::<wbr />SparseMatrix&lt;Real, Backend&gt;, VectorType_&gt;&gt;&lt;Backend, _2&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9ca3b26d059786be990b62b07d4d9d0b" class="m-doc-self">setAggressiveLevels</a>(</span><span class="m-doc-wrap">size_t count)</span></span>
+            </h3>
+            <p>Sets the number of levels of aggressive coarsening.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">count</td>
+                  <td>Number of levels, from the finest. Releases the retained hierarchy.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>This solver.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a1339be617d5010e831259afa2b554d99"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Backend, class VectorType_ _2&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="#afd0154116be280a08a187a20d7b26961" class="m-doc">BoomerAMG</a>&amp; Rodin::<wbr />Solver::<wbr />BoomerAMG&lt;::<wbr />Rodin::<wbr />Math::<wbr />LinearSystem&lt;::<wbr />Rodin::<wbr />Kokkos::<wbr />Math::<wbr />SparseMatrix&lt;Real, Backend&gt;, VectorType_&gt;&gt;&lt;Backend, _2&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1339be617d5010e831259afa2b554d99" class="m-doc-self">setMaxInterpolationElements</a>(</span><span class="m-doc-wrap">size_t count)</span></span>
+            </h3>
+            <p>Sets the maximum number of elements per row of the interpolation.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">count</td>
+                  <td>Number of elements, or zero for no truncation. Releases the retained hierarchy.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>This solver.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a7be5424905e95452112a495118b15586"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Backend, class VectorType_ _2&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Solver::<wbr />BoomerAMG&lt;::<wbr />Rodin::<wbr />Math::<wbr />LinearSystem&lt;::<wbr />Rodin::<wbr />Kokkos::<wbr />Math::<wbr />SparseMatrix&lt;Real, Backend&gt;, VectorType_&gt;&gt;&lt;Backend, _2&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7be5424905e95452112a495118b15586" class="m-doc-self">setup</a>(</span><span class="m-doc-wrap">const <a href="#a8f25576335b5d95266cab35aaef140a6" class="m-doc">LinearSystemType</a>&amp; system)</span></span>
+            </h3>
+            <p>Builds the hierarchy from the current matrix of a system.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">system</td>
+                  <td>System whose matrix is copied for the hierarchy.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Replaces any retained hierarchy.</p>
+          </div></section>
+          <section class="m-doc-details" id="a812c5a4cdb2106afc309433f39708e80"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Backend, class VectorType_ _2&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a717a190167959b837148d927a5d380ba" class="m-doc">Boolean</a> Rodin::<wbr />Solver::<wbr />BoomerAMG&lt;::<wbr />Rodin::<wbr />Math::<wbr />LinearSystem&lt;::<wbr />Rodin::<wbr />Kokkos::<wbr />Math::<wbr />SparseMatrix&lt;Real, Backend&gt;, VectorType_&gt;&gt;&lt;Backend, _2&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a812c5a4cdb2106afc309433f39708e80" class="m-doc-self">isSetup</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Whether a hierarchy is retained.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>True if a hierarchy has been set up and not cleared.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a5138badfa002a29e4d9dcce4d9a246c0"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Backend, class VectorType_ _2&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Solver::<wbr />BoomerAMG&lt;::<wbr />Rodin::<wbr />Math::<wbr />LinearSystem&lt;::<wbr />Rodin::<wbr />Kokkos::<wbr />Math::<wbr />SparseMatrix&lt;Real, Backend&gt;, VectorType_&gt;&gt;&lt;Backend, _2&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5138badfa002a29e4d9dcce4d9a246c0" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap"><a href="#a8f25576335b5d95266cab35aaef140a6" class="m-doc">LinearSystemType</a>&amp; system) <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Solves the system.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">system&nbsp;<span class="m-label m-flat m-danger">in/out</span></td>
+                  <td>System, whose solution is the initial guess when its size matches.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Builds the hierarchy from the current matrix when none is retained.</p>
+          </div></section>
+          <section class="m-doc-details" id="a7bd8b39d7964b40a7a4dcb0a1ff594b7"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Backend, class VectorType_ _2&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a717a190167959b837148d927a5d380ba" class="m-doc">Boolean</a> Rodin::<wbr />Solver::<wbr />BoomerAMG&lt;::<wbr />Rodin::<wbr />Math::<wbr />LinearSystem&lt;::<wbr />Rodin::<wbr />Kokkos::<wbr />Math::<wbr />SparseMatrix&lt;Real, Backend&gt;, VectorType_&gt;&gt;&lt;Backend, _2&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7bd8b39d7964b40a7a4dcb0a1ff594b7" class="m-doc-self">success</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Whether the last solve reached the tolerance.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>True if the last solve converged.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aaeefc8a5f2ecf0a47f975af9bfa39ff2"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Backend, class VectorType_ _2&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Solver::<wbr />BoomerAMG&lt;::<wbr />Rodin::<wbr />Math::<wbr />LinearSystem&lt;::<wbr />Rodin::<wbr />Kokkos::<wbr />Math::<wbr />SparseMatrix&lt;Real, Backend&gt;, VectorType_&gt;&gt;&lt;Backend, _2&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aaeefc8a5f2ecf0a47f975af9bfa39ff2" class="m-doc-self">getIterationNumber</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Number of iterations of the last solve.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Iteration count reported by hypre.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a7300e7d0367728f293f23cb1951a6d64"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Backend, class VectorType_ _2&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Solver::<wbr />BoomerAMG&lt;::<wbr />Rodin::<wbr />Math::<wbr />LinearSystem&lt;::<wbr />Rodin::<wbr />Kokkos::<wbr />Math::<wbr />SparseMatrix&lt;Real, Backend&gt;, VectorType_&gt;&gt;&lt;Backend, _2&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7300e7d0367728f293f23cb1951a6d64" class="m-doc-self">getError</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Relative residual of the last solve.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Final relative residual norm reported by hypre.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a834d1b989f7197a3d04e842f4c5f6281"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Backend, class VectorType_ _2&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="#afd0154116be280a08a187a20d7b26961" class="m-doc">BoomerAMG</a>* Rodin::<wbr />Solver::<wbr />BoomerAMG&lt;::<wbr />Rodin::<wbr />Math::<wbr />LinearSystem&lt;::<wbr />Rodin::<wbr />Kokkos::<wbr />Math::<wbr />SparseMatrix&lt;Real, Backend&gt;, VectorType_&gt;&gt;&lt;Backend, _2&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a834d1b989f7197a3d04e842f4c5f6281" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Creates a copy of this solver.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Pointer to a new BoomerAMG instance.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="af7d39f0eac0af0ed5785935ac72a1e7d"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Backend, class VectorType_ _2&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Solver::<wbr />BoomerAMG&lt;::<wbr />Rodin::<wbr />Math::<wbr />LinearSystem&lt;::<wbr />Rodin::<wbr />Kokkos::<wbr />Math::<wbr />SparseMatrix&lt;Real, Backend&gt;, VectorType_&gt;&gt;&lt;Backend, _2&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af7d39f0eac0af0ed5785935ac72a1e7d" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap">)</span></span>
+            </h3>
+            <p>Solves the associated problem.</p>
+<p>This method delegates solving to the problem&#x27;s solve method, passing this solver as the argument.</p>
+          </div></section>
+          <section class="m-doc-details" id="adeb0e48252fd318e8aa17cc7cad8d7c0"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Backend, class VectorType_ _2&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Solver::<wbr />BoomerAMG&lt;::<wbr />Rodin::<wbr />Math::<wbr />LinearSystem&lt;::<wbr />Rodin::<wbr />Kokkos::<wbr />Math::<wbr />SparseMatrix&lt;Real, Backend&gt;, VectorType_&gt;&gt;&lt;Backend, _2&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adeb0e48252fd318e8aa17cc7cad8d7c0" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap"><a href="#a8f25576335b5d95266cab35aaef140a6" class="m-doc">LinearSystemType</a>&amp; system) <span class="m-label m-warning">pure virtual</span></span></span>
+            </h3>
+            <p>Solves the linear system.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">system&nbsp;<span class="m-label m-flat m-danger">in/out</span></td>
+                  <td>The linear system to solve. On entry the solution vector is the initial guess; on exit it stores the solution.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Solves the linear system <svg class="m-math" style="width: 3.766em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 36.150849 8.302191">
+<title>
+$ Ax = b $
+</title>
+<defs>
+<path id='eq5-g1-61' d='M8.069738-3.873474C8.237111-3.873474 8.452304-3.873474 8.452304-4.088667C8.452304-4.315816 8.249066-4.315816 8.069738-4.315816H1.028144C.860772-4.315816 .645579-4.315816 .645579-4.100623C.645579-3.873474 .848817-3.873474 1.028144-3.873474H8.069738ZM8.069738-1.649813C8.237111-1.649813 8.452304-1.649813 8.452304-1.865006C8.452304-2.092154 8.249066-2.092154 8.069738-2.092154H1.028144C.860772-2.092154 .645579-2.092154 .645579-1.876961C.645579-1.649813 .848817-1.649813 1.028144-1.649813H8.069738Z'/>
+<path id='eq5-g0-65' d='M2.032379-1.327024C1.613948-.621669 1.207472-.382565 .633624-.3467C.502117-.334745 .406476-.334745 .406476-.119552C.406476-.047821 .466252 0 .549938 0C.765131 0 1.303113-.02391 1.518306-.02391C1.865006-.02391 2.247572 0 2.582316 0C2.654047 0 2.797509 0 2.797509-.227148C2.797509-.334745 2.701868-.3467 2.630137-.3467C2.355168-.37061 2.12802-.466252 2.12802-.753176C2.12802-.920548 2.199751-1.052055 2.355168-1.315068L3.263761-2.82142H6.312329C6.324284-2.713823 6.324284-2.618182 6.336239-2.510585C6.372105-2.199751 6.515567-.956413 6.515567-.729265C6.515567-.37061 5.905853-.3467 5.71457-.3467C5.583064-.3467 5.451557-.3467 5.451557-.131507C5.451557 0 5.559153 0 5.630884 0C5.834122 0 6.073225-.02391 6.276463-.02391H6.957908C7.687173-.02391 8.2132 0 8.225156 0C8.308842 0 8.440349 0 8.440349-.227148C8.440349-.3467 8.332752-.3467 8.153425-.3467C7.49589-.3467 7.483935-.454296 7.44807-.812951L6.718804-8.272976C6.694894-8.51208 6.647073-8.53599 6.515567-8.53599C6.396015-8.53599 6.324284-8.51208 6.216687-8.332752L2.032379-1.327024ZM3.466999-3.16812L5.869988-7.185056L6.276463-3.16812H3.466999Z'/>
+<path id='eq5-g0-98' d='M2.761644-7.998007C2.773599-8.045828 2.797509-8.117559 2.797509-8.177335C2.797509-8.296887 2.677958-8.296887 2.654047-8.296887C2.642092-8.296887 2.211706-8.261021 1.996513-8.237111C1.793275-8.225156 1.613948-8.201245 1.398755-8.18929C1.111831-8.16538 1.028144-8.153425 1.028144-7.938232C1.028144-7.81868 1.147696-7.81868 1.267248-7.81868C1.876961-7.81868 1.876961-7.711083 1.876961-7.591532C1.876961-7.507846 1.78132-7.161146 1.733499-6.945953L1.446575-5.798257C1.327024-5.32005 .645579-2.606227 .597758-2.391034C.537983-2.092154 .537983-1.888917 .537983-1.733499C.537983-.514072 1.219427 .119552 1.996513 .119552C3.383313 .119552 4.817933-1.661768 4.817933-3.395268C4.817933-4.495143 4.196264-5.272229 3.299626-5.272229C2.677958-5.272229 2.116065-4.758157 1.888917-4.519054L2.761644-7.998007ZM2.008468-.119552C1.625903-.119552 1.207472-.406476 1.207472-1.338979C1.207472-1.733499 1.243337-1.960648 1.458531-2.797509C1.494396-2.952927 1.685679-3.718057 1.733499-3.873474C1.75741-3.969116 2.462765-5.033126 3.275716-5.033126C3.801743-5.033126 4.040847-4.507098 4.040847-3.88543C4.040847-3.311582 3.706102-1.960648 3.407223-1.338979C3.108344-.6934 2.558406-.119552 2.008468-.119552Z'/>
+<path id='eq5-g0-120' d='M5.66675-4.877709C5.284184-4.805978 5.140722-4.519054 5.140722-4.291905C5.140722-4.004981 5.36787-3.90934 5.535243-3.90934C5.893898-3.90934 6.144956-4.220174 6.144956-4.542964C6.144956-5.045081 5.571108-5.272229 5.068991-5.272229C4.339726-5.272229 3.93325-4.554919 3.825654-4.327771C3.550685-5.224408 2.809465-5.272229 2.594271-5.272229C1.374844-5.272229 .729265-3.706102 .729265-3.443088C.729265-3.395268 .777086-3.335492 .860772-3.335492C.956413-3.335492 .980324-3.407223 1.004234-3.455044C1.41071-4.782067 2.211706-5.033126 2.558406-5.033126C3.096389-5.033126 3.203985-4.531009 3.203985-4.244085C3.203985-3.981071 3.132254-3.706102 2.988792-3.132254L2.582316-1.494396C2.402989-.777086 2.056289-.119552 1.422665-.119552C1.362889-.119552 1.06401-.119552 .812951-.274969C1.243337-.358655 1.338979-.71731 1.338979-.860772C1.338979-1.099875 1.159651-1.243337 .932503-1.243337C.645579-1.243337 .334745-.992279 .334745-.609714C.334745-.107597 .896638 .119552 1.41071 .119552C1.984558 .119552 2.391034-.334745 2.642092-.824907C2.833375-.119552 3.431133 .119552 3.873474 .119552C5.092902 .119552 5.738481-1.446575 5.738481-1.709589C5.738481-1.769365 5.69066-1.817186 5.618929-1.817186C5.511333-1.817186 5.499377-1.75741 5.463512-1.661768C5.140722-.609714 4.447323-.119552 3.90934-.119552C3.490909-.119552 3.263761-.430386 3.263761-.920548C3.263761-1.183562 3.311582-1.374844 3.502864-2.163885L3.921295-3.789788C4.100623-4.507098 4.507098-5.033126 5.057036-5.033126C5.080946-5.033126 5.415691-5.033126 5.66675-4.877709Z'/>
+</defs>
+<g id='eq5-page1'>
+<use x='0' y='0' xlink:href='#eq5-g0-65'/>
+<use x='8.775347' y='0' xlink:href='#eq5-g0-120'/>
+<use x='18.748263' y='0' xlink:href='#eq5-g1-61'/>
+<use x='31.173744' y='0' xlink:href='#eq5-g0-98'/>
+</g>
+</svg> where <svg class="m-math" style="width: 0.914em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 8.775347 8.169366">
+<title>
+$ A $
+</title>
+<defs>
+<path id='eq6-g0-65' d='M2.032379-1.327024C1.613948-.621669 1.207472-.382565 .633624-.3467C.502117-.334745 .406476-.334745 .406476-.119552C.406476-.047821 .466252 0 .549938 0C.765131 0 1.303113-.02391 1.518306-.02391C1.865006-.02391 2.247572 0 2.582316 0C2.654047 0 2.797509 0 2.797509-.227148C2.797509-.334745 2.701868-.3467 2.630137-.3467C2.355168-.37061 2.12802-.466252 2.12802-.753176C2.12802-.920548 2.199751-1.052055 2.355168-1.315068L3.263761-2.82142H6.312329C6.324284-2.713823 6.324284-2.618182 6.336239-2.510585C6.372105-2.199751 6.515567-.956413 6.515567-.729265C6.515567-.37061 5.905853-.3467 5.71457-.3467C5.583064-.3467 5.451557-.3467 5.451557-.131507C5.451557 0 5.559153 0 5.630884 0C5.834122 0 6.073225-.02391 6.276463-.02391H6.957908C7.687173-.02391 8.2132 0 8.225156 0C8.308842 0 8.440349 0 8.440349-.227148C8.440349-.3467 8.332752-.3467 8.153425-.3467C7.49589-.3467 7.483935-.454296 7.44807-.812951L6.718804-8.272976C6.694894-8.51208 6.647073-8.53599 6.515567-8.53599C6.396015-8.53599 6.324284-8.51208 6.216687-8.332752L2.032379-1.327024ZM3.466999-3.16812L5.869988-7.185056L6.276463-3.16812H3.466999Z'/>
+</defs>
+<g id='eq6-page1'>
+<use x='0' y='0' xlink:href='#eq6-g0-65'/>
+</g>
+</svg> is the matrix operator, <svg class="m-math" style="width: 0.693em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.652087 5.147373">
+<title>
+$ x $
+</title>
+<defs>
+<path id='eq7-g0-120' d='M5.66675-4.877709C5.284184-4.805978 5.140722-4.519054 5.140722-4.291905C5.140722-4.004981 5.36787-3.90934 5.535243-3.90934C5.893898-3.90934 6.144956-4.220174 6.144956-4.542964C6.144956-5.045081 5.571108-5.272229 5.068991-5.272229C4.339726-5.272229 3.93325-4.554919 3.825654-4.327771C3.550685-5.224408 2.809465-5.272229 2.594271-5.272229C1.374844-5.272229 .729265-3.706102 .729265-3.443088C.729265-3.395268 .777086-3.335492 .860772-3.335492C.956413-3.335492 .980324-3.407223 1.004234-3.455044C1.41071-4.782067 2.211706-5.033126 2.558406-5.033126C3.096389-5.033126 3.203985-4.531009 3.203985-4.244085C3.203985-3.981071 3.132254-3.706102 2.988792-3.132254L2.582316-1.494396C2.402989-.777086 2.056289-.119552 1.422665-.119552C1.362889-.119552 1.06401-.119552 .812951-.274969C1.243337-.358655 1.338979-.71731 1.338979-.860772C1.338979-1.099875 1.159651-1.243337 .932503-1.243337C.645579-1.243337 .334745-.992279 .334745-.609714C.334745-.107597 .896638 .119552 1.41071 .119552C1.984558 .119552 2.391034-.334745 2.642092-.824907C2.833375-.119552 3.431133 .119552 3.873474 .119552C5.092902 .119552 5.738481-1.446575 5.738481-1.709589C5.738481-1.769365 5.69066-1.817186 5.618929-1.817186C5.511333-1.817186 5.499377-1.75741 5.463512-1.661768C5.140722-.609714 4.447323-.119552 3.90934-.119552C3.490909-.119552 3.263761-.430386 3.263761-.920548C3.263761-1.183562 3.311582-1.374844 3.502864-2.163885L3.921295-3.789788C4.100623-4.507098 4.507098-5.033126 5.057036-5.033126C5.080946-5.033126 5.415691-5.033126 5.66675-4.877709Z'/>
+</defs>
+<g id='eq7-page1'>
+<use x='0' y='0' xlink:href='#eq7-g0-120'/>
+</g>
+</svg> is the solution vector, and <svg class="m-math" style="width: 0.518em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 4.977105 8.302191">
+<title>
+$ b $
+</title>
+<defs>
+<path id='eq8-g0-98' d='M2.761644-7.998007C2.773599-8.045828 2.797509-8.117559 2.797509-8.177335C2.797509-8.296887 2.677958-8.296887 2.654047-8.296887C2.642092-8.296887 2.211706-8.261021 1.996513-8.237111C1.793275-8.225156 1.613948-8.201245 1.398755-8.18929C1.111831-8.16538 1.028144-8.153425 1.028144-7.938232C1.028144-7.81868 1.147696-7.81868 1.267248-7.81868C1.876961-7.81868 1.876961-7.711083 1.876961-7.591532C1.876961-7.507846 1.78132-7.161146 1.733499-6.945953L1.446575-5.798257C1.327024-5.32005 .645579-2.606227 .597758-2.391034C.537983-2.092154 .537983-1.888917 .537983-1.733499C.537983-.514072 1.219427 .119552 1.996513 .119552C3.383313 .119552 4.817933-1.661768 4.817933-3.395268C4.817933-4.495143 4.196264-5.272229 3.299626-5.272229C2.677958-5.272229 2.116065-4.758157 1.888917-4.519054L2.761644-7.998007ZM2.008468-.119552C1.625903-.119552 1.207472-.406476 1.207472-1.338979C1.207472-1.733499 1.243337-1.960648 1.458531-2.797509C1.494396-2.952927 1.685679-3.718057 1.733499-3.873474C1.75741-3.969116 2.462765-5.033126 3.275716-5.033126C3.801743-5.033126 4.040847-4.507098 4.040847-3.88543C4.040847-3.311582 3.706102-1.960648 3.407223-1.338979C3.108344-.6934 2.558406-.119552 2.008468-.119552Z'/>
+</defs>
+<g id='eq8-page1'>
+<use x='0' y='0' xlink:href='#eq8-g0-98'/>
+</g>
+</svg> is the right-hand side vector.</p><aside class="m-note m-default"><h4>Initial guess contract</h4><p>On entry, the system&#x27;s solution vector holds the initial guess; on exit it holds the solution. Iterative solvers use the guess whenever it is correctly sized; direct solvers ignore it. Assembly seeds the guess from the trial function data, which is zero by construction unless set.</p></aside>
+          </div></section>
+        </section>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">&hellip;</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form>
+            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript.</noscript>
+          <div id="search-help" class="m-text m-dim m-text-center">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
+            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v2-eeb63e0c3a5e.js"></script>
+<script src="searchdata-v2.js" async="async"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+  <a class="rodin-ci-link" href="ci-index.html" aria-label="CI" title="CI"><span class="rodin-ci-mark" aria-hidden="true"></span><span class="rodin-ci-label">CI</span></a>
+</div>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>

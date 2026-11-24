@@ -80,13 +80,13 @@
             <li>
               <a href="#"></a>
               <ul>
-                <li><a href="#autotoc_md386">Approximation spaces</a></li>
+                <li><a href="#autotoc_md413">Approximation spaces</a></li>
               </ul>
             </li>
             <li>
               <a href="#"></a>
               <ul>
-                <li><a href="#autotoc_md387">Usage</a></li>
+                <li><a href="#autotoc_md414">Usage</a></li>
               </ul>
             </li>
           </ul>
@@ -115,7 +115,7 @@ $k\geq1$
 <use x='9.810333' y='0' xlink:href='#eq2-g0-21'/>
 <use x='22.42966' y='0' xlink:href='#eq2-g2-49'/>
 </g>
-</svg>. Vertex, edge, face and cell degrees of freedom are shared according to the mesh incidence and the family trace maps. Scalar, vector and matrix ranges use the corresponding range specialization.</p><section id="autotoc_md386_1s1"><section id="autotoc_md386"><h3><a href="#autotoc_md386">Approximation spaces</a></h3><p>On affine simplices the reference space is <svg class="m-math" style="width: 1.242em; height: 1.045em; vertical-align: -0.187em;" viewBox="0 -8.235778 11.927569 10.029041">
+</svg>. Vertex, edge, face and cell degrees of freedom are shared according to the mesh incidence and the family trace maps. Scalar, vector and matrix ranges use the corresponding range specialization.</p><section id="autotoc_md413_1s1"><section id="autotoc_md413"><h3><a href="#autotoc_md413">Approximation spaces</a></h3><p>On affine simplices the reference space is <svg class="m-math" style="width: 1.242em; height: 1.045em; vertical-align: -0.187em;" viewBox="0 -8.235778 11.927569 10.029041">
 <title>
 $\mathbb P_k$
 </title>
@@ -346,7 +346,7 @@ $(k+1)(k+2)(2k+3)/6$
 <use x='113.448363' y='0' xlink:href='#eq12-g0-61'/>
 <use x='119.301353' y='0' xlink:href='#eq12-g1-54'/>
 </g>
-</svg></td></tr></tbody></table><p>Reference nodal duality, geometric mapping and global coefficient numbering are separate objects. Use the element and space accessors when evaluating fields or transferring their coefficients. Polynomial approximation rates depend on solution regularity, mesh quality, geometry and quadrature.</p></section></section><section id="autotoc_md387_1s1"><section id="autotoc_md387"><h3><a href="#autotoc_md387">Usage</a></h3><p>A quadratic scalar space on a prepared mesh is constructed by selecting its degree at compile time.</p><pre class="m-code"><span class="nc">H1</span><span class="w"> </span><span class="nf">quadratic</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">integral_constant</span><span class="o">&lt;</span><span class="kt">size_t</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="o">&gt;</span><span class="p">{},</span><span class="w"> </span><span class="n">mesh</span><span class="p">);</span>
+</svg></td></tr></tbody></table><p>Reference nodal duality, geometric mapping and global coefficient numbering are separate objects. Use the element and space accessors when evaluating fields or transferring their coefficients. Polynomial approximation rates depend on solution regularity, mesh quality, geometry and quadrature.</p></section></section><section id="autotoc_md414_1s1"><section id="autotoc_md414"><h3><a href="#autotoc_md414">Usage</a></h3><p>A quadratic scalar space on a prepared mesh is constructed by selecting its degree at compile time.</p><pre class="m-code"><span class="nc">H1</span><span class="w"> </span><span class="nf">quadratic</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">integral_constant</span><span class="o">&lt;</span><span class="kt">size_t</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="o">&gt;</span><span class="p">{},</span><span class="w"> </span><span class="n">mesh</span><span class="p">);</span>
 <span class="nc">TrialFunction</span><span class="w"> </span><span class="nf">u</span><span class="p">(</span><span class="n">quadratic</span><span class="p">);</span>
 <span class="nc">TestFunction</span><span class="w"> </span><span class="nf">v</span><span class="p">(</span><span class="n">quadratic</span><span class="p">);</span></pre><p><a href="_variational_2_finite_element_spaces_8cpp-example.html" class="m-doc">The finite element space example</a> constructs and samples constant, linear and quadratic fields on one mesh. <a href="namespace_rodin_1_1_variational.html#a5519f0efb971b7fab2cf3dbbacf42c56" class="m-doc">RealH1Element&lt;K&gt;</a> exposes a scalar reference element; range-specific aliases and space specializations provide the other supported field types.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="fem-ciarlet.html" class="m-doc">Ciarlet&#x27;s definition of a finite element</a>, <a href="fem-spaces.html" class="m-doc">Finite element spaces</a>, <a href="guides-ordering.html" class="m-doc">Matrix storage and finite-element component ordering</a></p></aside></section></section>
       </div>
@@ -387,7 +387,7 @@ $(k+1)(k+2)(2k+3)/6$
     </div>
   </div>
 </div>
-<script src="search-v2-27108c4bc94e.js"></script>
+<script src="search-v2-eeb63e0c3a5e.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">

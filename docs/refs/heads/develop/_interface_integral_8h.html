@@ -77,10 +77,10 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md437">Mathematical Foundation</a></li>
-            <li><a href="#autotoc_md438">Discontinuous Galerkin Context</a></li>
-            <li><a href="#autotoc_md439">Interior Penalty Method</a></li>
-            <li><a href="#autotoc_md440">Usage Example</a></li>
+            <li><a href="#autotoc_md464">Mathematical Foundation</a></li>
+            <li><a href="#autotoc_md465">Discontinuous Galerkin Context</a></li>
+            <li><a href="#autotoc_md466">Interior Penalty Method</a></li>
+            <li><a href="#autotoc_md467">Usage Example</a></li>
             <li>
               Reference
               <ul>
@@ -90,7 +90,7 @@
             </li>
           </ul>
         </nav>
-<p>This file defines the InterfaceIntegral classes which represent integrals over interior mesh faces (interfaces between elements) in discontinuous Galerkin formulations. Interface integrals specifically exclude boundary faces, focusing on element-to-element coupling.</p><section id="autotoc_md437"><h2><a href="#autotoc_md437">Mathematical Foundation</a></h2><p>Interface integrals compute the following quantity.</p><div class="m-math"><svg style="width: 5.797em; height: 2.966em;" viewBox="166.446793 -28.471297 55.649381 28.471297">
+<p>This file defines the InterfaceIntegral classes which represent integrals over interior mesh faces (interfaces between elements) in discontinuous Galerkin formulations. Interface integrals specifically exclude boundary faces, focusing on element-to-element coupling.</p><section id="autotoc_md464"><h2><a href="#autotoc_md464">Mathematical Foundation</a></h2><p>Interface integrals compute the following quantity.</p><div class="m-math"><svg style="width: 5.797em; height: 2.966em;" viewBox="166.446793 -28.471297 55.649381 28.471297">
 <title>
 \[     \int_{\Gamma_h} f(x) \, ds
 \]
@@ -141,7 +141,7 @@ $ \partial\Omega $
 <use x='0' y='0' xlink:href='#eq3-g0-64'/>
 <use x='6.829868' y='0' xlink:href='#eq3-g1-10'/>
 </g>
-</svg>).</p></section><section id="autotoc_md438"><h2><a href="#autotoc_md438">Discontinuous Galerkin Context</a></h2><p>Interface integrals are fundamental to DG methods, enabling:</p><ul><li><strong>Element coupling</strong>: Connect discontinuous solutions across elements</li><li><strong>Flux consistency</strong>: Ensure conservative numerical fluxes</li><li><strong>Stability</strong>: Add necessary stabilization terms</li></ul></section><section id="autotoc_md439"><h2><a href="#autotoc_md439">Interior Penalty Method</a></h2><p>A typical IP-DG formulation includes</p><div class="m-math"><svg style="width: 40.705em; height: 2.966em;" viewBox="0 -28.471297 390.769493 28.471297">
+</svg>).</p></section><section id="autotoc_md465"><h2><a href="#autotoc_md465">Discontinuous Galerkin Context</a></h2><p>Interface integrals are fundamental to DG methods, enabling:</p><ul><li><strong>Element coupling</strong>: Connect discontinuous solutions across elements</li><li><strong>Flux consistency</strong>: Ensure conservative numerical fluxes</li><li><strong>Stability</strong>: Add necessary stabilization terms</li></ul></section><section id="autotoc_md466"><h2><a href="#autotoc_md466">Interior Penalty Method</a></h2><p>A typical IP-DG formulation includes</p><div class="m-math"><svg style="width: 40.705em; height: 2.966em;" viewBox="0 -28.471297 390.769493 28.471297">
 <title>
 \[     a(u,v) = \int_\Omega \nabla u \cdot \nabla v \, dx
             - \int_{\Gamma_h} \{\!\{\nabla u\}\!\} \cdot [\![v]\!] \, ds
@@ -249,7 +249,7 @@ $ \partial\Omega $
 <use x='379.172794' y='-12.198853' xlink:href='#eq4-g3-100'/>
 <use x='385.255487' y='-12.198853' xlink:href='#eq4-g3-115'/>
 </g>
-</svg></div></section><section id="autotoc_md440"><h2><a href="#autotoc_md440">Usage Example</a></h2><pre class="m-code"><span class="c1">// Interior penalty terms (only on interior faces)</span>
+</svg></div></section><section id="autotoc_md467"><h2><a href="#autotoc_md467">Usage Example</a></h2><pre class="m-code"><span class="c1">// Interior penalty terms (only on interior faces)</span>
 <span class="k">auto</span><span class="w"> </span><span class="n">penalty</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">InterfaceIntegral</span><span class="p">(</span><span class="n">sigma</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">h</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nc">Jump</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="nc">Jump</span><span class="p">(</span><span class="n">v</span><span class="p">));</span>
 <span class="k">auto</span><span class="w"> </span><span class="n">consistency</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">InterfaceIntegral</span><span class="p">(</span><span class="nc">Average</span><span class="p">(</span><span class="nc">Grad</span><span class="p">(</span><span class="n">u</span><span class="p">)),</span><span class="w"> </span><span class="nc">Jump</span><span class="p">(</span><span class="n">v</span><span class="p">));</span>
 <span class="k">auto</span><span class="w"> </span><span class="n">symmetry</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">InterfaceIntegral</span><span class="p">(</span><span class="nc">Jump</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="nc">Average</span><span class="p">(</span><span class="nc">Grad</span><span class="p">(</span><span class="n">v</span><span class="p">)));</span></pre><aside class="m-note m-default"><h4>See also</h4><p><a href="_face_integral_8h.html">FaceIntegral</a></p><p><a href="_boundary_integral_8h.html">BoundaryIntegral</a></p><p><a href="_jump_8h.html">Jump</a></p><p><a href="_average_8h.html">Average</a></p></aside></section>
@@ -269,12 +269,12 @@ $ \partial\Omega $
               <div class="m-doc-template">template&lt;class LHSDerived, class TrialFES, class RHSDerived, class TestFES&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_interface_integral_3_01_dot_3_01_shape_function_base_3_01_l_h_s_2c3b347461557ff6443df9328cd7378e.html" class="m-doc">Rodin::Variational::InterfaceIntegral&lt;Dot&lt;ShapeFunctionBase&lt;LHSDerived, TrialFES, TrialSpace&gt;, ShapeFunctionBase&lt;RHSDerived, TestFES, TestSpace&gt;&gt;&gt;</a>
             </dt>
-            <dd>Integration of the dot product of a trial and test operators.</dd>
+            <dd>Device integration of a trial/test dot product over the interface faces of a Kokkos mesh.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class NestedDerived, class FES&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_interface_integral_3_01_shape_function_base_3_01_nested_derived_0740aa23a8bbe751a8c3fab9254986b2.html" class="m-doc">Rodin::Variational::InterfaceIntegral&lt;ShapeFunctionBase&lt;NestedDerived, FES, TestSpace&gt;&gt;</a>
             </dt>
-            <dd>Integration of a test operator.</dd>
+            <dd>Device integration of a test operator over the interface faces of a Kokkos mesh.</dd>
           </dl>
         </section>
       </div>
@@ -315,7 +315,7 @@ $ \partial\Omega $
     </div>
   </div>
 </div>
-<script src="search-v2-27108c4bc94e.js"></script>
+<script src="search-v2-eeb63e0c3a5e.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">

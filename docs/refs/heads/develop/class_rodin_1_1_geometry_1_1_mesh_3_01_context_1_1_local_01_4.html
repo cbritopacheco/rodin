@@ -320,6 +320,22 @@ $ u $
             </dt>
             <dd>Traces faces using a simple attribute mapping restricted to a set of cell attributes.</dd>
             <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a128bc8603702b5de0fb3fff513160f44" class="m-doc">renumber</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_ordering_1_1_morton.html" class="m-doc">Ordering::<wbr />Morton</a>&amp; ordering) const -&gt; <a href="#a2a23c7c0c4e0da252b7bc0e13b6f81d8" class="m-doc">Mesh</a></span>
+            </dt>
+            <dd>Renumbers a copy using the Morton ordering.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad1b3f631502cf09fd86f4091be697312" class="m-doc">renumber</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_ordering_1_1_hilbert.html" class="m-doc">Ordering::<wbr />Hilbert</a>&amp; ordering) const -&gt; <a href="#a2a23c7c0c4e0da252b7bc0e13b6f81d8" class="m-doc">Mesh</a></span>
+            </dt>
+            <dd>Renumbers a copy using the Hilbert ordering.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a3790294b97c9db0edcf5d00cc105f321" class="m-doc">renumber</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_ordering_1_1_r_c_m.html" class="m-doc">Ordering::<wbr />RCM</a>&amp; ordering) const -&gt; <a href="#a2a23c7c0c4e0da252b7bc0e13b6f81d8" class="m-doc">Mesh</a></span>
+            </dt>
+            <dd>Renumbers a copy using the RCM ordering.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a722bcc4bec71a320442ad7ce88aa31b8" class="m-doc">renumber</a>(</span><span class="m-doc-wrap">const <a href="group___rodin_types.html#gaaa637a5d2cafaa3f415bbb2a2aae306d" class="m-doc">IndexVector</a>&amp; newToOld) const -&gt; <a href="#a2a23c7c0c4e0da252b7bc0e13b6f81d8" class="m-doc">Mesh</a></span>
+            </dt>
+            <dd>Rebuilds a copy using an explicit vertex permutation.</dd>
+            <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#aa66d766684c6856007643ea05ce1479e" class="m-doc">asSubMesh</a>(</span><span class="m-doc-wrap">) -&gt; <a href="class_rodin_1_1_geometry_1_1_sub_mesh_base.html" class="m-doc">SubMeshBase</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Casts to SubMeshBase interface (mutable).</dd>
@@ -1963,6 +1979,114 @@ $ D \longrightarrow d $
               </tfoot>
             </table>
           </div></section>
+          <section class="m-doc-details" id="a128bc8603702b5de0fb3fff513160f44"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="#a2a23c7c0c4e0da252b7bc0e13b6f81d8" class="m-doc">Mesh</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a128bc8603702b5de0fb3fff513160f44" class="m-doc-self">renumber</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_ordering_1_1_morton.html" class="m-doc">Ordering::<wbr />Morton</a>&amp; ordering) const</span></span>
+            </h3>
+            <p>Renumbers a copy using the Morton ordering.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">ordering&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Configured vertex ordering policy.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Renumbered mesh, with the reconstruction semantics of the permutation overload.</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>Apply before building finite element spaces; existing fields and spaces are not transferred. The policy can also be called directly to retain its new-to-old vertex permutation.</p>
+          </div></section>
+          <section class="m-doc-details" id="ad1b3f631502cf09fd86f4091be697312"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="#a2a23c7c0c4e0da252b7bc0e13b6f81d8" class="m-doc">Mesh</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad1b3f631502cf09fd86f4091be697312" class="m-doc-self">renumber</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_ordering_1_1_hilbert.html" class="m-doc">Ordering::<wbr />Hilbert</a>&amp; ordering) const</span></span>
+            </h3>
+            <p>Renumbers a copy using the Hilbert ordering.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">ordering&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Configured vertex ordering policy.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Renumbered mesh, with the reconstruction semantics of the permutation overload.</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>Apply before building finite element spaces; existing fields and spaces are not transferred. The policy can also be called directly to retain its new-to-old vertex permutation.</p>
+          </div></section>
+          <section class="m-doc-details" id="a3790294b97c9db0edcf5d00cc105f321"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="#a2a23c7c0c4e0da252b7bc0e13b6f81d8" class="m-doc">Mesh</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3790294b97c9db0edcf5d00cc105f321" class="m-doc-self">renumber</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_ordering_1_1_r_c_m.html" class="m-doc">Ordering::<wbr />RCM</a>&amp; ordering) const</span></span>
+            </h3>
+            <p>Renumbers a copy using the RCM ordering.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">ordering&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Configured vertex ordering policy.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Renumbered mesh, with the reconstruction semantics of the permutation overload.</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>Apply before building finite element spaces; existing fields and spaces are not transferred. The policy can also be called directly to retain its new-to-old vertex permutation.</p>
+          </div></section>
+          <section class="m-doc-details" id="a722bcc4bec71a320442ad7ce88aa31b8"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="#a2a23c7c0c4e0da252b7bc0e13b6f81d8" class="m-doc">Mesh</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a722bcc4bec71a320442ad7ce88aa31b8" class="m-doc-self">renumber</a>(</span><span class="m-doc-wrap">const <a href="group___rodin_types.html#gaaa637a5d2cafaa3f415bbb2a2aae306d" class="m-doc">IndexVector</a>&amp; newToOld) const</span></span>
+            </h3>
+            <p>Rebuilds a copy using an explicit vertex permutation.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">newToOld&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Old vertex index at each new vertex index.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Renumbered copy of this mesh.</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>The permutation must contain each old vertex exactly once. Wrong size, duplicates and out-of-range indices raise an Alert::Exception.</p><p>Polytopes of each positive dimension held by the connectivity are ordered by their smallest new vertex index, ties keeping their original order. Coordinates, vertex lists, orientations and attributes are carried over unchanged; only the indices change. Connectivity other than the polytope to vertex lists is not carried and must be computed again, and polytope transformations set on this mesh are not carried either: the copy has the native geometry of its vertices.</p><p>Assembly on a device sums the contributions of the cells in index order, so a mesh whose cell and vertex numberings are unrelated, such as one produced by a mesher, scatters its contributions across the matrix. Renumbering it once before building the spaces restores the locality. The numbering seen by the user changes, so the method is never applied implicitly.</p>
+          </div></section>
           <section class="m-doc-details" id="aa66d766684c6856007643ea05ce1479e"><div>
             <h3>
               <div class="m-doc-template">
@@ -3030,7 +3154,7 @@ $ x: K \rightarrow \tau $
     </div>
   </div>
 </div>
-<script src="search-v2-27108c4bc94e.js"></script>
+<script src="search-v2-eeb63e0c3a5e.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">

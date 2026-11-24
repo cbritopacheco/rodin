@@ -77,9 +77,9 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md344">Mathematical Foundation</a></li>
-            <li><a href="#autotoc_md345">Discontinuous Galerkin Context</a></li>
-            <li><a href="#autotoc_md346">Usage Example</a></li>
+            <li><a href="#autotoc_md371">Mathematical Foundation</a></li>
+            <li><a href="#autotoc_md372">Discontinuous Galerkin Context</a></li>
+            <li><a href="#autotoc_md373">Usage Example</a></li>
             <li>
               Reference
               <ul>
@@ -89,7 +89,7 @@
             </li>
           </ul>
         </nav>
-<p>This file defines the FaceIntegral classes which represent integrals over mesh faces (element interfaces) in discontinuous Galerkin (DG) formulations. Face integrals are crucial for coupling elements in DG methods where solutions are discontinuous across element boundaries.</p><section id="autotoc_md344"><h2><a href="#autotoc_md344">Mathematical Foundation</a></h2><p>Face integrals compute the following quantity.</p><div class="m-math"><svg style="width: 5.876em; height: 2.966em;" viewBox="166.069059 -28.471297 56.404849 28.471297">
+<p>This file defines the FaceIntegral classes which represent integrals over mesh faces (element interfaces) in discontinuous Galerkin (DG) formulations. Face integrals are crucial for coupling elements in DG methods where solutions are discontinuous across element boundaries.</p><section id="autotoc_md371"><h2><a href="#autotoc_md371">Mathematical Foundation</a></h2><p>Face integrals compute the following quantity.</p><div class="m-math"><svg style="width: 5.876em; height: 2.966em;" viewBox="166.069059 -28.471297 56.404849 28.471297">
 <title>
 \[     \int_{\mathcal{F}_h} f(x) \, ds
 \]
@@ -128,7 +128,7 @@ $ \mathcal{F}_h $
 <use x='0' y='0' xlink:href='#eq2-g0-70'/>
 <use x='8.592754' y='1.793263' xlink:href='#eq2-g1-104'/>
 </g>
-</svg> is the set of all mesh faces (both interior and boundary faces).</p></section><section id="autotoc_md345"><h2><a href="#autotoc_md345">Discontinuous Galerkin Context</a></h2><p>In DG methods, face integrals handle:</p><ul><li><strong>Numerical fluxes</strong>: Coupling between elements</li><li><strong>Jump terms</strong>: <svg class="m-math" style="width: 7.296em; height: 1.582em; vertical-align: -0.581em;" viewBox="0 -9.630618 70.041072 15.18763">
+</svg> is the set of all mesh faces (both interior and boundary faces).</p></section><section id="autotoc_md372"><h2><a href="#autotoc_md372">Discontinuous Galerkin Context</a></h2><p>In DG methods, face integrals handle:</p><ul><li><strong>Numerical fluxes</strong>: Coupling between elements</li><li><strong>Jump terms</strong>: <svg class="m-math" style="width: 7.296em; height: 1.582em; vertical-align: -0.581em;" viewBox="0 -9.630618 70.041072 15.18763">
 <title>
 $ \int_{\mathcal{F}_h} [\![u]\!] \cdot [\![v]\!] \, ds $
 </title>
@@ -198,7 +198,7 @@ $ \int_{\mathcal{F}_h} \{\!\{u\}\!\} \cdot [\![v]\!] \, ds $
 <use x='69.348156' y='0' xlink:href='#eq4-g4-100'/>
 <use x='75.430849' y='0' xlink:href='#eq4-g4-115'/>
 </g>
-</svg></li><li><strong>Penalty terms</strong>: Interior penalty for stability</li></ul></section><section id="autotoc_md346"><h2><a href="#autotoc_md346">Usage Example</a></h2><pre class="m-code"><span class="c1">// Interior penalty DG method</span>
+</svg></li><li><strong>Penalty terms</strong>: Interior penalty for stability</li></ul></section><section id="autotoc_md373"><h2><a href="#autotoc_md373">Usage Example</a></h2><pre class="m-code"><span class="c1">// Interior penalty DG method</span>
 <span class="k">auto</span><span class="w"> </span><span class="n">penalty</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">FaceIntegral</span><span class="p">(</span><span class="nc">Jump</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="nc">Jump</span><span class="p">(</span><span class="n">v</span><span class="p">));</span>
 <span class="k">auto</span><span class="w"> </span><span class="n">consistency</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">FaceIntegral</span><span class="p">(</span><span class="nc">Average</span><span class="p">(</span><span class="nc">Grad</span><span class="p">(</span><span class="n">u</span><span class="p">)),</span><span class="w"> </span><span class="nc">Jump</span><span class="p">(</span><span class="n">v</span><span class="p">));</span>
 <span class="k">auto</span><span class="w"> </span><span class="n">symmetry</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">FaceIntegral</span><span class="p">(</span><span class="nc">Jump</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="nc">Average</span><span class="p">(</span><span class="nc">Grad</span><span class="p">(</span><span class="n">v</span><span class="p">)));</span></pre><aside class="m-note m-default"><h4>See also</h4><p><a href="_interface_integral_8h.html">InterfaceIntegral</a></p><p><a href="_boundary_integral_8h.html">BoundaryIntegral</a></p><p><a href="_jump_8h.html">Jump</a></p><p><a href="_average_8h.html">Average</a></p></aside></section>
@@ -218,12 +218,12 @@ $ \int_{\mathcal{F}_h} \{\!\{u\}\!\} \cdot [\![v]\!] \, ds $
               <div class="m-doc-template">template&lt;class LHSDerived, class TrialFES, class RHSDerived, class TestFES&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_face_integral_3_01_dot_3_01_shape_function_base_3_01_l_h_s_deriv029e1b2d6561e14be8d288addc694963.html" class="m-doc">Rodin::Variational::FaceIntegral&lt;Dot&lt;ShapeFunctionBase&lt;LHSDerived, TrialFES, TrialSpace&gt;, ShapeFunctionBase&lt;RHSDerived, TestFES, TestSpace&gt;&gt;&gt;</a>
             </dt>
-            <dd>Integration of the dot product of a trial and test operators.</dd>
+            <dd>Device integration of a trial/test dot product over every face of a Kokkos mesh.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class NestedDerived, class FES&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_face_integral_3_01_shape_function_base_3_01_nested_derived_00_01ba6c1a7cf4cef12d1a5c5f827e21e49f.html" class="m-doc">Rodin::Variational::FaceIntegral&lt;ShapeFunctionBase&lt;NestedDerived, FES, TestSpace&gt;&gt;</a>
             </dt>
-            <dd>Integration of a test operator.</dd>
+            <dd>Device integration of a test operator over every face of a Kokkos mesh.</dd>
           </dl>
         </section>
       </div>
@@ -264,7 +264,7 @@ $ \int_{\mathcal{F}_h} \{\!\{u\}\!\} \cdot [\![v]\!] \, ds $
     </div>
   </div>
 </div>
-<script src="search-v2-27108c4bc94e.js"></script>
+<script src="search-v2-eeb63e0c3a5e.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">

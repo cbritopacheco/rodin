@@ -179,6 +179,10 @@
               <span class="m-doc-wrap-bumper">void <a href="#a7352c9bf8ed7dd250b174accac617cdc" class="m-doc">printData</a>(</span><span class="m-doc-wrap">std::ostream&amp; os) <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Prints the coefficient data.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a635010ba5d585a70258cb27ec1cb5096" class="m-doc">print</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; filename)</span>
+            </dt>
+            <dd>Prints object to a file path.</dd>
           </dl>
         </section>
         <section>
@@ -263,6 +267,26 @@
             </table>
 <p>Must be implemented by derived classes.</p>
           </div></section>
+          <section class="m-doc-details" id="a635010ba5d585a70258cb27ec1cb5096"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Range, class <a href="namespace_rodin_1_1_context.html" class="m-doc">Context</a> _2, class Data&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />IO::<wbr />GridFunctionPrinterBase&lt;FileFormat::<wbr />MFEM, Variational::<wbr />P1&lt;Range, Geometry::<wbr />Mesh&lt;Context&gt;&gt;, Data&gt;&lt;Range, _2, Data&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a635010ba5d585a70258cb27ec1cb5096" class="m-doc-self">print</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; filename)</span></span>
+            </h3>
+            <p>Prints object to a file path.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">filename&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Output file path.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
         </section>
       </div>
     </div>
@@ -302,7 +326,7 @@
     </div>
   </div>
 </div>
-<script src="search-v2-27108c4bc94e.js"></script>
+<script src="search-v2-eeb63e0c3a5e.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">

@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Rodin::Kokkos::Variational::LagrangeDOFs class | Rodin</title>
+  <link rel="stylesheet" href="mcss-22c93d2587ab.css" />
+  <link rel="stylesheet" href="rodin-62701ba7f0b9.css" />
+  <link rel="stylesheet" href="rodin-theme-1337632f765f.css" />
+  <link rel="icon" href="favicon-monogram.svg" type="image/svg+xml" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#18191c" />
+  <script src="rodin-theme.js"></script><script src="rodin-navigation.js" defer></script><script src="rodin-ci.js" defer></script><script src="rodin-video.js" defer></script>
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <a href="index.html" id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m">Rodin</a>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li>
+              <a href="pages.html">Pages</a>
+              <ol>
+                <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
+                <li><a href="gallery.html">Gallery</a></li>
+                <li><a href="guides-io.html">Input, output, and visualization</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
+                <li><a href="ci-index.html">Continuous integration</a></li>
+                <li><a href="notation-index.html">Notation</a></li>
+                <li><a href="credits-index.html">Credits</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="modules.html">Modules</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_geometry.html">Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Variational</a></li>
+                <li><a href="namespace_rodin_1_1_assembly.html">Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Quadrature formulae</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Solver</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">IO</a></li>
+              </ol>
+            </li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="3">
+            <li><a href="annotated.html">Classes</a></li>
+            <li><a href="files.html">Files</a></li>
+            <li><a href="benchmarks/index.html"><svg class="rodin-benchmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17 M7 15l4-5 4 3 6-7"></path></svg>Benchmarks</a></li>
+            <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <div class="rodin-reference-breadcrumb"><a href="namespace_rodin.html">Rodin</a><span>›</span>Kokkos<span>›</span>Variational</div><h1>LagrangeDOFs</h1><p class="rodin-reference-brief">Degrees of freedom of an H1 space of degree K on the device.</p><p class="rodin-reference-include">Defined in <a href="_kokkos_2_variational_2_h1_8h.html"><code>Rodin/Kokkos/Variational/H1.h</code></a></p><pre class="m-code rodin-declaration"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span>
+<span class="w">  </span><span class="kt">size_t</span><span class="w"> </span><span class="n">K</span><span class="p">,</span>
+<span class="w">  </span><span class="k">class</span><span class="w"> </span><span class="nc">MemorySpace</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">LagrangeDOFs</span><span class="p">;</span>
+</pre>
+        <table class="m-table m-fullwidth m-flat">
+          <thead>
+            <tr><th colspan="2">Template parameters</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="width: 1%">K</td>
+              <td>Polynomial degree.</td>
+            </tr>
+            <tr>
+              <td>MemorySpace</td>
+              <td>Kokkos memory space of the tables.</td>
+            </tr>
+          </tbody>
+        </table>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#pub-static-methods">Public static functions</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+<p>Holds the local to global numbering of every polytope of the mesh, copied from the host space, and the basis. Component <svg class="m-math" style="width: 0.583em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 5.600473 5.147373">
+<title>
+$ r $
+</title>
+<defs>
+<path id='eq1-g0-114' d='M4.65056-4.889664C4.27995-4.817933 4.088667-4.554919 4.088667-4.291905C4.088667-4.004981 4.315816-3.90934 4.483188-3.90934C4.817933-3.90934 5.092902-4.196264 5.092902-4.554919C5.092902-4.937484 4.722291-5.272229 4.124533-5.272229C3.646326-5.272229 3.096389-5.057036 2.594271-4.327771C2.510585-4.961395 2.032379-5.272229 1.554172-5.272229C1.08792-5.272229 .848817-4.913574 .705355-4.65056C.502117-4.220174 .32279-3.502864 .32279-3.443088C.32279-3.395268 .37061-3.335492 .454296-3.335492C.549938-3.335492 .561893-3.347447 .633624-3.622416C.812951-4.339726 1.0401-5.033126 1.518306-5.033126C1.80523-5.033126 1.888917-4.829888 1.888917-4.483188C1.888917-4.220174 1.769365-3.753923 1.685679-3.383313L1.350934-2.092154C1.303113-1.865006 1.171606-1.327024 1.111831-1.111831C1.028144-.800996 .896638-.239103 .896638-.179328C.896638-.011955 1.028144 .119552 1.207472 .119552C1.338979 .119552 1.566127 .035866 1.637858-.203238C1.673724-.298879 2.116065-2.10411 2.187796-2.379078C2.247572-2.642092 2.319303-2.893151 2.379078-3.156164C2.426899-3.323537 2.47472-3.514819 2.510585-3.670237C2.546451-3.777833 2.86924-4.363636 3.16812-4.62665C3.311582-4.758157 3.622416-5.033126 4.112578-5.033126C4.303861-5.033126 4.495143-4.99726 4.65056-4.889664Z'/>
+</defs>
+<g id='eq1-page1'>
+<use x='0' y='0' xlink:href='#eq1-g0-114'/>
+</g>
+</svg> of the scalar degree of freedom <svg class="m-math" style="width: 0.585em; height: 0.778em; vertical-align: -0.243em;" viewBox="0 -5.147373 5.61916 7.47198">
+<title>
+$ q $
+</title>
+<defs>
+<path id='eq2-g0-113' d='M5.272229-5.152677C5.272229-5.212453 5.224408-5.260274 5.164633-5.260274C5.068991-5.260274 4.60274-4.829888 4.375592-4.411457C4.160399-4.94944 3.789788-5.272229 3.275716-5.272229C1.924782-5.272229 .466252-3.526775 .466252-1.75741C.466252-.573848 1.159651 .119552 1.972603 .119552C2.606227 .119552 3.132254-.358655 3.383313-.633624L3.395268-.621669L2.940971 1.171606L2.833375 1.601993C2.725778 1.960648 2.546451 1.960648 1.984558 1.972603C1.853051 1.972603 1.733499 1.972603 1.733499 2.199751C1.733499 2.283437 1.80523 2.319303 1.888917 2.319303C2.056289 2.319303 2.271482 2.295392 2.438854 2.295392H3.658281C3.837609 2.295392 4.040847 2.319303 4.220174 2.319303C4.291905 2.319303 4.435367 2.319303 4.435367 2.092154C4.435367 1.972603 4.339726 1.972603 4.160399 1.972603C3.598506 1.972603 3.56264 1.888917 3.56264 1.793275C3.56264 1.733499 3.574595 1.721544 3.610461 1.566127L5.272229-5.152677ZM3.58655-1.422665C3.526775-1.219427 3.526775-1.195517 3.359402-.968369C3.096389-.633624 2.570361-.119552 2.008468-.119552C1.518306-.119552 1.243337-.561893 1.243337-1.267248C1.243337-1.924782 1.613948-3.263761 1.841096-3.765878C2.247572-4.60274 2.809465-5.033126 3.275716-5.033126C4.064757-5.033126 4.220174-4.052802 4.220174-3.957161C4.220174-3.945205 4.184309-3.789788 4.172354-3.765878L3.58655-1.422665Z'/>
+</defs>
+<g id='eq2-page1'>
+<use x='0' y='0' xlink:href='#eq2-g0-113'/>
+</g>
+</svg> has the global index <svg class="m-math" style="width: 3.398em; height: 0.960em; vertical-align: -0.243em;" viewBox="0 -6.890786 32.625214 9.215393">
+<title>
+$ q + r n $
+</title>
+<defs>
+<path id='eq3-g1-43' d='M4.770112-2.761644H8.069738C8.237111-2.761644 8.452304-2.761644 8.452304-2.976837C8.452304-3.203985 8.249066-3.203985 8.069738-3.203985H4.770112V-6.503611C4.770112-6.670984 4.770112-6.886177 4.554919-6.886177C4.327771-6.886177 4.327771-6.682939 4.327771-6.503611V-3.203985H1.028144C.860772-3.203985 .645579-3.203985 .645579-2.988792C.645579-2.761644 .848817-2.761644 1.028144-2.761644H4.327771V.537983C4.327771 .705355 4.327771 .920548 4.542964 .920548C4.770112 .920548 4.770112 .71731 4.770112 .537983V-2.761644Z'/>
+<path id='eq3-g0-110' d='M2.462765-3.502864C2.486675-3.574595 2.785554-4.172354 3.227895-4.554919C3.53873-4.841843 3.945205-5.033126 4.411457-5.033126C4.889664-5.033126 5.057036-4.674471 5.057036-4.196264C5.057036-3.514819 4.566874-2.15193 4.327771-1.506351C4.220174-1.219427 4.160399-1.06401 4.160399-.848817C4.160399-.310834 4.531009 .119552 5.104857 .119552C6.216687 .119552 6.635118-1.637858 6.635118-1.709589C6.635118-1.769365 6.587298-1.817186 6.515567-1.817186C6.40797-1.817186 6.396015-1.78132 6.336239-1.578082C6.06127-.597758 5.606974-.119552 5.140722-.119552C5.021171-.119552 4.829888-.131507 4.829888-.514072C4.829888-.812951 4.961395-1.171606 5.033126-1.338979C5.272229-1.996513 5.774346-3.335492 5.774346-4.016936C5.774346-4.734247 5.355915-5.272229 4.447323-5.272229C3.383313-5.272229 2.82142-4.519054 2.606227-4.220174C2.570361-4.901619 2.080199-5.272229 1.554172-5.272229C1.171606-5.272229 .908593-5.045081 .705355-4.638605C.490162-4.208219 .32279-3.490909 .32279-3.443088S.37061-3.335492 .454296-3.335492C.549938-3.335492 .561893-3.347447 .633624-3.622416C.824907-4.351681 1.0401-5.033126 1.518306-5.033126C1.793275-5.033126 1.888917-4.841843 1.888917-4.483188C1.888917-4.220174 1.769365-3.753923 1.685679-3.383313L1.350934-2.092154C1.303113-1.865006 1.171606-1.327024 1.111831-1.111831C1.028144-.800996 .896638-.239103 .896638-.179328C.896638-.011955 1.028144 .119552 1.207472 .119552C1.350934 .119552 1.518306 .047821 1.613948-.131507C1.637858-.191283 1.745455-.609714 1.80523-.848817L2.068244-1.924782L2.462765-3.502864Z'/>
+<path id='eq3-g0-113' d='M5.272229-5.152677C5.272229-5.212453 5.224408-5.260274 5.164633-5.260274C5.068991-5.260274 4.60274-4.829888 4.375592-4.411457C4.160399-4.94944 3.789788-5.272229 3.275716-5.272229C1.924782-5.272229 .466252-3.526775 .466252-1.75741C.466252-.573848 1.159651 .119552 1.972603 .119552C2.606227 .119552 3.132254-.358655 3.383313-.633624L3.395268-.621669L2.940971 1.171606L2.833375 1.601993C2.725778 1.960648 2.546451 1.960648 1.984558 1.972603C1.853051 1.972603 1.733499 1.972603 1.733499 2.199751C1.733499 2.283437 1.80523 2.319303 1.888917 2.319303C2.056289 2.319303 2.271482 2.295392 2.438854 2.295392H3.658281C3.837609 2.295392 4.040847 2.319303 4.220174 2.319303C4.291905 2.319303 4.435367 2.319303 4.435367 2.092154C4.435367 1.972603 4.339726 1.972603 4.160399 1.972603C3.598506 1.972603 3.56264 1.888917 3.56264 1.793275C3.56264 1.733499 3.574595 1.721544 3.610461 1.566127L5.272229-5.152677ZM3.58655-1.422665C3.526775-1.219427 3.526775-1.195517 3.359402-.968369C3.096389-.633624 2.570361-.119552 2.008468-.119552C1.518306-.119552 1.243337-.561893 1.243337-1.267248C1.243337-1.924782 1.613948-3.263761 1.841096-3.765878C2.247572-4.60274 2.809465-5.033126 3.275716-5.033126C4.064757-5.033126 4.220174-4.052802 4.220174-3.957161C4.220174-3.945205 4.184309-3.789788 4.172354-3.765878L3.58655-1.422665Z'/>
+<path id='eq3-g0-114' d='M4.65056-4.889664C4.27995-4.817933 4.088667-4.554919 4.088667-4.291905C4.088667-4.004981 4.315816-3.90934 4.483188-3.90934C4.817933-3.90934 5.092902-4.196264 5.092902-4.554919C5.092902-4.937484 4.722291-5.272229 4.124533-5.272229C3.646326-5.272229 3.096389-5.057036 2.594271-4.327771C2.510585-4.961395 2.032379-5.272229 1.554172-5.272229C1.08792-5.272229 .848817-4.913574 .705355-4.65056C.502117-4.220174 .32279-3.502864 .32279-3.443088C.32279-3.395268 .37061-3.335492 .454296-3.335492C.549938-3.335492 .561893-3.347447 .633624-3.622416C.812951-4.339726 1.0401-5.033126 1.518306-5.033126C1.80523-5.033126 1.888917-4.829888 1.888917-4.483188C1.888917-4.220174 1.769365-3.753923 1.685679-3.383313L1.350934-2.092154C1.303113-1.865006 1.171606-1.327024 1.111831-1.111831C1.028144-.800996 .896638-.239103 .896638-.179328C.896638-.011955 1.028144 .119552 1.207472 .119552C1.338979 .119552 1.566127 .035866 1.637858-.203238C1.673724-.298879 2.116065-2.10411 2.187796-2.379078C2.247572-2.642092 2.319303-2.893151 2.379078-3.156164C2.426899-3.323537 2.47472-3.514819 2.510585-3.670237C2.546451-3.777833 2.86924-4.363636 3.16812-4.62665C3.311582-4.758157 3.622416-5.033126 4.112578-5.033126C4.303861-5.033126 4.495143-4.99726 4.65056-4.889664Z'/>
+</defs>
+<g id='eq3-page1'>
+<use x='0' y='0' xlink:href='#eq3-g0-113'/>
+<use x='8.27582' y='0' xlink:href='#eq3-g1-43'/>
+<use x='20.037135' y='0' xlink:href='#eq3-g0-114'/>
+<use x='25.637608' y='0' xlink:href='#eq3-g0-110'/>
+</g>
+</svg>, where <svg class="m-math" style="width: 0.728em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.987606 5.147373">
+<title>
+$ n $
+</title>
+<defs>
+<path id='eq4-g0-110' d='M2.462765-3.502864C2.486675-3.574595 2.785554-4.172354 3.227895-4.554919C3.53873-4.841843 3.945205-5.033126 4.411457-5.033126C4.889664-5.033126 5.057036-4.674471 5.057036-4.196264C5.057036-3.514819 4.566874-2.15193 4.327771-1.506351C4.220174-1.219427 4.160399-1.06401 4.160399-.848817C4.160399-.310834 4.531009 .119552 5.104857 .119552C6.216687 .119552 6.635118-1.637858 6.635118-1.709589C6.635118-1.769365 6.587298-1.817186 6.515567-1.817186C6.40797-1.817186 6.396015-1.78132 6.336239-1.578082C6.06127-.597758 5.606974-.119552 5.140722-.119552C5.021171-.119552 4.829888-.131507 4.829888-.514072C4.829888-.812951 4.961395-1.171606 5.033126-1.338979C5.272229-1.996513 5.774346-3.335492 5.774346-4.016936C5.774346-4.734247 5.355915-5.272229 4.447323-5.272229C3.383313-5.272229 2.82142-4.519054 2.606227-4.220174C2.570361-4.901619 2.080199-5.272229 1.554172-5.272229C1.171606-5.272229 .908593-5.045081 .705355-4.638605C.490162-4.208219 .32279-3.490909 .32279-3.443088S.37061-3.335492 .454296-3.335492C.549938-3.335492 .561893-3.347447 .633624-3.622416C.824907-4.351681 1.0401-5.033126 1.518306-5.033126C1.793275-5.033126 1.888917-4.841843 1.888917-4.483188C1.888917-4.220174 1.769365-3.753923 1.685679-3.383313L1.350934-2.092154C1.303113-1.865006 1.171606-1.327024 1.111831-1.111831C1.028144-.800996 .896638-.239103 .896638-.179328C.896638-.011955 1.028144 .119552 1.207472 .119552C1.350934 .119552 1.518306 .047821 1.613948-.131507C1.637858-.191283 1.745455-.609714 1.80523-.848817L2.068244-1.924782L2.462765-3.502864Z'/>
+</defs>
+<g id='eq4-page1'>
+<use x='0' y='0' xlink:href='#eq4-g0-110'/>
+</g>
+</svg> is the stride, the size of the scalar space.</p><p>The quadratic simplices keep the closed form of QuadraticBasis, the other polytopes take LagrangeBasis.</p>
+        <section id="pub-static-methods">
+          <h2><a href="#pub-static-methods">Public static functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">static auto <a href="#a5f13d4dfe9cca3d2acaa45f0f6adbff0" class="m-doc">getCapacity</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> vertices) -&gt; <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Gets the number of local degrees of freedom of a polytope.</dd>
+          </dl>
+        </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt id="a34e966dd8d236b03e5319289ebed743b">
+              <span class="m-doc-wrap-bumper"><a href="#a34e966dd8d236b03e5319289ebed743b" class="m-doc-self">LagrangeDOFs</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-info">defaulted</span></span>
+            </dt>
+            <dd>Empty tables.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class FES, class ExecutionSpace&gt;</div>
+              <span class="m-doc-wrap-bumper"><a href="#ab6740620d70e5eb9433c20baa9f3c8fe" class="m-doc">LagrangeDOFs</a>(</span><span class="m-doc-wrap">const FES&amp; fes,
+              const ExecutionSpace&amp; execution)</span>
+            </dt>
+            <dd>Copies the numbering of a scalar host space to the device.</dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a80086f403766bf2918070ac7df95f9a0" class="m-doc">getStride</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a></span>
+            </dt>
+            <dd>Gets the offset between components.</dd>
+            <dt><a href="#a9ab37dffe3cdbf1eab5368ae43f4d3f3" class="m-doc">bind</a></dt><dd>Gets the global degrees of freedom of a polytope.<details class="rodin-declaration-disclosure"><summary>See declaration</summary><div class="rodin-overview-declaration">
+              <span class="m-doc-wrap-bumper">auto <a href="#a9ab37dffe3cdbf1eab5368ae43f4d3f3" class="m-doc">bind</a>(</span><span class="m-doc-wrap">const <a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Rodin::<wbr />Kokkos::<wbr />View</a>&lt;<a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">::<wbr />Rodin::<wbr />Geometry::<wbr />Polytope</a>&gt;&amp; polytope) const -&gt; <a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Rodin::<wbr />Kokkos::<wbr />View</a>&lt;<a href="group___rodin_types.html#gaaa637a5d2cafaa3f415bbb2a2aae306d" class="m-doc">::<wbr />Rodin::<wbr />IndexVector</a>&gt;</span>
+            </div></details></dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Point&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#aad426248ca487a5ca145b0564957a4d1" class="m-doc">getBasis</a>(</span><span class="m-doc-wrap">const Point&amp; ip,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> q) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Point&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a96f1e5a6403936b7ef9ca2c0e6e86b21" class="m-doc">getGradient</a>(</span><span class="m-doc-wrap">const Point&amp; ip,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> q) const -&gt; <a href="_kokkos_2_forward_decls_8h.html#ad8287f85a5c67aed3081e78f8914601b" class="m-doc">Geometry::<wbr />Vector</a></span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a1d17725277571465c9e74ab9815a071a" class="m-doc">getNode</a>(</span><span class="m-doc-wrap">const <a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Rodin::<wbr />Kokkos::<wbr />View</a>&lt;<a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">::<wbr />Rodin::<wbr />Geometry::<wbr />Polytope</a>&gt;&amp; polytope,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> q) const -&gt; <a href="_kokkos_2_forward_decls_8h.html#ad8287f85a5c67aed3081e78f8914601b" class="m-doc">Geometry::<wbr />Vector</a></span>
+            </dt>
+            <dd></dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a5f13d4dfe9cca3d2acaa45f0f6adbff0"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper">static <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5f13d4dfe9cca3d2acaa45f0f6adbff0" class="m-doc-self">getCapacity</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> vertices) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Gets the number of local degrees of freedom of a polytope.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">vertices</td>
+                  <td>Number of vertices of a polytope.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Maximum node count over the geometries of at most <code>vertices</code> vertices.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ab6740620d70e5eb9433c20baa9f3c8fe"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;size_t K, class MemorySpace&gt;
+                template&lt;class FES, class ExecutionSpace&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab6740620d70e5eb9433c20baa9f3c8fe" class="m-doc-self">LagrangeDOFs</a>(</span><span class="m-doc-wrap">const FES&amp; fes,
+              const ExecutionSpace&amp; execution)</span></span>
+            </h3>
+            <p>Copies the numbering of a scalar host space to the device.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">fes</td>
+                  <td>Scalar host space of degree K.</td>
+                </tr>
+                <tr>
+                  <td>execution</td>
+                  <td>Execution space ordering the transfers.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a80086f403766bf2918070ac7df95f9a0"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a80086f403766bf2918070ac7df95f9a0" class="m-doc-self">getStride</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Gets the offset between components.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Scalar space size.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a9ab37dffe3cdbf1eab5368ae43f4d3f3"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Rodin::<wbr />Kokkos::<wbr />View</a>&lt;<a href="group___rodin_types.html#gaaa637a5d2cafaa3f415bbb2a2aae306d" class="m-doc">::<wbr />Rodin::<wbr />IndexVector</a>&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9ab37dffe3cdbf1eab5368ae43f4d3f3" class="m-doc-self">bind</a>(</span><span class="m-doc-wrap">const <a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Rodin::<wbr />Kokkos::<wbr />View</a>&lt;<a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">::<wbr />Rodin::<wbr />Geometry::<wbr />Polytope</a>&gt;&amp; polytope) const</span></span>
+            </h3>
+            <p>Gets the global degrees of freedom of a polytope.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">polytope</td>
+                  <td>Polytope of the mesh.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Scalar global indices in local order.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aad426248ca487a5ca145b0564957a4d1"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;size_t K, class MemorySpace&gt;
+                template&lt;class Point&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aad426248ca487a5ca145b0564957a4d1" class="m-doc-self">getBasis</a>(</span><span class="m-doc-wrap">const Point&amp; ip,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> q) const</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">ip</td>
+                  <td>Integration point.</td>
+                </tr>
+                <tr>
+                  <td>q</td>
+                  <td>Local index.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Basis value.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a96f1e5a6403936b7ef9ca2c0e6e86b21"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;size_t K, class MemorySpace&gt;
+                template&lt;class Point&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="_kokkos_2_forward_decls_8h.html#ad8287f85a5c67aed3081e78f8914601b" class="m-doc">Geometry::<wbr />Vector</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a96f1e5a6403936b7ef9ca2c0e6e86b21" class="m-doc-self">getGradient</a>(</span><span class="m-doc-wrap">const Point&amp; ip,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> q) const</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">ip</td>
+                  <td>Integration point.</td>
+                </tr>
+                <tr>
+                  <td>q</td>
+                  <td>Local index.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Physical gradient.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a1d17725277571465c9e74ab9815a071a"><div>
+            <h3>
+              
+              <span class="m-doc-wrap-bumper"><a href="_kokkos_2_forward_decls_8h.html#ad8287f85a5c67aed3081e78f8914601b" class="m-doc">Geometry::<wbr />Vector</a> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1d17725277571465c9e74ab9815a071a" class="m-doc-self">getNode</a>(</span><span class="m-doc-wrap">const <a href="struct_rodin_1_1_kokkos_1_1_view.html" class="m-doc">::<wbr />Rodin::<wbr />Kokkos::<wbr />View</a>&lt;<a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">::<wbr />Rodin::<wbr />Geometry::<wbr />Polytope</a>&gt;&amp; polytope,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> q) const</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">polytope</td>
+                  <td>Polytope.</td>
+                </tr>
+                <tr>
+                  <td>q</td>
+                  <td>Local index.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference node.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+        </section>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">&hellip;</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form>
+            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript.</noscript>
+          <div id="search-help" class="m-text m-dim m-text-center">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
+            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v2-eeb63e0c3a5e.js"></script>
+<script src="searchdata-v2.js" async="async"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <div class="rodin-site-footer">
+  <p>Rodin. Copyright &copy; <a href="https://cbritopacheco.github.io/">Carlos Brito-Pacheco</a> and contributors.</p>
+  <p class="rodin-footer-tools">Created with
+    <a href="https://doxygen.org/" aria-label="Doxygen"><span class="rodin-footer-logo rodin-footer-doxygen" aria-hidden="true"></span><span class="rodin-footer-accessible">Doxygen</span></a>
+    1.15.0 and
+    <a href="https://mcss.mosra.cz/"><strong>m.css</strong></a>.
+  </p>
+  <a class="rodin-ci-link" href="ci-index.html" aria-label="CI" title="CI"><span class="rodin-ci-mark" aria-hidden="true"></span><span class="rodin-ci-label">CI</span></a>
+</div>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>

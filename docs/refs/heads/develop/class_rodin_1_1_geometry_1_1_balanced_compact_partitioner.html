@@ -86,9 +86,9 @@
             </li>
           </ul>
         </nav>
-<p>This partitioning strategy divides the mesh into partitions of approximately equal size while maintaining spatial locality. The algorithm aims to minimize the interface between partitions.</p><aside class="m-note m-info"><h4>Note</h4><p>This is particularly useful for parallel computing where minimizing communication between processors is important.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_geometry_1_1_greedy_partitioner.html">GreedyPartitioner</a></p></aside>
+<p>The partitions are made by recursive bisection. A set of polytopes for k partitions splits into a region for the first k / 2 partitions and the rest for the others. The region starts from a polytope at the periphery of the set and grows through the adjacency, lowest first along the axis to the polytope furthest from it, until it has its exact share of the set.</p><p>The sizes of the partitions differ by at most one polytope, and the region of a bisection is connected on a connected set. A partition is thus usually connected, though the rest of a bisection is not always.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_geometry_1_1_greedy_partitioner.html">GreedyPartitioner</a></p></aside>
         <figure class="rodin-inheritance"><figcaption>Direct inheritance by class family</figcaption><ul class="rodin-inheritance-row"><li><a href="class_rodin_1_1_geometry_1_1_partitioner.html" title="Partitioner">Partitioner</a></li></ul><div class="rodin-inheritance-arrow" aria-label="Inherited by">↓</div><div class="rodin-inheritance-current">BalancedCompactPartitioner</div></figure><section id="base-classes"><h2><a href="#base-classes">Inherits from</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Base class</th><th>Responsibility</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_geometry_1_1_partitioner.html"><code>Partitioner</code></a><span class="rodin-inheritance-qualifiers">public</span><details><summary>Full type</summary><pre class="m-code rodin-declaration"><span class="nc">Partitioner</span>
-</pre></details></td><td>Abstract base class for mesh partitioning strategies.</td></tr></tbody></table></section><section id="rodin-overrides"><h2><a href="#rodin-overrides">Overrides</a></h2><table class="m-table m-fullwidth"><thead><tr><th>Member</th><th>Base declaration</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_geometry_1_1_balanced_compact_partitioner.html#a638c45c253983ca10bd05eefb530f8a7"><code>getMesh()</code></a></td><td><a href="class_rodin_1_1_geometry_1_1_partitioner.html#a018d58eb3401554c145543399d9d6e23">Partitioner::getMesh</a></td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_balanced_compact_partitioner.html#aeb33e1e43173176ea21df08bcd372402"><code>partition()</code></a></td><td><a href="class_rodin_1_1_geometry_1_1_partitioner.html#a0cb81f7b6a0cccc3ca16882218673967">Partitioner::partition</a></td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_balanced_compact_partitioner.html#a9c4424742927ef57655d348302bd4195"><code>getPartition()</code></a></td><td><a href="class_rodin_1_1_geometry_1_1_partitioner.html#a4e5d35160b1e50ebb2b1a81de333381f">Partitioner::getPartition</a></td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_balanced_compact_partitioner.html#abb85506e676b292ae799e68a858b8823"><code>getCount()</code></a></td><td><a href="class_rodin_1_1_geometry_1_1_partitioner.html#a840b63813db56691da0ba90697077abf">Partitioner::getCount</a></td></tr></tbody></table></section><section id="rodin-inherited"><h2><a href="#rodin-inherited">Inherited interface</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Declared in</th><th>Members</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_geometry_1_1_partitioner.html"><code>Partitioner</code></a></td><td><details><summary>1 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_geometry_1_1_partitioner.html#a12e830ea3c0714fce4874d9c1d2cf346"><code>operator[]()</code></a></li></ul></details></td></tr></tbody></table></section>
+</pre></details></td><td>Abstract base class for mesh partitioning strategies.</td></tr></tbody></table></section><section id="rodin-overrides"><h2><a href="#rodin-overrides">Overrides</a></h2><table class="m-table m-fullwidth"><thead><tr><th>Member</th><th>Base declaration</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_geometry_1_1_balanced_compact_partitioner.html#a638c45c253983ca10bd05eefb530f8a7"><code>getMesh()</code></a></td><td><a href="class_rodin_1_1_geometry_1_1_partitioner.html#a018d58eb3401554c145543399d9d6e23">Partitioner::getMesh</a></td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_balanced_compact_partitioner.html#a407c7ac7190da4caeedcc19ef8e43f13"><code>partition()</code></a></td><td><a href="class_rodin_1_1_geometry_1_1_partitioner.html#a0cb81f7b6a0cccc3ca16882218673967">Partitioner::partition</a></td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_balanced_compact_partitioner.html#a9c4424742927ef57655d348302bd4195"><code>getPartition()</code></a></td><td><a href="class_rodin_1_1_geometry_1_1_partitioner.html#a4e5d35160b1e50ebb2b1a81de333381f">Partitioner::getPartition</a></td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_balanced_compact_partitioner.html#abb85506e676b292ae799e68a858b8823"><code>getCount()</code></a></td><td><a href="class_rodin_1_1_geometry_1_1_partitioner.html#a840b63813db56691da0ba90697077abf">Partitioner::getCount</a></td></tr></tbody></table></section><section id="rodin-inherited"><h2><a href="#rodin-inherited">Inherited interface</a></h2><table class="m-table m-fullwidth rodin-relations"><thead><tr><th>Declared in</th><th>Members</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_geometry_1_1_partitioner.html"><code>Partitioner</code></a></td><td><details><summary>1 members</summary><ul class="rodin-inherited-members"><li><a href="class_rodin_1_1_geometry_1_1_partitioner.html#a12e830ea3c0714fce4874d9c1d2cf346"><code>operator[]()</code></a></li></ul></details></td></tr></tbody></table></section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
@@ -119,12 +119,12 @@
             </dt>
             <dd>Gets the mesh being partitioned.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">void <a href="#aeb33e1e43173176ea21df08bcd372402" class="m-doc">partition</a>(</span><span class="m-doc-wrap">size_t maxPartitionSize,
+              <span class="m-doc-wrap-bumper">void <a href="#a407c7ac7190da4caeedcc19ef8e43f13" class="m-doc">partition</a>(</span><span class="m-doc-wrap">size_t count,
               size_t d) <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Partitions the mesh polytopes of dimension <code>d</code>.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">void <a href="#af6311da7ad1c9653aecaf9b8d39a4643" class="m-doc">partition</a>(</span><span class="m-doc-wrap">size_t maxPartitionSize)</span>
+              <span class="m-doc-wrap-bumper">void <a href="#a6475ab30eb7c39ccd1a867d61ef17fca" class="m-doc">partition</a>(</span><span class="m-doc-wrap">size_t count)</span>
             </dt>
             <dd>Partitions the mesh cells.</dd>
             <dt>
@@ -170,9 +170,9 @@
               </tfoot>
             </table>
           </div></section>
-          <section class="m-doc-details" id="aeb33e1e43173176ea21df08bcd372402"><div>
+          <section class="m-doc-details" id="a407c7ac7190da4caeedcc19ef8e43f13"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aeb33e1e43173176ea21df08bcd372402" class="m-doc-self">partition</a>(</span><span class="m-doc-wrap">size_t maxPartitionSize,
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a407c7ac7190da4caeedcc19ef8e43f13" class="m-doc-self">partition</a>(</span><span class="m-doc-wrap">size_t count,
               size_t d) <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Partitions the mesh polytopes of dimension <code>d</code>.</p>
@@ -182,8 +182,8 @@
               </thead>
               <tbody>
                 <tr>
-                  <td style="width: 1%">maxPartitionSize&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Maximum number of polytopes per partition</td>
+                  <td style="width: 1%">count&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Number of partitions</td>
                 </tr>
                 <tr>
                   <td>d&nbsp;<span class="m-label m-flat m-info">in</span></td>
@@ -191,11 +191,11 @@
                 </tr>
               </tbody>
             </table>
-<p>Creates partitions such that no partition contains more than <code>maxPartitionSize</code> polytopes, while maintaining spatial compactness.</p>
+<p>Requires the incidence (d, d). When <code>count</code> exceeds the number of polytopes, some partitions are empty.</p>
           </div></section>
-          <section class="m-doc-details" id="af6311da7ad1c9653aecaf9b8d39a4643"><div>
+          <section class="m-doc-details" id="a6475ab30eb7c39ccd1a867d61ef17fca"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af6311da7ad1c9653aecaf9b8d39a4643" class="m-doc-self">partition</a>(</span><span class="m-doc-wrap">size_t maxPartitionSize)</span></span>
+              <span class="m-doc-wrap-bumper">void </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6475ab30eb7c39ccd1a867d61ef17fca" class="m-doc-self">partition</a>(</span><span class="m-doc-wrap">size_t count)</span></span>
             </h3>
             <p>Partitions the mesh cells.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -204,12 +204,11 @@
               </thead>
               <tbody>
                 <tr>
-                  <td style="width: 1%">maxPartitionSize&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Maximum number of cells per partition</td>
+                  <td style="width: 1%">count&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Number of partitions</td>
                 </tr>
               </tbody>
             </table>
-<p>Convenience method that partitions the highest-dimensional polytopes (cells) of the mesh.</p>
           </div></section>
           <section class="m-doc-details" id="a9c4424742927ef57655d348302bd4195"><div>
             <h3>
@@ -287,7 +286,7 @@
     </div>
   </div>
 </div>
-<script src="search-v2-27108c4bc94e.js"></script>
+<script src="search-v2-eeb63e0c3a5e.js"></script>
 <script src="searchdata-v2.js" async="async"></script>
 <footer><nav>
   <div class="m-container">
