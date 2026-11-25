@@ -120,9 +120,9 @@ without candidates.
 Snapshot environments resolve Ubuntu mirror lists and point copied Ubuntu
 sources directly at the timestamped signed snapshot archive. Their source-local
 `Snapshot: no` / `snapshot=no` setting disables additional discovery of live
-indexes; it does not disable signature validation. This removes both redundant
-index downloads and the dependency on live mirror availability. Retries retain
-the same snapshot; non-snapshot environments retain the mirror sequence above.
+indexes and preserves signature validation. Shared bundle producers try the
+timestamped endpoint once, then use the signed live mirror sequence if that
+endpoint fails and no cached bundle was available.
 Index and download failures wait 30 and 120 seconds before the remaining
 attempts, each with up to 30 seconds of jitter. This spreads matrix requests
 across short service outages even when every source maps to the same snapshot.
@@ -540,9 +540,12 @@ build, reconnecting the new pages to the latest complete benchmark histories.
 It does not wait for benchmark builds, execution or pooling. After successful pooling, **Publish documentation and benchmarks**
 updates only complete benchmark histories; it cannot replace newer documentation. Missing or failed
 benchmark contributions leave the previous complete results intact. The independent documentation and benchmark workflows hold the same `rodin-gh-pages-publication` lock
-while writing and deploying. Each publisher uploads the locked `gh-pages`
-checkout as its own Pages artifact and deploys its exact artifact ID in that
-same job. The Pages API build version is the published `gh-pages` commit,
+while writing and deploying. Each publisher stages the documentation and
+static assets from the locked `gh-pages` checkout, uploads them as a Pages
+artifact, and deploys its exact artifact ID in that same job. Benchmark
+histories stay in the published Git tree. Staged benchmark pages load them
+from raw GitHub at the exact `gh-pages` commit, keeping the site within the
+GitHub Pages size limit. The Pages API build version is the published `gh-pages` commit,
 which distinguishes master, develop and benchmark updates even when they share
 one source commit. The deployment retains the workflow OIDC token and protected
 environment. This avoids a second hosted-runner queue for a legacy Pages build;
@@ -827,26 +830,25 @@ requirements remain unchanged.
 
 ### Stable package snapshots for shared builds
 
-Shared test and benchmark environments resolve Ubuntu packages against
-`SHARED_APT_SNAPSHOT` in `dev/ci_environment.py`, through APT's signed
-[snapshot service](https://snapshot.ubuntu.com/). Each common test-build job
-publishes its exact package plan and the matching `.deb` files. Directory and
-execution jobs restore that bundle by common-build identifier, verify the
-archive checksums, and install with empty APT sources and indexes. A consumer
-can install the producer's environment during an Ubuntu snapshot outage.
-Benchmark jobs resolve against the same timestamp through APT. Updating the
-pin is a dependency update and requires a new campaign. Retries and archive
-restores retain it.
-The package preferences select the snapshot versions over newer preinstalled
-runner packages. Exact-version downgrades are permitted only for these
-snapshot installs. Signature checks, bounded downloads, no-removal installs,
-and runtime-library hash validation remain enforced. Mirror fallback retains
-the snapshot timestamp and cannot silently switch to the live archive.
+Each common test or benchmark build first looks for an exact package bundle in
+the GitHub Actions cache. The key includes the Ubuntu snapshot timestamp,
+requested packages, architecture, runner image and provisioning code. On a
+miss, APT resolves and downloads the exact versions from the signed
+[Ubuntu snapshot service](https://snapshot.ubuntu.com/). A snapshot index or
+archive outage triggers a fresh plan against signed Ubuntu mirrors. Only
+bundles from the configured snapshot populate the reusable cache.
+
+The producer publishes its complete plan and matching package archives in
+the current run. Component builds and execution jobs restore that bundle,
+verify every archive checksum and install with empty APT sources and indexes.
+This preserves the producer’s compiler and runtime versions even when the
+published bundle came from the live archive. Installation prohibits package
+removals and retains runtime-library hash validation. Configuration failures
+from dpkg still fail the job.
 
 The 2026-11-12 campaign built against glibc `2.39-0ubuntu8.9`; consumers several
-hours later resolved `2.39-0ubuntu8.12`. Identical top-level package requests
-therefore failed the runtime hash check. The snapshot fixes that archive drift
-without weakening compatibility validation.
+hours later resolved `2.39-0ubuntu8.12`. The shared bundle keeps both stages on
+the same exact glibc version.
 
 Explicit CTest fixture producers declared under `examples/` set the
 `RODIN_TEST_OWNER` target property to their owning test directory and declare

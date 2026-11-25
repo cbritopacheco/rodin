@@ -31,6 +31,7 @@ jobs:
       - uses: ./.github/actions/benchmark-environment
         with:
           configuration: ${{ inputs.configuration }}
+          publish: 'true'
       - name: Configure and build shared libraries
         id: build
         env:

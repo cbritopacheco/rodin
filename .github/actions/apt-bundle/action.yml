@@ -1,0 +1,82 @@
+name: Shared Ubuntu package bundle
+description: Provision a signed package plan once and install its exact archives on dependent jobs.
+inputs:
+  packages:
+    description: Whitespace-separated Debian package requests.
+    required: true
+  id:
+    description: Identifier of the common build that owns the bundle.
+    required: true
+  publish:
+    description: Resolve and publish the bundle for this common build.
+    default: 'false'
+runs:
+  using: composite
+  steps:
+    - name: Identify the snapshot cache
+      id: identity
+      if: inputs.publish == 'true'
+      shell: bash
+      env:
+        PACKAGES: ${{ inputs.packages }}
+      run: |
+        python3 dev/ci_environment.py disk
+        key=$(python3 dev/ci_environment.py bundle-key --packages "$PACKAGES")
+        echo "key=$key" >> "$GITHUB_OUTPUT"
+    - name: Restore a verified snapshot bundle
+      id: cache
+      if: inputs.publish == 'true'
+      uses: actions/cache/restore@v5
+      with:
+        path: ${{ runner.temp }}/rodin-apt-bundle
+        key: ${{ steps.identity.outputs.key }}
+    - name: Install the cached snapshot offline
+      if: inputs.publish == 'true' && steps.cache.outputs.cache-hit == 'true'
+      shell: bash
+      env:
+        PACKAGES: ${{ inputs.packages }}
+      run: |
+        python3 dev/ci_environment.py install-bundle --snapshot-only --packages "$PACKAGES" \
+          --bundle "$RUNNER_TEMP/rodin-apt-bundle"
+    - if: inputs.publish == 'true' && steps.cache.outputs.cache-hit != 'true'
+      uses: ./.github/actions/prepare-apt
+    - name: Provision exact signed dependencies
+      id: provision
+      if: inputs.publish == 'true' && steps.cache.outputs.cache-hit != 'true'
+      shell: bash
+      env:
+        PACKAGES: ${{ inputs.packages }}
+      run: |
+        python3 dev/ci_environment.py provision-bundle --packages "$PACKAGES" \
+          --bundle "$RUNNER_TEMP/rodin-apt-bundle"
+    - name: Cache only signed snapshot bundles
+      if: steps.provision.outputs.snapshot == 'true'
+      uses: actions/cache/save@v5
+      with:
+        path: ${{ runner.temp }}/rodin-apt-bundle
+        key: ${{ steps.identity.outputs.key }}
+    - name: Publish pinned package bundle
+      if: inputs.publish == 'true'
+      uses: ./.github/actions/upload-artifacts
+      with:
+        name: ci-apt-${{ inputs.id }}
+        path: ${{ runner.temp }}/rodin-apt-bundle/
+        overwrite: true
+        compression-level: 0
+        retention-days: 7
+        if-no-files-found: error
+    - name: Restore pinned package bundle
+      if: inputs.publish != 'true'
+      uses: ./.github/actions/download-artifacts
+      with:
+        names: '["ci-apt-${{ inputs.id }}"]'
+        path: ${{ runner.temp }}/rodin-apt-bundle
+        merge-single: true
+    - name: Install pinned packages offline
+      if: inputs.publish != 'true'
+      shell: bash
+      env:
+        PACKAGES: ${{ inputs.packages }}
+      run: |
+        python3 dev/ci_environment.py install-bundle --packages "$PACKAGES" \
+          --bundle "$RUNNER_TEMP/rodin-apt-bundle"

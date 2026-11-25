@@ -190,7 +190,7 @@ class EnvironmentTest(unittest.TestCase):
             self.assertNotIn('aminya/setup-cpp', text)
             document = yaml.safe_load(text)
             steps = document['runs']['steps']
-            install = next(i for i, step in enumerate(steps) if step.get('uses') == './.github/actions/apt-dependencies')
+            install = next(i for i, step in enumerate(steps) if step.get('uses') == './.github/actions/apt-bundle')
             select = next(i for i, step in enumerate(steps) if 'ci_environment.py compiler' in step.get('run', ''))
             self.assertLess(install, select)
 
@@ -229,12 +229,21 @@ class EnvironmentTest(unittest.TestCase):
             self.assertEqual(run.call_count, len(environment.CLEANUP_PATHS))
             self.assertFalse(any('clean' in c.args[0] for c in run.call_args_list))
 
-    def test_shared_producers_and_consumers_use_the_pinned_snapshot(self):
+    def test_shared_producers_and_consumers_select_the_same_package_bundle(self):
         for action in ['test-environment', 'benchmark-environment']:
             document = yaml.safe_load((ROOT / '.github/actions' / action / 'action.yml').read_text())
             install = next(step for step in document['runs']['steps']
-                           if step.get('uses') == './.github/actions/apt-dependencies')
-            self.assertEqual(install['with']['snapshot'], 'shared')
+                           if step.get('uses') == './.github/actions/apt-bundle')
+            self.assertEqual(install['with']['packages'], '${{ steps.packages.outputs.packages }}')
+            self.assertEqual(install['with']['publish'], '${{ inputs.publish }}')
+        for workflow, publish in [('BenchmarkConfiguration.yml', 'true'),
+                                  ('BenchmarkGroup.yml', None)]:
+            doc = yaml.safe_load((ROOT / '.github/workflows' / workflow).read_text())
+            environments = [s for job in doc['jobs'].values() for s in job.get('steps', [])
+                            if s.get('uses') == './.github/actions/benchmark-environment']
+            self.assertTrue(environments)
+            for step in environments:
+                self.assertEqual(step['with'].get('publish'), publish)
 
     def test_snapshot_sources_select_signed_archive_versions_over_runner_packages(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -827,17 +836,17 @@ class EnvironmentTest(unittest.TestCase):
                 (cache / filename).write_text(filename)
             probe.side_effect = lambda command, **_: ('amd64' if command[0] == 'dpkg' else
                                                        '\t'.join(Path(command[-1]).stem.split('_')))
-            plan = {'requested': ['lcov'], 'versions': {'lcov': '1', 'libdep:amd64': '2'}}
+            plan = {'requested': ['lcov'], 'versions': {'lcov': '1', 'libdep:amd64': '2'},
+                    'snapshot': environment.SHARED_APT_SNAPSHOT}
             environment.export_bundle(bundle, cache, plan)
             self.assertEqual(sorted(path.name for path in bundle.iterdir()),
                              ['lcov_1_all.deb', 'libdep_2_amd64.deb', 'manifest.json'])
 
             def check_offline_options(arguments, options, _archives, _timeout):
-                self.assertEqual(arguments, ['--yes', '--no-remove', 'install',
+                self.assertEqual(arguments, ['--yes', '--no-remove', '--allow-downgrades', 'install',
                                  str((bundle / 'lcov_1_all.deb').resolve()),
                                  str((bundle / 'libdep_2_amd64.deb').resolve())])
                 overrides = dict(option.split('=', 1) for option in options if option != '-o')
-                self.assertEqual(overrides.pop('APT::Snapshot'), environment.SHARED_APT_SNAPSHOT)
                 self.assertEqual(set(overrides), {'Dir::Etc::sourcelist', 'Dir::Etc::sourceparts',
                                                  'Dir::State::lists'})
                 for value in overrides.values():
@@ -845,14 +854,20 @@ class EnvironmentTest(unittest.TestCase):
                     self.assertFalse(list(path.iterdir()) if path.is_dir() else path.read_text())
 
             apt.side_effect = check_offline_options
-            environment.install_bundle(bundle, ['lcov'], root / 'install-cache')
+            environment.install_bundle(bundle, ['lcov'], root / 'install-cache', snapshot_only=True)
+            manifest_path = bundle / 'manifest.json'
+            manifest = json.loads(manifest_path.read_text())
+            manifest['snapshot'] = None
+            manifest_path.write_text(json.dumps(manifest))
+            with self.assertRaisesRegex(ValueError, 'does not match'):
+                environment.install_bundle(bundle, ['lcov'], root / 'install-cache', snapshot_only=True)
             (bundle / 'libdep_2_amd64.deb').write_text('changed archive')
             with self.assertRaisesRegex(ValueError, 'checksum or file mismatch'):
                 environment.install_bundle(bundle, ['lcov'], root / 'install-cache')
             apt.assert_called_once()
 
     def test_bundle_consumer_uses_exact_artifact_name_and_installs_before_compiler_selection(self):
-        action = yaml.safe_load((ROOT / '.github/actions/test-environment/action.yml').read_text())
+        action = yaml.safe_load((ROOT / '.github/actions/apt-bundle/action.yml').read_text())
         steps = action['runs']['steps']
         upload = next(s for s in steps if s.get('uses') == './.github/actions/upload-artifacts')
         download = next(s for s in steps if s.get('uses') == './.github/actions/download-artifacts')
@@ -861,10 +876,43 @@ class EnvironmentTest(unittest.TestCase):
         self.assertEqual(download['with']['merge-single'], True)
         self.assertEqual(upload['if'], "inputs.publish == 'true'")
         self.assertEqual(download['if'], "inputs.publish != 'true'")
-        offline = next(s for s in steps if 'ci_environment.py install-bundle' in s.get('run', ''))
-        compiler = next(s for s in steps if 'ci_environment.py compiler' in s.get('run', ''))
+        offline = next(s for s in steps if s.get('name') == 'Install pinned packages offline')
         self.assertLess(steps.index(download), steps.index(offline))
-        self.assertLess(steps.index(offline), steps.index(compiler))
+        restore = next(s for s in steps if s.get('uses') == 'actions/cache/restore@v5')
+        save = next(s for s in steps if s.get('uses') == 'actions/cache/save@v5')
+        self.assertEqual(restore['with'], save['with'])
+        self.assertEqual(save['if'], "steps.provision.outputs.snapshot == 'true'")
+
+    def test_snapshot_transport_failure_resolves_a_fresh_live_plan_but_never_caches_it(self):
+        for failed_stage in ['indexes', 'archives']:
+            with self.subTest(stage=failed_stage), tempfile.TemporaryDirectory() as tmp, \
+                    patch.object(environment, 'prepare') as prepare, \
+                    patch.object(environment, 'install') as install:
+                root = Path(tmp)
+                error = environment.PackageSourceUnavailable(failed_stage)
+                if failed_stage == 'indexes':
+                    prepare.side_effect = [error, None]
+                else:
+                    install.side_effect = [error, None]
+                output = root / 'output'
+                with patch.dict(os.environ, GITHUB_OUTPUT=str(output)):
+                    environment.provision_bundle(['lcov'], root, root / 'bundle')
+                self.assertFalse(output.exists())
+                first, second = prepare.call_args_list
+                self.assertEqual(first.kwargs, {'mirrors': environment.MIRRORS[:1],
+                                                'snapshot': environment.SHARED_APT_SNAPSHOT})
+                self.assertEqual(second.kwargs, {'snapshot': ''})
+                self.assertNotEqual(first.args[2], second.args[2])
+                self.assertEqual(install.call_args.args[-1], root / 'bundle')
+                self.assertEqual(install.call_args.kwargs, second.kwargs)
+
+    def test_package_configuration_failure_does_not_change_source(self):
+        with tempfile.TemporaryDirectory() as tmp, patch.object(environment, 'prepare') as prepare, \
+                patch.object(environment, 'install', side_effect=subprocess.CalledProcessError(1, 'dpkg')):
+            root = Path(tmp)
+            with self.assertRaises(subprocess.CalledProcessError):
+                environment.provision_bundle(['lcov'], root, root / 'bundle')
+            prepare.assert_called_once()
 
     def test_slow_snapshot_download_has_a_bounded_larger_budget(self):
         with tempfile.TemporaryDirectory() as tmp, \

@@ -4,10 +4,12 @@ inputs:
   configuration:
     description: local or distributed benchmark configuration.
     required: true
+  publish:
+    description: Resolve and publish the configuration’s package bundle.
+    default: 'false'
 runs:
   using: composite
   steps:
-    - uses: ./.github/actions/prepare-apt
     - name: Select benchmark dependencies
       id: packages
       shell: bash
@@ -22,10 +24,11 @@ runs:
           *) exit 1 ;;
         esac
         echo "packages=$packages" >> "$GITHUB_OUTPUT"
-    - uses: ./.github/actions/apt-dependencies
+    - uses: ./.github/actions/apt-bundle
       with:
         packages: ${{ steps.packages.outputs.packages }}
-        snapshot: shared
+        id: benchmark-${{ inputs.configuration }}
+        publish: ${{ inputs.publish }}
     - name: Select and verify benchmark compiler
       shell: bash
       run: python3 dev/ci_environment.py compiler --compiler gcc-14

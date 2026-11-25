@@ -16,6 +16,11 @@ SITE = {'build_type': 'legacy', 'source': {'branch': 'gh-pages', 'path': '/'},
 
 
 class PagesTest(unittest.TestCase):
+    def staging(self):
+        directory = tempfile.TemporaryDirectory(prefix='rodin-pages-staging-')
+        self.addCleanup(directory.cleanup)
+        return Path(directory.name) / 'site'
+
     def marker(self):
         directory = tempfile.TemporaryDirectory(prefix='rodin-pages-verification-')
         self.addCleanup(directory.cleanup)
@@ -26,11 +31,12 @@ class PagesTest(unittest.TestCase):
 
     def test_prepared_artifact_identifies_exact_published_commit(self):
         checkout, marker = self.marker()
+        staging = self.staging()
         with patch('deploy_pages.api', side_effect=[dict(SITE, build_type='workflow'),
                 {'object': {'sha': COMMIT}}]), \
                 patch('deploy_pages.subprocess.check_output', return_value=COMMIT + '\n'):
-            self.assertEqual(deploy_pages.prepare('owner/repo', checkout), marker)
-            self.assertEqual(json.loads((checkout / deploy_pages.MARKER).read_text()), marker)
+            self.assertEqual(deploy_pages.prepare('owner/repo', checkout, staging), marker)
+            self.assertEqual(json.loads((staging / deploy_pages.MARKER).read_text()), marker)
 
     def test_preparation_exports_snapshot_version_for_deployment(self):
         checkout, _ = self.marker()
@@ -39,7 +45,7 @@ class PagesTest(unittest.TestCase):
                 patch('deploy_pages.api', side_effect=[dict(SITE, build_type='workflow'),
                       {'object': {'sha': COMMIT}}]), \
                 patch('deploy_pages.subprocess.check_output', return_value=COMMIT + '\n'):
-            deploy_pages.prepare('owner/repo', checkout)
+            deploy_pages.prepare('owner/repo', checkout, self.staging())
         self.assertEqual(output.read_text(), f'commit={COMMIT}\n')
 
     def test_waits_through_stale_content_and_verifies_exact_commit(self):
@@ -71,13 +77,47 @@ class PagesTest(unittest.TestCase):
                 {'object': {'sha': COMMIT}}]), \
                 patch('deploy_pages.subprocess.check_output', return_value='different\n'):
             with self.assertRaisesRegex(ValueError, 'changed'):
-                deploy_pages.prepare('owner/repo', checkout)
+                deploy_pages.prepare('owner/repo', checkout, self.staging())
             self.assertFalse((checkout / deploy_pages.MARKER).exists())
 
     def test_legacy_source_requires_explicit_settings_change(self):
         with patch('deploy_pages.api', return_value=SITE):
             with self.assertRaisesRegex(ValueError, 'GitHub Actions'):
-                deploy_pages.prepare('owner/repo', Path('checkout'))
+                deploy_pages.prepare('owner/repo', Path('checkout'), self.staging())
+
+    def test_historical_benchmarks_stay_in_git_and_charts_get_immutable_urls(self):
+        checkout, _ = self.marker()
+        staging = self.staging()
+        relative = 'benchmark-data/refs/heads/develop/solver & assembly/index.json'
+        history = checkout / relative
+        history.parent.mkdir(parents=True)
+        history.write_text('{"schema": 1}')
+        html = Path('docs/refs/heads/develop/benchmarks/solver/index.html')
+        (checkout / html).parent.mkdir(parents=True)
+        link = '../../../../../../benchmark-data/refs/heads/develop/solver &amp; assembly/index.json'
+        original = f'<div data-benchmark-history data-history-index="{link}"></div>'
+        (checkout / html).write_text(original)
+        (checkout / 'index.html').write_text('Rodin')
+        with patch('deploy_pages.api', side_effect=[dict(SITE, build_type='workflow'),
+                {'object': {'sha': COMMIT}}]), \
+                patch('deploy_pages.subprocess.check_output', return_value=COMMIT + '\n'):
+            deploy_pages.prepare('owner/repo', checkout, staging)
+        self.assertFalse((staging / 'benchmark-data').exists())
+        self.assertEqual((staging / 'index.html').read_text(), 'Rodin')
+        raw = f'https://raw.githubusercontent.com/owner/repo/{COMMIT}/'
+        self.assertIn(f'{raw}benchmark-data/refs/heads/develop/solver%20%26%20assembly/index.json',
+                      (staging / html).read_text())
+        self.assertEqual((checkout / html).read_text(), original)
+        self.assertEqual(history.read_text(), '{"schema": 1}')
+
+    def test_excessive_staging_fails_before_upload(self):
+        checkout, _ = self.marker()
+        with patch('deploy_pages.PAGES_LIMIT', 1), \
+                patch('deploy_pages.api', side_effect=[dict(SITE, build_type='workflow'),
+                      {'object': {'sha': COMMIT}}]), \
+                patch('deploy_pages.subprocess.check_output', return_value=COMMIT + '\n'):
+            with self.assertRaisesRegex(ValueError, 'site size limit'):
+                deploy_pages.prepare('owner/repo', checkout, self.staging())
 
     def test_every_pages_writer_deploys_its_artifact_under_same_lock(self):
         for filename, job in [('Documentation.yml', 'PublishDocumentation'),
@@ -94,6 +134,7 @@ class PagesTest(unittest.TestCase):
         action = yaml.safe_load((ROOT / '.github/actions/publish-pages/action.yml').read_text())
         steps = action['runs']['steps']
         self.assertEqual(steps[1]['uses'], 'actions/upload-pages-artifact@v5')
+        self.assertEqual(steps[1]['with']['path'], '${{ runner.temp }}/rodin-pages-stage')
         self.assertEqual(steps[2]['uses'], 'actions/github-script@v8')
         self.assertEqual(steps[2]['env']['SNAPSHOT'], '${{ steps.snapshot.outputs.commit }}')
         self.assertEqual(steps[2]['env']['ARTIFACT_ID'], '${{ steps.artifact.outputs.artifact_id }}')

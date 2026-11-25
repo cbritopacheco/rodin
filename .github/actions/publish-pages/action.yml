@@ -1,5 +1,5 @@
 name: Publish documentation and benchmarks
-description: Deploy the locked gh-pages checkout without queuing a second runner.
+description: Stage and deploy the documentation for the locked gh-pages commit.
 inputs:
   checkout:
     description: Checkout of the exact published gh-pages commit.
@@ -20,12 +20,12 @@ runs:
       env:
         GH_TOKEN: ${{ github.token }}
         CHECKOUT: ${{ inputs.checkout }}
-      run: python3 dev/deploy_pages.py prepare --checkout "$CHECKOUT"
+      run: python3 dev/deploy_pages.py prepare --checkout "$CHECKOUT" --staging "$RUNNER_TEMP/rodin-pages-stage"
     - uses: actions/upload-pages-artifact@v5
       id: artifact
       with:
         name: ${{ inputs.artifact-name }}-${{ github.run_attempt }}
-        path: ${{ inputs.checkout }}
+        path: ${{ runner.temp }}/rodin-pages-stage
     - name: Deploy the exact uploaded artifact
       id: deployment
       uses: actions/github-script@v8
@@ -42,6 +42,5 @@ runs:
     - name: Verify the served publication marker
       shell: bash
       env:
-        CHECKOUT: ${{ inputs.checkout }}
         PAGE_URL: ${{ steps.deployment.outputs.page_url }}
-      run: python3 dev/deploy_pages.py verify --checkout "$CHECKOUT" --url "$PAGE_URL"
+      run: python3 dev/deploy_pages.py verify --checkout "$RUNNER_TEMP/rodin-pages-stage" --url "$PAGE_URL"

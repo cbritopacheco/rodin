@@ -202,9 +202,11 @@ def setup_sources(system=Path('/etc/apt')):
         print('Excluded unused Microsoft Ubuntu feed from ' + str(source), flush=True)
 
 
-def sources(directory, mirror, system=Path('/etc/apt')):
+def sources(directory, mirror, system=Path('/etc/apt'), *, snapshot=None):
     """Copy source definitions; change Ubuntu transport only, retaining trust rules."""
-    snapshot = os.environ.get('RODIN_APT_SNAPSHOT', '')
+    prefer_archive = snapshot is not None
+    if snapshot is None:
+        snapshot = os.environ.get('RODIN_APT_SNAPSHOT', '')
     if snapshot == 'shared':
         snapshot = SHARED_APT_SNAPSHOT
     if snapshot and not re.fullmatch(r'[0-9]{8}T[0-9]{6}Z', snapshot):
@@ -303,15 +305,16 @@ def sources(directory, mirror, system=Path('/etc/apt')):
                # apt-cache must see the same required binary indexes as
                # apt-get, even when a runner disables the default target.
                '-o', 'Acquire::IndexTargets::deb::Packages::DefaultEnabled=true']
-    if snapshot:
-        # Retain the snapshot marker for exact-version installation policy.
-        # Prefer its versions even over newer preinstalled runner packages.
+    if snapshot or prefer_archive:
+        # Choose a version from the signed archive even when a runner has
+        # a newer build whose package file would be unavailable.
         preferences = directory / 'preferences'
         original = system / 'preferences'
         text = original.read_text() if original.is_file() else ''
         preferences.write_text(text + '\nPackage: *\nPin: release o=Ubuntu\nPin-Priority: 1001\n')
-        options += ['-o', 'APT::Snapshot=' + snapshot,
-                    '-o', 'Dir::Etc::preferences=' + str(preferences)]
+        options += ['-o', 'Dir::Etc::preferences=' + str(preferences)]
+    if snapshot:
+        options += ['-o', 'APT::Snapshot=' + snapshot]
     return options
 
 
@@ -388,13 +391,17 @@ def wait_for_apt_retry(attempt):
     time.sleep(delay)
 
 
-def prepare(requested, archives, state):
+class PackageSourceUnavailable(RuntimeError):
+    """The signed package indexes or archives could not be retrieved."""
+
+
+def prepare(requested, archives, state, *, mirrors=MIRRORS, snapshot=None):
     archives.mkdir(parents=True, exist_ok=True)
     (archives / 'partial').mkdir(exist_ok=True)
     state.mkdir(parents=True, exist_ok=True)
     last_error = None
-    for index, mirror in enumerate(MIRRORS):
-        options = sources(state / str(index), mirror)
+    for index, mirror in enumerate(mirrors):
+        options = sources(state / str(index), mirror, snapshot=snapshot)
         try:
             apt(['update'], options, archives, INDEX_REFRESH_TIMEOUT)
             versions = candidates(requested, options)
@@ -402,10 +409,10 @@ def prepare(requested, archives, state):
         except (subprocess.CalledProcessError, subprocess.TimeoutExpired, MissingCandidate) as error:
             last_error = error
             print('APT index attempt failed:', mirror or 'runner sources', str(error), flush=True)
-            if index < len(MIRRORS) - 1:
+            if index < len(mirrors) - 1:
                 wait_for_apt_retry(index)
     else:
-        raise RuntimeError('All signed APT index sources failed') from last_error
+        raise PackageSourceUnavailable('All signed APT index sources failed') from last_error
     # APT omits satisfied installed dependencies from its Inst records, while
     # --installed traversal omits new intermediate dependencies. Combine both
     # views until the explicit plan stops growing; never remove pins or accept
@@ -427,7 +434,9 @@ def prepare(requested, archives, state):
             break
         versions = resolved
     print('Pinned APT package plan:', json.dumps(versions, sort_keys=True), flush=True)
-    plan = {'requested': requested, 'versions': versions, 'source_index': index}
+    plan = {'requested': requested, 'versions': versions, 'source_index': index,
+            'snapshot': next((option.partition('=')[2] for option in options
+                              if option.startswith('APT::Snapshot=')), None)}
     (state / 'plan.json').write_text(json.dumps(plan, sort_keys=True) + '\n')
     system = Path('/etc/os-release').read_text()
     architecture = subprocess.check_output(['dpkg', '--print-architecture'], text=True).strip()
@@ -443,14 +452,13 @@ def prepare(requested, archives, state):
     return plan
 
 
-def install(archives, state, bundle=None):
+def install(archives, state, bundle=None, *, mirrors=MIRRORS, snapshot=None):
     plan = json.loads((state / 'plan.json').read_text())
     pinned = [name + '=' + version for name, version in sorted(plan['versions'].items())]
-    if bundle is not None and os.environ.get('RODIN_APT_SNAPSHOT') != 'shared':
-        raise ValueError('Exporting a package bundle requires the shared snapshot')
+    policy = ['--allow-downgrades'] if snapshot == '' else []
     last_error = None
-    for index in range(plan['source_index'], len(MIRRORS)):
-        options = sources(state / str(index), MIRRORS[index])
+    for index in range(plan['source_index'], len(mirrors)):
+        options = sources(state / str(index), mirrors[index], snapshot=snapshot)
         timeout = (SNAPSHOT_DOWNLOAD_TIMEOUT if any(option.startswith('APT::Snapshot=') for option in options)
                    else DOWNLOAD_TIMEOUT)
         try:
@@ -458,7 +466,7 @@ def install(archives, state, bundle=None):
                 apt(['update'], options, archives, INDEX_REFRESH_TIMEOUT)
             # Bound the whole transfer, not only idle sockets: slow downloads
             # can otherwise run for almost an hour while still making progress.
-            download = ['--yes', '--no-remove', '--download-only']
+            download = ['--yes', '--no-remove', '--download-only', *policy]
             if bundle is not None:
                 # Consumers may need packages already present on this runner.
                 download.append('--reinstall')
@@ -466,17 +474,43 @@ def install(archives, state, bundle=None):
             break
         except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as error:
             last_error = error
-            print('APT download attempt failed:', MIRRORS[index] or 'runner sources', flush=True)
-            if index < len(MIRRORS) - 1:
+            print('APT download attempt failed:', mirrors[index] or 'runner sources', flush=True)
+            if index < len(mirrors) - 1:
                 wait_for_apt_retry(index - plan['source_index'])
     else:
-        raise RuntimeError('All APT archive sources failed for the pinned package plan') from last_error
+        raise PackageSourceUnavailable('All APT archive sources failed for the pinned package plan') from last_error
     # Only download/index errors trigger mirror fallback. Do not retry a failed
     # package configuration or change its versions underneath shared artifacts.
-    apt(['--yes', '--no-remove', '--no-download', 'install', *pinned],
+    apt(['--yes', '--no-remove', '--no-download', *policy, 'install', *pinned],
         options, archives, INSTALL_TIMEOUT)
     if bundle is not None:
         export_bundle(bundle, archives, plan)
+
+
+def provision_bundle(requested, root, bundle):
+    archives = root / 'rodin-apt-archives'
+    state = root / 'rodin-apt-state'
+    # All configured mirrors map to the same endpoint in snapshot mode. On
+    # failure start a new plan against signed live sources in separate APT state.
+    try:
+        prepare(requested, archives, state / 'snapshot', mirrors=MIRRORS[:1], snapshot=SHARED_APT_SNAPSHOT)
+        install(archives, state / 'snapshot', bundle, mirrors=MIRRORS[:1], snapshot=SHARED_APT_SNAPSHOT)
+    except PackageSourceUnavailable as error:
+        print(f'::warning::{error}. Resolving a new exact plan from signed Ubuntu mirrors.', flush=True)
+        prepare(requested, archives, state / 'live', snapshot='')
+        install(archives, state / 'live', bundle, snapshot='')
+        return
+    if output := os.environ.get('GITHUB_OUTPUT'):
+        with open(output, 'a') as stream:
+            stream.write('snapshot=true\n')
+
+
+def bundle_key(requested):
+    architecture = subprocess.check_output(
+        ['dpkg', '--print-architecture'], text=True, timeout=INDEX_TIMEOUT).strip()
+    identity = [SHARED_APT_SNAPSHOT, requested, architecture, Path('/etc/os-release').read_text(),
+                os.environ.get('ImageOS'), os.environ.get('ImageVersion'), package_digest(Path(__file__))]
+    return 'rodin-apt-bundle-' + hashlib.sha256(json.dumps(identity).encode()).hexdigest()
 
 
 def package_digest(path):
@@ -511,18 +545,19 @@ def export_bundle(bundle, archives, plan):
         shutil.copy2(path, bundle / path.name)
         checksums[path.name] = package_digest(path)
     (bundle / 'manifest.json').write_text(json.dumps({
-        'architecture': architecture, 'snapshot': SHARED_APT_SNAPSHOT,
+        'architecture': architecture, 'snapshot': plan['snapshot'],
         'requested': plan['requested'], 'versions': versions,
         'files': {key: path.name for key, path in files.items()}, 'sha256': checksums,
     }, sort_keys=True) + '\n')
 
 
-def install_bundle(bundle, requested, archives):
+def install_bundle(bundle, requested, archives, *, snapshot_only=False):
     """Verify and install a common-build bundle without querying a remote index."""
     manifest = json.loads((bundle / 'manifest.json').read_text())
     architecture = subprocess.check_output(
         ['dpkg', '--print-architecture'], text=True, timeout=INDEX_TIMEOUT).strip()
-    if (manifest['snapshot'] != SHARED_APT_SNAPSHOT or
+    valid_snapshots = {SHARED_APT_SNAPSHOT} if snapshot_only else {SHARED_APT_SNAPSHOT, None}
+    if (manifest['snapshot'] not in valid_snapshots or
             manifest['architecture'] != architecture or manifest['requested'] != requested):
         raise ValueError('Package bundle does not match the shared test environment')
     files = manifest['files']
@@ -546,18 +581,18 @@ def install_bundle(bundle, requested, archives):
         (empty / 'lists').mkdir()
         options = ['-o', 'Dir::Etc::sourcelist=' + str(empty / 'sources.list'),
                    '-o', 'Dir::Etc::sourceparts=' + str(empty / 'sources.list.d'),
-                   '-o', 'Dir::State::lists=' + str(empty / 'lists'),
-                   '-o', 'APT::Snapshot=' + manifest['snapshot']]
-        apt(['--yes', '--no-remove', 'install', *paths], options, archives, INSTALL_TIMEOUT)
+                   '-o', 'Dir::State::lists=' + str(empty / 'lists')]
+        apt(['--yes', '--no-remove', '--allow-downgrades', 'install', *paths], options, archives, INSTALL_TIMEOUT)
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('operation', choices=[
-        'setup', 'disk', 'prepare', 'install', 'install-bundle', 'python', 'compiler'])
+        'setup', 'disk', 'prepare', 'install', 'provision-bundle', 'install-bundle', 'bundle-key', 'python', 'compiler'])
     parser.add_argument('--packages', default='')
     parser.add_argument('--compiler', default='')
     parser.add_argument('--bundle', type=Path)
+    parser.add_argument('--snapshot-only', action='store_true')
     parser.add_argument('--minimum-gib', type=float, default=MIN_FREE_GIB)
     args = parser.parse_args()
     if args.minimum_gib <= 0:
@@ -573,10 +608,17 @@ def main():
         select_compiler(args.compiler)
     elif args.operation == 'prepare':
         prepare(packages(args.packages), root / 'rodin-apt-archives', root / 'rodin-apt-state')
+    elif args.operation == 'provision-bundle':
+        if args.bundle is None:
+            parser.error('provision-bundle requires --bundle')
+        provision_bundle(packages(args.packages), root, args.bundle)
+    elif args.operation == 'bundle-key':
+        print(bundle_key(packages(args.packages)))
     elif args.operation == 'install-bundle':
         if args.bundle is None:
             parser.error('install-bundle requires --bundle')
-        install_bundle(args.bundle, packages(args.packages), root / 'rodin-apt-archives')
+        install_bundle(args.bundle, packages(args.packages), root / 'rodin-apt-archives',
+                       snapshot_only=args.snapshot_only)
     else:
         install(root / 'rodin-apt-archives', root / 'rodin-apt-state', args.bundle)
 

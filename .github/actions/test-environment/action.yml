@@ -36,38 +36,11 @@ runs:
           *) exit 1 ;;
         esac
         echo "packages=${packages[*]}" >> "$GITHUB_OUTPUT"
-    - name: Install compatible dependencies
-      if: inputs.publish == 'true'
-      uses: ./.github/actions/apt-dependencies
+    - uses: ./.github/actions/apt-bundle
       with:
         packages: ${{ steps.packages.outputs.packages }}
-        snapshot: shared
-        bundle: ${{ runner.temp }}/rodin-apt-bundle
-    - name: Publish pinned package bundle
-      if: inputs.publish == 'true'
-      uses: ./.github/actions/upload-artifacts
-      with:
-        name: ci-apt-${{ inputs.bundle-id }}
-        path: ${{ runner.temp }}/rodin-apt-bundle/
-        overwrite: true
-        compression-level: 0
-        retention-days: 7
-        if-no-files-found: error
-    - name: Restore pinned package bundle
-      if: inputs.publish != 'true'
-      uses: ./.github/actions/download-artifacts
-      with:
-        names: '["ci-apt-${{ inputs.bundle-id }}"]'
-        path: ${{ runner.temp }}/rodin-apt-bundle
-        merge-single: true
-    - name: Install pinned packages offline
-      if: inputs.publish != 'true'
-      shell: bash
-      env:
-        PACKAGES: ${{ steps.packages.outputs.packages }}
-      run: |
-        python3 dev/ci_environment.py install-bundle --packages "$PACKAGES" \
-          --bundle "$RUNNER_TEMP/rodin-apt-bundle"
+        id: ${{ inputs.bundle-id }}
+        publish: ${{ inputs.publish }}
     - name: Select and verify compatible compiler
       shell: bash
       env:
