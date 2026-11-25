@@ -32,6 +32,8 @@ jobs:
       - uses: ./.github/actions/test-environment
         with:
           definition: ${{ inputs.definition }}
+          bundle-id: ${{ inputs.id }}
+          publish: 'true'
       - name: Install pinned lane planning dependency
         run: python3 dev/ci_environment.py python
       - uses: ./.github/actions/download-artifacts

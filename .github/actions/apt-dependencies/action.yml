@@ -7,6 +7,9 @@ inputs:
   snapshot:
     description: Optional Ubuntu snapshot ID, or shared for the pinned campaign snapshot.
     default: ''
+  bundle:
+    description: Optional destination for the complete shared package bundle.
+    default: ''
 runs:
   using: composite
   steps:
@@ -31,8 +34,14 @@ runs:
     - name: Install resolved dependencies
       env:
         RODIN_APT_SNAPSHOT: ${{ inputs.snapshot }}
+        BUNDLE: ${{ inputs.bundle }}
       shell: bash
-      run: python3 dev/ci_environment.py install
+      run: |
+        if [ -n "$BUNDLE" ]; then
+          python3 dev/ci_environment.py install --bundle "$BUNDLE"
+        else
+          python3 dev/ci_environment.py install
+        fi
     - name: Save validated package archives
       if: steps.archives.outputs.cache-hit != 'true'
       uses: actions/cache/save@v5

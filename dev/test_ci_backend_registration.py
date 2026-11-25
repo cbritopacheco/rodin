@@ -372,9 +372,12 @@ class BackendRegistrationTest(unittest.TestCase):
         real = {n for n in real if not re.search(r"Boundary_|StokesStability_", n)}
         complex_tests, _ = self.configure("tests/convergence/isoparametric/Helmholtz", complex=True)
         complex_tests = {n for n in complex_tests if n.startswith("RodinConvergenceIsoparametricPETScHelmholtzBoundary_")}
-        for family, suite, step_name, names in [
-            ("PETScConvergence", "bulk", "Run PETSc convergence suite", real),
-            ("PETScComplexConvergence", "curved_boundary", "Run curved complex PETSc Helmholtz boundary suite", complex_tests),
+        boundary, _ = self.configure("tests/convergence/h/PETScHelmholtz", complex=True)
+        boundary = {n for n in boundary if n.startswith("RodinConvergenceHPETScHelmholtzBoundary_")}
+        for family, suites, step_name, names in [
+            ("PETScConvergence", {"bulk"}, "Run PETSc convergence suite", real),
+            ("PETScComplexConvergence", {"curved_boundary"}, "Run curved complex PETSc Helmholtz boundary suite", complex_tests),
+            ("PETScComplexConvergence", {"boundary", "boundary_pyramid"}, "Run complex PETSc Helmholtz boundary suite", boundary),
         ]:
             self.assertTrue(names)
             job = jobs[family]
@@ -386,7 +389,7 @@ class BackendRegistrationTest(unittest.TestCase):
                 for mt in ["ON", "OFF"]:
                     counts = Counter()
                     for row in job["strategy"]["matrix"]["include"]:
-                        if row["multithreaded"] != mt or row["suite"] != suite:
+                        if row["multithreaded"] != mt or row["suite"] not in suites:
                             continue
                         command = re.sub(r'\$\{\{\s*matrix\.(\w+)\s*\}\}', lambda m: str(row.get(m[1], "")), step)
                         args = subprocess.check_output(["bash", "-ec", command], text=True,
@@ -395,8 +398,41 @@ class BackendRegistrationTest(unittest.TestCase):
                         exclude = re.compile(args[args.index("-E") + 1]) if "-E" in args else None
                         selected = {n for n in names if include.search(n) and not (exclude and exclude.search(n))}
                         self.assertTrue(selected, row)
+                        if row["suite"] in {"boundary", "boundary_pyramid"}:
+                            self.assertEqual({n.endswith("_Pyramid") for n in selected},
+                                             {row["suite"] == "boundary_pyramid"})
                         counts.update(selected)
                     self.assertEqual(counts, Counter({n: 1 for n in names}))
+
+    def test_complex_affine_pyramid_cases_preserve_filters_ranks_and_watchdog(self):
+        tests, build = self.configure("tests/convergence/h/PETScHelmholtz", complex=True)
+        prefix = "RodinConvergenceHPETScHelmholtzBoundary"
+        properties = {}
+        for command, args, *_ in ci.commands((build / "cases" / "CTestTestfile.cmake").read_text()):
+            if command == "set_tests_properties":
+                boundary = args.index("PROPERTIES")
+                values = dict(zip(args[boundary + 1::2], args[boundary + 2::2]))
+                for name in args[:boundary]:
+                    properties.setdefault(name, {}).update(values)
+        cases = [f"{kind}P{degree}Rates" for kind in ["MixedNeumann", "Impedance"] for degree in range(1, 4)]
+        for rank in range(5):
+            context = f"{prefix}_MPI_np{rank}" if rank else prefix
+            fixture = "AllGeometries/" + ("MPITest." if rank else "LocalTest.")
+            all_test = f"{context}_Pyramid"
+            self.assertNotIn(all_test, tests)
+            rate_filters = [f"{fixture}{case}/Pyramid" for case in cases]
+            for case, filters in zip(cases + ["Controls"], rate_filters + [
+                    f"{fixture}*/Pyramid-" + ":".join(rate_filters)]):
+                name = f"{context}_{case}_Pyramid"
+                self.assertIn("--gtest_filter=" + filters, tests[name])
+                self.assertIn("--gtest_fail_if_no_test_selected", tests[name])
+                self.assertEqual(properties[name]["TIMEOUT"], "1800")
+                self.assertEqual(properties[name]["RESOURCE_LOCK"], "petsc_refinement_pyramid")
+                if rank:
+                    self.assertEqual(properties[name]["PROCESSORS"], str(rank))
+            for geometry in set(GEOMETRIES) - {"Pyramid"}:
+                name = f"{context}_{geometry}"
+                self.assertIn(f"--gtest_filter={fixture}*/{geometry}", tests[name])
 
     def test_curved_boundary_lanes_cover_configured_names_including_controls(self):
         modules = ["Diffusion", "ReactionDiffusion", "LinearElasticity", "NonlinearPoisson", "Stokes"]

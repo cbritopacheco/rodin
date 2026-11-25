@@ -15,8 +15,8 @@ permissions:
 jobs:
   PETScComplexConvergence:
     runs-on: ubuntu-24.04
-    timeout-minutes: ${{ matrix.suite == 'curved_boundary' && 240 || startsWith(matrix.suite, 'curved_helmholtz') && 180 ||
-      120 }}
+    timeout-minutes: ${{ (matrix.suite == 'curved_boundary' || matrix.suite == 'boundary_pyramid') && 240 || startsWith(matrix.suite,
+      'curved_helmholtz') && 180 || 120 }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(inputs.matrix) }}
@@ -55,10 +55,12 @@ jobs:
       run: ctest --test-dir build/tests -R '^RodinConvergenceIsoparametricPETSc(MPI)?P0Projection_' --output-on-failure --no-tests=error
         -j 1
     - name: Run complex PETSc Helmholtz boundary suite
-      if: matrix.suite == 'boundary'
-      run: "context_pattern=''\nif [ \"${{ matrix.context }}\" != local ]; then context_pattern='MPI_${{ matrix.context }}_';\
-        \ fi\nctest --test-dir build/tests -R \"^RodinConvergenceHPETScHelmholtzBoundary_${context_pattern}[A-Za-z]+$\" \\\
-        \n  --output-on-failure --no-tests=error -j 1\n"
+      if: matrix.suite == 'boundary' || matrix.suite == 'boundary_pyramid'
+      run: "case \"${{ matrix.context }}\" in\n  local) context_pattern='' ;;\n  np1|np2|np3|np4) context_pattern='MPI_${{\
+        \ matrix.context }}_' ;;\n  *) exit 1 ;;\nesac\ncase \"${{ matrix.suite }}\" in\n  boundary) test_pattern='(Segment|Triangle|Quadrilateral|Tetrahedron|Hexahedron|Wedge)'\
+        \ ;;\n  boundary_pyramid) test_pattern='[A-Za-z][A-Za-z0-9]*_Pyramid' ;;\n  *) exit 1 ;;\nesac\nctest --test-dir build/tests\
+        \ \\\n  -R \"^RodinConvergenceHPETScHelmholtzBoundary_${context_pattern}${test_pattern}$\" \\\n  --output-on-failure\
+        \ --no-tests=error -j 1\n"
     - name: Discover coverage tests without runtime profiles
       if: matrix.suite == 'submesh'
       env:

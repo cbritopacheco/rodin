@@ -829,9 +829,14 @@ requirements remain unchanged.
 
 Shared test and benchmark environments resolve Ubuntu packages against
 `SHARED_APT_SNAPSHOT` in `dev/ci_environment.py`, through APT's signed
-[snapshot service](https://snapshot.ubuntu.com/). Both build producers and
-execution consumers use the same timestamp. Updating this pin is a dependency
-update and requires a new campaign; retries and archive restores retain it.
+[snapshot service](https://snapshot.ubuntu.com/). Each common test-build job
+publishes its exact package plan and the matching `.deb` files. Directory and
+execution jobs restore that bundle by common-build identifier, verify the
+archive checksums, and install with empty APT sources and indexes. A consumer
+can install the producer's environment during an Ubuntu snapshot outage.
+Benchmark jobs resolve against the same timestamp through APT. Updating the
+pin is a dependency update and requires a new campaign. Retries and archive
+restores retain it.
 The package preferences select the snapshot versions over newer preinstalled
 runner packages. Exact-version downgrades are permitted only for these
 snapshot installs. Signature checks, bounded downloads, no-removal installs,

@@ -5703,7 +5703,7 @@ jobs:
       }})
   PETScComplexConvergence:
     runs-on: ubuntu-24.04
-    timeout-minutes: ${{ matrix.suite == 'curved_boundary' && 240 || startsWith(matrix.suite, 'curved_helmholtz')
+    timeout-minutes: ${{ (matrix.suite == 'curved_boundary' || matrix.suite == 'boundary_pyramid') && 240 || startsWith(matrix.suite, 'curved_helmholtz')
       && 180 || 120 }}
     strategy:
       fail-fast: false
@@ -5748,6 +5748,26 @@ jobs:
         - multithreaded: 'ON'
           suite: boundary
           path: Convergence / H / PETSc / BoundaryConditions / Complex
+          context: np4
+        - multithreaded: 'ON'
+          suite: boundary_pyramid
+          path: Convergence / H / PETSc / BoundaryConditions / Complex / Pyramid
+          context: local
+        - multithreaded: 'ON'
+          suite: boundary_pyramid
+          path: Convergence / H / PETSc / BoundaryConditions / Complex / Pyramid
+          context: np1
+        - multithreaded: 'ON'
+          suite: boundary_pyramid
+          path: Convergence / H / PETSc / BoundaryConditions / Complex / Pyramid
+          context: np2
+        - multithreaded: 'ON'
+          suite: boundary_pyramid
+          path: Convergence / H / PETSc / BoundaryConditions / Complex / Pyramid
+          context: np3
+        - multithreaded: 'ON'
+          suite: boundary_pyramid
+          path: Convergence / H / PETSc / BoundaryConditions / Complex / Pyramid
           context: np4
         - multithreaded: 'ON'
           suite: curved_boundary
@@ -5812,6 +5832,26 @@ jobs:
         - multithreaded: 'OFF'
           suite: boundary
           path: Convergence / H / PETSc / BoundaryConditions / Complex
+          context: np4
+        - multithreaded: 'OFF'
+          suite: boundary_pyramid
+          path: Convergence / H / PETSc / BoundaryConditions / Complex / Pyramid
+          context: local
+        - multithreaded: 'OFF'
+          suite: boundary_pyramid
+          path: Convergence / H / PETSc / BoundaryConditions / Complex / Pyramid
+          context: np1
+        - multithreaded: 'OFF'
+          suite: boundary_pyramid
+          path: Convergence / H / PETSc / BoundaryConditions / Complex / Pyramid
+          context: np2
+        - multithreaded: 'OFF'
+          suite: boundary_pyramid
+          path: Convergence / H / PETSc / BoundaryConditions / Complex / Pyramid
+          context: np3
+        - multithreaded: 'OFF'
+          suite: boundary_pyramid
+          path: Convergence / H / PETSc / BoundaryConditions / Complex / Pyramid
           context: np4
         - multithreaded: 'OFF'
           suite: curved_boundary
@@ -5872,10 +5912,21 @@ jobs:
       run: ctest --test-dir build/tests -R '^RodinConvergenceIsoparametricPETSc(MPI)?P0Projection_' --output-on-failure
         --no-tests=error -j 1
     - name: Run complex PETSc Helmholtz boundary suite
-      if: matrix.suite == 'boundary'
-      run: "context_pattern=''\nif [ \"${{ matrix.context }}\" != local ]; then context_pattern='MPI_${{ matrix.context\
-        \ }}_'; fi\nctest --test-dir build/tests -R \"^RodinConvergenceHPETScHelmholtzBoundary_${context_pattern}[A-Za-z]+$\"\
-        \ \\\n  --output-on-failure --no-tests=error -j 1\n"
+      if: matrix.suite == 'boundary' || matrix.suite == 'boundary_pyramid'
+      run: |
+        case "${{ matrix.context }}" in
+          local) context_pattern='' ;;
+          np1|np2|np3|np4) context_pattern='MPI_${{ matrix.context }}_' ;;
+          *) exit 1 ;;
+        esac
+        case "${{ matrix.suite }}" in
+          boundary) test_pattern='(Segment|Triangle|Quadrilateral|Tetrahedron|Hexahedron|Wedge)' ;;
+          boundary_pyramid) test_pattern='[A-Za-z][A-Za-z0-9]*_Pyramid' ;;
+          *) exit 1 ;;
+        esac
+        ctest --test-dir build/tests \
+          -R "^RodinConvergenceHPETScHelmholtzBoundary_${context_pattern}${test_pattern}$" \
+          --output-on-failure --no-tests=error -j 1
     - name: Discover coverage tests without runtime profiles
       if: matrix.suite == 'submesh'
       env:

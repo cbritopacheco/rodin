@@ -796,6 +796,76 @@ class EnvironmentTest(unittest.TestCase):
             self.assertEqual(apt.call_count, 2)
             self.retry_sleep.assert_not_called()
 
+    def test_bundle_producer_downloads_pins_even_when_already_installed(self):
+        with tempfile.TemporaryDirectory() as tmp, \
+                patch.dict(os.environ, RODIN_APT_SNAPSHOT='shared'), \
+                patch.object(environment, 'sources', return_value=[]), \
+                patch.object(environment, 'apt') as apt, \
+                patch.object(environment, 'export_bundle') as export:
+            root = Path(tmp)
+            plan = {'source_index': 0, 'requested': ['lcov'], 'versions': {'lcov': '1'}}
+            (root / 'plan.json').write_text(json.dumps(plan))
+            environment.install(root / 'cache', root, root / 'bundle')
+            download, install = [call.args[0] for call in apt.call_args_list]
+            self.assertIn('--reinstall', download)
+            self.assertIn('--download-only', download)
+            self.assertIn('lcov=1', download)
+            self.assertIn('lcov=1', install)
+            self.assertIn('--no-download', install)
+            export.assert_called_once_with(root / 'bundle', root / 'cache', plan)
+
+    def test_bundle_installs_only_exact_archives_and_checks_them_before_apt(self):
+        with tempfile.TemporaryDirectory() as tmp, \
+                patch.object(environment.subprocess, 'check_output') as probe, \
+                patch.object(environment, 'apt') as apt:
+            root = Path(tmp)
+            cache = root / 'cache'
+            bundle = root / 'bundle'
+            cache.mkdir()
+            filenames = ['libdep_2_arm64.deb', 'libdep_2_amd64.deb', 'libdep_3_amd64.deb', 'lcov_1_all.deb']
+            for filename in filenames:
+                (cache / filename).write_text(filename)
+            probe.side_effect = lambda command, **_: ('amd64' if command[0] == 'dpkg' else
+                                                       '\t'.join(Path(command[-1]).stem.split('_')))
+            plan = {'requested': ['lcov'], 'versions': {'lcov': '1', 'libdep:amd64': '2'}}
+            environment.export_bundle(bundle, cache, plan)
+            self.assertEqual(sorted(path.name for path in bundle.iterdir()),
+                             ['lcov_1_all.deb', 'libdep_2_amd64.deb', 'manifest.json'])
+
+            def check_offline_options(arguments, options, _archives, _timeout):
+                self.assertEqual(arguments, ['--yes', '--no-remove', 'install',
+                                 str((bundle / 'lcov_1_all.deb').resolve()),
+                                 str((bundle / 'libdep_2_amd64.deb').resolve())])
+                overrides = dict(option.split('=', 1) for option in options if option != '-o')
+                self.assertEqual(overrides.pop('APT::Snapshot'), environment.SHARED_APT_SNAPSHOT)
+                self.assertEqual(set(overrides), {'Dir::Etc::sourcelist', 'Dir::Etc::sourceparts',
+                                                 'Dir::State::lists'})
+                for value in overrides.values():
+                    path = Path(value)
+                    self.assertFalse(list(path.iterdir()) if path.is_dir() else path.read_text())
+
+            apt.side_effect = check_offline_options
+            environment.install_bundle(bundle, ['lcov'], root / 'install-cache')
+            (bundle / 'libdep_2_amd64.deb').write_text('changed archive')
+            with self.assertRaisesRegex(ValueError, 'checksum or file mismatch'):
+                environment.install_bundle(bundle, ['lcov'], root / 'install-cache')
+            apt.assert_called_once()
+
+    def test_bundle_consumer_uses_exact_artifact_name_and_installs_before_compiler_selection(self):
+        action = yaml.safe_load((ROOT / '.github/actions/test-environment/action.yml').read_text())
+        steps = action['runs']['steps']
+        upload = next(s for s in steps if s.get('uses') == './.github/actions/upload-artifacts')
+        download = next(s for s in steps if s.get('uses') == './.github/actions/download-artifacts')
+        self.assertEqual(json.loads(download['with']['names']), [upload['with']['name']])
+        self.assertEqual(download['with']['path'] + '/', upload['with']['path'])
+        self.assertEqual(download['with']['merge-single'], True)
+        self.assertEqual(upload['if'], "inputs.publish == 'true'")
+        self.assertEqual(download['if'], "inputs.publish != 'true'")
+        offline = next(s for s in steps if 'ci_environment.py install-bundle' in s.get('run', ''))
+        compiler = next(s for s in steps if 'ci_environment.py compiler' in s.get('run', ''))
+        self.assertLess(steps.index(download), steps.index(offline))
+        self.assertLess(steps.index(offline), steps.index(compiler))
+
     def test_slow_snapshot_download_has_a_bounded_larger_budget(self):
         with tempfile.TemporaryDirectory() as tmp, \
                 patch.object(environment, 'sources', return_value=['-o', 'APT::Snapshot=20261113T000000Z']), \

@@ -50,6 +50,7 @@ jobs:
       - uses: ./.github/actions/test-environment
         with:
           definition: ${{ steps.configuration.outputs.definition }}
+          bundle-id: ${{ inputs.common }}
       - name: Check disk headroom after dependency installation
         run: python3 dev/ci_environment.py disk
       - name: Download this configuration's common objects

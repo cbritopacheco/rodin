@@ -4,10 +4,15 @@ inputs:
   definition:
     description: Complete shared-build configuration.
     required: true
+  bundle-id:
+    description: Common-build identifier for the package bundle.
+    required: true
+  publish:
+    description: Resolve and publish the package bundle for this common build.
+    default: 'false'
 runs:
   using: composite
   steps:
-    - uses: ./.github/actions/prepare-apt
     - name: Select compatible dependencies
       id: packages
       shell: bash
@@ -32,10 +37,37 @@ runs:
         esac
         echo "packages=${packages[*]}" >> "$GITHUB_OUTPUT"
     - name: Install compatible dependencies
+      if: inputs.publish == 'true'
       uses: ./.github/actions/apt-dependencies
       with:
         packages: ${{ steps.packages.outputs.packages }}
         snapshot: shared
+        bundle: ${{ runner.temp }}/rodin-apt-bundle
+    - name: Publish pinned package bundle
+      if: inputs.publish == 'true'
+      uses: ./.github/actions/upload-artifacts
+      with:
+        name: ci-apt-${{ inputs.bundle-id }}
+        path: ${{ runner.temp }}/rodin-apt-bundle/
+        overwrite: true
+        compression-level: 0
+        retention-days: 7
+        if-no-files-found: error
+    - name: Restore pinned package bundle
+      if: inputs.publish != 'true'
+      uses: ./.github/actions/download-artifacts
+      with:
+        names: '["ci-apt-${{ inputs.bundle-id }}"]'
+        path: ${{ runner.temp }}/rodin-apt-bundle
+        merge-single: true
+    - name: Install pinned packages offline
+      if: inputs.publish != 'true'
+      shell: bash
+      env:
+        PACKAGES: ${{ steps.packages.outputs.packages }}
+      run: |
+        python3 dev/ci_environment.py install-bundle --packages "$PACKAGES" \
+          --bundle "$RUNNER_TEMP/rodin-apt-bundle"
     - name: Select and verify compatible compiler
       shell: bash
       env:

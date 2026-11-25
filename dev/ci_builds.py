@@ -92,6 +92,7 @@ def definition(job, row):
         else:
             choices = {'curved_projection': 'RodinConvergenceIsoparametricPETScP0Projection',
                        'boundary': 'RodinConvergenceHPETScHelmholtzBoundary',
+                       'boundary_pyramid': 'RodinConvergenceHPETScHelmholtzBoundary',
                        'submesh': 'RodinPETScMPIH1SubMeshRestrictionTest',
                        'curved_boundary': 'RodinConvergenceIsoparametricPETScHelmholtzBoundary'}
             if suite not in choices:

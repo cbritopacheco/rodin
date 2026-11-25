@@ -1,6 +1,9 @@
 add_executable(RodinConvergenceHPETScHelmholtz Helmholtz.cpp)
 include(../../PETScRefinement.cmake)
-rodin_add_petsc_refinement(RodinConvergenceHPETScHelmholtzBoundary BoundaryConditions.cpp)
+rodin_add_petsc_refinement(RodinConvergenceHPETScHelmholtzBoundary BoundaryConditions.cpp
+  PARTITION_GEOMETRIES Pyramid
+  RATE_CASES MixedNeumannP1Rates MixedNeumannP2Rates MixedNeumannP3Rates
+    ImpedanceP1Rates ImpedanceP2Rates ImpedanceP3Rates)
 target_link_libraries(RodinConvergenceHPETScHelmholtz
   PRIVATE GTest::gtest RodinConvergenceH Rodin::PETSc)
 set(_RODIN_HELMHOLTZ_GEOMETRIES

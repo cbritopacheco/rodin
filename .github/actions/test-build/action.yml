@@ -39,6 +39,7 @@ runs:
       if: inputs.environment == 'true'
       with:
         definition: ${{ steps.build.outputs.definition }}
+        bundle-id: ${{ steps.configuration.outputs.common }}
     - name: Download only this selection's required builds
       uses: ./.github/actions/download-artifacts
       with:

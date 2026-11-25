@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Bounded Ubuntu dependency provisioning and conditional hosted-runner cleanup.
 
-Package archives are an optimization only: APT still validates versions,
-dependencies, signatures and archive hashes. No installed system tree or test
-execution state is cached. Run this helper as the runner user, never with sudo.
+APT resolves and downloads packages from signed sources. Shared test consumers
+can install that exact package bundle with local APT sources only. No installed
+system tree or execution state is cached. Run as the runner user, never with sudo.
 """
 from __future__ import annotations
 
@@ -443,9 +443,11 @@ def prepare(requested, archives, state):
     return plan
 
 
-def install(archives, state):
+def install(archives, state, bundle=None):
     plan = json.loads((state / 'plan.json').read_text())
     pinned = [name + '=' + version for name, version in sorted(plan['versions'].items())]
+    if bundle is not None and os.environ.get('RODIN_APT_SNAPSHOT') != 'shared':
+        raise ValueError('Exporting a package bundle requires the shared snapshot')
     last_error = None
     for index in range(plan['source_index'], len(MIRRORS)):
         options = sources(state / str(index), MIRRORS[index])
@@ -456,8 +458,11 @@ def install(archives, state):
                 apt(['update'], options, archives, INDEX_REFRESH_TIMEOUT)
             # Bound the whole transfer, not only idle sockets: slow downloads
             # can otherwise run for almost an hour while still making progress.
-            apt(['--yes', '--no-remove', '--download-only', 'install', *pinned],
-                options, archives, timeout)
+            download = ['--yes', '--no-remove', '--download-only']
+            if bundle is not None:
+                # Consumers may need packages already present on this runner.
+                download.append('--reinstall')
+            apt([*download, 'install', *pinned], options, archives, timeout)
             break
         except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as error:
             last_error = error
@@ -470,13 +475,89 @@ def install(archives, state):
     # package configuration or change its versions underneath shared artifacts.
     apt(['--yes', '--no-remove', '--no-download', 'install', *pinned],
         options, archives, INSTALL_TIMEOUT)
+    if bundle is not None:
+        export_bundle(bundle, archives, plan)
+
+
+def package_digest(path):
+    digest = hashlib.sha256()
+    with path.open('rb') as stream:
+        for chunk in iter(lambda: stream.read(1024 * 1024), b''):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def export_bundle(bundle, archives, plan):
+    """Publish the exact, signed-source package closure selected by APT."""
+    architecture = subprocess.check_output(
+        ['dpkg', '--print-architecture'], text=True, timeout=INDEX_TIMEOUT).strip()
+    files = {}
+    versions = plan['versions']
+    for path in sorted(archives.glob('*.deb')):
+        name, version, arch = subprocess.check_output(
+            ['dpkg-deb', '--show', '--showformat=${Package}\t${Version}\t${Architecture}',
+             str(path)], text=True, timeout=INDEX_TIMEOUT).split('\t')
+        keys = [f'{name}:{arch}']
+        if arch in {architecture, 'all'}:
+            keys.append(name)
+        for key in keys:
+            if versions.get(key) == version:
+                files[key] = path
+    if missing := sorted(versions.keys() - files.keys()):
+        raise RuntimeError('Missing exact package archives: ' + ', '.join(missing))
+    bundle.mkdir(parents=True, exist_ok=False)
+    checksums = {}
+    for path in sorted(set(files.values())):
+        shutil.copy2(path, bundle / path.name)
+        checksums[path.name] = package_digest(path)
+    (bundle / 'manifest.json').write_text(json.dumps({
+        'architecture': architecture, 'snapshot': SHARED_APT_SNAPSHOT,
+        'requested': plan['requested'], 'versions': versions,
+        'files': {key: path.name for key, path in files.items()}, 'sha256': checksums,
+    }, sort_keys=True) + '\n')
+
+
+def install_bundle(bundle, requested, archives):
+    """Verify and install a common-build bundle without querying a remote index."""
+    manifest = json.loads((bundle / 'manifest.json').read_text())
+    architecture = subprocess.check_output(
+        ['dpkg', '--print-architecture'], text=True, timeout=INDEX_TIMEOUT).strip()
+    if (manifest['snapshot'] != SHARED_APT_SNAPSHOT or
+            manifest['architecture'] != architecture or manifest['requested'] != requested):
+        raise ValueError('Package bundle does not match the shared test environment')
+    files = manifest['files']
+    checksums = manifest['sha256']
+    if (not files or files.keys() != manifest['versions'].keys() or
+            set(files.values()) != checksums.keys()):
+        raise ValueError('Incomplete shared test package bundle')
+    paths = []
+    for name, checksum in sorted(checksums.items()):
+        if not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9+._%~:-]*\.deb', name):
+            raise ValueError('Invalid package filename in shared test bundle')
+        path = bundle / name
+        if not path.is_file() or path.is_symlink() or package_digest(path) != checksum:
+            raise ValueError('Package bundle checksum or file mismatch: ' + name)
+        paths.append(str(path.resolve()))
+    archives.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory(prefix='rodin-apt-offline-') as folder:
+        empty = Path(folder)
+        (empty / 'sources.list').touch()
+        (empty / 'sources.list.d').mkdir()
+        (empty / 'lists').mkdir()
+        options = ['-o', 'Dir::Etc::sourcelist=' + str(empty / 'sources.list'),
+                   '-o', 'Dir::Etc::sourceparts=' + str(empty / 'sources.list.d'),
+                   '-o', 'Dir::State::lists=' + str(empty / 'lists'),
+                   '-o', 'APT::Snapshot=' + manifest['snapshot']]
+        apt(['--yes', '--no-remove', 'install', *paths], options, archives, INSTALL_TIMEOUT)
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('operation', choices=['setup', 'disk', 'prepare', 'install', 'python', 'compiler'])
+    parser.add_argument('operation', choices=[
+        'setup', 'disk', 'prepare', 'install', 'install-bundle', 'python', 'compiler'])
     parser.add_argument('--packages', default='')
     parser.add_argument('--compiler', default='')
+    parser.add_argument('--bundle', type=Path)
     parser.add_argument('--minimum-gib', type=float, default=MIN_FREE_GIB)
     args = parser.parse_args()
     if args.minimum_gib <= 0:
@@ -492,8 +573,12 @@ def main():
         select_compiler(args.compiler)
     elif args.operation == 'prepare':
         prepare(packages(args.packages), root / 'rodin-apt-archives', root / 'rodin-apt-state')
+    elif args.operation == 'install-bundle':
+        if args.bundle is None:
+            parser.error('install-bundle requires --bundle')
+        install_bundle(args.bundle, packages(args.packages), root / 'rodin-apt-archives')
     else:
-        install(root / 'rodin-apt-archives', root / 'rodin-apt-state')
+        install(root / 'rodin-apt-archives', root / 'rodin-apt-state', args.bundle)
 
 
 if __name__ == '__main__':
