@@ -52,7 +52,7 @@ BORE = {"FPC8": 101.6e-3, "FPC16": 191.0e-3}  # m, radius
 # The seat designs are named everywhere (meshes, run folders, reports, video)
 # by the key of make_meshes.py --seat; "cad" is the original seat (folder FPC8_openNNN).
 DESIGN = {"": "cad", "cad": "cad", "fillet": "fillet", "chamfer": "chamfer", "upramp": "upramp",
-          "rampup": "rampup", "rampdn": "rampdn", "lip": "lip", "lipb": "lipb"}
+          "rampup": "rampup", "rampdn": "rampdn", "lip": "lip", "lipb": "lipb", "lipr": "lipr"}
 
 
 def fluid_params(log):
@@ -258,7 +258,7 @@ def main():
     pdf.savefig(fig); plt.close(fig)
     # ---- metrics against the design ------------------------------------------
     openings = sorted({r_["opening_pct"] for r_ in rows})
-    designs = [d_ for d_ in ("cad", "fillet", "chamfer", "upramp", "rampup", "rampdn", "lip", "lipb") if any(r_["design"] == d_ for r_ in rows)]
+    designs = [d_ for d_ in ("cad", "fillet", "chamfer", "upramp", "rampup", "rampdn", "lip", "lipb", "lipr") if any(r_["design"] == d_ for r_ in rows)]
     fig, axs = plt.subplots(1, 3, figsize=(11.7, 4.2))
     for ax, key, title in zip(axs, ("u_mean", "f_slow_0.1", "f_unyielded"),
                               ("ū en la zona del sello [m/s]", "fracción con ū < 0.1 m/s", "fracción sin fluir (τ < τ_y)")):

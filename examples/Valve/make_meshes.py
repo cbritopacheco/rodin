@@ -83,10 +83,20 @@ ATTR_INLET, ATTR_OUTLET, ATTR_WALL, ATTR_KNIFE = 1, 2, 3, 4
 #            rounded or sharp: floor corners LIPB_FLOOR, land-ramp edges
 #            LIPB_LAND, ramp-bore edges LIPB_BORE (bevel legs along each
 #            side, mm). Machinable with a chamfer tool only.
-# The seat dimensions (FILLET_MM, LIP_*, LIPB_*) are those of the FPC8 groove
-# (3.4 mm deep); for "fillet" and "lipb" they scale with the groove depth
+#   lipr     "lip" with the floor corners rounded as "fillet" (LIPR_FLOOR)
+#            and a small rounding at the land-ramp edges, of the radius that
+#            makes it meet the floor fillet tangentially, with no straight
+#            piece of land left between them (0.52 mm in the FPC8); ramps and
+#            ramp-bore edges (LIP_RB) as "lip". LIPR_FLOOR is 1.3 and not the
+#            1.5 of "fillet": on the 1.6 mm lands R 1.5 leaves room only for
+#            a 0.17 mm land-ramp rounding, which the 1.2 mm cells of the seat
+#            cannot follow (slivers, gamma 0.03). The knife (tip corners
+#            rounded alike) seats on the floor and the fillets.
+# The seat dimensions (FILLET_MM, LIP_*, LIPB_*, LIPR_*) are those of the FPC8
+# groove (3.4 mm deep); for "fillet", "lipb" and "lipr" they scale with the groove depth
 # R_k - R of the valve (FPC16: 5 mm, x 1.47).
-SEATS = ("cad", "fillet", "chamfer", "upramp", "rampup", "rampdn", "lip", "lipb")
+SEATS = ("cad", "fillet", "chamfer", "upramp", "rampup", "rampdn", "lip", "lipb", "lipr")
+LIPR_FLOOR = 1.3
 LIPB_FLOOR = 0.5
 LIPB_LAND = 0.3
 LIPB_BORE = 2.0
@@ -178,9 +188,15 @@ def profile_solid(corners, radii, R):
         return None
 
     arcs = [corner(i) for i in range(n)]
+    made = []
 
-    def pt(p):  # (z, r) -> (x = r, y = 0, z)
-        return occ.addPoint(float(p[1]), 0.0, float(p[0]))
+    def pt(p):  # (z, r) -> (x = r, y = 0, z); a point within 1e-6 mm of one made is reused
+        for q, tag in made:
+            if abs(q[0] - p[0]) < 1e-6 and abs(q[1] - p[1]) < 1e-6:
+                return tag
+        tag = occ.addPoint(float(p[1]), 0.0, float(p[0]))
+        made.append(((float(p[0]), float(p[1])), tag))
+        return tag
 
     q_start = pt((arcs[0][0][0], R - 1.0))
     q_end = pt((arcs[-1][1][0], R - 1.0))
@@ -193,7 +209,8 @@ def profile_solid(corners, radii, R):
             continue
         a_, b_, c_ = arc
         pa, pb = pt(a_), pt(b_)
-        curves.append(occ.addLine(prev, pa))
+        if pa != prev:
+            curves.append(occ.addLine(prev, pa))
         curves.append(occ.addCircleArc(pa, pt(c_), pb) if c_ is not None else occ.addLine(pa, pb))
         prev = pb
     curves += [occ.addLine(prev, q_end), occ.addLine(q_end, q_start)]
@@ -231,6 +248,26 @@ def lipb_profile_solid(R, Rk, t):
     return profile_solid(corners, [b, l_, fl, fl, l_, b], R)
 
 
+def lipr_profile_solid(R, Rk, t):
+    """Pocket of the "lipr" seat (see SEATS), scaled with the groove depth."""
+    sc = (Rk - R) / SEAT_REF_DEPTH
+    h = 0.5 * t
+    rl = Rk - LIP_LAND * sc
+    L = (rl - R) / math.tan(math.radians(LIP_DEG))
+    right = [(h, Rk), (h, rl), (h + L, R)]
+    corners = [(-z, r) for z, r in right[::-1]] + right
+    fb, ff, fl = LIP_RB * sc, LIPR_FLOOR * sc, lipr_land_radius(sc)
+    return profile_solid(corners, [fb, fl, ff, ff, fl, fb], R)
+
+
+def lipr_land_radius(sc=1.0):
+    """Land-ramp radius of "lipr": its tangent length on the land (the
+    direction turns by 90 - LIP_DEG there: radius tan((90 - LIP_DEG)/2))
+    fills what the floor fillet leaves of the land."""
+    assert LIPR_FLOOR < LIP_LAND, "lipr: LIPR_FLOOR must be below LIP_LAND"
+    return (LIP_LAND - LIPR_FLOOR) * sc / math.tan(math.radians(0.5 * (90.0 - LIP_DEG)))
+
+
 def seat_solid(seat, R, Rk, t):
     """The pocket of the modified seat in the lower half of the bore (y < 0),
     overlapping the bore (r >= R - 1) so that it fuses cleanly with the pipe.
@@ -261,6 +298,9 @@ def seat_solid(seat, R, Rk, t):
     elif seat == "lipb":
         parts = None
         solid = lipb_profile_solid(R, Rk, t)
+    elif seat == "lipr":
+        parts = None
+        solid = lipr_profile_solid(R, Rk, t)
     else:
         raise ValueError(seat)
     if parts is not None:

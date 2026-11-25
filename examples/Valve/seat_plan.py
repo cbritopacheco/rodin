@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Dimensioned drawing of the seat profiles "fillet" and "lipb" of
+Dimensioned drawing of the seat profiles "fillet" and "lipr" of
 make_meshes.py for the FPC8 and the FPC16: section by the plane x = 0 at the
 bottom of the bore (flow along z, left to right), liner in tan, fluid
 pocket in white, knife seated (closed) dashed. Dimensions in mm, taken from
@@ -55,8 +55,11 @@ def profile(seat, t, d):
     land = mm.LIP_LAND * sc
     L = (d - land) / math.tan(math.radians(mm.LIP_DEG))
     pts = [(-W, 0), (-h - L, 0), (-h, -(d - land)), (-h, -d), (h, -d), (h, -(d - land)), (h + L, 0), (W, 0)]
-    b, l_, fl = mm.LIPB_BORE * sc, mm.LIPB_LAND * sc, mm.LIPB_FLOOR * sc
-    return rounded(pts, [0, -b, -l_, -fl, -fl, -l_, -b, 0]), dict(land=land, L=L, b=b, l=l_, fl=fl, ramp=d - land)
+    if seat == "lipb":
+        b, l_, fl = mm.LIPB_BORE * sc, mm.LIPB_LAND * sc, mm.LIPB_FLOOR * sc
+        return rounded(pts, [0, -b, -l_, -fl, -fl, -l_, -b, 0]), dict(land=land, L=L, b=b, l=l_, fl=fl, ramp=d - land)
+    b, l_, fl = mm.LIP_RB * sc, mm.lipr_land_radius(sc), mm.LIPR_FLOOR * sc
+    return rounded(pts, [0, b, l_, fl, fl, l_, b, 0]), dict(land=land, L=L, b=b, l=l_, fl=fl, ramp=d - land)
 
 
 def dim_h(ax, x0, x1, y, txt, off=0.0):
@@ -81,7 +84,7 @@ def draw(ax, valve, seat):
     h = 0.5 * t
     # knife seated (closed): flat tip on the floor; corners as the floor corners
     kc = p.get("f", p.get("fl", 0.0))
-    if seat == "fillet":
+    if seat in ("fillet", "lipr"):
         kn = rounded([(-h, 0.45 * t), (-h, -d), (h, -d), (h, 0.45 * t)], [0, kc, kc, 0])
     else:
         kn = rounded([(-h, 0.45 * t), (-h, -d), (h, -d), (h, 0.45 * t)], [0, -kc, -kc, 0])
@@ -101,11 +104,17 @@ def draw(ax, valve, seat):
         dim_v(ax, h + p["L"] + 0.1 * t, -(d - p["land"]), 0, "rampa %.2g" % p["ramp"])
         dim_h(ax, -h - p["L"], h + p["L"], 0.06 * t, "%.1f en el diámetro" % (t + 2 * p["L"]))
         ax.text(-h - 0.55 * p["L"], -0.62 * p["ramp"], "%g°" % mm.LIP_DEG, fontsize=7, color=DIM, ha="right")
-        ax.text(0.98 * W, -d - 0.02 * t,
-                "biseles (catetos):\n  fondo %.2g × %.2g\n  labio-rampa %.2g × %.2g\n  rampa-diámetro %.2g × %.2g"
-                % (p["fl"], p["fl"], p["l"], p["l"], p["b"], p["b"]),
-                fontsize=7, color=DIM, ha="right", va="top")
-        ttl = "lipb: labios %.2g + rampas %g° a ambos lados, cambios de dirección biselados" % (p["land"], mm.LIP_DEG)
+        if seat == "lipb":
+            ax.text(0.98 * W, -d - 0.02 * t,
+                    "biseles (catetos):\n  fondo %.2g × %.2g\n  labio-rampa %.2g × %.2g\n  rampa-diámetro %.2g × %.2g"
+                    % (p["fl"], p["fl"], p["l"], p["l"], p["b"], p["b"]),
+                    fontsize=7, color=DIM, ha="right", va="top")
+            ttl = "lipb: labios %.2g + rampas %g° a ambos lados, cambios de dirección biselados" % (p["land"], mm.LIP_DEG)
+        else:
+            ax.text(0.98 * W, -d - 0.02 * t,
+                    "radios:\n  fondo R %.2g\n  labio-rampa R %.2g\n  rampa-diámetro R %.2g"
+                    % (p["fl"], p["l"], p["b"]), fontsize=7, color=DIM, ha="right", va="top")
+            ttl = "lipr: lip con fondo R %.2g y cambio de dirección R %.2g" % (p["fl"], p["l"])
     ax.set_title("%s — %s" % (valve, ttl), fontsize=9)
     ax.set_xlim(-W, W); ax.set_ylim(-d - 0.32 * t, 0.5 * t)
     ax.set_aspect("equal"); ax.axis("off")
@@ -117,7 +126,7 @@ def main():
     a = ap.parse_args()
     fig, axs = plt.subplots(2, 2, figsize=(11.7, 8.3))
     for i, valve in enumerate(("FPC8", "FPC16")):
-        for j, seat in enumerate(("fillet", "lipb")):
+        for j, seat in enumerate(("fillet", "lipr")):
             draw(axs[j, i], valve, seat)
     fig.suptitle("Asiento: sección por el plano x = 0 en el fondo del diámetro (cotas en mm; FPC16 escalado con la "
                  "profundidad de su ranura, %.1f/%.1f)" % (mm.VALVES["FPC16"]["Rk"] - mm.VALVES["FPC16"]["R"],
