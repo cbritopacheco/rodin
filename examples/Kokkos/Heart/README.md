@@ -116,7 +116,8 @@ $G(\mathrm{tr}\,c-3)$ 3.1 against 3.7 Pa (VE) and 7.1 against 8.1 Pa (TVE).
 
 Not run with CUDA, nor on `Coarse.mesh`.
 
-**Checkpoints.** At the end of every cycle a run writes `<output>.restart`
+**Checkpoints.** Every `checkpoint_every` steps (by default at the end of
+every cycle) and at its last step, a run writes `<output>.restart`
 ($u^n$, $u^{n-1}$, $\psi$, $n$, the state of the ventricle and the step).
 `restart=<file>` continues from it on the same mesh and time step: time,
 cycle numbers and the ventricle go on, and `cycles`/`t_end` count from there.
@@ -216,5 +217,5 @@ build-cuda/examples/Kokkos/Heart/KokkosAtriumRheologyPETSc /path/to/Coarse.mesh 
 
 Keys of `KokkosAtriumRheologyPETSc`, besides those above: `fluid`, `stab`,
 `order`, `inlet`, `t_end`, `n_in`, `n_init`, `devss`, `implicit`, `ptt`,
-`eta_plasma`, `lambda_h`, `pc_lag`, `restart`. Its flow solver is BiCGStab(4) with
+`eta_plasma`, `lambda_h`, `pc_lag`, `restart`, `checkpoint_every`. Its flow solver is BiCGStab(4) with
 Jacobi unless PETSc options say otherwise.

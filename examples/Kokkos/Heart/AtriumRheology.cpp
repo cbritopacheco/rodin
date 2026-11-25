@@ -119,9 +119,11 @@
  * n_in (1.5, with inlet=relaxed), n_init (-1: n_st(0)), devss (1), implicit
  * (2), ptt (0), eta_plasma (0.0012), lambda_h (0.005), output (AtriumRheology),
  * output_every (17), tolerance (1e-8), max_iterations (5000), pc_lag (1:
- * steps between two set-ups of the preconditioner), restart (none).
+ * steps between two set-ups of the preconditioner), restart (none),
+ * checkpoint_every (steps per cycle).
  *
- * Checkpoints: at the end of every cycle the run writes <output>.restart
+ * Checkpoints: every checkpoint_every steps (by default, at the end of every
+ * cycle) and at its last step, the run writes <output>.restart
  * (u^n, u^{n-1}, psi, n, the state of the ventricle and the step). A run with
  * restart=<file> on the same mesh and time step continues from it: time, cycle
  * numbers and the ventricle go on, and cycles / t_end count from there. psi and
@@ -223,6 +225,7 @@ namespace
       Real lambdaH = 0.005;
       std::string output = "AtriumRheology";
       std::string restart;
+      size_t checkpointEvery = 0; ///< Steps between checkpoints; 0: one cycle.
       size_t outputEvery = 17;
       Real tolerance = 1e-8;
       size_t maxIterations = 5000;
@@ -1368,6 +1371,7 @@ namespace
     real("tolerance", P.tolerance);
     count("max_iterations", P.maxIterations);
     count("pc_lag", P.preconditionerLag);
+    count("checkpoint_every", P.checkpointEvery);
     count("output_every", P.outputEvery);
     choice("stab", "asgs", "split", P.residual);
     choice("inlet", "developed", "relaxed", P.developedInlet);
@@ -2086,6 +2090,7 @@ int main(int argc, char** argv)
     const VectorFunction axis1{Real(0), Real(1), Real(0)};
     const VectorFunction axis2{Real(0), Real(0), Real(1)};
     const size_t last = stepOffset + total;
+    const size_t checkpointEvery = P.checkpointEvery > 0 ? P.checkpointEvery : P.steps;
     std::chrono::duration<double> rheologyTime{0}, assembly{0}, solve{0};
     bool valveWasOpen = true;
     for (size_t step = stepOffset + 1; step <= last; ++step)
@@ -2404,7 +2409,7 @@ int main(int argc, char** argv)
           << ',' << diagnostics.elasticEnergy << ',' << diagnostics.maxWeissenberg << ','
           << diagnostics.maxTrace << ',' << diagnostics.meanSize << ',' << rheologySeconds
           << ',' << assemblySeconds << ',' << solveSeconds << ',' << iterations << '\n';
-      if (step % P.steps == 0 || step == last)
+      if (step % checkpointEvery == 0 || step == last)
         writeCheckpoint(step, uh);
       if (step % P.outputEvery == 0 || step == last)
       {
