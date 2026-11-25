@@ -28,7 +28,7 @@ and the shear rate on the plane x = 0 zoomed on the seat; mean |u| in the pocket
 angle around the bore (bottom = -90 deg).
 
 Usage:
-  python3 seat_stats.py runs_seat [-o seat_report.pdf] [--zone-z 25] [--layer 1.0]
+  python3 seat_stats.py runs_seat [-o seat_report.pdf] [--valve FPC8] [--zone-z 25] [--layer 1.0]
 Needs numpy, matplotlib, h5py.
 """
 import argparse
@@ -52,7 +52,7 @@ BORE = {"FPC8": 101.6e-3, "FPC16": 191.0e-3}  # m, radius
 # The seat designs are named everywhere (meshes, run folders, reports, video)
 # by the key of make_meshes.py --seat; "cad" is the original seat (folder FPC8_openNNN).
 DESIGN = {"": "cad", "cad": "cad", "fillet": "fillet", "chamfer": "chamfer", "upramp": "upramp",
-          "rampup": "rampup", "rampdn": "rampdn", "lip": "lip"}
+          "rampup": "rampup", "rampdn": "rampdn", "lip": "lip", "lipb": "lipb"}
 
 
 def fluid_params(log):
@@ -123,6 +123,7 @@ def main():
     ap.add_argument("-o", "--out", default="seat_report.pdf")
     ap.add_argument("--zone-z", type=float, default=25.0, help="half-width of the seat zone along the pipe, mm")
     ap.add_argument("--layer", type=float, default=1.0, help="near-wall layer of the bore included in the zone, mm")
+    ap.add_argument("--valve", default="", help="only the cases of this valve (FPC8 or FPC16); one valve per report")
     ap.add_argument("--skip", type=float, default=None, help="transient cut in D/U (default: t_avg of the run)")
     a = ap.parse_args()
 
@@ -132,6 +133,8 @@ def main():
         tag = os.path.basename(d)
         valve, op = tag.split("_open"); op = int(op)
         base_valve, _, design = valve.partition("-")
+        if a.valve and base_valve != a.valve:
+            continue
         if not os.path.isfile(os.path.join(d, tag + ".xdmf")):
             print("[%s] no XDMF, skipped" % tag); continue
         R = BORE[base_valve]
@@ -255,7 +258,7 @@ def main():
     pdf.savefig(fig); plt.close(fig)
     # ---- metrics against the design ------------------------------------------
     openings = sorted({r_["opening_pct"] for r_ in rows})
-    designs = [d_ for d_ in ("cad", "fillet", "chamfer", "upramp", "rampup", "rampdn", "lip") if any(r_["design"] == d_ for r_ in rows)]
+    designs = [d_ for d_ in ("cad", "fillet", "chamfer", "upramp", "rampup", "rampdn", "lip", "lipb") if any(r_["design"] == d_ for r_ in rows)]
     fig, axs = plt.subplots(1, 3, figsize=(11.7, 4.2))
     for ax, key, title in zip(axs, ("u_mean", "f_slow_0.1", "f_unyielded"),
                               ("ū en la zona del sello [m/s]", "fracción con ū < 0.1 m/s", "fracción sin fluir (τ < τ_y)")):

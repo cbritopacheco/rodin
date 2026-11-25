@@ -35,7 +35,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import postprocess_valves as pv  # noqa: E402
 
 BORE = {"FPC8": 101.6e-3, "FPC16": 191.0e-3}  # m, radius
-ORDER = ("cad", "fillet", "chamfer", "upramp", "rampup", "rampdn", "lip")
+ORDER = ("cad", "fillet", "chamfer", "upramp", "rampup", "rampdn", "lip", "lipb")
 
 
 def merged_mesh(meshes):

@@ -79,7 +79,18 @@ ATTR_INLET, ATTR_OUTLET, ATTR_WALL, ATTR_KNIFE = 1, 2, 3, 4
 #            edges rounded LIP_RB (tangent to the bore), land-ramp edges
 #            obtuse (150 deg). A chamfer deeper than "chamfer" and without
 #            its corners.
-SEATS = ("cad", "fillet", "chamfer", "upramp", "rampup", "rampdn", "lip")
+#   lipb     "lip" with every change of direction bevelled instead of
+#            rounded or sharp: floor corners LIPB_FLOOR, land-ramp edges
+#            LIPB_LAND, ramp-bore edges LIPB_BORE (bevel legs along each
+#            side, mm). Machinable with a chamfer tool only.
+# The seat dimensions (FILLET_MM, LIP_*, LIPB_*) are those of the FPC8 groove
+# (3.4 mm deep); for "fillet" and "lipb" they scale with the groove depth
+# R_k - R of the valve (FPC16: 5 mm, x 1.47).
+SEATS = ("cad", "fillet", "chamfer", "upramp", "rampup", "rampdn", "lip", "lipb")
+LIPB_FLOOR = 0.5
+LIPB_LAND = 0.3
+LIPB_BORE = 2.0
+SEAT_REF_DEPTH = 3.4
 LIP_LAND = 1.6
 LIP_DEG = 30.0
 LIP_R = 0.6
@@ -150,14 +161,23 @@ def ramp_profile_solid(R, Rk, t, sign):
 def profile_solid(corners, radii, R):
     """Solid of revolution about the pipe axis of a pocket profile in the
     (z, r) half-plane: the corner polyline (it starts and ends on the bore,
-    r = R, and runs outside it), each corner rounded with its radius, the
-    first and last corners rounded tangent to the bore; closed inside the
-    bore at r = R - 1."""
+    r = R, and runs outside it), each corner rounded with its radius (0: sharp;
+    < 0: bevel with legs -radius along both sides), the first and last
+    corners on the bore; closed inside the bore at r = R - 1."""
     occ = gmsh.model.occ
     n = len(corners)
     ext = [(corners[0][0] - 20.0 * math.copysign(1.0, corners[1][0] - corners[0][0]), R)] + list(corners) + \
           [(corners[-1][0] + 20.0 * math.copysign(1.0, corners[-1][0] - corners[-2][0]), R)]
-    arcs = [_fillet(ext[i + 1], ext[i], ext[i + 2], radii[i]) if radii[i] > 0 else None for i in range(n)]
+    def corner(i):
+        P, A, B = (np.asarray(x, float) for x in (ext[i + 1], ext[i], ext[i + 2]))
+        if radii[i] > 0:
+            return _fillet(P, A, B, radii[i])
+        if radii[i] < 0:  # bevel
+            c = -radii[i]
+            return (P + c * (A - P) / np.linalg.norm(A - P), P + c * (B - P) / np.linalg.norm(B - P), None)
+        return None
+
+    arcs = [corner(i) for i in range(n)]
 
     def pt(p):  # (z, r) -> (x = r, y = 0, z)
         return occ.addPoint(float(p[1]), 0.0, float(p[0]))
@@ -172,9 +192,9 @@ def profile_solid(corners, radii, R):
             prev = pc_
             continue
         a_, b_, c_ = arc
-        pa, pb, pc = pt(a_), pt(b_), pt(c_)
+        pa, pb = pt(a_), pt(b_)
         curves.append(occ.addLine(prev, pa))
-        curves.append(occ.addCircleArc(pa, pc, pb))
+        curves.append(occ.addCircleArc(pa, pt(c_), pb) if c_ is not None else occ.addLine(pa, pb))
         prev = pb
     curves += [occ.addLine(prev, q_end), occ.addLine(q_end, q_start)]
     face = occ.addPlaneSurface([occ.addCurveLoop(curves)])
@@ -198,6 +218,19 @@ def lip_profile_solid(R, Rk, t):
     return profile_solid(corners, radii, R)
 
 
+def lipb_profile_solid(R, Rk, t):
+    """Pocket of the "lipb" seat: "lip" with bevels (see SEATS), scaled with
+    the groove depth."""
+    sc = (Rk - R) / SEAT_REF_DEPTH
+    h = 0.5 * t
+    rl = Rk - LIP_LAND * sc
+    L = (rl - R) / math.tan(math.radians(LIP_DEG))
+    right = [(h, Rk), (h, rl), (h + L, R)]
+    corners = [(-z, r) for z, r in right[::-1]] + right
+    b, l_, fl = -LIPB_BORE * sc, -LIPB_LAND * sc, -LIPB_FLOOR * sc
+    return profile_solid(corners, [b, l_, fl, fl, l_, b], R)
+
+
 def seat_solid(seat, R, Rk, t):
     """The pocket of the modified seat in the lower half of the bore (y < 0),
     overlapping the bore (r >= R - 1) so that it fuses cleanly with the pipe.
@@ -206,7 +239,7 @@ def seat_solid(seat, R, Rk, t):
     d = Rk - R
     h = 0.5 * t
     if seat == "fillet":
-        f = FILLET_MM
+        f = FILLET_MM * d / SEAT_REF_DEPTH
         parts = [occ.addCylinder(0, 0, -h, 0, 0, t, Rk - f),
                  occ.addCylinder(0, 0, -h + f, 0, 0, t - 2 * f, Rk),
                  occ.addTorus(0, 0, h - f, Rk - f, f), occ.addTorus(0, 0, -h + f, Rk - f, f)]
@@ -225,6 +258,9 @@ def seat_solid(seat, R, Rk, t):
     elif seat == "lip":
         parts = None
         solid = lip_profile_solid(R, Rk, t)
+    elif seat == "lipb":
+        parts = None
+        solid = lipb_profile_solid(R, Rk, t)
     else:
         raise ValueError(seat)
     if parts is not None:
