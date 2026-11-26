@@ -104,7 +104,9 @@ namespace Rodin::Tests::Unit
         Real massJ = 0, massQ = 0;
         bool different = false;
         size_t index = 0;
-        samples.forEachHinge(Gradient{true}, Gradient{zero},
+        const auto weights = samples.getHingeWeights(Gradient{true}, Gradient{zero});
+        EXPECT_EQ(weights.measures.empty(), zero);
+        samples.forEachHinge(weights,
           [&](const Variational::IntegrationPoint& ip, Real weightJ, Real weightQ) {
             ASSERT_NE(ip.getReferenceQuadratureFormula(), nullptr);
             ASSERT_LT(index, points.size());
@@ -689,14 +691,50 @@ namespace Rodin::Tests::Unit
     }
     EXPECT_TRUE(coveringActive);
     EXPECT_NEAR(mass, Real(1), Real(1e-12));
+    GridFunction predictor(fes);
+    predictor = inner;
+    const auto currentJacobian = Jacobian(current);
+    const auto predictorJacobian = Jacobian(predictor);
+    const auto weights =
+      std::make_shared<SWIFT::QualitySamples::HingeWeightTable>(mesh.getCellCount());
+    for (Index index = 0; index < mesh.getCellCount(); ++index)
+    {
+      const auto cell = mesh.getCell(index);
+      const SWIFT::QualitySamples samples(*cell, 2, parameters);
+      (*weights)[index] = samples.getHingeWeights(currentJacobian, predictorJacobian);
+    }
     BilinearForm metric(trial, test);
     LinearForm force(test);
-    metric = SWIFT::HingeMetric(trial, test, current, inner, inner, parameters, 1);
-    force = SWIFT::HingeForce(test, current, inner, inner, parameters, 1);
-    metric.assemble();
-    force.assemble();
-    EXPECT_GT(metric.getOperator().norm(), Real(0));
-    EXPECT_GT(force.getVector().norm(), Real(0));
+    metric = SWIFT::HingeMetric(trial, test, current, inner, predictor, parameters, 1);
+    force = SWIFT::HingeForce(test, current, inner, predictor, parameters, 1);
+    BilinearForm cachedMetric(trial, test);
+    LinearForm cachedForce(test);
+    cachedMetric =
+      SWIFT::HingeMetric(trial, test, current, inner, predictor, parameters, 1, weights);
+    cachedForce =
+      SWIFT::HingeForce(test, current, inner, predictor, parameters, 1, weights);
+    for (const size_t subdivision : {1, 2})
+    {
+      parameters.sampling.subdivision = subdivision;
+      metric.assemble();
+      force.assemble();
+      cachedMetric.assemble();
+      cachedForce.assemble();
+      EXPECT_GT(metric.getOperator().norm(), Real(0));
+      EXPECT_GT(force.getVector().norm(), Real(0));
+      constexpr Real roundoff = 128 * std::numeric_limits<Real>::epsilon();
+      EXPECT_LE((metric.getOperator() - cachedMetric.getOperator()).norm(),
+        roundoff * metric.getOperator().norm());
+      EXPECT_LE((force.getVector() - cachedForce.getVector()).norm(),
+        roundoff * force.getVector().norm());
+    }
+
+    parameters.sampling.subdivision = 1;
+    inner = Math::SpatialVector<Real>{0, 0};
+    cachedMetric.assemble();
+    cachedForce.assemble();
+    EXPECT_EQ(cachedMetric.getOperator().norm(), Real(0));
+    EXPECT_EQ(cachedForce.getVector().norm(), Real(0));
   }
 
   TEST(Rodin_Adaptation_SWIFTHingeState, NegativeAffineSlackRemainsFinite)

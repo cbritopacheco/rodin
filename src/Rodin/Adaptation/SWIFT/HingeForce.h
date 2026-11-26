@@ -5,6 +5,8 @@
 #ifndef RODIN_ADAPTATION_SWIFT_HINGEFORCE_H
 #define RODIN_ADAPTATION_SWIFT_HINGEFORCE_H
 
+#include <memory>
+
 #include "Rodin/Variational/Integrator.h"
 #include "../CellDeformation.h"
 #include "Hinge.h"
@@ -32,17 +34,20 @@ namespace Rodin::Adaptation::SWIFT
        * @param predictor Frozen directionally scaled predictor.
        * @param parameters Quality budgets and hinge activation weights.
        * @param hingeCoefficient Predicted decrease per volume, before constraint strengths.
+       * @param weights Optional frozen witness weights indexed by cell.
        */
       HingeForce(const TestFunction& z, const Displacement& current,
         const Displacement& inner, const Displacement& predictor,
-        const Parameters& parameters, Real hingeCoefficient)
+        const Parameters& parameters, Real hingeCoefficient,
+        std::shared_ptr<const QualitySamples::HingeWeightTable> weights = {})
         : Parent(z.getLeaf()),
           m_z(z),
           m_current(current),
           m_inner(inner),
           m_predictor(predictor),
           m_parameters(parameters),
-          m_hingeCoefficient(hingeCoefficient)
+          m_hingeCoefficient(hingeCoefficient),
+          m_weights(weights)
       {}
 
       /**
@@ -86,7 +91,11 @@ namespace Rodin::Adaptation::SWIFT
         auto predictorJacobian = Variational::Jacobian(m_predictor.get());
         CellDeformation deformation(dim);
 
-        samples.forEachHinge(currentJacobian, predictorJacobian,
+        const bool reuseWeights = m_weights && samples.matches((*m_weights)[index]);
+        const auto localWeights = reuseWeights
+          ? QualitySamples::HingeWeights{}
+          : samples.getHingeWeights(currentJacobian, predictorJacobian);
+        samples.forEachHinge(reuseWeights ? (*m_weights)[index] : localWeights,
           [&](const Variational::IntegrationPoint& ip, Real weightJ, Real weightQ) {
             deformation.setDisplacementGradient(currentJacobian.getValue(ip));
             if (!deformation.isAdmissible())
@@ -95,6 +104,8 @@ namespace Rodin::Adaptation::SWIFT
               deformation, innerJacobian.getValue(ip), parameters, m_hingeCoefficient);
             const Real coefficientJ = state.getJacobianForce();
             const Real coefficientQ = state.getDistortionForce();
+            if (coefficientJ == Real(0) && coefficientQ == Real(0))
+              return;
             testJacobian.setIntegrationPoint(ip);
             for (std::size_t local = 0; local < fe.getCount(); ++local)
             {
@@ -143,6 +154,7 @@ namespace Rodin::Adaptation::SWIFT
       std::reference_wrapper<const Displacement> m_predictor;
       std::reference_wrapper<const Parameters> m_parameters;
       Real m_hingeCoefficient;
+      std::shared_ptr<const QualitySamples::HingeWeightTable> m_weights;
       const Geometry::Polytope* m_polytope = nullptr;
       Math::Vector<Real> m_vector;
   };

@@ -12,6 +12,7 @@
 #define RODIN_ADAPTATION_SWIFT_QUALITYSAMPLES_H
 
 #include <algorithm>
+#include <cassert>
 #include <vector>
 
 #include "Rodin/Geometry/PolytopeTransformation.h"
@@ -33,6 +34,24 @@ namespace Rodin::Adaptation::SWIFT
   class QualitySamples
   {
     public:
+      /// @brief Jacobian and distortion measures at one witness.
+      struct HingeMeasure
+      {
+        Real jacobian; ///< Jacobian hinge measure.
+        Real distortion; ///< Distortion hinge measure.
+      };
+
+      /// @brief Frozen measures on a cell; empty measures means equal weights.
+      struct HingeWeights
+      {
+        size_t count; ///< Number of witnesses in the covering.
+        Real uniform; ///< Measure used when both constraints have uniform weights.
+        std::vector<HingeMeasure> measures; ///< Explicit weights in covering order.
+      };
+
+      /// @brief Frozen cell weights indexed by background cell index.
+      using HingeWeightTable = std::vector<HingeWeights>;
+
       /**
        * @brief Constructs the cell quality sampling policy.
        * @param cell Reference cell.
@@ -71,22 +90,24 @@ namespace Rodin::Adaptation::SWIFT
       }
 
       /**
-       * @brief Visits the frozen, constraint-specific adaptive hinge measures.
+       * @brief Computes the frozen, constraint-specific adaptive hinge measures.
        * @param currentJacobian Frozen outer displacement gradient.
        * @param predictorJacobian Frozen directionally scaled predictor gradient.
-       * @param evaluate Callable accepting a point, Jacobian weight and distortion weight.
+       * @returns Mapped weights in witness order.
        *
        * Each measure mixes equal weights with normalized guard penetration at
        * the current and full-predictor geometries. Both are strictly positive
        * and preserve mapped cell mass. No weight depends on the inner iterate.
        */
-      template <class Jacobian, class Evaluate>
-      void forEachHinge(const Jacobian& currentJacobian,
-        const Jacobian& predictorJacobian, Evaluate&& evaluate) const
+      template <class Jacobian>
+      HingeWeights getHingeWeights(
+        const Jacobian& currentJacobian, const Jacobian& predictorJacobian) const
       {
         const auto& model = m_parameters.get().model;
         const size_t count = m_formula.get().getSize();
-        std::vector<Real> riskJ(count), riskQ(count);
+        HingeWeights result{};
+        result.count = count;
+        result.measures.resize(count);
         Real measure = 0, sumJ = 0, sumQ = 0;
         size_t index = 0;
         CellDeformation state(m_cell.get().getDimension());
@@ -111,24 +132,66 @@ namespace Rodin::Adaptation::SWIFT
                     Real(0), MaximumRisk)
                 : MaximumRisk);
           }
-          riskJ[index] = jRisk;
-          riskQ[index] = qRisk;
+          result.measures[index] = {jRisk, qRisk};
           sumJ += jRisk;
           sumQ += qRisk;
           measure += weight;
           ++index;
         });
-        const Real equalWeight = measure / count;
+        result.uniform = measure / count;
+        if (sumJ == Real(0) && sumQ == Real(0))
+          return {count, result.uniform, {}};
         const auto weight = [&](Real risk, Real sum) {
-          return sum > Real(0) ? equalWeight *
+          return sum > Real(0) ? result.uniform *
               (Real(1) - AdaptiveFraction + AdaptiveFraction * count * risk / sum)
-                               : equalWeight;
+                               : result.uniform;
         };
-        index = 0;
-        forEach([&](const Variational::IntegrationPoint& ip, Real) {
-          evaluate(ip, weight(riskJ[index], sumJ), weight(riskQ[index], sumQ));
-          ++index;
-        });
+        for (auto& sample : result.measures)
+          sample = {weight(sample.jacobian, sumJ), weight(sample.distortion, sumQ)};
+        return result;
+      }
+
+      /**
+       * @brief Checks whether weights for this cell use the same witness resolution.
+       * @param weights Weights computed on this cell, possibly at another resolution.
+       * @returns Whether the two coverings of this cell have the same cardinality.
+       */
+      bool matches(const HingeWeights& weights) const noexcept
+      {
+        return weights.count == m_formula.get().getSize();
+      }
+
+      /**
+       * @brief Visits cell witnesses with previously computed hinge weights.
+       * @param weights Frozen weights for this cell.
+       * @param evaluate Callable accepting a point, Jacobian weight and distortion weight.
+       */
+      template <class Evaluate>
+      void forEachHinge(const HingeWeights& weights, Evaluate&& evaluate) const
+      {
+        const auto& quadrature = m_cell.get().getQuadrature(m_formula.get());
+        assert(matches(weights));
+        for (size_t q = 0; q < quadrature.getSize(); ++q)
+        {
+          const auto measure = weights.measures.empty()
+            ? HingeMeasure{weights.uniform, weights.uniform}
+            : weights.measures[q];
+          evaluate(Variational::IntegrationPoint(quadrature, q), measure.jacobian,
+            measure.distortion);
+        }
+      }
+
+      /**
+       * @brief Computes and visits hinge measures for one cell evaluation.
+       * @param currentJacobian Frozen outer displacement gradient.
+       * @param predictorJacobian Frozen directionally scaled predictor gradient.
+       * @param evaluate Callable accepting a point, Jacobian weight and distortion weight.
+       */
+      template <class Jacobian, class Evaluate>
+      void forEachHinge(const Jacobian& currentJacobian,
+        const Jacobian& predictorJacobian, Evaluate&& evaluate) const
+      {
+        forEachHinge(getHingeWeights(currentJacobian, predictorJacobian), evaluate);
       }
 
     private:
