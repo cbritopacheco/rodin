@@ -5,13 +5,13 @@ const {test} = require('node:test');
 const {deployPages} = require('../.github/actions/publish-pages/deploy.js');
 const version = 'a'.repeat(40);
 
-function fixture(statuses = ['succeed']) {
+function fixture(statuses = ['succeed'], identity = request => ({id: request.pages_build_version})) {
   const requests = [], output = {}, logs = [];
   let clock = 0;
   const github = {async request(route, parameters) {
     requests.push({route, parameters});
     if (route.startsWith('POST') && !route.endsWith('/cancel')) {
-      return {data: {id: parameters.pages_build_version, page_url: 'https://owner.github.io/repo/'}};
+      return {data: {...identity(parameters), page_url: 'https://owner.github.io/repo/'}};
     }
     if (route.endsWith('/cancel')) return {data: {}};
     const status = statuses.length > 1 ? statuses.shift() : statuses[0];
@@ -25,18 +25,35 @@ function fixture(statuses = ['succeed']) {
   return {github, core, options, requests, output, logs};
 }
 
-test('distinct snapshots deploy distinct versions even with the same source commit', async () => {
+test('fresh uploads get distinct deployment versions for the same snapshot', async () => {
   const f = fixture(['queued', 'succeed']);
-  for (const [id, snapshot] of [['17', version], ['18', 'b'.repeat(40)]]) {
-    assert.equal(await deployPages(f.github, f.core, 'owner/repo', id, snapshot, f.options),
+  for (const id of ['17', '18']) {
+    assert.equal(await deployPages(f.github, f.core, 'owner/repo', id, version, f.options),
       'https://owner.github.io/repo/');
   }
   const creates = f.requests.filter(x => x.route.endsWith('/deployments'));
-  assert.deepEqual(creates.map(x => x.parameters.pages_build_version), [version, 'b'.repeat(40)]);
+  const versions = creates.map(x => x.parameters.pages_build_version);
+  assert.equal(new Set(versions).size, 2);
+  for (const buildVersion of versions) {
+    assert.match(buildVersion, /^[a-f0-9]{40}$/);
+    assert.notEqual(buildVersion, version);
+  }
   assert.deepEqual(creates.map(x => x.parameters.artifact_id), [17, 18]);
   assert.ok(creates.every(x => x.parameters.oidc_token === 'secret-oidc'));
   assert.equal(f.output.page_url, 'https://owner.github.io/repo/');
+  assert.ok(f.logs.includes(`Pages deployed snapshot ${version}`));
   assert.ok(!f.logs.join('\n').includes('secret-oidc'));
+});
+
+test('polls the server deployment ID, then its status URL, then the upload version', async () => {
+  const statusURL = 'https://api.github.com/repos/owner/repo/pages/deployments/23/status';
+  for (const [identity, expected] of [[{id: '97', status_url: statusURL}, '97'],
+    [{status_url: statusURL}, '23'], [{}, undefined]]) {
+    const f = fixture(['succeed'], () => identity);
+    await deployPages(f.github, f.core, 'owner/repo', 17, version, f.options);
+    const [create, poll] = f.requests;
+    assert.equal(poll.parameters.deploymentId, expected ?? create.parameters.pages_build_version);
+  }
 });
 
 test('permanent deployment failure is not publication success', async () => {

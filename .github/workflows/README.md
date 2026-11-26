@@ -545,9 +545,9 @@ static assets from the locked `gh-pages` checkout, uploads them as a Pages
 artifact, and deploys its exact artifact ID in that same job. Benchmark
 histories stay in the published Git tree. Staged benchmark pages load them
 from raw GitHub at the exact `gh-pages` commit, keeping the site within the
-GitHub Pages size limit. The Pages API build version is the published `gh-pages` commit,
-which distinguishes master, develop and benchmark updates even when they share
-one source commit. The deployment retains the workflow OIDC token and protected
+GitHub Pages size limit. The Pages API build version includes the artifact ID
+and the published commit, so each upload has its own deployment version.
+The deployment retains the workflow OIDC token and protected
 environment. This avoids a second hosted-runner queue for a legacy Pages build;
 that queue delayed one deployment by almost eleven hours. A successful branch
 push alone is never treated as deployment success. After the deployment action
@@ -781,7 +781,8 @@ runner shutdown or replace the existing single-retry policy.
 
 Explicit resource hydration uses `dev/ci_lfs.py` with five attempts, 300 seconds
 per attempt, and 15-, 30-, 60- and 120-second backoffs for transient network/server
-failures. The retry span is 225 seconds; the worst-case total with all command
+failures, including GitHub's LFS batch timeout response. The retry span is 225
+seconds; the worst-case total with all command
 watchdogs exhausted is 1,725 seconds. Manufactured 3D elasticity partitions
 generate their meshes with `UniformGrid` and skip resource hydration. Authentication, missing objects, quota and unknown errors fail
 immediately. Exhaustion fails the job; required resources remain mandatory.

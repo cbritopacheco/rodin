@@ -75,7 +75,9 @@ if (RODIN_USE_PETSC AND NOT RODIN_CONVERGENCE_PETSC_COMPLEX)
   # while MPI-one completed in 815s and local controls took 1726s. Allow
   # the existing high-order budget without changing the numerical study.
   if (RODIN_CODE_COVERAGE AND RODIN_MULTITHREADED)
+    # The threaded local P3/P2 tetrahedron also exhausted the 1800 s watchdog.
     set_tests_properties(RodinConvergenceIsoparametricPETScStokesBoundary_P3P2Rates_Hexahedron
+      RodinConvergenceIsoparametricPETScStokesBoundary_P3P2Rates_Tetrahedron
       PROPERTIES TIMEOUT ${_RODIN_CURVED_STOKES_Q3_PYRAMID_TIMEOUT})
   endif()
   foreach(q 1 3)

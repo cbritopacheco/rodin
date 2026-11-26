@@ -118,13 +118,13 @@ class BuildGraphPlanTest(unittest.TestCase):
                 seen.setdefault(old['id'], old)
             collapsed[family] = list(seen.values())
         for value, digest in [(collapsed, '009a23d4c5fc380bcca406302cfb7062208a2b14f3526f2ce6078cde95005c54'),
-                              (targeted, '1101749566367ae256071a8672ab992929d25b6f6574234dd7bf18a87a24fa15')]:
+                              (targeted, 'd4c5a6874ddac2680e6283a57088f5369d696aac2739566cd88e959036391d26')]:
             self.assertEqual(hashlib.sha256(json.dumps(value, sort_keys=True, separators=(',', ':')).encode()).hexdigest(), digest)
         rows = graph.prepare(ordinary, targeted)
         self.assertEqual(len(rows), 46)
         requests = [r for row in rows for r in row['requests']]
-        self.assertEqual(len(requests), 1429)
-        self.assertEqual(len({graph.request_key(**r) for r in requests}), 1429)
+        self.assertEqual(len(requests), 1430)
+        self.assertEqual(len({graph.request_key(**r) for r in requests}), 1430)
         for row in rows:
             for request in row['requests']:
                 original = graph.specification(**request)
@@ -199,7 +199,7 @@ class BuildGraphPlanTest(unittest.TestCase):
             snapshot[name]['execution'] = [s for s in job['steps'] if s.get('name', '').startswith(
                 ('Run ', 'Discover ', 'Record native MPI CPU', 'Hydrate '))]
         digest = hashlib.sha256(json.dumps(snapshot, sort_keys=True, separators=(',', ':')).encode()).hexdigest()
-        self.assertEqual(digest, '9955259785762843bbc376ae22cd897b5affba0010574f0d529462ef6fc27c84')
+        self.assertEqual(digest, '52576f11e2274425149bb0a72f3eb0578102c3adf048fde6b64a95c5f0b3d142')
 
 
 class BuildGraphExecutionTest(unittest.TestCase):

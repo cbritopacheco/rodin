@@ -455,8 +455,13 @@ class BackendRegistrationTest(unittest.TestCase):
                     args = subprocess.check_output(["bash", "-ec", command], text=True,
                         env=dict(os.environ, PATH=directory + os.pathsep + os.environ["PATH"])).splitlines()
                     include = re.compile(args[args.index("-R") + 1])
-                    selected = {n for n in names if include.search(n)}
+                    exclude = re.compile(args[args.index("-E") + 1]) if "-E" in args else None
+                    selected = {n for n in names if include.search(n) and not (exclude and exclude.search(n))}
                     self.assertTrue(selected, row)
+                    if (row["physics"], row["geometry"], row["selection"], row["study"]) == (
+                            "Stokes", "tetrahedron", "local", "P3P2Rates"):
+                        self.assertEqual(mt, "ON")
+                        self.assertEqual(selected, {"RodinConvergenceIsoparametricPETScStokesBoundary_P3P2Rates_Tetrahedron"})
                     counts.update(selected)
                 self.assertEqual(counts, Counter({n: 1 for n in names}))
 
@@ -562,9 +567,10 @@ class BackendRegistrationTest(unittest.TestCase):
                         for name, args in tests.items()}
             properties = self.properties(build)
             self.assertEqual(properties[prefix + 'Hexahedron']['TIMEOUT'], '3600' if coverage and threaded else '1800')
+            self.assertEqual(properties[prefix + 'Tetrahedron']['TIMEOUT'], '3600' if coverage and threaded else '1800')
             pyramid_timeout = '7200' if coverage and threaded else '3600' if coverage else '1800'
             self.assertEqual(properties[prefix + 'Pyramid']['TIMEOUT'], pyramid_timeout)
-            for geometry, rank in itertools.product(['Hexahedron', 'Pyramid'], range(1, 5)):
+            for geometry, rank in itertools.product(['Hexahedron', 'Pyramid', 'Tetrahedron'], range(1, 5)):
                 name = f'RodinConvergenceIsoparametricPETScStokesBoundary_MPI_np{rank}_P3P2Rates_{geometry}'
                 self.assertEqual(properties[name]['TIMEOUT'], '1800')
                 self.assertEqual(properties[name]['PROCESSORS'], str(rank))

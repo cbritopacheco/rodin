@@ -4819,6 +4819,12 @@ jobs:
           study: all
         - multithreaded: 'ON'
           physics: Stokes
+          geometry: tetrahedron
+          selection: local
+          path: Convergence / Isoparametric / Stokes / BoundaryConditions
+          study: P3P2Rates
+        - multithreaded: 'ON'
+          physics: Stokes
           geometry: pyramid
           selection: local
           path: Convergence / Isoparametric / Stokes / BoundaryConditions
@@ -5477,13 +5483,17 @@ jobs:
         esac
         case "${{ matrix.study }}" in
           all) study_pattern='([A-Za-z][A-Za-z0-9]*_)?' ;;
-          MixedNeumannP[123]Rates|RobinP[123]Rates|PureNeumannP[123]Rates) study_pattern='${{ matrix.study }}_' ;;
+          MixedNeumannP[123]Rates|RobinP[123]Rates|PureNeumannP[123]Rates|P3P2Rates) study_pattern='${{ matrix.study }}_' ;;
           Controls) study_pattern='Controls_' ;;
           *) exit 1 ;;
         esac
-        ctest --test-dir build/tests \
-          -R "^RodinConvergenceIsoparametricPETSc${{ matrix.physics }}Boundary_${context_pattern}${study_pattern}${geometry_pattern}$" \
-          --output-on-failure --no-tests=error -j 1
+        pattern="^RodinConvergenceIsoparametricPETSc${{ matrix.physics }}Boundary_${context_pattern}${study_pattern}${geometry_pattern}$"
+        filters=(-R "$pattern")
+        if [[ "${{ matrix.physics }}/${{ matrix.geometry }}" == Stokes/tetrahedron &&
+              "${{ matrix.multithreaded }}/${{ matrix.selection }}/${{ matrix.study }}" == ON/all/all ]]; then
+          filters+=(-E '^RodinConvergenceIsoparametricPETScStokesBoundary_P3P2Rates_Tetrahedron$')
+        fi
+        ctest --test-dir build/tests "${filters[@]}" --output-on-failure --no-tests=error -j 1
     - name: Publish independent production coverage
       id: coverage_record
       uses: ./.github/actions/coverage

@@ -40,7 +40,9 @@ class LFSRetryTest(unittest.TestCase):
             sleep.assert_called_once_with(15)
 
     def test_exhaustion_fails_closed(self):
-        for failure in [self.response('HTTP 503', 2), subprocess.TimeoutExpired('git', 300)]:
+        for failure in [self.response('HTTP 503', 2),
+                        self.response("batch response: Fatal error: We couldn't respond to your request in time.", 2),
+                        subprocess.TimeoutExpired('git', 300)]:
             with self.subTest(failure=failure), \
                     patch.object(ci_lfs.subprocess, 'run', side_effect=[failure] * 5) as run, \
                     patch.object(ci_lfs.time, 'sleep') as sleep:
@@ -52,7 +54,8 @@ class LFSRetryTest(unittest.TestCase):
     def test_permanent_and_unknown_failures_are_not_retried(self):
         for output in ['HTTP 403', 'HTTP 404', 'bandwidth limit exceeded', 'invalid pointer',
                        'unknown failure', 'HTTP 502; authentication failed',
-                       'authentication failed; lookup github.com: server misbehaving']:
+                       'authentication failed; lookup github.com: server misbehaving',
+                       "HTTP 403; couldn't respond to your request in time"]:
             with self.subTest(output=output), \
                     patch.object(ci_lfs.subprocess, 'run', return_value=self.response(output, 2)) as run, \
                     patch.object(ci_lfs.time, 'sleep') as sleep:
@@ -74,7 +77,9 @@ calls = json.loads(state.read_text()) if state.exists() else []
 calls.append(sys.argv[1:])
 state.write_text(json.dumps(calls))
 if len(calls) <= 3:
-    print('batch response: Fatal error: Server error from HTTP 502', file=sys.stderr)
+    print("batch response: Fatal error: We couldn't respond to your request in time. "
+          "Sorry about that. Please try resubmitting your request and contact us if the problem persists.",
+          file=sys.stderr)
     sys.exit(2)
 ''')
             executable.chmod(0o755)

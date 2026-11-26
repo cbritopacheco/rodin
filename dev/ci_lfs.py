@@ -33,6 +33,7 @@ def pull(include):
             retryable = not permanent and re.search(
                 r'\bHTTP\s+(?:408|429|500|502|503|504)\b|connection reset|'
                 r'connection refused|timed? out|timeout|TLS handshake|'
+                r"couldn't respond to your request in time|"
                 r'temporary failure|could not resolve host|unexpected EOF|'
                 r'lookup [^\n]*: (?:server misbehaving|no such host)', output, re.I)
             failure = subprocess.CalledProcessError(result.returncode, command)

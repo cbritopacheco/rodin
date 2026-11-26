@@ -243,7 +243,7 @@ class TestPlanTest(unittest.TestCase):
                                         for k in [1, 2, 3]] + ['Controls']}
         with tempfile.TemporaryDirectory() as temporary:
             ctest = Path(temporary) / 'ctest'
-            ctest.write_text('#!/bin/sh\nwhile [ "$1" != "-R" ]; do shift; done\nprintf "%s\\n" "$2"\n')
+            ctest.write_text('#!/bin/sh\nprintf "%s\\n" "$@"\n')
             ctest.chmod(0o755)
             counts = {mt: Counter() for mt in ['ON', 'OFF']}
             rows = job['strategy']['matrix']['include']
@@ -254,8 +254,10 @@ class TestPlanTest(unittest.TestCase):
                 script = command
                 for name, value in row.items():
                     script = script.replace('${{ matrix.' + name + ' }}', value)
-                pattern = subprocess.check_output(['bash', '-eu', '-c', script], text=True,
-                                                  env=dict(os.environ, PATH=temporary + ':' + os.environ['PATH'])).strip()
+                args = subprocess.check_output(['bash', '-eu', '-c', script], text=True,
+                                               env=dict(os.environ, PATH=temporary + ':' + os.environ['PATH'])).splitlines()
+                pattern = args[args.index('-R') + 1]
+                exclude = args[args.index('-E') + 1] if '-E' in args else None
                 shapes = [g for g in geometries if g not in ['Tetrahedron', 'Pyramid']] if row['geometry'] == 'light' else [row['geometry'].capitalize()]
                 # Names reflect PETScRefinement.cmake's RATE_CASES and Controls
                 # registrations. Local selection must not capture an MPI rank.
@@ -271,7 +273,11 @@ class TestPlanTest(unittest.TestCase):
                                     and (rank is not None or not name.startswith(prefix + 'MPI_')) for rank in ranks)}
                 if row['study'] != 'all':
                     expected = {name for name in expected if '_' + row['study'] + '_' in name}
-                actual = {name for name in names if re.fullmatch(pattern, name)}
+                if tuple(row[key] for key in ('physics', 'geometry', 'multithreaded', 'selection', 'study')) == (
+                        'Stokes', 'tetrahedron', 'ON', 'all', 'all'):
+                    expected.remove(prefix + 'P3P2Rates_Tetrahedron')
+                actual = {name for name in names if re.fullmatch(pattern, name)
+                          and not (exclude and re.fullmatch(exclude, name))}
                 self.assertTrue(expected)
                 self.assertEqual(actual, expected, row)
                 counts[row['multithreaded']].update(actual)
