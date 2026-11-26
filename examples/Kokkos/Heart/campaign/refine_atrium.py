@@ -13,8 +13,12 @@ corrida previa en ella.
                        gradiente sea bajo;
          h_pared     = wall + d_pared / 1 mm (wall = 0.7): capa límite;
          h_aberturas = 0.5 + d_abertura / 3 mm: entrada de los chorros y salida;
-         cap (1.2)   = ninguna zona, ni las quietas (orejuela), se engruesa más
-                       que 1,2 veces el tamaño típico.
+         cap (1.2)   = ninguna zona quieta se engruesa más que 1,2 veces el
+                       tamaño típico;
+         h_orejuela  = hlaa + d_esfera / 2.5 mm, con laa=x,y,z,r (mm) la esfera
+                       de la orejuela y hlaa (0.5) su tamaño relativo; sin laa
+                       no hay término.
+         uexp (0.5) es el exponente de h_vel: más alto, chorros más finos.
          K se ajusta para que la malla tenga ~target celdas (fudge corrige la
          estimación con el resultado real de mmg3d).
   clean  in=out.mesh out=Fine.mesh   deja Vertices, Tetrahedra y Triangles.
@@ -161,14 +165,21 @@ elif cmd == "size":
     hg = (np.maximum(g, 1e-3 * gm) / gm) ** -0.5
     o2 = np.argsort(U)
     Um = U[o2][np.searchsorted(np.cumsum(lump[o2]), 0.5 * lump.sum())]
-    hu = (np.maximum(U, 1e-3 * Um) / Um) ** -0.5
+    hu = (np.maximum(U, 1e-3 * Um) / Um) ** -float(args.get("uexp", 0.5))
     F, Fr = m["F"], m["Fref"]
     wall = np.unique(F[Fr == WALL])
     opening = np.unique(F[np.isin(Fr, OPENINGS)])
     dw = cKDTree(V[wall]).query(V)[0]
     do = cKDTree(V[opening]).query(V)[0]
     WALLREL, CAP = float(args.get("wall", 0.7)), float(args.get("cap", 1.2))
-    rel = np.minimum.reduce([hg, hu, WALLREL + dw / 1.0, 0.5 + do / 3.0, np.full(len(V), CAP)])
+    terms = [hg, hu, WALLREL + dw / 1.0, 0.5 + do / 3.0, np.full(len(V), CAP)]
+    inlaa = np.zeros(len(V), bool)
+    if "laa" in args:
+        cx, cy, cz, r = (float(x) for x in args["laa"].split(","))
+        dl = np.maximum(np.linalg.norm(V - [cx, cy, cz], axis=1) - r, 0)
+        inlaa = dl == 0
+        terms.append(float(args.get("hlaa", 0.5)) + dl / 2.5)
+    rel = np.minimum.reduce(terms)
 
     def count(K):
         h = np.clip(K * rel, HMIN, HMAX)
@@ -192,6 +203,10 @@ elif cmd == "size":
     if run != "none":
         k = U >= np.percentile(U, 90)
         print(f"    10% de vértices más rápidos (chorros): h mediana {np.median(h[k]):.3f} mm")
+    if inlaa.any():
+        print(f"    orejuela ({100 * lump[inlaa].sum() / lump.sum():.1f}% del volumen):"
+              f" h mediana {np.median(h[inlaa]):.3f} mm, a >1 mm de la pared"
+              f" {np.median(h[inlaa & (dw > 1)]):.3f} mm")
     with open(args.get("out", "size.sol"), "w") as f:
         f.write(f"MeshVersionFormatted 2\n\nDimension 3\n\nSolAtVertices\n{len(V)}\n1 1\n\n")
         np.savetxt(f, h, fmt="%.6g")
