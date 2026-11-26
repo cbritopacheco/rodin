@@ -49,6 +49,6 @@ cmd=(python3 "$SCRIPT_DIR/render_cy_tube.py" "${dirs[@]}" --out "$OUT/cy_tube.pn
 if [[ -z "${DISPLAY:-}" ]] && command -v xvfb-run > /dev/null; then
   xvfb-run -a -s "-screen 0 1800x1560x24" "${cmd[@]}"
 else
-  "${cmd[@]}" || echo "rendering failed here: copy $OUT to a machine with a display and run ${cmd[*]}"
+  "${cmd[@]}" || { echo "rendering failed here: copy $OUT to a machine with a display and run ${cmd[*]}"; exit 1; }
 fi
 echo "done: $OUT/cy_tube.png"

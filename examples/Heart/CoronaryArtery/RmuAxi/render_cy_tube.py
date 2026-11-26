@@ -39,6 +39,9 @@ import h5py
 import numpy as np
 import pyvista as pv
 
+# numpy < 2 has trapz only, numpy >= 2 prefers trapezoid
+_trapz = getattr(np, "trapezoid", None) or np.trapz
+
 # Healthy blood (Table 1)
 CY = dict(mu0=0.0712616, muinf=0.0041, lam=9.2780, n=0.3572, a=1.8773)
 
@@ -114,7 +117,7 @@ def developed(m, R, L):
     r = np.linspace(0, R, 201)
     line = pv.PolyData(np.c_[np.full_like(r, xc), r, np.zeros_like(r)]).sample(m)
     u = line.point_data["velocity"][:, 0]
-    Q = np.trapezoid(2 * np.pi * r * u, r)
+    Q = _trapz(2 * np.pi * r * u, r)
     U = Q / (np.pi * R ** 2)
     dx = 0.1 * L
     pp = pv.PolyData(np.array([[xc - dx, 0.3 * R, 0], [xc + dx, 0.3 * R, 0]])).sample(m)
@@ -217,7 +220,7 @@ def main():
         ue = exact_profile(G, R, r)
         gm = re.search(r"g(\d+)", os.path.basename(os.path.normpath(f)))
         label = (f"Reference shear rate {gm.group(1)} 1/s" if gm else os.path.basename(f))
-        eQ = 100 * (np.trapezoid(r * u, r) / np.trapezoid(r * ue, r) - 1)
+        eQ = 100 * (_trapz(r * u, r) / _trapz(r * ue, r) - 1)
         print(f"{f}: R = {R:.3g} m, U = {U:.4g} m/s, dp/dx = {G:.4g} Pa/m, "
               f"u_max/U = {u.max() / U:.3f} (Poiseuille 2), flow vs exact {eQ:+.2f} %")
         runs.append((m, R, xc, r / R, u / U, ue / U, label))
