@@ -27,7 +27,9 @@ STAGE=${1:-all}
 
 REPO=$(cd ../../../../.. && pwd)
 export PTAGX_EXE=${PTAGX_EXE:-$REPO/build/examples/Heart/Thrombosis/LeftAtrium2DPTAGX/LeftAtrium2DPTAGX}
-export PTAGP_MPIRUN=${PTAGP_MPIRUN:-"mpirun -n 1"}
+# --bind-to none: cada caso es un mpirun independiente; con el amarre por
+# defecto de OpenMPI todos se fijan al nucleo 0 y comparten un solo nucleo.
+export PTAGP_MPIRUN=${PTAGP_MPIRUN:-"mpirun -n 1 --bind-to none"}
 
 if [ ! -x "$PTAGX_EXE" ]; then
   echo "No encuentro el ejecutable: $PTAGX_EXE" >&2

@@ -57,7 +57,7 @@ def main():
     args = ap.parse_args()
 
     out = os.path.abspath(args.out)
-    sub = os.path.join(out, "dose" + ("_seeded" if args.seed else ""))
+    sub = os.path.join(out, f"dose_{args.kinetics}" + ("_seeded" if args.seed else ""))
     os.makedirs(sub, exist_ok=True)
     cal = json.load(open(os.path.join(out, "calibration.json")))
     doses = [float(x) for x in args.doses.split(",")]
