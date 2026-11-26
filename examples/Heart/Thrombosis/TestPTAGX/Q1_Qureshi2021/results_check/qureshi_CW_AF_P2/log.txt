@@ -1,0 +1,14 @@
+mpirun --allow-run-as-root -n 1 /home/claude/bin/LeftAtrium2DPTAGX_q1 -ptag_mesh /home/claude/rodin/examples/Heart/Thrombosis/TestPTAGX/Q1_Qureshi2021/meshes/Q_CW.mesh -ptag_pv /home/claude/rodin/examples/Heart/Thrombosis/TestPTAGX/Q1_Qureshi2021/waveforms/pv_velocity_AF.dat -ptag_mv /home/claude/rodin/examples/Heart/Thrombosis/TestPTAGX/Q1_Qureshi2021/waveforms/mv_pressure_zero.dat -ptag_inlet_velocity 0.05 -ptag_mu 0.0035 -ptag_dt 0.01 -ptag_laa_wall_velocity 0.0 -ptag_laa_wall_phase 2.199114857512855 -ptag_laa_poly /home/claude/rodin/examples/Heart/Thrombosis/TestPTAGX/Q1_Qureshi2021/meshes/Q_CW_laa.txt -ptag_output_every 0 -ptag_skew true -ptag_csv_every 5 -ptag_xa false -ptag_immobile_fibrin false -ptag_k_a 0.0 -ptag_k_on 0.0 -ptag_wall_flux 0.0 -ptag_K_G 1.0 -ptag_k_F 7180.0 -ptag_fibrinogen 0.0045 -ptag_D_G 2e-11 -ptag_D_P 4.6e-11 -ptag_brinkman false -ptag_seed 0.089395122,0.106809756,0.002,9e-05 -ptag_flow_cycles 1 -ptag_species_cycles 10 -ptag_replay true -ptag_species_substeps 4 -ptag_csv /home/claude/rodin/examples/Heart/Thrombosis/TestPTAGX/Q1_Qureshi2021/results_check/qureshi_CW_AF_P2/run.csv -ptag_xdmf /home/claude/rodin/examples/Heart/Thrombosis/TestPTAGX/Q1_Qureshi2021/results_check/qureshi_CW_AF_P2/run
+[00m[34m[1mInfo[00m: [mesh] cells=10189 vertices=5482  T=1 s
+[00m[34m[1mInfo[00m: [PTAGX] factor Xa off (j_X=0 mol/m^2/s, kappa=3 1/s, k_dX=0.01 1/s, washout length sqrt(D/k_dX)=6.78233e-05 m); fibrin advected (G_0 - G)
+[00m[34m[1mInfo[00m: [scale] max|dp|=1 Pa -> u=0.0434372 m/s;  kinetics: k_on A_0=0 1/s, activation threshold T_th=-nan nM, wall layer sqrt(D/(k_on A_0))=inf m
+[00m[34m[1mInfo[00m: [run] 11 cycles x 100 steps; species from cycle 2 (never before the first OSI); Brinkman off; replay on
+[00m[34m[1mInfo[00m: step 1/1100  t=0.01 s  flow  max|u|=7.28402e-06 m/s  dp=5e-05 Pa  qIn=-1.6089e-07  step=2.80135 s  ETA 51.3111 min
+[00m[34m[1mInfo[00m: step 2/1100  t=0.02 s  flow  max|u|=1.20907e-05 m/s  dp=9e-05 Pa  qIn=-3.00413e-07  step=2.04209 s  ETA 44.3174 min
+[00m[34m[1mInfo[00m: step 3/1100  t=0.03 s  flow  max|u|=1.92757e-05 m/s  dp=0.00015 Pa  qIn=-5.03008e-07  step=1.77519 s  ETA 40.337 min
+[00m[34m[1mInfo[00m: step 21/1100  t=0.21 s  flow  max|u|=0.0101415 m/s  dp=0.0972 Pa  qIn=-0.000330675  step=2.18669 s  ETA 40.1694 min
+[00m[34m[1mInfo[00m: step 41/1100  t=0.41 s  flow  max|u|=0.0320573 m/s  dp=0.40479 Pa  qIn=-0.00140196  step=2.37222 s  ETA 39.9021 min
+[00m[34m[1mInfo[00m: step 61/1100  t=0.61 s  flow  max|u|=0.0734197 m/s  dp=0.99463 Pa  qIn=-0.00342988  step=2.09618 s  ETA 38.4632 min
+[00m[34m[1mInfo[00m: step 81/1100  t=0.81 s  flow  max|u|=0.0428033 m/s  dp=0.10754 Pa  qIn=-0.000378859  step=2.48255 s  ETA 37.9592 min
+[00m[34m[1mInfo[00m: [layer] int E dA = 0.177714 m, int E~ dV = 9.74195e-05 m^2, dose scale = 0.912107
+[00m[34m[1mInfo[00m: [run] of 1100 clock steps: flow solved in 100, species solved in 250 (dt_q = 0.04 s)

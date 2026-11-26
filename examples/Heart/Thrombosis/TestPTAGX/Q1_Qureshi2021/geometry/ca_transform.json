@@ -1,0 +1,12 @@
+{
+ "scale": 9.1452e-05,
+ "anchor_px": [
+  64.0,
+  135.4119170984456
+ ],
+ "anchor_phys": [
+  0.07192689799999999,
+  0.09786184064248706
+ ],
+ "note": "CA thumbnail of Fig. 1 (embedded image 446x518 px, y up), similarity fit on the common LA body (scale 9.15e-5 m/px); the mesh script rescales it about the anchor (left attachment) to the mean appendage area of CW, WS and BR"
+}

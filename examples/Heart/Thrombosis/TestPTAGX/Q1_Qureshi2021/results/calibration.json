@@ -1,0 +1,24 @@
+{
+ "SR": {
+  "walls": [
+   0.0
+  ],
+  "vmean_cm_s": [
+   0.320258175
+  ],
+  "target": 0.12,
+  "wall": 0.0,
+  "note": "still wall already above the target"
+ },
+ "AF": {
+  "walls": [
+   0.0
+  ],
+  "vmean_cm_s": [
+   0.16306493500000002
+  ],
+  "target": 0.022,
+  "wall": 0.0,
+  "note": "still wall already above the target"
+ }
+}

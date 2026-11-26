@@ -1,0 +1,661 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+
+\usepackage{lmodern}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage[table]{xcolor}
+\usepackage[margin=2.4cm]{geometry}
+\usepackage{fancyhdr}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true,linkcolor=black,urlcolor=[rgb]{0.1,0.25,0.5},citecolor=black}
+
+\definecolor{keep}{rgb}{0.08,0.38,0.18}
+\definecolor{chg}{rgb}{0.70,0.38,0.0}
+\definecolor{out}{rgb}{0.60,0.10,0.10}
+\newcommand{\MANT}{\textcolor{keep}{\textbf{MANTENER}}}
+\newcommand{\CAMB}{\textcolor{chg}{\textbf{CAMBIAR}}}
+\newcommand{\SACA}{\textcolor{out}{\textbf{SACAR}}}
+
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{\small Revisión crítica del modelo PTAGX}
+\rhead{\small CFDLab USACH}
+\cfoot{\small\thepage}
+
+\title{\vspace{-1.5cm}\textbf{Revisión crítica del modelo PTAGX}\\[2mm]
+\large Qué se mantiene, qué se cambia y qué se saca, comentario por comentario}
+\author{Nota técnica --- CFDLab USACH}
+\date{25 de noviembre de 2026}
+
+\begin{document}
+\maketitle
+\thispagestyle{fancy}
+
+\noindent
+Este documento responde, uno por uno, a los siete comentarios sobre la estructura del
+modelo PTAGX: transporte de la trombina, transporte de la fibrina, la elección de
+la especie iniciadora (FX, FVII, FT o Xa) y la química del daño de pared que entra
+en $E$. Para cada uno hay un veredicto, el argumento cuantitativo que lo sostiene y
+el costo en variables y constantes. Al final está lo que se probó y se descartó, lo
+que no se agregó a propósito, y el techo estructural que queda.
+
+\section{Resumen de veredictos}
+
+\renewcommand{\arraystretch}{1.25}
+\begin{center}
+\small
+\begin{tabular}{@{}p{5.0cm}p{2.25cm}p{2.9cm}p{4.5cm}@{}}
+\toprule
+\textbf{Comentario} & \textbf{Veredicto} & \textbf{Costo} & \textbf{Efecto medido} \\
+\midrule
+1. La trombina hace una capa delgada: ¿por qué CDR? & \MANT & --- &
+La advección \emph{es} el umbral de cizalle y la hipótesis de estasis (§2) \\
+2. ¿Y por qué no advectar la fibrina? & \CAMB & +1 campo, +1 constante de literatura &
+Monómero advectado; sin flujo no cambia nada (E2 idéntico) \\
+3--5. Expresar desde FVII y FT, o desde Xa & \MANT & --- &
+$X$ ya \emph{es} Xa; $j_X=\Gamma_{\mathrm{FT}}k_{\mathrm{cat}}E$ ya lleva FT y FVIIa (§4) \\
+6. ¿Es $X$ la mejor elección? & \CAMB & +1 constante &
+Faltaba el cofactor Va: E1 pasa de 2/3 a 3/3 (§5) \\
+7. El daño de pared: FT$\uparrow$, TM$\downarrow$, TFPI$\downarrow$, eNOS$\downarrow$ & \CAMB & +1 constante derivada &
+$E$ apaga la trombomodulina además de encender el FT (§6) \\
+\addlinespace
+(propio) $\sigma$, amplificación superficial & \SACA & $-$1 constante &
+Rompía E2, E3 y E4; la reemplaza la trombomodulina (§6.6) \\
+(propio) $\varphi$, lazo intrínseco con retardo & \SACA & 0 (queda en 0) &
+Probado en E2: va en la dirección equivocada (§7) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent
+Balance: el modelo pasa de 6 a 7 campos transportados y suma dos constantes
+($\varepsilon$ y $k_{\mathrm{pol}}$) más una derivada ($k_{TM}$), y pierde una
+($\sigma$). Con
+\verb|-pg_eps_x 1 -pg_kappa_x 3 -pg_fibrin_monomer false| (banco) o
+\verb|-ptag_eps_x 1 -ptag_kappa_x 3 -ptag_fibrin_monomer false -ptag_k_tm 0|
+(aurícula) se recupera el modelo anterior operación por operación, y así está
+verificado: el caso \texttt{nocof} de E2 reproduce exactamente los cuatro
+observables de la ronda pasada.
+
+\section{Comentario 1: la trombina y la ecuación de convección--difusión--reacción}
+
+\textbf{Veredicto: \MANT.} La capa de trombina junto a la pared es delgada
+\emph{y se la lleva el flujo}; lo segundo es justamente lo que hay que capturar.
+
+El número de Péclet, $\mathrm{Pe}=UL/D$ con $D_T=4{,}6\times10^{-11}$~m$^2$/s, va de
+$4\times10^{5}$ en la orejuela en estasis a $2\times10^{7}$ en el cuerpo auricular:
+la advección domina el volumen por seis órdenes de magnitud. Sobre un parche
+reactivo de longitud $L_p$ bajo cizalle de pared $\gamma$, la capa de concentración
+es la de Lévêque y el tiempo que el fluido pasa sobre el parche es
+%
+\begin{equation}
+\delta=\Big(\frac{D\,L_p}{\gamma}\Big)^{1/3},
+\qquad
+t_{\mathrm{res}}=\frac{L_p}{\gamma\,\delta},
+\end{equation}
+%
+que se compara con el tiempo de amplificación $1/k_a\approx29$~s:
+
+\begin{center}
+\small
+\begin{tabular}{@{}rrrrrl@{}}
+\toprule
+$\gamma$ (s$^{-1}$) & $L_p$ & $\delta$ & $t_{\mathrm{res}}$ & $t_{\mathrm{res}}k_a$ & ¿inicia? \\
+\midrule
+5   & 200\,$\mu$m & 12\,$\mu$m  & 3{,}3~s  & 0{,}11 & no \\
+40  & 200\,$\mu$m & 6\,$\mu$m   & 0{,}8~s  & 0{,}03 & no \\
+0{,}4 (orejuela) & 1~cm & 105\,$\mu$m & 239~s & 8{,}2 & sí \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent
+Ese cociente \emph{es} el umbral de cizalle de Shen et al.~2008 y \emph{es} la
+hipótesis clínica (estasis $\rightarrow$ trombo). Si se quita $u\cdot\nabla T$, el
+parche de 200~$\mu$m inicia a cualquier cizalle y la aurícula coagula en todas
+partes: desaparece lo único que el modelo pretende predecir.
+
+\paragraph{La crítica que sí es válida.} Es de malla, no de modelo: para que el
+balance de arriba sea el correcto hay que resolver $\delta$. En E5
+($h_y=2\,\mu$m junto a la pared) se resuelve. En la aurícula con $h=0{,}15$~mm no
+se resolvería a cizalle alto, pero $\delta\propto\gamma^{-1/3}$ y en la orejuela
+$\delta\approx105\,\mu$m, comparable a $h$. Es decir: el modelo resuelve la capa
+donde predice trombo y no la resuelve donde no predice nada. Eso es un límite de
+validez que hay que declarar, no un error. Es también la razón de fondo de la capa
+endocárdica $\delta_{\mathrm{endo}}=0{,}5$~mm: no es un truco numérico, es que la
+pared trabeculada tiene espesor.
+
+\section{Comentario 2: ¿por qué no advectar la fibrina?}
+
+\textbf{Veredicto: \CAMB.} El comentario era correcto y se implementó. El reparto
+químicamente correcto son tres especies, no dos:
+
+\begin{center}
+\small
+\begin{tabular}{@{}llp{7.2cm}@{}}
+\toprule
+Especie & Transporte & Por qué \\
+\midrule
+Fibrinógeno $G$ & advectado & soluble, se consume y lo repone el flujo (ya estaba) \\
+Monómero $f$ & \textbf{advectado} & soluble, vida corta: \textbf{es el cambio} \\
+Polímero $F$ & inmóvil & el gel está anclado a pared rígida; es lo que lee el arrastre de Brinkman \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent
+Con el monómero:
+%
+\begin{equation}
+\mathcal{L}f = R_F - R_{\mathrm{pol}},
+\qquad
+\partial_t F = R_{\mathrm{pol}},
+\qquad
+R_{\mathrm{pol}} = k_{\mathrm{pol}}\,f\,(f+F),
+\end{equation}
+%
+con $k_{\mathrm{pol}}=10^{3}$~m$^3$mol$^{-1}$s$^{-1}$ ($\approx10^{6}$~M$^{-1}$s$^{-1}$,
+Weisel \& Nagaswami 1992): una constante, de literatura, sin ajustar. El paso nodal
+conserva $G+f+F$ exactamente.
+
+La clave está en la vida del monómero, $1/(k_{\mathrm{pol}}f)$: \textbf{1~s} a
+1~$\mu$M y \textbf{100~s} a 10~nM. De ahí sale el resultado medido, que es el
+mejor argumento a favor del cambio:
+
+\begin{center}
+\small
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+E2 (sin flujo) & Tlag (min) & $V_i$ ($\mu$m/min) & $V_{st}$ ($\mu$m/min) & CS30 ($\mu$m) \\
+\midrule
+con monómero  & 1{,}00 & 55{,}4 & 26{,}8 & 1160 \\
+sin monómero  & 1{,}00 & 55{,}5 & 26{,}8 & 1160 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent
+Sin flujo no cambia nada, porque a $\mu$M el monómero polimeriza en 1~s y gela
+donde se cortó. Es decir: \textbf{la corrección sale gratis en la calibración}, y
+solo actúa donde debe actuar, bajo flujo, donde a nM la corriente se lo lleva antes
+de que gele. Ese es exactamente el fenómeno que mide Colace et al.~2012 (umbral de
+fibrina bajo flujo). Y responde tu objeción: ahora la trombina puede cortar
+fibrinógeno lejos de la lesión sin dejar gel ahí.
+
+\paragraph{Lo que no cambia.} Advectar el \emph{polímero} sería incorrecto: el gel
+está en reposo sobre una pared rígida, y el término de Brinkman
+$-\sigma_B(F)u$ es exactamente disipativo precisamente porque $F$ no se mueve.
+
+\section{Comentarios 3--5: FVII, factor tisular y Xa}
+
+\textbf{Veredicto: \MANT{} la elección de la especie, con una aclaración de
+nomenclatura que probablemente explica la duda.}
+
+\paragraph{La $X$ de PTAGX ya es factor Xa, no el zimógeno.} La ecuación del
+código es
+%
+\begin{equation}
+\mathcal{L}X=-k_{dX}X,
+\qquad
+-D\,\partial_n X = j_X\,E \ \ \text{(endocardio)},
+\qquad
+j_X=\Gamma_{\mathrm{FT}}\,k_{\mathrm{cat}} .
+\end{equation}
+%
+O sea: tu tercera propuesta ---``poner la contribución de FT y FVII en una CDR de
+Xa cuya fuente dependa de constantes relacionadas con ellos''--- es
+\textbf{exactamente} lo que el modelo hace. El nombre de la variable es lo que
+engaña; se renombró en la documentación. Y tu segunda propuesta ---``partir
+directamente desde Xa''--- es el estado actual.
+
+\paragraph{Por qué no llevar FVII ni FT como campos.}
+\begin{itemize}[leftmargin=1.2em,itemsep=2pt]
+\item El FVII del plasma está a $\sim$10~nM y el FVIIa a $\sim$0{,}1~nM, los dos
+prácticamente constantes: no se agotan.
+\item El complejo FT$\cdot$FVIIa es una especie \emph{de superficie}, confinada a
+la pared; no es un campo de volumen. Su ensamblaje es rápido ($K_d\sim1$~nM), así
+que su densidad es cuasi-estacionaria y vale $\Gamma_{\mathrm{FT}}$ veces la
+fracción ocupada.
+\item El producto de esa densidad por $k_{\mathrm{cat}}$ \emph{es} $j_X$.
+\end{itemize}
+Llevarlos explícitamente costaría dos campos de volumen, una especie de superficie
+y tres constantes ($k_{on}$, $k_{off}$, $k_{\mathrm{cat}}$) para no cambiar ningún
+resultado.
+
+\paragraph{Por qué tampoco llevar el zimógeno FX.} Con la dosis medida de Kastrup
+($j_X=4\times10^{-13}$~mol\,m$^{-2}$s$^{-1}$), el consumo de FX en 1000~s repartido
+en la capa de 0{,}5~mm es
+%
+\begin{equation}
+\Delta[\mathrm{FX}]=\frac{j_X\,t}{\delta}
+=\frac{4\times10^{-13}\cdot1000}{5\times10^{-4}}
+=8\times10^{-7}\ \mathrm{mol/m^3}=0{,}8\ \mathrm{nM},
+\end{equation}
+%
+contra $[\mathrm{FX}]_0=170$~nM: el 0{,}5\,\% del pool. Un campo y una constante de
+Michaelis para seguir una variable que no se mueve.
+
+\section{Comentario 6: ¿es $X$ la mejor elección de todas?}
+
+\textbf{Veredicto: \CAMB{} el paso Xa$\,\to\,$trombina, no la especie.} La especie
+está bien; lo que faltaba es el cofactor.
+
+El Xa \emph{libre} es un activador pésimo de protrombina. El complejo
+Xa$\cdot$Va$\cdot$fosfolípido (protrombinasa) es órdenes de magnitud más eficiente,
+y el Va lo hace la trombina misma. En el modelo, $\kappa=3$~s$^{-1}$ mezclaba las
+dos cosas en un valor ``parcialmente ensamblado''. Separado, con una sola constante
+nueva:
+%
+\begin{equation}
+R=\Big[k_a\,\theta\,\frac{T^2}{K_A+T}
+       +\kappa\,X\,\theta_X\Big]\frac{P}{P_{\mathrm{ref}}},
+\qquad
+\boxed{\ \theta_X=\varepsilon+(1-\varepsilon)\frac{T}{K_A+T}\ }
+\end{equation}
+%
+con $\kappa=10$~s$^{-1}$ (giro de la protrombinasa ensamblada, de literatura) y
+$\varepsilon=0{,}1$ (actividad sin cofactor). Se usa la misma semisaturación $K_A$
+que la otra realimentación, así que no entra una constante más. Con
+$\varepsilon=1$ se recupera el modelo anterior bit a bit.
+
+\paragraph{Por qué importa estructuralmente.} La iniciación tiene que arrancar su
+propio cofactor, así que se vuelve un \textbf{umbral}; la onda que propaga, donde
+$\theta_X\to1$, no cambia. Eso desacopla el retardo de la velocidad del frente,
+que es lo que los datos clínicos piden. Y sigue siendo cuadrática en $T$ en el
+origen, así que $R'(0)=0$ y una traza de trombina decae en vez de amplificarse: la
+propiedad que hace al modelo seguro no se pierde.
+
+\paragraph{Resultado medido (E1, trombograma CAT a 5~pM).}
+\begin{center}
+\small
+\begin{tabular}{@{}lccccl@{}}
+\toprule
+ & lag (min) & pico (nM) & ETP (nM$\cdot$min) & en rango & pico vs dosis de FT \\
+\midrule
+intervalos & 1{,}4--3{,}7 & 256--479 & 1414--2658 & & \\
+$\varepsilon=1$, $\kappa=3$ (antes) & 1{,}98 & \textbf{238} & 1576 & 2/3 & independiente \\
+$\varepsilon=0{,}1$, $\kappa=10$ & 1{,}61 & 311 & 1595 & \textbf{3/3} & 218 nM a 1 pM \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent
+Además de pasar el tercer criterio, se recupera un comportamiento cualitativo que
+el modelo no tenía y que estaba anotado como defecto conocido: el pico del
+trombograma ahora depende de la dosis de factor tisular. El ajuste no es fino:
+los tres intervalos se cumplen para $\varepsilon\in[0{,}03;0{,}3]$ y
+$k_a\in[0{,}03;0{,}05]$. Y E2 sigue pasando sus cinco criterios con el mismo
+$k_a=0{,}035$, sin recalibrar.
+
+\section{Comentario 7: el daño de pared y la química que entra en $E$}
+
+\textbf{Veredicto: \CAMB.} Aquí el comentario apuntaba al punto más débil del
+modelo, y el cambio es conceptual, no de ajuste.
+
+\subsection{Lo que dice la biología}
+
+La activación inflamatoria del endotelio no sube ``un poco todo'': sube el factor
+tisular y baja la trombomodulina, el EPCR, el TFPI y el eNOS \emph{a la vez}, por la
+misma vía (NF-$\kappa$B). En la aurícula está medido, y específicamente:
+
+\begin{itemize}[leftmargin=1.2em,itemsep=2pt]
+\item \textbf{Yamashita et al., \emph{Circulation} 108 (2003) 2450.} Marcapaseo
+auricular rápido en rata, 8~h: baja significativamente el ARNm de \textbf{TM y
+TFPI en la aurícula izquierda y no en el ventrículo}, con pérdida de expresión
+localizada en las células endocárdicas. Los autores lo describen como un
+debilitamiento de la barrera anticoagulante entre la pared auricular y la sangre.
+\item \textbf{Nakamura et al., \emph{Thromb Res} (2003).} El factor tisular sube en
+el endotelio auricular en fibrilación auricular no valvular.
+\end{itemize}
+
+\noindent
+Las cuatro cosas empujan en el mismo sentido, o sea son colineales: no hacen falta
+cuatro variables, hace falta que \emph{un} escalar module los acoplamientos que
+físicamente modula.
+
+\subsection{Lo que el modelo hacía}
+
+$E$ solo multiplicaba la fuente, $j_X E$. Y en la opción 2, además multiplicaba una
+ganancia genérica, $\theta=1+(\sigma/\delta)\chi\tilde E$. Eso es lo que estaba mal:
+una ganancia genérica no tiene contraparte química y, peor, actúa sobre
+\emph{cualquier} superficie reactiva (§6.6).
+
+\subsection{Lo que hace ahora}
+
+El mismo $E$ hace las dos cosas que hace en la realidad:
+%
+\begin{equation}
+\underbrace{-D\,\partial_n X = j_X\,E}_{\text{enciende el factor tisular}}
+\qquad\text{y}\qquad
+\underbrace{\text{sumidero } k_{TM}\,(1-E)\,T}_{\text{apaga la protección}} .
+\end{equation}
+
+\paragraph{Detalle 1: $(1-\tilde E)$ no es una capa.} Vale $\approx1$ en toda la
+luz, así que usarla pondría trombomodulina en medio de la aurícula. La protección
+correcta es la \emph{extensión} de $(1-E)$, que por linealidad del problema de
+Poisson apantallado es $\tilde L-\tilde E$, con $\tilde L$ la extensión del dato~1.
+Lleva su propia normalización de dosis:
+%
+\begin{equation}
+\int_\Omega \frac{k_{TM}}{\delta}\,\chi\,(\tilde L-\tilde E)\,dV
+= k_{TM}\int_{\Gamma_w}(1-E)\,dA .
+\end{equation}
+
+\paragraph{Detalle 2: la contabilidad.} La trombina que atrapa la trombomodulina se
+inactiva por antitrombina unas 20 veces más rápido, o sea sale del sistema como
+complejo serpina. El paso nodal la cobra con antitrombina 1:1,
+%
+\begin{equation}
+\Delta_{TM}=\min\!\Big(A_n,\ T_n\frac{\Delta t\,k_{TM}^{\mathrm{loc}}}{1+\Delta t\,k_{TM}^{\mathrm{loc}}}\Big),
+\qquad T\leftarrow T_n-\Delta_{TM},\quad A\leftarrow A_n-\Delta_{TM},
+\end{equation}
+%
+con lo cual $P+T-A$ sigue exacto para cualquier $\Delta t$, todo queda no negativo,
+y la protección queda \textbf{acotada por el pool de inhibidor}: la pared no puede
+proteger más de lo que hay. Esa última propiedad es la que $\sigma$ no tenía.
+
+\paragraph{La constante no se ajusta.} $k_{TM}\approx\Gamma_{TM}k_{on}$: con
+$10^2$--$10^3$ TM/$\mu$m$^2$ y un $k_{on}$ casi limitado por difusión
+($\sim10^{7}$~M$^{-1}$s$^{-1}$) sale $10^{-6}$--$10^{-5}$~m/s. Se usa
+$10^{-5}$~m/s. En la capa de 0{,}5~mm eso da una tasa de $0{,}02$~s$^{-1}$,
+comparable a $k_{on}A_0=0{,}02$~s$^{-1}$: duplica la inhibición junto a la pared
+sana, que es el orden correcto.
+
+\subsection{TFPI: implementado, pero apagado por defecto}
+
+El mismo trabajo que mide la caída de TM mide la del TFPI, y el TFPI es
+mayormente de superficie endotelial. La forma mínima es dejar que $E$ alargue la
+vida del Xa que la pared produce:
+%
+\begin{equation}
+k_{dX}\ \longrightarrow\ k_{dX}\,(1-\lambda\tilde E),
+\qquad \lambda\in[0,1).
+\end{equation}
+%
+De los $\sim10^{-2}$~s$^{-1}$ a los que el plasma inhibe el Xa, la antitrombina
+aporta $\sim6\times10^{-3}$ y el TFPI el resto, así que $\lambda\lesssim0{,}4$.
+Queda como opción (\verb|-ptag_tfpi_loss|) con \textbf{default 0}, por una razón
+honesta: solo afila un efecto que $j_XE$ ya produce, así que no se gana claridad
+poniéndolo encendido, y sí se gana una constante que habría que defender. Se
+reporta como sensibilidad.
+
+\subsection{eNOS: fuera}
+
+El óxido nítrico actúa sobre plaquetas, y PTAGX no las tiene por construcción
+(\verb|platelets off|, $\theta_0=1$). Meterlo sería acoplar a un módulo que no
+está. Si en algún momento se activa el módulo de plaquetas de \texttt{PTAGP}, el
+lugar natural del eNOS es el estímulo de activación, no la ecuación de $E$.
+
+\subsection{$\sigma$ (amplificación superficial): \SACA}
+
+$\sigma$ y la pérdida de trombomodulina representan la misma idea ---pared dañada
+es más trombogénica--- pero no son equivalentes:
+
+\begin{center}
+\small
+\begin{tabular}{@{}p{3.2cm}p{5.4cm}p{5.4cm}@{}}
+\toprule
+ & $\sigma$ (amplificación) & $k_{TM}(1-E)$ (protección) \\
+\midrule
+Signo & aditiva a la ganancia & sustractiva \\
+Cota & ninguna ($\theta$ crece con $\sigma/\delta$) & el pool de antitrombina \\
+Dónde actúa & \textbf{toda} superficie reactiva, incluido el activador sano de un ensayo & solo donde hay endotelio \\
+Contraparte medida & ninguna directa & TM del endocardio (Yamashita 2003) \\
+Efecto en los tests & rompe E2 (Tlag 0{,}33 vs 0{,}6--1{,}5), E4 (todos los parches encienden) y E3 & no toca ningún test de banco \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent
+Esa tercera fila es la que decide: $\sigma$ se calibró en E5 y después amplificó el
+activador de E2 y los parches de 50~$\mu$m de E4, que son vidrio y lípido, no
+endotelio. La pérdida de trombomodulina, por construcción, no puede hacer eso. Eso
+resuelve la incompatibilidad E4/E5 que quedó abierta en la ronda anterior: no era
+un problema de valor de $\sigma$, era que $\sigma$ estaba en el lugar equivocado.
+
+\subsection{¿Debería $E$ tener dinámica propia?}
+
+Es la pregunta de fondo de tu comentario (``el upregulation activa una respuesta
+inflamatoria''), y la respuesta es cuantitativa. Hoy $E=\sigma(\mathrm{TAWSS})\cdot
+\min(2\,\mathrm{OSI},1)$ es una función cuasi-estática de los índices de cizalle del
+ciclo. Lo natural sería darle relajación,
+%
+\begin{equation}
+\frac{dE}{dt}=\frac{E_\infty(\text{cizalle})-E}{\tau_E},
+\end{equation}
+%
+con $\tau_E$ el tiempo de la cascada NF-$\kappa$B $\to$ transcripción $\to$ recambio
+proteico. El trabajo de Yamashita mide el efecto a las \textbf{8~horas}; el recambio
+de la TM de membrana es de horas. O sea $\tau_E\sim10^4$~s, mientras que una corrida
+auricular es de \textbf{60~s}. Durante toda la simulación $E$ está congelado:
+$\tau_E$ no cambiaría ni un dígito del resultado, y sí agregaría una constante y una
+ecuación.
+
+\textbf{Veredicto: no agregarlo ahora}, y declarar explícitamente la separación de
+escalas: el modelo supone que el estado inflamatorio del endocardio es un dato del
+paciente (fijado por su historia de cizalle), no una variable del minuto que se
+simula. $\tau_E$ es la extensión correcta el día que la pregunta sea ``cómo remodela
+el endocardio a lo largo de días de FA'', y ahí hay que resolverla con un modelo de
+días, no de latidos.
+
+Lo mismo vale para la retroalimentación trombina $\to$ PAR-1 $\to$ activación
+endotelial: es real, es transcripcional, y con $\tau_E\gg60$~s no haría nada en una
+corrida. Además sería un lazo positivo sobre $E$, que es exactamente el tipo de
+término que uno no quiere agregar sin datos para acotarlo.
+
+\section{Lo que se probó y se descartó: el lazo intrínseco con retardo}
+
+La trombina tiene dos ramas de realimentación: activa el FV (protrombinasa,
+inmediata) y el FXI, cuya tenasa FIXa$\cdot$FVIIIa produce más Xa después de un
+retardo. Se implementó como una redistribución en el tiempo que no cambia la
+ganancia: una fracción $\varphi$ de $k_a\theta T^2/(K_A+T)$ se emite como Xa,
+$(k_{dX}/\kappa)$ veces ella, de modo que en estado estacionario $\kappa X$
+reproduce exactamente la misma tasa. $\varphi=0$ es el modelo como está.
+
+\begin{center}
+\small
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+E2 & Tlag (min) & $V_i$ & $V_{st}$ & CS30 \\
+\midrule
+intervalos & 0{,}6--1{,}5 & 38--56 & 20--29 & 800--1200 \\
+$\varphi=0$ & 0{,}75 & 39{,}6 & 28{,}8 & 1085 \\
+$\varphi=0{,}3$ & 0{,}83 & \textbf{37{,}1} & 23{,}5 & 905 \\
+$\varphi=0{,}7$ & 0{,}83 & 37{,}1 & \textbf{18{,}8} & \textbf{790} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent
+$\varphi=0{,}3$ se sale de $V_i$ por un 2\,\% y $\varphi=0{,}7$ saca a $V_{st}$ y
+CS30. Pero el argumento decisivo no es numérico: al enrutar parte de la
+\emph{propagación} por el Xa, $\varphi$ vuelve la velocidad del frente \emph{más}
+sensible al anti-Xa, y los datos de E3 piden lo contrario (cociente pico/valle de
+Tlag 1{,}18--1{,}67 con $V_i$ en 0{,}86--0{,}95). Va en la dirección equivocada. El
+término queda en el código con default 0 y documentado como descartado; el cofactor
+$\theta_X$ de §5 es el que sí produce el desacople que hace falta, porque actúa solo
+en la iniciación.
+
+\section{Qué se calibró con qué, después de los cambios}
+
+\begin{center}
+\small
+\begin{tabular}{@{}llp{7.8cm}@{}}
+\toprule
+Constante & Valor & De dónde \\
+\midrule
+$\kappa$ & 10~s$^{-1}$ & literatura: giro de la protrombinasa ensamblada \\
+$\varepsilon$ & 0{,}1 & \textbf{ajustada en E1}; robusta en $[0{,}03;0{,}3]$ \\
+$k_a$ & 0{,}035~s$^{-1}$ & \textbf{ajustada en E2}; sin cambio \\
+$k_{\mathrm{pol}}$ & $10^{3}$~m$^3$mol$^{-1}$s$^{-1}$ & literatura (Weisel \& Nagaswami 1992) \\
+$k_{TM}$ & $10^{-5}$~m/s & $\Gamma_{TM}k_{on}$; no ajustada \\
+$\lambda$ (TFPI) & 0 & apagada; $\lesssim0{,}4$ si se enciende \\
+$\varphi$ & 0 & descartada (§7) \\
+$j_X$ & $\Gamma_{\mathrm{FT}}k_{\mathrm{cat}}$ & medida en E4 (Kastrup); desconocida en E2, E5 y la aurícula \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\paragraph{Honestidad sobre E1.} Antes era predicción y fallaba el pico; ahora
+$\varepsilon$ se ajusta en él, así que dejó de ser predicción. Lo que sigue siendo
+informativo es que \emph{una} constante satisface \emph{tres} intervalos a la vez y
+además recupera la dependencia del pico con la dosis de FT, que no estaba impuesta.
+Quedan como predicción: el caso de 1~pM de E1, E3, E4, E5 y Q1.
+
+\section{Resultados de los tests}
+
+\begin{center}
+\small
+\begin{tabular}{@{}lp{4.5cm}p{6.4cm}@{}}
+\toprule
+Test & Antes ($\kappa=3$, $\varepsilon=1$) & Ahora ($\kappa=10$, $\varepsilon=0{,}1$) \\
+\midrule
+E1 CAT & FALLA, 2/3 (pico 238~nM) & \textbf{PASA, 3/3}: lag 1{,}61~min, pico 311~nM, ETP 1595 \\
+E2 Thrombodynamics & PASA, 5/5 & \textbf{PASA, 5/5} con el mismo $k_a$ \\
+E3 DOAC (ADAGE) & FALLA, 0/3 & FALLA, 0/3 (sin cambio) \\
+E4 Kastrup & FALLA, 2/3; umbral 100--200~$\mu$m & \textbf{FALLA, 2/3; umbral 50--100~$\mu$m, el medido} \\
+E5 Shen & FALLA, 2/4 & FALLA, 2/4 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent
+12 de 18 criterios contra 11 antes, pero el conteo esconde lo que importa. E4 es
+\textbf{predicción pura} ---su dosis es la densidad medida de Kastrup y nada se
+ajustó--- y el cofactor, calibrado en un trombograma 0D sin espacio ni parches,
+le acertó el umbral espacial de tamaño:
+
+\begin{center}
+\small
+\begin{tabular}{@{}lccc@{}}
+\toprule
+parche & antes & ahora & Kastrup \\
+\midrule
+25\,$\mu$m & no inicia & no inicia & no coagula \\
+50\,$\mu$m & no inicia & no inicia & no coagula \\
+100\,$\mu$m & \textbf{no inicia} & 6{,}0~min & coagula $<3$~min \\
+200\,$\mu$m & 4{,}6~min & 1{,}7~min & coagula $<3$~min \\
+400\,$\mu$m & 2{,}6~min & 1{,}3~min & coagula $<3$~min \\
+frente & 28{,}7~$\mu$m/min & 30{,}8~$\mu$m/min & 25--35~$\mu$m/min \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent
+El umbral pasó de 100--200~$\mu$m a 50--100~$\mu$m, que es la ventana medida.
+El criterio formal sigue fallando porque el parche de 100~$\mu$m tarda 6~min y se
+piden menos de 3; es un error de tiempo en el caso del borde, no de umbral.
+
+\paragraph{E3 y lo que mide.} Un DOAC se modela bajando $\kappa$ (anti-Xa) o
+subiendo $A_0$ (anti-IIa). Bajando \emph{solo} $\kappa$, CS30 casi no se mueve
+(0{,}94--1{,}00 contra 0{,}73--0{,}82 medido) y $V_i$ se mueve de más; bajando
+$\kappa$ y $k_a$ juntos, CS30 acierta (0{,}73 exacto para rivaroxabán) y $V_i$
+también (0{,}92 contra 0{,}86), pero el retardo no se mueve (1{,}00 contra
+1{,}67). El modelo iguala la respuesta del \emph{coágulo} o la del \emph{retardo},
+no las dos. La razón es la misma del techo~2: el Xa vive a $\sim$68~$\mu$m del
+activador, así que bajar $\kappa$ retrasa el arranque pero no toca la onda, y la
+onda la mueve $k_a$, que un anti-Xa no toca aquí. En la realidad sí lo toca,
+porque la realimentación de la trombina pasa por FXI $\to$ FIXa $\to$ FXa.
+
+\section{Los dos techos estructurales que quedan}
+
+\subsection{Techo 1: no hay complejos enzimáticos de superficie}
+
+$\theta_X$ es un sustituto \emph{de volumen} de un hecho \emph{de superficie}: la
+protrombinasa se ensambla sobre la membrana de la lesión y se queda ahí mientras el
+flujo barre el plasma. Un modelo con especies de superficie (Xa unido, Va unido, con
+sus tasas de adsorción y desorción) es el paso siguiente, y es lo que haría falta
+para reproducir la iniciación bajo flujo de E5 con la dosis medida de factor
+tisular. Costo: dos campos de superficie y cuatro constantes. No se hizo aquí a
+propósito, y conviene decirlo en el paper como límite declarado antes de que lo diga
+un revisor.
+
+\subsection{Techo 2: la onda es autónoma, pero apenas}
+
+En el ensayo de Thrombodynamics el frente de trombina es una onda de excitación
+(Dashkevich et~al.~2012): una vez arrancada, su velocidad es una propiedad del
+plasma y no del activador. El modelo pasa esa prueba, y conviene mostrarla porque
+es directa: misma cinética, dosis del activador variando ocho veces
+(\texttt{E2\_Thrombodynamics/source\_vs\_wave.py}).
+
+\begin{center}
+\small
+\begin{tabular}{@{}rrrrr@{}}
+\toprule
+$j_X/j_{X0}$ & Tlag (min) & $V_i$ ($\mu$m/min) & $V_{st}$ ($\mu$m/min) & CS30 ($\mu$m) \\
+\midrule
+0{,}5 & 1{,}42 & 40{,}9 & 30{,}0 & 1085 \\
+1     & 1{,}00 & 55{,}4 & 26{,}8 & 1160 \\
+2     & 0{,}67 & 62{,}3 & 25{,}1 & 1205 \\
+4     & 0{,}50 & 66{,}3 & 24{,}1 & 1235 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent
+CS30 se mueve un 6\,\% y $V_{st}$ un 20\,\% mientras la dosis cambia ocho veces: el
+coágulo final no se acuerda del activador. Lo que sí depende de la dosis es el
+retardo y $V_i$, y $V_i$ porque se mide entre 2 y 6~minutos \emph{después} del
+retardo, cuando el frente todavía está cerca del activador. Eso es lo correcto, y
+coincide con que el ensayo real también reporte $V_i>V_{st}$.
+
+Lo que sí es estrecho es el margen. El grado de supercriticidad del lazo de volumen
+frente a la inhibición es
+%
+\begin{equation}
+\frac{k_a}{k_{on}A_0}=\frac{0{,}035}{0{,}020}=1{,}76 ,
+\end{equation}
+%
+apenas por encima de 1, y $k_a$ no se puede subir porque lo fijan $V_{st}$ y CS30 de
+E2: con $k_a=0{,}04$ el coágulo a 30~min se va a 1780~$\mu$m contra 800--1200
+medidos. Es decir, el modelo reproduce el tamaño del coágulo con una onda que vive
+cerca de su umbral, y eso lo vuelve más sensible a cualquier perturbación de lo que
+son los pacientes del ADAGE. No es un error de parámetro: es la consecuencia de
+tener un solo lazo de amplificación de volumen haciendo a la vez de motor de la onda
+y de limitador del tamaño final, y de que ese lazo no pase por el Xa. Es también lo
+que hace fallar a E3: un anti-Xa debería frenar la onda y aquí no puede. Separar
+esas funciones pide un segundo lazo (FXI $\to$ FIXa) con su propia ganancia, y eso
+reabre la calibración de E2 entera.
+
+\subsection{Un punto que E5 no puede zanjar}
+
+Shen
+et~al.~2008 \textbf{no publica la densidad de factor tisular de sus parches}. Lo que
+ese experimento restringe no es la cinética sino el producto dosis~$\times$~cinética.
+Calibrar $\sigma$ en él gastaba un parámetro de la cinética en una propiedad no
+medida del experimento; lo correcto es calibrar $j_X$, que \emph{es} esa propiedad, y
+después preguntar cuántas veces la dosis medida de Kastrup hace falta. Ese barrido
+(\texttt{calibrate\_jx.py}) está corriendo.
+
+\section*{Referencias}
+\small
+\begin{itemize}[leftmargin=1.2em,itemsep=1pt]
+\item Yamashita T, et al. Thrombomodulin and tissue factor pathway inhibitor in
+endocardium of rapidly paced rat atria. \emph{Circulation} 108 (2003) 2450--2452.
+\item Nakamura Y, et al. Tissue factor expression in atrial endothelia associated
+with nonvalvular atrial fibrillation: possible involvement in intracardiac
+thrombogenesis. \emph{Thromb Res} 111 (2003) 137--142.
+\item Shen F, Kastrup CJ, Liu Y, Ismagilov RF. Threshold response of initiation of
+blood coagulation by tissue factor in patterned microfluidic capillaries is
+controlled by shear rate. \emph{Arterioscler Thromb Vasc Biol} 28 (2008) 2035--2041.
+\item Kastrup CJ, Runyon MK, Shen F, Ismagilov RF. Modular chemical mechanism
+predicts spatiotemporal dynamics of initiation in the complex network of hemostasis.
+\emph{PNAS} 103 (2006) 15747--15752.
+\item Kastrup CJ, Shen F, Runyon MK, Ismagilov RF. Characterization of the threshold
+response of initiation of blood clotting to stimulus patch size.
+\emph{Biophys J} 93 (2007) 2969--2977.
+\item Colace TV, Muthard RW, Diamond SL. Thrombus growth and embolism on tissue
+factor-bearing collagen surfaces under flow. \emph{Arterioscler Thromb Vasc Biol}
+32 (2012) 1466--1476.
+\item Weisel JW, Nagaswami C. Computer modeling of fibrin polymerization kinetics
+correlated with electron microscope and turbidity observations.
+\emph{Biophys J} 63 (1992) 111--128.
+\item Dashkevich NM, et al. Thrombin activity propagates in space during blood
+coagulation as an excitation wave. \emph{Biophys J} 103 (2012) 2233--2240.
+\end{itemize}
+
+\end{document}
