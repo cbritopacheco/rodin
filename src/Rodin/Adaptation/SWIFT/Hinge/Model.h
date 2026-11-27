@@ -35,21 +35,6 @@ namespace Rodin::Adaptation::SWIFT::Hinge
         return std::get<std::reference_wrapper<const Weights>>(m_weights).get();
       }
 
-      /**
-       * @brief Visits each point with the corresponding two penalty measures.
-       * @param evaluate Callable accepting a mapped point and its two weights.
-       */
-      template <class Evaluate>
-      void forEach(Evaluate&& evaluate) const
-      {
-        const auto& weights = getWeights();
-        for (size_t q = 0; q < m_witnesses.getSize(); ++q)
-        {
-          const auto measure = weights[q];
-          evaluate(m_witnesses.getPoint(q), measure.jacobian, measure.distortion);
-        }
-      }
-
     private:
       template <class>
       friend class Model;
@@ -196,13 +181,18 @@ namespace Rodin::Adaptation::SWIFT::Hinge
           for (Index i = 0; i < static_cast<Index>(cells.size()); ++i)
           {
             const auto cell = mesh.getCell(cells[i]);
-            on(*cell).forEach(
-              [&](const Variational::IntegrationPoint& ip, Real wj, Real wq) {
-                deformation.setDisplacementGradient(currentJacobian.getValue(ip));
-                const State state(
-                  deformation, innerJacobian.getValue(ip), m_parameters, m_coefficient);
-                energy += state.getEnergy(m_parameters, m_coefficient, wj, wq);
-              });
+            const auto hinge = on(*cell);
+            const auto& witnesses = hinge.getWitnesses();
+            const auto& weights = hinge.getWeights();
+            for (size_t q = 0; q < witnesses.getSize(); ++q)
+            {
+              const auto ip = witnesses.getPoint(q);
+              const auto [wj, wq] = weights[q];
+              deformation.setDisplacementGradient(currentJacobian.getValue(ip));
+              const State state(
+                deformation, innerJacobian.getValue(ip), m_parameters, m_coefficient);
+              energy += state.getEnergy(m_parameters, m_coefficient, wj, wq);
+            }
           }
         }
         return energy;

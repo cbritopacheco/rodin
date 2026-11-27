@@ -91,51 +91,55 @@ namespace Rodin::Adaptation::SWIFT::Hinge
         const bool sameSpace = trialFES == testFES;
         CellDeformation deformation(dim);
 
-        hinge.forEach(
-          [&](const Variational::IntegrationPoint& ip, Real measureJ, Real measureQ) {
-            deformation.setDisplacementGradient(currentJacobian.getValue(ip));
-            if (!deformation.isAdmissible())
-              return;
-            const State state(deformation, innerJacobian.getValue(ip), parameters,
-              m_model.getCoefficient());
-            const Real weightJ = state.getJacobianHessian();
-            const Real weightQ = state.getDistortionHessian();
-            if (weightJ == Real(0) && weightQ == Real(0))
-              return;
-            trialJacobian.setIntegrationPoint(ip);
-            for (std::size_t local = 0; local < nTrial; ++local)
+        const auto& witnesses = hinge.getWitnesses();
+        const auto& weights = hinge.getWeights();
+        for (size_t q = 0; q < witnesses.getSize(); ++q)
+        {
+          const auto ip = witnesses.getPoint(q);
+          deformation.setDisplacementGradient(currentJacobian.getValue(ip));
+          if (!deformation.isAdmissible())
+            continue;
+          const State state(deformation, innerJacobian.getValue(ip), parameters,
+            m_model.getCoefficient());
+          const Real weightJ = state.getJacobianHessian();
+          const Real weightQ = state.getDistortionHessian();
+          if (weightJ == Real(0) && weightQ == Real(0))
+            continue;
+          const auto [measureJ, measureQ] = weights[q];
+          trialJacobian.setIntegrationPoint(ip);
+          for (std::size_t local = 0; local < nTrial; ++local)
+          {
+            const auto gradient = trialJacobian.getBasis(local);
+            m_jTrial[local] = state.getJacobianRow(gradient);
+            m_qTrial[local] = state.getDistortionRow(gradient);
+          }
+          if (sameSpace)
+          {
+            m_jTest = m_jTrial;
+            m_qTest = m_qTrial;
+          }
+          else
+          {
+            testJacobian.setIntegrationPoint(ip);
+            for (std::size_t local = 0; local < nTest; ++local)
             {
-              const auto gradient = trialJacobian.getBasis(local);
-              m_jTrial[local] = state.getJacobianRow(gradient);
-              m_qTrial[local] = state.getDistortionRow(gradient);
+              const auto gradient = testJacobian.getBasis(local);
+              m_jTest[local] = state.getJacobianRow(gradient);
+              m_qTest[local] = state.getDistortionRow(gradient);
             }
-            if (sameSpace)
-            {
-              m_jTest = m_jTrial;
-              m_qTest = m_qTrial;
-            }
-            else
-            {
-              testJacobian.setIntegrationPoint(ip);
-              for (std::size_t local = 0; local < nTest; ++local)
-              {
-                const auto gradient = testJacobian.getBasis(local);
-                m_jTest[local] = state.getJacobianRow(gradient);
-                m_qTest[local] = state.getDistortionRow(gradient);
-              }
-            }
+          }
 
-            for (std::size_t test = 0; test < nTest; ++test)
+          for (std::size_t test = 0; test < nTest; ++test)
+          {
+            for (std::size_t trial = 0; trial < nTrial; ++trial)
             {
-              for (std::size_t trial = 0; trial < nTrial; ++trial)
-              {
-                m_matrix(
-                  static_cast<Eigen::Index>(test), static_cast<Eigen::Index>(trial)) +=
-                  measureJ * weightJ * m_jTrial[trial] * m_jTest[test] +
-                  measureQ * weightQ * m_qTrial[trial] * m_qTest[test];
-              }
+              m_matrix(
+                static_cast<Eigen::Index>(test), static_cast<Eigen::Index>(trial)) +=
+                measureJ * weightJ * m_jTrial[trial] * m_jTest[test] +
+                measureQ * weightQ * m_qTrial[trial] * m_qTest[test];
             }
-          });
+          }
+        }
         return *this;
       }
 

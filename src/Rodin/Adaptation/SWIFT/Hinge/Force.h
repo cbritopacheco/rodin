@@ -76,27 +76,31 @@ namespace Rodin::Adaptation::SWIFT::Hinge
         auto innerJacobian = Variational::Jacobian(m_inner.get());
         CellDeformation deformation(dim);
 
-        hinge.forEach(
-          [&](const Variational::IntegrationPoint& ip, Real weightJ, Real weightQ) {
-            deformation.setDisplacementGradient(currentJacobian.getValue(ip));
-            if (!deformation.isAdmissible())
-              return;
-            const State state(deformation, innerJacobian.getValue(ip), parameters,
-              m_model.getCoefficient());
-            const Real coefficientJ = state.getJacobianForce();
-            const Real coefficientQ = state.getDistortionForce();
-            if (coefficientJ == Real(0) && coefficientQ == Real(0))
-              return;
-            testJacobian.setIntegrationPoint(ip);
-            for (std::size_t local = 0; local < fe.getCount(); ++local)
-            {
-              const auto gradient = testJacobian.getBasis(local);
-              const Real rowJ = state.getJacobianRow(gradient);
-              const Real rowQ = state.getDistortionRow(gradient);
-              m_vector(static_cast<Eigen::Index>(local)) +=
-                weightJ * coefficientJ * rowJ + weightQ * coefficientQ * rowQ;
-            }
-          });
+        const auto& witnesses = hinge.getWitnesses();
+        const auto& weights = hinge.getWeights();
+        for (size_t q = 0; q < witnesses.getSize(); ++q)
+        {
+          const auto ip = witnesses.getPoint(q);
+          deformation.setDisplacementGradient(currentJacobian.getValue(ip));
+          if (!deformation.isAdmissible())
+            continue;
+          const State state(deformation, innerJacobian.getValue(ip), parameters,
+            m_model.getCoefficient());
+          const Real coefficientJ = state.getJacobianForce();
+          const Real coefficientQ = state.getDistortionForce();
+          if (coefficientJ == Real(0) && coefficientQ == Real(0))
+            continue;
+          const auto [weightJ, weightQ] = weights[q];
+          testJacobian.setIntegrationPoint(ip);
+          for (std::size_t local = 0; local < fe.getCount(); ++local)
+          {
+            const auto gradient = testJacobian.getBasis(local);
+            const Real rowJ = state.getJacobianRow(gradient);
+            const Real rowQ = state.getDistortionRow(gradient);
+            m_vector(static_cast<Eigen::Index>(local)) +=
+              weightJ * coefficientJ * rowJ + weightQ * coefficientQ * rowQ;
+          }
+        }
         return *this;
       }
 
