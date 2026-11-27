@@ -20,7 +20,7 @@
 
 #include "../CellDeformation.h"
 #include "Parameters.h"
-#include "QualitySamples.h"
+#include "Witnesses.h"
 
 namespace Rodin::Adaptation::SWIFT
 {
@@ -63,16 +63,16 @@ namespace Rodin::Adaptation::SWIFT
     }
 
     auto gradU = Jacobian(u);
-    Parameters parameters;
-    parameters.sampling.subdivision = subdivision;
+    Parameters::Sampling sampling;
+    sampling.subdivision = subdivision;
     CellDeformation deformation(dim);
     for (auto cellIt = mesh.getCell(); cellIt; ++cellIt)
     {
       const auto& cell = *cellIt;
       const auto& fe = fes.getFiniteElement(cell.getDimension(), cell.getIndex());
-      const QualitySamples samples(
-        cell, fe.getDegree().value_or(2 * fe.getOrder()), parameters);
-      samples.forEach([&](const IntegrationPoint& ip, Real) {
+      const Witnesses witnesses(
+        cell, fe.getDegree().value_or(2 * fe.getOrder()), sampling);
+      witnesses.forEach([&](const IntegrationPoint& ip) {
         deformation.setDisplacementGradient(gradU.getValue(ip));
         const Real j = deformation.getJacobian();
 

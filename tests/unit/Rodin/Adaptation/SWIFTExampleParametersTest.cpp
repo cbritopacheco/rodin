@@ -4,12 +4,12 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#include "Rodin/Adaptation/SWIFT/QualitySamples.h"
+#include "Rodin/Adaptation/SWIFT/Witnesses.h"
 #include <gtest/gtest.h>
 #include <limits>
 #include <utility>
 #include "Rodin/Adaptation/SWIFT/Admissibility.h"
-#include "Rodin/Adaptation/SWIFT/HingeProblem.h"
+#include "Rodin/Adaptation/SWIFT/Hinge/Problem.h"
 #include "Rodin/Adaptation/SWIFT/Report.h"
 #include "Rodin/Variational.h"
 #include "../../../convergence/CurvedGeometry.h"
@@ -43,11 +43,11 @@ TEST(Rodin_Adaptation_SWIFTExampleParameters, DirectQualityHeaderUsesGeometryOrd
     const Adaptation::SWIFT::Parameters parameters;
     const auto& formula = Adaptation::SWIFT::QualityCovering::get(
       cell.getGeometry(), parameters.sampling.getSubdivision(1, order, true));
-    const Adaptation::SWIFT::QualitySamples samples(cell, 1, parameters);
+    const Adaptation::SWIFT::Witnesses samples(cell, 1, parameters.sampling);
     size_t count = 0;
-    samples.forEach([&](const Variational::IntegrationPoint& ip, Real weight) {
+    samples.forEach([&](const Variational::IntegrationPoint& ip) {
       EXPECT_EQ(ip.getQuadratureFormula(), std::addressof(formula));
-      EXPECT_GT(weight, 0);
+      EXPECT_GT(samples.getWeight(ip.getIndex()), 0);
       ++count;
     });
     EXPECT_EQ(count, formula.getSize());
@@ -265,7 +265,7 @@ TEST(Rodin_Adaptation_SWIFTHingeProblem, CenteringEntersTheStationarityResidual)
   state = VectorFunction(Real(0.2), Real(0.4));
   Math::Matrix<Real> centering =
     Math::Matrix<Real>::Constant(space.getSize(), 1, Real(0.01));
-  Adaptation::SWIFT::HingeProblem problem(trial, test);
+  Adaptation::SWIFT::Hinge::Problem problem(trial, test);
   problem = Integral(Dot(trial, test));
   problem.setState(state).setCentering(centering).assemble();
   const auto& system = problem.getLinearSystem();

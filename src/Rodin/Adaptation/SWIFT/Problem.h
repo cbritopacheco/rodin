@@ -21,7 +21,7 @@
 #include <vector>
 
 #include "Rodin/Solver/NewtonSolver.h"
-#include "HingeProblem.h"
+#include "Hinge/Problem.h"
 #include "LinearSolver.h"
 #include "Rodin/Variational/Integrator.h"
 #include "Rodin/Variational/Jacobian.h"
@@ -35,11 +35,11 @@
 #include "ForwardDecls.h"
 #include "Loss.h"
 #include "Parameters.h"
-#include "QualityCovering.h"
+#include "Witnesses.h"
 #include "DirectionalNewton.h"
 #include "Distribution.h"
-#include "HingeForce.h"
-#include "HingeMetric.h"
+#include "Hinge/Force.h"
+#include "Hinge/Metric.h"
 #include "Report.h"
 #include "FittingTensor.h"
 #include "FittingForce.h"
@@ -116,7 +116,7 @@ namespace Rodin::Adaptation::SWIFT
    *
    * @par Architecture
    * A native @ref Rodin::Variational::Problem assembles the predictor metric
-   * and fitting force. @ref SWIFT::HingeProblem assembles the inner tangent
+   * and fitting force. @ref SWIFT::Hinge::Problem assembles the inner tangent
    * and stationarity residual; @ref Rodin::Solver::NewtonSolver drives its
    * corrections through a merit-backtracking policy.
    * One retained @ref SWIFT::LinearSolver handles both problems and their global
@@ -360,7 +360,7 @@ namespace Rodin::Adaptation::SWIFT
    * \qquad \gamma_k=\frac{f_k[\bar p_k]}{2|\Omega_0|}.
    * @f]
    * The set @f$\mathcal S_K@f$ contains the same closed-form reference covering
-   * points as the actual-quality checks. For each constraint, @ref QualitySamples
+   * points as the actual-quality checks. For each constraint, @ref Hinge::Weights
    * computes capped nonlinear guard penetration at the current geometry and
    * the full physical predictor, retaining the larger risk @f$r^c_{K,s}@f$.
    * With mapped cell mass @f$W_K@f$ and witness count @f$N_K@f$, it sets
@@ -603,14 +603,10 @@ namespace Rodin::Adaptation::SWIFT
       using SpatialVec = Math::SpatialVector<Real>;
       using SpatialMat = Math::SpatialMatrix<Real>;
       using Loss = SWIFT::Loss;
-      using Hinge = HingeState;
-      using HingeProblem = SWIFT::HingeProblem<TrialFunctionType, TestFunctionType>;
+      using HingeProblem = SWIFT::Hinge::Problem<TrialFunctionType, TestFunctionType>;
       using LinearSolver = SWIFT::LinearSolver<LinearSystemType>;
       using Distribution =
         SWIFT::Distribution<TrialFunctionType, TestFunctionType, Displacement>;
-      using HingeMetric =
-        SWIFT::HingeMetric<TrialFunctionType, TestFunctionType, Displacement>;
-      using HingeForce = SWIFT::HingeForce<TestFunctionType, Displacement>;
 
     public:
       /// @brief Observer of accepted-step and final diagnostics.
@@ -1244,15 +1240,13 @@ namespace Rodin::Adaptation::SWIFT
             if (!innerConverged)
             {
               const auto weightsStart = Clock::now();
-              const auto weights = std::make_shared<QualitySamples::HingeWeightTable>(
-                getHingeWeights(mesh, fes, validationCells, u, predictor, meshDim));
+              const Hinge::Model model(
+                u, predictor, p, hingeCoefficient, validationCells);
               const Real weightsSeconds = secondsSince(weightsStart);
               rep.tAssembly += weightsSeconds;
               rep.tInnerAssembly += weightsSeconds;
-              HingeMetric hingeMetric(
-                m_duStep, m_vStep, u, vK, predictor, p, hingeCoefficient, weights);
-              HingeForce hingeForce(
-                m_vStep, u, vK, predictor, p, hingeCoefficient, weights);
+              Hinge::Metric hingeMetric(m_duStep, m_vStep, model, vK);
+              Hinge::Force hingeForce(m_vStep, model, vK);
               typename ProblemType::ProblemBodyType body(m_distributionForm);
               body = body + m_fittingMetric + hingeMetric - m_fittingForce - hingeForce;
               m_hingeProblem = body;
@@ -1343,8 +1337,7 @@ namespace Rodin::Adaptation::SWIFT
                       m_centering * (m_centering.transpose() * increment.getData());
                     const Real quadratic = Real(0.5) * increment.getData().dot(image);
                     const Real force = fixedForce.dot(increment.getData());
-                    const Real quality = getHingeEnergy(mesh, fes, validationCells, u,
-                      increment, *weights, meshDim, hingeCoefficient);
+                    const Real quality = model.getEnergy(increment, validationCells);
                     return std::pair<Real, Real>{quadratic - force + quality,
                       std::abs(quadratic) + std::abs(force) + std::abs(quality)};
                   };
@@ -1437,8 +1430,8 @@ namespace Rodin::Adaptation::SWIFT
                 const Real residual = m_hingeProblem.getLinearSystem().getVector().norm();
                 recordResidual(residual, innerIterations, residual <= residualTolerance);
               }
-              // Release the snapshot retained by the assembled form's integrators.
-              weights->clear();
+              // Release the integrators and their frozen weights before the line search.
+              m_hingeProblem = typename ProblemType::ProblemBodyType{};
             }
             rep.innerConverged = innerConverged;
             if (solveOk && !innerConverged)
@@ -1933,15 +1926,15 @@ namespace Rodin::Adaptation::SWIFT
           for (Index i = 0; i < static_cast<Index>(cells.size()); ++i)
           {
             const auto cell = mesh.getCell(cells[static_cast<std::size_t>(i)]);
-            const QualitySamples samples(*cell,
+            const Witnesses witnesses(*cell,
               fes.getFiniteElement(dimension, cell->getIndex())
                 .getDegree()
                 .value_or(
                   2 * fes.getFiniteElement(dimension, cell->getIndex()).getOrder()),
-              m_parameters);
-            samples.forEach([&](const Variational::IntegrationPoint& ip, Real) {
+              m_parameters.sampling);
+            witnesses.forEach([&](const Variational::IntegrationPoint& ip) {
               deformation.setDisplacementGradient(currentJacobian.getValue(ip));
-              const Hinge state(
+              const Hinge::State state(
                 deformation, innerJacobian.getValue(ip), m_parameters, coefficient);
               active = active || !state.isAdmissible() ||
                 state.getJacobianHessian() != Real(0) ||
@@ -1950,94 +1943,6 @@ namespace Rodin::Adaptation::SWIFT
           }
         }
         return active;
-      }
-
-      /**
-       * @brief Tabulates the adaptive weights shared by one frozen hinge model.
-       * @param mesh Fixed reference mesh.
-       * @param fes Displacement finite element space defining witness resolution.
-       * @param cells Background cell indices.
-       * @param current Frozen outer displacement.
-       * @param predictor Frozen directionally scaled predictor.
-       * @param dimension Spatial dimension.
-       * @returns Frozen weights indexed by background cell.
-       */
-      template <class Mesh, class FES>
-      QualitySamples::HingeWeightTable getHingeWeights(const Mesh& mesh, const FES& fes,
-        const std::vector<Index>& cells, const Displacement& current,
-        const Displacement& predictor, std::size_t dimension) const
-      {
-        QualitySamples::HingeWeightTable weights(cells.size());
-#ifdef RODIN_USE_OPENMP
-#pragma omp parallel
-#endif
-        {
-          const auto currentJacobian = Variational::Jacobian(current);
-          const auto predictorJacobian = Variational::Jacobian(predictor);
-#ifdef RODIN_USE_OPENMP
-#pragma omp for schedule(static)
-#endif
-          for (Index i = 0; i < static_cast<Index>(cells.size()); ++i)
-          {
-            const Index index = cells[static_cast<std::size_t>(i)];
-            const auto cell = mesh.getCell(index);
-            const auto& fe = fes.getFiniteElement(dimension, index);
-            const QualitySamples samples(
-              *cell, fe.getDegree().value_or(2 * fe.getOrder()), m_parameters);
-            weights[index] = samples.getHingeWeights(currentJacobian, predictorJacobian);
-          }
-        }
-        return weights;
-      }
-
-      /**
-       * @brief Integrates the affine squared-hinge energy.
-       * @param mesh Fixed reference mesh.
-       * @param fes Displacement finite element space defining quadrature orders.
-       * @param validationCells Reference cell indices included in the check.
-       * @param current Frozen outer displacement.
-       * @param inner Current inner increment.
-       * @param weights Frozen adaptive hinge weights.
-       * @param dimension Spatial dimension.
-       * @param coefficient Effective hinge penalty coefficient.
-       * @returns The penalty energy of the current inner increment.
-       */
-      template <class Mesh, class FES>
-      Real getHingeEnergy(const Mesh& mesh, const FES& fes,
-        const std::vector<Index>& validationCells, const Displacement& current,
-        const Displacement& inner, const QualitySamples::HingeWeightTable& weights,
-        std::size_t dimension, Real coefficient) const
-      {
-        Real energy = 0;
-#ifdef RODIN_USE_OPENMP
-#pragma omp parallel reduction(+ : energy)
-#endif
-        {
-          auto currentJacobian = Variational::Jacobian(current);
-          auto innerJacobian = Variational::Jacobian(inner);
-          CellDeformation deformation(dimension);
-#ifdef RODIN_USE_OPENMP
-#pragma omp for schedule(static)
-#endif
-          for (Index i = 0; i < static_cast<Index>(validationCells.size()); ++i)
-          {
-            const auto cell = mesh.getCell(validationCells[static_cast<std::size_t>(i)]);
-            const QualitySamples samples(*cell,
-              fes.getFiniteElement(dimension, cell->getIndex())
-                .getDegree()
-                .value_or(
-                  2 * fes.getFiniteElement(dimension, cell->getIndex()).getOrder()),
-              m_parameters);
-            samples.forEachHinge(weights[cell->getIndex()],
-              [&](const Variational::IntegrationPoint& ip, Real weightJ, Real weightQ) {
-                deformation.setDisplacementGradient(currentJacobian.getValue(ip));
-                const Hinge state(
-                  deformation, innerJacobian.getValue(ip), m_parameters, coefficient);
-                energy += state.getEnergy(m_parameters, coefficient, weightJ, weightQ);
-              });
-          }
-        }
-        return energy;
       }
 
       /**
@@ -2074,7 +1979,8 @@ namespace Rodin::Adaptation::SWIFT
           Index cell = 0;
         };
         const bool recordWitness = current && m_parameters.traceQualityWitness;
-        std::vector<Witness> witnesses(recordWitness ? validationCells.size() : 0);
+        std::vector<Witness> limitingWitnesses(
+          recordWitness ? validationCells.size() : 0);
 #ifdef RODIN_USE_OPENMP
 #pragma omp parallel reduction(min : minJ, affineMinJ)                                   \
   reduction(max : maxJ, maxQ, affineMaxQ) reduction(+ : inadmissibleCount)
@@ -2092,9 +1998,9 @@ namespace Rodin::Adaptation::SWIFT
             const Index cellIndex = validationCells[static_cast<std::size_t>(i)];
             const auto cell = mesh.getCell(cellIndex);
             const auto& fe = fes.getFiniteElement(dimension, cellIndex);
-            const QualitySamples samples(
-              *cell, fe.getDegree().value_or(2 * fe.getOrder()), m_parameters);
-            samples.forEach([&](const Variational::IntegrationPoint& ip, Real) {
+            const Witnesses witnesses(
+              *cell, fe.getDegree().value_or(2 * fe.getOrder()), m_parameters.sampling);
+            witnesses.forEach([&](const Variational::IntegrationPoint& ip) {
               const auto trialGradient = displacementJacobian.getValue(ip);
               deformation.setDisplacementGradient(trialGradient);
               const Real j = deformation.getJacobian();
@@ -2124,7 +2030,7 @@ namespace Rodin::Adaptation::SWIFT
                     currentDeformation.getRelativeDistortionAction(increment));
                 if (recordWitness && deformation.isAdmissible())
                 {
-                  auto& witness = witnesses[static_cast<size_t>(i)];
+                  auto& witness = limitingWitnesses[static_cast<size_t>(i)];
                   const Real actual = deformation.getRelativeDistortion();
                   if (actual > witness.actual)
                   {
@@ -2143,7 +2049,7 @@ namespace Rodin::Adaptation::SWIFT
         AdmissibilityState result{
           minJ, maxJ, maxQ, inadmissibleCount, affineMinJ, affineMaxQ};
         Witness limiting;
-        for (const auto& witness : witnesses)
+        for (const auto& witness : limitingWitnesses)
         {
           if (witness.actual > limiting.actual)
             limiting = witness;
@@ -2300,17 +2206,11 @@ namespace Rodin::Adaptation::SWIFT
             const auto& fe = fes.getFiniteElement(face->getDimension(), facetIndex);
             const auto& qf = getGeometricValidationQuadrature(*face, fes);
             const auto& quadrature = face->getQuadrature(qf);
-            const Geometry::Polytope::Traits traits(face->getGeometry());
-            const auto& witnesses = QualityCovering::get(face->getGeometry(),
-              m_parameters.sampling.getSubdivision(fe.getOrder(),
-                face->getTransformation().getDegree().value_or(2),
-                traits.getVertexCount() == face->getDimension() + 1));
-            const auto& samples = face->getQuadrature(witnesses);
-            for (std::size_t q = 0; q < samples.getSize(); ++q)
+            const Witnesses witnesses(*face, fe.getOrder(), m_parameters.sampling);
+            for (std::size_t q = 0; q < witnesses.getSize(); ++q)
             {
               const auto& moved =
-                deformation.setIntegrationPoint(Variational::IntegrationPoint(samples, q))
-                  .getPoint();
+                deformation.setIntegrationPoint(witnesses.getPoint(q)).getPoint();
               const Real norm = grad.getValue(moved).norm();
               const Real distance = std::abs(phi.getValue(moved)) / norm;
               if (!(norm > gradientFloor) || !std::isfinite(norm) ||

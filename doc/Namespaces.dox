@@ -1966,8 +1966,9 @@
   `Adapt.h` owns the P1 mesh workflow; `Problem.h` owns outer orchestration;
   `FittingTensor.h` and
   `FittingForce.h` assemble fitting; `Distribution.h` assembles distribution;
-  `Hinge.h`, `HingeMetric.h`, `HingeForce.h` and `HingeProblem.h` define the
-  inner model; `LinearSolver.h` adapts native linear solvers.
+  `Witnesses.h` supplies the mapped covering for geometry checks and hinges.
+  `Hinge/Model.h` shares its frozen weights between the merit, force and tangent;
+  `Hinge/Problem.h` assembles the inner system. `LinearSolver.h` adapts native linear solvers.
   `Parameters.h` and `Report.h` are the configuration and diagnostic surfaces.
   Geometry evaluation uses the shared adaptation deformation infrastructure.
 

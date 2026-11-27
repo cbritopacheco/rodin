@@ -171,8 +171,8 @@ namespace Rodin::Tests::Unit
       auto jacobian = Jacobian(trial.getSolution());
       for (auto cell = mesh.getCell(); cell; ++cell)
       {
-        const SWIFT::QualitySamples samples(*cell, 2, p);
-        samples.forEach([&](const IntegrationPoint& ip, Real) {
+        const SWIFT::Witnesses samples(*cell, 2, p.sampling);
+        samples.forEach([&](const IntegrationPoint& ip) {
           CellDeformation deformation(2);
           deformation.setDisplacementGradient(jacobian.getValue(ip));
           EXPECT_GT(deformation.getJacobian(), p.model.jacobian);
@@ -1384,7 +1384,7 @@ namespace Rodin::Tests::Unit
       GridFunction state(fes);
       state = VectorFunction(size_t(2),
         [](const Point&) { return Math::SpatialVector<Real>{Real(0.3), Real(-0.2)}; });
-      SWIFT::HingeProblem problem(trial, test);
+      SWIFT::Hinge::Problem problem(trial, test);
       problem = Integral(Dot(trial, test));
       problem.setState(state).assemble();
       const auto& system = problem.getLinearSystem();
