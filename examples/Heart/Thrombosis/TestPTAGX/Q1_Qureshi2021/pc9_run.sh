@@ -5,6 +5,7 @@
 #   NPROC=60 bash pc9_run.sh
 #   bash pc9_run.sh dose            # solo el barrido de dosis de factor tisular
 #   bash pc9_run.sh report          # rehacer tablas y figuras sin recalcular
+#   bash pc9_run.sh look            # figuras rapidas comparando variantes (quicklook.py)
 #
 # Por que un rango MPI por caso y no 60 rangos en un caso: las mallas tienen
 # 10189 celdas. Con 60 rangos serian 170 celdas por rango y el tiempo se iria
@@ -82,8 +83,13 @@ case "$STAGE" in
     python3 dose_scan.py --out "$OUT" --jobs "$JOBS" --shapes CW \
       --cycles "$CYCLES" --warmup "$WARMUP"
     ;;
+  look)
+    echo "== vista rapida: series de fibrina, campos y barrido de dosis"
+    python3 quicklook.py --out "$OUT" --warmup "$WARMUP" "${@:2}"
+    exit 0
+    ;;
   *)
-    echo "etapa desconocida: $STAGE (use all, calib, coag, report o dose)" >&2
+    echo "etapa desconocida: $STAGE (use all, calib, coag, report, dose o look)" >&2
     exit 2
     ;;
 esac
