@@ -385,6 +385,19 @@ def installed_dependencies(requested, source_options):
     return sorted(dependencies - explicit)
 
 
+def installed_systemd_packages(architecture):
+    """List installed binaries from the systemd source package."""
+    output = subprocess.check_output(
+        ['dpkg-query', '-W', '-f=${db:Status-Status}\t${source:Package}\t${Package}\t${Architecture}\n'],
+        text=True, timeout=INDEX_TIMEOUT)
+    packages = set()
+    for line in output.splitlines():
+        status, source, name, arch = line.split('\t')
+        if status == 'installed' and source == 'systemd':
+            packages.add(name if arch in {architecture, 'all'} else f'{name}:{arch}')
+    return packages
+
+
 def wait_for_apt_retry(attempt):
     delay = APT_RETRY_DELAYS[attempt] + random.uniform(0, APT_RETRY_JITTER)
     print(f'Waiting {delay:.1f}s before the next signed APT attempt.', flush=True)
@@ -395,7 +408,7 @@ class PackageSourceUnavailable(RuntimeError):
     """The signed package indexes or archives could not be retrieved."""
 
 
-def prepare(requested, archives, state, *, mirrors=MIRRORS, snapshot=None):
+def prepare(requested, archives, state, *, mirrors=MIRRORS, snapshot=None, for_bundle=False):
     archives.mkdir(parents=True, exist_ok=True)
     (archives / 'partial').mkdir(exist_ok=True)
     state.mkdir(parents=True, exist_ok=True)
@@ -413,11 +426,20 @@ def prepare(requested, archives, state, *, mirrors=MIRRORS, snapshot=None):
                 wait_for_apt_retry(index)
     else:
         raise PackageSourceUnavailable('All signed APT index sources failed') from last_error
+    architecture = subprocess.check_output(['dpkg', '--print-architecture'], text=True).strip() if for_bundle else None
+    systemd = installed_systemd_packages(architecture) if for_bundle else set()
     # APT omits satisfied installed dependencies from its Inst records, while
     # --installed traversal omits new intermediate dependencies. Combine both
     # views until the explicit plan stops growing; never remove pins or accept
     # a solver version that conflicts with an earlier signed candidate.
     while True:
+        if systemd:
+            selected = {name.removesuffix(':' + architecture) for name in versions}
+            companions = systemd - selected
+            if selected & systemd and companions:
+                # Resolve lockstep dependencies before asking APT to simulate
+                # an upgrade or downgrade of any single systemd library.
+                versions.update(candidates(sorted(companions), options))
         pinned = [name + '=' + version for name, version in sorted(versions.items())]
         simulation = apt(['--simulate', '--no-remove', 'install', *pinned], options,
                          archives, INDEX_TIMEOUT, capture=True)
@@ -439,7 +461,8 @@ def prepare(requested, archives, state, *, mirrors=MIRRORS, snapshot=None):
                               if option.startswith('APT::Snapshot=')), None)}
     (state / 'plan.json').write_text(json.dumps(plan, sort_keys=True) + '\n')
     system = Path('/etc/os-release').read_text()
-    architecture = subprocess.check_output(['dpkg', '--print-architecture'], text=True).strip()
+    if architecture is None:
+        architecture = subprocess.check_output(['dpkg', '--print-architecture'], text=True).strip()
     # Image identity covers the preinstalled package baseline. Compiler flags,
     # MPI rank counts and test selections do not fragment dependency caches.
     baseline = [system, architecture, os.environ.get('ImageOS'), os.environ.get('ImageVersion'), requested, os.environ.get('RODIN_APT_SNAPSHOT', '')]
@@ -493,11 +516,12 @@ def provision_bundle(requested, root, bundle):
     # All configured mirrors map to the same endpoint in snapshot mode. On
     # failure start a new plan against signed live sources in separate APT state.
     try:
-        prepare(requested, archives, state / 'snapshot', mirrors=MIRRORS[:1], snapshot=SHARED_APT_SNAPSHOT)
+        prepare(requested, archives, state / 'snapshot', mirrors=MIRRORS[:1],
+                snapshot=SHARED_APT_SNAPSHOT, for_bundle=True)
         install(archives, state / 'snapshot', bundle, mirrors=MIRRORS[:1], snapshot=SHARED_APT_SNAPSHOT)
     except PackageSourceUnavailable as error:
         print(f'::warning::{error}. Resolving a new exact plan from signed Ubuntu mirrors.', flush=True)
-        prepare(requested, archives, state / 'live', snapshot='')
+        prepare(requested, archives, state / 'live', snapshot='', for_bundle=True)
         install(archives, state / 'live', bundle, snapshot='')
         return
     if output := os.environ.get('GITHUB_OUTPUT'):

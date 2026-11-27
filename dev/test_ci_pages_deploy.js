@@ -25,19 +25,14 @@ function fixture(statuses = ['succeed'], identity = request => ({id: request.pag
   return {github, core, options, requests, output, logs};
 }
 
-test('fresh uploads get distinct deployment versions for the same snapshot', async () => {
+test('each upload uses its published commit as the deployment version', async () => {
   const f = fixture(['queued', 'succeed']);
-  for (const id of ['17', '18']) {
-    assert.equal(await deployPages(f.github, f.core, 'owner/repo', id, version, f.options),
+  for (const [id, snapshot] of [['17', version], ['18', 'b'.repeat(40)]]) {
+    assert.equal(await deployPages(f.github, f.core, 'owner/repo', id, snapshot, f.options),
       'https://owner.github.io/repo/');
   }
   const creates = f.requests.filter(x => x.route.endsWith('/deployments'));
-  const versions = creates.map(x => x.parameters.pages_build_version);
-  assert.equal(new Set(versions).size, 2);
-  for (const buildVersion of versions) {
-    assert.match(buildVersion, /^[a-f0-9]{40}$/);
-    assert.notEqual(buildVersion, version);
-  }
+  assert.deepEqual(creates.map(x => x.parameters.pages_build_version), [version, 'b'.repeat(40)]);
   assert.deepEqual(creates.map(x => x.parameters.artifact_id), [17, 18]);
   assert.ok(creates.every(x => x.parameters.oidc_token === 'secret-oidc'));
   assert.equal(f.output.page_url, 'https://owner.github.io/repo/');
@@ -45,10 +40,11 @@ test('fresh uploads get distinct deployment versions for the same snapshot', asy
   assert.ok(!f.logs.join('\n').includes('secret-oidc'));
 });
 
-test('polls the server deployment ID, then its status URL, then the upload version', async () => {
+test('polls the server deployment ID, then its status URL, then the published commit', async () => {
   const statusURL = 'https://api.github.com/repos/owner/repo/pages/deployments/23/status';
+  const legacyStatusURL = 'https://api.github.com/repos/owner/repo/pages/deployment/status/42';
   for (const [identity, expected] of [[{id: '97', status_url: statusURL}, '97'],
-    [{status_url: statusURL}, '23'], [{}, undefined]]) {
+    [{status_url: statusURL}, '23'], [{status_url: legacyStatusURL}, '42'], [{}, undefined]]) {
     const f = fixture(['succeed'], () => identity);
     await deployPages(f.github, f.core, 'owner/repo', 17, version, f.options);
     const [create, poll] = f.requests;

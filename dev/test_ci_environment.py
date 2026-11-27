@@ -563,6 +563,37 @@ class EnvironmentTest(unittest.TestCase):
         self.assertTrue(set(apt.call_args_list[1].args[0]) <= set(apt.call_args_list[2].args[0]))
         self.assertTrue(set(apt.call_args_list[2].args[0]) <= set(apt.call_args_list[3].args[0]))
 
+    def test_systemd_package_inventory_includes_installed_binaries_and_architecture(self):
+        inventory = ('installed\tsystemd\tlibudev1\tamd64\n'
+                     'installed\tsystemd\tlibudev1\ti386\n'
+                     'installed\tsystemd\tsystemd-sysv\tamd64\n'
+                     'config-files\tsystemd\tsystemd-resolved\tamd64\n'
+                     'installed\tinit-system-helpers\tinit\tall\n')
+        with patch.object(environment.subprocess, 'check_output', return_value=inventory):
+            self.assertEqual(environment.installed_systemd_packages('amd64'),
+                             {'libudev1', 'libudev1:i386', 'systemd-sysv'})
+
+    def test_bundle_plan_pins_installed_systemd_reverse_dependencies(self):
+        version = '255.4-1ubuntu8.18'
+        siblings = {'libsystemd0', 'libudev1', 'systemd', 'systemd-sysv', 'udev'}
+        with tempfile.TemporaryDirectory() as tmp, \
+                patch.object(environment, 'sources', return_value=[]), \
+                patch.object(environment, 'installed_systemd_packages', return_value=siblings), \
+                patch.object(environment, 'installed_dependencies', return_value=[]), \
+                patch.object(environment, 'candidates', side_effect=lambda names, _: {
+                    name: version if name.split(':')[0] in siblings else '1' for name in names}) as resolve, \
+                patch.object(environment.subprocess, 'check_output', return_value='amd64\n'), \
+                patch.object(environment, 'apt', side_effect=[None,
+                    f'Inst libudev1:amd64 ({version} Ubuntu [amd64])\n', '']) as apt:
+            root = Path(tmp)
+            plan = environment.prepare(['app'], root / 'cache', root / 'state', for_bundle=True)
+
+        self.assertEqual(resolve.call_args.args[0], sorted(siblings - {'libudev1'}))
+        self.assertEqual(set(plan['versions']), {'app', 'libudev1:amd64'} | (siblings - {'libudev1'}))
+        self.assertEqual(plan['versions']['systemd-sysv'], version)
+        self.assertIn(f'systemd-sysv={version}', apt.call_args.args[0])
+        self.assertIn('--no-remove', apt.call_args.args[0])
+
     def test_conflicting_solver_versions_fail_before_plan_is_saved(self):
         with tempfile.TemporaryDirectory() as tmp, \
                 patch.object(environment, 'sources', return_value=[]), \
@@ -900,11 +931,11 @@ class EnvironmentTest(unittest.TestCase):
                 self.assertFalse(output.exists())
                 first, second = prepare.call_args_list
                 self.assertEqual(first.kwargs, {'mirrors': environment.MIRRORS[:1],
-                                                'snapshot': environment.SHARED_APT_SNAPSHOT})
-                self.assertEqual(second.kwargs, {'snapshot': ''})
+                                                'snapshot': environment.SHARED_APT_SNAPSHOT, 'for_bundle': True})
+                self.assertEqual(second.kwargs, {'snapshot': '', 'for_bundle': True})
                 self.assertNotEqual(first.args[2], second.args[2])
                 self.assertEqual(install.call_args.args[-1], root / 'bundle')
-                self.assertEqual(install.call_args.kwargs, second.kwargs)
+                self.assertEqual(install.call_args.kwargs, {'snapshot': ''})
 
     def test_package_configuration_failure_does_not_change_source(self):
         with tempfile.TemporaryDirectory() as tmp, patch.object(environment, 'prepare') as prepare, \

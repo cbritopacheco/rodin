@@ -126,14 +126,13 @@ jobs:
         working-directory: .ci-pages
         env:
           SHA: ${{ github.sha }}
+          RUN: ${{ github.run_id }}.${{ github.run_attempt }}
         run: |
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
           git add -A
-          if ! git diff --cached --quiet; then
-            git commit -m "Publish complete benchmark campaign $SHA"
-            git push origin HEAD:gh-pages
-          fi
+          git commit --allow-empty -m "Publish complete benchmark campaign $SHA (run $RUN)"
+          git push origin HEAD:gh-pages
       - name: Publish documentation and benchmarks
         id: deployment
         uses: ./.github/actions/publish-pages

@@ -545,8 +545,9 @@ static assets from the locked `gh-pages` checkout, uploads them as a Pages
 artifact, and deploys its exact artifact ID in that same job. Benchmark
 histories stay in the published Git tree. Staged benchmark pages load them
 from raw GitHub at the exact `gh-pages` commit, keeping the site within the
-GitHub Pages size limit. The Pages API build version includes the artifact ID
-and the published commit, so each upload has its own deployment version.
+GitHub Pages size limit. Each publication pushes a fresh `gh-pages` commit,
+including reruns with identical site files. Its SHA identifies the Pages API
+deployment version and the served snapshot marker.
 The deployment retains the workflow OIDC token and protected
 environment. This avoids a second hosted-runner queue for a legacy Pages build;
 that queue delayed one deployment by almost eleven hours. A successful branch
@@ -846,6 +847,11 @@ This preserves the producer’s compiler and runtime versions even when the
 published bundle came from the live archive. Installation prohibits package
 removals and retains runtime-library hash validation. Configuration failures
 from dpkg still fail the job.
+
+When the package plan selects a systemd runtime library, the bundle also
+includes the installed binaries from the systemd source package. This lets
+APT satisfy the consumer’s exact-version dependencies on images with a
+different systemd update.
 
 The 2026-11-12 campaign built against glibc `2.39-0ubuntu8.9`; consumers several
 hours later resolved `2.39-0ubuntu8.12`. The shared bundle keeps both stages on

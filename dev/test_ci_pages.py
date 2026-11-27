@@ -1,6 +1,8 @@
 """A branch push or a stale successful Pages build is not deployment success."""
 import unittest
 import json
+import os
+import subprocess
 import tempfile
 from pathlib import Path
 from unittest.mock import patch
@@ -141,8 +143,41 @@ class PagesTest(unittest.TestCase):
         self.assertIn(' prepare ', steps[0]['run'])
         self.assertIn(' verify ', steps[3]['run'])
 
+    def test_pages_reruns_publish_new_git_commits_for_identical_content(self):
+        for filename, job, step_name in [
+                ('Documentation.yml', 'PublishDocumentation', 'Publish documentation Pages update'),
+                ('Benchmarks.yml', 'Publish', 'Publish one atomic Pages update')]:
+            with self.subTest(workflow=filename), tempfile.TemporaryDirectory() as directory:
+                checkout = Path(directory) / 'site'
+                remote = Path(directory) / 'remote.git'
+                checkout.mkdir()
+                (checkout / 'index.html').write_text('Rodin')
+
+                def git(*args):
+                    return subprocess.check_output(['git', *args], cwd=checkout, text=True,
+                                                   stderr=subprocess.PIPE).strip()
+
+                git('init', '--bare', str(remote))
+                git('init')
+                git('config', 'commit.gpgsign', 'false')
+                git('config', 'core.hooksPath', os.devnull)
+                git('remote', 'add', 'origin', str(remote))
+                workflow = yaml.safe_load((ROOT / '.github/workflows' / filename).read_text())
+                step = next(s for s in workflow['jobs'][job]['steps'] if s.get('name') == step_name)
+                commits = []
+                trees = []
+                for attempt in (1, 2):
+                    result = subprocess.run(['bash', '-e', '-c', step['run']], cwd=checkout,
+                                            env=dict(os.environ, SHA=COMMIT, RUN=f'1234.{attempt}'),
+                                            capture_output=True, text=True)
+                    self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+                    commits.append(git('rev-parse', 'HEAD'))
+                    trees.append(git('rev-parse', 'HEAD^{tree}'))
+                    self.assertEqual(commits[-1], git('ls-remote', 'origin', 'refs/heads/gh-pages').split()[0])
+                self.assertNotEqual(*commits)
+                self.assertEqual(*trees)
+
     def test_snapshot_deployment_request_and_failure_handling(self):
-        import subprocess
         subprocess.run(['node', '--test', '--test-concurrency=1', 'dev/test_ci_pages_deploy.js'],
                        cwd=ROOT, check=True)
 

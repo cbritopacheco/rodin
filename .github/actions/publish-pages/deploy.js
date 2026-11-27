@@ -1,7 +1,5 @@
 'use strict';
 
-const {createHash} = require('node:crypto');
-
 async function deployPages(github, core, repository, artifactId, snapshot,
   {sleep = ms => new Promise(resolve => setTimeout(resolve, ms)),
     now = Date.now, timeout = 600000} = {}) {
@@ -11,17 +9,14 @@ async function deployPages(github, core, repository, artifactId, snapshot,
     throw new Error('Expected a repository, artifact ID and exact gh-pages commit');
   }
   const [owner, repo] = repository.split('/');
-  // A rerun can upload a new artifact for the same published Git commit.
-  // Keep the commit in the site marker and give each upload its own Pages version.
-  const buildVersion = createHash('sha256')
-    .update(JSON.stringify([repository.toLowerCase(), snapshot, String(artifactId)]))
-    .digest('hex').slice(0, 40);
+  // Each publication pushes its own gh-pages commit. Pages resolves this SHA
+  // in the repository, and the served marker verifies the same snapshot.
   const {data: deployment} = await github.request('POST /repos/{owner}/{repo}/pages/deployments', {
-    owner, repo, artifact_id: Number(artifactId), pages_build_version: buildVersion,
+    owner, repo, artifact_id: Number(artifactId), pages_build_version: snapshot,
     oidc_token: await core.getIDToken()
   });
-  const statusId = deployment.status_url?.match(/\/deployments\/([a-zA-Z0-9_-]+)(?:[/?#]|$)/)?.[1];
-  const deploymentId = deployment.id || statusId || buildVersion;
+  const statusId = deployment.status_url?.match(/\/(?:deployments\/|deployment\/status\/)([a-zA-Z0-9_-]+)(?:[/?#]|$)/)?.[1];
+  const deploymentId = deployment.id || statusId || snapshot;
   core.info(`Created Pages deployment ${deploymentId} with artifact ${artifactId} for snapshot ${snapshot}`);
   let pending = true;
   async function cancel() {
