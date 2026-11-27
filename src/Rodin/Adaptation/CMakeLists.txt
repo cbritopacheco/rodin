@@ -12,13 +12,15 @@ set(RodinAdaptation_HEADERS
   DeformationMap.h
   SWIFT/Loss.h
   SWIFT/Parameters.h
-  SWIFT/QualitySamples.h
+  SWIFT/Witnesses.h
   SWIFT/QualityCovering.h
   SWIFT/WitnessLattice.h
-  SWIFT/HingeForce.h
-  SWIFT/HingeMetric.h
-  SWIFT/Hinge.h
-  SWIFT/HingeProblem.h
+  SWIFT/Hinge/State.h
+  SWIFT/Hinge/Weights.h
+  SWIFT/Hinge/Model.h
+  SWIFT/Hinge/Force.h
+  SWIFT/Hinge/Metric.h
+  SWIFT/Hinge/Problem.h
   SWIFT/LinearSolver.h
   SWIFT/Distribution.h
   SWIFT/DirectionalNewton.h

@@ -2,8 +2,8 @@
  *          Copyright Carlos BRITO PACHECO 2021 - 2026.
  * Distributed under the Boost Software License, Version 1.0.
  */
-#ifndef RODIN_ADAPTATION_SWIFT_HINGEPROBLEM_H
-#define RODIN_ADAPTATION_SWIFT_HINGEPROBLEM_H
+#ifndef RODIN_ADAPTATION_SWIFT_HINGE_PROBLEM_H
+#define RODIN_ADAPTATION_SWIFT_HINGE_PROBLEM_H
 
 #include <chrono>
 #include <type_traits>
@@ -11,7 +11,7 @@
 #include "Rodin/Assembly.h"
 #include "Rodin/Variational/Problem.h"
 
-namespace Rodin::Adaptation::SWIFT
+namespace Rodin::Adaptation::SWIFT::Hinge
 {
   /**
    * @brief Native variational tangent problem for the affine quadratic hinges.
@@ -24,9 +24,8 @@ namespace Rodin::Adaptation::SWIFT
    * referenced GridFunction; its lifetime must include the Newton solve.
    */
   template <class TrialFunction, class TestFunction>
-  class HingeProblem final
-    : public std::decay_t<decltype(Variational::Problem(
-        std::declval<TrialFunction&>(), std::declval<TestFunction&>()))>
+  class Problem final : public std::decay_t<decltype(Variational::Problem(
+                          std::declval<TrialFunction&>(), std::declval<TestFunction&>()))>
   {
     public:
       /// @brief Native variational tangent problem type.
@@ -42,7 +41,7 @@ namespace Rodin::Adaptation::SWIFT
        * @param trial Increment trial function.
        * @param test Increment test function.
        */
-      HingeProblem(TrialFunction& trial, TestFunction& test)
+      Problem(TrialFunction& trial, TestFunction& test)
         : Parent(trial, test)
       {}
 
@@ -51,7 +50,7 @@ namespace Rodin::Adaptation::SWIFT
        * @param state Increment field whose lifetime includes the Newton solve.
        * @returns This problem.
        */
-      HingeProblem& setState(const Displacement& state)
+      Problem& setState(const Displacement& state)
       {
         m_state = &state;
         return *this;
@@ -62,7 +61,7 @@ namespace Rodin::Adaptation::SWIFT
        * @param dofs Boundary degree-of-freedom map that must outlive assembly.
        * @returns This problem.
        */
-      HingeProblem& setBoundaryDOFs(const IndexMap<Real>& dofs)
+      Problem& setBoundaryDOFs(const IndexMap<Real>& dofs)
       {
         m_boundaryDOFs = &dofs;
         return *this;
@@ -73,7 +72,7 @@ namespace Rodin::Adaptation::SWIFT
        * @param couplings Low-rank factor of the centered metric subtraction.
        * @returns This problem.
        */
-      HingeProblem& setCentering(const Math::Matrix<Real>& couplings)
+      Problem& setCentering(const Math::Matrix<Real>& couplings)
       {
         m_centering = couplings;
         return *this;
@@ -83,7 +82,7 @@ namespace Rodin::Adaptation::SWIFT
        * @brief Assembles the tangent and converts its load to a Newton residual.
        * @returns This assembled problem.
        */
-      HingeProblem& assemble() override
+      Problem& assemble() override
       {
         assert(m_state);
         const auto start = std::chrono::steady_clock::now();
@@ -119,9 +118,9 @@ namespace Rodin::Adaptation::SWIFT
        * @brief Clones the problem while retaining its referenced state.
        * @returns A newly allocated copy owned by the caller.
        */
-      HingeProblem* copy() const noexcept override
+      Problem* copy() const noexcept override
       {
-        return new HingeProblem(*this);
+        return new Problem(*this);
       }
 
     private:

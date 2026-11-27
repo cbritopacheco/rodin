@@ -60,7 +60,7 @@ namespace Rodin::Adaptation::SWIFT
           Real(1e-3); ///< Stationarity residual relative to force.
         Real innerAbsolute = Real(1e-12); ///< Absolute stationarity allowance.
         Real linearRelative =
-          Real(1e-6); ///< Linear residual tolerance for all backends.
+          Real(1e-6); ///< Relative convergence tolerance for CG.
         Real energy = Real(1e-8); ///< Relative energy-change stagnation threshold.
         Real step = 0; ///< Absolute accepted-motion stagnation threshold.
         Real stepOverH = Real(5e-4); ///< Accepted-motion/reference-size threshold.
@@ -103,7 +103,7 @@ namespace Rodin::Adaptation::SWIFT
 #ifdef RODIN_USE_MUMPS
       LinearSolver solver = LinearSolver::MUMPS; ///< Default direct backend.
 #else
-      LinearSolver solver = LinearSolver::SparseLU; ///< Default direct backend.
+      LinearSolver solver = LinearSolver::CG; ///< Fallback without MUMPS.
 #endif
       Index threads = 0; ///< Zero leaves the backend thread policy unchanged.
     };
@@ -146,7 +146,7 @@ namespace Rodin::Adaptation::SWIFT
       }
 
       /**
-       * @brief Independent geometric-validation order for an FE order.
+       * @brief Independent RMS and normal-error integration order for an FE order.
        * @param feOrder Polynomial order of the displacement finite element.
        * @returns Automatic geometric-validation sampling order.
        */
@@ -189,10 +189,11 @@ namespace Rodin::Adaptation::SWIFT
       std::size_t order = 0; ///< Zero selects automatic integration orders.
       std::size_t surface = 0; ///< Zero uses the common or automatic surface order.
       std::size_t volume = 0; ///< Zero uses the common or automatic volume order.
-      std::size_t validation = 0; ///< Zero selects an independent validation order.
+      std::size_t validation =
+        0; ///< RMS/normal and motion diagnostics; zero selects automatic order.
     };
 
-    /// @brief Shared reference witnesses for hinges and actual-quality checks.
+    /// @brief Reference coverings for cell quality/hinges and interface maximum error.
     struct Sampling
     {
       /**

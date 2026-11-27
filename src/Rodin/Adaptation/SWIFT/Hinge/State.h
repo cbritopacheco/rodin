@@ -2,18 +2,18 @@
  *          Copyright Carlos BRITO PACHECO 2021 - 2026.
  * Distributed under the Boost Software License, Version 1.0.
  */
-#ifndef RODIN_ADAPTATION_SWIFT_HINGE_H
-#define RODIN_ADAPTATION_SWIFT_HINGE_H
+#ifndef RODIN_ADAPTATION_SWIFT_HINGE_STATE_H
+#define RODIN_ADAPTATION_SWIFT_HINGE_STATE_H
 
 #include <limits>
 
-#include "../CellDeformation.h"
-#include "Parameters.h"
+#include "../../CellDeformation.h"
+#include "../Parameters.h"
 
-namespace Rodin::Adaptation::SWIFT
+namespace Rodin::Adaptation::SWIFT::Hinge
 {
   /// @brief Pointwise slacks and Newton coefficients of the affine quadratic hinges.
-  class HingeState
+  class State
   {
     public:
       /**
@@ -23,7 +23,7 @@ namespace Rodin::Adaptation::SWIFT
        * @param parameters Quality bounds, guard widths and constraint strengths.
        * @param hingeCoefficient Predicted decrease per volume, before constraint strengths.
        */
-      HingeState(const CellDeformation& deformation,
+      State(const CellDeformation& deformation,
         const Math::SpatialMatrix<Real>& innerGradient, const Parameters& parameters,
         Real hingeCoefficient)
         : m_rowDeformation(deformation)

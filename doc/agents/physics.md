@@ -107,7 +107,9 @@ subject to the selected linear backend; no uniqueness correction is imposed.
 without a `Detail` layer. All method-specific types belong to
 `Rodin::Adaptation::SWIFT`, without redundant class prefixes.
 `Problem.h` retains the outer orchestration and metric
-Problem. `HingeProblem.h` assembles the tangent and negative stationarity
+problem. `Witnesses.h` maps the geometric covering independently of the hinges.
+`Hinge/Model.h` owns the frozen weights, shared by its merit and the two integrators.
+`Hinge/Problem.h` assembles the tangent and negative stationarity
 residual for Rodin's `Solver::NewtonSolver`; its step policy retains the frozen
 inner merit search. `LinearSolver.h` adapts the retained
 linear backends to the native solver interface. The local Eigen backend supports CG,

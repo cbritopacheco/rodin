@@ -13,27 +13,25 @@ namespace Rodin::Adaptation::SWIFT
 {
   /**
    * @brief Quadratic-model minimizer with an optional physical-motion bound.
-   * Positive fitting curvature supplies the fallback when robust curvature is nonpositive.
-   * A zero maximumStep leaves the directional Newton scale unrestricted.
+   *
+   * Nonpositive curvature selects the physical-motion bound when it is positive.
+   * With no bound, positive curvature is required for a finite minimizing step.
    * @param action Positive fitting-force action on the predictor.
    * @param curvature Robust-energy directional curvature.
-   * @param fittingCurvature Positive squared-fit curvature used as a fallback.
    * @param directionNorm Physical displacement norm of the predictor.
    * @param maximumStep Physical-motion bound; zero leaves scaling unrestricted.
-   * @returns Directional scale, or zero when the model inputs are invalid.
+   * @returns Directional scale, or zero for invalid inputs or an unbounded model.
    */
-  inline Real getDirectionalNewtonStep(Real action, Real curvature, Real fittingCurvature,
-    Real directionNorm, Real maximumStep)
+  inline Real getDirectionalNewtonStep(
+    Real action, Real curvature, Real directionNorm, Real maximumStep)
   {
     if (!(action > Real(0)) || !std::isfinite(action) || !(directionNorm > Real(0)) ||
-      !std::isfinite(directionNorm) || maximumStep < Real(0) ||
-      !std::isfinite(maximumStep))
+      !std::isfinite(directionNorm) || !std::isfinite(curvature) ||
+      maximumStep < Real(0) || !std::isfinite(maximumStep))
       return Real(0);
-    const Real positiveCurvature =
-      curvature > Real(0) && std::isfinite(curvature) ? curvature : fittingCurvature;
-    if (!(positiveCurvature > Real(0)) || !std::isfinite(positiveCurvature))
-      return Real(0);
-    const Real scale = action / positiveCurvature;
+    if (curvature <= Real(0))
+      return maximumStep > Real(0) ? maximumStep / directionNorm : Real(0);
+    const Real scale = action / curvature;
     return maximumStep > Real(0) ? std::min(scale, maximumStep / directionNorm) : scale;
   }
 }
