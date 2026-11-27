@@ -101,9 +101,18 @@ def run_many(args, outdir, cases):
 
 
 def read_csv(path):
+    """Columns of a run CSV. A row cut short (two writers on one file, or a
+    process killed mid-line) is skipped with a warning instead of aborting."""
     with open(path) as f:
         rows = list(csv.DictReader(f))
-    return {k: np.array([float(r[k]) for r in rows]) for k in rows[0]}
+    good = [r for r in rows if None not in r.values() and "" not in r.values()
+            and None not in r]
+    if len(good) < len(rows):
+        print(f"  (aviso: {path}: {len(rows) - len(good)} fila(s) incompleta(s) saltada(s))",
+              flush=True)
+    if not good:
+        raise ValueError(f"{path}: sin filas completas")
+    return {k: np.array([float(r[k]) for r in good]) for k in good[0]}
 
 
 def read_xdmf(path, fields):
