@@ -54,7 +54,20 @@ examples/Models).
   approximations), `Rvachev` and `SpaldingTucker` (normalizations of an
   existing level set).
 - **Eikonal/FMM** — fast marching method on simplicial meshes (the
-  workhorse redistancer; "fmm" in example flags).
+  workhorse redistancer; "fmm" in example flags). Tensor coefficients use the
+  shared inverse-velocity `Eikonal::Metric`, frozen per cell, and require native
+  first-order affine simplices nonobtuse in that metric. Unsupported tensor
+  stencils raise; the scalar path is unchanged.
+- **Eikonal/FIM** — local real P1 active-list solver on native first-order
+  straight convex cells with planar faces. Scalar speeds or SPD tensor metrics
+  are sampled/factored once per cell before each pending solve, then shared
+  read-only by all updates. Point, edge, and triangular trace updates are
+  analytic; native bilinear quadrilateral traces retain numerical search.
+  Straight travel costs use no path quadrature or simplex subdivision.
+  Higher-order geometric charts are rejected; cell validity, convexity and
+  planar-face conformity are caller preconditions. OpenMP dependency levels
+  preserve serial values and round counts. No MPI/PETSc specialization.
+  See `examples/Models/Eikonal/README.md` for the coefficient discretization.
 - **Advection/Lagrangian** — Lagrangian variational advection of scalar
   fields (level-set transport).
 - **Hilbert/H1a** — the Hilbertian H¹ extension-regularization of shape
