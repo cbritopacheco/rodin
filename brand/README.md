@@ -73,7 +73,7 @@ Octicons; its [MIT license](licenses/github-icon-MIT.txt) is included.
 
 The caption is always:
 
-> A modern C++ FEM library for shape and topology optimization.
+> A modern C++ finite element library for shape optimisation, multiphysics and distributed GPU computing
 
 Preserve its wording, capitalization, and final period, including when
 it wraps onto two lines. The social card places the HTTPS website URL

@@ -8,7 +8,7 @@
   </a>
 </p>
 
-<p align="center"><strong>A modern C++ FEM library for shape and topology optimization.</strong></p>
+<p align="center"><strong>A modern C++ finite element library for shape optimisation, multiphysics and distributed GPU computing</strong></p>
 
 <p align="center">
   <a href="LICENSE"><img alt="Boost Software License 1.0" src="https://img.shields.io/badge/license-BSL--1.0-green"></a>
